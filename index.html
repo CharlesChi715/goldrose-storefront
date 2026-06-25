@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GoldRose | 24K Gold Dipped Rose Gifts</title>
+    <meta
+      name="description"
+      content="A direct-to-consumer storefront prototype for 24K gold dipped rose gifts."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="GoldRose home">
+        <span class="brand-mark" aria-hidden="true">GR</span>
+        <span>GoldRose</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#shop">Shop</a>
+        <a href="#story">Story</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <button class="cart-button" type="button" data-cart-open aria-label="Open cart">
+        <span>Cart</span>
+        <span class="cart-count" data-cart-count>0</span>
+      </button>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Real roses preserved as lasting gifts</p>
+          <h1>24K gold dipped roses for moments worth keeping.</h1>
+          <p>
+            A polished DTC storefront concept for premium rose gifts, built around
+            clear product photography, simple offers, and a friction-light cart.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#shop">Shop roses</a>
+            <a class="button secondary" href="#story">See how they are made</a>
+          </div>
+        </div>
+        <div class="hero-media" aria-label="Gold and red rose gift arrangement">
+          <img
+            src="src/8c17f2145610b00080a150ddd6dc526c.PNG"
+            alt="Gold and red rose gift arrangement for Valentine's Day"
+          />
+        </div>
+      </section>
+
+      <section class="benefits" aria-label="Store benefits">
+        <div>
+          <strong>Gift-ready box</strong>
+          <span>Ships in a presentation case.</span>
+        </div>
+        <div>
+          <strong>Made from real roses</strong>
+          <span>Each bloom has natural variation.</span>
+        </div>
+        <div>
+          <strong>Independent storefront</strong>
+          <span>No marketplace branding or distractions.</span>
+        </div>
+      </section>
+
+      <section class="section" id="shop">
+        <div class="section-heading">
+          <p class="eyebrow">Shop the collection</p>
+          <h2>Start with a tight catalog.</h2>
+          <p>
+            New DTC stores usually work better with a focused offer. These first
+            products are examples you can rename, reprice, or replace.
+          </p>
+        </div>
+
+        <div class="product-grid" data-products></div>
+      </section>
+
+      <section class="split-section" id="story">
+        <div class="story-media">
+          <img
+            src="src/d2c7caeb31a69a572169a652d3972e35.JPG"
+            alt="24K gold plated rose making process"
+          />
+        </div>
+        <div class="story-copy">
+          <p class="eyebrow">Why people buy</p>
+          <h2>A DTC product needs a reason beyond price.</h2>
+          <p>
+            This rose is positioned as a keepsake gift for anniversaries,
+            Valentine's Day, Mother's Day, and Christmas. That gives the store a
+            clear audience and a clear reason to buy now.
+          </p>
+          <ul class="feature-list">
+            <li>Use emotional gifting occasions in product copy.</li>
+            <li>Show packaging so buyers know it is gift-ready.</li>
+            <li>Explain the material and process to justify the premium.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section occasions" aria-label="Gift occasions">
+        <div class="section-heading">
+          <p class="eyebrow">Sell the occasion</p>
+          <h2>Make the buyer's job easy.</h2>
+        </div>
+        <div class="occasion-grid">
+          <article>
+            <span>01</span>
+            <h3>Valentine's Day</h3>
+            <p>Lead with romance, delivery timing, and a polished gift box.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Mother's Day</h3>
+            <p>Emphasize lasting appreciation and a keepsake she can display.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Anniversary</h3>
+            <p>Position it as a traditional rose made permanent.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section faq" id="faq">
+        <div class="section-heading">
+          <p class="eyebrow">Questions</p>
+          <h2>Remove buyer hesitation.</h2>
+        </div>
+        <details>
+          <summary>Is checkout connected?</summary>
+          <p>
+            Not yet. This is the storefront prototype. The next step is connecting
+            Stripe Checkout, Shopify Buy Button, or another payment flow.
+          </p>
+        </details>
+        <details>
+          <summary>Can the product details change?</summary>
+          <p>
+            Yes. Product names, images, descriptions, and prices are stored in
+            <code>script.js</code> so they are easy to edit while learning.
+          </p>
+        </details>
+        <details>
+          <summary>Why not start with a big framework?</summary>
+          <p>
+            Plain HTML, CSS, and JavaScript make the fundamentals visible. Once
+            the store concept is clear, moving to Next.js, Shopify, or Medusa is
+            much easier.
+          </p>
+        </details>
+      </section>
+    </main>
+
+    <aside class="cart-drawer" data-cart-drawer aria-hidden="true">
+      <div class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+        <div class="cart-header">
+          <h2 id="cart-title">Cart</h2>
+          <button class="icon-button" type="button" data-cart-close aria-label="Close cart">x</button>
+        </div>
+        <div class="cart-items" data-cart-items></div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Subtotal</span>
+            <strong data-cart-subtotal>$0</strong>
+          </div>
+          <button class="button primary checkout-button" type="button" data-checkout>
+            Continue to checkout
+          </button>
+          <p class="cart-note">
+            Demo only: checkout is the next integration step.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <footer class="site-footer">
+      <p>GoldRose storefront prototype</p>
+      <p>Built as a first DTC learning project.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
