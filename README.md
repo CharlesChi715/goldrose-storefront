@@ -1,54 +1,52 @@
-# GoldRose Storefront
+# AUREÀ Storefront
 
-A beginner-friendly direct-to-consumer storefront project for a 24K gold dipped
-rose gift product.
+A beginner-friendly direct-to-consumer storefront MVP for a 24K gold dipped rose
+gift product.
 
 This README is the project map. Keep it updated as decisions change.
 
-## Project Goal
+## Current Result
 
-Build an independent storefront that can eventually sell directly to customers.
-The first serious version should teach the fundamentals while moving toward a
-real store:
+The project now has a working Next.js storefront:
 
-- a polished product page
-- product images and product details
-- cart behavior
-- checkout integration
-- trust, shipping, returns, and FAQ content
-- analytics and launch basics
+- luxury-style homepage/product page
+- three-product gift catalog
+- product options
+- interactive cart drawer
+- quantity controls and subtotal
+- email capture UI placeholder
+- product/story/occasion/FAQ sections
+- SEO metadata and basic structured data
+- local product images served from `public/products/`
+
+Checkout is intentionally not connected yet. Payments, tax, shipping, inventory,
+and order creation should wait until the business details are confirmed.
+
+## Brand Direction
+
+The visible brand is now `AUREÀ`.
+
+`AUREÀ` is a stylized luxury brand name based on `aurea`, a Latin-root word
+associated with "golden." The accent is decorative and gives the name a more
+premium fashion/beauty feel.
+
+For technical placeholders, use plain `aurea`:
+
+- display brand: `AUREÀ`
+- placeholder domain: `https://aurea.example`
+- practical fallback spelling: `Aurea`
+
+Before launch, check domain availability, trademark risk, and whether customers
+in the launch market can type and pronounce the name easily.
 
 ## What DTC Means
 
 DTC means direct-to-consumer. Instead of selling only through a marketplace like
 Amazon or Etsy, the brand has its own storefront and customer experience.
 
-An independent storefront still can use services like Stripe, Shopify, Shippo,
+An independent storefront can still use services like Stripe, Shopify, Shippo,
 Klaviyo, or Vercel. The important idea is that the site, brand, content, and
 customer journey are controlled by the business.
-
-## Current Status
-
-The project currently has a fresh Next.js scaffold plus an earlier static HTML
-prototype.
-
-Main app path:
-
-- `app/` is the Next.js application we will build from.
-- `app/page.tsx` is the home page.
-- `app/layout.tsx` wraps every page and controls metadata/fonts.
-- `app/globals.css` contains global CSS and Tailwind setup.
-
-Reference prototype:
-
-- `index.html`, `styles.css`, and `script.js` are a plain HTML/CSS/JS prototype.
-- Treat these as reference material, not the long-term app structure.
-
-Product assets:
-
-- `src/` currently contains rose product images.
-- We will likely move final storefront images into `public/products/` when we
-  start wiring them into Next.js pages.
 
 ## Tech Stack
 
@@ -57,7 +55,7 @@ Product assets:
 - TypeScript
 - Tailwind CSS `4`
 - ESLint
-- Node.js package tooling through `npm` for now
+- Node.js package tooling through `npm`
 
 We do not need `uv` right now. `uv` is for Python projects. Add it only if we
 later create Python tooling for image processing, imports, automation, or a
@@ -107,72 +105,100 @@ npm run start
 .
 +-- app/
 |   +-- globals.css      # global styles and Tailwind import
-|   +-- layout.tsx       # root document layout and metadata
-|   +-- page.tsx         # current home page
-+-- public/              # browser-accessible static files
-+-- src/                 # current product image source folder
+|   +-- layout.tsx       # metadata and root HTML/body wrapper
+|   +-- page.tsx         # server page that renders the storefront
++-- components/
+|   +-- Storefront.tsx   # interactive storefront and cart UI
++-- lib/
+|   +-- products.ts      # product data, types, and money formatting
++-- public/
+|   +-- products/        # browser-accessible storefront images
++-- src/                 # original source image folder
++-- index.html           # earlier static prototype reference
++-- styles.css           # earlier static prototype CSS reference
++-- script.js            # earlier static prototype JS reference
 +-- package.json         # scripts and dependencies
 +-- README.md            # project map and learning notes
 +-- AGENTS.md            # instructions for AI agents working in this repo
 ```
 
-## Learning Plan
+## Important Files
 
-Work in small passes. Each pass should leave the app better and the README more
-accurate.
+### `app/page.tsx`
 
-1. Understand the scaffold
-   - Learn what `app/page.tsx`, `app/layout.tsx`, and `app/globals.css` do.
-   - Run the app locally.
-   - Replace the default Next.js starter page.
+This is the Next.js route for `/`. It imports the storefront component and adds
+basic structured data for search engines.
 
-2. Build the storefront shell
-   - Header
-   - Product hero
-   - Product detail section
-   - Trust badges
-   - FAQ
-   - Footer
+Beginner idea: a file named `app/page.tsx` becomes the homepage.
 
-3. Add real product content
-   - Product name
-   - Price
-   - Short description
-   - Product images
-   - Gift options
-   - Shipping and returns copy
+### `app/layout.tsx`
 
-4. Add cart behavior
-   - Add to cart
-   - Quantity changes
-   - Subtotal
-   - Cart drawer or cart page
+This wraps the app and defines metadata like title, description, keywords, and
+Open Graph image.
 
-5. Add checkout
-   - Choose Stripe Checkout, Shopify Buy Button, or another commerce provider.
-   - Keep payment, tax, and order logic out of custom code unless there is a
-     strong reason.
+Beginner idea: layout is shared page setup.
 
-6. Prepare for launch
-   - Analytics
-   - SEO metadata
-   - Email capture
-   - Privacy policy
-   - Terms
-   - Refund policy
-   - Shipping policy
+### `components/Storefront.tsx`
 
-## How Codex Should Work Here
+This is a client component because it uses React state for cart interactions,
+email form feedback, and the cart drawer.
 
-The owner is learning while Codex builds. That means changes should be practical
-and well documented.
+Beginner idea: when a component needs browser interaction, it usually needs
+`"use client"` at the top in the Next.js app router.
 
-- Ask clarifying questions when the prompt is unclear.
-- Make conservative technical choices.
-- Prefer small, understandable steps over large rewrites.
-- Explain important decisions in plain language.
-- Keep this README updated when the plan, stack, or structure changes.
-- Do not add new tools just because they are popular.
+### `lib/products.ts`
+
+Product names, prices, images, descriptions, options, and details live here.
+
+Beginner idea: keeping product data separate from UI makes the page easier to
+change later.
+
+### `public/products/`
+
+Images in `public/` can be referenced with paths like
+`/products/gold-rose-box.jpg`.
+
+Beginner idea: `public/` is for files the browser can request directly.
+
+## MVP Assumptions
+
+Because the business details are not final, the current MVP uses safe
+placeholders:
+
+- Brand name: `AUREÀ`
+- Currency: USD
+- Catalog shape: three gift options
+- Pricing: placeholder values
+- Checkout: not connected
+- Domain in metadata: `https://aurea.example`
+- Email capture: UI-only, no real provider
+- Product claims: conservative placeholders
+
+Replace these before launch.
+
+## What Works Now
+
+- The page renders as a real storefront.
+- Product cards show images, prices, details, and gift options.
+- Add-to-cart opens a cart drawer.
+- Cart quantities can increase, decrease, or remove lines.
+- Subtotal updates automatically.
+- FAQ sections expand and collapse.
+- Email form validates a simple email shape and shows local feedback.
+- `npm run lint` passes.
+- `npm run build` passes.
+
+## What Is Not Real Yet
+
+- No payment processing.
+- No order creation.
+- No tax calculation.
+- No shipping rates.
+- No inventory tracking.
+- No real email provider.
+- No privacy, refund, terms, or shipping policy pages.
+- No analytics.
+- No real production domain.
 
 ## Storefront Decisions To Make
 
@@ -180,7 +206,7 @@ These are business decisions, not just code decisions:
 
 - Final brand name
 - Exact product title
-- Price
+- Real price
 - Cost of goods
 - Shipping cost
 - Delivery promise
@@ -189,14 +215,31 @@ These are business decisions, not just code decisions:
 - Product claims we can honestly support
 - Checkout provider
 - Launch country/currency
+- Production domain
 
-## Next Build Step
+## Recommended Next Steps
 
-Replace the default `app/page.tsx` starter screen with the first real GoldRose
-home/product page.
+1. Review the storefront at `http://localhost:3000`.
+2. Replace placeholder product prices and copy in `lib/products.ts`.
+3. Replace the metadata domain in `app/layout.tsx` and `app/page.tsx`.
+4. Choose checkout direction:
+   - Stripe Checkout if you want a lightweight custom storefront.
+   - Shopify if you want built-in products, orders, taxes, and inventory.
+5. Add policy pages before accepting real orders:
+   - shipping policy
+   - refund policy
+   - privacy policy
+   - terms of service
+6. Add analytics and email capture only after the core offer is clear.
 
-Before coding that page, decide:
+## How Codex Should Work Here
 
-- Should this be a one-product landing page or a small catalog?
-- What price should we show for the first product?
-- Which checkout direction do we want later: Stripe Checkout or Shopify?
+The owner is learning while Codex builds. Changes should be practical and well
+documented.
+
+- Ask clarifying questions when the prompt is unclear.
+- Make conservative technical choices.
+- Prefer small, understandable steps over large rewrites.
+- Explain important decisions in plain language.
+- Keep this README updated when the plan, stack, or structure changes.
+- Do not add new tools just because they are popular.

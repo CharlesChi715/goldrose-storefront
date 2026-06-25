@@ -21,3 +21,22 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
 - Replaced the default Next.js README with a project-specific learning map for
   the GoldRose DTC storefront and documented the current Next.js scaffold as the
   main build path.
+- Built the first real Next.js storefront MVP: product data module, interactive
+  cart drawer, product/occasion/story/FAQ sections, copied storefront images into
+  `public/products/`, and verified with lint/build plus a local dev server.
+- Rebranded the current storefront direction from GoldRose to display brand
+  `AUREÀ`, restyled the UI toward the bundled `temp/Gold Rose Landing.html`
+  luxury visual direction, and documented the brand meaning and launch caveats.
+
+## 2026-06-25 13:15 AEST
+
+- Reread `.ai/HANDOFF.md` and `.ai/WORKLOG.md` on request.
+- Confirmed the current direction: Next.js storefront MVP, visible brand
+  `AUREÀ`, luxury visual style based on `temp/Gold Rose Landing.html`, checkout
+  intentionally not connected yet.
+
+## 2026-06-25 15:46 AEST
+
+- Added `.claude/` to `.gitignore` and removed the staged `.claude` worktree
+  entry from git tracking with `git rm --cached -r -f .claude`, keeping local
+  files on disk.

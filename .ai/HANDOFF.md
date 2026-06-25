@@ -5,74 +5,93 @@ Agent: Codex
 
 ## Current Task
 
-README-first planning for a beginner-friendly DTC independent storefront built
-with the current Next.js scaffold.
+Built the strongest practical AUREÀ DTC storefront MVP possible under safe
+placeholder assumptions, then restyled it toward the luxury direction in
+`temp/Gold Rose Landing.html`.
 
 ## Changed Files
 
-- `index.html` - one-page storefront structure with hero, product grid, story,
-  occasions, FAQ, cart drawer, and footer.
-- `styles.css` - responsive storefront styling, product cards, cart drawer, and
-  layout rules.
-- `script.js` - product data, add-to-cart behavior, quantity controls, subtotal,
-  and demo checkout alert.
-- `README.md` - replaced default Next.js README with project goal, stack,
-  commands, structure, learning plan, Codex working style, decisions to make,
-  and next build step.
-- `.gitignore` - ignores `.DS_Store`, dependency/build folders, and env files.
-- `.ai/HANDOFF.md` - updated with current work.
-- `.ai/WORKLOG.md` - appended concise history entry.
+- `app/page.tsx` - replaced the default starter page with the AUREÀ homepage
+  route, structured data, and no-JS fallback.
+- `app/layout.tsx` - added AUREÀ metadata, keywords, Open Graph image, and a
+  placeholder metadata base URL.
+- `app/globals.css` - simplified global styles, Tailwind setup, and system font
+  tokens.
+- `components/Storefront.tsx` - added the interactive luxury-style storefront UI,
+  product cards, cart drawer, quantity controls, subtotal, trust sections, and
+  email placeholder.
+- `lib/products.ts` - added typed product data and money formatting helper.
+- `public/products/` - copied selected product assets with readable filenames,
+  including added romance/comparison/lifestyle assets from `src/`.
+- `README.md` - updated from planning doc to current MVP map with structure,
+  assumptions, working features, limitations, and next steps.
+- `package-lock.json` - created by `npm install`.
+- `.ai/HANDOFF.md` - updated with this current state.
+- `.ai/WORKLOG.md` - appended concise project history.
 
 ## Decisions Made
 
-- The current main build path is the Next.js app in `app/`.
-- Existing `index.html`, `styles.css`, and `script.js` are now documented as a
-  reference prototype, not the long-term app structure.
-- Kept checkout as a demo alert; next real commerce step is Stripe Checkout,
-  Shopify Buy Button, or another provider.
-- Used existing `src/` image assets and selected product-specific photos for
-  product cards.
-- Positioned the storefront around gift occasions and a focused catalog rather
-  than a broad marketplace-style assortment.
-- `uv` is not needed unless Python tooling is added later.
+- Main build path is the Next.js app in `app/`; earlier `index.html`,
+  `styles.css`, and `script.js` remain reference prototype files only.
+- Display brand is now `AUREÀ`, chosen because the boss-provided `src/` assets
+  are generic supplier/product material and the temp design's luxury brand
+  direction fits the product better than the descriptive `GoldRose` name.
+- `AUREÀ` is treated as a stylized display name based on `aurea` / "golden";
+  final domain/trademark/pronunciation checks are still required.
+- Built a small three-product catalog instead of a single-product page because
+  it supports good/better/best offer testing without making the store broad.
+- Used USD placeholder pricing and conservative placeholder claims.
+- Kept checkout intentionally disconnected until product pricing, taxes,
+  shipping, inventory, and policies are confirmed.
+- Did not add `uv`; no Python tooling is needed.
+- Removed `next/font/google` from the scaffold to avoid external font fetching
+  during builds.
+- Used `https://aurea.example` as a reserved placeholder metadata/domain URL.
+- Cart state is session-only. Persistence was removed because the React 19 lint
+  rule flagged direct state hydration from localStorage in an effect.
 
 ## Commands / Tests Run
 
 - `git status --short`
-- `sed -n '1,220p' .ai/HANDOFF.md`
-- `find src -maxdepth 3 -type f | sort`
-- `file src/*`
-- `node --check script.js`
-- `rg "src/.*\\.(JPG|PNG)" -n index.html script.js`
-- `python3 -m http.server 8787` once in sandbox, blocked by permissions.
-- `python3 -m http.server 8787` with approval for temporary local serving.
-- `curl -I http://127.0.0.1:8787/`
-- `curl -I http://127.0.0.1:8787/styles.css`
-- `curl -I http://127.0.0.1:8787/script.js`
-- `sed -n '1,260p' README.md`
-- `sed -n '1,220p' package.json`
-- `rg --files -g '!node_modules' -g '!*.JPG' -g '!*.PNG'`
-- `sed -n '1,240p' app/page.tsx`
-- `sed -n '1,220p' app/layout.tsx`
-- `sed -n '1,280p' app/globals.css`
+- `sed -n '1,260p' .ai/HANDOFF.md`
+- `sed -n '1,260p' AGENTS.md`
+- `rg --files -g '!node_modules'`
+- attempted `find node_modules/next/dist/docs ...`; local Next docs were absent
+- `npm install` in sandbox was stopped after appearing stalled
+- `npm install` with approval succeeded
+- `npm run lint` failed once on `react-hooks/set-state-in-effect`, then passed
+- `npm run build` failed once in sandbox due Turbopack internal port binding,
+  then passed with approval
+- `npm run dev` with approval started the dev server
+- `curl -I http://127.0.0.1:3000/` returned `200 OK`
+- Rechecked `src/` boss-provided assets with `find src -maxdepth 1 -type f` and
+  `file src/*`.
+- `npm run lint` passed after the AUREÀ restyle.
+- `npm run build` passed after the AUREÀ restyle.
 
 ## Known Issues
 
-- Browser-based visual verification was attempted earlier through the in-app
-  browser but the browser runtime failed to initialize in that session.
-- No real checkout, order creation, tax, shipping, inventory, or email capture
-  is implemented yet.
+- Dev server is running at `http://localhost:3000` from this session.
+- `npm install` reported 2 moderate vulnerabilities. Do not run
+  `npm audit fix --force` blindly because it may introduce breaking changes.
+- `npm install` also warned that install scripts for `sharp` and
+  `unrs-resolver` are pending approval through npm's script approval flow.
+- No real checkout, order creation, tax, shipping, inventory, analytics, or email
+  provider is implemented yet.
 - Product copy, prices, return policy, shipping promise, and legal claims are
   placeholders and need owner confirmation before launch.
-- README asks for three decisions before the first real Next.js page: one-product
-  landing page vs small catalog, first product price, and Stripe vs Shopify
-  direction.
+- Browser-based visual verification was attempted earlier in the project, but
+  the in-app browser runtime failed to initialize in that session. This turn
+  verified via lint, production build, dev server, and HTTP `200 OK`.
 
 ## Next Steps
 
-1. Use `README.md` as the project map.
-2. Answer the three README questions before replacing the default
-   `app/page.tsx`.
-3. Replace the default Next.js starter screen with the first GoldRose
-   home/product page.
-4. Keep README updated as structure and decisions change.
+1. Open `http://localhost:3000` and visually review the storefront.
+2. Replace placeholder product prices and copy in `lib/products.ts`.
+3. Replace `https://aurea.example` in `app/layout.tsx` and `app/page.tsx`
+   when the production domain is known.
+4. Decide checkout direction: Stripe Checkout for a lightweight custom store, or
+   Shopify for built-in products/orders/taxes/inventory.
+5. Add policy pages before real orders: shipping, refund, privacy, and terms.
+6. Review `npm audit` and npm script approvals deliberately before launch.
+7. Validate the `AUREÀ` brand legally and commercially before launch.
