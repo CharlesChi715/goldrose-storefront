@@ -1,6 +1,10 @@
 # AI Worklog
 
-Append concise dated entries here when agent work creates useful project history.
+Append concise timestamped entries here when agent work creates useful project history.
+
+Use a minute-precision timestamp for each entry heading, in local time with the
+timezone, formatted as `## YYYY-MM-DD HH:MM TZ` (for example `## 2026-06-25 12:28 AEST`).
+Run `date "+%Y-%m-%d %H:%M %Z"` to get the current value.
 
 This file is optional history. Agents should read `.ai/HANDOFF.md` at startup and search this file only when they need older context.
 
