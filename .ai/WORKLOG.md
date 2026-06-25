@@ -40,3 +40,12 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
 - Added `.claude/` to `.gitignore` and removed the staged `.claude` worktree
   entry from git tracking with `git rm --cached -r -f .claude`, keeping local
   files on disk.
+
+## 2026-06-25 18:54 AEST
+
+- Added mock US-market business assumptions for the AUREÀ storefront: China
+  import origin, US inventory, Ontario CA warehouse placeholder, shipping/return
+  policy placeholders, SKU/inventory/landed-cost fields, and an owner-review doc
+  at `docs/mock-business-decisions.md`.
+- Updated the storefront to display conservative origin and fulfillment copy,
+  then verified with `npm run lint`, `npm run build`, and a local `200 OK` check.

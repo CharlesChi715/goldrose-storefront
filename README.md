@@ -16,11 +16,15 @@ The project now has a working Next.js storefront:
 - quantity controls and subtotal
 - email capture UI placeholder
 - product/story/occasion/FAQ sections
+- mock US-warehouse shipping, return, inventory, and origin assumptions
 - SEO metadata and basic structured data
 - local product images served from `public/products/`
 
 Checkout is intentionally not connected yet. Payments, tax, shipping, inventory,
 and order creation should wait until the business details are confirmed.
+
+See [docs/mock-business-decisions.md](docs/mock-business-decisions.md) for the
+mock launch assumptions that need owner review.
 
 ## Brand Direction
 
@@ -111,6 +115,9 @@ npm run start
 |   +-- Storefront.tsx   # interactive storefront and cart UI
 +-- lib/
 |   +-- products.ts      # product data, types, and money formatting
+|   +-- business.ts      # mock operations, shipping, returns, and launch decisions
++-- docs/
+|   +-- mock-business-decisions.md
 +-- public/
 |   +-- products/        # browser-accessible storefront images
 +-- src/                 # original source image folder
@@ -153,6 +160,14 @@ Product names, prices, images, descriptions, options, and details live here.
 Beginner idea: keeping product data separate from UI makes the page easier to
 change later.
 
+### `lib/business.ts`
+
+Mock operating assumptions live here: US warehouse, shipping promise, return
+window, country-of-origin copy, and launch decisions.
+
+Beginner idea: business rules should live in data/config first, not be scattered
+through page markup.
+
 ### `public/products/`
 
 Images in `public/` can be referenced with paths like
@@ -169,6 +184,12 @@ placeholders:
 - Currency: USD
 - Catalog shape: three gift options
 - Pricing: placeholder values
+- Product source: imported from China
+- Inventory location: United States
+- Fulfillment copy: `Imported from China. Ships from US inventory.`
+- Mock warehouse: Ontario, California
+- Mock free shipping threshold: $75
+- Mock return window: 30 days
 - Checkout: not connected
 - Domain in metadata: `https://aurea.example`
 - Email capture: UI-only, no real provider
@@ -180,11 +201,13 @@ Replace these before launch.
 
 - The page renders as a real storefront.
 - Product cards show images, prices, details, and gift options.
+- Product cards show mock stock, US warehouse, and origin signals.
 - Add-to-cart opens a cart drawer.
 - Cart quantities can increase, decrease, or remove lines.
 - Subtotal updates automatically.
 - FAQ sections expand and collapse.
 - Email form validates a simple email shape and shows local feedback.
+- Mock business decisions are listed in `docs/mock-business-decisions.md`.
 - `npm run lint` passes.
 - `npm run build` passes.
 
@@ -199,6 +222,7 @@ Replace these before launch.
 - No privacy, refund, terms, or shipping policy pages.
 - No analytics.
 - No real production domain.
+- No verified customs, tariff, or country-of-origin review.
 
 ## Storefront Decisions To Make
 
@@ -220,17 +244,18 @@ These are business decisions, not just code decisions:
 ## Recommended Next Steps
 
 1. Review the storefront at `http://localhost:3000`.
-2. Replace placeholder product prices and copy in `lib/products.ts`.
-3. Replace the metadata domain in `app/layout.tsx` and `app/page.tsx`.
-4. Choose checkout direction:
+2. Review every assumption in `docs/mock-business-decisions.md`.
+3. Replace placeholder product prices and copy in `lib/products.ts`.
+4. Replace the metadata domain in `app/layout.tsx` and `app/page.tsx`.
+5. Choose checkout direction:
    - Stripe Checkout if you want a lightweight custom storefront.
    - Shopify if you want built-in products, orders, taxes, and inventory.
-5. Add policy pages before accepting real orders:
+6. Add policy pages before accepting real orders:
    - shipping policy
    - refund policy
    - privacy policy
    - terms of service
-6. Add analytics and email capture only after the core offer is clear.
+7. Add analytics and email capture only after the core offer is clear.
 
 ## How Codex Should Work Here
 

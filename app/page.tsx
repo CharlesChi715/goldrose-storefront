@@ -13,12 +13,14 @@ export default function Home() {
       itemOffered: {
         "@type": "Product",
         name: product.name,
+        sku: product.sku,
         description: product.description,
         image: product.image,
       },
       price: (product.price / 100).toFixed(2),
       priceCurrency: "USD",
-      availability: "https://schema.org/PreOrder",
+      availability:
+        product.inventoryOnHand > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     })),
   };
 

@@ -1,0 +1,162 @@
+# Mock Business Decisions
+
+These are temporary assumptions so the AUREÀ storefront can keep moving. Replace
+them with real business data before launch.
+
+## Current Product Reality
+
+- Product source: imported from China.
+- Current stock location: United States.
+- Launch market: United States customers.
+- Customer-facing origin copy: `Imported from China. Ships from US inventory.`
+- Do not use: `Made in USA`, `American-made`, or US-flag origin language.
+
+Reason: the product is imported. A US warehouse location can be advertised as
+shipping/fulfillment information, but it should not imply US manufacture.
+
+## Mock Product Data
+
+| SKU | Product | Price | Compare At | Mock Landed Cost | Mock Stock | Reorder Point |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `AUR-GR-SIG-001` | AUREÀ Signature 24K Gold Rose | $49.99 | $89.99 | $14.25 | 420 | 90 |
+| `AUR-GR-BOX-002` | AUREÀ Boxed Keepsake Rose | $64.99 | $109.99 | $17.80 | 260 | 75 |
+| `AUR-GR-BND-003` | AUREÀ Premium Gift Bundle | $79.99 | $139.99 | $23.60 | 140 | 50 |
+
+Owner checks:
+
+- Confirm actual landed cost per unit after product cost, freight, duty, tariffs,
+  packaging, and warehouse receiving.
+- Confirm real available inventory.
+- Confirm whether the product is truly 24K gold dipped/plated and what exact
+  wording the supplier can substantiate.
+- Confirm each product variant maps cleanly to Shopify variants later.
+
+## Mock Fulfillment
+
+- Warehouse: Ontario, California.
+- Inventory status: stocked in the United States.
+- Order cutoff: 2:00 PM PT.
+- Processing time: 1-2 business days.
+- Standard transit: 3-5 business days.
+- Expedited transit: 2 business days.
+- Mock carriers: USPS Ground Advantage, UPS Ground.
+- Launch region: contiguous United States.
+- Excluded for now: Alaska, Hawaii, US territories, expedited PO box shipping.
+
+Owner checks:
+
+- Replace Ontario, CA with the real warehouse or 3PL.
+- Confirm daily cutoff, carrier service levels, and weekend handling.
+- Confirm packaging dimensions and package weight.
+- Confirm whether Alaska/Hawaii are excluded or priced separately.
+
+## Mock Shipping Offer
+
+- Standard shipping: $5.95.
+- Free standard shipping threshold: $75.
+- Expedited shipping: not priced yet.
+
+Owner checks:
+
+- Run real carrier quotes for each package weight.
+- Confirm whether free shipping still leaves acceptable margin.
+- Decide whether to show delivery estimates by state.
+
+## Mock Return And Damage Policy
+
+- Return window: 30 days.
+- Damage report window: 7 days from delivery.
+- Return condition: unused, original packaging, photo proof for damage claims.
+- Refund timing: 5-10 business days after inspection.
+
+Owner checks:
+
+- Decide who pays return shipping.
+- Decide whether gift orders can be refunded to the original purchaser only.
+- Decide whether damaged items are refunded, replaced, or store-credit only.
+
+## Mock Checkout Decision
+
+Recommended path:
+
+```text
+Next.js storefront -> Shopify Storefront API -> Shopify cart/checkout/orders
+```
+
+Why:
+
+- Shopify saves product admin, inventory, checkout, payment, order, refund, and
+  tax setup work.
+- The custom Next.js frontend keeps the AUREÀ luxury visual style.
+- It is easier to launch safely than building a custom commerce backend.
+
+Owner checks:
+
+- Create Shopify store.
+- Add products and variants.
+- Configure Shopify Payments or another payment provider.
+- Configure tax and shipping settings.
+- Decide whether to use Shopify Markets for future non-US sales.
+
+## Mock Tax Decision
+
+- Do not calculate sales tax manually in custom code.
+- Use Shopify tax setup, Shopify Tax, or another trusted tax provider.
+
+Owner checks:
+
+- Confirm nexus obligations with an accountant or sales-tax tool.
+- Confirm whether holding inventory in a US state creates sales-tax obligations.
+
+## Mock Email Decision
+
+- Current email field is UI-only.
+- Recommended future providers: Shopify Email or Klaviyo.
+
+Owner checks:
+
+- Pick email provider.
+- Add consent language.
+- Add privacy policy.
+- Decide welcome flow and abandoned checkout flow.
+
+## What Works Now
+
+- Storefront renders.
+- Product catalog renders from structured data.
+- Cart drawer works in the browser.
+- Quantity changes and subtotal work.
+- Mock US-warehouse fulfillment copy is visible.
+- Mock origin disclosure is visible.
+- Build and lint pass.
+
+## What Does Not Work Yet
+
+- No real checkout.
+- No real order creation.
+- No real inventory sync.
+- No real shipping rates.
+- No real sales tax.
+- No real email capture.
+- No real policy pages.
+- No real analytics.
+
+## Compliance Notes To Recheck
+
+- The FTC says unqualified `Made in USA` claims require the product to be
+  "all or virtually all" made in the United States. This product is imported, so
+  the mock copy avoids that claim.
+- Imported products can raise country-of-origin marking issues. Confirm
+  packaging/marking with supplier paperwork, customs broker, or qualified
+  counsel before launch.
+
+Useful references:
+
+- FTC Made in USA guidance:
+  https://www.ftc.gov/business-guidance/resources/complying-made-usa-standard
+- Shopify product admin:
+  https://help.shopify.com/en/manual/products
+- Shopify checkout:
+  https://help.shopify.com/en/manual/checkout-settings
+- Shopify Storefront API cart:
+  https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/cart/manage

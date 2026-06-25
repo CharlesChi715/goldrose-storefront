@@ -3,6 +3,13 @@
 import Image from "next/image";
 import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
+import {
+  mockLaunchDecisions,
+  returnPolicy,
+  shippingPolicy,
+  storeProfile,
+  warehouse,
+} from "@/lib/business";
 import { formatMoney, heroProduct, products, type Product } from "@/lib/products";
 
 type CartLine = {
@@ -17,6 +24,10 @@ type CartLineView = CartLine & {
 };
 
 const brandName = "AUREÀ";
+
+function stockLabel(product: Product) {
+  return product.inventoryOnHand > product.reorderPoint ? "In stock" : "Low stock";
+}
 
 function getLineKey(productId: string, option: string) {
   return `${productId}::${option}`;
@@ -103,6 +114,13 @@ function ProductCard({
             </div>
           </div>
           <p className="text-sm font-semibold text-[#7a5d1c]">{product.bestFor}</p>
+          <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.12em] text-[#7c6e50]">
+            <span>{stockLabel(product)}</span>
+            <span>·</span>
+            <span>{warehouse.label}</span>
+            <span>·</span>
+            <span>{storeProfile.productOriginCountry} origin</span>
+          </div>
         </div>
 
         <div className="grid gap-2">
@@ -272,7 +290,7 @@ function CartDrawer({
             Continue
           </GoldButton>
           <p className="mt-3 text-center text-xs leading-5 text-[#9c9277]">
-            Payments stay paused until price, shipping, tax, and policies are confirmed.
+            Payments stay paused until Shopify or Stripe checkout is connected.
           </p>
         </div>
       </aside>
@@ -449,11 +467,11 @@ export function Storefront() {
             </div>
             <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#7c6e50]">
               <span className="text-[#b8922e]">★★★★★</span>
-              <span>Review section ready</span>
+              <span>{storeProfile.originDisclosure}</span>
               <span>·</span>
-              <span>Gift box included</span>
+              <span>Ships from {warehouse.city}, {warehouse.state}</span>
               <span>·</span>
-              <span>Policy copy pending</span>
+              <span>{returnPolicy.returnWindowDays}-day returns mocked</span>
             </div>
           </div>
 
@@ -473,9 +491,9 @@ export function Storefront() {
         <section className="grid border-y border-[#b8922e]/25 bg-[#f7f1e6] sm:grid-cols-4">
           {[
             ["24K", "Gold Dipped Finish"],
-            ["100%", "Real Rose Base"],
-            ["Gift", "Box & Stand"],
-            ["MVP", "Checkout Pending"],
+            ["US", "Inventory On Hand"],
+            ["$75", "Free Shipping Mock"],
+            ["30", "Return Days Mock"],
           ].map(([value, label]) => (
             <div
               key={label}
@@ -543,9 +561,9 @@ export function Storefront() {
               </h2>
               <div className="mt-7 grid gap-5 text-[#4a3f2a]">
                 {[
-                  "Carefully selected rose imagery supports a stronger premium story than generic gift copy.",
+                  `${storeProfile.originDisclosure} This avoids implying the product is made in America.`,
                   "The physical box and stand reduce buyer uncertainty because the gift feels complete.",
-                  "Final claims should be checked against supplier documentation before launch.",
+                  "Final material and gold-finish claims should be checked against supplier documentation before launch.",
                 ].map((item) => (
                   <div key={item} className="flex gap-4 font-light leading-7">
                     <span className="text-[#b8922e]" aria-hidden="true">
@@ -671,29 +689,45 @@ export function Storefront() {
         </section>
 
         <section className="bg-[#16110a] px-4 py-16 text-center sm:px-6 lg:px-8 lg:py-24">
-          <SectionLabel dark>Trust before checkout</SectionLabel>
+          <SectionLabel dark>Mock operations</SectionLabel>
           <h2 className="font-serif text-4xl font-medium leading-tight text-[#f7f1e6] sm:text-5xl">
-            What still needs to become real.
+            Enough to plan the store, not enough to take money yet.
           </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-8 text-[#bdb39a]">
+            These are mocked launch assumptions for a China-sourced product
+            already stocked in the United States. Revise them before connecting
+            checkout.
+          </p>
           <div className="mx-auto mt-10 grid max-w-6xl gap-5 text-left lg:grid-cols-3">
             {[
               [
-                "Real policy copy",
-                "Shipping, refunds, damage replacement, and delivery timing must be finalized before launch.",
+                "US fulfillment",
+                `${warehouse.label}: ${warehouse.city}, ${warehouse.state}. Processing ${shippingPolicy.processingTime}; standard transit ${shippingPolicy.standardTransit}.`,
               ],
               [
-                "Real checkout",
-                "Stripe Checkout or Shopify should handle payments, tax, order records, and customer receipts.",
+                "Shipping offer",
+                `Mock standard shipping is ${formatMoney(shippingPolicy.standardShippingPrice)} or free over ${formatMoney(shippingPolicy.freeShippingThreshold)}.`,
               ],
               [
-                "Real social proof",
-                "Do not publish review counts or testimonials until they come from actual buyers.",
+                "Return promise",
+                `${returnPolicy.returnWindowDays}-day return window; damaged items should be reported within ${returnPolicy.damageReportWindowDays} days.`,
               ],
             ].map(([title, copy]) => (
               <article key={title} className="rounded-md border border-[#c9a24b]/20 bg-[#1c160d] p-7">
                 <h3 className="font-serif text-2xl font-medium text-[#f4dd9c]">{title}</h3>
                 <p className="mt-3 text-sm leading-7 text-[#bdb39a]">{copy}</p>
               </article>
+            ))}
+          </div>
+          <div className="mx-auto mt-8 grid max-w-6xl gap-3 text-left">
+            {mockLaunchDecisions.slice(0, 5).map((item) => (
+              <div
+                key={item.area}
+                className="grid gap-2 rounded-md border border-[#c9a24b]/15 bg-[#100d09] p-4 text-sm text-[#bdb39a] md:grid-cols-[150px_1fr]"
+              >
+                <strong className="text-[#f4dd9c]">{item.area}</strong>
+                <span>{item.decision}</span>
+              </div>
             ))}
           </div>
         </section>
@@ -704,8 +738,8 @@ export function Storefront() {
             <em className="text-[#f4dd9c]">the moment</em>.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg font-light leading-8 text-[#bdb39a]">
-            The visual direction is ready. The next serious step is confirming
-            price, policy, and checkout operations.
+            The visual direction and mock operations are ready. The next serious
+            step is connecting Shopify products, cart, checkout, and order flow.
           </p>
           <div className="mt-7 flex flex-wrap items-baseline justify-center gap-4">
             <span className="font-serif text-5xl text-[#f4dd9c]">

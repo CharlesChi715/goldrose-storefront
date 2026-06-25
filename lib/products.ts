@@ -1,9 +1,14 @@
 export type Product = {
   id: string;
+  sku: string;
   name: string;
   shortName: string;
   price: number;
   compareAtPrice?: number;
+  landedCost: number;
+  inventoryOnHand: number;
+  reorderPoint: number;
+  packageWeightOz: number;
   image: string;
   alt: string;
   description: string;
@@ -16,10 +21,15 @@ export type Product = {
 export const products: Product[] = [
   {
     id: "signature-gold-rose",
+    sku: "AUR-GR-SIG-001",
     name: "AUREÀ Signature 24K Gold Rose",
     shortName: "Signature Rose",
     price: 4999,
     compareAtPrice: 8999,
+    landedCost: 1425,
+    inventoryOnHand: 420,
+    reorderPoint: 90,
+    packageWeightOz: 12,
     image: "/products/gold-rose-stand.jpg",
     alt: "Gold dipped rose displayed beside a brown gift box",
     description:
@@ -31,10 +41,15 @@ export const products: Product[] = [
   },
   {
     id: "boxed-keepsake-rose",
+    sku: "AUR-GR-BOX-002",
     name: "AUREÀ Boxed Keepsake Rose",
     shortName: "Boxed Keepsake",
     price: 6499,
     compareAtPrice: 10999,
+    landedCost: 1780,
+    inventoryOnHand: 260,
+    reorderPoint: 75,
+    packageWeightOz: 18,
     image: "/products/gold-rose-box.jpg",
     alt: "Gold dipped rose shown with a presentation box",
     description:
@@ -46,10 +61,15 @@ export const products: Product[] = [
   },
   {
     id: "premium-gift-bundle",
+    sku: "AUR-GR-BND-003",
     name: "AUREÀ Premium Gift Bundle",
     shortName: "Premium Bundle",
     price: 7999,
     compareAtPrice: 13999,
+    landedCost: 2360,
+    inventoryOnHand: 140,
+    reorderPoint: 50,
+    packageWeightOz: 24,
     image: "/products/gold-rose-detail.jpg",
     alt: "Close-up detail graphic of a gold dipped rose",
     description:
@@ -70,4 +90,8 @@ export function formatMoney(cents: number) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100);
+}
+
+export function grossMarginPercent(product: Product) {
+  return Math.round(((product.price - product.landedCost) / product.price) * 100);
 }

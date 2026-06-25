@@ -6,8 +6,9 @@ Agent: Codex
 ## Current Task
 
 Built the strongest practical AUREÀ DTC storefront MVP possible under safe
-placeholder assumptions, then restyled it toward the luxury direction in
-`temp/Gold Rose Landing.html`.
+placeholder assumptions, restyled it toward the luxury direction in
+`temp/Gold Rose Landing.html`, and added mock US-market operational decisions
+for a China-imported product stocked in America.
 
 ## Changed Files
 
@@ -21,6 +22,10 @@ placeholder assumptions, then restyled it toward the luxury direction in
   product cards, cart drawer, quantity controls, subtotal, trust sections, and
   email placeholder.
 - `lib/products.ts` - added typed product data and money formatting helper.
+- `lib/business.ts` - added mock US warehouse, shipping, returns, origin,
+  compliance, and launch-decision data.
+- `docs/mock-business-decisions.md` - added owner-review checklist for mocked
+  product, sourcing, shipping, returns, checkout, tax, and email assumptions.
 - `public/products/` - copied selected product assets with readable filenames,
   including added romance/comparison/lifestyle assets from `src/`.
 - `README.md` - updated from planning doc to current MVP map with structure,
@@ -41,6 +46,13 @@ placeholder assumptions, then restyled it toward the luxury direction in
 - Built a small three-product catalog instead of a single-product page because
   it supports good/better/best offer testing without making the store broad.
 - Used USD placeholder pricing and conservative placeholder claims.
+- Mocked product reality from owner input: imported from China, inventory already
+  in the United States, selling to US customers first.
+- Added conservative origin copy: `Imported from China. Ships from US inventory.`
+  Avoid `Made in USA` or implied US-origin claims.
+- Mocked Ontario, CA warehouse, 1-2 business day processing, 3-5 business day
+  standard transit, $5.95 standard shipping, free shipping over $75, and 30-day
+  returns.
 - Kept checkout intentionally disconnected until product pricing, taxes,
   shipping, inventory, and policies are confirmed.
 - Did not add `uv`; no Python tooling is needed.
@@ -68,6 +80,11 @@ placeholder assumptions, then restyled it toward the luxury direction in
   `file src/*`.
 - `npm run lint` passed after the AUREÀ restyle.
 - `npm run build` passed after the AUREÀ restyle.
+- Checked FTC guidance on Made in USA claims and kept product-origin copy
+  conservative.
+- `npm run lint` passed after adding mock operations.
+- `npm run build` passed after adding mock operations.
+- `curl -I http://127.0.0.1:3000/` returned `200 OK` after adding mock operations.
 
 ## Known Issues
 
@@ -80,6 +97,9 @@ placeholder assumptions, then restyled it toward the luxury direction in
   provider is implemented yet.
 - Product copy, prices, return policy, shipping promise, and legal claims are
   placeholders and need owner confirmation before launch.
+- Mock operations are not legal/tax/customs advice. Confirm country-of-origin
+  marking, tariff/import paperwork, sales-tax nexus, and product claims with the
+  right professionals/tools before launch.
 - Browser-based visual verification was attempted earlier in the project, but
   the in-app browser runtime failed to initialize in that session. This turn
   verified via lint, production build, dev server, and HTTP `200 OK`.
@@ -87,11 +107,14 @@ placeholder assumptions, then restyled it toward the luxury direction in
 ## Next Steps
 
 1. Open `http://localhost:3000` and visually review the storefront.
-2. Replace placeholder product prices and copy in `lib/products.ts`.
-3. Replace `https://aurea.example` in `app/layout.tsx` and `app/page.tsx`
+2. Review every mocked decision in `docs/mock-business-decisions.md`.
+3. Replace placeholder product prices, stock counts, landed costs, and copy in
+   `lib/products.ts`.
+4. Replace mock operations in `lib/business.ts`.
+5. Replace `https://aurea.example` in `app/layout.tsx` and `app/page.tsx`
    when the production domain is known.
-4. Decide checkout direction: Stripe Checkout for a lightweight custom store, or
+6. Decide checkout direction: Stripe Checkout for a lightweight custom store, or
    Shopify for built-in products/orders/taxes/inventory.
-5. Add policy pages before real orders: shipping, refund, privacy, and terms.
-6. Review `npm audit` and npm script approvals deliberately before launch.
-7. Validate the `AUREÀ` brand legally and commercially before launch.
+7. Add policy pages before real orders: shipping, refund, privacy, and terms.
+8. Review `npm audit` and npm script approvals deliberately before launch.
+9. Validate the `AUREÀ` brand legally and commercially before launch.
