@@ -73,9 +73,9 @@ export const mockLaunchDecisions = [
   },
   {
     area: "Checkout",
-    decision: "Recommended path is Shopify checkout behind the custom Next.js storefront.",
-    status: "Recommended",
-    ownerCheck: "Choose Shopify plan, payment setup, tax settings, and product variants.",
+    decision: "Use Shopify checkout behind the custom Next.js storefront. This branch has a mock Shopify cart route.",
+    status: "Mocked in code",
+    ownerCheck: "Choose Shopify plan, payment setup, tax settings, and real product variant IDs.",
   },
   {
     area: "Tax",

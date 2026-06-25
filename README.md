@@ -15,16 +15,22 @@ The project now has a working Next.js storefront:
 - interactive cart drawer
 - quantity controls and subtotal
 - email capture UI placeholder
-- product/story/occasion/FAQ sections
+- product/story/occasion/operations sections
 - mock US-warehouse shipping, return, inventory, and origin assumptions
+- mock Shopify cart creation through a Next.js API route
 - SEO metadata and basic structured data
 - local product images served from `public/products/`
 
-Checkout is intentionally not connected yet. Payments, tax, shipping, inventory,
-and order creation should wait until the business details are confirmed.
+This `shopify-checkout` branch now has a Shopify-shaped checkout path. It runs
+in mock mode by default, so no real payment, tax, order, or inventory action
+happens yet. Live Shopify checkout can be turned on later with real Shopify
+products, variant IDs, store domain, and Storefront API token.
 
 See [docs/mock-business-decisions.md](docs/mock-business-decisions.md) for the
 mock launch assumptions that need owner review.
+
+See [docs/shopify-integration.md](docs/shopify-integration.md) for the Shopify
+setup guide.
 
 ## Brand Direction
 
@@ -60,6 +66,7 @@ customer journey are controlled by the business.
 - Tailwind CSS `4`
 - ESLint
 - Node.js package tooling through `npm`
+- Shopify Storefront API integration path, mocked by default
 
 We do not need `uv` right now. `uv` is for Python projects. Add it only if we
 later create Python tooling for image processing, imports, automation, or a
@@ -111,19 +118,25 @@ npm run start
 |   +-- globals.css      # global styles and Tailwind import
 |   +-- layout.tsx       # metadata and root HTML/body wrapper
 |   +-- page.tsx         # server page that renders the storefront
+|   +-- api/
+|   |   +-- shopify/
+|   |       +-- cart/route.ts  # cart creation endpoint
 +-- components/
 |   +-- Storefront.tsx   # interactive storefront and cart UI
 +-- lib/
 |   +-- products.ts      # product data, types, and money formatting
 |   +-- business.ts      # mock operations, shipping, returns, and launch decisions
+|   +-- shopify/         # Shopify config, API client, mock cart, and types
 +-- docs/
 |   +-- mock-business-decisions.md
+|   +-- shopify-integration.md
 +-- public/
 |   +-- products/        # browser-accessible storefront images
 +-- src/                 # original source image folder
 +-- index.html           # earlier static prototype reference
 +-- styles.css           # earlier static prototype CSS reference
 +-- script.js            # earlier static prototype JS reference
++-- .env.example         # safe Shopify environment variable template
 +-- package.json         # scripts and dependencies
 +-- README.md            # project map and learning notes
 +-- AGENTS.md            # instructions for AI agents working in this repo
@@ -153,9 +166,31 @@ email form feedback, and the cart drawer.
 Beginner idea: when a component needs browser interaction, it usually needs
 `"use client"` at the top in the Next.js app router.
 
+### `app/api/shopify/cart/route.ts`
+
+This is the server endpoint the cart calls when the customer clicks Shopify
+Checkout. It validates the cart request, then asks `lib/shopify/client.ts` to
+create a mock or live Shopify cart.
+
+Beginner idea: a `route.ts` file inside `app/api/...` creates an API endpoint in
+Next.js.
+
+### `lib/shopify/`
+
+Shopify-specific code lives here:
+
+- `config.ts` reads environment variables.
+- `client.ts` creates Shopify carts.
+- `mock.ts` creates local fake carts while learning.
+- `types.ts` keeps the cart data shapes readable.
+
+Beginner idea: keep third-party service code in its own folder so the UI does
+not become tangled with API details.
+
 ### `lib/products.ts`
 
-Product names, prices, images, descriptions, options, and details live here.
+Product names, prices, images, descriptions, options, Shopify handles, and
+Shopify variant IDs live here.
 
 Beginner idea: keeping product data separate from UI makes the page easier to
 change later.
@@ -190,7 +225,7 @@ placeholders:
 - Mock warehouse: Ontario, California
 - Mock free shipping threshold: $75
 - Mock return window: 30 days
-- Checkout: not connected
+- Checkout: Shopify mock mode through `POST /api/shopify/cart`
 - Domain in metadata: `https://aurea.example`
 - Email capture: UI-only, no real provider
 - Product claims: conservative placeholders
@@ -205,19 +240,21 @@ Replace these before launch.
 - Add-to-cart opens a cart drawer.
 - Cart quantities can increase, decrease, or remove lines.
 - Subtotal updates automatically.
-- FAQ sections expand and collapse.
+- Shopify Checkout button creates a mock Shopify cart in mock mode.
 - Email form validates a simple email shape and shows local feedback.
 - Mock business decisions are listed in `docs/mock-business-decisions.md`.
+- Shopify setup steps are listed in `docs/shopify-integration.md`.
 - `npm run lint` passes.
 - `npm run build` passes.
 
 ## What Is Not Real Yet
 
-- No payment processing.
-- No order creation.
-- No tax calculation.
-- No shipping rates.
-- No inventory tracking.
+- No real Shopify store is connected.
+- No real payment processing.
+- No real order creation.
+- No real tax calculation.
+- No real shipping rates.
+- No real inventory sync.
 - No real email provider.
 - No privacy, refund, terms, or shipping policy pages.
 - No analytics.
@@ -237,7 +274,7 @@ These are business decisions, not just code decisions:
 - Return/refund policy
 - Warranty or damage policy
 - Product claims we can honestly support
-- Checkout provider
+- Shopify plan and checkout settings
 - Launch country/currency
 - Production domain
 
@@ -245,17 +282,17 @@ These are business decisions, not just code decisions:
 
 1. Review the storefront at `http://localhost:3000`.
 2. Review every assumption in `docs/mock-business-decisions.md`.
-3. Replace placeholder product prices and copy in `lib/products.ts`.
-4. Replace the metadata domain in `app/layout.tsx` and `app/page.tsx`.
-5. Choose checkout direction:
-   - Stripe Checkout if you want a lightweight custom storefront.
-   - Shopify if you want built-in products, orders, taxes, and inventory.
-6. Add policy pages before accepting real orders:
+3. Read `docs/shopify-integration.md`.
+4. Create the Shopify products and variants.
+5. Replace placeholder product prices, copy, and Shopify IDs in `lib/products.ts`.
+6. Replace the metadata domain in `app/layout.tsx` and `app/page.tsx`.
+7. Configure `.env.local` from `.env.example` when the Shopify store exists.
+8. Add policy pages before accepting real orders:
    - shipping policy
    - refund policy
    - privacy policy
    - terms of service
-7. Add analytics and email capture only after the core offer is clear.
+9. Add analytics and email capture only after the core offer is clear.
 
 ## How Codex Should Work Here
 

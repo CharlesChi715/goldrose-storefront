@@ -29,7 +29,7 @@ Owner checks:
 - Confirm real available inventory.
 - Confirm whether the product is truly 24K gold dipped/plated and what exact
   wording the supplier can substantiate.
-- Confirm each product variant maps cleanly to Shopify variants later.
+- Replace each mock Shopify variant ID with a real Shopify variant ID.
 
 ## Mock Fulfillment
 
@@ -90,10 +90,18 @@ Why:
 - The custom Next.js frontend keeps the AUREÀ luxury visual style.
 - It is easier to launch safely than building a custom commerce backend.
 
+Current implementation:
+
+- `POST /api/shopify/cart` creates a mock Shopify-shaped cart by default.
+- `SHOPIFY_MODE=mock` means no money, order, tax, or inventory action happens.
+- `SHOPIFY_MODE=live` can call Shopify after real credentials and variant IDs
+  exist.
+
 Owner checks:
 
 - Create Shopify store.
 - Add products and variants.
+- Replace mock variant IDs in `lib/products.ts`.
 - Configure Shopify Payments or another payment provider.
 - Configure tax and shipping settings.
 - Decide whether to use Shopify Markets for future non-US sales.
@@ -126,13 +134,14 @@ Owner checks:
 - Product catalog renders from structured data.
 - Cart drawer works in the browser.
 - Quantity changes and subtotal work.
+- Shopify mock cart creation works through the Next.js API route.
 - Mock US-warehouse fulfillment copy is visible.
 - Mock origin disclosure is visible.
 - Build and lint pass.
 
 ## What Does Not Work Yet
 
-- No real checkout.
+- No real Shopify checkout credentials yet.
 - No real order creation.
 - No real inventory sync.
 - No real shipping rates.

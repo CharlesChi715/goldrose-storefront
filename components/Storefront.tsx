@@ -23,6 +23,16 @@ type CartLineView = CartLine & {
   lineTotal: number;
 };
 
+type ShopifyCartApiResponse = {
+  cart?: {
+    id: string;
+    checkoutUrl: string;
+  };
+  mode?: "mock" | "live";
+  warnings?: string[];
+  error?: string;
+};
+
 const brandName = "AUREÀ";
 
 function stockLabel(product: Product) {
@@ -41,16 +51,21 @@ function GoldButton({
   children,
   onClick,
   type = "button",
+  disabled = false,
+  className = "",
 }: {
   children: ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
+  disabled?: boolean;
+  className?: string;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
-      className="inline-flex h-12 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-[#f3d77c] focus:ring-offset-2"
+      disabled={disabled}
+      className={`inline-flex h-12 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-[#f3d77c] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100 ${className}`}
     >
       {children}
     </button>
@@ -166,6 +181,10 @@ function CartDrawer({
   onClose,
   onChangeQuantity,
   onRemove,
+  onCheckout,
+  isCheckingOut,
+  checkoutMessage,
+  checkoutError,
 }: {
   isOpen: boolean;
   lines: CartLineView[];
@@ -173,6 +192,10 @@ function CartDrawer({
   onClose: () => void;
   onChangeQuantity: (productId: string, option: string, amount: number) => void;
   onRemove: (productId: string, option: string) => void;
+  onCheckout: () => void;
+  isCheckingOut: boolean;
+  checkoutMessage: string;
+  checkoutError: string;
 }) {
   return (
     <div
@@ -282,15 +305,21 @@ function CartDrawer({
             <span className="font-bold text-[#f7f1e6]">Subtotal</span>
             <strong className="text-[#f4dd9c]">{formatMoney(subtotal)}</strong>
           </div>
-          <GoldButton
-            onClick={() =>
-              alert("Checkout is not connected yet. Next step: choose Stripe Checkout or Shopify.")
-            }
-          >
-            Continue
+          <GoldButton onClick={onCheckout} disabled={isCheckingOut} className="w-full">
+            {isCheckingOut ? "Creating Cart" : "Shopify Checkout"}
           </GoldButton>
+          {checkoutError ? (
+            <p className="mt-3 rounded-[3px] border border-[#7c2f2f] bg-[#241010] p-3 text-xs leading-5 text-[#ffb4a8]">
+              {checkoutError}
+            </p>
+          ) : null}
+          {checkoutMessage ? (
+            <p className="mt-3 rounded-[3px] border border-[#6b5425] bg-[#1c160d] p-3 text-xs leading-5 text-[#c9bfa6]">
+              {checkoutMessage}
+            </p>
+          ) : null}
           <p className="mt-3 text-center text-xs leading-5 text-[#9c9277]">
-            Payments stay paused until Shopify or Stripe checkout is connected.
+            Mock mode creates a Shopify-shaped cart without charging money.
           </p>
         </div>
       </aside>
@@ -303,6 +332,9 @@ export function Storefront() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [checkoutError, setCheckoutError] = useState("");
 
   const lines = useMemo<CartLineView[]>(
     () =>
@@ -366,6 +398,71 @@ export function Storefront() {
     setCart((currentCart) =>
       currentCart.filter((line) => getLineKey(line.productId, line.option) !== key),
     );
+  }
+
+  async function handleShopifyCheckout() {
+    if (lines.length === 0) {
+      setCheckoutError("Add at least one product before creating a Shopify checkout.");
+      setCheckoutMessage("");
+      setIsCartOpen(true);
+      return;
+    }
+
+    setIsCheckingOut(true);
+    setCheckoutError("");
+    setCheckoutMessage("");
+
+    try {
+      const response = await fetch("/api/shopify/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          lines: lines.map((line) => ({
+            merchandiseId: line.product.shopifyVariantId,
+            quantity: line.quantity,
+            attributes: [
+              {
+                key: "Gift option",
+                value: line.option,
+              },
+              {
+                key: "Local SKU",
+                value: line.product.sku,
+              },
+            ],
+          })),
+          buyerIdentity: {
+            countryCode: "US",
+          },
+        }),
+      });
+
+      const result = (await response.json()) as ShopifyCartApiResponse;
+
+      if (!response.ok || result.error || !result.cart) {
+        throw new Error(result.error ?? "Shopify checkout could not be created.");
+      }
+
+      if (result.mode === "live") {
+        window.location.assign(result.cart.checkoutUrl);
+        return;
+      }
+
+      setCheckoutMessage(
+        `Mock Shopify cart created: ${result.cart.id}. Mock checkout URL: ${result.cart.checkoutUrl}. ${
+          result.warnings?.[0] ?? "No real payment or order was created."
+        }`,
+      );
+    } catch (error) {
+      setCheckoutError(
+        error instanceof Error ? error.message : "Unable to create Shopify checkout.",
+      );
+    } finally {
+      setIsCheckingOut(false);
+      setIsCartOpen(true);
+    }
   }
 
   function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
@@ -738,8 +835,9 @@ export function Storefront() {
             <em className="text-[#f4dd9c]">the moment</em>.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg font-light leading-8 text-[#bdb39a]">
-            The visual direction and mock operations are ready. The next serious
-            step is connecting Shopify products, cart, checkout, and order flow.
+            The visual direction, mock operations, and Shopify-shaped checkout
+            route are ready. The next serious step is replacing mock IDs with
+            real Shopify products and credentials.
           </p>
           <div className="mt-7 flex flex-wrap items-baseline justify-center gap-4">
             <span className="font-serif text-5xl text-[#f4dd9c]">
@@ -805,6 +903,10 @@ export function Storefront() {
         onClose={() => setIsCartOpen(false)}
         onChangeQuantity={changeQuantity}
         onRemove={removeLine}
+        onCheckout={handleShopifyCheckout}
+        isCheckingOut={isCheckingOut}
+        checkoutMessage={checkoutMessage}
+        checkoutError={checkoutError}
       />
     </div>
   );

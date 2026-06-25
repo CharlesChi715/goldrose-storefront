@@ -1,6 +1,9 @@
 export type Product = {
   id: string;
   sku: string;
+  handle: string;
+  shopifyProductId: string;
+  shopifyVariantId: string;
   name: string;
   shortName: string;
   price: number;
@@ -16,12 +19,16 @@ export type Product = {
   badge: string;
   options: string[];
   details: string[];
+  tags: string[];
 };
 
 export const products: Product[] = [
   {
     id: "signature-gold-rose",
     sku: "AUR-GR-SIG-001",
+    handle: "signature-24k-gold-rose",
+    shopifyProductId: "gid://shopify/Product/100000000001",
+    shopifyVariantId: "gid://shopify/ProductVariant/200000000001",
     name: "AUREÀ Signature 24K Gold Rose",
     shortName: "Signature Rose",
     price: 4999,
@@ -38,10 +45,14 @@ export const products: Product[] = [
     badge: "Save 44%",
     options: ["Gift box included", "Valentine card", "No message card"],
     details: ["Real rose base", "Clear display stand", "Gift-ready presentation"],
+    tags: ["signature", "anniversary", "valentines-day", "gift-ready"],
   },
   {
     id: "boxed-keepsake-rose",
     sku: "AUR-GR-BOX-002",
+    handle: "boxed-keepsake-gold-rose",
+    shopifyProductId: "gid://shopify/Product/100000000002",
+    shopifyVariantId: "gid://shopify/ProductVariant/200000000002",
     name: "AUREÀ Boxed Keepsake Rose",
     shortName: "Boxed Keepsake",
     price: 6499,
@@ -58,10 +69,14 @@ export const products: Product[] = [
     badge: "Gift-ready",
     options: ["Valentine card", "Anniversary card", "Mother's Day card"],
     details: ["Embossed keepsake box", "Message card option", "Premium visual finish"],
+    tags: ["boxed", "mothers-day", "valentines-day", "keepsake"],
   },
   {
     id: "premium-gift-bundle",
     sku: "AUR-GR-BND-003",
+    handle: "premium-gold-rose-gift-bundle",
+    shopifyProductId: "gid://shopify/Product/100000000003",
+    shopifyVariantId: "gid://shopify/ProductVariant/200000000003",
     name: "AUREÀ Premium Gift Bundle",
     shortName: "Premium Bundle",
     price: 7999,
@@ -78,6 +93,7 @@ export const products: Product[] = [
     badge: "Best value",
     options: ["Gift message", "Premium insert", "Standard insert"],
     details: ["Detail-focused finish", "Premium insert option", "Strongest gift presentation"],
+    tags: ["bundle", "premium", "gift-ready", "high-aov"],
   },
 ];
 

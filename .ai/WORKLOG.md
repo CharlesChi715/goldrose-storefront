@@ -49,3 +49,13 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
   at `docs/mock-business-decisions.md`.
 - Updated the storefront to display conservative origin and fulfillment copy,
   then verified with `npm run lint`, `npm run build`, and a local `200 OK` check.
+
+## 2026-06-25 19:18 AEST
+
+- On branch `shopify-checkout`, added Shopify mock/live cart creation: checkout
+  UI posts to `POST /api/shopify/cart`, mock mode returns a Shopify-shaped cart,
+  and live mode is ready to call Storefront API `cartCreate` after real Shopify
+  credentials and variant IDs exist.
+- Added `.env.example`, `lib/shopify/`, `docs/shopify-integration.md`, and
+  updated README/business docs. Verified with lint, production build, homepage
+  `200 OK`, and a mock Shopify cart POST.
