@@ -1,17 +1,37 @@
 # AI Handoff
 
-Last updated: 2026-06-25 19:18 AEST
-Agent: Codex
+Last updated: 2026-06-28 17:56 AEST
+Agent: Claude
 
 ## Current Task
 
-Working on branch `shopify-checkout`. Added a Shopify-first checkout path to
-the AUREÀ Next.js storefront while keeping it safe in mock mode by default.
+Branches consolidated into `main` (the owner was overwhelmed by parallel
+branches). The Shopify checkout path is merged; the ideas/learning docs are
+folded in; the in-progress Stripe exploration is archived on `stripe-checkout`.
 
-The storefront still uses local mock product/business data, but the cart now
-posts to a Next.js API route that can either return a local Shopify-shaped cart
-or call Shopify Storefront API `cartCreate` when real credentials and variant IDs
-exist.
+On top of that, built a unified checkout offering **Shop Pay, credit card, and
+PayPal**. All three are served by one Shopify checkout in live mode (Shop Pay
+and PayPal as accelerated wallets, card via Shopify Payments) and are fully
+mocked by default — no real money, order, or stored card number. Shopify was
+chosen as the single backend because Shop Pay only exists on Shopify; Stripe
+(archived) cannot offer it. See `docs/checkout.md`.
+
+### New checkout files
+
+- `lib/cart/store.ts` — `useCart()` localStorage cart shared by storefront + `/checkout`.
+- `lib/checkout/{types,methods,card,mock,client}.ts` — method registry, Luhn
+  card validation (format only, no PAN storage), mock order processor with
+  server-side re-pricing and live Shopify hand-off, and the express helper.
+- `app/api/checkout/route.ts` — validates input, calls `processCheckout()`.
+- `app/checkout/{page,success/page,cancel/page}.tsx` — checkout UI + result pages.
+- `components/Storefront.tsx` — refactored onto `useCart`; drawer now has Shop Pay
+  + PayPal express buttons and a Checkout · Credit Card button.
+
+## Earlier Task (Shopify path, now merged into main)
+
+Added a Shopify-first checkout path: the cart posts to a Next.js API route that
+returns a local Shopify-shaped cart in mock mode or calls Storefront API
+`cartCreate` in live mode.
 
 ## Changed Files
 

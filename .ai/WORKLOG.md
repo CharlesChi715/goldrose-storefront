@@ -59,3 +59,17 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
 - Added `.env.example`, `lib/shopify/`, `docs/shopify-integration.md`, and
   updated README/business docs. Verified with lint, production build, homepage
   `200 OK`, and a mock Shopify cart POST.
+
+## 2026-06-28 17:56 AEST
+
+- Consolidated branches into `main`: merged the Shopify checkout path, folded in
+  the ideas/learning docs, and archived the in-progress Stripe exploration on the
+  `stripe-checkout` branch. Removed the stray worktrees and redundant branches.
+- Built a unified checkout offering Shop Pay, credit card, and PayPal, all served
+  by one Shopify checkout in live mode and fully mocked by default. Added
+  `lib/cart/store.ts` (localStorage cart), `lib/checkout/*` (methods, Luhn card
+  validation, mock order processor, express helper), `app/api/checkout`, and
+  `app/checkout` (page + success + cancel). Card numbers are validated for format
+  only and never stored.
+- Refactored the storefront/cart drawer onto the shared cart hook with Shop Pay +
+  PayPal express buttons and a Checkout · Credit Card button. Added `docs/checkout.md`.

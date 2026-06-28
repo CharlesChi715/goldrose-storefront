@@ -73,9 +73,9 @@ export const mockLaunchDecisions = [
   },
   {
     area: "Checkout",
-    decision: "Use Shopify checkout behind the custom Next.js storefront. This branch has a mock Shopify cart route.",
+    decision: "Offer Shop Pay, credit card, and PayPal through one Shopify checkout behind the custom Next.js storefront. All three run in mock mode until live Shopify credentials are added.",
     status: "Mocked in code",
-    ownerCheck: "Choose Shopify plan, payment setup, tax settings, and real product variant IDs.",
+    ownerCheck: "Choose Shopify plan, enable Shop Pay + PayPal in Shopify Payments, set tax settings, and add real product variant IDs.",
   },
   {
     area: "Tax",

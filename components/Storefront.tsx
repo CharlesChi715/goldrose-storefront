@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   mockLaunchDecisions,
   returnPolicy,
@@ -11,40 +12,16 @@ import {
   warehouse,
 } from "@/lib/business";
 import { formatMoney, heroProduct, products, type Product } from "@/lib/products";
-
-type CartLine = {
-  productId: string;
-  option: string;
-  quantity: number;
-};
-
-type CartLineView = CartLine & {
-  product: Product;
-  lineTotal: number;
-};
-
-type ShopifyCartApiResponse = {
-  cart?: {
-    id: string;
-    checkoutUrl: string;
-  };
-  mode?: "mock" | "live";
-  warnings?: string[];
-  error?: string;
-};
+import { getLineKey, useCart, type CartLineView } from "@/lib/cart/store";
+import { startExpressCheckout } from "@/lib/checkout/client";
+import { paymentMethods } from "@/lib/checkout/methods";
+import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
+const expressMethods = paymentMethods.filter((method) => method.kind === "express");
 
 function stockLabel(product: Product) {
   return product.inventoryOnHand > product.reorderPoint ? "In stock" : "Low stock";
-}
-
-function getLineKey(productId: string, option: string) {
-  return `${productId}::${option}`;
-}
-
-function getProduct(productId: string) {
-  return products.find((product) => product.id === productId);
 }
 
 function GoldButton({
@@ -182,9 +159,9 @@ function CartDrawer({
   onChangeQuantity,
   onRemove,
   onCheckout,
-  isCheckingOut,
-  checkoutMessage,
-  checkoutError,
+  onExpress,
+  pendingMethod,
+  expressError,
 }: {
   isOpen: boolean;
   lines: CartLineView[];
@@ -193,9 +170,9 @@ function CartDrawer({
   onChangeQuantity: (productId: string, option: string, amount: number) => void;
   onRemove: (productId: string, option: string) => void;
   onCheckout: () => void;
-  isCheckingOut: boolean;
-  checkoutMessage: string;
-  checkoutError: string;
+  onExpress: (method: PaymentMethodId) => void;
+  pendingMethod: PaymentMethodId | null;
+  expressError: string;
 }) {
   return (
     <div
@@ -305,21 +282,34 @@ function CartDrawer({
             <span className="font-bold text-[#f7f1e6]">Subtotal</span>
             <strong className="text-[#f4dd9c]">{formatMoney(subtotal)}</strong>
           </div>
-          <GoldButton onClick={onCheckout} disabled={isCheckingOut} className="w-full">
-            {isCheckingOut ? "Creating Cart" : "Shopify Checkout"}
+          <div className="grid grid-cols-2 gap-3">
+            {expressMethods.map((method) => (
+              <button
+                key={method.id}
+                type="button"
+                disabled={lines.length === 0 || pendingMethod !== null}
+                onClick={() => onExpress(method.id)}
+                style={{ background: method.background, color: method.color }}
+                className="inline-flex h-12 items-center justify-center rounded-[4px] text-sm font-bold tracking-[0.04em] shadow-sm transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {pendingMethod === method.id ? "Starting…" : method.label}
+              </button>
+            ))}
+          </div>
+          <GoldButton
+            onClick={onCheckout}
+            disabled={lines.length === 0 || pendingMethod !== null}
+            className="mt-3 w-full"
+          >
+            Checkout · Credit Card
           </GoldButton>
-          {checkoutError ? (
+          {expressError ? (
             <p className="mt-3 rounded-[3px] border border-[#7c2f2f] bg-[#241010] p-3 text-xs leading-5 text-[#ffb4a8]">
-              {checkoutError}
-            </p>
-          ) : null}
-          {checkoutMessage ? (
-            <p className="mt-3 rounded-[3px] border border-[#6b5425] bg-[#1c160d] p-3 text-xs leading-5 text-[#c9bfa6]">
-              {checkoutMessage}
+              {expressError}
             </p>
           ) : null}
           <p className="mt-3 text-center text-xs leading-5 text-[#9c9277]">
-            Mock mode creates a Shopify-shaped cart without charging money.
+            Shop Pay, credit card, and PayPal. Mock mode — no real charge is taken.
           </p>
         </div>
       </aside>
@@ -328,141 +318,37 @@ function CartDrawer({
 }
 
 export function Storefront() {
-  const [cart, setCart] = useState<CartLine[]>([]);
+  const router = useRouter();
+  const { lines, rawLines, subtotal, itemCount, add, changeQuantity, remove, clear } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutMessage, setCheckoutMessage] = useState("");
-  const [checkoutError, setCheckoutError] = useState("");
-
-  const lines = useMemo<CartLineView[]>(
-    () =>
-      cart
-        .map((line) => {
-          const product = getProduct(line.productId);
-
-          if (!product) {
-            return null;
-          }
-
-          return {
-            ...line,
-            product,
-            lineTotal: product.price * line.quantity,
-          };
-        })
-        .filter((line): line is CartLineView => Boolean(line)),
-    [cart],
-  );
-
-  const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
-  const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
+  const [pendingMethod, setPendingMethod] = useState<PaymentMethodId | null>(null);
+  const [expressError, setExpressError] = useState("");
 
   function addToCart(productId: string, option: string) {
-    setCart((currentCart) => {
-      const key = getLineKey(productId, option);
-      const existingLine = currentCart.find(
-        (line) => getLineKey(line.productId, line.option) === key,
-      );
-
-      if (existingLine) {
-        return currentCart.map((line) =>
-          getLineKey(line.productId, line.option) === key
-            ? { ...line, quantity: line.quantity + 1 }
-            : line,
-        );
-      }
-
-      return [...currentCart, { productId, option, quantity: 1 }];
-    });
+    add(productId, option);
+    setExpressError("");
     setIsCartOpen(true);
   }
 
-  function changeQuantity(productId: string, option: string, amount: number) {
-    const key = getLineKey(productId, option);
-
-    setCart((currentCart) =>
-      currentCart
-        .map((line) =>
-          getLineKey(line.productId, line.option) === key
-            ? { ...line, quantity: line.quantity + amount }
-            : line,
-        )
-        .filter((line) => line.quantity > 0),
-    );
+  async function handleExpress(method: PaymentMethodId) {
+    setPendingMethod(method);
+    setExpressError("");
+    const error = await startExpressCheckout({
+      method,
+      lines: rawLines,
+      router,
+      clearCart: clear,
+    });
+    if (error) {
+      setExpressError(error);
+      setPendingMethod(null);
+    }
   }
 
-  function removeLine(productId: string, option: string) {
-    const key = getLineKey(productId, option);
-    setCart((currentCart) =>
-      currentCart.filter((line) => getLineKey(line.productId, line.option) !== key),
-    );
-  }
-
-  async function handleShopifyCheckout() {
-    if (lines.length === 0) {
-      setCheckoutError("Add at least one product before creating a Shopify checkout.");
-      setCheckoutMessage("");
-      setIsCartOpen(true);
-      return;
-    }
-
-    setIsCheckingOut(true);
-    setCheckoutError("");
-    setCheckoutMessage("");
-
-    try {
-      const response = await fetch("/api/shopify/cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          lines: lines.map((line) => ({
-            merchandiseId: line.product.shopifyVariantId,
-            quantity: line.quantity,
-            attributes: [
-              {
-                key: "Gift option",
-                value: line.option,
-              },
-              {
-                key: "Local SKU",
-                value: line.product.sku,
-              },
-            ],
-          })),
-          buyerIdentity: {
-            countryCode: "US",
-          },
-        }),
-      });
-
-      const result = (await response.json()) as ShopifyCartApiResponse;
-
-      if (!response.ok || result.error || !result.cart) {
-        throw new Error(result.error ?? "Shopify checkout could not be created.");
-      }
-
-      if (result.mode === "live") {
-        window.location.assign(result.cart.checkoutUrl);
-        return;
-      }
-
-      setCheckoutMessage(
-        `Mock Shopify cart created: ${result.cart.id}. Mock checkout URL: ${result.cart.checkoutUrl}. ${
-          result.warnings?.[0] ?? "No real payment or order was created."
-        }`,
-      );
-    } catch (error) {
-      setCheckoutError(
-        error instanceof Error ? error.message : "Unable to create Shopify checkout.",
-      );
-    } finally {
-      setIsCheckingOut(false);
-      setIsCartOpen(true);
-    }
+  function goToCheckout() {
+    router.push("/checkout");
   }
 
   function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
@@ -902,11 +788,11 @@ export function Storefront() {
         subtotal={subtotal}
         onClose={() => setIsCartOpen(false)}
         onChangeQuantity={changeQuantity}
-        onRemove={removeLine}
-        onCheckout={handleShopifyCheckout}
-        isCheckingOut={isCheckingOut}
-        checkoutMessage={checkoutMessage}
-        checkoutError={checkoutError}
+        onRemove={remove}
+        onCheckout={goToCheckout}
+        onExpress={handleExpress}
+        pendingMethod={pendingMethod}
+        expressError={expressError}
       />
     </div>
   );
