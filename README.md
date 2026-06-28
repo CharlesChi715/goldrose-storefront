@@ -280,19 +280,17 @@ These are business decisions, not just code decisions:
 
 ## Recommended Next Steps
 
-1. Review the storefront at `http://localhost:3000`.
-2. Review every assumption in `docs/mock-business-decisions.md`.
-3. Read `docs/shopify-integration.md`.
-4. Create the Shopify products and variants.
-5. Replace placeholder product prices, copy, and Shopify IDs in `lib/products.ts`.
-6. Replace the metadata domain in `app/layout.tsx` and `app/page.tsx`.
-7. Configure `.env.local` from `.env.example` when the Shopify store exists.
-8. Add policy pages before accepting real orders:
-   - shipping policy
-   - refund policy
-   - privacy policy
-   - terms of service
-9. Add analytics and email capture only after the core offer is clear.
+The full, ordered to-do list for going from this mock to a real working store
+lives in **[docs/launch-checklist.md](docs/launch-checklist.md)** — one place,
+plain language, with checkboxes. The short version:
+
+1. Confirm the real business facts (`docs/mock-business-decisions.md`).
+2. Set up Shopify: products + variants, Shopify Payments with Shop Pay & PayPal,
+   tax, and shipping rates (`docs/shopify-integration.md`, `docs/checkout.md`).
+3. Connect this site: real `shopifyVariantId`s in `lib/products.ts`, fill
+   `.env.local`, set `SHOPIFY_MODE=live`, and place a real test order.
+4. Add the required policy pages (shipping, refund, privacy, terms).
+5. Replace the placeholder domain and deploy; connect email + analytics last.
 
 ## How Codex Should Work Here
 
