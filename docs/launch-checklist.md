@@ -32,7 +32,14 @@ you can confirm. Nothing technical, but everything downstream depends on them.
 All three payment buttons are powered by one Shopify checkout. See
 `docs/checkout.md` and `docs/shopify-integration.md`.
 
-- [ ] Create the Shopify store and pick a plan.
+> **You don't have to rebuild your store on Shopify.** Shop Pay only works
+> through Shopify, but you can keep this custom storefront and use Shopify
+> *headless* — purely as the checkout/payment engine behind it. A low-tier plan
+> (e.g. Shopify Starter) is enough to enable Shop Pay + checkout. There is no
+> way to accept Shop Pay without some Shopify account.
+
+- [ ] Create the Shopify store and pick a plan (a low-tier/Starter plan is fine
+      for headless checkout).
 - [ ] Add the 3 products with their variants and real prices.
 - [ ] Turn on **Shopify Payments**, then enable **Shop Pay** and **PayPal** as
       accelerated checkout wallets (this is what makes those two buttons real).
@@ -61,6 +68,30 @@ All three payment buttons are powered by one Shopify checkout. See
 - [ ] Privacy policy page
 - [ ] Terms of service page
 - [ ] Contact / support email that someone actually reads.
+
+## Phase 4b — Stay compliant & avoid payment holds
+
+Most "Shopify banned me" stories are really one of two things. Both are
+preventable. This is guidance, not legal advice.
+
+**Avoid the store being suspended (policy / legal):**
+
+- [ ] Keep every product claim truthful and backed by supplier paperwork —
+      "24K gold", "real rose", and the China-origin wording. Never use
+      "Made in USA" (the code already blocks this).
+- [ ] No fake discounts, fake scarcity, or fake reviews.
+- [ ] Only use product images you have the rights to (supplier/stock images can
+      trigger IP complaints). Don't use other brands' names or trademarks.
+- [ ] Use accurate, complete business identity details in Shopify.
+
+**Avoid payment holds / frozen funds (risk — the common one):**
+
+- [ ] Have real inventory on hand and ship fast; state delivery times clearly.
+- [ ] Expect a new store + a gift-season spike to look "risky" — funds may be
+      held or a reserve applied at first. Don't over-promise dates.
+- [ ] Reply to customer questions quickly and refund cleanly to keep
+      **chargebacks low** (chargebacks are the #1 reason processors cut you off).
+- [ ] Don't take a flood of orders you can't fulfill yet.
 
 ## Phase 5 — Go live
 

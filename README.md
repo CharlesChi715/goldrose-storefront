@@ -278,16 +278,52 @@ These are business decisions, not just code decisions:
 - Launch country/currency
 - Production domain
 
-## Recommended Next Steps
+## Recommended Next Steps — Roadmap to Launch
 
-The full, ordered to-do list for going from this mock to a real working store
-lives in **[docs/launch-checklist.md](docs/launch-checklist.md)** — one place,
-plain language, with checkboxes. The short version:
+Where we are now: the storefront and a full Shop Pay / credit card / PayPal
+checkout are built and working in **mock mode** (a safe simulation — no real
+money or orders). The road from here to a real store is 6 milestones.
 
-1. Confirm the real business facts (`docs/mock-business-decisions.md`).
-2. Set up Shopify: products + variants, Shopify Payments with Shop Pay & PayPal,
-   tax, and shipping rates (`docs/shopify-integration.md`, `docs/checkout.md`).
-3. Connect this site: real `shopifyVariantId`s in `lib/products.ts`, fill
-   `.env.local`, set `SHOPIFY_MODE=live`, and place a real test order.
-4. Add the required policy pages (shipping, refund, privacy, terms).
-5. Replace the placeholder domain and deploy; connect email + analytics last.
+The detailed, checkbox version lives in
+**[docs/launch-checklist.md](docs/launch-checklist.md)**. This is the map.
+
+```
+M0 Decide ──▶ M1 Shopify ──▶ M2 Connect & test ──▶ M3 Pages & compliance ──▶ M4 Launch ──▶ M5 Grow
+ (you)         (you)          (you + this app)        (you + this app)         (this app)    (later)
+                                     ▲
+                          "store can take real money" line
+```
+
+**M0 — Decide the business facts** *(you; ~hours)*
+Confirm real prices, gift-box contents, shipping/return terms, and **truthful
+product claims** (gold, real rose, China origin — no "Made in USA"). See
+`docs/mock-business-decisions.md`.
+
+**M1 — Stand up Shopify as the checkout engine** *(you; ~½–1 day)*
+Shop Pay only works through Shopify, so this is required for all three buttons.
+You do **not** rebuild your site — a low-tier Shopify plan is used headless,
+behind this storefront. Add the products + variants, enable **Shopify Payments**
+with **Shop Pay** and **PayPal**, and set up tax + shipping rates.
+See `docs/shopify-integration.md` and `docs/checkout.md`.
+
+**M2 — Connect this site and test** *(you + this app; ~hours)* ← go-live line
+Put real `shopifyVariantId`s in `lib/products.ts`, fill `.env.local`, set
+`SHOPIFY_MODE=live`, then place one **real test order per method** and confirm it
+lands in Shopify admin. After this, "no real orders" is no longer true.
+
+**M3 — Required pages & staying compliant** *(you + this app; ~1 day)*
+Add shipping / refund / privacy / terms pages. Keep claims truthful, use images
+you have rights to, and reduce payment-hold risk (real inventory, fast shipping,
+clear delivery times, responsive support). See the compliance section in
+`docs/launch-checklist.md`.
+
+**M4 — Launch** *(this app; ~hours)*
+Swap the placeholder `aurea.example` domain in `app/layout.tsx` / `app/page.tsx`,
+connect the real domain, and deploy.
+
+**M5 — Grow** *(later)*
+Email capture/marketing, analytics, reviews, more products, lifecycle emails.
+
+**Who does what:** M0–M1 are yours (decisions + Shopify account — I can't make
+those). From M2 on I can do the wiring, the policy pages, the domain swap, and
+run the live tests with you.
