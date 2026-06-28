@@ -291,15 +291,3 @@ plain language, with checkboxes. The short version:
    `.env.local`, set `SHOPIFY_MODE=live`, and place a real test order.
 4. Add the required policy pages (shipping, refund, privacy, terms).
 5. Replace the placeholder domain and deploy; connect email + analytics last.
-
-## How Codex Should Work Here
-
-The owner is learning while Codex builds. Changes should be practical and well
-documented.
-
-- Ask clarifying questions when the prompt is unclear.
-- Make conservative technical choices.
-- Prefer small, understandable steps over large rewrites.
-- Explain important decisions in plain language.
-- Keep this README updated when the plan, stack, or structure changes.
-- Do not add new tools just because they are popular.
