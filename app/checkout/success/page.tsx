@@ -65,12 +65,18 @@ export default async function CheckoutSuccessPage({
           </p>
         ) : null}
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/"
             className="inline-flex h-12 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105"
           >
             Continue shopping
+          </Link>
+          <Link
+            href="/orders"
+            className="inline-flex h-12 items-center justify-center rounded-[3px] border border-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#8a6a22] transition hover:bg-[#f7ecd6]"
+          >
+            View order log →
           </Link>
         </div>
       </div>

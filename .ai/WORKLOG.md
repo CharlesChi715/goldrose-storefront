@@ -908,3 +908,31 @@ Owner asked to be guided through activating Shopify Payments (new to it).
   the boss/accountant before continuing. Did not enter any data.
 - Paused setup pending the owner's entity decision.
 - No app code or docs changed this session; README left unchanged.
+
+## 2026-06-30 20:40 AEST
+
+Close the demo loop: capture orders and show them at /orders
+
+Owner goal: let the boss see the tech stack functioning end to end — a
+visitor can click, pay, and the order/money goes the right way. Not about
+selling the real product yet.
+
+- Recorded the goal in docs/demo-goal.md (demo script + real-vs-simulated)
+  and linked it from a new README "Current Goal" section.
+- New lib/orders/store.ts: file-backed (.data/orders.json, gitignored)
+  capture of completed orders. Demo stand-in for a real Shopify order record.
+- app/api/checkout/route.ts now saves the order on a successful mock result
+  (card + mock express). Live external-redirect results are deliberately not
+  captured (order not placed until Shopify checkout completes). Write failures
+  never fail the checkout.
+- New app/orders/page.tsx: noindex, force-dynamic order log with item lines,
+  totals, method/last-four, timestamp, and a running order count + revenue.
+- Checkout success page now links straight to /orders ("View order log →").
+- Verified end to end against `npm run start`: POSTed a card order and a Shop
+  Pay order; both persisted to .data/orders.json and rendered on /orders.
+  `npm run lint` and `npm run build` both pass. Test .data/ removed after.
+
+Open decision (not yet made): to make the *pay* step a real sandbox charge on
+a provider dashboard, pick Shopify test mode (chosen backend, but blocked on
+the merchant-entity question) or a payment sandbox like Stripe test mode
+(fastest for a demo, not the production backend). Mock loop stands until then.

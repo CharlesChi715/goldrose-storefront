@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isPaymentMethodId } from "@/lib/checkout/methods";
 import { processCheckout } from "@/lib/checkout/mock";
+import { saveOrder } from "@/lib/orders/store";
 import type {
   CardInput,
   CheckoutContact,
@@ -124,6 +125,25 @@ export async function POST(request: Request) {
 
   try {
     const result = await processCheckout(checkoutRequest, nonce);
+
+    // Capture completed mock orders so the demo can show the order landing in
+    // the order log (/orders). A "mock" result is a finished demo order: card
+    // payments complete in place and mock express returns an internal success
+    // URL. Live express results redirect to Shopify's hosted checkout where the
+    // order is not placed yet, so they are deliberately not captured here.
+    if (result.ok && result.mode === "mock") {
+      try {
+        await saveOrder({
+          ...result.order,
+          mode: result.mode,
+          placedAt: new Date().toISOString(),
+        });
+      } catch {
+        // Never fail a successful checkout just because the demo log write
+        // failed (e.g. read-only filesystem). The order still completes.
+      }
+    }
+
     return NextResponse.json(result, { status: result.ok ? 200 : 400 });
   } catch (error) {
     return NextResponse.json(

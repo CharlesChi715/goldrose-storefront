@@ -3,16 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { shippingPolicy } from "@/lib/business";
 import { formatMoney } from "@/lib/products";
 import { useCart } from "@/lib/cart/store";
+import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
 import { paymentMethods } from "@/lib/checkout/methods";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
 
-const expressMethods = paymentMethods.filter((method) => method.kind === "express");
+// PayPal-only first round: Shop Pay isn't configured yet, so it's excluded.
+const expressMethods = paymentMethods.filter(
+  (method) => method.kind === "express" && method.id !== "shop_pay",
+);
 
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 19);
@@ -90,6 +94,17 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Clear the loading state if the page is restored from the back/forward cache
+  // (e.g. shopper taps a pay button, then hits "back" from Shopify/PayPal) so
+  // the buttons don't stay frozen on "Processing…"/"Starting…".
+  useEffect(() => {
+    function resetCheckoutState() {
+      setPendingMethod(null);
+    }
+    window.addEventListener("pageshow", resetCheckoutState);
+    return () => window.removeEventListener("pageshow", resetCheckoutState);
+  }, []);
+
   const shippingAmount = useMemo(() => {
     if (subtotal === 0) {
       return 0;
@@ -105,6 +120,19 @@ export default function CheckoutPage() {
   async function submitCheckout(method: PaymentMethodId, withForm: boolean) {
     if (rawLines.length === 0) {
       setError("Your cart is empty.");
+      return;
+    }
+
+    // Live mode: every method hands off to Shopify's hosted checkout, where
+    // PayPal is the enabled payment method for the first-round test.
+    if (isLiveCheckout()) {
+      const permalink = buildCartPermalink(rawLines);
+      if (permalink) {
+        setPendingMethod(method);
+        window.location.assign(permalink);
+        return;
+      }
+      setError("Checkout is not available right now. Please try again later.");
       return;
     }
 
@@ -206,14 +234,13 @@ export default function CheckoutPage() {
         <section className="order-2 lg:order-1">
           <h1 className="font-serif text-4xl font-medium leading-tight text-[#211a0e]">Checkout</h1>
           <p className="mt-2 text-sm leading-6 text-[#5c4f38]">
-            Choose how you want to pay. Shop Pay and PayPal are one-tap; or enter
-            a card below.
+            Pay with PayPal in one tap, or enter a card below.
           </p>
 
           {/* Express checkout */}
           <div className="mt-7">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#9a7826]">Express checkout</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid gap-3">
               {expressMethods.map((method) => (
                 <button
                   key={method.id}
@@ -228,8 +255,7 @@ export default function CheckoutPage() {
               ))}
             </div>
             <p className="mt-2 text-xs leading-5 text-[#7c6e50]">
-              Shop Pay and PayPal collect shipping and payment in their own
-              secure window.
+              PayPal collects shipping and payment in its own secure window.
             </p>
           </div>
 
@@ -371,8 +397,9 @@ export default function CheckoutPage() {
               {pendingMethod === "card" ? "Processing…" : `Pay ${formatMoney(total)}`}
             </button>
             <p className="text-center text-xs leading-5 text-[#9c9277]">
-              Runs in mock mode — no real charge is taken and card numbers are
-              never stored. Use a test number like 4242 4242 4242 4242.
+              {isLiveCheckout()
+                ? "You'll complete payment securely on Shopify with PayPal. A real charge is taken."
+                : "Runs in mock mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."}
             </p>
           </form>
         </section>

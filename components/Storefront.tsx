@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   mockLaunchDecisions,
   returnPolicy,
@@ -14,11 +14,16 @@ import {
 import { formatMoney, heroProduct, products, type Product } from "@/lib/products";
 import { getLineKey, useCart, type CartLineView } from "@/lib/cart/store";
 import { startExpressCheckout } from "@/lib/checkout/client";
+import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
 import { paymentMethods } from "@/lib/checkout/methods";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
-const expressMethods = paymentMethods.filter((method) => method.kind === "express");
+// PayPal-only first round: Shop Pay isn't configured as a wallet yet, so it's
+// excluded here. Re-include it (drop the id check) once Shop Pay is live.
+const expressMethods = paymentMethods.filter(
+  (method) => method.kind === "express" && method.id !== "shop_pay",
+);
 
 function stockLabel(product: Product) {
   return product.inventoryOnHand > product.reorderPoint ? "In stock" : "Low stock";
@@ -282,7 +287,7 @@ function CartDrawer({
             <span className="font-bold text-[#f7f1e6]">Subtotal</span>
             <strong className="text-[#f4dd9c]">{formatMoney(subtotal)}</strong>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {expressMethods.map((method) => (
               <button
                 key={method.id}
@@ -309,7 +314,9 @@ function CartDrawer({
             </p>
           ) : null}
           <p className="mt-3 text-center text-xs leading-5 text-[#9c9277]">
-            Shop Pay, credit card, and PayPal. Mock mode — no real charge is taken.
+            {isLiveCheckout()
+              ? "Secure checkout on Shopify. PayPal accepted — a real charge is taken."
+              : "Credit card and PayPal. Mock mode — no real charge is taken."}
           </p>
         </div>
       </aside>
@@ -325,6 +332,21 @@ export function Storefront() {
   const [emailMessage, setEmailMessage] = useState("");
   const [pendingMethod, setPendingMethod] = useState<PaymentMethodId | null>(null);
   const [expressError, setExpressError] = useState("");
+
+  // When the shopper taps an express/checkout button we set a loading state and
+  // immediately navigate to Shopify. If they then hit "back", the browser can
+  // restore this page from its back/forward cache with that loading state still
+  // frozen on (button stuck on "Starting…", all checkout buttons disabled).
+  // `pageshow` fires on every restore — clear the loading state so the buttons
+  // are clickable again.
+  useEffect(() => {
+    function resetCheckoutState() {
+      setPendingMethod(null);
+      setExpressError("");
+    }
+    window.addEventListener("pageshow", resetCheckoutState);
+    return () => window.removeEventListener("pageshow", resetCheckoutState);
+  }, []);
 
   function addToCart(productId: string, option: string) {
     add(productId, option);
@@ -348,6 +370,15 @@ export function Storefront() {
   }
 
   function goToCheckout() {
+    // Live mode: skip the local /checkout page and hand off to Shopify's
+    // hosted checkout (PayPal) directly from the cart.
+    if (isLiveCheckout()) {
+      const permalink = buildCartPermalink(rawLines);
+      if (permalink) {
+        window.location.assign(permalink);
+        return;
+      }
+    }
     router.push("/checkout");
   }
 

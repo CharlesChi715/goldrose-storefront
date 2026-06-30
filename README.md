@@ -5,6 +5,14 @@ gift product.
 
 This README is the project map. Keep it updated as decisions change.
 
+## Current Goal
+
+**Show the boss the stack works end to end** — a visitor can click, pay, and the
+order goes the right way — *without* selling the real product yet. The full loop
+(click → pay → **order lands in the `/orders` log**) now runs in mock mode. See
+[docs/demo-goal.md](docs/demo-goal.md) for the demo script and what is real vs.
+simulated.
+
 ## Current Result
 
 The project now has a working Next.js storefront:
@@ -18,6 +26,9 @@ The project now has a working Next.js storefront:
 - product/story/occasion/operations sections
 - mock US-warehouse shipping, return, inventory, and origin assumptions
 - mock Shopify cart creation through a Next.js API route
+- a checkout (Shop Pay / Credit Card / PayPal) that captures each completed
+  order to a demo **order log at `/orders`**, so the click → pay → order loop is
+  visible end to end
 - SEO metadata and basic structured data
 - local product images served from `public/products/`
 

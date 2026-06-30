@@ -1,6 +1,7 @@
 "use client";
 
 import type { CheckoutLineInput, PaymentMethodId } from "@/lib/checkout/types";
+import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
 
 type Navigator = { push: (url: string) => void };
 
@@ -25,6 +26,17 @@ export async function startExpressCheckout({
 }): Promise<string | null> {
   if (lines.length === 0) {
     return "Add a product before checking out.";
+  }
+
+  // Live mode: hand the cart off to Shopify's hosted checkout (PayPal lives
+  // there). No local API call — Shopify becomes the order + payment system.
+  if (isLiveCheckout()) {
+    const permalink = buildCartPermalink(lines);
+    if (permalink) {
+      window.location.assign(permalink);
+      return null;
+    }
+    return "Checkout is not available right now. Please try again later.";
   }
 
   try {
