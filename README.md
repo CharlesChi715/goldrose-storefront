@@ -274,8 +274,14 @@ These are business decisions, not just code decisions:
 - Return/refund policy
 - Warranty or damage policy
 - Product claims we can honestly support
-- Shopify plan and checkout settings
-- Launch country/currency
+- Shopify plan (chosen: **Advanced**, $1/mo trial) and checkout settings
+- ⚠️ **Payment processor eligibility (blocker, decide first):** which country's
+  legal entity + bank account owns the store and receives payouts. Shopify
+  Payments (and therefore the Shop Pay button) is **not available for mainland
+  China**. If the owner is China-based, a different processor is required and
+  Shop Pay can't be used. This must be settled before M1.
+- Launch country/currency (⚠️ plan billed in AUD vs USD storefront assumption —
+  confirm; see `docs/mock-business-decisions.md`)
 - Production domain
 
 ## Recommended Next Steps — Roadmap to Launch
@@ -300,6 +306,9 @@ product claims** (gold, real rose, China origin — no "Made in USA"). See
 `docs/mock-business-decisions.md`.
 
 **M1 — Stand up Shopify as the checkout engine** *(you; ~½–1 day)*
+⚠️ **Decide the payment processor first:** Shopify Payments is not available for
+mainland China, so a China-based owner can't use it or the Shop Pay button —
+confirm the owning entity/bank-account country before this step.
 Shop Pay only works through Shopify, so this is required for all three buttons.
 You do **not** rebuild your site — a low-tier Shopify plan is used headless,
 behind this storefront. Add the products + variants, enable **Shopify Payments**

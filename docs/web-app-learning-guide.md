@@ -10,7 +10,7 @@ code in *this* repo. Every section points at real files so you can read along.
 > **One correction up front.** Your current mental model includes a step like
 > "store the payment/card details in a JSON file." **Do not ever do this.**
 > Storing raw card numbers is illegal-grade dangerous (it's governed by a
-> standard called PCI-DSS) and no real store does it. Instead you hand the
+> standard called PCI-DSS) anfd no real store does it. Instead you hand the
 > customer off to a payment company (Shopify or Stripe) that collects the card
 > on their own secure page. We'll cover exactly how in
 > [Level 6](#level-6-payments-done-properly). Keep reading — this is the single

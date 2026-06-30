@@ -73,3 +73,838 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
   only and never stored.
 - Refactored the storefront/cart drawer onto the shared cart hook with Shop Pay +
   PayPal express buttons and a Checkout · Credit Card button. Added `docs/checkout.md`.
+
+## 2026-06-29 14:56 AEST
+
+Reset local main to origin/main, discarding local edits
+
+Synced the local working copy up to the published main branch at the
+user's request.
+
+- Ran `git reset --hard origin/main`, moving local `main` from 8fc5704 to
+  d10b05b (7 commits forward) so the checkout now includes the Shopify
+  cart/checkout integration, ideas/learning docs, and launch checklist.
+- Discarded the only uncommitted changes (stale `.ai/WORKLOG.md` and
+  `README.md` edits from earlier this session) as the user explicitly
+  asked to drop local changes.
+- Gitignored `.claude/` was untouched, so local settings (worktree
+  bgIsolation "none") and the Stop hook survive the reset.
+- README.md left unchanged; the upstream version already reflects the
+  current Shopify-integrated state.
+
+## 2026-06-29 15:03 AEST
+
+Recommend lightweight terminal markdown readers
+
+Answered a learning question about reading the project's markdown docs
+(e.g. docs/web-app-learning-guide.md) with minimal Mac battery use.
+
+- Recommended `glow` (`brew install glow`; `glow -p <file>`) as the
+  primary low-energy terminal renderer, since it avoids the Electron
+  overhead of VS Code / Typora / Obsidian.
+- Listed `bat` and `mdcat` as terminal alternatives and native Quick
+  Look (Spacebar in Finder, plus the QLMarkdown cask) as a zero-install
+  option.
+- No project code or docs changed; README left unchanged as it already
+  reflects the current Shopify-integrated state.
+
+## 2026-06-29 15:07 AEST
+
+Explain headless commerce concept to learner
+
+Answered a learning question about whether one backend serving multiple
+frontends in a shopping project means "headless".
+
+- Confirmed the project's Next.js storefront on top of Shopify's API is
+  already a headless setup: backend (Shopify: products, cart, checkout)
+  decoupled from the frontend (the AUREÀ Next.js head) via API calls.
+- Clarified that decoupling via API is the definition of headless, while
+  serving many heads (web, app, kiosk) is a benefit, not the definition.
+- No project code or docs changed; README left unchanged as it already
+  reflects the current Shopify-integrated state.
+
+## 2026-06-29 15:12 AEST
+
+Explain why choose headless commerce
+
+Answered a learning follow-up on why a project would need a headless
+architecture, with trade-offs framed for the AUREÀ storefront.
+
+- Covered the wins: design freedom beyond Shopify themes, CDN/Next.js
+  performance, one backend serving many frontends, best-tool-per-job,
+  and brand differentiation for a luxury DTC product.
+- Covered the costs: more to build and maintain, some Shopify features
+  not free out of the box, and more moving parts to break.
+- Concluded headless earns its keep here because the storefront
+  experience is the brand's competitive advantage and a strong learning
+  vehicle.
+- No project code or docs changed; README left unchanged as it already
+  reflects the current Shopify-integrated state.
+
+## 2026-06-29 15:14 AEST
+
+Clarify Shopify backend-only and alternatives
+
+Answered a learning follow-up on whether Shopify must be the backend and
+why it feels flexible.
+
+- Explained Shopify supports headless backend-only use first-class via
+  the Storefront API (Hydrogen/Oxygen), which is what this project does.
+- Noted the backend is replaceable: Medusa, Vendure, Saleor, Swell,
+  BigCommerce, Commerce.js, or just Stripe are alternatives, since
+  headless is a pattern, not a Shopify-specific feature.
+- Covered Shopify's two consumption modes (themes vs headless) and the
+  caveats: paid hosted service and checkout/payment rules are theirs.
+- No project code or docs changed; README left unchanged as it already
+  reflects the current Shopify-integrated state.
+
+## 2026-06-29 15:21 AEST
+
+Explain headless vs full-Shopify using this repo
+
+Read the repo and answered learning questions about whether to use
+Shopify for both front and back, or keep this frontend headless.
+
+- Confirmed current state from the code: Next.js storefront with
+  lib/shopify + app/api/shopify/cart in mock mode; no real Shopify store
+  connected yet (matches README "What Is Not Real Yet").
+- Explained that going full-Shopify (theme) leaves the custom Next.js UI
+  unused, while headless (Path B) keeps this repo as the frontend; the
+  non-UI work (products, business rules, docs) survives either way.
+- Noted connecting is the README M2 steps: real variant IDs, .env.local,
+  SHOPIFY_MODE=live.
+- Clarified Shopify plans are not cheaper for backend-only use; the
+  Storefront API ships on paid plans and transaction fees still apply
+  (flagged exact prices need verifying on shopify.com).
+- Gave simplified product/cart/checkout flow examples for custom
+  frontend talking to Shopify backend.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 15:39 AEST
+
+Explain shopifyVariantId and where to source it
+
+Answered a learning question about the shopifyVariantId placeholders in
+lib/products.ts and how to obtain real values.
+
+- Explained Shopify's product-vs-variant model and that checkout adds a
+  variant (gid://shopify/ProductVariant/...), not a product.
+- Pointed to the current fake placeholders in lib/products.ts (lines 31,
+  55, 79) and the matching shopifyProductId fields.
+- Described three ways to get real IDs: admin variant URL (wrap the
+  number in gid:// form), the Storefront/Admin API (returns gid://
+  directly), or a CSV export.
+- Stressed sequence: real variant IDs only exist after the store and
+  products are created (roadmap M1), then pasted in for M2 go-live.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 15:46 AEST
+
+Explain purpose of lib/ and variant placement
+
+Answered a beginner question on what lib/ is for and why the variant ID
+lives in lib/products.ts.
+
+- Explained lib/ is the conventional home for non-UI data and logic
+  (products.ts, business.ts, shopify/), distinct from app/ pages and
+  components/ UI.
+- Gave the rationale for keeping shopifyVariantId in lib/products.ts:
+  single source of truth, edit data without touching UI, UI stays about
+  looks, and a clean seam to later fetch from Shopify's API.
+- Framed the two worlds for a Shopify newbie: Shopify admin (clicking,
+  no code) vs this repo, with lib/products.ts as the bridge via variant
+  IDs; advised learning the admin side first.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 15:51 AEST
+
+Explain what a SKU is
+
+Answered a beginner question defining SKU (Stock Keeping Unit).
+
+- Explained a SKU is a self-assigned, human-readable code for tracking
+  inventory, and decoded the structure of the repo's existing SKUs in
+  lib/products.ts (e.g. AUR-GR-SIG-001 = brand/product/variant/sequence).
+- Contrasted SKU (you invent, for humans/inventory) with
+  shopifyVariantId (Shopify generates, for the checkout API).
+- Added a practical tip: keep SKUs short, structured, stable, and never
+  reused so inventory reports stay trustworthy.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 15:53 AEST
+
+Clarify one SKU per buyable variation
+
+Answered a beginner follow-up confirming that even a size-only
+difference means a separate SKU.
+
+- Explained the rule "one SKU = one combination a customer can pick,"
+  each with its own variant ID and stock count, and how it scales with
+  options (size x color grids).
+- Mapped it to the repo: the three roses are three products with one
+  SKU/variant each, and the options field in lib/products.ts is
+  display-only text today, not real variants.
+- Flagged the real-store decision: any option that changes price or
+  needs its own stock must become its own Shopify variant + SKU.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 15:54 AEST
+
+Note 30-SKU catalog plan in ideas backlog
+
+Captured the owner's plan to grow the catalog to around 30 SKUs.
+
+- Added a new "Catalog plans" section to docs/ideas.md with a 🆕 idea to
+  scale from the current 3 placeholder products to ~30 sellable SKUs.
+- Recorded implications to triage when accepted: separate products vs
+  variants, a variant ID per SKU in lib/products.ts at roadmap M1->M2,
+  and storefront navigation/filtering for a larger catalog.
+- README left unchanged: the 30 SKUs are a backlog plan, not current
+  state; the README still accurately describes the 3-product MVP.
+
+## 2026-06-29 15:55 AEST
+
+Note autonomous-backend direction in ideas
+
+Captured the owner's long-term plan to start headless and gradually
+replace the Shopify backend to reach a fully autonomous stack.
+
+- Added an "Architecture direction" section to docs/ideas.md describing
+  the strangler-fig approach via the lib/shopify/ seam, with a tiered
+  replacement order (catalog/cart first; inventory/orders/shipping/tax
+  later; payments last or never, using Stripe rather than self-hosting
+  card processing).
+- Included guidance to launch on Shopify and earn real sales before
+  peeling off any capability.
+- Saved the same direction to project memory for future sessions.
+- README left unchanged: this is a future direction, not current state;
+  README still accurately describes the current headless MVP.
+
+## 2026-06-29 15:57 AEST
+
+Restrict ideas.md to owner's raw ideas only
+
+Applied owner feedback that docs/ideas.md should contain only their own
+ideas, without AI-generated elaboration.
+
+- Added a rule at the top of docs/ideas.md: record ideas in the owner's
+  own words, no AI descriptions, elaboration, or sub-bullets.
+- Replaced my padded "Catalog plans" and "Architecture direction"
+  entries with a "From me" section holding the two ideas as one-line
+  owner statements (30 SKUs; custom frontend + Shopify backend, then
+  gradually replace it to go fully autonomous).
+- Left the attributed "From boss" section unchanged.
+- Saved the preference to project memory so future sessions keep
+  analysis in chat/WORKLOG rather than in ideas.md.
+- README left unchanged: no current-state change; it still accurately
+  describes the headless MVP.
+
+## 2026-06-29 16:00 AEST
+
+Clarify variant-ID fetch options give same value
+
+Answered a learning question on whether the three ways to get a Shopify
+variant ID differ substantially.
+
+- Explained options A (admin URL), B (API), and C (CSV export) all
+  return the same variant ID; only the fetch method and formatting
+  differ (A/C give a raw number to wrap in gid://; B returns the full
+  gid:// string).
+- Framed the choice by scale: option A for the current 3 products,
+  option B or C when scaling to ~30 SKUs (B natural once the .env.local
+  token is set up for go-live).
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 16:02 AEST
+
+Guide beginner through Shopify login and setup
+
+Walked the owner through getting started in Shopify after receiving an
+account from their boss, aligned to docs/shopify-integration.md.
+
+- Covered login: invite-email vs username/password paths, admin.shopify
+  .com URL, and likely speed bumps (2FA, "no store found").
+- Described the post-login admin dashboard/sidebar and advised exploring
+  read-only first.
+- Mapped the road ahead to the repo's admin checklist (add 3 products,
+  set SKUs matching lib/products.ts, prices/inventory, payments/shipping
+  /taxes, Storefront API token, copy variant IDs back).
+- Added safety notes for working in the boss's real store (avoid
+  payments/billing/deletions; ask before risky clicks) and asked which
+  login type and store URL they have.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-29 16:29 AEST
+
+Advise reusing existing Shopify store, not new
+
+Answered whether the owner should create a new Shopify store after
+seeing an existing Active store ("My Store 5", g0pe0h-x8.myshopify.com)
+on the login screen.
+
+- Advised against creating a new store: one is already Active, and a new
+  one would be empty with its own billing ($1/mo offer is for new paid
+  stores).
+- Flagged that "My Store 5" looks like a default placeholder name and
+  could be either the boss's real store or a leftover test/dev store.
+- Recommended confirming with the boss which store is for the AUREA
+  project, and inspecting Products + Settings -> Store details to judge
+  whether it is fresh/test or the real store, since all later setup
+  (products, payments, variant IDs) is tied to one store.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 15:19 AEST
+
+Log Advanced Shopify plan choice and AUD flag
+
+Recorded the owner's decision to take the Shopify Advanced plan and
+surfaced a currency mismatch to confirm.
+
+- Added a "Confirmed Decisions" section to docs/mock-business-decisions
+  .md noting Shopify Advanced chosen 2026-06-30 on the $1/mo 3-month
+  trial (~$575/mo AUD), with its feature/card-rate highlights.
+- Flagged that plan pricing/card rates show in AUD while the storefront
+  and docs assume USD and a US launch market; asked the owner to confirm
+  store currency and launch market before further setup.
+- Updated README "Storefront Decisions To Make" to mark the Shopify plan
+  as chosen (Advanced) and add the AUD-vs-USD confirm note.
+- Reflects a real decision/state change, hence the README edit.
+
+## 2026-06-30 16:17 AEST
+
+Outline next Shopify setup steps for owner
+
+Answered "what's the next step" after the Advanced plan was chosen.
+
+- Advised confirming the store currency first (Settings -> Store
+  details) and checking with the boss whether AUREA sells in USD or AUD,
+  since currency is hard to change later and lib/products.ts prices are
+  USD today.
+- Then add the three products under Products with SKUs matching the code
+  (AUR-GR-SIG-001, AUR-GR-BOX-002, AUR-GR-BND-003).
+- Restated the remaining roadmap: payments/shipping/tax, Storefront API
+  token, copy real variant IDs into lib/products.ts, flip
+  SHOPIFY_MODE=live and test.
+- No project code or docs changed; README already reflects the plan
+  choice and AUD/USD flag, so it was left unchanged.
+
+## 2026-06-30 16:22 AEST
+
+Open Shopify admin in browser; blocked at login
+
+Attempted to drive the owner's Shopify admin via Chrome automation to
+continue store setup (currency check, then products).
+
+- Created an MCP browser tab and navigated to admin.shopify.com; it
+  landed on the Shopify login screen (email prefilled
+  shangrongjie5@gmail.com) because the automation tab is a separate
+  session from the owner's already-logged-in tab.
+- Did not proceed: entering passwords/verification codes is off-limits,
+  especially on the boss's live store. Asked the owner to complete login
+  by hand in the automation-opened tab, then report back.
+- Set the plan once logged in: read-only check of Settings -> Store
+  details currency first, confirm before any changes.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:24 AEST
+
+Re-check Shopify tab; still on login screen
+
+Re-screenshotted the automation tab to verify login state.
+
+- Confirmed the automation-controlled tab still shows the Shopify login
+  page; the owner's existing logged-in tab is a separate session the
+  extension cannot control.
+- Asked the owner to log in within that exact automation tab and to
+  check whether their logged-in Shopify is under a different Chrome
+  profile than the one the extension is attached to.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:32 AEST
+
+Confirm automation cannot reach logged-in session
+
+Investigated whether the extension could control the owner's existing
+logged-in Shopify tab.
+
+- Listed connected browsers: only one (Browser 1, local macOS); selected
+  it. The MCP tab group still exposes only its own tab, not the owner's
+  separately logged-in tab.
+- Navigating the controllable tab to the store admin
+  (admin.shopify.com/store/g0pe0h-x8) redirected back to login: the
+  automation tab's session is isolated and not authenticated, and cookies
+  are not shared with the owner's tab.
+- Stopped retrying to avoid a loop; offered two paths: (A) owner logs in
+  once in the automation tab so I can drive it, or (B) I guide by text
+  while the owner clicks in their logged-in tab, starting with the
+  Settings -> Store details currency check.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:36 AEST
+
+Establish automation/login tab mismatch; pick path
+
+Diagnosed why automation could not reach the goldrose admin and chose a
+way forward.
+
+- Confirmed the owner's logged-in "goldrose" tab and the automation's
+  controllable tab (id 2052668844) are different tabs with separate
+  sessions; a fresh screenshot of the automation tab still shows the
+  Shopify login page despite the owner being logged in elsewhere.
+- Stopped retrying to avoid a loop. Recommended Option B (text guidance
+  while the owner clicks in their logged-in tab) over Option A (sign in
+  within the exact automation tab).
+- Next concrete step requested: read Settings -> Store details currency
+  (USD vs AUD) to unblock product setup.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:40 AEST
+
+Confirm extension session isolated from Shopify login
+
+Verified the browser automation cannot share the owner's Shopify login.
+
+- Owner deleted the tab they were viewing; the MCP tab group was gone,
+  confirming that tab had been the automation's controllable tab.
+- Recreated a fresh tab group and navigated directly to the goldrose
+  admin (store g0pe0h-x8); it redirected to the Shopify login page
+  again, proving the extension runs in an isolated session not logged
+  into Shopify (login does not carry over from the owner's normal Chrome).
+- Restated the two options: (A) sign in within the exact automation tab
+  showing the login, or (B) text guidance in the owner's logged-in tab;
+  recommended B to make progress, starting with the store currency.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:43 AEST
+
+Verify automation tab still not logged in
+
+Owner asked whether I am logged in; screenshotted to check rather than
+assume.
+
+- Confirmed the automation tab still shows the Shopify login page (email
+  shangrongjie5@gmail.com prefilled); not authenticated.
+- Reiterated that login must happen in this exact automation tab (I
+  cannot enter credentials), or switch to text guidance starting with
+  the store currency from Settings -> Store details.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:44 AEST
+
+Handle browser page check with no open tab
+
+Owner asked to check the page in the Chrome working group; verified
+state before acting rather than assuming a tab existed.
+
+- Loaded the claude-in-chrome tools and called tabs_context_mcp; no MCP
+  tab group exists for this session, so there is no page to inspect.
+- Did not auto-create a tab or guess a destination; asked the owner
+  which URL to open (offered to start the local dev server if they want
+  the storefront).
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:48 AEST
+
+Reopen Shopify admin; await owner login in tab
+
+Owner asked me to work on the Shopify store and to ask for anything
+needing login.
+
+- Created a fresh MCP tab group and navigated to the goldrose admin
+  (store g0pe0h-x8); it redirected to the Shopify login page with email
+  shangrongjie5@gmail.com prefilled, confirming the automation session
+  is still not authenticated.
+- Cannot enter credentials or authenticate myself, so handed login back
+  to the owner with step-by-step instructions to sign in within this
+  exact automation tab (tabId 2052668862); login elsewhere will not
+  carry over to the isolated automation session.
+- Blocked pending owner login; no store work performed yet.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:50 AEST
+
+Report login tab state; screenshots blocked on domain
+
+Owner asked what I can currently see in the browser.
+
+- Checked the automation tab (tabId 2052668862): still on the Shopify
+  login page (accounts.shopify.com/lookup), not yet authenticated.
+- Screenshot returned "Permission denied for this action on this
+  domain" for accounts.shopify.com, so I have no visibility into the
+  login screen itself; relayed this to the owner.
+- Asked the owner to complete login until the tab reaches
+  admin.shopify.com (where visibility worked before), and to grant the
+  extension site permission for the Shopify domains if screenshots stay
+  blocked after login.
+- Still blocked pending owner login; no store work performed.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:52 AEST
+
+Review project state and advise next step
+
+Owner asked me to read everything and say what to do next. Read README,
+.ai/HANDOFF.md, .ai/WORKLOG.md, and project memory; gave a prioritized
+recommendation. No code or state change this session.
+
+- Confirmed status: storefront + unified Shop Pay/card/PayPal checkout
+  are built and passing in mock mode; the project is blocked at M1
+  (stand up Shopify), a business/account task only the owner can do.
+- Diagnosed the recent dead end: ~10 WORKLOG entries today were all the
+  isolated browser-automation tab failing to reach the boss's
+  logged-in Shopify session; advised stopping that approach in favor of
+  text-guided clicks in the owner's own logged-in tab.
+- Named the true blocker as a decision, not a task: confirm AUD vs USD
+  currency with the boss before any store setup, since currency is hard
+  to change after orders begin and lib/products.ts prices assume USD.
+- Flagged 507 lines of uncommitted doc changes (mostly this WORKLOG)
+  and offered to commit them.
+- README left unchanged: it already reflects current state (mock-mode
+  checkout, Advanced plan chosen, AUD/USD flag).
+
+## 2026-06-30 16:52 AEST
+
+Try goldrose-9372 admin; still bounced to login
+
+Owner clarified their admin URL is the goldrose-9372 store and asked me
+to continue with it.
+
+- Navigated the automation tab (tabId 2052668862) to
+  admin.shopify.com/store/goldrose-9372/; it redirected back to the
+  Shopify login page, confirming the automation session is still not
+  authenticated for this store either.
+- Reiterated the root cause: the owner's normal-Chrome login does not
+  carry into the isolated automation tab; login must be completed inside
+  that exact tab. Screenshots remain blocked on accounts.shopify.com so
+  I cannot assist during login itself.
+- Still blocked pending owner login; no store work performed.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 16:56 AEST
+
+Help owner locate hidden automation tab
+
+Owner reported they cannot see/find the automation tab to log in.
+
+- Confirmed via tabs_context that the tab still exists (tabId
+  2052668862, "Log in — Shopify") inside the extension's colored tab
+  group, just hidden behind other Chrome windows.
+- Gave macOS steps to surface it: Cmd+Shift+A tab search for "Log in",
+  the Chrome Window menu, or Cmd+` to cycle windows to the colored tab
+  group; then complete login in that exact tab.
+- Still blocked pending owner login; no store work performed.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 17:04 AEST
+
+Confirm prior reset complete; no new work
+
+Session opened after a context compaction with no new user request.
+
+- Verified the previously requested `git reset --hard origin/main` and its
+  WORKLOG entry were already complete; nothing further to do.
+- Made no code or doc changes this session. Pre-existing uncommitted edits
+  (README.md, docs/ideas.md, docs/mock-business-decisions.md,
+  docs/web-app-learning-guide.md) are carried over from earlier sessions and
+  were left untouched.
+- README.md verified accurate and left unchanged.
+
+## 2026-06-30 17:06 AEST
+
+Attempt to reopen Shopify; extension disconnected
+
+Owner asked to open the Shopify page in Chrome.
+
+- tabs_context_mcp reported the Claude browser extension is not
+  connected, so no tab could be created or controlled.
+- Asked the owner to verify the extension is installed/running, that
+  Chrome is logged into the same claude.ai account, and to restart
+  Chrome if needed, then retry.
+- Blocked pending extension reconnection; no store work performed.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 17:08 AEST
+
+Reach authenticated goldrose Shopify admin
+
+Owner asked to retry; the browser extension reconnected this time.
+
+- Created a fresh MCP tab group, navigated to
+  admin.shopify.com/store/goldrose-9372/, and it loaded the admin
+  WITHOUT redirecting to login — the automation session is now
+  authenticated for the goldrose store.
+- Screenshot confirmed the admin home (UI in Chinese): nav for
+  Orders/Products/Customers/Growth/Discounts/Content/Markets/Finance/
+  Analytics, sales channels Online Store/Agentic/Point of Sale, and the
+  goldrose account chip.
+- Asked the owner which admin task to start with (e.g. Settings -> store
+  currency, Products, Orders).
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 17:10 AEST
+
+Read store currency; flag USD vs AUD mismatch
+
+Owner asked to do the next steps; per prior worklog that meant reading
+Settings -> Store details currency to unblock product setup.
+
+- Opened Settings -> General (常规) on the goldrose-9372 admin and read
+  Store defaults: store currency is USD ($), while the business entity,
+  store address (1B Vangelis Street, Rouse Hill NSW 2155), and backup
+  region are all Australia.
+- Surfaced the mismatch to the owner: USD currency on an AU-based store
+  would price products in USD. Did not change the currency (account
+  setting + Shopify locks base currency after first sale); asked the
+  owner to decide USD vs AUD before product pricing setup.
+- No project code or docs changed; README verified accurate and left
+  unchanged.
+
+## 2026-06-30 17:32 AEST
+
+Create live AUREÀ catalog in Shopify; confirm USD
+
+Owner confirmed the store sells into the US (USD) and asked to push
+toward a working MVP, then to publish products live.
+
+- Settings -> General: read store defaults; base currency is USD ($)
+  while the business entity/address/region are Australian. Owner
+  confirmed USD is intentional. Recorded the decision in
+  docs/mock-business-decisions.md (replaced the "currency to confirm"
+  warning with a confirmed USD entry).
+- Created all 3 AUREÀ products in the live store (goldrose-9372) via the
+  Shopify admin, each Active and on all 3 sales channels, using the
+  catalog in lib/products.ts (names, USD price, compare-at, cost-per-
+  item, SKU, inventory) plus the required origin copy "Imported from
+  China. Ships from US inventory.":
+  - AUR-GR-SIG-001 Signature 24K Gold Rose  $49.99 / qty 420 / id 7607585865774
+  - AUR-GR-BOX-002 Boxed Keepsake Rose      $64.99 / qty 260 / id 7607586160686
+  - AUR-GR-BND-003 Premium Gift Bundle      $79.99 / qty 140 / id 7607586193454
+  Verified all three on the product list with correct stock/status.
+- Recorded the real product IDs and a go-live checklist (Storefront API
+  token, variant IDs, images, SHOPIFY_MODE flip) in
+  docs/mock-business-decisions.md. Storefront still defaults to mock mode.
+- Flagged that the "24K gold" wording and landed costs remain unverified
+  per the doc; published as-is per the owner's explicit go-live choice.
+- No app code changed (catalog/variant IDs in lib/products.ts untouched),
+  so README remains accurate and was left unchanged.
+
+## 2026-06-30 17:38 AEST
+
+Verify product images; hit browser upload limitation
+
+Owner asked to add the repo product images to the live Shopify products.
+
+- Inspected public/products/: 9 images present. Per lib/products.ts the
+  three product shots are gold-rose-stand.jpg (Signature),
+  gold-rose-box.jpg (Boxed Keepsake), and gold-rose-detail.jpg (Premium
+  Bundle); the rest are hero/lifestyle. Viewed all three to confirm fit.
+- Noted the supplier imagery itself reads "Dipped in 24K Gold" and "24
+  carat gold plated stem and leaves", which substantiates "24K gold
+  dipped/plated" wording (real rose, gold-plated, not solid gold).
+- Attempted to upload gold-rose-stand.jpg to the Signature product via
+  the Chrome extension file_upload tool; it rejected host filesystem
+  paths in this environment ("no longer accepts host filesystem paths"),
+  including a copy placed in the session job dir. So programmatic upload
+  of repo images is not possible here.
+- Handed off to the owner: drag the 3 mapped files onto each product's
+  media area (full quality), or share them into chat for a reduced-
+  quality screenshot upload. Provided alt-text suggestions from the repo.
+- No app code or docs changed this session; README left unchanged.
+
+## 2026-06-30 17:45 AEST
+
+Confirm no in-browser path for repo image upload
+
+Owner asked whether there is any other way to upload the images.
+
+- Tested navigating the automation tab to a file:// URL of a repo image;
+  the extension blocks browser-internal/file URLs. Combined with the
+  broken file_upload (host paths rejected) and the un-automatable native
+  OS file picker, there is no way to push repo files into Shopify from
+  the automation side directly.
+- Identified the one working automated path: if the owner drags the 3
+  images into the chat, they become session-owned files that upload_image
+  can place into each product at full quality. Otherwise the owner can
+  drag-drop them onto Shopify's media box (same quality).
+- Awaiting the owner to share the images or upload them manually.
+- No app code or docs changed this session; README left unchanged.
+
+## 2026-06-30 17:50 AEST
+
+Verify owner-uploaded product images in Shopify
+
+Owner reported uploading the product images and said done.
+
+- Checked the product list: all 3 products now have images attached, so
+  the manual upload worked. Inventory/status unchanged (Active; 140/260/
+  420 in stock).
+- Zoomed the thumbnails to verify mapping. Signature looks like the
+  intended gold-rose product shot, but Boxed Keepsake appears to show a
+  Valentine lifestyle collage and Premium Bundle a candlelit-dinner shot
+  rather than gold-rose-box.jpg / gold-rose-detail.jpg.
+- Flagged the possible mismatch to the owner and asked whether the
+  lifestyle images are intentional or should be swapped to the clean
+  product shots; also offered to set alt text on all three.
+- No app code or docs changed this session; README left unchanged.
+
+## 2026-06-30 17:56 AEST
+
+Demo full storefront workflow end to end locally
+
+Owner wanted to prove the tech stack works so the boss can review;
+accuracy/realness not required (mock mode acceptable).
+
+- Confirmed owner-uploaded product images are attached to all 3 products
+  (kept as-is per owner; mapping accuracy not required for the demo).
+- Started the Next.js dev server (next dev, Next 16.2.9) and drove the
+  storefront in the browser at http://localhost:3000:
+  - Homepage renders AUREÀ brand, hero, hero product, USD pricing
+    ($89.99 -> $49.99, SAVE 44%) and origin copy.
+  - Add to Cart opens the cart slide-out (Signature Rose, gift box, qty,
+    $49.99 subtotal) with Shop Pay / PayPal / credit-card options.
+  - Checkout page shows order summary with shipping ($5.95) and total
+    ($55.94), express wallets, and card form; mock mode (no real charge).
+- Left the dev server running and the tab on the homepage for the boss
+  to review live; documented restart (npm run dev) and that live
+  transacting still needs the Storefront API token + SHOPIFY_MODE flip.
+- No app code or docs changed this session; README accurately describes
+  the mock-mode app and was left unchanged.
+
+## 2026-06-30 18:03 AEST
+
+Check payments status; explain real money flow
+
+Owner clarified "end to end" means a real customer pays and money lands
+in the bank, and (being new) asked how the money flow works.
+
+- Read Settings -> Payments on goldrose-9372: Shopify Payments is NOT
+  set up (shows "Complete setup"); PayPal shows "Setup incomplete". So
+  no payment provider is active and the store cannot take real money yet.
+- Explained the 3-layer model: storefront (frontend) only collects the
+  order and never touches money; Shopify's hosted Checkout takes the
+  card; Shopify Payments charges it and pays out to the owner's bank.
+  Clarified that money does not flow through the frontend.
+- Laid out go-live order: (1) owner activates Shopify Payments (bank +
+  identity; owner-only, I cannot enter financial credentials), (2) I
+  publish/wire a storefront (Shopify native theme OR custom Next.js +
+  live Shopify checkout), (3) test order then small real order to verify
+  payout.
+- No changes made (explanation only); README left unchanged.
+
+## 2026-06-30 18:19 AEST
+
+Explain the "Opening soon" page and launch path
+
+Owner showed the Shopify "Opening soon" password page (goldrose-9372)
+and asked how to launch the store.
+
+- Clarified the two senses of "launch": (1) the literal Shopify
+  password page is removed via Online Store -> Preferences -> Password
+  protection, but advised against doing it yet because the live product
+  is the custom AUREA storefront, not Shopify's default theme.
+- Walked through the real launch path from docs/launch-checklist.md:
+  confirm business facts (Phase 1), stand up Shopify as the headless
+  checkout engine + Storefront API token (Phase 2), connect this site
+  and flip SHOPIFY_MODE=live with a real test order (Phase 3), add
+  required policy pages + compliance (Phase 4), swap the placeholder
+  domain and deploy (Phase 5).
+- Noted the store is still entirely in mock mode and offered next
+  actionable steps (wire Shopify, build policy pages, or capture
+  newsletter emails).
+- Explanation only; no app code or docs changed. README still
+  accurately describes the mock-mode app and was left unchanged.
+
+## 2026-06-30 18:22 AEST
+
+Advise on Shopify Payments country/entity eligibility
+
+- Answered an owner question about Shopify's "Set up Shopify
+  Payments" entity step (individual / registered business /
+  non-profit) and why it pre-detected Australia.
+- Explained detection comes mainly from the store's country
+  setting, then account/billing country, then IP/locale.
+- Flagged the key constraint: Shopify Payments is not available
+  for mainland China, and eligibility follows the owning entity's
+  country and payout bank account, not the customer market. Since
+  the store is being built for a China-based boss, this determines
+  whether Shopify Payments is usable at all.
+- Held off on a recommendation pending which country/entity and
+  bank account will own the store and receive payouts; noted
+  changing store country later is costly (re-KYC / new store).
+- No code or content changes this session; advisory only.
+
+## 2026-06-30 18:27 AEST
+
+Flag China payment-processor blocker in README
+
+- Answered "what's left before real orders/money flow" by mapping
+  the current state to docs/launch-checklist.md (M0–M5) and the
+  mock vs live SHOPIFY_MODE go-live line.
+- Surfaced that the launch checklist and README assumed Shopify
+  Payments works, but it is unavailable for mainland China. Since
+  the store is being built for a China-based owner, this is a
+  blocker that sits above M1.
+- Updated README.md to record the processor-eligibility decision:
+  added it to "Storefront Decisions To Make" and to the M1
+  milestone, noting Shop Pay can't be used if the owning entity /
+  bank account is in mainland China.
+- No code changes; documentation only.
+
+## 2026-06-30 18:30 AEST
+
+Clarify Shopify Payments is a merchant-side rule
+
+- Answered whether "Shopify Payments not available for mainland
+  China" refers to the paying customer or the receiving account.
+- Clarified it is purely merchant-side: eligibility follows the
+  owning entity's country and the payout bank account's country,
+  not where the buyer is. Customers can be anywhere, including
+  China; serving Chinese buyers is a separate question of offering
+  international cards / Alipay / WeChat Pay.
+- No project files changed; README already records the China
+  processor blocker added in the prior session. Documentation and
+  advisory only.
+
+## 2026-06-30 20:06 AEST
+
+Open Shopify Payments setup; flag merchant-entity issue
+
+Owner asked to be guided through activating Shopify Payments (new to it).
+
+- Opened the Shopify Payments setup interview from Settings -> Payments
+  (URL shows legalEntityCountry=AU). A mis-aimed click also opened a
+  PayPal business-signup tab; closed it without proceeding (account
+  creation is owner-only).
+- Owner asked why it detected Australia and noted the real situation:
+  boss is in Hong Kong, products from China, selling to US customers.
+- Explained: AU was auto-detected from the store's business address
+  (Rouse Hill NSW) and AUD billing. Flagged that the "registered with
+  the government of Australia" checkbox is a legal declaration and must
+  be true. Shopify Payments is country-locked and pays out to a bank in
+  the registered country; Hong Kong is not supported. Laid out the three
+  honest paths (genuine AU business / new US entity / non-Shopify
+  provider) and recommended confirming the legal merchant of record with
+  the boss/accountant before continuing. Did not enter any data.
+- Paused setup pending the owner's entity decision.
+- No app code or docs changed this session; README left unchanged.

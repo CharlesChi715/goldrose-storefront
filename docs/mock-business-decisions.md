@@ -3,6 +3,19 @@
 These are temporary assumptions so the AUREÀ storefront can keep moving. Replace
 them with real business data before launch.
 
+## Confirmed Decisions
+
+- **Shopify plan: Advanced.** Chosen 2026-06-30 on a $1/mo 3-month trial
+  (regular ~$575/mo AUD). Includes Grow features plus up to 15 staff accounts,
+  real-time third-party shipping rates, region-customized stores, and the lowest
+  card rate (1.4% + 30¢ AUD).
+- **Currency: USD.** Confirmed 2026-06-30 by the owner ("boss sells it in US").
+  The Shopify store base currency is set to **US Dollar (USD $)** and the launch
+  market is the **United States**, matching `lib/products.ts` USD prices and the
+  US-market assumptions below. Note the plan pricing/card rates are billed in
+  AUD (the business entity/address are Australian), but customer-facing prices
+  and the store currency are USD.
+
 ## Current Product Reality
 
 - Product source: imported from China.
@@ -30,6 +43,30 @@ Owner checks:
 - Confirm whether the product is truly 24K gold dipped/plated and what exact
   wording the supplier can substantiate.
 - Replace each mock Shopify variant ID with a real Shopify variant ID.
+
+## Live Shopify Catalog
+
+Created in the live store (`goldrose-9372`) on 2026-06-30. All three are
+**Active** and published to all 3 sales channels, with the prices, compare-at
+prices, cost, and inventory from the table above.
+
+| SKU | Shopify product ID | Admin product GID |
+| --- | --- | --- |
+| `AUR-GR-SIG-001` | `7607585865774` | `gid://shopify/Product/7607585865774` |
+| `AUR-GR-BOX-002` | `7607586160686` | `gid://shopify/Product/7607586160686` |
+| `AUR-GR-BND-003` | `7607586193454` | `gid://shopify/Product/7607586193454` |
+
+Still TODO before the Next.js storefront can run live (it currently defaults to
+`SHOPIFY_MODE=mock`):
+
+1. Add product images in Shopify (created text-only for now).
+2. Create a public **Storefront API access token** in Shopify admin (owner
+   action — it is a secret; do not commit it). Set `SHOPIFY_STORE_DOMAIN=
+   goldrose-9372.myshopify.com` and `SHOPIFY_STOREFRONT_ACCESS_TOKEN` in env.
+3. Pull each product's real **variant GID** (needs the Storefront/Admin API) and
+   replace the placeholder `shopifyVariantId` values in `lib/products.ts`; also
+   update `shopifyProductId` to the GIDs above.
+4. Flip `SHOPIFY_MODE` off `mock` and verify a real cart/checkout end to end.
 
 ## Mock Fulfillment
 
