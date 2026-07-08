@@ -68,7 +68,7 @@ export default async function CheckoutSuccessPage({
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex h-12 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105"
+            className="inline-flex h-12 items-center justify-center rounded-[3px] bg-[#c9a24b] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition-colors hover:bg-[#9a7826]"
           >
             Continue shopping
           </Link>

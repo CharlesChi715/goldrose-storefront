@@ -75,7 +75,7 @@ export default async function OrdersPage() {
             </p>
             <Link
               href="/#shop"
-              className="mt-6 inline-flex h-11 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-6 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105"
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-[3px] bg-[#c9a24b] px-6 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition-colors hover:bg-[#9a7826]"
             >
               Place a test order
             </Link>

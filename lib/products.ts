@@ -108,7 +108,3 @@ export function formatMoney(cents: number) {
     maximumFractionDigits: 2,
   }).format(cents / 100);
 }
-
-export function grossMarginPercent(product: Product) {
-  return Math.round(((product.price - product.landedCost) / product.price) * 100);
-}

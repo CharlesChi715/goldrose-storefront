@@ -50,6 +50,15 @@ export const paymentMethods: PaymentMethod[] = [
   },
 ];
 
+/**
+ * Express wallet methods rendered as one-tap buttons in the cart and checkout.
+ * Shop Pay is intentionally excluded for the PayPal-only first round — drop the
+ * id check to bring it back once Shop Pay is configured.
+ */
+export const expressMethods = paymentMethods.filter(
+  (method) => method.kind === "express" && method.id !== "shop_pay",
+);
+
 const methodsById = new Map(paymentMethods.map((method) => [method.id, method]));
 
 export function isPaymentMethodId(value: unknown): value is PaymentMethodId {

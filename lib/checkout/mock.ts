@@ -139,6 +139,15 @@ export async function processCheckout(
 
   // Card: collect and validate everything on-page (format only — no PAN kept).
   if (method.kind === "card") {
+    // Live mode: a raw card must never reach this server — it belongs on
+    // Shopify's PCI-compliant hosted fields. Refuse to handle the PAN here.
+    if (config.mode === "live") {
+      return {
+        ok: false,
+        error: "Card payments are completed on Shopify's secure checkout in live mode.",
+      };
+    }
+
     const fieldErrors: Record<string, string> = {};
 
     if (!request.contact?.email || !isValidEmail(request.contact.email)) {
@@ -166,9 +175,7 @@ export async function processCheckout(
       mode: config.mode,
       order: baseOrder,
       warnings: [
-        config.mode === "live"
-          ? "Live mode: connect Shopify Payments hosted card fields before charging real cards. This server never receives raw card numbers in live mode."
-          : "Mock card payment authorized locally. No money moved, no order or customer was created, and the card number was discarded after format validation.",
+        "Mock card payment authorized locally. No money moved, no order or customer was created, and the card number was discarded after format validation.",
       ],
     };
   }

@@ -8,15 +8,10 @@ import { shippingPolicy } from "@/lib/business";
 import { formatMoney } from "@/lib/products";
 import { useCart } from "@/lib/cart/store";
 import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
-import { paymentMethods } from "@/lib/checkout/methods";
+import { expressMethods } from "@/lib/checkout/methods";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
-
-// PayPal-only first round: Shop Pay isn't configured yet, so it's excluded.
-const expressMethods = paymentMethods.filter(
-  (method) => method.kind === "express" && method.id !== "shop_pay",
-);
 
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 19);
@@ -206,7 +201,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href="/#shop"
-            className="mt-7 inline-flex h-12 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105"
+            className="mt-7 inline-flex h-12 items-center justify-center rounded-[3px] bg-[#c9a24b] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition-colors hover:bg-[#9a7826]"
           >
             Shop the edit
           </Link>
@@ -392,7 +387,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={isBusy}
-              className="inline-flex h-12 w-full items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-12 w-full items-center justify-center rounded-[3px] bg-[#c9a24b] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition-colors hover:bg-[#9a7826] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pendingMethod === "card" ? "Processing…" : `Pay ${formatMoney(total)}`}
             </button>

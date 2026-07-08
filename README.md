@@ -3,6 +3,9 @@
 A beginner-friendly direct-to-consumer storefront MVP for a 24K gold dipped rose
 gift product.
 
+**Live site:** <https://goldrose-storefront.vercel.app/> (deployed on Vercel;
+checkout hands off to Shopify for PayPal).
+
 This README is the project map. Keep it updated as decisions change.
 
 ## Current Goal

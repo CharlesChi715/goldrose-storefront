@@ -15,16 +15,10 @@ import { formatMoney, heroProduct, products, type Product } from "@/lib/products
 import { getLineKey, useCart, type CartLineView } from "@/lib/cart/store";
 import { startExpressCheckout } from "@/lib/checkout/client";
 import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
-import { paymentMethods } from "@/lib/checkout/methods";
+import { expressMethods } from "@/lib/checkout/methods";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
-// PayPal-only first round: Shop Pay isn't configured as a wallet yet, so it's
-// excluded here. Re-include it (drop the id check) once Shop Pay is live.
-const expressMethods = paymentMethods.filter(
-  (method) => method.kind === "express" && method.id !== "shop_pay",
-);
-
 function stockLabel(product: Product) {
   return product.inventoryOnHand > product.reorderPoint ? "In stock" : "Low stock";
 }
@@ -47,7 +41,7 @@ function GoldButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-12 items-center justify-center rounded-[3px] bg-gradient-to-b from-[#f3d77c] to-[#b8922e] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-[#f3d77c] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100 ${className}`}
+      className={`inline-flex h-12 items-center justify-center rounded-[3px] bg-[#c9a24b] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition-colors hover:bg-[#9a7826] focus:outline-none focus:ring-2 focus:ring-[#f3d77c] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[#c9a24b] ${className}`}
     >
       {children}
     </button>
@@ -188,7 +182,7 @@ function CartDrawer({
       onClick={onClose}
     >
       <aside
-        className={`grid h-full w-full max-w-[440px] grid-rows-[auto_1fr_auto] border-l border-[#3c2d14] bg-[#14100a] text-[#f7f1e6] shadow-2xl transition duration-200 ${
+        className={`grid h-full w-full max-w-[440px] grid-rows-[auto_1fr_auto] border-l border-[#d9c48a] bg-[#fbf6ec] text-[#211a0e] shadow-2xl transition duration-200 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
@@ -196,15 +190,15 @@ function CartDrawer({
         aria-label="Shopping cart"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#3c2d14] p-5">
+        <div className="flex items-center justify-between border-b border-[#d7c28a] p-5">
           <div>
-            <h2 className="font-serif text-2xl text-[#f7f1e6]">Cart</h2>
-            <p className="text-sm text-[#bdb39a]">Review your forever rose.</p>
+            <h2 className="font-serif text-2xl text-[#211a0e]">Cart</h2>
+            <p className="text-sm text-[#7c6e50]">Review your forever rose.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="grid h-10 w-10 place-items-center rounded-full border border-[#c9a24b]/35 text-lg font-bold text-[#f7f1e6] transition hover:bg-[#241a0d]"
+            className="grid h-10 w-10 place-items-center rounded-full border border-[#d7c28a] text-lg font-bold text-[#8a6a22] transition hover:bg-[#f2e7d4]"
             aria-label="Close cart"
           >
             x
@@ -213,9 +207,9 @@ function CartDrawer({
 
         <div className="overflow-y-auto p-5">
           {lines.length === 0 ? (
-            <div className="rounded-md border border-dashed border-[#6b5425] bg-[#1c160d] p-6 text-center">
-              <p className="font-bold text-[#f7f1e6]">Your cart is empty.</p>
-              <p className="mt-2 text-sm text-[#bdb39a]">
+            <div className="rounded-md border border-dashed border-[#d7c28a] bg-[#fffaf2] p-6 text-center">
+              <p className="font-bold text-[#211a0e]">Your cart is empty.</p>
+              <p className="mt-2 text-sm text-[#7c6e50]">
                 Add a rose gift to see cart totals here.
               </p>
             </div>
@@ -224,9 +218,9 @@ function CartDrawer({
               {lines.map((line) => (
                 <article
                   key={getLineKey(line.productId, line.option)}
-                  className="grid grid-cols-[76px_1fr] gap-4 border-b border-[#3c2d14] pb-4"
+                  className="grid grid-cols-[76px_1fr] gap-4 border-b border-[#e3d4ab] pb-4"
                 >
-                  <div className="relative h-[76px] overflow-hidden rounded-md bg-[#f4ede1]">
+                  <div className="relative h-[76px] overflow-hidden rounded-md bg-[#f2e7d4]">
                     <Image
                       src={line.product.image}
                       alt={line.product.alt}
@@ -238,19 +232,19 @@ function CartDrawer({
                   <div className="min-w-0">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-bold text-[#f7f1e6]">{line.product.shortName}</h3>
-                        <p className="text-sm text-[#bdb39a]">{line.option}</p>
+                        <h3 className="font-bold text-[#211a0e]">{line.product.shortName}</h3>
+                        <p className="text-sm text-[#7c6e50]">{line.option}</p>
                       </div>
-                      <strong className="whitespace-nowrap text-sm text-[#f4dd9c]">
+                      <strong className="whitespace-nowrap text-sm text-[#8a6a22]">
                         {formatMoney(line.lineTotal)}
                       </strong>
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <div className="grid grid-cols-[34px_34px_34px] overflow-hidden rounded-[3px] border border-[#6b5425]">
+                      <div className="grid grid-cols-[34px_34px_34px] overflow-hidden rounded-[3px] border border-[#d7c28a]">
                         <button
                           type="button"
                           onClick={() => onChangeQuantity(line.productId, line.option, -1)}
-                          className="h-9 bg-[#21180c] font-bold"
+                          className="h-9 bg-[#fffaf2] font-bold"
                           aria-label={`Decrease ${line.product.shortName} quantity`}
                         >
                           -
@@ -261,7 +255,7 @@ function CartDrawer({
                         <button
                           type="button"
                           onClick={() => onChangeQuantity(line.productId, line.option, 1)}
-                          className="h-9 bg-[#21180c] font-bold"
+                          className="h-9 bg-[#fffaf2] font-bold"
                           aria-label={`Increase ${line.product.shortName} quantity`}
                         >
                           +
@@ -270,7 +264,7 @@ function CartDrawer({
                       <button
                         type="button"
                         onClick={() => onRemove(line.productId, line.option)}
-                        className="text-sm font-bold text-[#f4dd9c]"
+                        className="text-sm font-bold text-[#8a6a22] hover:underline"
                       >
                         Remove
                       </button>
@@ -282,10 +276,10 @@ function CartDrawer({
           )}
         </div>
 
-        <div className="border-t border-[#3c2d14] p-5">
+        <div className="border-t border-[#d7c28a] p-5">
           <div className="mb-4 flex items-center justify-between text-lg">
-            <span className="font-bold text-[#f7f1e6]">Subtotal</span>
-            <strong className="text-[#f4dd9c]">{formatMoney(subtotal)}</strong>
+            <span className="font-bold text-[#211a0e]">Subtotal</span>
+            <strong className="font-serif text-[#8a6a22]">{formatMoney(subtotal)}</strong>
           </div>
           <div className="grid grid-cols-1 gap-3">
             {expressMethods.map((method) => (
@@ -309,7 +303,7 @@ function CartDrawer({
             Checkout · Credit Card
           </GoldButton>
           {expressError ? (
-            <p className="mt-3 rounded-[3px] border border-[#7c2f2f] bg-[#241010] p-3 text-xs leading-5 text-[#ffb4a8]">
+            <p className="mt-3 rounded-[3px] border border-[#b3473f] bg-[#fbeae8] p-3 text-xs leading-5 text-[#8a2f29]">
               {expressError}
             </p>
           ) : null}
