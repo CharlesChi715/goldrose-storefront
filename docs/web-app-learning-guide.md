@@ -148,7 +148,7 @@ matter:
 2. Calls `processCheckout()` to do the real work.
 3. If an order completed, calls `saveOrder()` to record it.
 4. Returns JSON to the browser.
-
+f
 **The brain** `lib/checkout/mock.ts`, function `processCheckout()`. Its comment
 states the security rule plainly:
 
