@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * ROLE OF THIS FILE
+ * The browser-side helper that starts an express (PayPal / Shop Pay)
+ * checkout. Both the cart drawer and the /checkout page call this one
+ * function instead of duplicating the fetch-and-redirect dance.
+ */
+
 import type { CheckoutLineInput, PaymentMethodId } from "@/lib/checkout/types";
 import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
 

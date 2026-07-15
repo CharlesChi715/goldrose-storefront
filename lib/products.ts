@@ -1,16 +1,31 @@
+/**
+ * ROLE OF THIS FILE
+ * The product catalog — the single source of truth for what the store sells.
+ * Every part of the app (homepage, cart, checkout, order log) looks products
+ * up here by `id`, so prices and names only ever need changing in one place.
+ *
+ * Prices are stored in CENTS (4999 = $49.99). Doing money math in whole
+ * integers avoids floating-point rounding bugs like 0.1 + 0.2 = 0.30000000004.
+ */
+
+/**
+ * The shape of one product. `type` in TypeScript declares what fields an
+ * object must have; the compiler then catches typos like `product.pricee`.
+ * A `?` after a field name (compareAtPrice?) means the field is optional.
+ */
 export type Product = {
-  id: string;
-  sku: string;
-  handle: string;
-  shopifyProductId: string;
-  shopifyVariantId: string;
+  id: string; // internal id used in the cart and URLs, e.g. "signature-gold-rose"
+  sku: string; // stock-keeping unit — the human-readable warehouse code
+  handle: string; // URL slug matching the product's handle in Shopify admin
+  shopifyProductId: string; // real Shopify GraphQL id (GID) of the product
+  shopifyVariantId: string; // real Shopify GID of the variant — this is what checkout sends to Shopify
   name: string;
   shortName: string;
-  price: number;
-  compareAtPrice?: number;
-  landedCost: number;
-  inventoryOnHand: number;
-  reorderPoint: number;
+  price: number; // selling price in cents
+  compareAtPrice?: number; // optional "was" price shown struck through
+  landedCost: number; // what one unit costs the business, in cents (not shown to customers)
+  inventoryOnHand: number; // stock count (maintained by hand — can drift from Shopify)
+  reorderPoint: number; // when stock falls below this, the UI shows "Low stock"
   packageWeightOz: number;
   image: string;
   alt: string;
@@ -31,8 +46,7 @@ export const products: Product[] = [
     shopifyVariantId: "gid://shopify/ProductVariant/42470616727598",
     name: "AUREÀ Signature 24K Gold Rose",
     shortName: "Signature Rose",
-    // TEMP: $1 for a live PayPal payment test. Restore to 4999 after testing.
-    price: 100,
+    price: 4999,
     compareAtPrice: 8999,
     landedCost: 1425,
     inventoryOnHand: 420,
@@ -98,8 +112,14 @@ export const products: Product[] = [
   },
 ];
 
+/** The product featured in the big banner at the top of the homepage. */
 export const heroProduct = products[0];
 
+/**
+ * Turn cents into a display string: 4999 -> "$49.99".
+ * `Intl.NumberFormat` is the browser/Node built-in for locale-aware
+ * formatting — it handles the $ sign, commas, and two decimals for us.
+ */
 export function formatMoney(cents: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

@@ -1,3 +1,15 @@
+/**
+ * ROLE OF THIS FILE
+ * Business facts and policies in one place: who we sell to, where stock ships
+ * from, shipping/return promises, and the launch-decision checklist. The UI
+ * reads these values instead of hard-coding them into page markup, so a policy
+ * change is a one-line edit here.
+ *
+ * Several values are still provisional defaults awaiting owner confirmation —
+ * see `launchDecisions` at the bottom for what still needs review.
+ */
+
+/** Brand identity and market assumptions used across the site and metadata. */
 export const storeProfile = {
   brandName: "AUREÀ",
   fallbackBrandName: "Aurea",
@@ -13,6 +25,7 @@ export const storeProfile = {
   placeholderDomain: "https://aurea.example",
 };
 
+/** Where orders ship from — shown on product cards and the operations copy. */
 export const warehouse = {
   label: "US warehouse",
   city: "Ontario",
@@ -22,6 +35,7 @@ export const warehouse = {
   orderCutoff: "2:00 PM PT",
 };
 
+/** Shipping promise. Prices are in cents (595 = $5.95, 7500 = $75 threshold). */
 export const shippingPolicy = {
   processingTime: "1-2 business days",
   standardTransit: "3-5 business days",
@@ -33,6 +47,7 @@ export const shippingPolicy = {
   excludedRegions: ["Alaska", "Hawaii", "US territories", "PO boxes for expedited shipping"],
 };
 
+/** Return promise shown in the storefront copy. */
 export const returnPolicy = {
   returnWindowDays: 30,
   damageReportWindowDays: 7,
@@ -40,7 +55,14 @@ export const returnPolicy = {
   refundTiming: "5-10 business days after the returned item is inspected.",
 };
 
-export const mockLaunchDecisions = [
+/**
+ * The launch-decision checklist: each operating assumption, its current
+ * status, and what the owner still has to verify before trusting it.
+ * This is internal planning data — it is documented in
+ * docs/mock-business-decisions.md and is no longer rendered on the
+ * customer-facing storefront.
+ */
+export const launchDecisions = [
   {
     area: "Sourcing",
     decision: "Product is imported from China and already stocked in the United States.",
@@ -73,9 +95,9 @@ export const mockLaunchDecisions = [
   },
   {
     area: "Checkout",
-    decision: "Offer Shop Pay, credit card, and PayPal through one Shopify checkout behind the custom Next.js storefront. All three run in mock mode until live Shopify credentials are added.",
-    status: "Mocked in code",
-    ownerCheck: "Choose Shopify plan, enable Shop Pay + PayPal in Shopify Payments, set tax settings, and add real product variant IDs.",
+    decision: "Live: the storefront hands the real cart to Shopify's hosted checkout via a cart permalink, and real payments are accepted there. Shop Pay stays hidden until Shopify Payments is enabled.",
+    status: "Live",
+    ownerCheck: "Verify tax and shipping-rate settings in Shopify, and enable Shopify Payments to unlock card + Shop Pay natively.",
   },
   {
     area: "Tax",

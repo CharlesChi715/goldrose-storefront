@@ -1,7 +1,16 @@
 "use client";
 
+/**
+ * ROLE OF THIS FILE
+ * The LIVE checkout path. A "cart permalink" is a plain Shopify URL that
+ * pre-fills a cart and drops the buyer straight into Shopify's hosted
+ * checkout — no API token or server call needed, which is why this was the
+ * fastest safe way to take real payments.
+ */
+
 import { products } from "@/lib/products";
 
+// Accepts anything with productId + quantity (our CartLine fits this shape).
 type LineLike = { productId: string; quantity: number };
 
 /**

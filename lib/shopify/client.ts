@@ -1,3 +1,14 @@
+/**
+ * ROLE OF THIS FILE
+ * The server-side Shopify Storefront API client. Its one job: turn our cart
+ * into a Shopify cart via the `cartCreate` GraphQL mutation and hand back a
+ * checkout URL. In mock mode it swaps in the local fake cart instead.
+ *
+ * This is the token-based alternative to the cart-permalink live path — kept
+ * because it is the natural next step (per-cart checkout URLs, buyer email
+ * prefill) once the Storefront API token is configured.
+ */
+
 import { getShopifyConfig, assertShopifyConfigured } from "@/lib/shopify/config";
 import { createMockShopifyCart } from "@/lib/shopify/mock";
 import type {
@@ -6,6 +17,9 @@ import type {
   ShopifyCheckoutRequest,
 } from "@/lib/shopify/types";
 
+// GraphQL: unlike REST, one request describes exactly which fields we want
+// back. This mutation creates a cart and asks for its id, checkout URL,
+// totals, and lines in a single round trip.
 const cartCreateMutation = `
   mutation CartCreate($input: CartInput!) {
     cartCreate(input: $input) {
@@ -54,6 +68,9 @@ const cartCreateMutation = `
   }
 `;
 
+// The raw JSON shape Shopify answers with — deeply nested because GraphQL
+// mirrors the query above. Everything is optional (`?`) because errors can
+// leave any level missing.
 type ShopifyGraphqlCartCreateResponse = {
   data?: {
     cartCreate?: {
@@ -103,10 +120,14 @@ type ShopifyGraphqlCartCreateResponse = {
   }>;
 };
 
+// `NonNullable<...>` strips `undefined`/`null` from a type — this digs the
+// cart type out of the response type once all the optional levels are known
+// to exist.
 type ShopifyGraphqlCart = NonNullable<
   NonNullable<NonNullable<ShopifyGraphqlCartCreateResponse["data"]>["cartCreate"]>["cart"]
 >;
 
+/** Flatten Shopify's nested GraphQL cart into our simple ShopifyCart shape. */
 function normalizeLiveCart(cart: ShopifyGraphqlCart): ShopifyCart {
   return {
     id: cart.id,
@@ -125,6 +146,11 @@ function normalizeLiveCart(cart: ShopifyGraphqlCart): ShopifyCart {
   };
 }
 
+/**
+ * Call the real Storefront API: POST the mutation with the store's public
+ * token, then check all three places an error can hide (HTTP status, GraphQL
+ * `errors`, and cartCreate `userErrors`) before trusting the cart.
+ */
 async function createLiveShopifyCart(
   request: ShopifyCheckoutRequest,
 ): Promise<ShopifyCartCreateResult> {
@@ -182,6 +208,10 @@ async function createLiveShopifyCart(
   };
 }
 
+/**
+ * The public entry point: create a cart in whichever mode the env says —
+ * a local fake cart in mock mode, a real Shopify cart in live mode.
+ */
 export async function createShopifyCart(
   request: ShopifyCheckoutRequest,
 ): Promise<ShopifyCartCreateResult> {

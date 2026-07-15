@@ -1,9 +1,21 @@
-/** The three checkout types the storefront offers. */
+/**
+ * ROLE OF THIS FILE
+ * All the TypeScript shapes shared by the checkout system: what the browser
+ * sends (`CheckoutRequest`), what the server answers (`CheckoutResult` or
+ * `CheckoutError`), and what an order looks like. Keeping types in one file
+ * with no logic means both client and server code can import them freely.
+ */
+
+/**
+ * The three checkout types the storefront offers. The `|` makes a "union
+ * type": a value that must be exactly one of these strings.
+ */
 export type PaymentMethodId = "shop_pay" | "card" | "paypal";
 
 /** How a method is presented and where the payment data is collected. */
 export type PaymentMethodKind = "express" | "card";
 
+/** One cart line as the browser sends it — note: no price. The server looks prices up itself. */
 export type CheckoutLineInput = {
   productId: string;
   option: string;
@@ -38,6 +50,7 @@ export type CardInput = {
   name: string;
 };
 
+/** The full body POSTed to /api/checkout. Express wallets send only method + lines. */
 export type CheckoutRequest = {
   method: PaymentMethodId;
   lines: CheckoutLineInput[];
@@ -46,6 +59,7 @@ export type CheckoutRequest = {
   card?: CardInput;
 };
 
+/** A cart line after the server resolved it against the catalog (with real prices). */
 export type OrderLine = {
   productId: string;
   sku: string;
@@ -58,6 +72,7 @@ export type OrderLine = {
   lineTotal: number;
 };
 
+/** A completed order: what the receipt, success page, and order log display. */
 export type Order = {
   number: string;
   method: PaymentMethodId;
@@ -74,6 +89,11 @@ export type Order = {
   cardLast4?: string;
 };
 
+/**
+ * Success response. `ok: true` here and `ok: false` below form a
+ * "discriminated union": checking `result.ok` tells TypeScript (and you)
+ * exactly which of the two shapes you are holding.
+ */
 export type CheckoutResult = {
   ok: true;
   mode: "mock" | "live";
@@ -83,6 +103,7 @@ export type CheckoutResult = {
   warnings: string[];
 };
 
+/** Failure response: a human-readable message plus optional per-field errors. */
 export type CheckoutError = {
   ok: false;
   error: string;

@@ -1,3 +1,11 @@
+/**
+ * ROLE OF THIS FILE
+ * The /orders page — the internal demo order log. A Server Component that
+ * reads captured mock orders from lib/orders/store.ts on every request and
+ * renders them newest-first, proving the click -> pay -> order loop closes.
+ * Not linked from customer navigation and excluded from search indexing.
+ */
+
 import Link from "next/link";
 import type { Metadata } from "next";
 import { formatMoney } from "@/lib/products";
@@ -14,6 +22,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/** Turn the stored ISO timestamp into a readable "Jul 15, 2026, 1:47 PM". */
 function formatPlacedAt(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
@@ -61,10 +70,11 @@ export default async function OrdersPage() {
         </div>
 
         <p className="mt-5 rounded-[3px] border border-[#b8922e]/40 bg-[#f7ecd6] px-4 py-3 text-sm leading-6 text-[#7a5d1c]">
-          These are <strong>mock orders</strong>. No real money moved and no card
-          number was stored — only a brand and last four derived for the receipt.
-          In live mode the authoritative order would live in Shopify; this log is
-          the demo stand-in so the click → pay → order flow is visible end to end.
+          These are <strong>development test orders</strong> from mock mode. No
+          real money moved and no card number was stored — only a brand and last
+          four derived for the receipt. Real orders live in Shopify admin; this
+          log is the demo stand-in so the click → pay → order flow is visible
+          end to end.
         </p>
 
         {orders.length === 0 ? (

@@ -1,3 +1,11 @@
+/**
+ * ROLE OF THIS FILE
+ * The /checkout/cancel page — where a shopper lands after backing out of a
+ * hosted checkout. Its job is reassurance: nothing was charged, the cart is
+ * still intact, come back when ready. (`robots: index false` keeps utility
+ * pages like this out of search results.)
+ */
+
 import Link from "next/link";
 import type { Metadata } from "next";
 

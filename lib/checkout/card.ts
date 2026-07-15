@@ -1,3 +1,11 @@
+/**
+ * ROLE OF THIS FILE
+ * Format-only card validation for the mock (development) checkout: brand
+ * detection, the Luhn checksum, and expiry checks. It can say "this LOOKS
+ * like a card number", never "this card can pay". In live mode cards are
+ * handled entirely by Shopify's hosted checkout and never touch this code.
+ */
+
 import type { CardInput } from "@/lib/checkout/types";
 
 export type CardBrand = "Visa" | "Mastercard" | "American Express" | "Discover" | "Card";
@@ -32,6 +40,11 @@ export function detectBrand(digits: string): CardBrand {
   return "Card";
 }
 
+/**
+ * The Luhn checksum every real card number satisfies: walking right-to-left,
+ * double every second digit (subtracting 9 if that passes 9) and the grand
+ * total must end in 0. It catches typos, not fake cards.
+ */
 function passesLuhn(digits: string): boolean {
   let sum = 0;
   let double = false;
@@ -49,6 +62,7 @@ function passesLuhn(digits: string): boolean {
   return digits.length > 0 && sum % 10 === 0;
 }
 
+/** Parse "MM/YY" or "MM/YYYY" and check the date is this month or later (within 20 years). */
 function expiryInFuture(expiry: string): boolean {
   const match = expiry.trim().match(/^(\d{1,2})\s*\/\s*(\d{2}|\d{4})$/);
   if (!match) {
@@ -74,6 +88,11 @@ function expiryInFuture(expiry: string): boolean {
   return true;
 }
 
+/**
+ * Run all the format checks on a card form and collect per-field error
+ * messages. Returns the detected brand and last four digits so a receipt can
+ * say "Visa ····4242" without ever keeping the full number.
+ */
 export function validateCard(card: CardInput): CardValidation {
   const fieldErrors: Record<string, string> = {};
   const digits = card.number.replace(/\D/g, "");

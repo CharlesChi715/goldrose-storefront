@@ -22,7 +22,7 @@ where*:
 | Where it runs | What it is here | Example files |
 |---|---|---|
 | **The browser** (client) | React UI, cart state, buttons | `components/Storefront.tsx`, `lib/cart/store.ts` |
-| **The Next.js server** — this is "the backend" | Runs on Node.js. Renders pages, answers API calls, does trusted logic like pricing | `app/api/**/route.ts`, `lib/checkout/mock.ts`, `lib/orders/store.ts` |
+| **The Next.js server** — this is "the backend" | Runs on Node.js. Renders pages, answers API calls, does trusted logic like pricing | `app/api/**/route.ts`, `lib/checkout/process.ts`, `lib/orders/store.ts` |
 | **Shopify** (external, someone else's servers) | Real payments, real orders. Contacted over the internet | reached from `lib/shopify/client.ts` |
 
 "Node.js" is just the runtime — the program that executes JavaScript on the
@@ -147,8 +147,8 @@ matter:
 2. Calls `processCheckout()` to do the real work.
 3. If an order completed, calls `saveOrder()` to record it.
 4. Returns JSON to the browser.
-f
-**The brain** `lib/checkout/mock.ts`, function `processCheckout()`. Its comment
+
+**The brain** `lib/checkout/process.ts`, function `processCheckout()`. Its comment
 states the security rule plainly:
 
 > Quantity and gift option come from the request; identity and unit price are
@@ -242,7 +242,7 @@ whole app:
    - If **live**: build a Shopify permalink and send you to Shopify. Done — Shopify owns it from here.
    - If **mock**: `fetch("POST /api/checkout")` with `{ method, lines }`.
 3. **Server** (`app/api/checkout/route.ts`): sanitize the input.
-4. **Server** (`lib/checkout/mock.ts`): re-price from the catalog, validate, build the order.
+4. **Server** (`lib/checkout/process.ts`): re-price from the catalog, validate, build the order.
 5. **Server** (`lib/orders/store.ts`): append the order to `.data/orders.json`.
 6. **Server → Browser**: return JSON with a success URL.
 7. **Browser**: clear the cart, navigate to `/checkout/success`.
@@ -255,7 +255,7 @@ whole app:
 To internalize the backend half, read the files in this sequence — "most
 backend" to "least":
 
-1. `lib/checkout/mock.ts` — the trusted pricing brain (re-read the comments)
+1. `lib/checkout/process.ts` — the trusted pricing brain (re-read the comments)
 2. `app/api/checkout/route.ts` — how an untrusted request is defended against
 3. `lib/shopify/config.ts` — how one env var switches mock↔live safely
 4. `lib/shopify/client.ts` — one real external API call, with a secret

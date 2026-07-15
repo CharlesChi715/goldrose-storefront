@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ROLE OF THIS FILE
+ * The dedicated /checkout page: express (PayPal) buttons plus a full card
+ * form with contact, shipping, and card fields, next to a live order summary.
+ * In LIVE mode any button hands the cart straight to Shopify's hosted
+ * checkout; the form itself is only actually submitted in mock (development)
+ * mode. A client component because the form is all state and events.
+ */
+
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,11 +22,13 @@ import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
 
+/** Re-format whatever is typed into "4242 4242 4242 4242" groups as the user types. */
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 19);
   return digits.replace(/(.{4})/g, "$1 ").trim();
 }
 
+/** Auto-insert the slash in the expiry field: typing "0829" shows "08/29". */
 function formatExpiry(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 4);
   if (digits.length <= 2) {
@@ -26,6 +37,10 @@ function formatExpiry(value: string): string {
   return `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }
 
+/**
+ * One labelled text input with inline error display, so the form below
+ * doesn't repeat the same label/input/error markup a dozen times.
+ */
 function Field({
   id,
   label,
@@ -69,6 +84,7 @@ function Field({
   );
 }
 
+/** The checkout page component: form state, submit logic, and the two-column layout. */
 export default function CheckoutPage() {
   const router = useRouter();
   const { lines, rawLines, subtotal, hydrated, changeQuantity, remove, clear } = useCart();
@@ -108,10 +124,16 @@ export default function CheckoutPage() {
   }, [subtotal]);
   const total = subtotal + shippingAmount;
 
+  /** Update one address field by name (`keyof typeof shipping` = "any key of that object"). */
   function setShippingField(key: keyof typeof shipping, value: string) {
     setShipping((current) => ({ ...current, [key]: value }));
   }
 
+  /**
+   * The single submit path for every method. Live mode: build the Shopify
+   * permalink and go. Mock mode: POST to /api/checkout (with the form fields
+   * when the card method is used) and follow the redirect it returns.
+   */
   async function submitCheckout(method: PaymentMethodId, withForm: boolean) {
     if (rawLines.length === 0) {
       setError("Your cart is empty.");
@@ -393,8 +415,8 @@ export default function CheckoutPage() {
             </button>
             <p className="text-center text-xs leading-5 text-[#9c9277]">
               {isLiveCheckout()
-                ? "You'll complete payment securely on Shopify with PayPal. A real charge is taken."
-                : "Runs in mock mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."}
+                ? "You'll complete payment securely on Shopify's hosted checkout. PayPal accepted."
+                : "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."}
             </p>
           </form>
         </section>

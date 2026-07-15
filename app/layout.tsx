@@ -1,6 +1,17 @@
+/**
+ * ROLE OF THIS FILE
+ * The root layout — the outer HTML shell every page renders inside. In the
+ * Next.js App Router this is where the site-wide <html>/<body> tags, global
+ * CSS import, and default SEO metadata live.
+ */
+
 import type { Metadata } from "next";
 import "./globals.css";
 
+// Exporting `metadata` is the App Router way to set <title>, description,
+// and social-share (Open Graph) tags. The `template` makes child pages render
+// as "Checkout | AUREÀ" etc. NOTE: metadataBase still uses the placeholder
+// domain — swap it when the real production domain is connected.
 export const metadata: Metadata = {
   metadataBase: new URL("https://aurea.example"),
   title: {
@@ -33,6 +44,7 @@ export const metadata: Metadata = {
   },
 };
 
+/** Wrap every page in the shared <html>/<body>. `children` is the page itself. */
 export default function RootLayout({
   children,
 }: Readonly<{

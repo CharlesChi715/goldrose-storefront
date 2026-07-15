@@ -1,6 +1,15 @@
+/**
+ * ROLE OF THIS FILE
+ * The checkout API endpoint. In Next.js, a `route.ts` under app/api/...
+ * becomes a URL — this one handles POST /api/checkout. It is the trust
+ * boundary between the browser and the checkout engine: everything in the
+ * request body is UNTRUSTED until the sanitize functions below have checked
+ * types, trimmed strings, and enforced limits.
+ */
+
 import { NextResponse } from "next/server";
 import { isPaymentMethodId } from "@/lib/checkout/methods";
-import { processCheckout } from "@/lib/checkout/mock";
+import { processCheckout } from "@/lib/checkout/process";
 import { saveOrder } from "@/lib/orders/store";
 import type {
   CardInput,
@@ -12,10 +21,12 @@ import type {
 
 const MAX_QUANTITY = 20;
 
+/** Coerce an unknown value to a trimmed, length-capped string (or undefined). */
 function str(value: unknown, max = 255): string | undefined {
   return typeof value === "string" ? value.trim().slice(0, max) : undefined;
 }
 
+/** Validate the cart lines array; returns null if anything is malformed. */
 function sanitizeLines(value: unknown): CheckoutLineInput[] | null {
   if (!Array.isArray(value) || value.length === 0) {
     return null;
@@ -45,6 +56,7 @@ function sanitizeLines(value: unknown): CheckoutLineInput[] | null {
   return lines;
 }
 
+/** Pull a usable email out of the request body, if there is one. */
 function sanitizeContact(value: unknown): CheckoutContact | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
@@ -53,6 +65,7 @@ function sanitizeContact(value: unknown): CheckoutContact | undefined {
   return email ? { email } : undefined;
 }
 
+/** Trim and length-cap the address fields (required-field checks happen later). */
 function sanitizeShipping(value: unknown): ShippingAddress | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
@@ -69,6 +82,7 @@ function sanitizeShipping(value: unknown): ShippingAddress | undefined {
   };
 }
 
+/** Shape the card fields for validation (mock/dev mode only — never stored). */
 function sanitizeCard(value: unknown): CardInput | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
@@ -82,6 +96,11 @@ function sanitizeCard(value: unknown): CardInput | undefined {
   };
 }
 
+/**
+ * Handle POST /api/checkout: parse the JSON, sanitize every field, run the
+ * checkout engine, save completed mock orders to the demo log, and answer
+ * with the result (HTTP 200 on success, 400/500 with a message on failure).
+ */
 export async function POST(request: Request) {
   let body: unknown;
   try {

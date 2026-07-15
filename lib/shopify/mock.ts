@@ -1,3 +1,11 @@
+/**
+ * ROLE OF THIS FILE
+ * The development stand-in for Shopify: builds a cart object with the same
+ * shape a real `cartCreate` call would return, priced from the local catalog.
+ * Lets checkout be developed and demoed with zero risk — no store, payment,
+ * order, tax, or inventory action ever happens.
+ */
+
 import { formatMoney, products } from "@/lib/products";
 import type {
   ShopifyCart,
@@ -6,10 +14,12 @@ import type {
   ShopifyCartLineInput,
 } from "@/lib/shopify/types";
 
+/** Reverse lookup: which local product owns this Shopify variant id? */
 function findProductByVariant(variantId: string) {
   return products.find((product) => product.shopifyVariantId === variantId);
 }
 
+/** Build one fake cart line, priced from the local catalog. */
 function mockLine(input: ShopifyCartLineInput, index: number): ShopifyCartLine {
   const product = findProductByVariant(input.merchandiseId);
   const option =
@@ -37,6 +47,7 @@ function mockLine(input: ShopifyCartLineInput, index: number): ShopifyCartLine {
   };
 }
 
+/** Build the whole fake cart: map the lines, sum the subtotal, attach warnings. */
 export function createMockShopifyCart(lines: ShopifyCartLineInput[]): ShopifyCartCreateResult {
   const cartLines = lines.map(mockLine);
   const subtotalCents = cartLines.reduce((sum, line) => {

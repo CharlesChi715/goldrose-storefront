@@ -1,7 +1,17 @@
+/**
+ * ROLE OF THIS FILE
+ * The homepage route: in the App Router, `app/page.tsx` IS the `/` URL.
+ * It stays a Server Component (no "use client") and does the SEO work —
+ * structured data and a <noscript> fallback — then hands the interactive UI
+ * to the <Storefront> client component.
+ */
+
 import { Storefront } from "@/components/Storefront";
 import { formatMoney, heroProduct, products } from "@/lib/products";
 
 export default function Home() {
+  // Schema.org "structured data": a JSON description of the store and its
+  // offers that search engines read to show rich results (price, stock).
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Store",

@@ -1,3 +1,16 @@
+/**
+ * ROLE OF THIS FILE
+ * The server-side checkout engine behind POST /api/checkout. It re-prices the
+ * cart from the catalog (never trusting browser prices), validates the form,
+ * and builds the order. In live mode express wallets get a real Shopify
+ * checkout URL; in mock (development) mode everything is simulated locally
+ * with no payment, order, or inventory side effects anywhere.
+ *
+ * Note: the normal LIVE path doesn't come through here at all — the browser
+ * goes straight to Shopify via a cart permalink (lib/shopify/permalink.ts).
+ * This engine is the mock/dev flow plus a live fallback.
+ */
+
 import { shippingPolicy } from "@/lib/business";
 import { products } from "@/lib/products";
 import { validateCard } from "@/lib/checkout/card";
@@ -16,6 +29,7 @@ import type {
 
 const MAX_QUANTITY = 20;
 
+/** Catalog lookup by our internal product id. */
 function findProduct(productId: string) {
   return products.find((product) => product.id === productId);
 }
@@ -53,6 +67,11 @@ function computeShipping(subtotal: number) {
   return { amount: free ? 0 : shippingPolicy.standardShippingPrice, free };
 }
 
+/**
+ * Build a short human-friendly order number like "AUR-3F9K-A2B7" from a hash
+ * of the cart contents plus a per-request nonce (a one-time value) so two
+ * identical carts still get different numbers.
+ */
 function buildOrderNumber(seed: string, nonce: string): string {
   let hash = 0;
   for (let i = 0; i < seed.length; i += 1) {
@@ -61,10 +80,12 @@ function buildOrderNumber(seed: string, nonce: string): string {
   return `AUR-${hash.toString(36).toUpperCase().slice(0, 4)}-${nonce.toUpperCase().slice(-4)}`;
 }
 
+/** Loose email shape check — "something@something.something" is good enough here. */
 function isValidEmail(email: string): boolean {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 }
 
+/** Check the required address fields are filled in; returns one message per missing field. */
 function validateShipping(shipping: ShippingAddress | undefined): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!shipping) {
@@ -89,12 +110,14 @@ function validateShipping(shipping: ShippingAddress | undefined): Record<string,
 }
 
 /**
- * Process a checkout request and return a Shopify-shaped mock order (or, in
- * live mode for express wallets, a real Shopify checkout URL to redirect to).
+ * Process one checkout request end to end: resolve + re-price the cart,
+ * validate whatever the method requires, and return either a completed mock
+ * order or (live express) a real Shopify checkout URL to redirect to.
  *
- * Mock mode is the default and creates NO payment, order, customer, tax, or
- * inventory side effect anywhere. `nonce` is supplied by the caller (the route
- * handler) so this function stays free of non-deterministic calls.
+ * Mock mode is the development default and creates NO payment, order,
+ * customer, tax, or inventory side effect anywhere. `nonce` is supplied by
+ * the caller (the route handler) so this function stays deterministic and
+ * easy to test.
  */
 export async function processCheckout(
   request: CheckoutRequest,

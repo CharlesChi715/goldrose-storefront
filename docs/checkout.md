@@ -40,7 +40,7 @@ Cart drawer / Checkout page
                                          ▼
                           POST /api/checkout
                                          │
-                 lib/checkout/mock.ts → processCheckout()
+                 lib/checkout/process.ts → processCheckout()
                   • re-prices every line from the catalog
                   • validates card format (Luhn) — card method
                   • computes subtotal + shipping (lib/business.ts)
@@ -58,7 +58,7 @@ Cart drawer / Checkout page
 | `lib/cart/store.ts` | `useCart()` — localStorage cart shared by the storefront and `/checkout` |
 | `lib/checkout/methods.ts` | Registry of the three methods (label, kind, brand colors) |
 | `lib/checkout/card.ts` | Format-only card validation (Luhn, brand, expiry, CVC) — never stores the PAN |
-| `lib/checkout/mock.ts` | `processCheckout()` — server-side pricing, mock orders, live Shopify hand-off |
+| `lib/checkout/process.ts` | `processCheckout()` — server-side pricing, mock orders, live Shopify hand-off |
 | `lib/checkout/client.ts` | `startExpressCheckout()` — shared express helper for the UI |
 | `app/api/checkout/route.ts` | Validates input and calls `processCheckout()` |
 | `app/checkout/page.tsx` | Order summary + express buttons + card form |

@@ -1,5 +1,14 @@
+/*
+ * ROLE OF THIS FILE
+ * Site-wide styles, imported once by app/layout.tsx. The @import line pulls
+ * in all of Tailwind CSS; almost all styling lives in Tailwind utility
+ * classes inside the components, so only true globals live here: brand color
+ * variables, base fonts, smooth scrolling, and small element resets.
+ */
+
 @import "tailwindcss";
 
+/* CSS custom properties ("variables") — referenced below and by Tailwind. */
 :root {
   --background: #fffaf6;
   --foreground: #231f20;

@@ -1,3 +1,11 @@
+/**
+ * ROLE OF THIS FILE
+ * The /checkout/success "thank you" page. The order details arrive in the
+ * URL query string (?order=...&total=...), because the mock flow redirects
+ * here after completing. Everything from a URL is untrusted user input, so
+ * each param is validated before display.
+ */
+
 import Link from "next/link";
 import type { Metadata } from "next";
 import { formatMoney } from "@/lib/products";
@@ -8,6 +16,8 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
+// In Next.js 15+ `searchParams` is a Promise, so the page function is async
+// and awaits it — that's why this stays a Server Component.
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
@@ -59,9 +69,9 @@ export default async function CheckoutSuccessPage({
 
         {isMock ? (
           <p className="mt-6 rounded-[3px] border border-[#b8922e]/40 bg-[#f7ecd6] px-4 py-3 text-sm leading-6 text-[#7a5d1c]">
-            This is a <strong>mock checkout</strong>. No payment was taken and no
-            real order exists. Connect Shopify (<code>SHOPIFY_MODE=live</code>)
-            to process real Shop Pay, card, and PayPal payments.
+            This is a <strong>development test order</strong> placed in mock
+            mode. No payment was taken and no real order exists. Real checkouts
+            complete on Shopify's hosted checkout instead.
           </p>
         ) : null}
 

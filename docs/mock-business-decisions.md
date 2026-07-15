@@ -129,7 +129,9 @@ Why:
 
 Current implementation:
 
-- `POST /api/shopify/cart` creates a mock Shopify-shaped cart by default.
+- Live checkout hands the cart to Shopify's hosted checkout via a cart
+  permalink (`lib/shopify/permalink.ts`); mock mode simulates orders through
+  `POST /api/checkout`.
 - `SHOPIFY_MODE=mock` means no money, order, tax, or inventory action happens.
 - `SHOPIFY_MODE=live` can call Shopify after real credentials and variant IDs
   exist.

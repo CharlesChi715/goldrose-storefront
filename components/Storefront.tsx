@@ -1,11 +1,21 @@
 "use client";
 
+/**
+ * ROLE OF THIS FILE
+ * The whole customer-facing homepage: header, hero banner, story sections,
+ * product grid, footer, and the slide-in cart drawer. `app/page.tsx` renders
+ * this one component.
+ *
+ * The `"use client"` directive above marks this as a Client Component in the
+ * Next.js App Router: it ships JavaScript to the browser so it can hold state
+ * (useState) and react to clicks. Server Components (the default) cannot.
+ */
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
-  mockLaunchDecisions,
   returnPolicy,
   shippingPolicy,
   storeProfile,
@@ -19,10 +29,16 @@ import { expressMethods } from "@/lib/checkout/methods";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 
 const brandName = "AUREÀ";
+
+/** Turn raw stock numbers into the small "In stock" / "Low stock" label. */
 function stockLabel(product: Product) {
   return product.inventoryOnHand > product.reorderPoint ? "In stock" : "Low stock";
 }
 
+/**
+ * The brand's primary gold call-to-action button, reused everywhere so all
+ * CTAs look identical. `children` is whatever you put between the tags.
+ */
 function GoldButton({
   children,
   onClick,
@@ -48,6 +64,7 @@ function GoldButton({
   );
 }
 
+/** The small gold uppercase "eyebrow" heading that introduces each section. */
 function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return (
     <p
@@ -60,6 +77,12 @@ function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: 
   );
 }
 
+/**
+ * One card in the product grid: image, price, gift-option dropdown, and an
+ * Add to Cart button. It owns one piece of state — the currently selected
+ * gift option — and reports upward via the `onAdd` callback prop when the
+ * customer adds the product (React data flows down, events flow up).
+ */
 function ProductCard({
   product,
   onAdd,
@@ -150,6 +173,13 @@ function ProductCard({
   );
 }
 
+/**
+ * The slide-in cart panel. It is a "controlled" component: it holds no cart
+ * state of its own — everything (lines, subtotal, open/closed) comes in as
+ * props and every user action goes back out through an `on...` callback.
+ * Clicking the dark backdrop closes it; clicks inside stopPropagation so
+ * they don't bubble up to that backdrop handler.
+ */
 function CartDrawer({
   isOpen,
   lines,
@@ -309,8 +339,8 @@ function CartDrawer({
           ) : null}
           <p className="mt-3 text-center text-xs leading-5 text-[#9c9277]">
             {isLiveCheckout()
-              ? "Secure checkout on Shopify. PayPal accepted — a real charge is taken."
-              : "Credit card and PayPal. Mock mode — no real charge is taken."}
+              ? "Secure checkout powered by Shopify · PayPal accepted."
+              : "Development mode — no real charge is taken."}
           </p>
         </div>
       </aside>
@@ -318,6 +348,12 @@ function CartDrawer({
   );
 }
 
+/**
+ * The top-level homepage component. It wires everything together: the shared
+ * cart hook, the page sections, and the cart drawer, plus the small pieces of
+ * page state (is the drawer open, which express button is loading, the
+ * newsletter form message).
+ */
 export function Storefront() {
   const router = useRouter();
   const { lines, rawLines, subtotal, itemCount, add, changeQuantity, remove, clear } = useCart();
@@ -342,12 +378,17 @@ export function Storefront() {
     return () => window.removeEventListener("pageshow", resetCheckoutState);
   }, []);
 
+  /** Add a product to the cart and pop the drawer open so the customer sees it. */
   function addToCart(productId: string, option: string) {
     add(productId, option);
     setExpressError("");
     setIsCartOpen(true);
   }
 
+  /**
+   * Start a PayPal / Shop Pay express checkout from the cart drawer. Shows a
+   * loading state on the tapped button; on failure the error is shown inline.
+   */
   async function handleExpress(method: PaymentMethodId) {
     setPendingMethod(method);
     setExpressError("");
@@ -376,6 +417,10 @@ export function Storefront() {
     router.push("/checkout");
   }
 
+  /**
+   * Footer "launch list" form. Email capture is UI-only for now — no provider
+   * is connected, so we just validate the shape and show a local message.
+   */
   function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -459,7 +504,7 @@ export function Storefront() {
                 </span>
               ) : null}
               <span className="rounded-[2px] bg-[#b8922e] px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#fbf6ec]">
-                Save 44%
+                {heroProduct.badge}
               </span>
             </div>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -479,7 +524,7 @@ export function Storefront() {
               <span>·</span>
               <span>Ships from {warehouse.city}, {warehouse.state}</span>
               <span>·</span>
-              <span>{returnPolicy.returnWindowDays}-day returns mocked</span>
+              <span>{returnPolicy.returnWindowDays}-day returns</span>
             </div>
           </div>
 
@@ -499,9 +544,9 @@ export function Storefront() {
         <section className="grid border-y border-[#b8922e]/25 bg-[#f7f1e6] sm:grid-cols-4">
           {[
             ["24K", "Gold Dipped Finish"],
-            ["US", "Inventory On Hand"],
-            ["$75", "Free Shipping Mock"],
-            ["30", "Return Days Mock"],
+            ["US", "Ships From US Stock"],
+            ["$75+", "Free US Shipping"],
+            ["30", "Day Returns"],
           ].map(([value, label]) => (
             <div
               key={label}
@@ -522,8 +567,8 @@ export function Storefront() {
               Detail you can hold.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg font-light leading-8 text-[#5c4f38]">
-              The source assets focus on real rose material, gold finish, and gift
-              presentation. The page should sell that premium feel clearly.
+              Every rose starts as a real bloom, is preserved at its peak, and is
+              finished in a luminous layer of gold — then boxed, ready to give.
             </p>
             <div className="mx-auto mt-12 grid max-w-6xl items-center gap-10 text-left lg:grid-cols-[1.1fr_0.9fr]">
               <div className="relative aspect-square overflow-hidden rounded-md bg-[#fbf6ec]">
@@ -539,15 +584,15 @@ export function Storefront() {
                 {[
                   [
                     "Quality Material",
-                    "The supplier imagery positions the rose as a real preserved bloom, not a plastic prop.",
+                    "A real preserved rose at the core — not a plastic imitation.",
                   ],
                   [
                     "Fine 24K Finish",
-                    "The gold stem, leaves, and petals carry the premium visual signal.",
+                    "Stem, leaves, and petals carry a luminous 24K gold dipped finish.",
                   ],
                   [
                     "Gift Presentation",
-                    "The box and stand matter because buyers want a ready-to-hand-over gift.",
+                    "Arrives with a display stand and gift box, ready to hand over.",
                   ],
                 ].map(([title, copy]) => (
                   <div key={title} className="border-t border-[#b8922e]/30 pt-7 first:border-t-0 first:pt-0">
@@ -569,9 +614,9 @@ export function Storefront() {
               </h2>
               <div className="mt-7 grid gap-5 text-[#4a3f2a]">
                 {[
-                  `${storeProfile.originDisclosure} This avoids implying the product is made in America.`,
-                  "The physical box and stand reduce buyer uncertainty because the gift feels complete.",
-                  "Final material and gold-finish claims should be checked against supplier documentation before launch.",
+                  storeProfile.originDisclosure,
+                  "Ships complete with a display stand and gift box — nothing to assemble or wrap.",
+                  "No water, no wilting, no maintenance — made to be displayed for years.",
                 ].map((item) => (
                   <div key={item} className="flex gap-4 font-light leading-7">
                     <span className="text-[#b8922e]" aria-hidden="true">
@@ -681,11 +726,11 @@ export function Storefront() {
             <div className="mb-10 max-w-3xl">
               <SectionLabel>Shop the edit</SectionLabel>
               <h2 className="font-serif text-4xl font-medium leading-tight text-[#211a0e] sm:text-5xl">
-                Three offers are enough to test demand.
+                Three ways to give the rose.
               </h2>
               <p className="mt-4 text-lg font-light leading-8 text-[#5c4f38]">
-                The first version should stay focused: one signature rose, one
-                stronger gift presentation, and one premium bundle.
+                One signature rose, one boxed keepsake presentation, and one
+                premium bundle — each one arrives gift-ready.
               </p>
             </div>
             <div className="grid gap-5 lg:grid-cols-3">
@@ -696,15 +741,17 @@ export function Storefront() {
           </div>
         </section>
 
+        {/* Shipping & returns: the practical promises, pulled from lib/business.ts
+            so the numbers here always match the checkout math. */}
         <section className="bg-[#16110a] px-4 py-16 text-center sm:px-6 lg:px-8 lg:py-24">
-          <SectionLabel dark>Mock operations</SectionLabel>
+          <SectionLabel dark>Shipping &amp; returns</SectionLabel>
           <h2 className="font-serif text-4xl font-medium leading-tight text-[#f7f1e6] sm:text-5xl">
-            Enough to plan the store, not enough to take money yet.
+            From our shelf to her hands, fast.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg font-light leading-8 text-[#bdb39a]">
-            These are mocked launch assumptions for a China-sourced product
-            already stocked in the United States. Revise them before connecting
-            checkout.
+            Every rose is stocked in the United States and ships within{" "}
+            {shippingPolicy.processingTime} — no overseas wait between you and
+            the moment.
           </p>
           <div className="mx-auto mt-10 grid max-w-6xl gap-5 text-left lg:grid-cols-3">
             {[
@@ -714,7 +761,7 @@ export function Storefront() {
               ],
               [
                 "Shipping offer",
-                `Mock standard shipping is ${formatMoney(shippingPolicy.standardShippingPrice)} or free over ${formatMoney(shippingPolicy.freeShippingThreshold)}.`,
+                `Standard shipping is ${formatMoney(shippingPolicy.standardShippingPrice)}, free over ${formatMoney(shippingPolicy.freeShippingThreshold)}.`,
               ],
               [
                 "Return promise",
@@ -727,17 +774,6 @@ export function Storefront() {
               </article>
             ))}
           </div>
-          <div className="mx-auto mt-8 grid max-w-6xl gap-3 text-left">
-            {mockLaunchDecisions.slice(0, 5).map((item) => (
-              <div
-                key={item.area}
-                className="grid gap-2 rounded-md border border-[#c9a24b]/15 bg-[#100d09] p-4 text-sm text-[#bdb39a] md:grid-cols-[150px_1fr]"
-              >
-                <strong className="text-[#f4dd9c]">{item.area}</strong>
-                <span>{item.decision}</span>
-              </div>
-            ))}
-          </div>
         </section>
 
         <section className="bg-[radial-gradient(120%_100%_at_50%_0%,#2e2313,#100d09_70%)] px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
@@ -746,9 +782,8 @@ export function Storefront() {
             <em className="text-[#f4dd9c]">the moment</em>.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-lg font-light leading-8 text-[#bdb39a]">
-            The visual direction, mock operations, and Shopify-shaped checkout
-            route are ready. The next serious step is replacing mock IDs with
-            real Shopify products and credentials.
+            Fresh flowers fade in a week. A gold rose stays on her shelf for
+            years — still saying what you meant the day you gave it.
           </p>
           <div className="mt-7 flex flex-wrap items-baseline justify-center gap-4">
             <span className="font-serif text-5xl text-[#f4dd9c]">

@@ -1341,3 +1341,128 @@ Record no-op session with no code changes
   config were touched.
 - README.md reviewed against session scope: no work occurred that
   would make it stale, so it was left unchanged.
+
+## 2026-07-15 14:09 AEST
+
+Clean mock traces for live store; add learning comments
+
+Store is live and receiving payments (owner-confirmed), so the
+customer-facing mock apparatus and stale test artifacts were removed,
+and every source file now documents its own role for the owner's
+learning.
+
+- Restore Signature Rose price from the $1 live-PayPal-test value to
+  the normal 4999 cents ($49.99), as the old TEMP comment instructed.
+- Rewrite customer-visible mock copy in components/Storefront.tsx:
+  the "Mock operations / not enough to take money yet" section is now
+  a Shipping & returns section; "Free Shipping Mock" / "Return Days
+  Mock" stats, "30-day returns mocked", and internal builder notes in
+  the Craft/real-roses/shop sections replaced with real customer copy;
+  the internal launch-decision list no longer renders on the homepage.
+- Delete dead endpoint app/api/shopify/cart/route.ts (nothing called
+  it; checkout goes through /api/checkout in mock mode or a Shopify
+  cart permalink in live mode).
+- Rename lib/checkout/mock.ts to lib/checkout/process.ts — it is the
+  whole checkout engine (mock AND live), not just a mock.
+- Rename lib/business.ts mockLaunchDecisions to launchDecisions and
+  update the stale Checkout entry to reflect live status.
+- Reword mock-mode notices (success page, /orders, cart drawer,
+  checkout page) as "development mode" text; refresh .env.example
+  comments to frame mock as the safe dev default.
+- Add "ROLE OF THIS FILE" headers plus per-function comments to every
+  file in app/, components/, and lib/, calibrated for a TypeScript
+  beginner (type guards, unions, useSyncExternalStore, Luhn, GraphQL
+  notes explained in place).
+- Update README (live-payment status, restored price, new structure)
+  and fix stale file references in docs/checkout.md,
+  docs/web-app-learning-guide.md, docs/shopify-integration.md, and
+  docs/mock-business-decisions.md.
+- Kept: mock dev mode itself, the /orders demo log, the Storefront API
+  client (future token-based live path), and the root static prototype
+  files (index.html, script.js, styles.css, src/) — deleting those
+  needs owner confirmation.
+- npm run lint and npm run build both pass.
+
+## 2026-07-15 15:09 AEST
+
+Answer git staging question; no repo changes
+
+- Advised the owner on `git add .` vs adding specific files: prefer
+  named files (or `git add -p` / `git add -u`) so each commit stays
+  one coherent idea; `git add .` is fine when the whole working tree
+  is one piece of work, as with today's mock-cleanup changes.
+- No code or docs modified after the 14:09 entry; README.md remains
+  accurate.
+
+## 2026-07-15 15:21 AEST
+
+Clarify git add -u behavior for untracked files
+
+- Confirmed `git add -u` stages only tracked-file modifications and
+  deletions; new untracked files are left alone on disk (skipped from
+  staging, not removed).
+- Noted for today's changes that the mock.ts -> process.ts rename was
+  done with `git mv`, so it is already staged; `git add .` or named
+  files remain the right way to stage the rest.
+- No code or docs modified; README.md remains accurate.
+
+## 2026-07-15 15:21 AEST
+
+Explain git add -A vs -u vs . staging scopes
+
+- Answered follow-up git question: `git add -A` stages modified,
+  deleted, and new files repo-wide; `git add .` does the same but
+  only for the current directory subtree; `git add -u` skips new
+  untracked files.
+- Also pointed to `git add -p` for reviewing hunks while staging and
+  `git diff --staged` for checking what is queued before committing.
+- No code or docs modified; README.md remains accurate.
+
+## 2026-07-15 15:23 AEST
+
+Advise when git add -p is worth the interaction cost
+
+- Agreed `git add -p` is too slow for daily use; recommended
+  `git add -A` + commit as the default, with `-p` reserved for
+  splitting unrelated changes inside a single file.
+- Suggested the cheaper habit: skim `git diff` once before staging,
+  and commit small and often so mixed working trees rarely happen.
+- No code or docs modified; README.md remains accurate.
+
+## 2026-07-15 15:27 AEST
+
+Clarify commits attach only to changed files
+
+- Confirmed `git add -A` stages only files that differ, so a commit
+  message is associated solely with the modified file(s); unchanged
+  files keep their previous last-touched commit in GitHub's file
+  browser, `git log <file>`, and `git blame`.
+- Noted the internal snapshot model vs the per-file diff view tools
+  present.
+- No code or docs modified; README.md remains accurate.
+
+## 2026-07-15 15:38 AEST
+
+Explain subfolder scoping for git commands
+
+- Continued the git staging Q&A: `git add .` behaves like `-A` for
+  changed-files-only staging, differing only in directory scope.
+- Explained when working from a subfolder matters: monorepos, tools
+  that resolve the current directory (npm, scripts), or area-by-area
+  commits — while noting path arguments from the root
+  (`git add lib/`) achieve the same without cd, and that this repo
+  is single-project so root is the right place to work.
+- Warned that `git add .` from a subfolder silently misses changes
+  elsewhere; `git status` always shows the whole repo.
+- No code or docs modified; README.md remains accurate.
+
+## 2026-07-15 15:41 AEST
+
+Draft commit message for the mock-cleanup changes
+
+- Provided a ready-to-use conventional commit message covering the
+  session's working-tree changes: price restore, customer-facing mock
+  copy removal, dead route deletion, mock.ts -> process.ts rename,
+  learning comments, and README/docs updates.
+- Offered to run the commit on request; nothing committed yet.
+- No code or docs modified; README.md remains accurate.

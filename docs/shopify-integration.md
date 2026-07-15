@@ -6,46 +6,47 @@ The storefront is still a custom Next.js site. Shopify is responsible for the
 commerce parts once real credentials are added: product admin, cart, checkout,
 payment, taxes, inventory, orders, refunds, and customer checkout emails.
 
-## Current Status
+## Current Status (updated 2026-07-15)
 
 What works now:
 
-- The customer can add AUREÀ products to the cart drawer.
-- The cart drawer can call `POST /api/shopify/cart`.
-- In mock mode, the API returns a Shopify-shaped cart locally.
-- In live mode, the API calls Shopify Storefront API `cartCreate`.
-- Product records already include mock Shopify product and variant GraphQL IDs.
+- The real store `goldrose-9372.myshopify.com` exists with all three products
+  and real variant GraphQL IDs wired into `lib/products.ts`.
+- **Live checkout takes real payments**: the deployed site hands the cart to
+  Shopify's hosted checkout via a cart permalink (`lib/shopify/permalink.ts`).
+- Mock mode still exists for safe local development — `lib/shopify/mock.ts`
+  builds a Shopify-shaped cart locally with no side effects.
+- The Storefront API `cartCreate` client (`lib/shopify/client.ts`) is kept as
+  the next-step live path once a Storefront API token is configured. (The old
+  `POST /api/shopify/cart` demo endpoint has been removed.)
 
-What is still mocked:
+What is still pending:
 
-- Shopify store domain.
-- Storefront API access token.
-- Product and variant GraphQL IDs.
-- Checkout URL in mock mode.
-- Shopify admin product setup.
-- Real tax, shipping, inventory, payment, orders, refunds, and customer emails.
+- Shopify Payments activation (unlocks card + Shop Pay natively).
+- Verified tax, shipping-rate, refund, and policy setup in Shopify admin.
+- Inventory sync between Shopify and `lib/products.ts`.
 
 ## How The Flow Works
 
 ```text
-Customer clicks Shopify Checkout
-  -> components/Storefront.tsx
-  -> POST /api/shopify/cart
-  -> app/api/shopify/cart/route.ts
-  -> lib/shopify/client.ts
-  -> mock cart now, real Shopify cart later
+Customer clicks any checkout button (live mode)
+  -> components/Storefront.tsx or app/checkout/page.tsx
+  -> lib/shopify/permalink.ts builds
+     https://{store}/cart/{variantId}:{qty},...
+  -> browser goes straight to Shopify's hosted checkout
 ```
 
-Beginner idea: the browser does not call Shopify directly in this project. It
-calls our own Next.js API route first. That keeps Shopify configuration in server
-code instead of spreading commerce logic through the UI.
+Beginner idea: a cart permalink is just a URL — no API token or server call is
+needed, which is why it was the fastest safe way to go live. The alternative
+Storefront API path (`lib/shopify/client.ts`) needs a token but returns a
+per-cart checkout URL and supports buyer email prefill.
 
 ## Shopify Files
 
 | File | Purpose |
 | --- | --- |
-| `components/Storefront.tsx` | Builds the visible cart and sends cart lines to the API route. |
-| `app/api/shopify/cart/route.ts` | Validates the request and creates a Shopify cart. |
+| `components/Storefront.tsx` | Builds the visible cart and starts checkout. |
+| `lib/shopify/permalink.ts` | Builds the live cart-permalink checkout URL. |
 | `lib/shopify/config.ts` | Reads Shopify environment variables and decides mock vs live mode. |
 | `lib/shopify/client.ts` | Contains the Storefront API GraphQL `cartCreate` request. |
 | `lib/shopify/mock.ts` | Creates a fake cart response for local development. |

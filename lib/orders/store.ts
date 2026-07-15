@@ -1,3 +1,13 @@
+/**
+ * ROLE OF THIS FILE
+ * The demo order log: saves completed MOCK checkouts to a local JSON file so
+ * the /orders page can show the click -> pay -> order loop closing. Live
+ * orders never land here — Shopify is their system of record.
+ *
+ * This file uses Node's filesystem module, so it can only run on the server
+ * (API routes / server components) — never in the browser.
+ */
+
 import { promises as fs } from "fs";
 import path from "path";
 import type { Order } from "@/lib/checkout/types";
@@ -25,6 +35,7 @@ export type StoredOrder = Order & {
 const DATA_DIR = path.join(process.cwd(), ".data");
 const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
 
+/** Read every saved order from the JSON file (empty list if none yet). */
 async function readAll(): Promise<StoredOrder[]> {
   try {
     const raw = await fs.readFile(ORDERS_FILE, "utf8");

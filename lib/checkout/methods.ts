@@ -1,3 +1,11 @@
+/**
+ * ROLE OF THIS FILE
+ * The registry of payment methods (Shop Pay, Credit Card, PayPal): their
+ * labels, button colors, and which kind of flow each uses. UI code maps over
+ * these arrays instead of hard-coding buttons, so enabling/disabling a method
+ * is a change here, not in every page.
+ */
+
 import type { PaymentMethodId, PaymentMethodKind } from "@/lib/checkout/types";
 
 export type PaymentMethod = {
@@ -59,12 +67,18 @@ export const expressMethods = paymentMethods.filter(
   (method) => method.kind === "express" && method.id !== "shop_pay",
 );
 
+// Map gives O(1) lookup by id instead of scanning the array each time.
 const methodsById = new Map(paymentMethods.map((method) => [method.id, method]));
 
+/**
+ * Type guard used by the API route to check untrusted input: is this string
+ * actually one of our method ids? (`unknown` = "could be anything".)
+ */
 export function isPaymentMethodId(value: unknown): value is PaymentMethodId {
   return typeof value === "string" && methodsById.has(value as PaymentMethodId);
 }
 
+/** Fetch a method's config by id; throws if the id is unknown (a programmer error). */
 export function getPaymentMethod(id: PaymentMethodId): PaymentMethod {
   const method = methodsById.get(id);
   if (!method) {

@@ -16,11 +16,11 @@ This README is the project map. Keep it updated as decisions change.
 
 ## Current Goal
 
-**Show the boss the stack works end to end** — a visitor can click, pay, and the
-order goes the right way — *without* selling the real product yet. The full loop
-(click → pay → **order lands in the `/orders` log**) now runs in mock mode. See
-[docs/demo-goal.md](docs/demo-goal.md) for the demo script and what is real vs.
-simulated.
+**The store is live and can receive real payments** (confirmed 2026-07-15):
+checkout hands the real cart to Shopify's hosted checkout via a cart
+permalink. The next focus is launch hygiene — policy pages, real domain,
+verified tax/shipping — and unlocking card + Shop Pay via Shopify Payments.
+See [docs/launch-checklist.md](docs/launch-checklist.md).
 
 ## Current Result
 
@@ -33,23 +33,24 @@ The project now has a working Next.js storefront:
 - quantity controls and subtotal
 - email capture UI placeholder
 - product/story/occasion/operations sections
-- mock US-warehouse shipping, return, inventory, and origin assumptions
-- mock Shopify cart creation through a Next.js API route
-- a checkout (Credit Card / PayPal; Shop Pay is built but hidden until it is
-  configured as a wallet) that captures each completed order to a demo
-  **order log at `/orders`**, so the click → pay → order loop is visible end
-  to end
+- provisional US-warehouse shipping, return, inventory, and origin assumptions
+  (owner review still pending — see `lib/business.ts` `launchDecisions`)
+- a checkout (Credit Card / PayPal; Shop Pay is built but hidden until Shopify
+  Payments is enabled) — in mock (development) mode completed orders are
+  captured to a demo **order log at `/orders`**, so the click → pay → order
+  loop is visible end to end
 - SEO metadata and basic structured data
 - local product images served from `public/products/`
 
-`main` now has a Shopify-shaped checkout path (the former `shopify-checkout`
-branch, since merged). It runs in mock mode by default, so no real payment,
-tax, order, or inventory action happens yet. Live checkout is switched on by
-setting `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`, which hands the cart to Shopify's
-hosted checkout via a cart permalink.
+Checkout has two modes. **Live** (the deployed site): setting
+`NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` hands the real cart to Shopify's hosted
+checkout via a cart permalink — real money moves. **Mock** (local
+development default): everything is simulated server-side with no payment,
+tax, order, or inventory side effects, so the flow can be developed and
+demoed safely.
 
 See [docs/mock-business-decisions.md](docs/mock-business-decisions.md) for the
-mock launch assumptions that need owner review.
+launch assumptions that still need owner review.
 
 See [docs/shopify-integration.md](docs/shopify-integration.md) for the Shopify
 setup guide.
@@ -162,16 +163,14 @@ utilities like `vercel env pull` or `vercel logs`.
 |   +-- checkout/        # checkout page plus success and cancel pages
 |   +-- orders/          # demo order log page
 |   +-- api/
-|   |   +-- checkout/route.ts  # unified checkout endpoint (mock orders)
-|   |   +-- shopify/
-|   |       +-- cart/route.ts  # Shopify cart endpoint (no longer called by the UI)
+|   |   +-- checkout/route.ts  # unified checkout endpoint (mock/dev orders)
 +-- components/
 |   +-- Storefront.tsx   # interactive storefront and cart UI
 +-- lib/
 |   +-- products.ts      # product data, types, and money formatting
-|   +-- business.ts      # mock operations, shipping, returns, and launch decisions
-|   +-- cart/            # shared cart state store
-|   +-- checkout/        # checkout client, payment methods, and mock order processing
+|   +-- business.ts      # operations data: shipping, returns, launch decisions
+|   +-- cart/            # shared cart state store (localStorage + useCart hook)
+|   +-- checkout/        # checkout client, payment methods, card checks, order engine
 |   +-- orders/          # demo order log store
 |   +-- shopify/         # Shopify config, API client, mock cart, permalinks, and types
 +-- docs/
@@ -221,29 +220,24 @@ Beginner idea: when a component needs browser interaction, it usually needs
 
 ### `app/api/checkout/route.ts`
 
-This is the server endpoint the storefront calls when the customer checks out.
-It validates the cart lines and payment method, then processes a mock order
-(via `lib/checkout/mock.ts`) and records it in the demo order log at `/orders`.
-In live mode the client skips this route and hands the cart to Shopify's
-hosted checkout through a cart permalink (`lib/shopify/permalink.ts`).
+This is the server endpoint the storefront calls when the customer checks out
+in mock (development) mode. It validates the cart lines and payment method,
+then processes the order via the checkout engine (`lib/checkout/process.ts`)
+and records it in the demo order log at `/orders`. In live mode the client
+skips this route and hands the cart to Shopify's hosted checkout through a
+cart permalink (`lib/shopify/permalink.ts`).
 
 Beginner idea: a `route.ts` file inside `app/api/...` creates an API endpoint in
 Next.js.
-
-### `app/api/shopify/cart/route.ts`
-
-An earlier endpoint that creates a mock or live Shopify cart through
-`lib/shopify/client.ts`. The storefront UI no longer calls it — checkout now
-goes through `/api/checkout` (mock) or a Shopify cart permalink (live) — but it
-remains as the Storefront API cart-creation path.
 
 ### `lib/shopify/`
 
 Shopify-specific code lives here:
 
 - `config.ts` reads environment variables.
-- `client.ts` creates Shopify carts.
-- `mock.ts` creates local fake carts while learning.
+- `client.ts` creates Shopify carts via the Storefront API.
+- `permalink.ts` builds the cart permalink URL — the live checkout path.
+- `mock.ts` creates local fake carts for safe development.
 - `types.ts` keeps the cart data shapes readable.
 
 Beginner idea: keep third-party service code in its own folder so the UI does
@@ -280,8 +274,8 @@ placeholders:
 - Brand name: `AUREÀ`
 - Currency: USD
 - Catalog shape: three gift options
-- Pricing: placeholder values (⚠️ the signature rose is temporarily $1 in
-  `lib/products.ts` for the live PayPal test — restore before launch)
+- Pricing: placeholder values ($49.99 / $64.99 / $79.99 — the $1 live-test
+  price has been restored to $49.99; confirm final pricing before launch)
 - Product source: imported from China
 - Inventory location: United States
 - Fulfillment copy: `Imported from China. Ships from US inventory.`
@@ -300,18 +294,22 @@ Replace these before launch.
 
 - The page renders as a real storefront.
 - Product cards show images, prices, details, and gift options.
-- Product cards show mock stock, US warehouse, and origin signals.
+- Product cards show stock, US warehouse, and origin signals.
 - Add-to-cart opens a cart drawer.
 - Cart quantities can increase, decrease, or remove lines.
 - Subtotal updates automatically.
-- Checkout buttons process a mock order and log it at `/orders` in mock mode.
-- With `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` set (as on the Vercel deploy), the
-  PayPal button hands the real cart to Shopify's hosted checkout.
+- **Live checkout takes real payments**: with
+  `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` set (as on the Vercel deploy), every
+  checkout button hands the real cart to Shopify's hosted checkout.
+- In local development (mock mode), checkout simulates the order and logs it
+  at `/orders`.
 - Email form validates a simple email shape and shows local feedback.
-- Mock business decisions are listed in `docs/mock-business-decisions.md`.
+- Launch assumptions are listed in `docs/mock-business-decisions.md`.
 - Shopify setup steps are listed in `docs/shopify-integration.md`.
 - `npm run lint` passes.
 - `npm run build` passes.
+- Every source file carries a "ROLE OF THIS FILE" comment plus per-function
+  notes, written as learning documentation for the owner.
 
 ## What Is Real vs Not Real Yet
 
@@ -320,15 +318,16 @@ Real now:
 - A real Shopify store exists (`goldrose-9372`) with all three products
   published, images attached, and the real variant IDs wired into
   `lib/products.ts`.
-- The deployed site can hand a real cart to Shopify's hosted checkout via a
-  cart permalink (the PayPal path; enabled by setting
-  `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`). The ⚠️ $1 test price set for the live
-  PayPal test is still in `lib/products.ts`.
+- **The store can receive real payments** (owner-confirmed 2026-07-15): the
+  deployed site hands the real cart to Shopify's hosted checkout via a cart
+  permalink (enabled by `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`).
+- The $1 live-test price has been restored to the normal $49.99 in
+  `lib/products.ts` (deploys with the next push).
 
 Not real yet:
 
-- Shopify Payments is not activated, so no card or Shop Pay payments — blocked
-  on the payment-processor / merchant-entity decision (see ⚠️ below).
+- Shopify Payments / Shop Pay: the Shop Pay button stays hidden until Shopify
+  Payments is enabled (the merchant-entity decision — see ⚠️ below).
 - No verified tax or shipping-rate setup in Shopify.
 - No inventory sync — Shopify stock and `lib/products.ts` are maintained by
   hand and can drift.
@@ -365,12 +364,11 @@ These are business decisions, not just code decisions:
 
 ## Recommended Next Steps — Roadmap to Launch
 
-Where we are now: the storefront and a credit card / PayPal checkout (Shop Pay
-built but hidden) work in **mock mode**, and the real Shopify store
-(`goldrose-9372`) already exists with products, images, and real variant IDs in
-`lib/products.ts` — so M1 is partly done. The remaining wall is the ⚠️
-payment-processor entity decision (M0), which blocks Shopify Payments and
-therefore card + Shop Pay. The road from here to a real store is 6 milestones.
+Where we are now: the store is past the "can take real money" line — the
+deployed storefront hands real carts to the real Shopify checkout and
+payments are being accepted (M2 substantially done). Remaining: the ⚠️
+payment-processor entity decision (M0) to unlock Shopify Payments (card +
+Shop Pay natively), then policy pages, compliance, and the real domain.
 
 The detailed, checkbox version lives in
 **[docs/launch-checklist.md](docs/launch-checklist.md)**. This is the map.
@@ -403,10 +401,10 @@ images. Remaining: activate a payment provider, tax, and shipping rates.*
 Put real `shopifyVariantId`s in `lib/products.ts`, fill `.env.local`, set
 `SHOPIFY_MODE=live`, then place one **real test order per method** and confirm it
 lands in Shopify admin. After this, "no real orders" is no longer true.
-*Progress: real variant IDs are already in `lib/products.ts`, and the deployed
-site hands the cart to the real Shopify checkout via a PayPal cart permalink
-(⚠️ the $1 test price from that test is still in `lib/products.ts`). Card +
-Shop Pay tests wait on Shopify Payments (M0/M1).*
+*Progress: done for the permalink path — real variant IDs are wired in, the
+deployed site hands carts to the real Shopify checkout, and payments are
+confirmed working (the $1 test price is restored to $49.99). Card + Shop Pay
+as native buttons wait on Shopify Payments (M0/M1).*
 
 **M3 — Required pages & staying compliant** *(you + this app; ~1 day)*
 Add shipping / refund / privacy / terms pages. Keep claims truthful, use images
