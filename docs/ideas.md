@@ -18,12 +18,13 @@ turn it into a real task.
 
 - redirect customer from other AI generated videos to this website and finishes the final episode to bring more views of this website
 
+- 🆕 Analytics about behavior of the viewer in this website.
+
 ## From me
 
 - 🆕 Customized frontend + Shopify backend, then let my customized backend
   replace the Shopify backend gradually to achieve fully autonomous.
-- 🆕 We decide to use paypal as only method to do the first round test. and add
-  my account as payee.
+- 🆕 We decide to use paypal as only method to do the first round test. and add my account as payee.
 
 ## General / unsorted
 
