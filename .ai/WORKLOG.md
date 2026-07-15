@@ -936,3 +936,408 @@ Open decision (not yet made): to make the *pay* step a real sandbox charge on
 a provider dashboard, pick Shopify test mode (chosen backend, but blocked on
 the merchant-entity question) or a payment sandbox like Stripe test mode
 (fastest for a demo, not the production backend). Mock loop stands until then.
+
+## 2026-07-08 15:59 AEST
+
+Re-apply README checkout fixes lost to hard reset
+
+Session summary: confirmed handleShopifyCheckout() existed only in
+the old learning guide, rewrote the guide as function traces, then
+the owner ran git reset --hard origin/main, which discarded that
+uncommitted work (plus this session's earlier worklog entries) and
+brought in remote 5524139 with its own top-down guide rewrite and
+checkout code changes.
+
+- Explained that hard-reset content that was never committed,
+  stashed, or staged is unrecoverable through git; the trace-based
+  guide survives only in this session and can be regenerated on
+  request (owner has not yet decided).
+- Re-applied the README corrections on top of the new remote README:
+  structure tree now lists checkout/orders pages, api/checkout, all
+  docs, and lib/cart|checkout|orders; /api/checkout documented as
+  the active endpoint with app/api/shopify/cart marked as no longer
+  called by the UI; MVP-assumptions and What Works Now checkout
+  lines corrected; "shopify-checkout branch" wording updated to
+  merged main.
+- Noted current-state facts from 5524139 in the README: Shop Pay is
+  built but hidden (expressMethods filter), and the signature rose
+  is temporarily $1 for the live PayPal test.
+
+## 2026-07-08 16:10 AEST
+
+Verify learning guide alignment with current code
+
+Owner asked to make sure docs/web-app-learning-guide.md (the
+top-down rewrite from remote commit 5524139) matches the repo.
+
+- Checked every factual claim against source: expressMethods snippet
+  location (lib/checkout/methods.ts), live-mode card refusal in
+  lib/checkout/mock.ts, TEMP $1 price comment in lib/products.ts,
+  ld+json in app/page.tsx, SHOPIFY_MODE default in
+  lib/shopify/config.ts, cartCreate mutation and secret token header
+  in lib/shopify/client.ts, permalink format, quantity caps,
+  saveOrder to .data/orders.json, and force-dynamic on /orders.
+- All claims verified accurate; the guide was written against the
+  same commit as the code, so no edits were needed.
+- README.md unchanged this turn; it was re-corrected earlier today
+  and still reflects the current checkout flow.
+
+## 2026-07-08 16:17 AEST
+
+Add deploy section to README; answer runtime questions
+
+Owner asked where the storefront code runs and how updates reach
+the live Vercel site.
+
+- Confirmed the three-places mental model from the learning guide:
+  browser (untrusted UI + localStorage cart), Next.js server on
+  Vercel (trusted pricing, API routes, order log), and Shopify
+  (hosted checkout in live mode only; not contacted in mock mode).
+- Determined Vercel deploys via its GitHub integration: the only
+  remote is github.com/CharlesChi715/goldrose-storefront, no local
+  .vercel/ directory exists, so pushes to main auto-deploy to
+  production and other branches get preview URLs.
+- Added a "How To Deploy" section to README.md documenting the
+  push-to-deploy workflow, dashboard-managed env vars, and the
+  ephemeral /orders demo log resetting on each deploy — the README
+  covered local run steps but not deployment.
+
+## 2026-07-08 16:21 AEST
+
+Confirm .vercel already ignored; no changes needed
+
+Owner asked whether .vercel should be added to .gitignore on this
+freshly cloned device.
+
+- Verified .gitignore line 38 already ignores .vercel (part of the
+  default Next.js template) and that no .vercel files are tracked;
+  the ignore rule travels with every clone, so no action needed.
+- Explained the folder only appears when the Vercel CLI links a
+  machine (stores projectId/orgId) and is machine-specific state
+  that Vercel docs say not to commit; GitHub-integration deploys
+  never create it.
+- No repo files changed this turn; README still accurate.
+
+## 2026-07-08 16:25 AEST
+
+Explain CLI-linked device; note CLI path in README
+
+Owner revealed their original device has the Vercel CLI and a
+.vercel folder and asked what that implies.
+
+- Explained the folder means that machine ran `vercel link`/deploy
+  once and can deploy or manage the project from the terminal
+  (vercel --prod, env pull, logs) without going through GitHub;
+  the GitHub push-to-deploy integration is unaffected and remains
+  the primary path.
+- Warned that `vercel --prod` ships the folder's current contents,
+  including uncommitted code, so GitHub pushes are preferred for a
+  production history that maps to commits.
+- Updated README's How To Deploy section: replaced "there is no
+  manual deploy step" with accurate wording and added a short note
+  on the CLI-linked-machine deploy path and its caveat.
+
+## 2026-07-08 16:33 AEST
+
+Walk through price-tampering example of golden rule
+
+Owner asked for a concrete example of the learning guide's golden
+rule (server re-checks anything a customer could tamper with).
+
+- Traced the rose price through three files: cart lines in
+  lib/cart/store.ts deliberately carry no price field;
+  sanitizeLines() in app/api/checkout/route.ts copies only
+  productId/option/quantity so injected price fields are never
+  read; resolveOrderLines() in lib/checkout/mock.ts re-prices every
+  line from lib/products.ts.
+- Showed a forged curl POST with "price": 1 and explained why it
+  still yields a correctly priced order: the trusted side recomputes
+  value rather than detecting lies.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 16:34 AEST
+
+Explain intersection-type syntax behind CartLineView
+
+Owner asked what the `export type CartLineView = CartLine & {...}`
+syntax means.
+
+- Explained TypeScript intersection types: `&` merges CartLine with
+  the extra `product: Product` and `lineTotal: number` properties,
+  producing an enriched "view" type for rendering cart lines.
+- Noted the near-equivalent `interface ... extends` form and the
+  trade-off (extends errors on conflicting property types, while an
+  intersection silently collapses them to never).
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:00 AEST
+
+Explain sanitizeLines allowlist push line
+
+Owner (in a new conversation branch) asked what
+lines.push({ productId, option, quantity }) does in
+app/api/checkout/route.ts.
+
+- Explained the mechanics: .push appends to the clean array being
+  built, and { productId, option, quantity } is object shorthand
+  that constructs a fresh object from the three extracted-and-
+  validated variables.
+- Highlighted the security point: the customer's original object is
+  never copied (no lines.push(entry)), so forged fields like
+  "price" never cross into processCheckout — an allowlist
+  (copy-what-you-allow) rather than delete-what-you-fear.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:02 AEST
+
+Share editor shortcuts for finding function references
+
+Owner asked for the keyboard shortcut to see all references to a
+function from its definition in this repo.
+
+- Listed VS Code/Cursor on macOS: Shift+F12 peeks references
+  inline, Option+Shift+F12 opens the References panel, F12 jumps
+  to definition, Ctrl+Minus jumps back.
+- Mentioned JetBrains (Option+F7) and Vim/Neovim LSP (gr)
+  equivalents, and noted results are type-aware via the TypeScript
+  language server rather than text matches.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:05 AEST
+
+Explain request direction of the POST route handler
+
+Owner asked which end sends and which receives for
+`export async function POST(request: Request)`.
+
+- Clarified it is the receiving end: the browser sends the HTTP
+  POST and the handler in app/api/checkout/route.ts runs on the
+  server (Vercel function in production) to receive it.
+- Located the sending ends in the repo: fetch("/api/checkout") in
+  app/checkout/page.tsx:139 and lib/checkout/client.ts:43.
+- Walked the round trip (click -> fetch -> handler -> Response back
+  to the browser) and tied it to the learning guide's golden rule:
+  this handler is the first code on trusted hardware.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:07 AEST
+
+Explain what triggers the POST route handler
+
+Owner asked what causes POST() in app/api/checkout/route.ts to run.
+
+- Explained Next.js App Router routing: a route.ts file maps its
+  folder path to a URL, and each exported HTTP-method-named
+  function handles that verb; the framework calls POST() once per
+  incoming POST to /api/checkout.
+- Listed possible senders: the checkout page's fetch (intended) and
+  any external client such as curl or Postman, since the endpoint
+  is public.
+- Tied this to the learning guide: you cannot control the trigger,
+  only the handler's behavior, hence server-side re-validation;
+  noted unexported methods get an automatic 405.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:09 AEST
+
+Clarify route.ts and POST as framework contracts
+
+Owner asked whether POST(request) and placing the handler in
+route.ts are conventions.
+
+- Explained they are enforced naming contracts (convention over
+  configuration), verified against the docs bundled in this repo's
+  Next.js at node_modules/next/dist/docs: only route.ts files
+  become endpoints, and only the seven HTTP-method-named exports
+  (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) are routed.
+- Separated the freely chosen parts: parameter name, the /api/ URL
+  prefix, and the handler body; noted Next.js auto-implements
+  OPTIONS with an Allow header when not exported.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:15 AEST
+
+Confirm /api/checkout exists; untangle page vs route
+
+Owner asked whether app/api/checkout exists in this repo.
+
+- Confirmed app/api/checkout/route.ts serves POST /api/checkout,
+  alongside the repo's other endpoint app/api/shopify/cart/route.ts.
+- Untangled the two similarly named folders: app/checkout/page.tsx
+  is the customer-facing /checkout screen, while
+  app/api/checkout/route.ts is the data endpoint its JavaScript
+  posts to -- the page.tsx vs route.ts naming contract in action.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:20 AEST
+
+Map every reference to /api/checkout in the repo
+
+Owner asked where app/api/checkout shows up across the repo.
+
+- Grouped the seven files by role: the endpoint definition
+  (app/api/checkout/route.ts), two call sites, and docs
+  (README.md, docs/checkout.md, docs/web-app-learning-guide.md,
+  .ai/HANDOFF.md, .ai/WORKLOG.md).
+- Verified the two call sites are distinct purchase paths, not
+  duplication: app/checkout/page.tsx:139 for the checkout page and
+  lib/checkout/client.ts:43 (startExpressCheckout), imported by
+  components/Storefront.tsx for the express button.
+- Noted both paths converge on one handler, so server-side
+  re-validation lives in a single place.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:23 AEST
+
+Confirm fetch-to-route matching happens server-side
+
+Owner confirmed understanding that fetch("/api/checkout") reaches
+the route file under that folder; sharpened two details.
+
+- Corrected the filename to route.ts (singular); routes.ts would be
+  ignored and 404.
+- Explained fetch knows nothing about folders: the relative URL is
+  expanded by the browser against the current origin (localhost in
+  dev, production domain live), and the Next.js server's router
+  maps the path to app/api/checkout/route.ts at request time.
+- Noted the URL is the contract between the two ends, which is what
+  makes a future backend swap (per the autonomous-backend plan)
+  invisible to the frontend.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:38 AEST
+
+Explain where the route handler's server runs
+
+Owner asked whether "the server" is Vercel by default.
+
+- Split by environment: npm run dev runs a local Node server on
+  the owner's Mac (localhost:3000); in production this repo's
+  handlers run as Vercel serverless functions, spun up per request
+  via the GitHub push-to-deploy setup.
+- Stressed Next.js is not tied to Vercel: the same code can run on
+  any Node host (next start, Docker, a VPS); Vercel is this
+  project's hosting choice, not a code dependency.
+- Reinforced the trust model: "trusted end" means hardware the
+  customer does not control, in both dev and prod.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:41 AEST
+
+Break sanitizers down into three golden-rule moves
+
+Owner asked whether all the sanitize functions in
+app/api/checkout/route.ts exist to obey the golden rule.
+
+- Confirmed yes, then split the rule into three techniques the
+  file uses: allowlist copying (fresh objects from known fields,
+  so injected fields like price are never read), validation
+  (quantity 1-20 integer, isPaymentMethodId, JSON checks -> 400),
+  and bounding (str() trims and caps every string length).
+- Pointed out the rule's other half lives downstream: re-pricing
+  in resolveOrderLines() (lib/checkout/mock.ts) ignores customer
+  claims about money entirely; sanitize cleans, re-compute trusts
+  only the server catalog.
+- Noted sanitization doubles as robustness: buggy or stale clients
+  get a clean 400 instead of a crash.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:44 AEST
+
+Define API route as data-for-programs endpoint
+
+Owner asked to confirm that an API route is a URL returning data
+(JSON) instead of a web page.
+
+- Confirmed the working definition and refined it: the real split
+  is audience -- page.tsx returns rendered HTML for humans, while
+  route.ts returns whatever Response the handler builds, typically
+  JSON consumed by page JavaScript.
+- Grounded it in the repo: every exit in app/api/checkout/route.ts
+  is NextResponse.json(body, {status}), and the checkout page turns
+  ok:false into a human-facing error message.
+- Added two refinements: JSON is customary, not mandatory (text,
+  files, redirects, streams all work), and the status code is the
+  machine-readable half of the answer (200/400/500, response.ok).
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:46 AEST
+
+Define the term API route from its two halves
+
+Owner asked for a plain definition of "API route".
+
+- Defined it by decomposing the term: API = interface for programs
+  (URLs and JSON, versus a UI's buttons for humans); route = a path
+  the server answers; so an API route is a route whose audience is
+  code.
+- Contrasted the repo's pair side by side: /checkout from
+  app/checkout/page.tsx returns HTML for a human, /api/checkout
+  from app/api/checkout/route.ts returns JSON for the page's fetch.
+- Listed near-synonyms the owner will encounter: endpoint, backend
+  route, and Next.js's own term route handler.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-08 17:47 AEST
+
+Explain casual "API" usage and how the terms nest
+
+Owner asked whether people just say "API" for simplicity.
+
+- Confirmed the loose usage and laid out the nesting: the API is
+  the whole set of callable URLs (here /api/checkout and
+  /api/shopify/cart), an API route/endpoint is one URL, and an API
+  call is one request.
+- Noted precision matters only for locating problems ("API is
+  down" vs "checkout endpoint returns 500").
+- Added the other-side usage: "the Shopify API" names someone
+  else's service, and /api/shopify/cart is both at once -- an
+  endpoint in this repo's API whose job is to call Shopify's.
+- Teaching answer only; no repo files changed and README remains
+  accurate.
+
+## 2026-07-15 12:01 AEST
+
+Refresh README to match the real Shopify store state
+
+Owner said the README should get updated; verified current facts
+against code and worklog before editing.
+
+- Replaced "What Is Not Real Yet" with "What Is Real vs Not Real
+  Yet": a real store (goldrose-9372) with published products, real
+  variant IDs in lib/products.ts, and a deployed PayPal cart-
+  permalink hand-off are now facts; still-not-real items (Shopify
+  Payments blocked on the entity decision, tax/shipping, email,
+  policies, analytics, domain) kept.
+- Corrected the roadmap intro (Shop Pay hidden, store partly stood
+  up) and added Progress notes to M1 and M2, both flagging the ⚠️
+  $1 test price still in lib/products.ts.
+- Added the live PayPal hand-off to What Works Now and .data/ to
+  the project-structure tree.
+- Did not claim the $1 live PayPal payment completed (unverified on
+  this device); worded as "hands the cart to Shopify checkout".
+- .ai/HANDOFF.md (dated 2026-06-28) is now stale on the same points
+  (still says mock variant IDs); not updated this turn.
+
+## 2026-07-15 13:47 AEST
+
+Record no-op session with no code changes
+
+- Session consisted only of a greeting exchange; no code, docs, or
+  config were touched.
+- README.md reviewed against session scope: no work occurred that
+  would make it stale, so it was left unchanged.

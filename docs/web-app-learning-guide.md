@@ -10,14 +10,13 @@ you can read along.
 
 ## 0. First, the one mental model you need
 
-There is no separate "backend server" in this project. That's the biggest thing
-to unlearn. In a classic setup you'd have:
+There is no separate "backend server" in this project. That's the biggest thing to unlearn. In a classic setup you'd have:
 
 - a **front end** (React in the browser), and
 - a **separate backend** (a Node/Java/Python server + a database) elsewhere.
 
 **Next.js collapses both into one app.** The same project contains code that
-runs in three different places, and the whole game is knowing *which code runs
+runs in three different places, and the whole game is knowing *which code runsgit 
 where*:
 
 | Where it runs | What it is here | Example files |
