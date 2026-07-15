@@ -3,11 +3,12 @@
 This is the single to-do list for turning AUREÀ from a clickable mock into a
 real store that takes real orders. Work top to bottom. Tick boxes as you go.
 
-**Plain-language status today:** the storefront looks and behaves like a real
-shop — you can browse, add to cart, and check out with Shop Pay, credit card,
-or PayPal — but everything money-related is **simulated (mock mode)**. No real
-charge, order, tax, or inventory change happens yet. Each section below is what
-it takes to make a part real.
+**Plain-language status today (updated 2026-07-15):** the deployed store is
+**live and takes real payments** — checkout hands the real cart to Shopify's
+hosted checkout via a cart permalink (PayPal confirmed working). Local
+development still uses the simulated mock mode by default. What remains below
+is launch hygiene: Shopify Payments (card + Shop Pay natively), verified
+tax/shipping, policy pages, and the real domain.
 
 Legend: `[ ]` = to do · `[x]` = done · `(mock)` = simulated today
 
@@ -38,9 +39,10 @@ All three payment buttons are powered by one Shopify checkout. See
 > (e.g. Shopify Starter) is enough to enable Shop Pay + checkout. There is no
 > way to accept Shop Pay without some Shopify account.
 
-- [ ] Create the Shopify store and pick a plan (a low-tier/Starter plan is fine
-      for headless checkout).
-- [ ] Add the 3 products with their variants and real prices.
+- [x] Create the Shopify store and pick a plan (done: `goldrose-9372`,
+      Advanced plan on trial).
+- [x] Add the 3 products with their variants and real prices (done, with
+      images; real GIDs recorded in `lib/products.ts`).
 - [ ] Turn on **Shopify Payments**, then enable **Shop Pay** and **PayPal** as
       accelerated checkout wallets (this is what makes those two buttons real).
 - [ ] Set up **sales tax** in Shopify (don't calculate tax by hand) — confirm
@@ -51,13 +53,13 @@ All three payment buttons are powered by one Shopify checkout. See
 
 ## Phase 3 — Connect this site to Shopify
 
-- [ ] Copy each product's real Shopify **variant ID** into `lib/products.ts`
+- [x] Copy each product's real Shopify **variant ID** into `lib/products.ts`
       (`shopifyVariantId`).
-- [ ] Copy `.env.example` to `.env.local` and fill in:
-      `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`,
-      `NEXT_PUBLIC_SITE_URL`, and set `SHOPIFY_MODE=live`.
-- [ ] Place a real test order end-to-end with each method (Shop Pay, card,
-      PayPal) and confirm it appears in Shopify admin.
+- [x] Connect live checkout (done via `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` on
+      Vercel — cart permalink to hosted checkout; the token-based
+      `SHOPIFY_MODE=live` path remains optional).
+- [x] Place a real test order and confirm it appears in Shopify admin
+      (done for PayPal; Shop Pay + native card wait on Shopify Payments).
 - [ ] Decide how orders get fulfilled (you, or a 3PL) and confirm confirmation
       + tracking emails go out.
 
@@ -113,6 +115,6 @@ preventable. This is guidance, not legal advice.
 
 ## The one-line "is it real yet?" test
 
-When `SHOPIFY_MODE=live` is set with real credentials **and** a real test order
-shows up in Shopify admin, the store is taking real money. Until then, every
-checkout here is a safe simulation.
+**✅ Passed 2026-07-15.** The deployed store hands real carts to Shopify's
+hosted checkout and real payments are accepted. Local `npm run dev` without
+env vars remains a safe simulation.

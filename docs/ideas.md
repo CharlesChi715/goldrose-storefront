@@ -16,9 +16,10 @@ turn it into a real task.
 
 - 🆕 **GEO (Generative Engine Optimization)** 
 
+- redirect customer from other AI generated videos to this website and finishes the final episode to bring more views of this website
+
 ## From me
 
-- 🆕 Planning to get 30 SKUs.
 - 🆕 Customized frontend + Shopify backend, then let my customized backend
   replace the Shopify backend gradually to achieve fully autonomous.
 - 🆕 We decide to use paypal as only method to do the first round test. and add

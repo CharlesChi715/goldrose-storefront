@@ -1466,3 +1466,29 @@ Draft commit message for the mock-cleanup changes
   learning comments, and README/docs updates.
 - Offered to run the commit on request; nothing committed yet.
 - No code or docs modified; README.md remains accurate.
+
+## 2026-07-15 15:53 AEST
+
+Refresh docs to reflect live-payment status
+
+The owner flagged that docs/ still read as if the store could not
+take money. Fixed the stale project-state claims while keeping
+legitimate "mock" references (the local dev mode and still-
+unconfirmed business assumptions).
+
+- docs/checkout.md: replace "mocked by default" intro with live
+  status; turn "Going live" into a progress list (store, products,
+  real payments done; Shopify Payments and Storefront API token
+  remaining).
+- docs/launch-checklist.md: update the plain-language status, tick
+  completed Phase 2/3 items (store, products, variant IDs, live
+  PayPal order), and mark the "is it real yet?" test as passed
+  2026-07-15.
+- docs/mock-business-decisions.md: mark the variant-ID and go-live
+  TODOs done, update What Works Now / What Does Not Work Yet to the
+  current live state.
+- docs/demo-goal.md: add an ACHIEVED/superseded banner; the demo
+  phase it describes is history.
+- docs/web-app-learning-guide.md left as is — its mock references
+  teach the dev-mode mechanism and remain accurate.
+- Markdown-only changes; README.md already reflects this state.

@@ -1,5 +1,11 @@
 # Demo goal: prove the stack works end to end
 
+> **✅ ACHIEVED — superseded 2026-07-15.** The store went past this goal: the
+> deployed site now takes **real payments** through Shopify's hosted checkout.
+> This document is kept as history of the demo phase; the mock loop below
+> still works locally as the development mode. Current status lives in
+> `README.md`.
+
 **Goal (owner, 2026-06-30):** let the boss see that this tech stack *functions* —
 a visitor can click, pay, and the order/money goes the right way. This is about
 proving the plumbing, **not** about selling the real product yet.

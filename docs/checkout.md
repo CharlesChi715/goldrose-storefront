@@ -6,10 +6,12 @@ The storefront offers three ways to pay, in priority order:
 2. **Credit Card** — on-page card form (Visa, Mastercard, Amex, Discover)
 3. **PayPal** — accelerated wallet
 
-All three are **mocked by default** so the whole flow is clickable without any
-real account, money, or order. Nothing is charged and no card number is ever
-stored. See `docs/web-app-learning-guide.md` for why storing card numbers is
-never done.
+**Status (2026-07-15): the deployed store is live and takes real payments** —
+checkout hands the cart to Shopify's hosted checkout via a cart permalink.
+Locally, everything still runs in **mock (development) mode** by default, so
+the whole flow is clickable without any real account, money, or order.
+Nothing is charged in mock mode and no card number is ever stored. See
+`docs/web-app-learning-guide.md` for why storing card numbers is never done.
 
 ## Why one Shopify checkout powers all three
 
@@ -75,18 +77,20 @@ Cart drawer / Checkout page
 
 No real payment is taken in any of these.
 
-## Going live
+## Going live — progress
 
-1. Create the Shopify store, add the three products, and copy their real
-   **variant IDs** into `lib/products.ts` (`shopifyVariantId`).
-2. In Shopify admin, enable **Shopify Payments** and turn on **Shop Pay** and
-   **PayPal** as accelerated checkout wallets.
-3. Set env vars (see `.env.example`): `SHOPIFY_MODE=live`,
-   `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`,
-   `NEXT_PUBLIC_SITE_URL`.
-4. Express buttons then redirect to the real Shopify checkout with the wallet
-   pre-selected; the card form maps to Shopify Payments' hosted fields.
+1. ✅ Shopify store `goldrose-9372` exists with the three products, and the
+   real **variant IDs** are in `lib/products.ts` (`shopifyVariantId`).
+2. ✅ The deployed site takes real payments: `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`
+   is set on Vercel, so every checkout button opens Shopify's hosted checkout
+   via a cart permalink (PayPal is the confirmed working method).
+3. ⬜ Enable **Shopify Payments** to unlock card + **Shop Pay** as native
+   buttons (blocked on the merchant-entity decision).
+4. ⬜ Optional next step: switch from cart permalinks to the Storefront API
+   path (`SHOPIFY_MODE=live` + `SHOPIFY_STORE_DOMAIN` +
+   `SHOPIFY_STOREFRONT_ACCESS_TOKEN`) for per-cart checkout URLs and email
+   prefill.
 
-**What is still mocked / owner to confirm before launch:** real product variant
-IDs, Shopify plan + payment activation, sales-tax configuration, and order
-fulfillment / confirmation emails.
+**Owner to confirm before full launch:** Shopify Payments activation,
+sales-tax configuration, shipping rates, and order fulfillment /
+confirmation emails.

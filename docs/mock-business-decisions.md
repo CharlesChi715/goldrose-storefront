@@ -42,7 +42,8 @@ Owner checks:
 - Confirm real available inventory.
 - Confirm whether the product is truly 24K gold dipped/plated and what exact
   wording the supplier can substantiate.
-- Replace each mock Shopify variant ID with a real Shopify variant ID.
+- ~~Replace each mock Shopify variant ID with a real Shopify variant ID.~~
+  ✅ Done — real variant GIDs are wired into `lib/products.ts`.
 
 ## Live Shopify Catalog
 
@@ -56,17 +57,17 @@ prices, cost, and inventory from the table above.
 | `AUR-GR-BOX-002` | `7607586160686` | `gid://shopify/Product/7607586160686` |
 | `AUR-GR-BND-003` | `7607586193454` | `gid://shopify/Product/7607586193454` |
 
-Still TODO before the Next.js storefront can run live (it currently defaults to
-`SHOPIFY_MODE=mock`):
+Live status (2026-07-15): the storefront **runs live** via the cart-permalink
+path (`NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` on Vercel) and real payments work.
+Of the original TODOs:
 
-1. Add product images in Shopify (created text-only for now).
-2. Create a public **Storefront API access token** in Shopify admin (owner
-   action — it is a secret; do not commit it). Set `SHOPIFY_STORE_DOMAIN=
-   goldrose-9372.myshopify.com` and `SHOPIFY_STOREFRONT_ACCESS_TOKEN` in env.
-3. Pull each product's real **variant GID** (needs the Storefront/Admin API) and
-   replace the placeholder `shopifyVariantId` values in `lib/products.ts`; also
-   update `shopifyProductId` to the GIDs above.
-4. Flip `SHOPIFY_MODE` off `mock` and verify a real cart/checkout end to end.
+1. ✅ Product images added in Shopify.
+2. ✅ Real variant GIDs wired into `lib/products.ts` (product GIDs above).
+3. ✅ Real checkout verified end to end (PayPal via hosted checkout).
+4. ⬜ Optional: create a **Storefront API access token** (owner action — it is
+   a secret; do not commit it) and set `SHOPIFY_MODE=live` +
+   `SHOPIFY_STORE_DOMAIN` + `SHOPIFY_STOREFRONT_ACCESS_TOKEN` to switch from
+   permalinks to per-cart `cartCreate` checkout URLs.
 
 ## Mock Fulfillment
 
@@ -173,21 +174,23 @@ Owner checks:
 - Product catalog renders from structured data.
 - Cart drawer works in the browser.
 - Quantity changes and subtotal work.
-- Shopify mock cart creation works through the Next.js API route.
-- Mock US-warehouse fulfillment copy is visible.
-- Mock origin disclosure is visible.
+- **Live checkout takes real payments** via the Shopify cart permalink;
+  real orders land in Shopify admin.
+- Mock (development) checkout simulates orders locally with no side effects.
+- Provisional US-warehouse fulfillment copy is visible.
+- Origin disclosure is visible.
 - Build and lint pass.
 
 ## What Does Not Work Yet
 
-- No real Shopify checkout credentials yet.
-- No real order creation.
-- No real inventory sync.
-- No real shipping rates.
-- No real sales tax.
+- No Shopify Payments activation (card + Shop Pay as native buttons).
+- No real inventory sync (Shopify and `lib/products.ts` are kept by hand).
+- No verified shipping rates.
+- No verified sales tax.
 - No real email capture.
 - No real policy pages.
 - No real analytics.
+- No production domain (metadata still uses `aurea.example`).
 
 ## Compliance Notes To Recheck
 
