@@ -17,7 +17,7 @@ export default function Home() {
     "@type": "Store",
     name: "AUREÀ",
     description: "Gift-ready 24K gold dipped rose keepsakes.",
-    url: "https://aurea.example",
+    url: "https://goldrose-storefront.vercel.app/",
     makesOffer: products.map((product) => ({
       "@type": "Offer",
       itemOffered: {
