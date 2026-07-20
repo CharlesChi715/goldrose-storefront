@@ -256,9 +256,12 @@ export default function ShopPage() {
           layout. Browsers too old for length-division calc simply keep the
           unscaled centered canvas. */}
       <style>{`
+        .figshop-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
+        .figshop-navstage { position: relative; width: 375px; height: 66px; margin: 0 auto; pointer-events: auto; }
         @supports (transform: scale(calc(100vw / 375px))) {
           .figshop-wrap { height: calc(min(100vw, 480px) * 4.5066667); overflow: hidden; }
           .figshop-stage { transform: scale(calc(min(100vw, 480px) / 375px)); transform-origin: top center; }
+          .figshop-navstage { transform: scale(calc(min(100vw, 480px) / 375px)); transform-origin: bottom center; }
         }
       `}</style>
       <div className="figshop-wrap">
@@ -393,8 +396,17 @@ export default function ShopPage() {
           <ForwardIcon />
         </span>
 
-        {/* Bottom navigation */}
-        <nav style={{ ...abs(6, 1624, 363, 60), background: INK, borderRadius: 20 }}>
+        </div>
+      </div>
+
+      {/* Bottom navigation — fixed to the viewport bottom like an app tab bar.
+          It lives outside the scrolling stage because position:fixed cannot
+          escape a transformed (scaled) ancestor; its own overlay re-applies
+          the same scale, anchored bottom-center. The 6px gap below the pill
+          matches the design's gap between the nav and the canvas bottom. */}
+      <div className="figshop-navfix">
+        <div className="figshop-navstage">
+          <nav style={{ ...abs(6, 0, 363, 60), background: INK, borderRadius: 20 }}>
           <div style={{ ...abs(16, 10, 40, 40), background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
             <span style={abs(8, 8, 24, 24)}>
               <NavHomeIcon />
@@ -416,7 +428,7 @@ export default function ShopPage() {
               <NavProfileIcon />
             </span>
           </div>
-        </nav>
+          </nav>
         </div>
       </div>
     </div>

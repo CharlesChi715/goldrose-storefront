@@ -1501,3 +1501,4 @@ unconfirmed business assumptions).
 - Design frame's empty bottom ~2,900px (blank background below the nav) was trimmed; page ends at y=1690.
 - Pushed to main (0c43b50); live at https://goldrose-storefront.vercel.app/shop (kept off the home page until checkout is wired up).
 - Added proportional scaling to /shop: canvas scales to viewport width (capped 480px); verified 360/375/430/desktop, no overflow; 375 render bit-identical.
+- Bottom nav on /shop is now fixed to the viewport bottom (app tab-bar style), in a scaled overlay; 375 render still bit-identical.
