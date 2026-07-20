@@ -1492,3 +1492,10 @@ unconfirmed business assumptions).
 - docs/web-app-learning-guide.md left as is — its mock references
   teach the dev-mode mechanism and remain accurate.
 - Markdown-only changes; README.md already reflects this state.
+
+## 2026-07-20 — Figma "Home page" imported as /shop (pixel-exact)
+- Built `app/shop/page.tsx` from the Figma file (Open Fashion kit, GoldRose-customized), frame `418:616`, via the Figma REST API using a read-only token Charles created (he should now revoke it in Figma Settings → Security).
+- All coordinates/colors/fonts taken from API data (font: Tenor Sans via next/font). Image assets are Figma-rendered node exports at 2x in `public/shop/`.
+- Verified with an automated screenshot pixel-diff loop (Chrome @2x vs Figma's own 2x render): structural difference 0.0045% (113 px of 2.5M); remaining 0.95% is glyph antialiasing style only.
+- Notable gotchas solved: image fill `imageTransform` crop matrix, Figma outside-aligned strokes on chips, Chrome rounding half-pixel positions (fixed with 0.5px translate), Hamming filter matches Figma downscaling.
+- Design frame's empty bottom ~2,900px (blank background below the nav) was trimmed; page ends at y=1690.
