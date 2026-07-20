@@ -9,7 +9,7 @@
  * on-screen device-pixel size (2x) so browsers don't resample them.
  */
 
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Tenor_Sans } from "next/font/google";
 
 const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
@@ -17,16 +17,6 @@ const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Shop",
   description: "GoldRose apparel and gift catalogue.",
-};
-
-// Lock browser zoom so the page behaves like an app screen. Android honors
-// this viewport; iOS ignores it by design, so touch-action + the gesture
-// script below cover Safari.
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 /* ---------- Design constants (Figma values) ---------- */
@@ -266,7 +256,7 @@ export default function ShopPage() {
           layout. Browsers too old for length-division calc simply keep the
           unscaled centered canvas. */}
       <style>{`
-        html, body { overflow-x: hidden; touch-action: pan-x pan-y; }
+        html, body { overflow-x: hidden; }
         .figshop-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
         .figshop-navstage { position: relative; width: 375px; height: 66px; margin: 0 auto; pointer-events: auto; }
         @supports (transform: scale(calc(100vw / 375px))) {
@@ -462,12 +452,6 @@ export default function ShopPage() {
             "if(nv){nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}" +
             "if(wr){wr.style.height=1690*s+'px';wr.style.overflow='hidden';}}}" +
             "fit();window.addEventListener('resize',fit);" +
-            "}catch(e){}})();" +
-            // iOS Safari ignores user-scalable=no; its proprietary gesture
-            // events are the reliable way to block pinch-zoom there.
-            "(function(){try{" +
-            "document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});" +
-            "document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});" +
             "}catch(e){}})();",
         }}
       />
