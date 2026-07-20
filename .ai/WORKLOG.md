@@ -1503,3 +1503,4 @@ unconfirmed business assumptions).
 - Added proportional scaling to /shop: canvas scales to viewport width (capped 480px); verified 360/375/430/desktop, no overflow; 375 render bit-identical.
 - Bottom nav on /shop is now fixed to the viewport bottom (app tab-bar style), in a scaled overlay; 375 render still bit-identical.
 - Added old-browser fallback to /shop scaling (zoom-based, via inline script) + overflow-x guard; fixes sideways scrolling on narrow phones with pre-2024 engines/in-app browsers.
+- Locked browser zoom on /shop (viewport meta for Android, touch-action + gesture-event blocking for iOS); page now behaves like a fixed app screen.
