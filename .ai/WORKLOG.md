@@ -1499,3 +1499,4 @@ unconfirmed business assumptions).
 - Verified with an automated screenshot pixel-diff loop (Chrome @2x vs Figma's own 2x render): structural difference 0.0045% (113 px of 2.5M); remaining 0.95% is glyph antialiasing style only.
 - Notable gotchas solved: image fill `imageTransform` crop matrix, Figma outside-aligned strokes on chips, Chrome rounding half-pixel positions (fixed with 0.5px translate), Hamming filter matches Figma downscaling.
 - Design frame's empty bottom ~2,900px (blank background below the nav) was trimmed; page ends at y=1690.
+- Pushed to main (0c43b50); live at https://goldrose-storefront.vercel.app/shop (kept off the home page until checkout is wired up).
