@@ -13,7 +13,7 @@ import "./globals.css";
 // as "Checkout | AUREÀ" etc. NOTE: metadataBase still uses the placeholder
 // domain — swap it when the real production domain is connected.
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aurea.example"),
+  // metadataBase: new URL("https://aurea.example"),
   title: {
     default: "AUREÀ | 24K Gold Dipped Rose Gifts",
     template: "%s | AUREÀ",
