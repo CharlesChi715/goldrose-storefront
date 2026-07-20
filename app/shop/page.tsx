@@ -256,6 +256,7 @@ export default function ShopPage() {
           layout. Browsers too old for length-division calc simply keep the
           unscaled centered canvas. */}
       <style>{`
+        html, body { overflow-x: hidden; }
         .figshop-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
         .figshop-navstage { position: relative; width: 375px; height: 66px; margin: 0 auto; pointer-events: auto; }
         @supports (transform: scale(calc(100vw / 375px))) {
@@ -431,6 +432,29 @@ export default function ShopPage() {
           </nav>
         </div>
       </div>
+
+      {/* Fallback for browsers without calc() length division (pre-~2024
+          engines, e.g. old Android WebViews / in-app browsers): apply the same
+          scale via `zoom` (or transform where zoom is unsupported) so narrow
+          screens never scroll sideways. No-op on modern browsers. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "(function(){try{" +
+            "if(window.CSS&&CSS.supports&&CSS.supports('transform','scale(calc(100vw / 375px))'))return;" +
+            "var z='zoom' in document.documentElement.style;" +
+            "function fit(){var s=Math.min(window.innerWidth,480)/375;" +
+            "var st=document.querySelector('.figshop-stage');" +
+            "var nv=document.querySelector('.figshop-navstage');" +
+            "var wr=document.querySelector('.figshop-wrap');if(!st)return;" +
+            "if(z){st.style.zoom=s;if(nv)nv.style.zoom=s;}" +
+            "else{st.style.transform='scale('+s+')';st.style.transformOrigin='top center';" +
+            "if(nv){nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}" +
+            "if(wr){wr.style.height=1690*s+'px';wr.style.overflow='hidden';}}}" +
+            "fit();window.addEventListener('resize',fit);" +
+            "}catch(e){}})();",
+        }}
+      />
     </div>
   );
 }
