@@ -250,7 +250,22 @@ function ProductCard({ card }: { card: CardData }) {
 export default function ShopPage() {
   return (
     <div className={tenor.className} style={{ minHeight: "100vh", background: "#FCFCFC" }}>
-      <div style={{ position: "relative", width: 375, height: 1690, margin: "0 auto", overflow: "hidden" }}>
+      {/* Proportional scaling: the 375-wide canvas scales to the viewport width
+          (capped at 480px so desktop shows a phone-sized column). The wrapper
+          reserves the scaled layout height, since transform doesn't affect
+          layout. Browsers too old for length-division calc simply keep the
+          unscaled centered canvas. */}
+      <style>{`
+        @supports (transform: scale(calc(100vw / 375px))) {
+          .figshop-wrap { height: calc(min(100vw, 480px) * 4.5066667); overflow: hidden; }
+          .figshop-stage { transform: scale(calc(min(100vw, 480px) / 375px)); transform-origin: top center; }
+        }
+      `}</style>
+      <div className="figshop-wrap">
+        <div
+          className="figshop-stage"
+          style={{ position: "relative", width: 375, height: 1690, margin: "0 auto", overflow: "hidden" }}
+        >
         {/* Promo banner (sits underneath the header bar, exactly as in Figma) */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -402,6 +417,7 @@ export default function ShopPage() {
             </span>
           </div>
         </nav>
+        </div>
       </div>
     </div>
   );

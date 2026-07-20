@@ -1500,3 +1500,4 @@ unconfirmed business assumptions).
 - Notable gotchas solved: image fill `imageTransform` crop matrix, Figma outside-aligned strokes on chips, Chrome rounding half-pixel positions (fixed with 0.5px translate), Hamming filter matches Figma downscaling.
 - Design frame's empty bottom ~2,900px (blank background below the nav) was trimmed; page ends at y=1690.
 - Pushed to main (0c43b50); live at https://goldrose-storefront.vercel.app/shop (kept off the home page until checkout is wired up).
+- Added proportional scaling to /shop: canvas scales to viewport width (capped 480px); verified 360/375/430/desktop, no overflow; 375 render bit-identical.
