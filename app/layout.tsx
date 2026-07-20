@@ -13,7 +13,7 @@ import "./globals.css";
 // as "Checkout | AUREÀ" etc. NOTE: metadataBase still uses the placeholder
 // domain — swap it when the real production domain is connected.
 export const metadata: Metadata = {
-  metadataBase: new URL("https://goldrose-storefront.vercel.app"),
+  // metadataBase: new URL("https://goldrose-storefront.vercel.app"),
   title: {
     default: "AUREÀ | 24K Gold Dipped Rose Gifts",
     template: "%s | AUREÀ",
