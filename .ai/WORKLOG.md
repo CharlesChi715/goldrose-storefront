@@ -1542,3 +1542,4 @@ unconfirmed business assumptions).
 - Delivered docs/admin-design.md: full design — schema (products/inventory movements/orders/site_content/admin_users + RLS view), admin screens, Shopify order webhook, pixel-vs-editable-content rule, Phase B exit plan, 8 build stages with acceptance criteria.
 - Build not started per Charles (docs first). Waiting on: real product info, Supabase project.
 - Rebrand: AUREÀ → GoldRose across code + docs (metadata, JSON-LD, checkout/orders pages, chatbox, product names, business profile, placeholder domains, internal keys + GR- SKU prefix — no live shoppers, so no legacy kept).
+- Admin design: added bilingual EN/中文 requirement (§6.7) — cookie-persisted toggle, typed t() dictionary, full label coverage, en fallback; storefront stays English.

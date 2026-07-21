@@ -216,7 +216,8 @@ later = one insert.
 ## 6. The admin application
 
 Route group `app/admin/*`, Tailwind UI, sidebar: **Products · Inventory ·
-Orders · Site content · Log out**. All pages `noindex`, `force-dynamic`.
+Orders · Site content · Log out**, plus an **EN / 中文 language toggle**
+(§6.8). All pages `noindex`, `force-dynamic`.
 
 ### 6.1 Access control
 
@@ -273,7 +274,28 @@ button, and the note *"✦ symbols may look slightly different from the original
 design once edited"* (§9). The slot system is generic — future slots (hero
 banner, featured products) are new rows, not new code.
 
-### 6.7 Price-drift guard (Phase A only)
+### 6.7 Bilingual admin UI — English / 中文
+
+The **admin** (not the storefront — that stays English for the US market) is
+fully bilingual, switched by a persistent **EN / 中文** button in the sidebar.
+
+- **Mechanism**: `lib/admin/i18n.ts` — one typed dictionary with `en` and `zh`
+  maps (`t("products.price.label")`); a missing `zh` key falls back to `en` so
+  a half-translated build never crashes or shows blanks.
+- **Persistence**: the choice is stored in an `admin_lang` cookie (not
+  localStorage) so server-rendered admin pages come out in the right language
+  with no flash; the toggle is a tiny server action that sets the cookie and
+  refreshes.
+- **Coverage**: every admin-authored string — sidebar, form labels and help
+  text, buttons, warnings (incl. the price-drift banner), zod validation
+  messages, empty states, and dashboard cards. Simplified Chinese (简体).
+- **Not translated**: data the owner types (product names, descriptions,
+  slogans) and provider values (order statuses from Shopify/PayPal raw
+  payloads are mapped to translated display labels where they appear).
+- **Build rule**: no hardcoded UI strings in admin components — everything
+  through `t()`, both languages added in the same commit as each new screen.
+
+### 6.8 Price-drift guard (Phase A only)
 
 On price save where `price_cents ≠ shopify_price_cents`: warning banner on the
 product row, form, and dashboard — *"Customers are charged by Shopify. Update
@@ -421,7 +443,7 @@ Each stage ships alone on `main`; live checkout works after every one.
 |---|---|---|---|
 | 0 | Test baseline | `playwright.config.ts`, `tests/e2e/*` | Pixel snapshots of `/`, `/shop`, product page committed; checkout click-through green (permalink URL asserted byte-for-byte; mock API flow returns an order) |
 | 1 | Supabase + seed | `supabase/migrations/0001_init.sql`, `lib/supabase/*`, `scripts/seed.ts` | Seed prints 3 products; rows visible in dashboard; site unchanged; Stage 0 green |
-| 2 | Auth + shell | `middleware.ts`, `app/admin/login`, `app/admin/layout.tsx` | Logged-out → redirected; owner logs in; non-admin 404s; storefront untouched |
+| 2 | Auth + shell | `middleware.ts`, `app/admin/login`, `app/admin/layout.tsx`, `lib/admin/i18n.ts` | Logged-out → redirected; owner logs in; non-admin 404s; EN/中文 toggle switches every label and persists across pages/reloads; storefront untouched |
 | 3 | Products + inventory | `app/admin/products/*`, `app/admin/inventory/*`, `lib/admin/*` | Create/edit/archive works; photo upload works; stock adjust writes movement; drift banner appears & clears |
 | 4 | **Money path → DB** | `lib/checkout/process.ts`, `app/api/checkout/route.ts`, `lib/cart/store.ts`, `lib/shopify/permalink.ts`, checkout page split, `lib/orders/db.ts` | Permalink URL byte-identical; tamper-replay re-priced from DB; admin price edit changes mock total; order lands in DB with stock decrement; pixel-diffs unchanged |
 | 5 | Orders + webhook | `app/api/webhooks/shopify/route.ts`, `app/admin/orders/*` | Sample payload with valid HMAC → one row (twice → still one); bad HMAC → 401; Shopify test notification lands in prod; fulfillment toggle persists |
