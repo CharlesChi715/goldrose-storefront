@@ -1504,3 +1504,14 @@ unconfirmed business assumptions).
 - Bottom nav on /shop is now fixed to the viewport bottom (app tab-bar style), in a scaled overlay; 375 render still bit-identical.
 - Added old-browser fallback to /shop scaling (zoom-based, via inline script) + overflow-x guard; fixes sideways scrolling on narrow phones with pre-2024 engines/in-app browsers.
 - Reverted the /shop zoom lock (pinch-zoom allowed again) at Charles's request.
+
+## 2026-07-21 — Project tracking system set up
+
+- Created root `SUMMARY.md` — short single source of truth (goal, current
+  state, constraints, next steps), per Charles's global agent rules.
+- Created `docs/flow-map.md` — the buyer flow step by step, with each step's
+  implementation files and status (✅ real / 🟡 mock / ⬜ not built / 💡 future).
+- README now points to both.
+- Recorded open item: uncommitted deletions of `docs/demo-goal.md` and
+  `docs/mock-business-decisions.md` (launch checklist still references the
+  latter); `docs/SEO.md` untracked. Owner chose to decide later.

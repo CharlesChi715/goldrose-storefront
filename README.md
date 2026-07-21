@@ -14,6 +14,10 @@ checkout hands off to Shopify for PayPal).
 
 This README is the project map. Keep it updated as decisions change.
 
+> **Where are we?** [SUMMARY.md](SUMMARY.md) is the short single source of
+> truth (read it first); [docs/flow-map.md](docs/flow-map.md) tracks every
+> step of the buyer flow — what's real, what's mock, what's still to build.
+
 ## Current Goal
 
 **The store is live and can receive real payments** (confirmed 2026-07-15):
