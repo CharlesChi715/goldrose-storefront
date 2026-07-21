@@ -690,7 +690,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                             {combo.join(" / ")}
                           </Text>
                           <TextField
-                            label={t("form.price")}
+                            label={`${t("form.price")} · ${combo.join(" / ")}`}
                             labelHidden
                             prefix="$"
                             value={variant.price}
@@ -699,7 +699,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                             inputMode="decimal"
                           />
                           <TextField
-                            label={t("form.quantity")}
+                            label={`${t("form.quantity")} · ${combo.join(" / ")}`}
                             labelHidden
                             type="number"
                             value={variant.quantity}
@@ -707,7 +707,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                             autoComplete="off"
                           />
                           <TextField
-                            label={t("form.sku")}
+                            label={`${t("form.sku")} · ${combo.join(" / ")}`}
                             labelHidden
                             placeholder="SKU"
                             value={variant.sku}

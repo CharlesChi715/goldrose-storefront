@@ -47,14 +47,7 @@ export function isAllowedImageName(fileName: string): boolean {
   return path.extname(fileName).toLowerCase() in EXTENSION_TYPES;
 }
 
-/** Resolve a product_images.path to a browser-usable URL. */
-export function fileUrl(storedPath: string): string {
-  if (storedPath.startsWith("/")) {
-    return storedPath; // public asset or local /api/files route
-  }
-  const env = getSupabaseEnv();
-  return `${env.url}/storage/v1/object/public/${BUCKET}/${storedPath}`;
-}
+export { fileUrl } from "@/lib/files-url";
 
 function storageClient() {
   const env = getSupabaseEnv();

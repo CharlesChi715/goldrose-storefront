@@ -24,6 +24,12 @@ import {
 } from "@/components/veloria";
 import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { products } from "@/lib/products";
+import { BuyButtons } from "@/components/BuyButtons";
+import { getCatalog } from "@/lib/supabase/catalog.ts";
+
+// Re-check the DB catalog every 5 minutes so admin edits reach buyers
+// without a redeploy (§8).
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return products.map((product) => ({ slug: product.handle }));
@@ -93,6 +99,17 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = products.find((p) => p.handle === slug);
   if (!product) notFound();
+
+  // Default variant for ADD TO CART / BUY NOW, from the DB catalog. On a
+  // build without any database the buttons render inert (§0.2 fallback).
+  let variantId: string | null = null;
+  try {
+    const catalog = await getCatalog();
+    const catalogProduct = catalog.find((p) => p.handle === slug);
+    variantId = catalogProduct?.variants.find((v) => v.in_stock)?.id ?? catalogProduct?.variants[0]?.id ?? null;
+  } catch {
+    variantId = null;
+  }
 
   return (
     <>
@@ -347,32 +364,9 @@ export default async function ProductDetailPage({
         ))}
       </Section>
 
-      {/* 07 · Checkout actions (visual only for now — cart wiring comes next) */}
+      {/* 07 · Checkout actions — wired to the v2 cart (Stage 4) */}
       <Section x={16} y={1321} w={398} h={144} radius={18} stroke="#E8E0D7">
-        <div
-          style={{
-            ...abs(16, 18, 178, 54),
-            background: "#FFFFFF",
-            borderRadius: 14,
-            boxShadow: "inset 0 0 0 1.5px #17483F",
-          }}
-        >
-          <div style={{ ...abs(38, 18, 102), ...txt(15, 18.153, "#173A33"), fontWeight: 500 }}>
-            ADD TO CART
-          </div>
-        </div>
-        <div
-          style={{
-            ...abs(204, 18, 178, 54),
-            background: "#073A31",
-            borderRadius: 14,
-            boxShadow: "inset 0 0 0 1.5px #17483F",
-          }}
-        >
-          <div style={{ ...abs(27, 19, 124), ...txt(13, 15.733, "#FFFFFF"), fontWeight: 500 }}>
-            BUY NOW · $159.00
-          </div>
-        </div>
+        <BuyButtons variantId={variantId} />
         <div style={{ ...abs(16, 85, 232), ...txt(11, 13.312, "#8C857D") }}>
           Secure Checkout · Multiple Payment Options
         </div>

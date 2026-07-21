@@ -1,176 +1,177 @@
 /**
  * ROLE OF THIS FILE
- * The checkout API endpoint. In Next.js, a `route.ts` under app/api/...
- * becomes a URL — this one handles POST /api/checkout. It is the trust
- * boundary between the browser and the checkout engine: everything in the
- * request body is UNTRUSTED until the sanitize functions below have checked
- * types, trimmed strings, and enforced limits.
+ * The MOCK checkout endpoint — the no-payment-keys dev mode (§10.4). Full
+ * click-through: server re-prices the cart from the database, validates the
+ * card format locally (never stored), then records a real order row with
+ * source='mock' — stock decrement, customer, timeline, emails and all — with
+ * no money moving anywhere. Disabled the moment PayPal keys exist: real
+ * checkouts go through /api/paypal/* instead (§10.2).
  */
 
 import { NextResponse } from "next/server";
-import { isPaymentMethodId } from "@/lib/checkout/methods";
-import { processCheckout } from "@/lib/checkout/process";
-import { saveOrder } from "@/lib/orders/store";
-import type {
-  CardInput,
-  CheckoutContact,
-  CheckoutLineInput,
-  CheckoutRequest,
-  ShippingAddress,
-} from "@/lib/checkout/types";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { validateCard } from "@/lib/checkout/card";
+import { priceCart } from "@/lib/checkout/pricing";
+import { createOrder } from "@/lib/orders/db";
+import { getPayPalConfig } from "@/lib/paypal/client";
+import { getStore } from "@/lib/supabase/store.ts";
+import type { Address } from "@/lib/supabase/types.ts";
 
-const MAX_QUANTITY = 20;
+const requestSchema = z.object({
+  method: z.enum(["card", "paypal"]),
+  lines: z
+    .array(
+      z.object({
+        variantId: z.string().min(1).max(120),
+        quantity: z.number().int().min(1).max(20),
+      }),
+    )
+    .min(1)
+    .max(50),
+  country: z.string().trim().length(2),
+  email: z.string().trim().email().max(254).optional(),
+  note: z.string().trim().max(1000).optional(),
+  visitorId: z.string().trim().max(64).optional(),
+  shipping: z
+    .object({
+      name: z.string().trim().max(120),
+      address1: z.string().trim().max(200),
+      address2: z.string().trim().max(200).optional(),
+      city: z.string().trim().max(120),
+      state: z.string().trim().max(120),
+      postalCode: z.string().trim().max(20),
+    })
+    .optional(),
+  card: z
+    .object({
+      number: z.string().max(30),
+      expiry: z.string().max(10),
+      cvc: z.string().max(5),
+      name: z.string().max(120),
+    })
+    .optional(),
+});
 
-/** Coerce an unknown value to a trimmed, length-capped string (or undefined). */
-function str(value: unknown, max = 255): string | undefined {
-  return typeof value === "string" ? value.trim().slice(0, max) : undefined;
-}
-
-/** Validate the cart lines array; returns null if anything is malformed. */
-function sanitizeLines(value: unknown): CheckoutLineInput[] | null {
-  if (!Array.isArray(value) || value.length === 0) {
-    return null;
-  }
-
-  const lines: CheckoutLineInput[] = [];
-  for (const entry of value) {
-    if (!entry || typeof entry !== "object") {
-      return null;
-    }
-    const maybe = entry as Partial<CheckoutLineInput>;
-    const productId = str(maybe.productId, 120);
-    const option = str(maybe.option, 120) ?? "Standard";
-    const quantity = maybe.quantity;
-
-    if (
-      !productId ||
-      typeof quantity !== "number" ||
-      !Number.isInteger(quantity) ||
-      quantity <= 0 ||
-      quantity > MAX_QUANTITY
-    ) {
-      return null;
-    }
-    lines.push({ productId, option, quantity });
-  }
-  return lines;
-}
-
-/** Pull a usable email out of the request body, if there is one. */
-function sanitizeContact(value: unknown): CheckoutContact | undefined {
-  if (!value || typeof value !== "object") {
-    return undefined;
-  }
-  const email = str((value as { email?: unknown }).email, 254);
-  return email ? { email } : undefined;
-}
-
-/** Trim and length-cap the address fields (required-field checks happen later). */
-function sanitizeShipping(value: unknown): ShippingAddress | undefined {
-  if (!value || typeof value !== "object") {
-    return undefined;
-  }
-  const maybe = value as Partial<ShippingAddress>;
-  return {
-    name: str(maybe.name, 120) ?? "",
-    address1: str(maybe.address1, 200) ?? "",
-    address2: str(maybe.address2, 200),
-    city: str(maybe.city, 120) ?? "",
-    state: str(maybe.state, 120) ?? "",
-    postalCode: str(maybe.postalCode, 20) ?? "",
-    country: str(maybe.country, 60) ?? "US",
-  };
-}
-
-/** Shape the card fields for validation (mock/dev mode only — never stored). */
-function sanitizeCard(value: unknown): CardInput | undefined {
-  if (!value || typeof value !== "object") {
-    return undefined;
-  }
-  const maybe = value as Partial<CardInput>;
-  return {
-    number: str(maybe.number, 30) ?? "",
-    expiry: str(maybe.expiry, 10) ?? "",
-    cvc: str(maybe.cvc, 5) ?? "",
-    name: str(maybe.name, 120) ?? "",
-  };
-}
-
-/**
- * Handle POST /api/checkout: parse the JSON, sanitize every field, run the
- * checkout engine, save completed mock orders to the demo log, and answer
- * with the result (HTTP 200 on success, 400/500 with a message on failure).
- */
 export async function POST(request: Request) {
-  let body: unknown;
+  // Mock checkout exists only while no real provider is configured (§10.4).
+  if (getPayPalConfig().configured) {
+    return NextResponse.json(
+      { ok: false, error: "Mock checkout is disabled — PayPal is configured." },
+      { status: 400 },
+    );
+  }
+
+  let parsed: z.infer<typeof requestSchema>;
   try {
-    body = await request.json();
+    parsed = requestSchema.parse(await request.json());
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
   }
-
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
-  }
-
-  const payload = body as Record<string, unknown>;
-
-  if (!isPaymentMethodId(payload.method)) {
-    return NextResponse.json(
-      { ok: false, error: "Choose Shop Pay, Credit Card, or PayPal." },
-      { status: 400 },
-    );
-  }
-
-  const lines = sanitizeLines(payload.lines);
-  if (!lines) {
-    return NextResponse.json(
-      { ok: false, error: `Send 1 or more cart lines with quantity 1-${MAX_QUANTITY}.` },
-      { status: 400 },
-    );
-  }
-
-  const checkoutRequest: CheckoutRequest = {
-    method: payload.method,
-    lines,
-    contact: sanitizeContact(payload.contact),
-    shipping: sanitizeShipping(payload.shipping),
-    card: sanitizeCard(payload.card),
-  };
-
-  // Request-time nonce keeps the order number unique without baking a
-  // non-deterministic call into the order-building helpers themselves.
-  const nonce = Date.now().toString(36);
 
   try {
-    const result = await processCheckout(checkoutRequest, nonce);
+    // Server-side re-pricing: the request carries no prices at all (§8).
+    const priced = await priceCart({
+      lines: parsed.lines,
+      country: parsed.country.toUpperCase(),
+    });
 
-    // Capture completed mock orders so the demo can show the order landing in
-    // the order log (/orders). A "mock" result is a finished demo order: card
-    // payments complete in place and mock express returns an internal success
-    // URL. Live express results redirect to Shopify's hosted checkout where the
-    // order is not placed yet, so they are deliberately not captured here.
-    if (result.ok && result.mode === "mock") {
-      try {
-        await saveOrder({
-          ...result.order,
-          mode: result.mode,
-          placedAt: new Date().toISOString(),
-        });
-      } catch {
-        // Never fail a successful checkout just because the demo log write
-        // failed (e.g. read-only filesystem). The order still completes.
+    const fieldErrors: Record<string, string> = {};
+    if (parsed.method === "card") {
+      if (!parsed.email) {
+        fieldErrors.email = "Enter a valid email address.";
+      }
+      if (!parsed.shipping?.name?.trim()) {
+        fieldErrors.name = "Enter the recipient name.";
+      }
+      if (!parsed.shipping?.address1?.trim()) {
+        fieldErrors.address1 = "Enter a street address.";
+      }
+      if (!parsed.card) {
+        fieldErrors.cardNumber = "Enter your card details.";
+      } else {
+        const card = validateCard(parsed.card);
+        Object.assign(fieldErrors, card.fieldErrors);
+      }
+      if (Object.keys(fieldErrors).length > 0) {
+        return NextResponse.json(
+          { ok: false, error: "Please fix the highlighted fields.", fieldErrors },
+          { status: 400 },
+        );
       }
     }
 
-    return NextResponse.json(result, { status: result.ok ? 200 : 400 });
+    const shippingAddress: Address | null = parsed.shipping
+      ? {
+          name: parsed.shipping.name,
+          address1: parsed.shipping.address1,
+          address2: parsed.shipping.address2,
+          city: parsed.shipping.city,
+          state: parsed.shipping.state,
+          postal_code: parsed.shipping.postalCode,
+          country: priced.country,
+        }
+      : null;
+
+    // Log the checkout row (→ abandoned list if it never completes, §7.6).
+    const checkoutId = randomUUID();
+    await getStore().insert("checkouts", [
+      {
+        id: checkoutId,
+        cart: {
+          lines: parsed.lines.map((line) => ({
+            variant_id: line.variantId,
+            quantity: line.quantity,
+          })),
+          note: parsed.note,
+          country: priced.country,
+          visitor_id: parsed.visitorId,
+        },
+        email: parsed.email ?? null,
+        discount_code: null,
+        subtotal_cents: priced.subtotal_cents,
+        total_cents: priced.total_cents,
+        provider_order_id: null,
+        status: "open",
+        created_at: new Date().toISOString(),
+        completed_at: null,
+      },
+    ]);
+
+    const order = await createOrder({
+      priced,
+      source: "mock",
+      payment_provider: "mock",
+      financial_status: "paid",
+      email: parsed.email ?? null,
+      shipping_address: shippingAddress,
+      note: parsed.note ?? null,
+      visitor_id: parsed.visitorId ?? null,
+      checkout_id: checkoutId,
+    });
+
+    const params = new URLSearchParams({
+      order: order.name,
+      method: parsed.method,
+      total: String(order.total_cents),
+      mock: "1",
+    });
+    return NextResponse.json({
+      ok: true,
+      mode: "mock",
+      order: { number: order.name, total: order.total_cents },
+      redirectUrl: `/checkout/success?${params.toString()}`,
+      warnings: [
+        "Mock checkout completed locally. No money moved — the order is recorded with a test badge.",
+      ],
+    });
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
         error: error instanceof Error ? error.message : "Unable to process checkout.",
       },
-      { status: 500 },
+      { status: 400 },
     );
   }
 }

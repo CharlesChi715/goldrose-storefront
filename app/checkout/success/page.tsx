@@ -48,8 +48,8 @@ export default async function CheckoutSuccessPage({
           Thank you for your order.
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#5c4f38]">
-          Your {methodLabel} checkout completed. A confirmation email and
-          tracking details would follow once order fulfillment is connected.
+          Your {methodLabel} checkout completed. A confirmation email is on
+          its way, and tracking details will follow once your gift ships.
         </p>
 
         <dl className="mx-auto mt-7 grid max-w-sm gap-2 text-left">
@@ -70,8 +70,8 @@ export default async function CheckoutSuccessPage({
         {isMock ? (
           <p className="mt-6 rounded-[3px] border border-[#b8922e]/40 bg-[#f7ecd6] px-4 py-3 text-sm leading-6 text-[#7a5d1c]">
             This is a <strong>development test order</strong> placed in mock
-            mode. No payment was taken and no real order exists. Real checkouts
-            complete on Shopify's hosted checkout instead.
+            mode. No payment was taken and no money moved — the order is recorded
+            in the admin with a test badge.
           </p>
         ) : null}
 

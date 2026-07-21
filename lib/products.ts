@@ -16,9 +16,7 @@
 export type Product = {
   id: string; // internal id used in the cart and URLs, e.g. "signature-gold-rose"
   sku: string; // stock-keeping unit — the human-readable warehouse code
-  handle: string; // URL slug matching the product's handle in Shopify admin
-  shopifyProductId: string; // real Shopify GraphQL id (GID) of the product
-  shopifyVariantId: string; // real Shopify GID of the variant — this is what checkout sends to Shopify
+  handle: string; // URL slug → /products/[handle]
   name: string;
   shortName: string;
   price: number; // selling price in cents
@@ -42,8 +40,6 @@ export const products: Product[] = [
     id: "signature-gold-rose",
     sku: "GR-SIG-001",
     handle: "signature-24k-gold-rose",
-    shopifyProductId: "gid://shopify/Product/7607585865774",
-    shopifyVariantId: "gid://shopify/ProductVariant/42470616727598",
     name: "GoldRose Signature 24K Gold Rose",
     shortName: "Signature Rose",
     price: 4999,
@@ -66,8 +62,6 @@ export const products: Product[] = [
     id: "boxed-keepsake-rose",
     sku: "GR-BOX-002",
     handle: "boxed-keepsake-gold-rose",
-    shopifyProductId: "gid://shopify/Product/7607586160686",
-    shopifyVariantId: "gid://shopify/ProductVariant/42470645366830",
     name: "GoldRose Boxed Keepsake Rose",
     shortName: "Boxed Keepsake",
     price: 6499,
@@ -90,8 +84,6 @@ export const products: Product[] = [
     id: "premium-gift-bundle",
     sku: "GR-BND-003",
     handle: "premium-gold-rose-gift-bundle",
-    shopifyProductId: "gid://shopify/Product/7607586193454",
-    shopifyVariantId: "gid://shopify/ProductVariant/42470699958318",
     name: "GoldRose Premium Gift Bundle",
     shortName: "Premium Bundle",
     price: 7999,

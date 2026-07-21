@@ -40,10 +40,11 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
     env: {
-      // Real process env beats .env.local in Next, so blanking these here
-      // guarantees mock checkout even on a machine configured for live.
-      NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN: "",
-      SHOPIFY_MODE: "",
+      // Real process env beats .env.local, so blanking these guarantees the
+      // suite runs mock checkout even on a machine with PayPal keys.
+      PAYPAL_CLIENT_ID: "",
+      PAYPAL_SECRET: "",
+      NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
       // Known password for the local-adapter admin login tests.
       ADMIN_DEV_PASSWORD: "stage2-test-password",
     },

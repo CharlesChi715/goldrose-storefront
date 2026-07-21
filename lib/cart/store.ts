@@ -2,99 +2,62 @@
 
 /**
  * ROLE OF THIS FILE
- * The shared shopping cart. The cart lives in the browser's localStorage (so
- * it survives page reloads) and every page reads it through one React hook,
- * `useCart()` — the homepage drawer and the /checkout page always agree on
- * the contents because they are literally reading the same stored value.
+ * The shared shopping cart, v2 (§8 cart refactor): lines are keyed by
+ * VARIANT ID + quantity — never prices, never product data — stored in
+ * localStorage under "goldrose-cart-v2". Product/price display resolves
+ * against the DB-backed catalog passed into useCart(catalog) by a server
+ * component, and the server re-prices everything again at checkout, so
+ * stale or tampered localStorage can never change what a customer pays.
  */
 
 import { useMemo, useSyncExternalStore } from "react";
-import { products, type Product } from "@/lib/products";
+import type { CatalogProduct, CatalogVariant } from "@/lib/supabase/types.ts";
 
-/**
- * A single cart entry. We persist only the product id, the chosen gift option,
- * and the quantity — never the price. Prices are always re-resolved from the
- * catalog (here for display, and again server-side at checkout) so a stale or
- * tampered localStorage value can never change what a customer is charged.
- */
 export type CartLine = {
-  productId: string;
-  option: string;
+  variantId: string;
   quantity: number;
 };
 
-/**
- * A cart line enriched for display: the stored line plus the looked-up product
- * and computed line total. The `&` joins two types together ("intersection").
- */
 export type CartLineView = CartLine & {
-  product: Product;
+  product: CatalogProduct;
+  variant: CatalogVariant;
   lineTotal: number;
 };
 
-const STORAGE_KEY = "goldrose-cart-v1";
+const STORAGE_KEY = "goldrose-cart-v2";
 const CHANGE_EVENT = "goldrose-cart-change";
 const MAX_QUANTITY = 20;
 
 const EMPTY: CartLine[] = [];
 
-/**
- * The unique key for a cart line. The same product with two different gift
- * options counts as two separate lines, so the key combines both.
- */
-export function getLineKey(productId: string, option: string) {
-  return `${productId}::${option}`;
-}
-
-/** Look a product up in the catalog by id (undefined if it no longer exists). */
-export function getProduct(productId: string) {
-  return products.find((product) => product.id === productId);
-}
-
-/**
- * A TypeScript "type guard": it checks at runtime that a value parsed from
- * localStorage really has the CartLine shape. The `value is CartLine` return
- * type tells the compiler "if this returns true, treat it as a CartLine".
- * Needed because localStorage can contain anything (old versions, tampering).
- */
 function isCartLine(value: unknown): value is CartLine {
   if (!value || typeof value !== "object") {
     return false;
   }
   const maybe = value as Partial<CartLine>;
   return (
-    typeof maybe.productId === "string" &&
-    typeof maybe.option === "string" &&
+    typeof maybe.variantId === "string" &&
     typeof maybe.quantity === "number" &&
     Number.isFinite(maybe.quantity) &&
     maybe.quantity > 0
   );
 }
 
-/**
- * Clean up whatever came out of localStorage: drop malformed lines and lines
- * whose product no longer exists, and clamp quantities into the 1-20 range.
- */
 function normalize(parsed: unknown): CartLine[] {
   if (!Array.isArray(parsed)) {
     return EMPTY;
   }
-  const clean = parsed
-    .filter(isCartLine)
-    .filter((line) => Boolean(getProduct(line.productId)))
-    .map((line) => ({
-      ...line,
-      quantity: Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity))),
-    }));
+  const clean = parsed.filter(isCartLine).map((line) => ({
+    variantId: line.variantId,
+    quantity: Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity))),
+  }));
   return clean.length > 0 ? clean : EMPTY;
 }
 
-// getSnapshot must return a stable reference while the underlying storage is
-// unchanged, so we cache the parsed value keyed by the raw string.
+// getSnapshot must return a stable reference while storage is unchanged.
 let cachedRaw: string | null = null;
 let cachedLines: CartLine[] = EMPTY;
 
-/** Read the current cart from localStorage (empty on the server, where there is no window). */
 function readLines(): CartLine[] {
   if (typeof window === "undefined") {
     return EMPTY;
@@ -116,7 +79,6 @@ function readLines(): CartLine[] {
   return cachedLines;
 }
 
-/** Save the cart to localStorage and tell every open useCart() hook to re-read it. */
 function writeLines(next: CartLine[]) {
   if (typeof window === "undefined") {
     return;
@@ -124,15 +86,9 @@ function writeLines(next: CartLine[]) {
   cachedRaw = JSON.stringify(next);
   cachedLines = next;
   window.localStorage.setItem(STORAGE_KEY, cachedRaw);
-  // Notify every mounted useCart() subscriber in this tab.
   window.dispatchEvent(new CustomEvent(CHANGE_EVENT));
 }
 
-/**
- * Tell React how to listen for cart changes: our own custom event covers
- * changes made in this tab, and the browser's "storage" event covers changes
- * made in OTHER tabs of the same site. Returns a cleanup function.
- */
 function subscribe(callback: () => void) {
   window.addEventListener(CHANGE_EVENT, callback);
   window.addEventListener("storage", callback);
@@ -142,40 +98,31 @@ function subscribe(callback: () => void) {
   };
 }
 
-// A subscribe function that never fires — used by the `hydrated` flag below,
-// which only needs to differ between server render (false) and client (true).
 const subscribeHydration = () => () => {};
 
-/** Helper: read the cart, apply a change function to it, save the result. */
 function mutate(transform: (lines: CartLine[]) => CartLine[]) {
   writeLines(transform(readLines()));
 }
 
-/** Add one unit of a product+option, or bump the quantity if it's already in the cart. */
-function addLine(productId: string, option: string) {
-  if (!getProduct(productId)) {
-    return;
-  }
+/** Add units of a variant (bumps quantity if it's already in the cart). */
+export function addToCart(variantId: string, quantity = 1) {
   mutate((lines) => {
-    const key = getLineKey(productId, option);
-    const existing = lines.find((line) => getLineKey(line.productId, line.option) === key);
+    const existing = lines.find((line) => line.variantId === variantId);
     return existing
       ? lines.map((line) =>
-          getLineKey(line.productId, line.option) === key
-            ? { ...line, quantity: Math.min(MAX_QUANTITY, line.quantity + 1) }
+          line.variantId === variantId
+            ? { ...line, quantity: Math.min(MAX_QUANTITY, line.quantity + quantity) }
             : line,
         )
-      : [...lines, { productId, option, quantity: 1 }];
+      : [...lines, { variantId, quantity: Math.min(MAX_QUANTITY, Math.max(1, quantity)) }];
   });
 }
 
-/** Adjust a line's quantity by +1/-1; a line that reaches 0 is removed entirely. */
-function changeLineQuantity(productId: string, option: string, amount: number) {
-  const key = getLineKey(productId, option);
+function changeLineQuantity(variantId: string, amount: number) {
   mutate((lines) =>
     lines
       .map((line) =>
-        getLineKey(line.productId, line.option) === key
+        line.variantId === variantId
           ? { ...line, quantity: Math.min(MAX_QUANTITY, line.quantity + amount) }
           : line,
       )
@@ -183,27 +130,20 @@ function changeLineQuantity(productId: string, option: string, amount: number) {
   );
 }
 
-/** Remove a line from the cart regardless of quantity. */
-function removeLine(productId: string, option: string) {
-  const key = getLineKey(productId, option);
-  mutate((lines) => lines.filter((line) => getLineKey(line.productId, line.option) !== key));
+function removeLine(variantId: string) {
+  mutate((lines) => lines.filter((line) => line.variantId !== variantId));
 }
 
-/** Empty the cart (used after a completed mock checkout). */
 function clearCart() {
   writeLines(EMPTY);
 }
 
 /**
- * Shared cart state backed by localStorage so the storefront and the dedicated
- * /checkout route read and write the same cart across client navigations.
- *
- * Built on `useSyncExternalStore`: the server snapshot is always empty and the
- * client reads localStorage, so there is no hydration mismatch and no
- * setState-in-effect. `hydrated` flips to true once mounted on the client, so
- * callers can defer cart-dependent UI (e.g. the empty-cart screen).
+ * Cart state resolved against the DB catalog (fetched server-side and passed
+ * as props). Lines whose variant no longer exists in the catalog are hidden
+ * from display but kept in rawLines; the server rejects them at checkout.
  */
-export function useCart() {
+export function useCart(catalog: CatalogProduct[]) {
   const lines = useSyncExternalStore(subscribe, readLines, () => EMPTY);
   const hydrated = useSyncExternalStore(subscribeHydration, () => true, () => false);
 
@@ -211,14 +151,21 @@ export function useCart() {
     () =>
       lines
         .map((line) => {
-          const product = getProduct(line.productId);
-          if (!product) {
-            return null;
+          for (const product of catalog) {
+            const variant = product.variants.find((entry) => entry.id === line.variantId);
+            if (variant) {
+              return {
+                ...line,
+                product,
+                variant,
+                lineTotal: variant.price_cents * line.quantity,
+              };
+            }
           }
-          return { ...line, product, lineTotal: product.price * line.quantity };
+          return null;
         })
         .filter((line): line is CartLineView => Boolean(line)),
-    [lines],
+    [lines, catalog],
   );
 
   const subtotal = lineViews.reduce((sum, line) => sum + line.lineTotal, 0);
@@ -230,7 +177,7 @@ export function useCart() {
     subtotal,
     itemCount,
     hydrated,
-    add: addLine,
+    add: addToCart,
     changeQuantity: changeLineQuantity,
     remove: removeLine,
     clear: clearCart,
