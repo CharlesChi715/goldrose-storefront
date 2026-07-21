@@ -1530,3 +1530,4 @@ unconfirmed business assumptions).
   cart wiring, deploy/push.
 - Follow-up: home page dark pill nav replaced with the shared VELORIA white tab bar (Home tab active) for cross-page consistency.
 - Chatbox: mascot + concierge bar extracted into a fixed overlay above the nav (components/ConciergeChat.tsx); click opens a placeholder chat panel (real widget later).
+- Chatbox added to the home page as well (same fixed overlay as /shop).
