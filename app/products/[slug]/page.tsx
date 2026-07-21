@@ -14,6 +14,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ConciergeChat } from "@/components/ConciergeChat";
 import {
   abs,
   txt,
@@ -94,7 +95,8 @@ export default async function ProductDetailPage({
   if (!product) notFound();
 
   return (
-    <ScaleFrame height={2501} background="#FCFAF7" fontClass={inter.className}>
+    <>
+      <ScaleFrame height={2501} background="#FCFAF7" fontClass={inter.className}>
       <PromoBar />
       <VHeader backHref="/shop" right="heart" />
 
@@ -510,29 +512,12 @@ export default async function ProductDetailPage({
         ))}
       </Section>
 
-      {/* Concierge mascot sticker — painted underneath the chat bar here */}
-      <img
-        src="/veloria/concierge-mascot.png"
-        alt=""
-        width={98}
-        height={98}
-        style={{ ...abs(0, 2336, 98, 98), display: "block" }}
-      />
+      </ScaleFrame>
 
-      {/* 12 · Concierge chat */}
-      <div style={{ ...abs(16, 2396, 398, 46), background: "#06372E", borderRadius: 18 }}>
-        <div style={{ ...abs(16, 8, 258), ...txt(12.5, 15.128, "#FFFFFF"), fontWeight: 500 }}>
-          Need help choosing the perfect rose?
-        </div>
-        <div style={{ ...abs(16, 17, 258), ...txt(11, 13.312, "#D9E3DE") }}>
-          Ask our gifting concierge.
-        </div>
-        <div style={{ ...abs(274, 2, 112, 42), background: "#C89236", borderRadius: 99 }}>
-          <div style={{ ...abs(14, 13, 84), ...txt(13, 15.733, "#FFFFFF"), fontWeight: 500 }}>
-            {"CHAT NOW \u00A0›"}
-          </div>
-        </div>
-      </div>
-    </ScaleFrame>
+      {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
+          placeholder chat panel on click. Bar paints over the mascot here,
+          matching the 详情页 layer order. */}
+      <ConciergeChat navClearance={59} mascotOnTop={false} />
+    </>
   );
 }

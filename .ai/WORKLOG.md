@@ -1529,3 +1529,4 @@ unconfirmed business assumptions).
   residual (text AA). Pending: symbol-glyph SVG swap (Figma API rate limit),
   cart wiring, deploy/push.
 - Follow-up: home page dark pill nav replaced with the shared VELORIA white tab bar (Home tab active) for cross-page consistency.
+- Chatbox: mascot + concierge bar extracted into a fixed overlay above the nav (components/ConciergeChat.tsx); click opens a placeholder chat panel (real widget later).

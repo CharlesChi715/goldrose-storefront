@@ -10,6 +10,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ConciergeChat } from "@/components/ConciergeChat";
 import {
   abs,
   txt,
@@ -23,7 +24,7 @@ import {
   ScaleFrame,
   VHeader,
 } from "@/components/veloria";
-import { cormorant, inter, notoSC, tenor } from "@/lib/fonts";
+import { cormorant, notoSC, tenor } from "@/lib/fonts";
 import { products } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -96,7 +97,8 @@ function ProductCard({ card, href }: { card: (typeof CARDS)[number]; href: strin
 
 export default function ShopPage() {
   return (
-    <ScaleFrame height={1938} background="#FFFFFF" fontClass={tenor.className} navGap={1}>
+    <>
+      <ScaleFrame height={1938} background="#FFFFFF" fontClass={tenor.className} navGap={1}>
       {/* Hero carousel render (dots baked in); bleeds 7px past both canvas
           edges in the design — the canvas clips it, exactly as Figma does. */}
       <img
@@ -159,27 +161,6 @@ export default function ShopPage() {
         <ProductCard key={i} card={card} href={`/products/${products[i % products.length].handle}`} />
       ))}
 
-      {/* Concierge chat bar */}
-      <div style={{ ...abs(16, 1832, 398, 46), background: "#06372E", borderRadius: 18 }}>
-        <div
-          className={inter.className}
-          style={{ ...abs(16, 8, 258), ...txt(12.5, 15.128, "#FFFFFF"), fontWeight: 500 }}
-        >
-          Need help choosing the perfect rose?
-        </div>
-        <div className={inter.className} style={{ ...abs(16, 17, 258), ...txt(11, 13.312, "#D9E3DE") }}>
-          Ask our gifting concierge.
-        </div>
-        <div style={{ ...abs(274, 2, 112, 42), background: "#C89236", borderRadius: 99 }}>
-          <div
-            className={inter.className}
-            style={{ ...abs(14, 13, 84), ...txt(13, 15.733, "#FFFFFF"), fontWeight: 500 }}
-          >
-            {"CHAT NOW  ›"}
-          </div>
-        </div>
-      </div>
-
       {/* Pagination */}
       {[
         { x: 101, label: "1", active: true },
@@ -209,15 +190,11 @@ export default function ShopPage() {
       <span style={abs(318.052, 1767.09, 24, 24)}>
         <ForwardIcon />
       </span>
+      </ScaleFrame>
 
-      {/* Concierge mascot sticker — painted above the chat bar on this page */}
-      <img
-        src="/veloria/concierge-mascot.png"
-        alt=""
-        width={98}
-        height={98}
-        style={{ ...abs(-3, 1772, 98, 98), display: "block" }}
-      />
-    </ScaleFrame>
+      {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
+          placeholder chat panel on click. */}
+      <ConciergeChat navClearance={60} mascotOnTop />
+    </>
   );
 }
