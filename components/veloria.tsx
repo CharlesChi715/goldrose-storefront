@@ -230,19 +230,21 @@ function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
   );
 }
 
+// Floating tab bar geometry (Charles's override of the full-bleed Figma nav):
+// same 16px side inset as the content column, fully rounded, lifted 8px off
+// the screen edge. Height and tab sizing stay from the Figma frame.
+export const NAV_LIFT = 8; // gap between nav bottom and viewport bottom
+export const NAV_STAGE_H = 59 + NAV_LIFT;
+
 /**
  * Self-contained fixed bottom tab bar, usable on any page (it carries its own
  * scaling CSS + no-calc fallback, anchored bottom-center at /430 scale).
- * `active` highlights the current section's tab. `bottomGap` reserves N
- * transparent px below the nav — the shop canvas ends 1px below the nav frame
- * in the design, the detail canvas is flush.
+ * `active` highlights the current section's tab.
  */
 export function BottomNav({
   active = "shop",
-  bottomGap = 0,
 }: {
   active?: "Home" | "Shop" | (string & {});
-  bottomGap?: number;
 }) {
   return (
     <div className="figv-navfix">
@@ -253,22 +255,22 @@ export function BottomNav({
           .figv-navstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
         }
       `}</style>
-      <div className="figv-navstage" style={{ height: 59 + bottomGap }}>
+      <div className="figv-navstage" style={{ height: NAV_STAGE_H }}>
         <nav
           style={{
             position: "absolute",
-            left: 0,
+            left: 16,
             top: 0,
-            width: 430,
+            width: 398,
             height: 59,
             background: "#FFFFFF",
-            borderRadius: "15px 15px 0 0",
-            boxShadow: "inset 0 0 0 1px #EEE6DD",
+            borderRadius: 15,
+            boxShadow: "inset 0 0 0 1px #EEE6DD, 0 6px 24px rgba(6,55,46,0.10)",
             overflow: "hidden",
           }}
         >
           {TABS.map((tab, i) => {
-            const x = [18, 126, 234, 342][i];
+            const x = [14, 114, 214, 314][i];
             const style: React.CSSProperties = { ...abs(x, -2.5, 70, 54), display: "block" };
             const content = <TabContent tab={tab} isActive={tab.label === active} />;
             return tab.href ? (
@@ -313,13 +315,11 @@ export function ScaleFrame({
   height,
   background,
   fontClass,
-  navGap = 0,
   children,
 }: {
   height: number;
   background: string;
   fontClass: string;
-  navGap?: number;
   children: React.ReactNode;
 }) {
   const ratio = (height / 430).toFixed(7);
@@ -347,7 +347,7 @@ export function ScaleFrame({
           {children}
         </div>
       </div>
-      <BottomNav bottomGap={navGap} />
+      <BottomNav />
       {/* Fallback for browsers without calc() length division: apply the same
           scale via `zoom`/transform so narrow screens never scroll sideways. */}
       <script

@@ -383,7 +383,7 @@ export default function HomePage() {
       <BottomNav active="Home" />
 
       {/* Chatbox (mascot + bar), fixed above the nav — same as /shop. */}
-      <ConciergeChat navClearance={59} mascotOnTop />
+      <ConciergeChat mascotOnTop />
 
       {/* Fallback for browsers without calc() length division (pre-~2024
           engines, e.g. old Android WebViews / in-app browsers): apply the same
