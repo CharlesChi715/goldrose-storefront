@@ -44,6 +44,8 @@ export default defineConfig({
       // guarantees mock checkout even on a machine configured for live.
       NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN: "",
       SHOPIFY_MODE: "",
+      // Known password for the local-adapter admin login tests.
+      ADMIN_DEV_PASSWORD: "stage2-test-password",
     },
   },
 });
