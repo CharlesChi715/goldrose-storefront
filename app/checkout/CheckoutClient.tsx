@@ -180,6 +180,14 @@ export function CheckoutClient({
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState(defaultCountry);
   const [note, setNote] = useState("");
+  const [discountInput, setDiscountInput] = useState("");
+  const [discount, setDiscount] = useState<{
+    code: string;
+    discountCents: number;
+    shippingFree: boolean;
+  } | null>(null);
+  const [discountError, setDiscountError] = useState("");
+  const [discountBusy, setDiscountBusy] = useState(false);
   const [shipping, setShipping] = useState({
     name: "",
     address1: "",
@@ -203,13 +211,60 @@ export function CheckoutClient({
   }, []);
 
   const zone = useMemo(() => zoneForCountry(zones, country), [zones, country]);
+  const discountCents = discount ? Math.min(discount.discountCents, subtotal) : 0;
   const shippingInfo = useMemo(() => {
     if (subtotal === 0 || !zone) {
       return { amount: 0, free: false };
     }
-    return computeShipping(zone, subtotal);
-  }, [zone, subtotal]);
-  const total = subtotal + shippingInfo.amount;
+    // Display mirror of the server's rule: threshold on the discounted
+    // subtotal; free-shipping codes zero it out. The server re-prices anyway.
+    const base = computeShipping(zone, subtotal - discountCents);
+    if (discount?.shippingFree) {
+      return { amount: 0, free: true };
+    }
+    return base;
+  }, [zone, subtotal, discountCents, discount]);
+  const total = subtotal - discountCents + shippingInfo.amount;
+
+  /** Server-validate the typed code against the live cart. */
+  async function applyDiscount() {
+    const code = discountInput.trim();
+    if (!code || rawLines.length === 0) {
+      return;
+    }
+    setDiscountBusy(true);
+    setDiscountError("");
+    try {
+      const response = await fetch("/api/discount", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          lines: rawLines.map((line) => ({
+            variantId: line.variantId,
+            quantity: line.quantity,
+          })),
+          country,
+          ...(email.trim() ? { email: email.trim() } : {}),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        setDiscount(null);
+        setDiscountError(result.error ?? "Enter a valid discount code.");
+        return;
+      }
+      setDiscount({
+        code: result.code,
+        discountCents: result.discountCents,
+        shippingFree: result.shippingFree,
+      });
+    } catch {
+      setDiscountError("Could not check that code. Please try again.");
+    } finally {
+      setDiscountBusy(false);
+    }
+  }
 
   function setShippingField(key: keyof typeof shipping, value: string) {
     setShipping((current) => ({ ...current, [key]: value }));
@@ -223,6 +278,7 @@ export function CheckoutClient({
       })),
       country,
       ...(note.trim() ? { note: note.trim() } : {}),
+      ...(discount ? { discountCode: discount.code } : {}),
     };
   }
 
@@ -606,11 +662,62 @@ export function CheckoutClient({
             ))}
           </div>
 
-          <dl className="mt-6 grid gap-2 border-t border-[#d7c28a] pt-4 text-sm">
+          {/* Discount code (§8) — validated server-side */}
+          <div className="mt-6 border-t border-[#d7c28a] pt-4">
+            <label
+              htmlFor="discount-code"
+              className="text-xs font-black uppercase tracking-[0.14em] text-[#6b5c3f]"
+            >
+              Discount code
+            </label>
+            <div className="mt-1.5 flex gap-2">
+              <input
+                id="discount-code"
+                value={discountInput}
+                onChange={(event) => setDiscountInput(event.target.value)}
+                placeholder="GOLD10"
+                className="h-11 min-w-0 flex-1 rounded-[3px] border border-[#d7c28a] bg-[#fffaf2] px-3 text-sm uppercase text-[#211a0e] outline-none focus:border-[#9a7826]"
+              />
+              <button
+                type="button"
+                onClick={applyDiscount}
+                disabled={discountBusy}
+                className="h-11 rounded-[3px] border border-[#9a7826] px-4 text-xs font-bold uppercase tracking-[0.14em] text-[#8a6a22] transition-colors hover:bg-[#f7ecd6] disabled:opacity-60"
+              >
+                {discountBusy ? "…" : "Apply"}
+              </button>
+            </div>
+            {discountError ? (
+              <p className="mt-1.5 text-xs text-[#b3473f]">{discountError}</p>
+            ) : null}
+            {discount ? (
+              <p className="mt-1.5 text-xs text-[#177245]">
+                Code <strong>{discount.code}</strong> applied.{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDiscount(null);
+                    setDiscountInput("");
+                  }}
+                  className="underline"
+                >
+                  Remove
+                </button>
+              </p>
+            ) : null}
+          </div>
+
+          <dl className="mt-4 grid gap-2 border-t border-[#d7c28a] pt-4 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-[#5c4f38]">Subtotal</dt>
               <dd className="font-bold">{formatMoney(subtotal)}</dd>
             </div>
+            {discount ? (
+              <div className="flex items-center justify-between">
+                <dt className="text-[#5c4f38]">Discount ({discount.code})</dt>
+                <dd className="font-bold text-[#177245]">−{formatMoney(discountCents)}</dd>
+              </div>
+            ) : null}
             <div className="flex items-center justify-between">
               <dt className="text-[#5c4f38]">
                 Shipping{zone ? ` (${zone.name})` : ""}

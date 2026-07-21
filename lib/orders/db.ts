@@ -10,6 +10,7 @@
  */
 
 import { randomUUID } from "crypto";
+import { incrementDiscountUsage } from "../checkout/discounts.ts";
 import { sendOrderPlacedEmails } from "../email.ts";
 import { getStore } from "../supabase/store.ts";
 import type {
@@ -39,6 +40,8 @@ export type CreateOrderInput = {
   checkout_id?: string | null;
   raw?: unknown;
   actor?: string;
+  /** Drafts are created without touching stock; "Mark as paid" decrements. */
+  decrementStock?: boolean;
 };
 
 async function upsertCustomer(input: CreateOrderInput, orderName: string): Promise<string | null> {
@@ -192,7 +195,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
 
   // Sales auto-decrement stock with a visible movement (§7.3 decision).
   for (const line of lines) {
-    if (line.variant_id) {
+    if ((input.decrementStock ?? true) && line.variant_id) {
       await store.adjustInventory({
         variantId: line.variant_id,
         delta: -line.quantity,
@@ -241,6 +244,11 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     );
   }
 
-  await sendOrderPlacedEmails(order, lines);
+  if (order.financial_status === "paid") {
+    if (order.discount_code) {
+      await incrementDiscountUsage(order.discount_code);
+    }
+    await sendOrderPlacedEmails(order, lines);
+  }
   return order;
 }

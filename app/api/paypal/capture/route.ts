@@ -56,6 +56,8 @@ export async function POST(request: Request) {
         quantity: line.quantity,
       })),
       country,
+      discountCode: checkout.discount_code,
+      email: mapped.email ?? checkout.email,
     });
 
     if (mapped.amountCents !== null && mapped.amountCents !== priced.total_cents) {

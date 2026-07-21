@@ -44,6 +44,7 @@ import {
   saveOrderNoteAction,
   saveOrderTagsAction,
 } from "../actions";
+import { markDraftPaidAction } from "../drafts/actions";
 
 type CustomerSummary = {
   id: string;
@@ -155,11 +156,23 @@ export function OrderDetailView({
     },
   ];
 
+  // Shopify's draft flow (§9.4): "Mark as paid" converts the draft.
+  const isPendingDraft = order.source === "draft" && order.financial_status === "pending";
+
   return (
     <Page
       title={order.name}
       backAction={{ url: "/admin/orders" }}
       subtitle={new Date(order.placed_at).toLocaleString()}
+      primaryAction={
+        isPendingDraft
+          ? {
+              content: t("drafts.markPaid"),
+              loading: pending,
+              onAction: () => run(() => markDraftPaidAction(order.id)),
+            }
+          : undefined
+      }
       titleMetadata={
         <InlineStack gap="200">
           <Badge

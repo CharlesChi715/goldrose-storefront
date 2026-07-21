@@ -10,6 +10,7 @@
 
 import { getStore } from "../supabase/store.ts";
 import { COUNTRIES } from "./countries.ts";
+import { applyDiscountCode } from "./discounts.ts";
 import { computeShipping, zoneForCountry, type ShippingZone } from "./zones.ts";
 
 export type { ShippingZone } from "./zones.ts";
@@ -77,6 +78,8 @@ export async function getTaxRatePercent(): Promise<number> {
 export async function priceCart(input: {
   lines: CartLineInput[];
   country: string;
+  discountCode?: string | null;
+  email?: string | null;
 }): Promise<PricedCart> {
   const store = getStore();
   const [variants, products, zones, taxRate] = await Promise.all([
@@ -118,23 +121,45 @@ export async function priceCart(input: {
   });
 
   const subtotal = lines.reduce((sum, line) => sum + line.line_total_cents, 0);
-  const { amount: shipping, free: shippingFree } = computeShipping(zone, subtotal);
+
+  // Discount code (§7.8) — validated server-side, never trusted from the client.
+  let discountCents = 0;
+  let discountCode: string | null = null;
+  let discountFreeShipping = false;
+  if (input.discountCode?.trim()) {
+    const applied = await applyDiscountCode({
+      code: input.discountCode,
+      lines,
+      subtotalCents: subtotal,
+      email: input.email ?? null,
+    });
+    discountCents = Math.min(applied.discount_cents, subtotal);
+    discountCode = applied.discount.code;
+    discountFreeShipping = applied.free_shipping;
+  }
+
+  // Shipping thresholds apply to the discounted merchandise total.
+  const discountedSubtotal = subtotal - discountCents;
+  const shippingBase = computeShipping(zone, discountedSubtotal);
+  const shippingFree = discountFreeShipping || shippingBase.free;
+  const shipping = shippingFree ? 0 : shippingBase.amount;
+
   const taxable = lines
     .filter((line) => line.charge_tax)
     .reduce((sum, line) => sum + line.line_total_cents, 0);
-  const tax = Math.round((taxable * taxRate) / 100);
+  const tax = Math.round((Math.max(0, taxable - discountCents) * taxRate) / 100);
 
   return {
     lines,
     country: input.country,
     zone,
     subtotal_cents: subtotal,
-    discount_code: null,
-    discount_cents: 0,
+    discount_code: discountCode,
+    discount_cents: discountCents,
     shipping_cents: shipping,
     shipping_free: shippingFree,
     tax_cents: tax,
-    total_cents: subtotal + shipping + tax,
+    total_cents: discountedSubtotal + shipping + tax,
     currency: "USD",
   };
 }

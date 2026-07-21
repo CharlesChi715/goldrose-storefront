@@ -32,6 +32,7 @@ const requestSchema = z.object({
   country: z.string().trim().length(2),
   email: z.string().trim().email().max(254).optional(),
   note: z.string().trim().max(1000).optional(),
+  discountCode: z.string().trim().max(64).optional(),
   visitorId: z.string().trim().max(64).optional(),
   shipping: z
     .object({
@@ -74,6 +75,8 @@ export async function POST(request: Request) {
     const priced = await priceCart({
       lines: parsed.lines,
       country: parsed.country.toUpperCase(),
+      discountCode: parsed.discountCode ?? null,
+      email: parsed.email ?? null,
     });
 
     const fieldErrors: Record<string, string> = {};
@@ -128,7 +131,7 @@ export async function POST(request: Request) {
           visitor_id: parsed.visitorId,
         },
         email: parsed.email ?? null,
-        discount_code: null,
+        discount_code: priced.discount_code,
         subtotal_cents: priced.subtotal_cents,
         total_cents: priced.total_cents,
         provider_order_id: null,

@@ -92,6 +92,8 @@ async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<Webhoo
       quantity: line.quantity,
     })),
     country: checkout.cart.country ?? "US",
+    discountCode: checkout.discount_code,
+    email: checkout.email,
   });
   const order = await createOrder({
     priced,
