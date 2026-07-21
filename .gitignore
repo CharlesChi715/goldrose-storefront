@@ -47,3 +47,7 @@ temp/
 
 # local demo order-capture log (see lib/orders/store.ts)
 .data/
+
+# playwright
+/test-results/
+/playwright-report/
