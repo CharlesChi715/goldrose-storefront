@@ -4,8 +4,8 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 
 ## Goal
 
-- Sell the 24K gold-dipped rose gift line direct-to-consumer (US market) via this custom Next.js storefront. Brand: **GoldRose** (renamed from AUREÀ 2026-07-21).
-- Payments: Shopify hosted checkout still wired but slated for deletion; the admin build ships a native PayPal checkout per [docs/admin-design.md](docs/admin-design.md).
+- Sell the 24K gold-dipped rose gift line direct-to-consumer — **international, not US-only (decided 2026-07-21); USD-only pricing V1, storefront stays English** — via this custom Next.js storefront. Brand: **GoldRose** (renamed from AUREÀ 2026-07-21).
+- Payments: Shopify hosted checkout still wired but slated for deletion; the admin build ships a native checkout per [docs/admin-design.md](docs/admin-design.md). **Provider undecided since 2026-07-22 (OQ-1): PayPal is the working assumption; schema is provider-neutral.**
 
 ## Current state (2026-07-21)
 
@@ -26,9 +26,15 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 
 ## Custom admin (decided 2026-07-21, design approved, build not started)
 
-- **Charles is dropping Shopify — no transition phase** (no customers yet, nothing to protect). One build: Supabase-backed admin (products, prices, inventory, orders, site content) + native PayPal checkout (sandbox first); Shopify code deleted in the same build (Stage 4), then the subscription gets cancelled.
-- Full design: [docs/admin-design.md](docs/admin-design.md) — schema, security model, admin screens, webhook ingestion, staged rollout (each stage keeps live checkout working), Phase B Shopify exit.
-- Waiting on: Charles's real product info; Supabase project creation.
+- **Charles is dropping Shopify — no transition phase** (no customers yet, nothing to protect). One build: Supabase-backed admin + native PayPal checkout (sandbox first); Shopify code deleted in the same build (Stage 4); the subscription is cancelled **last** (live admin = visual reference).
+- **Rev 3 (2026-07-21, owner request): the admin UX is a screen-for-screen Shopify-admin clone** — built with Shopify's Polaris, same nav/screens/wording in EN + Shopify's own 中文 terms; only the appearance/Online-Store features (themes, pages, blog…) are dropped. Parity additions: variants, customers, discounts, drafts, abandoned checkouts, analytics, settings, timeline, refunds, order emails.
+- **Rev 4 (2026-07-21): international.** Markets settings page (adapt), zone-based shipping (seed: US · Rest of world), ship-to country selector at checkout, customs fields on products; duties on buyer, per-market pricing/multi-currency V2.
+- **Rev 4.1 (2026-07-22): closer Shopify parity** — Duplicate product, buyer gift message → order Notes, customer Timeline + export, 2FA; returns/partial fulfillment/bulk editor/saved views/template editing explicitly V2.
+- **Rev 4.2 (2026-07-22): visitor behavior in V1** — first-party page_views beacon → Supabase (no external provider): sessions, conversion funnel, traffic sources, live-visitor card, order Conversion summary. Anonymous/cookieless. GA4/Meta Pixel deferred until paid ads start (then + consent banner).
+- **Rev 4.3 (2026-07-22): SEO + GEO in V1** — DB-driven sitemap/robots/canonicals/OG + Product JSON-LD; Settings → Search engine & AI (homepage listing, AI-crawler toggle); /llms.txt for AI assistants; every PNG-pixel fact must also exist machine-readably; checkout country defaults via geo-IP.
+- **Rev 4.4 (2026-07-22): §0 one-shot autonomous build directive** — Charles authorizes an agent to build the whole backend unattended: decide within guardrails, mock missing resources (local Supabase, fixture-tested PayPal), sandbox money only, one commit per stage, deliver docs/BUILD-REPORT.md + owner activation checklist.
+- Full design: [docs/admin-design.md](docs/admin-design.md) — fidelity cut list, schema, security model, screen-by-screen clone spec, checkout/webhook flows, staged rollout (stages 0–9). Restructured 2026-07-22 as a formal design doc: ToC, agent guide (§2), open questions OQ-1..4 (§4), alternatives (§5), changelog (§17).
+- Waiting on (= the doc's open questions §4): payment provider decision (OQ-1); ship-to country list + international rates (OQ-2); Charles's real product info (OQ-3); Supabase project creation (OQ-4).
 
 ## Next steps
 

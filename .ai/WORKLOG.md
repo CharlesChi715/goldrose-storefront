@@ -1544,3 +1544,54 @@ unconfirmed business assumptions).
 - Rebrand: AUREÀ → GoldRose across code + docs (metadata, JSON-LD, checkout/orders pages, chatbox, product names, business profile, placeholder domains, internal keys + GR- SKU prefix — no live shoppers, so no legacy kept).
 - Admin design: added bilingual EN/中文 requirement (§6.7) — cookie-persisted toggle, typed t() dictionary, full label coverage, en fallback; storefront stays English.
 - Admin design Rev 2: cut the Shopify transition phase (no customers to protect). Single build = admin + native PayPal checkout (sandbox); Shopify code deleted in Stage 4; schema drops all Shopify/drift columns, orders keyed on paypal_order_id; webhook = PayPal capture verification.
+
+## 2026-07-21 — admin-design.md Rev 3: Shopify-clone admin
+- Owner directive: the custom admin must be "exactly the same as Shopify, as exact as possible", minus the useless appearance features.
+- Rewrote docs/admin-design.md: admin UX = screen-for-screen Shopify admin clone (Polaris + polaris-viz), EN/中文 using Shopify's own zh-CN vocabulary; live Shopify admin kept as reference until final walkthrough (cancel last, screenshot first).
+- Dropped (the cut list): Online Store/themes/pages/blog (the "appearance"), Apps, channels/POS, Marketing, Markets, Plan/Billing, Collections, gift cards, segments, fraud analysis, label buying.
+- Schema grown for parity: product_variants (+options/media), customers, discounts, checkouts (abandoned), order_events (timeline), settings; orders gain #1001 numbering, tracking, cancel/refund fields.
+- Stages renumbered 0–9; SUMMARY.md refreshed.
+
+## 2026-07-22 — admin-design.md Rev 4: international, not US-only
+- Owner decision: GoldRose sells internationally (was US-only).
+- Un-dropped Shopify Markets (adapted): Settings → Markets lists countries served, grouped into shipping zones (seed: United States · Rest of world).
+- Shipping goes zone-based (settings-driven, replaces flat rate); checkout gains ship-to country selector; capture verifies country is served.
+- Products gain customs fields (country of origin, HS code); Analytics gains Sales by country.
+- V1 keeps USD-only pricing (PayPal settles USD), duties on buyer, storefront English; per-market pricing/multi-currency/translations listed as V2.
+- SUMMARY.md refreshed; waiting on country list + international rates from Charles.
+
+## 2026-07-22 — admin-design.md Rev 4.1: parity tightening
+- Owner confirmed pushing parity further after gap review.
+- Added to V1: Duplicate product action; buyer gift message / checkout note → order Notes card (Shopify cart-note behavior); customer profile Timeline (customer_events) + customers CSV export; Supabase MFA (TOTP) on owner login; responsive/mobile note (email alert replaces Shopify app push).
+- Named explicitly as V2 (were unstated): returns workflow, partial fulfillment, bulk editor, saved list views, editable email templates, Live View, mobile push.
+- Stage 3/4/5 acceptance criteria extended accordingly.
+
+## 2026-07-22 — admin-design.md Rev 4.2: visitor behavior into V1 (+ V2 list audit)
+- Audited all inline V1/V2 mentions vs §15: added missing rich-text descriptions + inventory holds to the V2 list.
+- Owner asked for user-behavior analytics in V1. Resolved the "provider decision" blocker by going first-party: page_views table + <Beacon /> on storefront pages + POST /api/beacon (service-key insert); anonymous localStorage visitor id, cookieless, no third parties.
+- Unlocks Shopify-parity cards previously hidden: Sessions, Conversion rate funnel, Sales by traffic source, "Visitors right now", Home session/conversion cards, and the order-detail Conversion summary (orders.visitor_id).
+- Full Live View globe screen stays V2; Stage 7 now builds the beacon; risk row added (ad-blocker undercount, consent wording at launch).
+
+## 2026-07-22 — analytics decision recorded: first-party now, ad pixels when ads start
+- Owner accepted recommendation: keep the first-party beacon as the admin's analytics foundation; no GA4/external trackers yet.
+- Added to §15 Future: ad-platform tags (GA4/Google tag, Meta Pixel, TikTok) + consent banner are added when the first paid campaign launches — additive, coexists with the beacon.
+- Cross-noted in §5.12; SUMMARY refreshed.
+
+## 2026-07-22 — admin-design.md restructured as a formal design doc
+- Owner asked for a professional structure, agent-implementable, rev history out of the preamble.
+- New skeleton: metadata header + ToC; §2 "How to use this document" (agent execution rules); §4 Open questions (OQ-1 payment provider, OQ-2 countries/rates, OQ-3 product info, OQ-4 Supabase project); §5 Alternatives considered; webhook merged into §10 Checkout & payments; §17 Revision history table (Rev 1→4.2). All content preserved; cross-references renumbered.
+- Payment provider formally reopened as OQ-1 ("not sure what payment we going to use", 2026-07-22): PayPal stays the working assumption; order schema made provider-neutral (payment_provider, provider_order_id, provider_capture_id).
+- SUMMARY waiting-on now mirrors the OQ list; memory (checkout-backend-decision) updated.
+
+## 2026-07-22 — admin-design.md Rev 4.3: SEO + GEO into V1
+- Owner directive: "add SEO and GEO in V1".
+- New §8.1: technical SEO (DB-driven app/sitemap.ts, app/robots.ts, canonicals, per-page metadata + OG/Twitter cards, Organization/WebSite/Product/BreadcrumbList JSON-LD with live-stock availability) — all DB-driven, no redeploy for new products.
+- GEO (generative engine optimization): AI crawlers explicitly allowed with owner toggle, auto-generated /llms.txt from the DB, JSON-LD as the shared backbone, and the machine-readable-compensation rule (every PNG-pixel fact also exists in meta/JSON-LD/alt).
+- Shopify Online Store → Preferences SEO fields adapted into Settings → Search engine & AI (cut-list exception noted).
+- Bonus geo: checkout ship-to selector defaults to buyer country via Vercel geo-IP header.
+- Stage 8 extended (key files + acceptance); risk row for PNG-text invisibility; V2 gets SEO/GEO extensions (FAQ/review schema, hreflang); changelog Rev 4.3.
+
+## 2026-07-22 — admin-design.md Rev 4.4: §0 one-shot autonomous build directive
+- Owner request: an agent should build the whole backend in one unattended run — no questions, no approvals; owner returns to a finished build.
+- Added §0 (ToC item 0): decision authority (doc → live Shopify → closest-to-Shopify + record), OQs resolve to working assumptions, resource-fallback table (local Supabase via CLI/Docker or adapter; PayPal routes verified by mock + fixtures; console emails; build-with/without-DB-env), hard guardrails (sandbox/mock money only; owner-only actions → checklist, never performed; main never broken; no new paid deps; no secrets committed), execution order (stages 0→8 one commit each, stage 9 wired with seed data), deliverables (BUILD-REPORT.md with per-stage verification + decisions + mocks + owner activation checklist).
+- Header Status/Audience/Version updated; §2 cross-ref; changelog 4.4. Preserved Charles's own header edits (Owner "store dev", Users "Charles' teammates").
