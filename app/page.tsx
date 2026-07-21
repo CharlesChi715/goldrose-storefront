@@ -247,7 +247,7 @@ export default function HomePage() {
       <div className="fighome-wrap">
         <div
           className="fighome-stage"
-          style={{ position: "relative", width: 375, height: 1690, margin: "0 auto", overflow: "hidden" }}
+          style={{ position: "relative", width: 375, height: 1690, left: "calc((100% - 375px) / 2)", overflow: "hidden" }}
         >
         {/* Promo banner (sits underneath the header bar, exactly as in Figma) */}
         {/* eslint-disable-next-line @next/next/no-img-element */}

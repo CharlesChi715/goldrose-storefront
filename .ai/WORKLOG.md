@@ -1533,3 +1533,4 @@ unconfirmed business assumptions).
 - Chatbox added to the home page as well (same fixed overlay as /shop).
 - Back button live on all headers: walks browser history when the previous page is ours, else falls back to the parent page (product→/shop, shop→/).
 - Glyph polish: symbol/star/promo glyphs now served as exact pixel crops from the Figma frame render (public/veloria/glyph-*.png) — bypassed the rate-limited image API entirely. Shop 98.6% / detail 96.6% visually identical to design.
+- Fixed iPhone right-drift: over-wide (430px) overlay stages cannot be centered by margin:auto on narrow screens (CSS pins them left, so the scale skews right). All stages now center via left: calc((100% - W)/2). Floating-nav experiment reverted (misdiagnosis of the same bug).

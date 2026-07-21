@@ -248,7 +248,9 @@ export function BottomNav({
     <div className="figv-navfix">
       <style>{`
         .figv-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
-        .figv-navstage { position: relative; width: 430px; margin: 0 auto; pointer-events: auto; }
+        /* left calc, not margin:auto — auto margins pin an over-wide box to the
+           left edge on narrow phones, drifting it right after the scale. */
+        .figv-navstage { position: relative; width: 430px; left: calc((100% - 430px) / 2); pointer-events: auto; }
         @supports (transform: scale(calc(100vw / 430px))) {
           .figv-navstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
         }
@@ -339,7 +341,7 @@ export function ScaleFrame({
             position: "relative",
             width: 430,
             height,
-            margin: "0 auto",
+            left: "calc((100% - 430px) / 2)",
             overflow: "hidden",
             background,
           }}

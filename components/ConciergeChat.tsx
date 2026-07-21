@@ -192,7 +192,8 @@ export function ConciergeChat({
     <div className="figv-chatfix">
       <style>{`
         .figv-chatfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 11; pointer-events: none; }
-        .figv-chatstage { position: relative; width: 430px; margin: 0 auto; }
+        /* left calc, not margin:auto — see BottomNav: avoids right-drift on phones. */
+        .figv-chatstage { position: relative; width: 430px; left: calc((100% - 430px) / 2); }
         @supports (transform: scale(calc(100vw / 430px))) {
           .figv-chatstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
         }
