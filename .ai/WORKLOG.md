@@ -1528,3 +1528,4 @@ unconfirmed business assumptions).
 - Playwright/numpy pixel-verify vs Figma renders: shop 1.29%, detail 3.28%
   residual (text AA). Pending: symbol-glyph SVG swap (Figma API rate limit),
   cart wiring, deploy/push.
+- Follow-up: home page dark pill nav replaced with the shared VELORIA white tab bar (Home tab active) for cross-page consistency.

@@ -191,20 +191,19 @@ type Tab = {
   label: string;
   labelX: number;
   labelW: number;
-  active?: boolean;
 };
 
 // Geometry from the Figma nav frame: tabs are 70×54 at x 18/126/234/342,
 // sitting 2.5px above the nav frame top (clipped by it, as in Figma).
 const TABS: Tab[] = [
   { href: "/", icon: "⌂", iconX: 27.5, iconW: 15, label: "Home", labelX: 19.5, labelW: 31 },
-  { href: "/shop", icon: "◆", iconX: 25, iconW: 20, label: "Shop", labelX: 21, labelW: 28, active: true },
+  { href: "/shop", icon: "◆", iconX: 25, iconW: 20, label: "Shop", labelX: 21, labelW: 28 },
   { icon: "□", iconX: 25, iconW: 20, label: "Business", labelX: 11.5, labelW: 47 },
   { icon: "○", iconX: 25, iconW: 20, label: "Account", labelX: 13, labelW: 44 },
 ];
 
-function TabContent({ tab }: { tab: Tab }) {
-  const color = tab.active ? "#0A3B31" : "#66706B";
+function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
+  const color = isActive ? "#0A3B31" : "#66706B";
   return (
     <>
       <div
@@ -218,7 +217,7 @@ function TabContent({ tab }: { tab: Tab }) {
         style={{
           ...abs(tab.labelX, 34, tab.labelW, 13),
           ...txt(11, 13.312, color),
-          fontWeight: tab.active ? 700 : 400,
+          fontWeight: isActive ? 700 : 400,
         }}
       >
         {tab.label}
@@ -228,12 +227,28 @@ function TabContent({ tab }: { tab: Tab }) {
 }
 
 /**
- * `bottomGap` reserves N transparent px below the nav — the shop canvas ends
- * 1px below the nav frame in the design, the detail canvas is flush.
+ * Self-contained fixed bottom tab bar, usable on any page (it carries its own
+ * scaling CSS + no-calc fallback, anchored bottom-center at /430 scale).
+ * `active` highlights the current section's tab. `bottomGap` reserves N
+ * transparent px below the nav — the shop canvas ends 1px below the nav frame
+ * in the design, the detail canvas is flush.
  */
-export function BottomNav({ bottomGap = 0 }: { bottomGap?: number }) {
+export function BottomNav({
+  active = "shop",
+  bottomGap = 0,
+}: {
+  active?: "Home" | "Shop" | (string & {});
+  bottomGap?: number;
+}) {
   return (
     <div className="figv-navfix">
+      <style>{`
+        .figv-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
+        .figv-navstage { position: relative; width: 430px; margin: 0 auto; pointer-events: auto; }
+        @supports (transform: scale(calc(100vw / 430px))) {
+          .figv-navstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
+        }
+      `}</style>
       <div className="figv-navstage" style={{ height: 59 + bottomGap }}>
         <nav
           style={{
@@ -251,18 +266,33 @@ export function BottomNav({ bottomGap = 0 }: { bottomGap?: number }) {
           {TABS.map((tab, i) => {
             const x = [18, 126, 234, 342][i];
             const style: React.CSSProperties = { ...abs(x, -2.5, 70, 54), display: "block" };
+            const content = <TabContent tab={tab} isActive={tab.label === active} />;
             return tab.href ? (
               <Link key={tab.label} href={tab.href} style={style}>
-                <TabContent tab={tab} />
+                {content}
               </Link>
             ) : (
               <div key={tab.label} style={style}>
-                <TabContent tab={tab} />
+                {content}
               </div>
             );
           })}
         </nav>
       </div>
+      {/* No-calc fallback: scale the nav stage via zoom/transform. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "(function(){try{" +
+            "if(window.CSS&&CSS.supports&&CSS.supports('transform','scale(calc(100vw / 430px))'))return;" +
+            "var nv=document.querySelector('.figv-navstage');if(!nv)return;" +
+            "function fit(){var s=Math.min(window.innerWidth,480)/430;" +
+            "if('zoom' in nv.style){nv.style.zoom=s;}" +
+            "else{nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}}" +
+            "fit();window.addEventListener('resize',fit);" +
+            "}catch(e){}})();",
+        }}
+      />
     </div>
   );
 }
@@ -293,12 +323,9 @@ export function ScaleFrame({
     <div className={fontClass} style={{ minHeight: "100vh", background }}>
       <style>{`
         html, body { overflow-x: hidden; }
-        .figv-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
-        .figv-navstage { position: relative; width: 430px; height: 59px; margin: 0 auto; pointer-events: auto; }
         @supports (transform: scale(calc(100vw / 430px))) {
           .figv-wrap { height: calc(min(100vw, 480px) * ${ratio}); overflow: hidden; }
           .figv-stage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: top center; }
-          .figv-navstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
         }
       `}</style>
       <div className="figv-wrap">
@@ -327,11 +354,9 @@ export function ScaleFrame({
             "var z='zoom' in document.documentElement.style;" +
             "function fit(){var s=Math.min(window.innerWidth,480)/430;" +
             "var st=document.querySelector('.figv-stage');" +
-            "var nv=document.querySelector('.figv-navstage');" +
             "var wr=document.querySelector('.figv-wrap');if(!st)return;" +
-            "if(z){st.style.zoom=s;if(nv)nv.style.zoom=s;}" +
+            "if(z){st.style.zoom=s;}" +
             "else{st.style.transform='scale('+s+')';st.style.transformOrigin='top center';" +
-            "if(nv){nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}" +
             `if(wr){wr.style.height=${height}*s+'px';wr.style.overflow='hidden';}}}` +
             "fit();window.addEventListener('resize',fit);" +
             "}catch(e){}})();",

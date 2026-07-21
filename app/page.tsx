@@ -12,6 +12,7 @@
 
 import Link from "next/link";
 import { Tenor_Sans } from "next/font/google";
+import { BottomNav } from "@/components/veloria";
 import { products } from "@/lib/products";
 
 const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
@@ -110,54 +111,6 @@ const StarIcon = () => (
 const ForwardIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path d="M9 5L15.9632 11.9632L9 18.9263" stroke="#14142B" />
-  </svg>
-);
-
-const NavHomeIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M20.04 6.82006L14.28 2.79006C12.71 1.69006 10.3 1.75006 8.78999 2.92006L3.77999 6.83006C2.77999 7.61006 1.98999 9.21006 1.98999 10.4701V17.3701C1.98999 19.9201 4.05999 22.0001 6.60999 22.0001H17.39C19.94 22.0001 22.01 19.9301 22.01 17.3801V10.6001C22.01 9.25006 21.14 7.59006 20.04 6.82006ZM12.75 18.0001C12.75 18.4101 12.41 18.7501 12 18.7501C11.59 18.7501 11.25 18.4101 11.25 18.0001V15.0001C11.25 14.5901 11.59 14.2501 12 14.2501C12.41 14.2501 12.75 14.5901 12.75 15.0001V18.0001Z"
-      fill="#FDFDFD"
-    />
-  </svg>
-);
-
-const NavCartIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M8.40002 6.5H15.6C19 6.5 19.34 8.09 19.57 10.03L20.47 17.53C20.76 19.99 20 22 16.5 22H7.51003C4.00003 22 3.24002 19.99 3.54002 17.53L4.44003 10.03C4.66003 8.09 5.00002 6.5 8.40002 6.5Z"
-      stroke="#FDFDFD"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M8 8V4.5C8 3 9 2 10.5 2H13.5C15 2 16 3 16 4.5V8"
-      stroke="#FDFDFD"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M20.41 17.03H8" stroke="#FDFDFD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const NavProfileIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M12.16 10.87C12.06 10.86 11.94 10.86 11.83 10.87C9.45 10.79 7.56 8.84 7.56 6.44C7.56 3.99 9.54 2 12 2C14.45 2 16.44 3.99 16.44 6.44C16.43 8.84 14.54 10.79 12.16 10.87Z"
-      stroke="#FDFDFD"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M7.15997 14.56C4.73997 16.18 4.73997 18.82 7.15997 20.43C9.90997 22.27 14.42 22.27 17.17 20.43C19.59 18.81 19.59 16.17 17.17 14.56C14.43 12.73 9.91997 12.73 7.15997 14.56Z"
-      stroke="#FDFDFD"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
   </svg>
 );
 
@@ -284,12 +237,9 @@ export default function HomePage() {
           unscaled centered canvas. */}
       <style>{`
         html, body { overflow-x: hidden; }
-        .fighome-navfix { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; pointer-events: none; }
-        .fighome-navstage { position: relative; width: 375px; height: 66px; margin: 0 auto; pointer-events: auto; }
         @supports (transform: scale(calc(100vw / 375px))) {
           .fighome-wrap { height: calc(min(100vw, 480px) * 4.5066667); overflow: hidden; }
           .fighome-stage { transform: scale(calc(min(100vw, 480px) / 375px)); transform-origin: top center; }
-          .fighome-navstage { transform: scale(calc(min(100vw, 480px) / 375px)); transform-origin: bottom center; }
         }
       `}</style>
       <div className="fighome-wrap">
@@ -427,46 +377,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Bottom navigation — fixed to the viewport bottom like an app tab bar.
-          It lives outside the scrolling stage because position:fixed cannot
-          escape a transformed (scaled) ancestor; its own overlay re-applies
-          the same scale, anchored bottom-center. The 6px gap below the pill
-          matches the design's gap between the nav and the canvas bottom. */}
-      <div className="fighome-navfix">
-        <div className="fighome-navstage">
-          <nav style={{ ...abs(6, 0, 363, 60), background: INK, borderRadius: 20 }}>
-          <Link
-            href="/"
-            aria-label="Home"
-            style={{ ...abs(16, 10, 40, 40), display: "block", background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}
-          >
-            <span style={abs(8, 8, 24, 24)}>
-              <NavHomeIcon />
-            </span>
-            <div style={{ ...abs(18, 34, 4, 4), background: "#FFFFFF", borderRadius: "50%" }} />
-          </Link>
-          <Link
-            href="/shop"
-            aria-label="Shop"
-            style={{ ...abs(113, 10, 40, 40), display: "block", background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}
-          >
-            <span style={abs(8, 8, 24, 24)}>
-              <NavCartIcon />
-            </span>
-            <div style={{ ...abs(22, 12, 8, 8), background: "#F13658", borderRadius: 7.5 }} />
-          </Link>
-          <div style={{ ...abs(210, 10, 40, 40), background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/shop/fav-nav.png" alt="Favourites" width={26} height={24} style={{ ...abs(7, 8, 26, 24), objectFit: "cover" }} />
-          </div>
-          <div style={{ ...abs(307, 10, 40, 40), background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
-            <span style={abs(8, 8, 24, 24)}>
-              <NavProfileIcon />
-            </span>
-          </div>
-          </nav>
-        </div>
-      </div>
+      {/* Bottom navigation — the shared white tab bar from the VELORIA design
+          (same as /shop and /products), fixed to the viewport bottom, with the
+          Home tab highlighted here. Replaces the old dark pill nav so all
+          pages navigate consistently. */}
+      <BottomNav active="Home" />
 
       {/* Fallback for browsers without calc() length division (pre-~2024
           engines, e.g. old Android WebViews / in-app browsers): apply the same
@@ -480,11 +395,9 @@ export default function HomePage() {
             "var z='zoom' in document.documentElement.style;" +
             "function fit(){var s=Math.min(window.innerWidth,480)/375;" +
             "var st=document.querySelector('.fighome-stage');" +
-            "var nv=document.querySelector('.fighome-navstage');" +
             "var wr=document.querySelector('.fighome-wrap');if(!st)return;" +
-            "if(z){st.style.zoom=s;if(nv)nv.style.zoom=s;}" +
+            "if(z){st.style.zoom=s;}" +
             "else{st.style.transform='scale('+s+')';st.style.transformOrigin='top center';" +
-            "if(nv){nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}" +
             "if(wr){wr.style.height=1690*s+'px';wr.style.overflow='hidden';}}}" +
             "fit();window.addEventListener('resize',fit);" +
             "}catch(e){}})();",
