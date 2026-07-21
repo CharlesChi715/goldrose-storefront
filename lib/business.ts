@@ -11,8 +11,8 @@
 
 /** Brand identity and market assumptions used across the site and metadata. */
 export const storeProfile = {
-  brandName: "AUREÀ",
-  fallbackBrandName: "Aurea",
+  brandName: "GoldRose",
+  fallbackBrandName: "GoldRose",
   market: "United States",
   currency: "USD",
   language: "en-US",
@@ -21,8 +21,8 @@ export const storeProfile = {
   inventoryCountry: "United States",
   originDisclosure: "Imported from China. Ships from US inventory.",
   madeInUsaClaimAllowed: false,
-  supportEmail: "support@aurea.example",
-  placeholderDomain: "https://aurea.example",
+  supportEmail: "support@goldrose.example",
+  placeholderDomain: "https://goldrose.example",
 };
 
 /** Where orders ship from — shown on product cards and the operations copy. */

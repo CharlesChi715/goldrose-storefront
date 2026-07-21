@@ -29,7 +29,7 @@ import { products } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "Shop",
-  description: "Shop the AUREÀ 24K gold dipped rose collection.",
+  description: "Shop the GoldRose 24K gold dipped rose collection.",
 };
 
 const INK = "#1B362B";

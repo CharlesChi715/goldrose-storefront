@@ -47,7 +47,7 @@ function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void })
         <div style={{ ...abs(56, 9), ...txt(13, 16, "#FFFFFF"), fontWeight: 600 }}>
           Gifting Concierge
         </div>
-        <div style={{ ...abs(56, 26), ...txt(10, 12, "#D9E3DE") }}>AUREÀ · usually replies fast</div>
+        <div style={{ ...abs(56, 26), ...txt(10, 12, "#D9E3DE") }}>GoldRose · usually replies fast</div>
         <button
           type="button"
           aria-label="Close chat"

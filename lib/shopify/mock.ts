@@ -56,8 +56,8 @@ export function createMockShopifyCart(lines: ShopifyCartLineInput[]): ShopifyCar
   }, 0);
 
   const cart: ShopifyCart = {
-    id: "gid://shopify/Cart/mock-aurea-cart",
-    checkoutUrl: "https://aurea.example/mock-checkout",
+    id: "gid://shopify/Cart/mock-goldrose-cart",
+    checkoutUrl: "https://goldrose.example/mock-checkout",
     totalQuantity: cartLines.reduce((sum, line) => sum + line.quantity, 0),
     subtotalAmount: {
       amount: (subtotalCents / 100).toFixed(2),

@@ -43,7 +43,7 @@ export default async function CheckoutSuccessPage({
         <div className="mx-auto mb-6 grid h-14 w-14 place-items-center rounded-full bg-gradient-to-b from-[#f3d77c] to-[#b8922e] text-2xl text-[#211706]">
           ✓
         </div>
-        <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#9a7826]">AUREÀ</p>
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#9a7826]">GoldRose</p>
         <h1 className="font-serif text-4xl font-medium leading-tight text-[#211a0e]">
           Thank you for your order.
         </h1>

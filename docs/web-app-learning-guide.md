@@ -48,7 +48,7 @@ Two vocabulary items you'll need:
 
 ## 1. What the website actually does (the feature list)
 
-AUREÀ (a demo store selling gold-dipped roses) has six functions:
+GoldRose (a demo store selling gold-dipped roses) has six functions:
 
 1. **Show the storefront** — hero, product grid, product details
 2. **Manage a shopping cart** — add/remove/change quantity, remember it across page loads
@@ -95,7 +95,7 @@ The actual visual UI lives in `components/Storefront.tsx`, which *is*
 **Runs entirely in the browser. No server involved.**
 
 `lib/cart/store.ts` is the cart. It lives in **`localStorage`** (a small
-key-value store built into every browser), under the key `aurea-cart-v1`. That's
+key-value store built into every browser), under the key `goldrose-cart-v1`. That's
 why your cart survives a page refresh without any server or login.
 
 The critical backend-security idea shows up right here, even in client code:

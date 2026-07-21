@@ -64,7 +64,7 @@ SHOPIFY_MODE=mock
 SHOPIFY_STORE_DOMAIN=
 SHOPIFY_STOREFRONT_ACCESS_TOKEN=
 SHOPIFY_STOREFRONT_API_VERSION=2026-04
-SHOPIFY_MOCK_CHECKOUT_URL=https://aurea.example/mock-checkout
+SHOPIFY_MOCK_CHECKOUT_URL=https://goldrose.example/mock-checkout
 ```
 
 Use `SHOPIFY_MODE=mock` while learning and designing.
@@ -86,9 +86,9 @@ The local products currently use mock IDs:
 
 | Local SKU | Handle | Mock Variant ID |
 | --- | --- | --- |
-| `AUR-GR-SIG-001` | `signature-24k-gold-rose` | `gid://shopify/ProductVariant/200000000001` |
-| `AUR-GR-BOX-002` | `boxed-keepsake-gold-rose` | `gid://shopify/ProductVariant/200000000002` |
-| `AUR-GR-BND-003` | `premium-gold-rose-gift-bundle` | `gid://shopify/ProductVariant/200000000003` |
+| `GR-SIG-001` | `signature-24k-gold-rose` | `gid://shopify/ProductVariant/200000000001` |
+| `GR-BOX-002` | `boxed-keepsake-gold-rose` | `gid://shopify/ProductVariant/200000000002` |
+| `GR-BND-003` | `premium-gold-rose-gift-bundle` | `gid://shopify/ProductVariant/200000000003` |
 
 When real Shopify products exist, replace these fields in `lib/products.ts`:
 
@@ -105,7 +105,7 @@ Shopify becomes the catalog source of truth.
 ## Shopify Admin Setup Checklist
 
 1. Create the Shopify store.
-2. Add the three AUREÀ products.
+2. Add the three GoldRose products.
 3. Add SKUs exactly as shown in `lib/products.ts`.
 4. Add product prices, compare-at prices, weights, and inventory.
 5. Configure Shopify Payments or another payment provider.

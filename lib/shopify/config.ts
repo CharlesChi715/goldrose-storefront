@@ -34,7 +34,7 @@ export function getShopifyConfig(): ShopifyConfig {
     storeDomain,
     storefrontAccessToken,
     apiVersion: process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2026-04",
-    mockCheckoutUrl: process.env.SHOPIFY_MOCK_CHECKOUT_URL ?? "https://aurea.example/mock-checkout",
+    mockCheckoutUrl: process.env.SHOPIFY_MOCK_CHECKOUT_URL ?? "https://goldrose.example/mock-checkout",
   };
 }
 

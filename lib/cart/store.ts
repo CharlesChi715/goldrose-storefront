@@ -32,8 +32,8 @@ export type CartLineView = CartLine & {
   lineTotal: number;
 };
 
-const STORAGE_KEY = "aurea-cart-v1";
-const CHANGE_EVENT = "aurea-cart-change";
+const STORAGE_KEY = "goldrose-cart-v1";
+const CHANGE_EVENT = "goldrose-cart-change";
 const MAX_QUANTITY = 20;
 
 const EMPTY: CartLine[] = [];

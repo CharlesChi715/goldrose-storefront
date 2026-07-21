@@ -1,4 +1,4 @@
-# AUREÀ Admin — Full Design Document
+# GoldRose Admin — Full Design Document
 
 _Design for the custom admin backend that replaces Shopify as the system of
 record. Written 2026-07-21. Status: **approved design, not yet built.**_
@@ -7,7 +7,7 @@ record. Written 2026-07-21. Status: **approved design, not yet built.**_
 
 ## 1. Purpose & vision
 
-Build "our own Shopify" for AUREÀ: an `/admin` area where the owner manages
+Build "our own Shopify" for GoldRose: an `/admin` area where the owner manages
 **products, prices, inventory, orders, and site content** without touching
 code, backed by the project's first real database (Supabase).
 
@@ -99,7 +99,7 @@ Migration file: `supabase/migrations/0001_init.sql`.
 | Column | Type | Notes |
 |---|---|---|
 | `id` | text **PK** | Same slugs as today (`"signature-gold-rose"`) so existing browser carts keep working |
-| `sku` | text unique | Warehouse code (`AUR-GR-SIG-001`) |
+| `sku` | text unique | Warehouse code (`GR-SIG-001`) |
 | `handle` | text unique | URL slug → `/products/[handle]`. Admin warns: don't change after launch |
 | `name` / `short_name` | text | Full name / card display name |
 | `price_cents` | int ≥ 0 | Selling price. **All money is integer cents** (avoids float bugs) |
@@ -199,7 +199,7 @@ later = one insert.
   currently imports the hardcoded catalog into the browser bundle. It becomes
   `useCart(catalog)` — the catalog is fetched by a server component and passed
   as props. Same for `buildCartPermalink(lines, catalog)`. The localStorage
-  format (`aurea-cart-v1`: productId/option/quantity, never prices) is
+  format (`goldrose-cart-v1`: productId/option/quantity, never prices) is
   untouched, so shoppers' carts survive the migration.
 - **Checkout re-pricing**: `/api/checkout` already re-prices every line
   server-side; it simply re-prices from the DB instead of the array. Tampered

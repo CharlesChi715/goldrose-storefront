@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import { formatMoney } from "@/lib/products";
 import { listOrders } from "@/lib/orders/store";
 
-const brandName = "AUREÀ";
+const brandName = "GoldRose";
 
 // Always read the latest captured orders — never serve a cached snapshot, or a
 // freshly placed demo order would not appear.

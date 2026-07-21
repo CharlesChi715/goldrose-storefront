@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 // "back" only walks history when the previous entry is our own site (a fresh
 // tab that landed straight on a product page falls back to the parent page
 // instead of escaping to about:blank or another site).
-const VISITED_KEY = "aurea-visited";
+const VISITED_KEY = "goldrose-visited";
 
 export function BackButton({
   fallback,

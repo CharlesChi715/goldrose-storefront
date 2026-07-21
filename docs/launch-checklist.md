@@ -1,6 +1,6 @@
 # Launch Checklist — from mock to a real working store
 
-This is the single to-do list for turning AUREÀ from a clickable mock into a
+This is the single to-do list for turning GoldRose from a clickable mock into a
 real store that takes real orders. Work top to bottom. Tick boxes as you go.
 
 **Plain-language status today (updated 2026-07-15):** the deployed store is
@@ -97,7 +97,7 @@ preventable. This is guidance, not legal advice.
 
 ## Phase 5 — Go live
 
-- [ ] Replace the placeholder domain (`https://aurea.example`) in
+- [ ] Replace the placeholder domain (`https://goldrose.example`) in
       `app/layout.tsx` and `app/page.tsx` with the real domain.
 - [ ] Buy/connect the production domain and deploy.
 - [ ] Connect a real email provider for the "launch list" signup (currently UI

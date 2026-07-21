@@ -174,7 +174,7 @@ async function createLiveShopifyCart(
             attributes: [
               {
                 key: "source",
-                value: "aurea-nextjs-storefront",
+                value: "goldrose-nextjs-storefront",
               },
             ],
           },

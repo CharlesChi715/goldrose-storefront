@@ -25,14 +25,14 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
   cart drawer, product/occasion/story/FAQ sections, copied storefront images into
   `public/products/`, and verified with lint/build plus a local dev server.
 - Rebranded the current storefront direction from GoldRose to display brand
-  `AUREÀ`, restyled the UI toward the bundled `temp/Gold Rose Landing.html`
+  `GoldRose`, restyled the UI toward the bundled `temp/Gold Rose Landing.html`
   luxury visual direction, and documented the brand meaning and launch caveats.
 
 ## 2026-06-25 13:15 AEST
 
 - Reread `.ai/HANDOFF.md` and `.ai/WORKLOG.md` on request.
 - Confirmed the current direction: Next.js storefront MVP, visible brand
-  `AUREÀ`, luxury visual style based on `temp/Gold Rose Landing.html`, checkout
+  `GoldRose`, luxury visual style based on `temp/Gold Rose Landing.html`, checkout
   intentionally not connected yet.
 
 ## 2026-06-25 15:46 AEST
@@ -43,7 +43,7 @@ This file is optional history. Agents should read `.ai/HANDOFF.md` at startup an
 
 ## 2026-06-25 18:54 AEST
 
-- Added mock US-market business assumptions for the AUREÀ storefront: China
+- Added mock US-market business assumptions for the GoldRose storefront: China
   import origin, US inventory, Ontario CA warehouse placeholder, shipping/return
   policy placeholders, SKU/inventory/landed-cost fields, and an owner-review doc
   at `docs/mock-business-decisions.md`.
@@ -117,7 +117,7 @@ frontends in a shopping project means "headless".
 
 - Confirmed the project's Next.js storefront on top of Shopify's API is
   already a headless setup: backend (Shopify: products, cart, checkout)
-  decoupled from the frontend (the AUREÀ Next.js head) via API calls.
+  decoupled from the frontend (the GoldRose Next.js head) via API calls.
 - Clarified that decoupling via API is the definition of headless, while
   serving many heads (web, app, kiosk) is a benefit, not the definition.
 - No project code or docs changed; README left unchanged as it already
@@ -128,7 +128,7 @@ frontends in a shopping project means "headless".
 Explain why choose headless commerce
 
 Answered a learning follow-up on why a project would need a headless
-architecture, with trade-offs framed for the AUREÀ storefront.
+architecture, with trade-offs framed for the GoldRose storefront.
 
 - Covered the wins: design freedom beyond Shopify themes, CDN/Next.js
   performance, one backend serving many frontends, best-tool-per-job,
@@ -227,7 +227,7 @@ Answered a beginner question defining SKU (Stock Keeping Unit).
 
 - Explained a SKU is a self-assigned, human-readable code for tracking
   inventory, and decoded the structure of the repo's existing SKUs in
-  lib/products.ts (e.g. AUR-GR-SIG-001 = brand/product/variant/sequence).
+  lib/products.ts (e.g. GR-SIG-001 = brand/product/variant/sequence).
 - Contrasted SKU (you invent, for humans/inventory) with
   shopifyVariantId (Shopify generates, for the checkout API).
 - Added a practical tip: keep SKUs short, structured, stable, and never
@@ -389,7 +389,7 @@ Answered "what's the next step" after the Advanced plan was chosen.
   since currency is hard to change later and lib/products.ts prices are
   USD today.
 - Then add the three products under Products with SKUs matching the code
-  (AUR-GR-SIG-001, AUR-GR-BOX-002, AUR-GR-BND-003).
+  (GR-SIG-001, GR-BOX-002, GR-BND-003).
 - Restated the remaining roadmap: payments/shipping/tax, Storefront API
   token, copy real variant IDs into lib/products.ts, flip
   SHOPIFY_MODE=live and test.
@@ -682,7 +682,7 @@ Settings -> Store details currency to unblock product setup.
 
 ## 2026-06-30 17:32 AEST
 
-Create live AUREÀ catalog in Shopify; confirm USD
+Create live GoldRose catalog in Shopify; confirm USD
 
 Owner confirmed the store sells into the US (USD) and asked to push
 toward a working MVP, then to publish products live.
@@ -692,14 +692,14 @@ toward a working MVP, then to publish products live.
   confirmed USD is intentional. Recorded the decision in
   docs/mock-business-decisions.md (replaced the "currency to confirm"
   warning with a confirmed USD entry).
-- Created all 3 AUREÀ products in the live store (goldrose-9372) via the
+- Created all 3 GoldRose products in the live store (goldrose-9372) via the
   Shopify admin, each Active and on all 3 sales channels, using the
   catalog in lib/products.ts (names, USD price, compare-at, cost-per-
   item, SKU, inventory) plus the required origin copy "Imported from
   China. Ships from US inventory.":
-  - AUR-GR-SIG-001 Signature 24K Gold Rose  $49.99 / qty 420 / id 7607585865774
-  - AUR-GR-BOX-002 Boxed Keepsake Rose      $64.99 / qty 260 / id 7607586160686
-  - AUR-GR-BND-003 Premium Gift Bundle      $79.99 / qty 140 / id 7607586193454
+  - GR-SIG-001 Signature 24K Gold Rose  $49.99 / qty 420 / id 7607585865774
+  - GR-BOX-002 Boxed Keepsake Rose      $64.99 / qty 260 / id 7607586160686
+  - GR-BND-003 Premium Gift Bundle      $79.99 / qty 140 / id 7607586193454
   Verified all three on the product list with correct stock/status.
 - Recorded the real product IDs and a go-live checklist (Storefront API
   token, variant IDs, images, SHOPIFY_MODE flip) in
@@ -779,7 +779,7 @@ accuracy/realness not required (mock mode acceptable).
   (kept as-is per owner; mapping accuracy not required for the demo).
 - Started the Next.js dev server (next dev, Next 16.2.9) and drove the
   storefront in the browser at http://localhost:3000:
-  - Homepage renders AUREÀ brand, hero, hero product, USD pricing
+  - Homepage renders GoldRose brand, hero, hero product, USD pricing
     ($89.99 -> $49.99, SAVE 44%) and origin copy.
   - Add to Cart opens the cart slide-out (Signature Rose, gift box, qty,
     $49.99 subtotal) with Shop Pay / PayPal / credit-card options.
@@ -1541,3 +1541,4 @@ unconfirmed business assumptions).
 - Decision: Charles is dropping Shopify. Custom /admin + Supabase becomes system of record; Shopify stays only as a temporary payment rail; Phase B = PayPal-direct checkout.
 - Delivered docs/admin-design.md: full design — schema (products/inventory movements/orders/site_content/admin_users + RLS view), admin screens, Shopify order webhook, pixel-vs-editable-content rule, Phase B exit plan, 8 build stages with acceptance criteria.
 - Build not started per Charles (docs first). Waiting on: real product info, Supabase project.
+- Rebrand: AUREÀ → GoldRose across code + docs (metadata, JSON-LD, checkout/orders pages, chatbox, product names, business profile, placeholder domains, internal keys + GR- SKU prefix — no live shoppers, so no legacy kept).

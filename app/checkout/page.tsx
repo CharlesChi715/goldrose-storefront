@@ -20,7 +20,7 @@ import { buildCartPermalink, isLiveCheckout } from "@/lib/shopify/permalink";
 import { expressMethods } from "@/lib/checkout/methods";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 
-const brandName = "AUREÀ";
+const brandName = "GoldRose";
 
 /** Re-format whatever is typed into "4242 4242 4242 4242" groups as the user types. */
 function formatCardNumber(value: string): string {

@@ -207,7 +207,7 @@ export default function HomePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Store",
-    name: "AUREÀ",
+    name: "GoldRose",
     description: "Gift-ready 24K gold dipped rose keepsakes.",
     url: "https://goldrose-storefront.vercel.app/",
     makesOffer: products.map((product) => ({

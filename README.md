@@ -4,7 +4,7 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# AUREÀ Storefront
+# GoldRose Storefront
 
 A beginner-friendly direct-to-consumer storefront MVP for a 24K gold dipped rose
 gift product.
@@ -61,20 +61,21 @@ setup guide.
 
 ## Brand Direction
 
-The visible brand is now `AUREÀ`.
+The visible brand is `GoldRose` (renamed from the earlier working name
+`AUREÀ` on 2026-07-21).
 
-`AUREÀ` is a stylized luxury brand name based on `aurea`, a Latin-root word
-associated with "golden." The accent is decorative and gives the name a more
-premium fashion/beauty feel.
+`GoldRose` says exactly what the product is — a rose finished in 24K gold —
+and is easy to type, pronounce, and search in the US launch market.
 
-For technical placeholders, use plain `aurea`:
+Naming conventions:
 
-- display brand: `AUREÀ`
-- placeholder domain: `https://aurea.example`
-- practical fallback spelling: `Aurea`
+- display brand: `GoldRose`
+- placeholder domain: `https://goldrose.example`
+- internal identifiers renamed with the brand (`goldrose-cart-v1`
+  localStorage key, `goldrose-visited` marker, `GR-` SKU prefixes) — safe
+  because the store had no live shoppers or warehouse stock at rename time.
 
-Before launch, check domain availability, trademark risk, and whether customers
-in the launch market can type and pronounce the name easily.
+Before launch, check domain availability and trademark risk.
 
 ## What DTC Means
 
@@ -275,7 +276,7 @@ Beginner idea: `public/` is for files the browser can request directly.
 Because the business details are not final, the current MVP uses safe
 placeholders:
 
-- Brand name: `AUREÀ`
+- Brand name: `GoldRose`
 - Currency: USD
 - Catalog shape: three gift options
 - Pricing: placeholder values ($49.99 / $64.99 / $79.99 — the $1 live-test
@@ -288,7 +289,7 @@ placeholders:
 - Mock return window: 30 days
 - Checkout: mock mode through `POST /api/checkout`; live mode hands off to
   Shopify hosted checkout via a cart permalink
-- Domain in metadata: `https://aurea.example`
+- Domain in metadata: `https://goldrose.example`
 - Email capture: UI-only, no real provider
 - Product claims: conservative placeholders
 
@@ -340,7 +341,7 @@ Not real yet:
 - No real email provider.
 - No privacy, refund, terms, or shipping policy pages.
 - No analytics.
-- No real production domain (metadata still uses `aurea.example`).
+- No real production domain (metadata still uses `goldrose.example`).
 - No verified customs, tariff, or country-of-origin review.
 
 ## Storefront Decisions To Make
@@ -417,7 +418,7 @@ clear delivery times, responsive support). See the compliance section in
 `docs/launch-checklist.md`.
 
 **M4 — Launch** *(this app; ~hours)*
-Swap the placeholder `aurea.example` domain in `app/layout.tsx` / `app/page.tsx`,
+Swap the placeholder `goldrose.example` domain in `app/layout.tsx` / `app/page.tsx`,
 connect the real domain, and deploy.
 
 **M5 — Grow** *(later)*

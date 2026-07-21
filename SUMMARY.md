@@ -1,11 +1,11 @@
-# AUREÀ / goldrose-storefront — SUMMARY
+# GoldRose / goldrose-storefront — SUMMARY
 
 Single source of truth for anyone (human or agent) working here. Read first; keep fresh.
 
 ## Goal
 
-- Sell the 24K gold-dipped rose gift line direct-to-consumer (US market) via this custom Next.js storefront.
-- Shopify is the one and only checkout/payment backend (Shop Pay requires Shopify).
+- Sell the 24K gold-dipped rose gift line direct-to-consumer (US market) via this custom Next.js storefront. Brand: **GoldRose** (renamed from AUREÀ 2026-07-21).
+- Payments flow through Shopify hosted checkout for now (transitional); the custom admin + PayPal-direct checkout replaces it per [docs/admin-design.md](docs/admin-design.md).
 
 ## Current state (2026-07-21)
 
