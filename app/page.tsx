@@ -12,6 +12,7 @@
 
 import Link from "next/link";
 import { Tenor_Sans } from "next/font/google";
+import { BackButton } from "@/components/BackButton";
 import { ConciergeChat } from "@/components/ConciergeChat";
 import { BottomNav } from "@/components/veloria";
 import { products } from "@/lib/products";
@@ -266,13 +267,10 @@ export default function HomePage() {
           <span style={{ ...abs(6, 19, 24, 24), transform: "translateX(0.5px)" }}>
             <MenuIcon />
           </span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <BackButton
+            fallback="/"
             src="/shop/back.png"
-            alt="Back"
-            width={24}
-            height={24}
-            style={{ ...abs(61, 19, 24, 24), transform: "translateX(0.5px)", objectFit: "cover" }}
+            style={{ ...abs(61, 19, 24, 24), transform: "translateX(0.5px)" }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

@@ -1531,3 +1531,4 @@ unconfirmed business assumptions).
 - Follow-up: home page dark pill nav replaced with the shared VELORIA white tab bar (Home tab active) for cross-page consistency.
 - Chatbox: mascot + concierge bar extracted into a fixed overlay above the nav (components/ConciergeChat.tsx); click opens a placeholder chat panel (real widget later).
 - Chatbox added to the home page as well (same fixed overlay as /shop).
+- Back button live on all headers: walks browser history when the previous page is ours, else falls back to the parent page (product→/shop, shop→/).

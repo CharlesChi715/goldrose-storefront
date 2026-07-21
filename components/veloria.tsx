@@ -10,6 +10,7 @@
  */
 
 import Link from "next/link";
+import { BackButton } from "@/components/BackButton";
 import { inter, notoSC } from "@/lib/fonts";
 
 /* ---------- Style helpers ---------- */
@@ -159,9 +160,7 @@ export function VHeader({ backHref, right }: { backHref: string; right: "search"
       <span style={abs(9, 51, 24, 24)}>
         <MenuIcon />
       </span>
-      <Link href={backHref} style={{ ...abs(78, 51, 24, 24), display: "block" }} aria-label="Back">
-        <img src="/veloria/back.png" alt="" width={24} height={24} style={{ display: "block" }} />
-      </Link>
+      <BackButton fallback={backHref} style={abs(78, 51, 24, 24)} />
       <Link href="/" style={{ ...abs(147, 43.5, 136, 39), display: "block" }} aria-label="Home">
         <img src="/veloria/logo.png" alt="VELORIA" width={136} height={39} style={{ display: "block", width: 136, height: 39 }} />
       </Link>
