@@ -421,7 +421,8 @@ snapshotted so deleted products never break history.
 System rows written automatically (placed, paid, fulfilled, refunded,
 cancelled); comments typed by the owner in the Timeline card, exactly like
 Shopify. A twin `customer_events` table powers the customer-profile
-Timeline (§9.7).
+Timeline (§9.7) — system rows on profile creation and each order placed,
+plus owner comments.
 
 ### 7.6 `checkouts` — abandoned checkouts
 
@@ -479,7 +480,7 @@ staff later = one insert.
 `id, visitor_id, session_id, path, referrer, utm jsonb, country,
 created_at`. Written by a tiny `<Beacon />` on every storefront page via
 `POST /api/beacon` (server-side insert with the service key — no anon write
-policy). The visitor id is an anonymous random id in localStorage: **no
+policy; `country` filled server-side from Vercel's geo-IP request header). The visitor id is an anonymous random id in localStorage: **no
 cookies, no PII, no third parties, first-party only** — deliberately
 consent-light for international traffic; revisit wording at launch.
 Sessions are derived in a SQL view (30-minute gap rule). This one table
@@ -630,7 +631,8 @@ first-party `page_views` beacon (§7.12).
   CSV export.
 - **Detail** — card-for-card:
   - Left: **line items** card with fulfillment badge → "Fulfill items" flow
-    (tracking number + carrier → Fulfilled card with tracking link);
+    (tracking number + carrier → Fulfilled card with tracking link; sends
+    the shipping-confirmation email, §10.3);
     **payment** card (subtotal / discount with code / shipping / tax /
     total; Paid or Pending; provider capture id); **Timeline** (system
     events + owner comments).
@@ -806,8 +808,9 @@ sequenceDiagram
   validates/applies the discount code, logs the `checkouts` row, creates the
   PayPal order, returns its id to the JS SDK buttons.
 - `app/api/paypal/capture/route.ts` — captures after approval, writes the
-  order + lines + customer + stock decrement + timeline event, returns the
-  success redirect.
+  order + lines + customer + stock decrement + timeline event, increments
+  `discounts.used_count` when a code was applied, and returns the success
+  redirect.
 
 ### 10.3 International model (V1) & emails
 
@@ -947,6 +950,12 @@ snapshots and click-through test are the regression net for everything
 after.
 
 ### 14.2 Stages & acceptance criteria
+
+Under a §0 autonomous run, criteria that name the hosted dashboard or a live
+sandbox ("rows visible in dashboard", "sandbox payment completes",
+"refund via sandbox") are satisfied via the §0.2 fallbacks — local Supabase
+Studio and fixture-driven route tests — with the live-sandbox repeat listed
+on the activation checklist.
 
 | # | Stage | Key files | Accepted when |
 |---|---|---|---|
