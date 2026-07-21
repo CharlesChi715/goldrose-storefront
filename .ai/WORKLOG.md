@@ -1535,3 +1535,9 @@ unconfirmed business assumptions).
 - Glyph polish: symbol/star/promo glyphs now served as exact pixel crops from the Figma frame render (public/veloria/glyph-*.png) — bypassed the rate-limited image API entirely. Shop 98.6% / detail 96.6% visually identical to design.
 - Fixed iPhone right-drift: over-wide (430px) overlay stages cannot be centered by margin:auto on narrow screens (CSS pins them left, so the scale skews right). All stages now center via left: calc((100% - W)/2). Floating-nav experiment reverted (misdiagnosis of the same bug).
 - Renamed public/shop → public/home (home-page assets were confusingly named after their old route); deleted unused fav-nav.png.
+
+## 2026-07-21 — Custom admin design (Deliveries)
+
+- Decision: Charles is dropping Shopify. Custom /admin + Supabase becomes system of record; Shopify stays only as a temporary payment rail; Phase B = PayPal-direct checkout.
+- Delivered docs/admin-design.md: full design — schema (products/inventory movements/orders/site_content/admin_users + RLS view), admin screens, Shopify order webhook, pixel-vs-editable-content rule, Phase B exit plan, 8 build stages with acceptance criteria.
+- Build not started per Charles (docs first). Waiting on: real product info, Supabase project.

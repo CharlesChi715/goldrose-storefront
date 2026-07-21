@@ -19,14 +19,18 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 
 ## Key facts / constraints
 
-- Owner is non-technical: docs stay plain-language; work stays consolidated on `main`.
 - Shopify store: `goldrose-9372.myshopify.com` (Advanced plan, on trial).
 - Env switches: `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` turns on live permalink checkout; `SHOPIFY_MODE=live` + Storefront API token would activate the dormant API path (`lib/shopify/client.ts`).
 - Owner ideas are captured verbatim in [docs/ideas.md](docs/ideas.md) — don't expand them.
 
+## Custom admin (decided 2026-07-21, design approved, build not started)
+
+- **Charles is dropping Shopify.** A custom admin (products, prices, inventory, orders, site content) backed by Supabase becomes the system of record; Shopify remains only as a temporary payment rail until a PayPal-direct checkout replaces it (Shop Pay loss accepted — reverses the original decision).
+- Full design: [docs/admin-design.md](docs/admin-design.md) — schema, security model, admin screens, webhook ingestion, staged rollout (each stage keeps live checkout working), Phase B Shopify exit.
+- Waiting on: Charles's real product info; Supabase project creation.
+
 ## Next steps
 
-- Finish glyph-SVG swap on new pages; re-verify; push to deploy.
-- Wire ADD TO CART / BUY NOW into the cart + Shopify permalink checkout.
-- Charles: revoke the Figma token once imports are done.
-- Launch hygiene per [docs/launch-checklist.md](docs/launch-checklist.md): Shopify Payments (unlocks card + Shop Pay), tax, shipping rates, policy pages, real domain.
+- Start admin build per [docs/admin-design.md](docs/admin-design.md) stages 0–2 (test baseline → Supabase schema → admin auth shell).
+- Charles: revoke the Figma token (imports done); real product info for the catalog.
+- Wire ADD TO CART / BUY NOW into checkout (folds into admin build Stage 4).
