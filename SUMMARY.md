@@ -10,7 +10,8 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 ## Current state (2026-07-21)
 
 - **Live** at <https://goldrose-storefront.vercel.app> (Vercel, deploys from `main`).
-- **Real payments work**: checkout hands the cart to Shopify's hosted checkout via a cart permalink; PayPal confirmed with a real payment 2026-07-15.
+- **Redesign in progress (2026-07-21)**: `/` is now the pixel-exact Figma home page; old interactive storefront UI deleted (backup: branch `gold-rose-v0`). `/shop` temporarily redirects to `/` until Figma "Frame 26" is imported; product detail pages (`/products/[slug]`, from 详情页 frame) come next.
+- **Checkout backend intact but unreachable from UI**: the Shopify cart-permalink flow (`/checkout`, PayPal confirmed 2026-07-15) still works, but nothing adds to the cart until the new design is wired in.
 - Local dev defaults to **mock checkout** — fully clickable, no money moves.
 - Step-by-step status of the whole buyer flow: [docs/flow-map.md](docs/flow-map.md).
 
