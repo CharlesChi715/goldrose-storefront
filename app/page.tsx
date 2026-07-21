@@ -5,7 +5,7 @@
  * Every coordinate, size, color, and font value below is taken verbatim from
  * the Figma REST API data, not eyeballed. The design canvas is 375 CSS px wide;
  * the whole page is absolutely positioned inside that canvas and centered on
- * wider screens. Photo assets in /public/shop are pre-cropped to the exact
+ * wider screens. Photo assets in /public/home are pre-cropped to the exact
  * on-screen device-pixel size (2x) so browsers don't resample them.
  * It also carries the store's Schema.org structured data for search engines.
  */
@@ -147,14 +147,14 @@ type CardData = {
 // Figma card instances, in frame order. Cards without subtitle/rating and the
 // one #F9F9F9 card match the design exactly (they differ card-to-card).
 const CARDS: CardData[] = [
-  { x: 16, y: 347, img: "/shop/rose-red.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 194, y: 347, img: "/shop/rose-gold.png", showSubtitle: false, showRating: false, bg: "#FFFFFF" },
-  { x: 16, y: 641, img: "/shop/gift-box.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 195, y: 641, img: "/shop/rose-white.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 16, y: 935, img: "/shop/rose-red.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 194, y: 935, img: "/shop/rose-gold.png", showSubtitle: false, showRating: false, bg: "#FFFFFF" },
-  { x: 16, y: 1229, img: "/shop/gift-box.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 195, y: 1229, img: "/shop/rose-white.png", showSubtitle: true, showRating: true, bg: "#F9F9F9" },
+  { x: 16, y: 347, img: "/home/rose-red.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
+  { x: 194, y: 347, img: "/home/rose-gold.png", showSubtitle: false, showRating: false, bg: "#FFFFFF" },
+  { x: 16, y: 641, img: "/home/gift-box.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
+  { x: 195, y: 641, img: "/home/rose-white.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
+  { x: 16, y: 935, img: "/home/rose-red.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
+  { x: 194, y: 935, img: "/home/rose-gold.png", showSubtitle: false, showRating: false, bg: "#FFFFFF" },
+  { x: 16, y: 1229, img: "/home/gift-box.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
+  { x: 195, y: 1229, img: "/home/rose-white.png", showSubtitle: true, showRating: true, bg: "#F9F9F9" },
 ];
 
 function ProductCard({ card, href }: { card: CardData; href: string }) {
@@ -252,7 +252,7 @@ export default function HomePage() {
         {/* Promo banner (sits underneath the header bar, exactly as in Figma) */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/shop/banner.png"
+          src="/home/banner.png"
           alt="This week's pick: Sapphire Blue Forever Rose — limited offer, 15% off"
           width={372}
           height={172}
@@ -269,12 +269,12 @@ export default function HomePage() {
           </span>
           <BackButton
             fallback="/"
-            src="/shop/back.png"
+            src="/home/back.png"
             style={{ ...abs(61, 19, 24, 24), transform: "translateX(0.5px)" }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/shop/logo.png"
+            src="/home/logo.png"
             alt="GoldRose"
             width={136}
             height={39}
