@@ -9,6 +9,7 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 
 ## Current state (2026-07-21)
 
+- **No customers yet — still testing.** The live site is a test deployment; no real traffic, orders, or shopper data to preserve (breaking changes are fine).
 - **Live** at <https://goldrose-storefront.vercel.app> (Vercel, deploys from `main`).
 - **Redesign (2026-07-21)**: all three pages are pixel-exact Figma imports — `/` (home), `/shop` (VELORIA "Frame 26"), `/products/[slug]` (VELORIA 详情页; every product shows the same placeholder design for now). Cards link to product pages; all three pages share the same fixed white bottom nav (Home/Shop wired, active tab per page). Concierge chatbox (mascot + green bar) floats fixed above the nav on all pages — clicking opens a placeholder panel; real chat widget TBD. Old storefront UI deleted (backup: branch `gold-rose-v0`).
 - Pixel-verified vs Figma renders: shop 98.6% / detail 96.6% visually identical (residual = text antialiasing). Symbol glyphs (✦◯▣★●…) served as exact pixel crops from the frame render (`public/veloria/glyph-*.png`).
