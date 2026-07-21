@@ -8,12 +8,12 @@
  * testing).
  */
 
-import { getStore } from "@/lib/supabase/store.ts";
-import { COUNTRIES } from "./countries";
-import { computeShipping, zoneForCountry, type ShippingZone } from "./zones";
+import { getStore } from "../supabase/store.ts";
+import { COUNTRIES } from "./countries.ts";
+import { computeShipping, zoneForCountry, type ShippingZone } from "./zones.ts";
 
-export type { ShippingZone } from "./zones";
-export { zoneForCountry } from "./zones";
+export type { ShippingZone } from "./zones.ts";
+export { zoneForCountry } from "./zones.ts";
 
 export type CartLineInput = { variantId: string; quantity: number };
 

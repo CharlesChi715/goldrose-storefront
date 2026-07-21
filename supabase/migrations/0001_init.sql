@@ -165,6 +165,7 @@ create table orders (
   currency text not null default 'USD',
   financial_status text not null default 'pending'
     check (financial_status in ('pending', 'paid', 'partially_refunded', 'refunded')),
+  refunded_cents int not null default 0,
   fulfillment_status text not null default 'unfulfilled'
     check (fulfillment_status in ('unfulfilled', 'fulfilled')),
   tracking_number text,

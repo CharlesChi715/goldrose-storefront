@@ -10,8 +10,8 @@
  */
 
 import { randomUUID } from "crypto";
-import { sendOrderPlacedEmails } from "@/lib/email";
-import { getStore } from "@/lib/supabase/store.ts";
+import { sendOrderPlacedEmails } from "../email.ts";
+import { getStore } from "../supabase/store.ts";
 import type {
   Address,
   CustomerRow,
@@ -19,8 +19,8 @@ import type {
   OrderLineRow,
   OrderRow,
   OrderSource,
-} from "@/lib/supabase/types.ts";
-import type { PricedCart } from "@/lib/checkout/pricing";
+} from "../supabase/types.ts";
+import type { PricedCart } from "../checkout/pricing.ts";
 
 export type CreateOrderInput = {
   priced: PricedCart;
@@ -159,6 +159,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     total_cents: input.priced.total_cents,
     currency: input.priced.currency,
     financial_status: input.financial_status ?? "paid",
+    refunded_cents: 0,
     fulfillment_status: "unfulfilled",
     tracking_number: null,
     tracking_url: null,

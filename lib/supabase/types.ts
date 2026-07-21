@@ -123,6 +123,7 @@ export type OrderRow = {
   total_cents: number;
   currency: string;
   financial_status: FinancialStatus;
+  refunded_cents: number;
   fulfillment_status: FulfillmentStatus;
   tracking_number: string | null;
   tracking_url: string | null;

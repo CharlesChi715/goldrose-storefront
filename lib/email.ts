@@ -7,8 +7,8 @@
  * toggles live in settings (§9.11) and default to on.
  */
 
-import { getStore } from "@/lib/supabase/store.ts";
-import type { OrderLineRow, OrderRow } from "@/lib/supabase/types.ts";
+import { getStore } from "./supabase/store.ts";
+import type { OrderLineRow, OrderRow } from "./supabase/types.ts";
 
 type NotificationToggles = {
   order_confirmation: boolean;

@@ -6,7 +6,7 @@
  * flipping to live is an owner-only activation step).
  */
 
-import type { PricedCart } from "@/lib/checkout/pricing";
+import type { PricedCart } from "../checkout/pricing.ts";
 
 export type PayPalConfig = {
   configured: boolean;
