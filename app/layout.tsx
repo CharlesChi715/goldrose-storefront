@@ -10,8 +10,8 @@ import "./globals.css";
 
 // Exporting `metadata` is the App Router way to set <title>, description,
 // and social-share (Open Graph) tags. The `template` makes child pages render
-// as "Checkout | AUREÀ" etc. NOTE: metadataBase still uses the placeholder
-// domain — swap it when the real production domain is connected.
+// as "Checkout | AUREÀ" etc.
+// metadataBase: never fill anything in, even after buying a real domain. Vercel maintains a built-in variable (VERCEL_PROJECT_PRODUCTION_URL) that always holds your site's current production address. Today that's goldrose-storefront.vercel.app; the moment you connect a custom domain in Vercel's dashboard, that variable becomes the custom domain automatically
 export const metadata: Metadata = {
   // metadataBase: new URL("https://aurea.example"),
   title: {
