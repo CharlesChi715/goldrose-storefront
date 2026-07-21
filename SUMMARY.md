@@ -5,7 +5,7 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 ## Goal
 
 - Sell the 24K gold-dipped rose gift line direct-to-consumer (US market) via this custom Next.js storefront. Brand: **GoldRose** (renamed from AUREÀ 2026-07-21).
-- Payments flow through Shopify hosted checkout for now (transitional); the custom admin + PayPal-direct checkout replaces it per [docs/admin-design.md](docs/admin-design.md).
+- Payments: Shopify hosted checkout still wired but slated for deletion; the admin build ships a native PayPal checkout per [docs/admin-design.md](docs/admin-design.md).
 
 ## Current state (2026-07-21)
 
@@ -26,7 +26,7 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 
 ## Custom admin (decided 2026-07-21, design approved, build not started)
 
-- **Charles is dropping Shopify.** A custom admin (products, prices, inventory, orders, site content) backed by Supabase becomes the system of record; Shopify remains only as a temporary payment rail until a PayPal-direct checkout replaces it (Shop Pay loss accepted — reverses the original decision).
+- **Charles is dropping Shopify — no transition phase** (no customers yet, nothing to protect). One build: Supabase-backed admin (products, prices, inventory, orders, site content) + native PayPal checkout (sandbox first); Shopify code deleted in the same build (Stage 4), then the subscription gets cancelled.
 - Full design: [docs/admin-design.md](docs/admin-design.md) — schema, security model, admin screens, webhook ingestion, staged rollout (each stage keeps live checkout working), Phase B Shopify exit.
 - Waiting on: Charles's real product info; Supabase project creation.
 

@@ -1543,3 +1543,4 @@ unconfirmed business assumptions).
 - Build not started per Charles (docs first). Waiting on: real product info, Supabase project.
 - Rebrand: AUREÀ → GoldRose across code + docs (metadata, JSON-LD, checkout/orders pages, chatbox, product names, business profile, placeholder domains, internal keys + GR- SKU prefix — no live shoppers, so no legacy kept).
 - Admin design: added bilingual EN/中文 requirement (§6.7) — cookie-persisted toggle, typed t() dictionary, full label coverage, en fallback; storefront stays English.
+- Admin design Rev 2: cut the Shopify transition phase (no customers to protect). Single build = admin + native PayPal checkout (sandbox); Shopify code deleted in Stage 4; schema drops all Shopify/drift columns, orders keyed on paypal_order_id; webhook = PayPal capture verification.
