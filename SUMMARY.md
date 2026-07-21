@@ -12,7 +12,8 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 - **Live** at <https://goldrose-storefront.vercel.app> (Vercel, deploys from `main`).
 - **Redesign (2026-07-21)**: all three pages are pixel-exact Figma imports — `/` (home), `/shop` (VELORIA "Frame 26"), `/products/[slug]` (VELORIA 详情页; every product shows the same placeholder design for now). Cards link to product pages; all three pages share the same fixed white bottom nav (Home/Shop wired, active tab per page). Concierge chatbox (mascot + green bar) floats fixed above the nav on all pages — clicking opens a placeholder panel; real chat widget TBD. Old storefront UI deleted (backup: branch `gold-rose-v0`).
 - Pixel-verified vs Figma renders (~1–3% residual = text antialiasing); one cosmetic follow-up pending: swap ✦◯▣★● symbol glyphs for Figma SVG exports (API rate-limited mid-session).
-- **Checkout backend intact but unreachable from UI**: the Shopify cart-permalink flow (`/checkout`, PayPal confirmed 2026-07-15) still works, but ADD TO CART / BUY NOW on the new product page aren't wired to it yet. Not pushed/deployed yet.
+- **Deployed**: redesign pushed to `main` 2026-07-21 → live on Vercel. Working back button on all headers; chatbox on all pages.
+- **Checkout backend intact but unreachable from UI**: the Shopify cart-permalink flow (`/checkout`, PayPal confirmed 2026-07-15) still works, but ADD TO CART / BUY NOW on the new product page aren't wired to it yet — the live site currently can't take an order.
 - Local dev defaults to **mock checkout** — fully clickable, no money moves.
 - Step-by-step status of the whole buyer flow: [docs/flow-map.md](docs/flow-map.md).
 
