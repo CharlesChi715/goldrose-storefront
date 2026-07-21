@@ -14,17 +14,25 @@ checkout hands off to Shopify for PayPal).
 
 This README is the project map. Keep it updated as decisions change.
 
+> **⚠️ Direction change (2026-07-21): Shopify is being removed.** The next
+> build replaces it with a custom admin + native checkout —
+> [docs/admin-design.md](docs/admin-design.md) is the authoritative design
+> (its Stage 4 also rewrites this README). Shopify-era content below is
+> historical context until then; don't implement from it.
+
 > **Where are we?** [SUMMARY.md](SUMMARY.md) is the short single source of
 > truth (read it first); [docs/flow-map.md](docs/flow-map.md) tracks every
 > step of the buyer flow — what's real, what's mock, what's still to build.
 
 ## Current Goal
 
-**The store is live and can receive real payments** (confirmed 2026-07-15):
-checkout hands the real cart to Shopify's hosted checkout via a cart
-permalink. The next focus is launch hygiene — policy pages, real domain,
-verified tax/shipping — and unlocking card + Shop Pay via Shopify Payments.
-See [docs/launch-checklist.md](docs/launch-checklist.md).
+**Build the custom admin + native checkout** per
+[docs/admin-design.md](docs/admin-design.md) (§0 authorizes a one-shot
+autonomous build), then cancel Shopify. Until that build's Stage 4 lands,
+the deployed site still carries the Shopify cart-permalink checkout
+(real-payment path confirmed 2026-07-15, currently unreachable from the
+redesigned product page). Launch hygiene lives in
+[docs/launch-checklist.md](docs/launch-checklist.md).
 
 ## Current Result
 
@@ -53,11 +61,11 @@ development default): everything is simulated server-side with no payment,
 tax, order, or inventory side effects, so the flow can be developed and
 demoed safely.
 
-See [docs/mock-business-decisions.md](docs/mock-business-decisions.md) for the
-launch assumptions that still need owner review.
+Launch assumptions that still need owner review live in `lib/business.ts`
+(`launchDecisions`).
 
-See [docs/shopify-integration.md](docs/shopify-integration.md) for the Shopify
-setup guide.
+See [docs/archive/shopify-integration.md](docs/archive/shopify-integration.md)
+for the historical Shopify setup guide.
 
 ## Brand Direction
 
@@ -179,24 +187,22 @@ utilities like `vercel env pull` or `vercel logs`.
 |   +-- orders/          # demo order log store
 |   +-- shopify/         # Shopify config, API client, mock cart, permalinks, and types
 +-- docs/
-|   +-- checkout.md
-|   +-- demo-goal.md
+|   +-- admin-design.md  # THE design doc: custom admin + native checkout
+|   +-- archive/         # historical docs (Shopify-era checkout + integration)
+|   +-- flow-map.md
 |   +-- ideas.md
 |   +-- launch-checklist.md
-|   +-- mock-business-decisions.md
-|   +-- shopify-integration.md
+|   +-- seo-roadmap.md   # post-launch SEO/GEO levers
 |   +-- web-app-learning-guide.md
 +-- public/
 |   +-- products/        # browser-accessible storefront images
+|   +-- veloria/         # pixel-exact Figma render crops for the redesign
 +-- .data/               # runtime-only demo order log (orders.json, gitignored)
-+-- src/                 # original source image folder
-+-- index.html           # earlier static prototype reference
-+-- styles.css           # earlier static prototype CSS reference
-+-- script.js            # earlier static prototype JS reference
-+-- .env.example         # safe Shopify environment variable template
++-- assets/
+|   +-- product-photos/  # owner's original product photos (renamed from src/)
++-- .env.example         # environment variable template
 +-- package.json         # scripts and dependencies
 +-- README.md            # project map and learning notes
-+-- AGENTS.md            # instructions for AI agents working in this repo
 ```
 
 ## Important Files
@@ -309,8 +315,8 @@ Replace these before launch.
 - In local development (mock mode), checkout simulates the order and logs it
   at `/orders`.
 - Email form validates a simple email shape and shows local feedback.
-- Launch assumptions are listed in `docs/mock-business-decisions.md`.
-- Shopify setup steps are listed in `docs/shopify-integration.md`.
+- Launch assumptions are listed in `lib/business.ts` (`launchDecisions`).
+- Historical Shopify setup steps: `docs/archive/shopify-integration.md`.
 - `npm run lint` passes.
 - `npm run build` passes.
 - Every source file carries a "ROLE OF THIS FILE" comment plus per-function
@@ -388,7 +394,7 @@ M0 Decide ──▶ M1 Shopify ──▶ M2 Connect & test ──▶ M3 Pages & 
 **M0 — Decide the business facts** *(you; ~hours)*
 Confirm real prices, gift-box contents, shipping/return terms, and **truthful
 product claims** (gold, real rose, China origin — no "Made in USA"). See
-`docs/mock-business-decisions.md`.
+`lib/business.ts` (`launchDecisions`).
 
 **M1 — Stand up Shopify as the checkout engine** *(you; ~½–1 day)*
 ⚠️ **Decide the payment processor first:** Shopify Payments is not available for
@@ -398,7 +404,8 @@ Shop Pay only works through Shopify, so this is required for all three buttons.
 You do **not** rebuild your site — a low-tier Shopify plan is used headless,
 behind this storefront. Add the products + variants, enable **Shopify Payments**
 with **Shop Pay** and **PayPal**, and set up tax + shipping rates.
-See `docs/shopify-integration.md` and `docs/checkout.md`.
+See `docs/archive/shopify-integration.md` and `docs/archive/checkout.md`
+(historical — superseded by `docs/admin-design.md`).
 *Progress: store `goldrose-9372` and all three products are created with
 images. Remaining: activate a payment provider, tax, and shipping rates.*
 

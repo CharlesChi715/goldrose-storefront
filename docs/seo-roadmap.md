@@ -1,4 +1,10 @@
-is there any more advanced way to do SEO?
+# SEO / GEO Roadmap (post-launch)
+
+_Advanced SEO ideas beyond the V1 baseline that ships with the admin build
+(see [admin-design.md §8.1](admin-design.md) — sitemap, robots, JSON-LD,
+llms.txt, meta/OG). These are post-launch levers, roughly in order of
+bang-for-buck. Renamed from `SEO.md` 2026-07-22; original owner question:
+"is there any more advanced way to do SEO?"_
 
 1. One page per thing people search for (biggest lever)
 Right now you have essentially one indexable page competing for every search. Advanced e-commerce SEO inverts that: a dedicated URL for each product (/products/eternal-red-rose) and for each occasion people actually type into Google — "anniversary gift for wife", "preserved rose vs real rose", "Valentine's day gold rose". Each page targets one search intent deeply. Done systematically (dozens of occasion/audience pages generated from a template + data), this is called programmatic SEO — it's how big stores dominate search. For you, even 5–10 hand-made pages would multiply your surface area.

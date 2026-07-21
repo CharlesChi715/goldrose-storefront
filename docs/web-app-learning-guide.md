@@ -297,5 +297,6 @@ that this demo stands in for.**
 
 ### Where to read next in this repo
 - `README.md` — the project map and current status.
-- `docs/shopify-integration.md` — concrete steps to connect a real Shopify store.
-- `docs/mock-business-decisions.md` — which placeholder assumptions need real decisions.
+- `docs/admin-design.md` — the design for the custom admin + native checkout
+  that replaces Shopify (the current direction).
+- `docs/archive/shopify-integration.md` — historical: the Shopify-era setup.

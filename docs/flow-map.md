@@ -18,7 +18,8 @@ Legend: ✅ real / live · 🟡 simulated (mock) · ⬜ not built yet · 💡 fu
 - `/shop` (`app/shop/page.tsx`) is a separate pixel-exact Figma import — a
   design reference page, not wired into the buying flow.
 - ⬜ Real domain (still on the vercel.app address) — launch checklist.
-- 💡 SEO improvements tracked in `docs/SEO.md`.
+- 💡 SEO/GEO baseline ships with the admin build ([admin-design.md](admin-design.md) §8.1);
+  post-launch levers tracked in `docs/seo-roadmap.md`.
 
 ## 2. Browse products — ✅ real data
 
@@ -100,15 +101,14 @@ Legend: ✅ real / live · 🟡 simulated (mock) · ⬜ not built yet · 💡 fu
 
 ## Open items (not tied to one step)
 
-- Uncommitted deletions in the working tree: `docs/demo-goal.md` and
-  `docs/mock-business-decisions.md`. Decide: restore, or commit the deletion
-  and migrate what's still referenced — `docs/launch-checklist.md` still
-  points at `mock-business-decisions.md`.
-- `docs/SEO.md` exists but is not committed to git yet.
+- (2026-07-22) Repo hygiene done: old prototype files deleted, `src/` →
+  `assets/product-photos/`, Shopify-era docs archived to `docs/archive/`,
+  `SEO.md` → `seo-roadmap.md`.
 
 ## Related docs
 
+- [admin-design.md](admin-design.md) — **the authoritative design**: custom admin + native checkout replacing Shopify
 - [launch-checklist.md](launch-checklist.md) — the phased to-do list (tasks live there, not here)
-- [checkout.md](checkout.md) — payment methods in depth
-- [shopify-integration.md](shopify-integration.md) — Shopify setup details
+- [seo-roadmap.md](seo-roadmap.md) — post-launch SEO/GEO levers
 - [ideas.md](ideas.md) — owner's raw future ideas
+- [archive/checkout.md](archive/checkout.md), [archive/shopify-integration.md](archive/shopify-integration.md) — historical (Shopify era)

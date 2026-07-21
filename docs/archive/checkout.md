@@ -1,3 +1,7 @@
+> **HISTORICAL (archived 2026-07-22).** This describes the Shopify-era
+> checkout that is being removed. The authoritative design is
+> [docs/admin-design.md](../admin-design.md) — do not implement from this file.
+
 # Checkout: Shop Pay, Credit Card & PayPal
 
 The storefront offers three ways to pay, in priority order:

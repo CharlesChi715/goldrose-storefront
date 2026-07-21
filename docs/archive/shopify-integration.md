@@ -1,3 +1,7 @@
+> **HISTORICAL (archived 2026-07-22).** Shopify is being removed from this
+> project (decision 2026-07-21). The authoritative design is
+> [docs/admin-design.md](../admin-design.md) — do not implement from this file.
+
 # Shopify Integration
 
 This branch uses Shopify as the commerce backend direction.

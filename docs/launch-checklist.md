@@ -30,8 +30,12 @@ you can confirm. Nothing technical, but everything downstream depends on them.
 
 ## Phase 2 — Set up Shopify (the checkout engine)
 
-All three payment buttons are powered by one Shopify checkout. See
-`docs/checkout.md` and `docs/shopify-integration.md`.
+> **⚠️ Superseded (2026-07-21):** Shopify is being removed — the custom admin
+> + native checkout per [admin-design.md](admin-design.md) replaces this
+> phase. Kept for historical context; details archived in
+> `docs/archive/checkout.md` and `docs/archive/shopify-integration.md`.
+
+All three payment buttons are powered by one Shopify checkout.
 
 > **You don't have to rebuild your store on Shopify.** Shop Pay only works
 > through Shopify, but you can keep this custom storefront and use Shopify

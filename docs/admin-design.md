@@ -7,7 +7,7 @@
 | **Users** | Charles' teammates |
 | **Audience** | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below |
 | **Version** | Rev 4.4 · 2026-07-22 — full history in §17 |
-| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/flow-map.md` · `docs/launch-checklist.md` · `docs/ideas.md` |
+| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/flow-map.md` · `docs/launch-checklist.md` · `docs/seo-roadmap.md` (post-launch SEO/GEO) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
 
 ## Table of contents
 
@@ -47,6 +47,9 @@
   three existing placeholder products; OQ-4 → resource fallbacks below.
 - Never wait for or ask the owner mid-build. Every "owner action" in this
   document becomes an item on the activation checklist (§0.5) instead.
+- Trust hierarchy for conflicting written sources: this document >
+  `SUMMARY.md` > everything else. `docs/archive/*` and the Shopify-era
+  sections of `README.md` are historical — never implement from them.
 
 ### 0.2 Resource fallbacks — mock, don't ask
 
@@ -1015,7 +1018,9 @@ Explicitly out of scope for this build:
   then, no external trackers: better accuracy at small scale (ad-blockers
   hit GA hardest) and no consent-banner burden.
 - SEO/GEO extensions: content/landing pages, FAQ & review structured data
-  (needs reviews first), `hreflang` when storefront translations arrive.
+  (needs reviews first), `hreflang` when storefront translations arrive;
+  prioritized post-launch roadmap (Search Console, Merchant Center,
+  programmatic occasion pages) in `docs/seo-roadmap.md`.
 - Full Markets parity: per-market pricing, multi-currency (PayPal supports
   it), storefront translations, duties/taxes calculated at checkout.
 - Collections & storefront navigation (only if the storefront design ever
