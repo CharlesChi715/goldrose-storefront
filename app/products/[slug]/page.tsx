@@ -131,12 +131,13 @@ export default async function ProductDetailPage({
         <div style={{ ...abs(0, 75, 398), ...txt(13, 15.733, "#7C7369") }}>
           Real Rose · Hand-Finished · Made to Last
         </div>
-        <div
-          className={notoSC.className}
-          style={{ ...abs(0, 98, 70, 17), ...txt(14, 16.8, "#C89233"), fontWeight: 500 }}
-        >
-          ★★★★★
-        </div>
+        <img
+          src="/veloria/glyph-stars-14.png"
+          alt="5 stars"
+          width={72}
+          height={21}
+          style={{ ...abs(0, 96, 72, 21), display: "block" }}
+        />
         <div style={{ ...abs(76, 99, 112), ...txt(12, 14.523, "#6E6A64") }}>{"4.9 · 286 Reviews \u00A0›"}</div>
         <div
           className={notoSC.className}
@@ -158,17 +159,18 @@ export default async function ProductDetailPage({
       {/* 05 · Benefits */}
       <Section x={16} y={541} w={398} h={156} radius={16} stroke="#EAD9BC">
         {[
-          { icon: "✦", iconW: 18, labelX: 46, label: "Ships from U.S. Warehouse 🇺🇸", y: 14 },
-          { icon: "◷", iconW: 15, labelX: 43, label: "Delivered in 3–5 Business Days", y: 66 },
-          { icon: "□", iconW: 20, labelX: 48, label: "Premium Gift Box Included", y: 118 },
+          { glyph: "glyph-benefit-1", glyphW: 24, labelX: 46, label: "Ships from U.S. Warehouse 🇺🇸", y: 14 },
+          { glyph: "glyph-benefit-2", glyphW: 24, labelX: 43, label: "Delivered in 3–5 Business Days", y: 66 },
+          { glyph: "glyph-benefit-3", glyphW: 26, labelX: 48, label: "Premium Gift Box Included", y: 118 },
         ].map((row, i) => (
           <div key={row.label}>
-            <div
-              className={notoSC.className}
-              style={{ ...abs(16, row.y, row.iconW, 24), ...txt(20, 24, "#B87B24"), ...SYMBOL_STYLE }}
-            >
-              {row.icon}
-            </div>
+            <img
+              src={`/veloria/${row.glyph}.png`}
+              alt=""
+              width={row.glyphW}
+              height={28}
+              style={{ ...abs(14, row.y - 2, row.glyphW, 28), display: "block" }}
+            />
             <div style={{ ...abs(row.labelX, row.y + 3, 213), ...txt(15, 18.153, "#263530"), fontWeight: 500 }}>
               {row.label}
             </div>
@@ -228,23 +230,23 @@ export default async function ProductDetailPage({
         </div>
         {[
           {
-            x: 16, y: 168, selected: true, iconBg: "#E9EDF6", symbol: "✦", symbolColor: "#103276",
-            symbolX: 25.5, symbolW: 21, name: "Classic Single Stem", nameY: 16, wrap: true,
+            x: 16, y: 168, selected: true, iconBg: "#E9EDF6", glyph: "glyph-pres-1",
+            name: "Classic Single Stem", nameY: 16, wrap: true,
             sub: "SELECTED", subY: 48, subNoto: false, subColor: "#B67722",
           },
           {
-            x: 204, y: 168, selected: false, iconBg: "#ECE8E2", symbol: "◯", symbolColor: "#153A31",
-            symbolX: 24.5, symbolW: 23, name: "Glass Dome", nameY: 23.5, wrap: false,
+            x: 204, y: 168, selected: false, iconBg: "#ECE8E2", glyph: "glyph-pres-2",
+            name: "Glass Dome", nameY: 23.5, wrap: false,
             sub: "+ $20", subY: 40.5, subNoto: true, subColor: "#7A736B",
           },
           {
-            x: 16, y: 254, selected: false, iconBg: "#ECE8E2", symbol: "▣", symbolColor: "#153A31",
-            symbolX: 24.5, symbolW: 23, name: "Gift Box", nameY: 23.5, wrap: false,
+            x: 16, y: 254, selected: false, iconBg: "#ECE8E2", glyph: "glyph-pres-3",
+            name: "Gift Box", nameY: 23.5, wrap: false,
             sub: "+ $30", subY: 40.5, subNoto: true, subColor: "#7A736B",
           },
           {
-            x: 204, y: 254, selected: false, iconBg: "#ECE8E2", symbol: "◆", symbolColor: "#153A31",
-            symbolX: 24.5, symbolW: 23, name: "Luxury Set", nameY: 23.5, wrap: false,
+            x: 204, y: 254, selected: false, iconBg: "#ECE8E2", glyph: "glyph-pres-4",
+            name: "Luxury Set", nameY: 23.5, wrap: false,
             sub: "+ $15", subY: 40.5, subNoto: true, subColor: "#7A736B",
           },
         ].map((tile) => (
@@ -265,16 +267,13 @@ export default async function ProductDetailPage({
                 background: "#FFFFFF",
               }}
             />
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(tile.symbolX, 24, tile.symbolW, 28),
-                ...txt(23, 27.6, tile.symbolColor),
-                ...SYMBOL_STYLE,
-              }}
-            >
-              {tile.symbol}
-            </div>
+            <img
+              src={`/veloria/${tile.glyph}.png`}
+              alt=""
+              width={30}
+              height={36}
+              style={{ ...abs(21, 20, 30, 36), display: "block" }}
+            />
             <div
               style={{
                 ...abs(70, tile.nameY, 96, tile.wrap ? 30 : undefined),
@@ -299,10 +298,10 @@ export default async function ProductDetailPage({
           3. Personalize It (Optional)
         </div>
         {[
-          { y: 376, icon: "✎", iconW: 18, labelX: 42, label: "Engraving (Name / Date)", value: "+ $15", valueX: 319, valueW: 33, valueNoto: true, valueColor: "#B87922" },
-          { y: 436, icon: "▱", iconW: 17, labelX: 41, label: "Add a Gift Message Card", value: "FREE", valueX: 320, valueW: 32, valueNoto: false, valueColor: "#B87922" },
-          { y: 496, icon: "◇", iconW: 17, labelX: 41, label: "Upgrade to Premium Gift Box", value: "+ $29", valueX: 319, valueW: 33, valueNoto: true, valueColor: "#B87922" },
-          { y: 556, icon: "•••", iconW: 51, labelX: 75, label: "More Personalization Options", value: "＋", valueX: 339, valueW: 13, valueNoto: true, valueColor: "#57625E" },
+          { y: 376, glyph: "glyph-pers-1", glyphW: 24, labelX: 42, label: "Engraving (Name / Date)", value: "+ $15", valueX: 319, valueW: 33, valueNoto: true, valueColor: "#B87922" },
+          { y: 436, glyph: "glyph-pers-2", glyphW: 24, labelX: 41, label: "Add a Gift Message Card", value: "FREE", valueX: 320, valueW: 32, valueNoto: false, valueColor: "#B87922" },
+          { y: 496, glyph: "glyph-pers-3", glyphW: 24, labelX: 41, label: "Upgrade to Premium Gift Box", value: "+ $29", valueX: 319, valueW: 33, valueNoto: true, valueColor: "#B87922" },
+          { y: 556, glyph: "glyph-pers-4", glyphW: 58, labelX: 75, label: "More Personalization Options", value: null, valueX: 0, valueW: 0, valueNoto: true, valueColor: "" },
         ].map((row) => (
           <div
             key={row.label}
@@ -313,25 +312,37 @@ export default async function ProductDetailPage({
               boxShadow: "inset 0 0 0 1px #EEE6DD",
             }}
           >
-            <div
-              className={notoSC.className}
-              style={{ ...abs(14, 15, row.iconW, 20), ...txt(17, 20.4, "#C2852E"), ...SYMBOL_STYLE }}
-            >
-              {row.icon}
-            </div>
+            <img
+              src={`/veloria/${row.glyph}.png`}
+              alt=""
+              width={row.glyphW}
+              height={28}
+              style={{ ...abs(12, 11, row.glyphW, 28), display: "block" }}
+            />
             <div style={{ ...abs(row.labelX, 17, 269), ...txt(13, 15.733, "#34423D"), fontWeight: 500 }}>
               {row.label}
             </div>
-            <div
-              className={row.valueNoto ? notoSC.className : undefined}
-              style={{
-                ...abs(row.valueX, 17, row.valueW),
-                ...txt(13, row.valueNoto ? 15.6 : 15.733, row.valueColor),
-                fontWeight: 500,
-              }}
-            >
-              {row.value}
-            </div>
+            {row.value ? (
+              <div
+                className={row.valueNoto ? notoSC.className : undefined}
+                style={{
+                  ...abs(row.valueX, 17, row.valueW),
+                  ...txt(13, row.valueNoto ? 15.6 : 15.733, row.valueColor),
+                  fontWeight: 500,
+                }}
+              >
+                {row.value}
+              </div>
+            ) : (
+              // The "＋" glyph, as design pixels (fallback fonts render it differently)
+              <img
+                src="/veloria/glyph-pers-plus.png"
+                alt=""
+                width={20}
+                height={24}
+                style={{ ...abs(337, 13, 20, 24), display: "block" }}
+              />
+            )}
           </div>
         ))}
       </Section>
@@ -368,7 +379,13 @@ export default async function ProductDetailPage({
         <div style={{ ...abs(16, 111, 62), ...txt(14, 16.943, "#5E4AE3"), fontWeight: 600 }}>shop Pay</div>
         <div style={{ ...abs(95, 111, 48), ...txt(14, 16.943, "#111111"), fontWeight: 600 }}>Klarna.</div>
         <div style={{ ...abs(160, 111, 46), ...txt(14, 16.943, "#1167B1"), fontWeight: 600 }}>PayPal</div>
-        <div style={{ ...abs(223, 111, 41), ...txt(14, 16.943, "#111111"), fontWeight: 600 }}>● Pay</div>
+        <img
+          src="/veloria/glyph-applepay.png"
+          alt="Apple Pay"
+          width={48}
+          height={24}
+          style={{ ...abs(220, 108, 48, 24), display: "block" }}
+        />
       </Section>
 
       {/* 08 · Unboxing gallery */}
@@ -423,12 +440,13 @@ export default async function ProductDetailPage({
         >
           4.9
         </div>
-        <div
-          className={notoSC.className}
-          style={{ ...abs(24.5, 121, 75, 18), ...txt(15, 18, "#C88B2C"), fontWeight: 500 }}
-        >
-          ★★★★★
-        </div>
+        <img
+          src="/veloria/glyph-stars-15.png"
+          alt="5 stars"
+          width={80}
+          height={22}
+          style={{ ...abs(22, 119, 80, 22), display: "block" }}
+        />
         <div style={{ ...abs(9.5, 144, 105), ...txt(10, 12.102, "#8C847B") }}>Based on 286 reviews</div>
         {[
           { y: 67, label: "5 stars", labelW: 33, trackX: 171, fill: 136.5, pct: "91%", pctX: 329, pctW: 21 },
@@ -496,12 +514,13 @@ export default async function ProductDetailPage({
             <div style={{ ...abs(9, 109, 98, 32), ...txt(11, 16, "#35413D"), fontWeight: 500, whiteSpace: "normal" }}>
               {card.name}
             </div>
-            <div
-              className={notoSC.className}
-              style={{ ...abs(9, 144, 98, 11), ...txt(9, 10.8, "#C78A2C"), fontWeight: 500 }}
-            >
-              ★★★★★
-            </div>
+            <img
+              src="/veloria/glyph-stars-9.png"
+              alt="5 stars"
+              width={60}
+              height={15}
+              style={{ ...abs(7, 142, 60, 15), display: "block" }}
+            />
             <div
               className={notoSC.className}
               style={{ ...abs(9, 158, 98), ...txt(12, 14.4, "#123D34"), fontWeight: 700 }}

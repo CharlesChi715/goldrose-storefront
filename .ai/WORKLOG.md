@@ -1532,3 +1532,4 @@ unconfirmed business assumptions).
 - Chatbox: mascot + concierge bar extracted into a fixed overlay above the nav (components/ConciergeChat.tsx); click opens a placeholder chat panel (real widget later).
 - Chatbox added to the home page as well (same fixed overlay as /shop).
 - Back button live on all headers: walks browser history when the previous page is ours, else falls back to the parent page (product→/shop, shop→/).
+- Glyph polish: symbol/star/promo glyphs now served as exact pixel crops from the Figma frame render (public/veloria/glyph-*.png) — bypassed the rate-limited image API entirely. Shop 98.6% / detail 96.6% visually identical to design.

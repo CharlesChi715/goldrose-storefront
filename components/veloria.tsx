@@ -134,17 +134,22 @@ export const ForwardIcon = () => (
 
 /* ---------- Shared page sections ---------- */
 
-/** 01 · Promo bar — dark green strip at the very top of both frames. */
+/**
+ * 01 · Promo bar — dark green strip at the very top of both frames. The
+ * slogan is served as Figma's own rendered pixels (cropped from the frame
+ * render) because the ✦ glyphs hit different fallback fonts in browsers.
+ */
 export function PromoBar() {
   return (
     <>
       <div style={{ ...abs(0, 0, 430, 32), background: "#06372E" }} />
-      <div
-        className={inter.className}
-        style={{ ...abs(39, 11, 352), ...txt(8.5, 10.287, "#E8C477", "center"), fontWeight: 500 }}
-      >
-        ✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦
-      </div>
+      <img
+        src="/veloria/glyph-promo.png"
+        alt="✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"
+        width={358}
+        height={20}
+        style={{ ...abs(36, 6, 358, 20), display: "block" }}
+      />
     </>
   );
 }
