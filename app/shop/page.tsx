@@ -98,7 +98,7 @@ function ProductCard({ card, href }: { card: (typeof CARDS)[number]; href: strin
 export default function ShopPage() {
   return (
     <>
-      <ScaleFrame height={1938} background="#FFFFFF" fontClass={tenor.className}>
+      <ScaleFrame height={1938} background="#FFFFFF" fontClass={tenor.className} navGap={1}>
       {/* Hero carousel render (dots baked in); bleeds 7px past both canvas
           edges in the design — the canvas clips it, exactly as Figma does. */}
       <img
@@ -194,7 +194,7 @@ export default function ShopPage() {
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
           placeholder chat panel on click. */}
-      <ConciergeChat mascotOnTop />
+      <ConciergeChat navClearance={60} mascotOnTop />
     </>
   );
 }

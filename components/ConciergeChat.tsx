@@ -14,11 +14,9 @@
 
 import { useState } from "react";
 import { inter } from "@/lib/fonts";
-import { abs, txt, NAV_STAGE_H } from "@/components/veloria";
+import { abs, txt } from "@/components/veloria";
 
 const CHAT_H = 106; // mascot top → bar bottom
-// Sit 4px above the floating nav (which is lifted 8px off the screen edge).
-const DEFAULT_CLEARANCE = NAV_STAGE_H + 4;
 
 function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void }) {
   return (
@@ -127,7 +125,7 @@ function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void })
 }
 
 export function ConciergeChat({
-  navClearance = DEFAULT_CLEARANCE,
+  navClearance = 59,
   mascotOnTop = true,
 }: {
   /** Height of the fixed bottom nav (+gap) this floats above. */

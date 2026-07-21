@@ -536,7 +536,7 @@ export default async function ProductDetailPage({
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
           placeholder chat panel on click. Bar paints over the mascot here,
           matching the 详情页 layer order. */}
-      <ConciergeChat mascotOnTop={false} />
+      <ConciergeChat navClearance={59} mascotOnTop={false} />
     </>
   );
 }
