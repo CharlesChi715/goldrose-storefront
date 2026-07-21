@@ -1515,3 +1515,16 @@ unconfirmed business assumptions).
 - Recorded open item: uncommitted deletions of `docs/demo-goal.md` and
   `docs/mock-business-decisions.md` (launch checklist still references the
   latter); `docs/SEO.md` untracked. Owner chose to decide later.
+
+## 2026-07-21 — VELORIA redesign: shop + product pages (Deliveries)
+
+- `/` now serves the Figma home import (moved from /shop); old interactive
+  storefront deleted (backup branch `gold-rose-v0`).
+- New pixel-exact imports from VELORIA Figma file: `/shop` (Frame 26) and
+  `/products/[slug]` (详情页 frame; placeholder design shared by all 3 products).
+- Shared chrome: `components/veloria.tsx` (promo bar, header, fixed bottom nav
+  with Home/Shop links), `lib/fonts.ts`, assets in `public/veloria/`.
+- Home + shop cards link to product pages; back arrows and logo navigate.
+- Playwright/numpy pixel-verify vs Figma renders: shop 1.29%, detail 3.28%
+  residual (text AA). Pending: symbol-glyph SVG swap (Figma API rate limit),
+  cart wiring, deploy/push.

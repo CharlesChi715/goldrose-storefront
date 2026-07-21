@@ -10,6 +10,7 @@
  * It also carries the store's Schema.org structured data for search engines.
  */
 
+import Link from "next/link";
 import { Tenor_Sans } from "next/font/google";
 import { products } from "@/lib/products";
 
@@ -201,11 +202,13 @@ const CARDS: CardData[] = [
   { x: 195, y: 1229, img: "/shop/rose-white.png", showSubtitle: true, showRating: true, bg: "#F9F9F9" },
 ];
 
-function ProductCard({ card }: { card: CardData }) {
+function ProductCard({ card, href }: { card: CardData; href: string }) {
   return (
-    <div
+    <Link
+      href={href}
       style={{
         ...abs(card.x, card.y, 165, 285),
+        display: "block",
         background: card.bg,
         border: "1px solid #FDF2E4",
         borderRadius: 15,
@@ -237,7 +240,7 @@ function ProductCard({ card }: { card: CardData }) {
           <div style={{ ...abs(89.51, 265), ...text(12, 14, GREY) }}>4.8 Ratings</div>
         </>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -383,9 +386,9 @@ export default function HomePage() {
           </div>
         ))}
 
-        {/* Product grid */}
+        {/* Product grid — cards route to the product detail pages */}
         {CARDS.map((card, i) => (
-          <ProductCard key={i} card={card} />
+          <ProductCard key={i} card={card} href={`/products/${products[i % products.length].handle}`} />
         ))}
 
         {/* Pagination */}
@@ -432,18 +435,26 @@ export default function HomePage() {
       <div className="fighome-navfix">
         <div className="fighome-navstage">
           <nav style={{ ...abs(6, 0, 363, 60), background: INK, borderRadius: 20 }}>
-          <div style={{ ...abs(16, 10, 40, 40), background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
+          <Link
+            href="/"
+            aria-label="Home"
+            style={{ ...abs(16, 10, 40, 40), display: "block", background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}
+          >
             <span style={abs(8, 8, 24, 24)}>
               <NavHomeIcon />
             </span>
             <div style={{ ...abs(18, 34, 4, 4), background: "#FFFFFF", borderRadius: "50%" }} />
-          </div>
-          <div style={{ ...abs(113, 10, 40, 40), background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
+          </Link>
+          <Link
+            href="/shop"
+            aria-label="Shop"
+            style={{ ...abs(113, 10, 40, 40), display: "block", background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}
+          >
             <span style={abs(8, 8, 24, 24)}>
               <NavCartIcon />
             </span>
             <div style={{ ...abs(22, 12, 8, 8), background: "#F13658", borderRadius: 7.5 }} />
-          </div>
+          </Link>
           <div style={{ ...abs(210, 10, 40, 40), background: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/shop/fav-nav.png" alt="Favourites" width={26} height={24} style={{ ...abs(7, 8, 26, 24), objectFit: "cover" }} />
