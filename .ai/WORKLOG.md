@@ -1664,3 +1664,6 @@ unconfirmed business assumptions).
   (owner request; the old login-page link bounced already-identified
   visitors straight back). Announcement seeds made fully bilingual — titles
   and bodies EN + 中文 (owner request). e2e: nickname-popup test added.
+- Follow-up: guide page now renders EN and 中文 as side-by-side columns
+  (owner request) — one column per "# " heading in USER-GUIDE.md, stacking
+  on narrow screens.
