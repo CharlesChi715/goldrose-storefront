@@ -1,39 +1,52 @@
 # GoldRose / goldrose-storefront — SUMMARY
 
-Single source of truth for anyone (human or agent) working here. Read first; keep fresh.
+Single source of truth. Read first; keep fresh. "§" = sections of the spec, [docs/admin-design.md](docs/admin-design.md).
 
 ## Goal
 
-- Sell the 24K gold-dipped rose gift line direct-to-consumer — **international, USD-only V1, storefront in English** — via this custom Next.js storefront + our own Shopify-clone admin. Brand: **GoldRose**.
-- Payments: **native checkout, PayPal Orders v2 (sandbox until launch)**; provider choice stays OQ-1 (schema is provider-neutral). Shopify code is fully removed; the subscription is cancelled by the owner **after** the §14.3 walkthrough.
+- Sell the 24K gold-dipped rose gift line DTC — **international, USD-only V1, English storefront**. Brand: **GoldRose**.
+- **Native checkout, PayPal Orders v2 (sandbox until launch)**; provider choice = OQ-1 (schema provider-neutral). Shopify code fully removed; owner cancels the subscription **after** the §14.3 walkthrough.
 
-## Current state (2026-07-22)
+## File structure
 
-- **ADMIN BUILD COMPLETE — stages 0–9 all merged to `main`** per [docs/admin-design.md](docs/admin-design.md) §0 autonomous run. Full report + **owner activation checklist**: [docs/BUILD-REPORT.md](docs/BUILD-REPORT.md).
-- `/admin` is a bilingual (EN/中文) Polaris Shopify-clone: Home dashboard, Orders (drafts, abandoned, fulfill/refund/cancel, timeline), Products (variants, media, inventory + movement log), Customers, Content (slots + files), Analytics (first-party beacon: sessions/funnel/live visitors; **attribution 2026-07-22 (owner request)**: sessions by channel Google/FB/TikTok/Ins/Pinterest/YouTube + visitor country (geo-IP) + utm_campaign per creative; live card splits by channel+country, 30s auto-refresh — owner must use UTM-tagged links, see USER-GUIDE "Marketing links"), Discounts, Settings (zones, tax, notifications, policies, Search engine & AI), ⌘K search.
-- **Storefront reads the DB** (catalog view, revalidate 300); pixel-exact Figma design intact — home byte-exact, shop/product gated by masked pixel-diff (only the designated text boxes show live data). SEO/GEO live: sitemap, robots (AI-crawler toggle), /llms.txt, Product JSON-LD.
-- **Nav button art = owner's cat icons (2026-07-22, matched folder names)**: bottom bar PNGs in `public/bottom-nav/` (outline idle, `-active` colored shown on own page; raws in `assets/bottom-nav-buttons/`); tabs Home / Shop / Wholesale / Me (wholesale has no page yet → non-link; **Me → /account** since 2026-07-23). Top bar set in `public/top-nav/` (back/search/wishlist/cart/menu + `wishlist-active` = gold heart; raws in `assets/top-nav-buttons/`, public copies cropped to content via sharp) — **wired into ALL headers** (home `app/page.tsx` + `VHeader`): menu/search/cart replace the Figma SVG icons (deleted, HeartIcon kept for shop cards), `BackButton` defaults to `/top-nav/back.png` (old `home/back.png` + `veloria/back.png` deleted); wishlist heart on product pages (`components/WishlistButton.tsx` — tap toggles outline↔gold, saved per product in localStorage; no backend yet). Pixel baselines regenerated (bottom nav + header). Storefront's inline no-calc `<script>` fallbacks → `components/NoCalcScale.tsx` client component (React never runs inline scripts on client nav).
-- **SUPABASE ACTIVATED (2026-07-22, verified)**: keys in `.env.local` AND Vercel — live admin auto-locked (login: owner email in `admin_users`), catalog + forum announcements seeded hosted. ⚠️ local dev now writes the SAME live db; the e2e suite stays on the file adapter (playwright blanks the env). `npm run seed -- --demo` (new flag) tops up the hosted db with the demo store (orders #901–905, customers, GOLD10, page views, feedback) — refuses if orders exist, skips non-empty tables; owner still needs to run it (classifier blocked the agent). PayPal sandbox = remaining checklist.
-- **Supabase activation IN PROGRESS (2026-07-22)**: hosted project created (region ap-southeast-2-ish, project ref cfvsvgbldnzkcjvbwnjp), migration run, clean seed done + announcements inserted, verified (catalog public / orders 401 / bucket ✓). Local `.env.local` now points at hosted. Owner auth user + allowlist row created; local admin = real email/password login. **ADMIN_OPEN_ACCESS=1 override built (owner decision)**: keeps admin open on hosted during testing, but everyone funnels through the login page — nickname is the minimum identity (proxy gate; e2e pinned to local adapter). **Sign-up + approval (owner request)**: "Request access" on the login page (hosted only) creates a Supabase account; unapproved logins see "awaiting approval"; owner approves/removes at Settings → Team (requireRealAdmin — nickname guests 404). **Owner decision (2026-07-22 evening): run live-like now — everyone logs in; the ADMIN_OPEN_ACCESS override was later DELETED from the code entirely** (open access exists only in local no-Supabase dev mode). Sign-up nickname is MANDATORY (user_metadata) and is the forum identity (popup cookie = optional override; pre-nickname accounts fall back to email name). Password recovery: "Forgot password?" on login → Supabase reset email → /admin/reset-password (proxy-exempt; browser client exchanges the code). REMAINING (owner): Vercel env vars (3 Supabase keys, Prod+Preview) + redeploy; Supabase: confirm-email OFF + add redirect URLs (live + localhost /admin/reset-password) in Auth → URL Configuration.
-- **Login methods (2026-07-23, owner request)**: **passkeys for admins + customers** (Supabase WebAuthn beta, experimental client flag) and **customer accounts** — storefront `/account` (Me tab): Continue with Google / Apple → `/auth/callback` (PKCE), passkey sign-in, orders listed by provider-verified email, `customers.auth_user_id` link (migration `0002_customer_auth.sql`); admin: "Sign in with a passkey" on /admin/login (allowlist re-checked server-side after the ceremony) + Settings → Security to add/rename/remove passkeys (EN/中文). ALL DORMANT until owner runs BUILD-REPORT §5 item 2 (enable Passkeys RP `goldrose-storefront.vercel.app` — ⚠️ changing RP ID later kills enrolled passkeys; Google OAuth client; Apple needs paid dev account + secret rotation every 6 months; add /auth/callback redirect URLs). Local/e2e mode: /account shows a "sign-in unavailable" card. Password-account (admin tester) emails are NOT trusted for order linking — auto-confirm is on, would let anyone claim a stranger's orders.
-- **Visitor ideas (2026-07-23)**: the concierge chat bubble now collects ideas/feedback (`/api/feedback` → `feedback` table); owner reads/deletes them at Content → Ideas. Persists locally; on live it's ephemeral until Supabase activation (same as all data).
-- **Testing forum (2026-07-22)**: /admin/forum — threads + replies for the testing crew; identity = the account's sign-up nickname (login page shows a nickname field ONLY in dormant open-access mode — owner removed per-login nickname entry). Posts editable by their author (nickname match, "edited" marker); attachments per post (paste images or attach files, ≤5×5 MB, inline image rendering — `forum_posts.attachments` jsonb); nickname changeable via the forum popup (on hosted it updates the ACCOUNT nickname permanently; cookie fallback in local mode); two seeded 📢 announcement threads explain the forum + testing phase (fully bilingual, titles + bodies). Tables `forum_threads`/`forum_posts` in both backends. Owner also confirmed **Supabase (not self-hosted Postgres)**; backup plan = Free plan + nightly pg_dump→AWS S3 (Pro at launch) — see [docs/Database.md](docs/Database.md). **Tester guide**: /admin/guide (nav item "Guide") renders [docs/USER-GUIDE.md](docs/USER-GUIDE.md) (owner-editable markdown; EN and 中文 in side-by-side columns, one per `# ` heading).
-- **Testing-phase conveniences (2026-07-23)**: /admin needs NO login while no Supabase + no ADMIN_DEV_PASSWORD (auto-locks when either exists); demo store data seeds locally + on live (orders #901–905, customers, GOLD10, analytics) — hosted activation seeds clean; EN/中文 toggle is a visible top-bar button.
-- **Team revocation is owner-only (2026-07-22)**: owner = earliest-created approved account (`lib/admin/team-owner.ts`); Remove gated server-side in the team action + hidden in UI for non-owners ("Owner" badge). Approve stays any-real-admin.
-- Tests: 52 e2e (Playwright vs production build, own port 3001) + 14 unit — green. `npm run seed -- --reset` restores a pristine local db.
-- Live deploy at <https://goldrose-storefront.vercel.app> now runs the build (fixed via .npmrc legacy-peer-deps): open demo admin, seeded demo store, mock checkout. Ephemeral until Supabase env vars are set.
+```text
+goldrose-storefront/
+├── app/                 # Next.js App Router: storefront (/, /shop, /products/[slug], /account), /admin, API routes, sitemap/robots/llms.txt
+├── components/          # Storefront + shared UI (VHeader, BackButton, WishlistButton, NoCalcScale…)
+├── lib/                 # Domain logic: admin/, checkout/, supabase/ (2 backends: hosted / .data file adapter), account/, cart/
+├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth)
+├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
+├── tests/               # 52 Playwright e2e (production build, port 3001, file adapter) + 14 unit — green
+├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
+├── assets/              # Raw owner art (not served; cropped copies go to public/)
+├── docs/                # admin-design.md (SPEC), USER-GUIDE.md (rendered at /admin/guide), Database.md, ideas.md, seo-roadmap.md, archive/
+└── SUMMARY.md           # this file
+```
+
+## Current state (2026-07-23)
+
+- **Admin build COMPLETE** — stages 0–9 on `main` per §0 one-shot run. Historical report: [docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) — its **§5 owner activation checklist is still the live to-do list**.
+- `/admin` = bilingual (EN/中文, visible top-bar toggle) Polaris Shopify-clone: Home, Orders (drafts/abandoned/fulfill/refund/cancel/timeline), Products (variants, media, inventory + movements), Customers, Content (slots/files/Ideas), Analytics (first-party beacon; channel + country + UTM attribution — owner must use UTM-tagged links, see USER-GUIDE "Marketing links"), Discounts, Settings, ⌘K search.
+- **Storefront reads the DB** (revalidate 300). Pixel-exact Figma design guarded by pixel-diff; only designated text boxes show live data. SEO/GEO baseline live: sitemap, robots (AI-crawler toggle), /llms.txt, JSON-LD.
+- **Nav art = owner's cat icons**: `public/bottom-nav/` (Home / Shop / Wholesale / Me; wholesale = non-link, Me → /account) + `public/top-nav/` (back/search/wishlist/cart/menu), wired into all headers. Wishlist heart per product = localStorage only.
+- **SUPABASE ACTIVE (hosted, ref `cfvsvgbldnzkcjvbwnjp`)**: migrations run, clean seed + announcements, verified. ⚠️ **local dev writes the SAME live db** (e2e stays on the file adapter). `npm run seed -- --demo` tops up demo store data (refuses if orders exist) — owner still to run it.
+- **Admin auth = live-like**: everyone logs in (open-access override deleted; local no-Supabase dev stays open). "Request access" sign-up → owner approves at Settings → Team; **sign-up nickname mandatory** = forum identity; "Forgot password?" → `/admin/reset-password`. Team **Remove is owner-only** (earliest approved account, `lib/admin/team-owner.ts`).
+- **Login methods (2026-07-23, DORMANT until owner runs archive/BUILD-REPORT §5 item 2)**: passkeys for admins (+ Settings → Security) & customers (Supabase WebAuthn beta); customer accounts at `/account` — Google/Apple OAuth (PKCE `/auth/callback`), orders matched by provider-verified email (`customers.auth_user_id`, migration 0002). ⚠️ RP ID = `goldrose-storefront.vercel.app`; changing it later kills enrolled passkeys. Password-account emails NOT trusted for order linking (auto-confirm on). Local/e2e: /account shows "sign-in unavailable".
+- **Tester tooling**: forum `/admin/forum` (threads/replies, attachments ≤5×5 MB, edit-own, nickname popup); guide `/admin/guide` renders [docs/USER-GUIDE.md](docs/USER-GUIDE.md) (owner-editable, EN+中文 columns). Visitor ideas via storefront chat bubble → `feedback` table → Content → Ideas.
+- **Live deploy** <https://goldrose-storefront.vercel.app> — still ephemeral (demo mode) until owner sets the 3 Supabase env vars in Vercel + redeploys, and in Supabase Auth: confirm-email OFF + redirect URLs (live + localhost `/admin/reset-password`, `/auth/callback`).
+- `npm run seed -- --reset` restores a pristine local db.
 
 ## Key facts / constraints
 
-- All money integer cents; orders never hard-deleted; admin strings all go through `t()` (EN + Shopify 中文); service key only server-side; sandbox/mock money only — `PAYPAL_ENV=live` is owner-only.
-- Design doc [docs/admin-design.md](docs/admin-design.md) is the spec (§0 guardrails restored 2026-07-22 after an accidental deletion).
-- Owner ideas verbatim in [docs/ideas.md](docs/ideas.md) — don't expand them.
+- Money = integer cents; orders never hard-deleted; admin strings via `t()` (EN + Shopify 中文); service key server-side only; sandbox/mock money only — `PAYPAL_ENV=live` is owner-only.
+- [docs/admin-design.md](docs/admin-design.md) is the spec — don't compress or renumber (§0 guardrails were once accidentally deleted and restored).
+- Owner ideas verbatim in [docs/ideas.md](docs/ideas.md) — don't expand. [docs/Database.md](docs/Database.md): Supabase Free + nightly pg_dump→S3 backup plan; edit only on request.
 
 ## Open questions (§4)
 
-- OQ-1 payment provider (PayPal working assumption — built), OQ-2 real shipping rates (RoW $19.95 is a placeholder), OQ-3 real product info (seed placeholders live in the designated boxes), OQ-4 Supabase project (checklist step 1).
+- OQ-1 payment provider (PayPal working assumption — built) · OQ-2 real shipping rates (RoW $19.95 placeholder) · OQ-3 real product info (seed placeholders) · OQ-4 Supabase — **done**.
 
 ## Next steps
 
-- **Charles: run the activation checklist** in [docs/BUILD-REPORT.md](docs/BUILD-REPORT.md) §5 (Supabase → PayPal sandbox → walkthrough → screenshots → cancel Shopify → revoke Figma token).
+- **Charles: finish the activation checklist** ([docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) §5): Vercel env vars + redeploy → Supabase auth config → auth providers (passkeys RP, Google/Apple) → PayPal sandbox → §14.3 walkthrough → screenshots → cancel Shopify → revoke Figma token.
 - Then: real rates (OQ-2), real product content (OQ-3), launch checklist items.

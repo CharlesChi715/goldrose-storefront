@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-07-23.** Historical record of the one-shot admin build.
+> Still live: the **§5 owner activation checklist** below (tracked from
+> `SUMMARY.md` → Next steps).
+
 # GoldRose Admin Build — Report (§0.5)
 
 **Build:** one-shot autonomous run per [docs/admin-design.md](admin-design.md) §0, stages 0–9, one commit per stage on `main`.

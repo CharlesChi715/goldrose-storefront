@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-07-23.** Shopify-era snapshot — `lib/products.ts`, cart
+> permalinks and `launch-checklist.md` no longer exist. Current state lives in
+> `SUMMARY.md`; the spec is `docs/admin-design.md`.
+
 # Buyer flow map — every step, its implementation, and its status
 
 This walks the whole shopper journey one step at a time: how each step works

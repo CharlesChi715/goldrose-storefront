@@ -89,7 +89,7 @@
 ### 0.5 Deliverables on completion
 
 1. The build itself, merged to `main` stage by stage.
-2. `docs/BUILD-REPORT.md` — per stage: what shipped and how it was
+2. `docs/archive/BUILD-REPORT.md` (delivered, since archived) — per stage: what shipped and how it was
    verified; every self-made decision and why; everything mocked and what
    activates it; known gaps.
 3. **Owner activation checklist** (inside the report): create the Supabase
@@ -901,7 +901,7 @@ step**, because the live Shopify admin is the visual reference for the clone
 - **Owner actions**: after the final walkthrough (§14.3) passes, cancel the
   Shopify trial/subscription. The single historical Shopify test order
   (2026-07-15, PayPal $1-test since reverted) needs no migration.
-- **Launch prerequisites** (tracked in `docs/launch-checklist.md`, not
+- **Launch prerequisites** (tracked in `docs/archive/launch-checklist.md`, not
   blockers while testing): sales-tax approach (simplest is tax-inclusive
   pricing or a tax API at launch), real shipping rates per zone + carrier
   choice for international, customs/duties stance, real domain, policy

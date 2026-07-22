@@ -1806,3 +1806,20 @@ unconfirmed business assumptions).
 - Security note: password-account emails are NOT trusted for order linking (auto-confirm is on) — only Google/Apple-verified emails claim checkout history.
 - Dormant until owner runs BUILD-REPORT §5 item 2 (enable Passkeys RP + Google/Apple providers + redirect URLs; Apple secret rotates 6-monthly; RP ID change breaks enrolled passkeys).
 - Tests: 55 e2e + 20 unit green (new account.spec.ts); home pixel baseline still byte-exact.
+
+## 2026-07-23 — docs cleanup: archive stale docs, compress SUMMARY, rewrite README
+
+- Owner asked for docs/ + SUMMARY.md to be concise; redundant/stale content archived.
+- Moved to docs/archive/ (git mv, ARCHIVED banners added): flow-map.md (Shopify-era,
+  described deleted lib/products.ts) and BUILD-REPORT.md (§5 activation checklist
+  still live, now tracked from SUMMARY → Next steps).
+- SUMMARY.md compressed to short bullets + added the mandatory file-structure ASCII
+  chart; merged the two overlapping Supabase-activation mega-bullets; all ⚠️ warnings
+  (shared live db, RP ID, order-linking trust) kept.
+- README.md rewritten from scratch — old one still described the deleted Shopify
+  cart-permalink checkout end to end. Now a short current map (stack, run/test,
+  deploy, structure, docs table). nextjs-agent-rules block preserved.
+- Path-only link fixes: docs/Database.md + admin-design.md §0.5/§14 now point at
+  docs/archive/ paths (no spec content or numbering touched).
+- Left alone by design: admin-design.md (spec), ideas.md (verbatim), USER-GUIDE.md
+  (rendered at /admin/guide), Database.md content, seo-roadmap.md.

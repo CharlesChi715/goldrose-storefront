@@ -10,7 +10,7 @@ For agents: keep this file concise.
 **DECISION (owner, 2026-07-22): Option 1 — Supabase.** No self-hosted
 Postgres. The code already targets it (hosted Supabase backend + local file
 fallback); what remains is the activation checklist in
-[BUILD-REPORT.md](BUILD-REPORT.md) §5 step 1 (create the Supabase project and
+[archive/BUILD-REPORT.md](archive/BUILD-REPORT.md) §5 step 1 (create the Supabase project and
 set the env vars).
 
 ## Backup plan (2026-07-22): Supabase Free + DIY backups on AWS
