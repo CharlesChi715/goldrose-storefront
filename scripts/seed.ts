@@ -9,6 +9,10 @@
  *   rows, but only into an EMPTY database — it never deletes hosted data.
  *   The admin_users row is skipped (it must reference a real auth.users
  *   uid — activation checklist).
+ * - `--demo` (hosted, testing phase): also seed the demo store (orders
+ *   #901–905, customers, GOLD10, page views, feedback, forum announcements).
+ *   Works on an empty db or on top of an already-seeded catalog; refuses if
+ *   any orders exist, and skips tables that already hold rows (idempotent).
  *
  * Ends by printing the seeded products/variants + settings/content keys, so
  * the Stage 1 acceptance check is the script output itself.
@@ -20,7 +24,7 @@ import { getSupabaseEnv } from "../lib/supabase/env.ts";
 import { createLocalStore } from "../lib/supabase/local.ts";
 import { createRemoteStore } from "../lib/supabase/remote.ts";
 import { buildSeedTables } from "../lib/supabase/seed-data.ts";
-import type { TableStore } from "../lib/supabase/types.ts";
+import type { TableName, TableStore } from "../lib/supabase/types.ts";
 
 /** Minimal .env.local loader (Node scripts don't get Next's env handling). */
 async function loadEnvLocal(): Promise<void> {
@@ -81,25 +85,69 @@ async function seedLocal(reset: boolean): Promise<void> {
   await printSummary(store);
 }
 
-async function seedHosted(): Promise<void> {
+async function seedHosted(demo: boolean): Promise<void> {
   const store = createRemoteStore();
-  const existing = await store.all("products");
-  if (existing.length > 0) {
+  const existingProducts = await store.all("products");
+  const existingOrders = await store.all("orders");
+
+  // Hard stop: a store with orders is (or has been) live — never seed into it.
+  if (existingOrders.length > 0) {
     console.error(
-      "Hosted database already has products — refusing to seed. (This script never deletes hosted data.)",
+      "Hosted database already has orders — refusing to seed. (This script never touches a store with order data.)",
+    );
+    process.exitCode = 1;
+    return;
+  }
+  if (existingProducts.length > 0 && !demo) {
+    console.error(
+      "Hosted database already has products — refusing to seed. (This script never deletes hosted data. Pass --demo to add the testing-phase demo store on top of the existing catalog.)",
     );
     process.exitCode = 1;
     return;
   }
 
-  // Real store: no demo data (that exists for the testing phase only).
-  const tables = buildSeedTables(new Date().toISOString(), { includeDemo: false });
-  // FK-safe insert order; admin_users deliberately skipped for hosted (see header).
-  await store.insert("products", tables.products);
-  await store.insert("product_images", tables.product_images);
-  await store.insert("product_variants", tables.product_variants);
-  await store.insert("site_content", tables.site_content);
-  await store.insert("settings", tables.settings);
+  // Without --demo the real store seeds clean (demo data is testing-phase only).
+  const tables = buildSeedTables(new Date().toISOString(), { includeDemo: demo });
+
+  if (existingProducts.length === 0) {
+    // FK-safe insert order; admin_users deliberately skipped for hosted (see header).
+    await store.insert("products", tables.products);
+    await store.insert("product_images", tables.product_images);
+    await store.insert("product_variants", tables.product_variants);
+    await store.insert("site_content", tables.site_content);
+    await store.insert("settings", tables.settings);
+  } else {
+    console.log("Catalog already seeded — adding the demo store on top.");
+  }
+
+  if (demo) {
+    // Demo top-up, FK-safe order. Tables that already hold rows are skipped
+    // (e.g. the forum announcements), so re-running --demo is harmless.
+    const topUp = async <T extends TableName>(table: T): Promise<void> => {
+      const rows = tables[table];
+      if (rows.length === 0) return;
+      const existing = await store.all(table);
+      if (existing.length > 0) {
+        console.log(`  • ${table}: ${existing.length} rows already present — skipped`);
+        return;
+      }
+      await store.insert(table, rows);
+      console.log(`  • ${table}: inserted ${rows.length} demo rows`);
+    };
+    console.log("Demo data:");
+    await topUp("customers");
+    await topUp("customer_events");
+    await topUp("orders");
+    await topUp("order_lines");
+    await topUp("order_events");
+    await topUp("checkouts");
+    await topUp("discounts");
+    await topUp("page_views");
+    await topUp("feedback");
+    await topUp("forum_threads");
+    await topUp("forum_posts");
+  }
+
   await printSummary(store);
   console.log(
     "\nRemember (activation checklist): create the owner user in Supabase Auth and insert their uid + email into admin_users.",
@@ -109,8 +157,9 @@ async function seedHosted(): Promise<void> {
 async function main(): Promise<void> {
   await loadEnvLocal();
   const reset = process.argv.includes("--reset");
+  const demo = process.argv.includes("--demo");
   if (getSupabaseEnv().hosted) {
-    await seedHosted();
+    await seedHosted(demo);
   } else {
     await seedLocal(reset);
   }
