@@ -1749,3 +1749,10 @@ unconfirmed business assumptions).
   updated; LIVE DB needs one-line ALTER — owner). Images render inline,
   other files as links. serverActions bodySizeLimit raised to 30mb.
   e2e: reply-with-image coverage.
+- Perf (language toggle seconds-slow): root cause = toggle did TWO
+  sequential server round trips (action gated on requireAdmin, then
+  router.refresh re-running the force-dynamic dashboard = auth + ~22
+  full-table queries; orders ×6, page_views ×3). Fix: lang now lives in
+  client state (PolarisShell useState + SetLangContext) so the flip is
+  instant; cookie written fire-and-forget without auth gate; analytics
+  reads deduped per request via React cache (cachedAll).

@@ -14,8 +14,12 @@ import { ADMIN_LANG_COOKIE, isAdminLang } from "@/lib/admin/i18n";
 import { requireAdmin, signOut } from "@/lib/admin/auth";
 import { searchAdmin, type SearchResults } from "@/lib/admin/analytics";
 
+/**
+ * No requireAdmin here on purpose (perf fix 2026-07-22): this only writes
+ * the caller's own display-language cookie — whitelist-validated, zero
+ * security value — and the auth gate cost a Supabase round trip per toggle.
+ */
 export async function setAdminLangAction(lang: string): Promise<void> {
-  await requireAdmin();
   if (!isAdminLang(lang)) {
     return;
   }

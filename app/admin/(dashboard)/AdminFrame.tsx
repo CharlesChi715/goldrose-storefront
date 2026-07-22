@@ -38,7 +38,7 @@ import {
   SettingsIcon,
 } from "@shopify/polaris-icons";
 import { searchAdminAction, setAdminLangAction, signOutAction } from "../actions";
-import { useAdminLang, useAdminT } from "../PolarisShell";
+import { useAdminLang, useAdminT, useSetAdminLang } from "../PolarisShell";
 import type { AdminAlert } from "@/lib/admin/analytics";
 import type { SearchResults } from "@/lib/admin/analytics";
 
@@ -106,12 +106,15 @@ export function AdminFrame({
     router.push(url);
   }
 
+  const setLang = useSetAdminLang();
   const toggleLang = useCallback(() => {
-    startTransition(async () => {
-      await setAdminLangAction(lang === "en" ? "zh" : "en");
-      router.refresh();
-    });
-  }, [lang, router]);
+    const next = lang === "en" ? "zh" : "en";
+    // Instant client flip (perf fix 2026-07-22): every admin string renders
+    // from LangContext, so no server round trip is needed to switch. The
+    // cookie write runs in the background for future page loads.
+    setLang(next);
+    void setAdminLangAction(next);
+  }, [lang, setLang]);
 
   const logOut = useCallback(() => {
     startTransition(async () => {

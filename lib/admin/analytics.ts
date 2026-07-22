@@ -6,8 +6,25 @@
  * period, like Shopify's compare-to-previous.
  */
 
+import { cache } from "react";
 import { getStore } from "@/lib/supabase/store.ts";
-import type { OrderRow, PageViewRow } from "@/lib/supabase/types.ts";
+import type {
+  DbTables,
+  OrderRow,
+  PageViewRow,
+  TableName,
+} from "@/lib/supabase/types.ts";
+
+/**
+ * Per-request table reads (perf fix 2026-07-22): one dashboard render calls
+ * analyticsSummary ×3 + homeFeed ×2 + adminAlerts, which used to fetch
+ * `orders` six times and the unbounded `page_views` three times. React
+ * cache() collapses identical reads within a single request.
+ */
+const cachedAllUntyped = cache((table: TableName) => getStore().all(table));
+function cachedAll<T extends TableName>(table: T): Promise<DbTables[T][]> {
+  return cachedAllUntyped(table) as Promise<DbTables[T][]>;
+}
 
 export type RangeKey = "today" | "7d" | "30d" | "90d";
 
@@ -95,11 +112,10 @@ export async function analyticsSummary(
   key: RangeKey,
   now = new Date(),
 ): Promise<AnalyticsSummary> {
-  const store = getStore();
   const [orders, lines, views] = await Promise.all([
-    store.all("orders"),
-    store.all("order_lines"),
-    store.all("page_views"),
+    cachedAll("orders"),
+    cachedAll("order_lines"),
+    cachedAll("page_views"),
   ]);
   const { current, previous } = rangesFor(key, now);
 
@@ -265,13 +281,12 @@ export type HomeFeed = {
 };
 
 export async function homeFeed(now = new Date()): Promise<HomeFeed> {
-  const store = getStore();
   const [orders, variants, products, checkouts, settings] = await Promise.all([
-    store.all("orders"),
-    store.all("product_variants"),
-    store.all("products"),
-    store.all("checkouts"),
-    store.all("settings"),
+    cachedAll("orders"),
+    cachedAll("product_variants"),
+    cachedAll("products"),
+    cachedAll("checkouts"),
+    cachedAll("settings"),
   ]);
   const threshold =
     (settings.find((row) => row.key === "low_stock_threshold")?.value as number) ?? 10;
@@ -313,16 +328,15 @@ export type SearchResults = {
 };
 
 export async function searchAdmin(query: string): Promise<SearchResults> {
-  const store = getStore();
   const needle = query.trim().toLowerCase();
   if (!needle) {
     return { orders: [], products: [], customers: [] };
   }
   const [orders, products, variants, customers] = await Promise.all([
-    store.all("orders"),
-    store.all("products"),
-    store.all("product_variants"),
-    store.all("customers"),
+    cachedAll("orders"),
+    cachedAll("products"),
+    cachedAll("product_variants"),
+    cachedAll("customers"),
   ]);
 
   const orderHits = orders
@@ -376,10 +390,9 @@ export async function searchAdmin(query: string): Promise<SearchResults> {
 export type AdminAlert = { message: string; url: string };
 
 export async function adminAlerts(): Promise<AdminAlert[]> {
-  const store = getStore();
   const [orders, events] = await Promise.all([
-    store.all("orders"),
-    store.all("order_events"),
+    cachedAll("orders"),
+    cachedAll("order_events"),
   ]);
   const feed = await homeFeed();
   const orderById = new Map(orders.map((order) => [order.id, order]));
