@@ -34,6 +34,9 @@ turn it into a real task.
   nickname to tell whos who. leave the email and password as it is just add
   nickanme field in login page.
 
+- 🔍 well i think how about keep the email and password fucntions really. and
+  add passkeys for log in.
+
 ## General / unsorted
 
 - 🆕 _(anything that doesn't fit a list above)_
