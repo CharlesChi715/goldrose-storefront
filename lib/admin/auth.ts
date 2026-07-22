@@ -37,18 +37,42 @@ export type AdminSession = {
 
 /* ---------- Local (file adapter) sessions ---------- */
 
-function devPassword(): string {
-  return process.env.ADMIN_DEV_PASSWORD?.trim() || "goldrose-admin";
+/**
+ * The dev-login password. The "goldrose-admin" default exists ONLY in
+ * development: on a production deployment with no Supabase configured, the
+ * fallback login stays disabled unless ADMIN_DEV_PASSWORD is explicitly set
+ * — a public site must never ship a known default password.
+ */
+function devPassword(): string | null {
+  const explicit = process.env.ADMIN_DEV_PASSWORD?.trim();
+  if (explicit) {
+    return explicit;
+  }
+  return process.env.NODE_ENV === "production" ? null : "goldrose-admin";
 }
 
+let memorySecret: string | null = null;
+
 async function localSecret(): Promise<string> {
+  // With ADMIN_DEV_PASSWORD set, derive a stable secret from it so sessions
+  // survive serverless instance churn (no shared disk there).
+  const password = process.env.ADMIN_DEV_PASSWORD?.trim();
+  if (password) {
+    return createHmac("sha256", "goldrose-admin-session-v1").update(password).digest("hex");
+  }
   try {
     return (await fs.readFile(SECRET_FILE, "utf8")).trim();
   } catch {
-    const secret = randomBytes(32).toString("hex");
-    await fs.mkdir(path.dirname(SECRET_FILE), { recursive: true });
-    await fs.writeFile(SECRET_FILE, secret, "utf8");
-    return secret;
+    if (!memorySecret) {
+      memorySecret = randomBytes(32).toString("hex");
+      try {
+        await fs.mkdir(path.dirname(SECRET_FILE), { recursive: true });
+        await fs.writeFile(SECRET_FILE, memorySecret, "utf8");
+      } catch {
+        // Read-only fs — in-memory secret; sessions last per instance only.
+      }
+    }
+    return memorySecret;
   }
 }
 
@@ -170,8 +194,10 @@ export async function signInWithPassword(
   const env = getSupabaseEnv();
 
   if (!env.hosted) {
-    // Local dev fallback: any email + the dev password.
-    if (!safeEqual(password, devPassword())) {
+    // Local dev fallback: any email + the dev password. Disabled entirely in
+    // production unless ADMIN_DEV_PASSWORD is explicitly set (see devPassword).
+    const expected = devPassword();
+    if (!expected || !safeEqual(password, expected)) {
       return { ok: false, error: "invalid" };
     }
     const token = await makeLocalToken(email || LOCAL_OWNER.email);

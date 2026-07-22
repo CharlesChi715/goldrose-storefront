@@ -71,11 +71,26 @@ class LocalStore implements TableStore {
     return this.cache;
   }
 
+  /** True once the filesystem rejected a write (e.g. Vercel's read-only
+   * serverless fs) — from then on this store is in-memory only. */
+  private ephemeral = false;
+
   private async persist(db: DbFile): Promise<void> {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    const tmp = `${DB_FILE}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
-    await fs.rename(tmp, DB_FILE);
+    if (this.ephemeral) {
+      return;
+    }
+    try {
+      await fs.mkdir(DATA_DIR, { recursive: true });
+      const tmp = `${DB_FILE}.tmp`;
+      await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
+      await fs.rename(tmp, DB_FILE);
+    } catch (error) {
+      // Read-only fs (serverless without Supabase): keep serving the seeded
+      // in-memory copy so the site demos instead of erroring. Data written
+      // here does not survive the instance — hosted Supabase is the fix.
+      this.ephemeral = true;
+      console.warn("[local-db] filesystem not writable — running in-memory:", error);
+    }
   }
 
   /** Reset to a fresh seed (used by scripts/seed.ts and tests). */

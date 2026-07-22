@@ -15,11 +15,22 @@ import { CheckoutClient } from "./CheckoutClient";
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage() {
-  const [catalog, zones, settings] = await Promise.all([
-    getCatalog(),
-    getShippingZones(),
-    getSettingsMap(),
-  ]);
+  // A dead/unwritable DB must degrade to the empty-cart screen, never a 500.
+  let catalog: Awaited<ReturnType<typeof getCatalog>> = [];
+  let zones: Awaited<ReturnType<typeof getShippingZones>> = [];
+  let showDiscountField = true;
+  try {
+    const [loadedCatalog, loadedZones, settings] = await Promise.all([
+      getCatalog(),
+      getShippingZones(),
+      getSettingsMap(),
+    ]);
+    catalog = loadedCatalog;
+    zones = loadedZones;
+    showDiscountField = settings.checkout.discount_field_enabled;
+  } catch {
+    // fall through with empty catalog
+  }
   const countries = servedCountries(zones);
 
   const headerStore = await headers();
@@ -38,7 +49,7 @@ export default async function CheckoutPage() {
       countries={countries}
       defaultCountry={defaultCountry}
       paypalClientId={paypalClientId}
-      showDiscountField={settings.checkout.discount_field_enabled}
+      showDiscountField={showDiscountField}
     />
   );
 }
