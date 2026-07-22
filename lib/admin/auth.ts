@@ -52,7 +52,10 @@ export type AdminSession = {
  * real accounts; open access exists only in the local no-Supabase mode.)
  */
 export function isOpenAccess(): boolean {
-  return !getSupabaseEnv().hosted && !process.env.ADMIN_DEV_PASSWORD?.trim();
+  // `!url`, not `!hosted`: a PARTIAL Supabase config (URL set, service key
+  // missing/mis-scoped) must fail closed to a locked admin — never fall
+  // open to the public because one env var didn't make it to the deploy.
+  return !getSupabaseEnv().url && !process.env.ADMIN_DEV_PASSWORD?.trim();
 }
 
 /**

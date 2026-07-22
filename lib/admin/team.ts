@@ -10,7 +10,7 @@
  */
 
 import "server-only";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type User } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "@/lib/supabase/env.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import { requireAdmin, type AdminSession } from "./auth";
@@ -58,14 +58,23 @@ export async function listTeam(): Promise<TeamMember[]> {
     }));
   }
 
-  const { data, error } = await adminAuthClient().auth.admin.listUsers({
-    page: 1,
-    perPage: 200,
-  });
-  if (error) {
-    throw new Error(`listUsers: ${error.message}`);
+  // Paginate to the end: storefront customer accounts (Google/Apple/passkey)
+  // share auth.users, so one page would silently drop admins past the cap —
+  // and with them the owner-detection that gates Remove.
+  const client = adminAuthClient();
+  const perPage = 200;
+  const users: User[] = [];
+  for (let page = 1; ; page++) {
+    const { data, error } = await client.auth.admin.listUsers({ page, perPage });
+    if (error) {
+      throw new Error(`listUsers: ${error.message}`);
+    }
+    users.push(...data.users);
+    if (data.users.length < perPage) {
+      break;
+    }
   }
-  return data.users
+  return users
     .map((user) => ({
       userId: user.id,
       email: user.email ?? "",
