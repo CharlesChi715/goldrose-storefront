@@ -18,6 +18,8 @@ test("team page lists the owner as approved", async ({ page }) => {
   const main = page.locator("#AppFrameMain");
   await expect(main.getByText("owner@goldrose.local")).toBeVisible();
   await expect(main.getByText("Approved")).toBeVisible();
+  // Owner rule (2026-07-22): the earliest approved account wears the badge.
+  await expect(main.getByText("Owner", { exact: true })).toBeVisible();
 });
 
 test("request-access sign-up is not offered in local mode", async ({ page }) => {

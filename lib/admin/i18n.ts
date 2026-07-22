@@ -99,6 +99,8 @@ const en = {
   "team.signedUp": "Signed up",
   "team.approve": "Approve",
   "team.remove": "Remove access",
+  "team.owner": "Owner",
+  "team.ownerOnly": "Only the store owner can remove a member's access.",
 
   // Forum (testing phase)
   "forum.postingAs": "Posting as",
@@ -585,6 +587,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "team.signedUp": "注册时间",
   "team.approve": "批准",
   "team.remove": "移除权限",
+  "team.owner": "店主",
+  "team.ownerOnly": "只有店主可以移除成员的权限。",
 
   // Forum (testing phase)
   "forum.postingAs": "发帖身份",

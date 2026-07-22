@@ -25,9 +25,13 @@ import { approveMemberAction, removeMemberAction } from "./actions";
 export function TeamView({
   members,
   selfUserId,
+  ownerUserId,
+  selfIsOwner,
 }: {
   members: TeamMember[];
   selfUserId: string;
+  ownerUserId: string | null;
+  selfIsOwner: boolean;
 }) {
   const t = useAdminT();
   const router = useRouter();
@@ -40,6 +44,11 @@ export function TeamView({
       backAction={{ url: "/admin/settings" }}
     >
       <BlockStack gap="300">
+        {!selfIsOwner && members.some((member) => member.approved) ? (
+          <Text as="p" tone="subdued">
+            {t("team.ownerOnly")}
+          </Text>
+        ) : null}
         {members.length === 0 ? (
           <Card>
             <Text as="p" tone="subdued">
@@ -60,6 +69,9 @@ export function TeamView({
                     ) : (
                       <Badge tone="attention">{t("team.pending")}</Badge>
                     )}
+                    {member.userId === ownerUserId ? (
+                      <Badge tone="info">{t("team.owner")}</Badge>
+                    ) : null}
                     {member.userId === selfUserId ? <Badge>{t("team.you")}</Badge> : null}
                   </InlineStack>
                   {member.createdAt ? (
@@ -69,7 +81,7 @@ export function TeamView({
                   ) : null}
                 </BlockStack>
                 {member.approved ? (
-                  member.userId !== selfUserId ? (
+                  selfIsOwner && member.userId !== selfUserId ? (
                     <Button
                       tone="critical"
                       variant="plain"
