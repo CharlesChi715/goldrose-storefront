@@ -25,11 +25,17 @@ import {
   VHeader,
 } from "@/components/veloria";
 import { cormorant, notoSC, tenor } from "@/lib/fonts";
-import { products } from "@/lib/products";
+import { getPromoSlogan } from "@/lib/content";
+import { getCatalog } from "@/lib/supabase/catalog.ts";
+import { siteBaseUrl } from "@/lib/admin/settings";
+
+// DB-backed data (card links, promo slogan) refreshes without a redeploy (§8).
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Shop",
   description: "Shop the GoldRose 24K gold dipped rose collection.",
+  alternates: { canonical: "/shop" },
 };
 
 const INK = "#1B362B";
@@ -95,7 +101,18 @@ function ProductCard({ card, href }: { card: (typeof CARDS)[number]; href: strin
 
 /* ---------- Page ---------- */
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
+  let handles: string[] = [];
+  let promo = { text: "", isDefault: true };
+  try {
+    const catalog = await getCatalog();
+    handles = catalog.map((product) => product.handle);
+    promo = await getPromoSlogan();
+  } catch {
+    // fixed design still renders
+  }
+
   return (
     <>
       <ScaleFrame height={1938} background="#FFFFFF" fontClass={tenor.className} navGap={1}>
@@ -110,7 +127,7 @@ export default function ShopPage() {
       />
 
       <VHeader backHref="/" right="search" />
-      <PromoBar />
+      <PromoBar slogan={promo.text} isDefault={promo.isDefault} />
 
       {/* Filter bar. The +1.5px on the two tight-line-height Tenor labels is
           the Chrome-vs-Figma baseline correction verified on the homepage. */}
@@ -158,7 +175,7 @@ export default function ShopPage() {
 
       {/* Product grid — each card routes to its product detail page. */}
       {CARDS.map((card, i) => (
-        <ProductCard key={i} card={card} href={`/products/${products[i % products.length].handle}`} />
+        <ProductCard key={i} card={card} href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"} />
       ))}
 
       {/* Pagination */}

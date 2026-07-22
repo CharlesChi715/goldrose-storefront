@@ -15,7 +15,7 @@ import {
   Page,
   Text,
 } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { interpolate } from "@/lib/admin/i18n";
 import type { HomeFeed } from "@/lib/admin/analytics";
 import { useAdminT } from "../PolarisShell";

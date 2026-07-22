@@ -6,7 +6,7 @@
  */
 
 import { Banner, BlockStack, Card, IndexTable, Page, Text } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { useAdminT } from "../../../PolarisShell";
 
 export type AbandonedItem = {

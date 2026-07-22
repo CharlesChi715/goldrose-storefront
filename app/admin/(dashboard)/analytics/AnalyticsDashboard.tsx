@@ -19,7 +19,7 @@ import {
   Select,
   Text,
 } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import type { AnalyticsSummary, MetricPair, RangeKey } from "@/lib/admin/analytics";
 import { useAdminT } from "../../PolarisShell";
 import { SalesChart } from "../SalesChart";

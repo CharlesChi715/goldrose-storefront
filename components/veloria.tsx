@@ -139,17 +139,45 @@ export const ForwardIcon = () => (
  * slogan is served as Figma's own rendered pixels (cropped from the frame
  * render) because the ✦ glyphs hit different fallback fonts in browsers.
  */
-export function PromoBar() {
+export function PromoBar({
+  slogan,
+  isDefault = true,
+}: {
+  slogan?: string;
+  isDefault?: boolean;
+} = {}) {
   return (
     <>
       <div style={{ ...abs(0, 0, 430, 32), background: "#06372E" }} />
-      <img
-        src="/veloria/glyph-promo.png"
-        alt="✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"
-        width={358}
-        height={20}
-        style={{ ...abs(36, 6, 358, 20), display: "block" }}
-      />
+      {isDefault || !slogan ? (
+        // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
+        <img
+          src="/veloria/glyph-promo.png"
+          alt={slogan ?? "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"}
+          width={358}
+          height={20}
+          style={{ ...abs(36, 6, 358, 20), display: "block" }}
+        />
+      ) : (
+        // Owner-edited → real text in the same 358×20 box; minor glyph drift
+        // accepted (the admin shows the caveat inline, §11).
+        <div
+          className={inter.className}
+          style={{
+            ...abs(36, 6, 358, 20),
+            color: "#FFFFFF",
+            fontSize: 11,
+            lineHeight: "20px",
+            letterSpacing: 0.4,
+            textAlign: "center",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {slogan}
+        </div>
+      )}
     </>
   );
 }

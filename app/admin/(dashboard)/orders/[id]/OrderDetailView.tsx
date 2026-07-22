@@ -30,7 +30,7 @@ import {
   TextField,
   Toast,
 } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { interpolate } from "@/lib/admin/i18n";
 import type { Address, OrderEventRow, OrderLineRow, OrderRow } from "@/lib/supabase/types.ts";
 import type { ConversionSummary } from "@/lib/admin/orders";

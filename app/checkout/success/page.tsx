@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { isPaymentMethodId, getPaymentMethod } from "@/lib/checkout/methods";
 
 export const metadata: Metadata = {

@@ -8,7 +8,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, IndexTable, Page, Text, TextField } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { useAdminT } from "../../PolarisShell";
 
 export type CustomerListItem = {

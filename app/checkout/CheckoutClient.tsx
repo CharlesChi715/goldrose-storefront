@@ -13,7 +13,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { useCart, type CartLine } from "@/lib/cart/store";
 import { computeShipping, zoneForCountry, type ShippingZone } from "@/lib/checkout/zones";
 import { expressMethods } from "@/lib/checkout/methods";
@@ -167,12 +167,14 @@ export function CheckoutClient({
   countries,
   defaultCountry,
   paypalClientId,
+  showDiscountField = true,
 }: {
   catalog: CatalogProduct[];
   zones: ShippingZone[];
   countries: Array<{ code: string; name: string }>;
   defaultCountry: string;
   paypalClientId: string | null;
+  showDiscountField?: boolean;
 }) {
   const router = useRouter();
   const { lines, rawLines, subtotal, hydrated, changeQuantity, remove, clear } =
@@ -666,8 +668,11 @@ export function CheckoutClient({
             ))}
           </div>
 
-          {/* Discount code (§8) — validated server-side */}
-          <div className="mt-6 border-t border-[#d7c28a] pt-4">
+          {/* Discount code (§8) — validated server-side; toggle in Settings → Checkout */}
+          <div
+            className="mt-6 border-t border-[#d7c28a] pt-4"
+            style={showDiscountField ? undefined : { display: "none" }}
+          >
             <label
               htmlFor="discount-code"
               className="text-xs font-black uppercase tracking-[0.14em] text-[#6b5c3f]"

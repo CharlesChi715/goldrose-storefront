@@ -7,7 +7,7 @@
 
 import { useRouter } from "next/navigation";
 import { Badge, Card, IndexTable, Page, Text } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import { interpolate } from "@/lib/admin/i18n";
 import { useAdminT } from "../../../PolarisShell";
 

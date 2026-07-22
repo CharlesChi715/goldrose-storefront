@@ -278,6 +278,7 @@ export type SettingsShape = {
     placeholder?: boolean;
   }>;
   tax: { rate_percent: number; note: string };
+  checkout: { discount_field_enabled: boolean };
   low_stock_threshold: number;
   notifications: {
     order_confirmation: boolean;
@@ -316,6 +317,7 @@ export const SEED_SETTINGS: SettingsShape = {
     },
   ],
   tax: { rate_percent: 0, note: "0 while testing — real approach on the launch checklist" },
+  checkout: { discount_field_enabled: true },
   low_stock_threshold: 50,
   notifications: {
     order_confirmation: true,

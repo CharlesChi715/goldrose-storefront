@@ -9,12 +9,17 @@
 import { headers } from "next/headers";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getShippingZones, servedCountries } from "@/lib/checkout/pricing";
+import { getSettingsMap } from "@/lib/admin/settings";
 import { CheckoutClient } from "./CheckoutClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage() {
-  const [catalog, zones] = await Promise.all([getCatalog(), getShippingZones()]);
+  const [catalog, zones, settings] = await Promise.all([
+    getCatalog(),
+    getShippingZones(),
+    getSettingsMap(),
+  ]);
   const countries = servedCountries(zones);
 
   const headerStore = await headers();
@@ -33,6 +38,7 @@ export default async function CheckoutPage() {
       countries={countries}
       defaultCountry={defaultCountry}
       paypalClientId={paypalClientId}
+      showDiscountField={settings.checkout.discount_field_enabled}
     />
   );
 }

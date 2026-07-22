@@ -22,7 +22,7 @@ import {
   Text,
   TextField,
 } from "@shopify/polaris";
-import { formatMoney } from "@/lib/products";
+import { formatMoney } from "@/lib/money";
 import type { Address, CustomerRow } from "@/lib/supabase/types.ts";
 import { useAdminT } from "../../../PolarisShell";
 import {

@@ -15,7 +15,32 @@ import { Tenor_Sans } from "next/font/google";
 import { BackButton } from "@/components/BackButton";
 import { ConciergeChat } from "@/components/ConciergeChat";
 import { BottomNav } from "@/components/veloria";
-import { products } from "@/lib/products";
+import type { Metadata } from "next";
+import { getCatalog } from "@/lib/supabase/catalog.ts";
+import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
+import { fileUrl } from "@/lib/files-url";
+
+// DB-backed data (links, JSON-LD, search listing) refreshes without a redeploy (§8).
+export const revalidate = 300;
+
+/** Homepage search listing — editable in Settings → Search engine & AI (§8.1). */
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const { search_engine } = await getSettingsMap();
+    return {
+      title: { absolute: search_engine.home_title },
+      description: search_engine.home_description,
+      alternates: { canonical: "/" },
+      openGraph: {
+        title: search_engine.home_title,
+        description: search_engine.home_description,
+        images: [{ url: search_engine.social_image }],
+      },
+    };
+  } catch {
+    return { alternates: { canonical: "/" } };
+  }
+}
 
 const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
 
@@ -201,30 +226,56 @@ function ProductCard({ card, href }: { card: CardData; href: string }) {
 
 /* ---------- Page ---------- */
 
-export default function HomePage() {
-  // Schema.org "structured data": a JSON description of the store and its
-  // offers that search engines read to show rich results (price, stock).
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    name: "GoldRose",
-    description: "Gift-ready 24K gold dipped rose keepsakes.",
-    url: "https://goldrose-storefront.vercel.app/",
-    makesOffer: products.map((product) => ({
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "Product",
-        name: product.name,
-        sku: product.sku,
-        description: product.description,
-        image: product.image,
-      },
-      price: (product.price / 100).toFixed(2),
-      priceCurrency: "USD",
-      availability:
-        product.inventoryOnHand > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    })),
-  };
+export default async function HomePage() {
+  // Schema.org structured data from the LIVE catalog (§8.1): Organization +
+  // WebSite + the store's offers, with price/availability from real stock.
+  let catalog: Awaited<ReturnType<typeof getCatalog>> = [];
+  let storeName = "GoldRose";
+  try {
+    catalog = await getCatalog();
+    storeName = (await getSettingsMap()).store.name;
+  } catch {
+    // fixed design still renders with no DB
+  }
+  const base = siteBaseUrl();
+  const handles = catalog.map((product) => product.handle);
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: storeName,
+      url: `${base}/`,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: storeName,
+      url: `${base}/`,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      name: storeName,
+      description: "Gift-ready 24K gold dipped rose keepsakes.",
+      url: `${base}/`,
+      makesOffer: catalog.map((product) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Product",
+          name: product.title,
+          sku: product.variants[0]?.sku,
+          description: product.description,
+          image: product.images[0] ? fileUrl(product.images[0].path) : undefined,
+          url: `${base}/products/${product.handle}`,
+        },
+        price: ((product.variants[0]?.price_cents ?? 0) / 100).toFixed(2),
+        priceCurrency: "USD",
+        availability: product.variants.some((variant) => variant.in_stock)
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      })),
+    },
+  ];
 
   return (
     <div className={tenor.className} style={{ minHeight: "100vh", background: "#FCFCFC" }}>
@@ -337,7 +388,7 @@ export default function HomePage() {
 
         {/* Product grid — cards route to the product detail pages */}
         {CARDS.map((card, i) => (
-          <ProductCard key={i} card={card} href={`/products/${products[i % products.length].handle}`} />
+          <ProductCard key={i} card={card} href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"} />
         ))}
 
         {/* Pagination */}

@@ -23,16 +23,26 @@ import {
   VHeader,
 } from "@/components/veloria";
 import { cormorant, inter, notoSC } from "@/lib/fonts";
-import { products } from "@/lib/products";
 import { BuyButtons } from "@/components/BuyButtons";
-import { getCatalog } from "@/lib/supabase/catalog.ts";
+import { getCatalog, getCatalogProduct } from "@/lib/supabase/catalog.ts";
+import { getPromoSlogan } from "@/lib/content";
+import { fileUrl } from "@/lib/files-url";
+import { siteBaseUrl } from "@/lib/admin/settings";
 
 // Re-check the DB catalog every 5 minutes so admin edits reach buyers
 // without a redeploy (§8).
 export const revalidate = 300;
 
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.handle }));
+export async function generateStaticParams() {
+  // Handles come from the DB; a dead DB at build time degrades to on-demand
+  // rendering (dynamicParams default true) — no redeploy needed to add a
+  // product (§8).
+  try {
+    const catalog = await getCatalog();
+    return catalog.map((product) => ({ slug: product.handle }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -41,9 +51,24 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = products.find((p) => p.handle === slug);
-  if (!product) return { title: "Product" };
-  return { title: product.shortName, description: product.description };
+  try {
+    const product = await getCatalogProduct(slug);
+    if (!product) return { title: "Product" };
+    const image = product.images[0] ? fileUrl(product.images[0].path) : undefined;
+    return {
+      // Search engine listing (§9.5): seo fields with title/description fallback.
+      title: product.short_name || product.title,
+      description: product.description,
+      alternates: { canonical: `/products/${product.handle}` },
+      openGraph: {
+        title: product.title,
+        description: product.description,
+        ...(image ? { images: [{ url: image }] } : {}),
+      },
+    };
+  } catch {
+    return { title: "Product" };
+  }
 }
 
 /* ---------- Small building blocks ---------- */
@@ -97,31 +122,79 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = products.find((p) => p.handle === slug);
-  if (!product) notFound();
 
-  // Default variant for ADD TO CART / BUY NOW, from the DB catalog. On a
-  // build without any database the buttons render inert (§0.2 fallback).
-  let variantId: string | null = null;
+  // Everything DB-backed degrades gracefully; the fixed design always renders.
+  let catalogProduct: Awaited<ReturnType<typeof getCatalogProduct>> = null;
+  let promo = { text: "", isDefault: true };
+  let handles: string[] = [];
   try {
     const catalog = await getCatalog();
-    const catalogProduct = catalog.find((p) => p.handle === slug);
-    variantId = catalogProduct?.variants.find((v) => v.in_stock)?.id ?? catalogProduct?.variants[0]?.id ?? null;
+    handles = catalog.map((entry) => entry.handle);
+    catalogProduct = catalog.find((entry) => entry.handle === slug) ?? null;
+    promo = await getPromoSlogan();
   } catch {
-    variantId = null;
+    catalogProduct = null;
   }
+  if (!catalogProduct) notFound();
+  const product = catalogProduct;
+  const variantId =
+    product.variants.find((v) => v.in_stock)?.id ?? product.variants[0]?.id ?? null;
+
+  // Product + BreadcrumbList JSON-LD (§8.1) — the machine-readable layer
+  // that compensates for the PNG-pixel design.
+  const base = siteBaseUrl();
+  const defaultVariant = product.variants[0];
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product.title,
+      description: product.description,
+      sku: defaultVariant?.sku,
+      brand: { "@type": "Brand", name: "GoldRose" },
+      image: product.images.map((image) => fileUrl(image.path)),
+      url: `${base}/products/${product.handle}`,
+      offers: {
+        "@type": "Offer",
+        price: ((defaultVariant?.price_cents ?? 0) / 100).toFixed(2),
+        priceCurrency: "USD",
+        availability: product.variants.some((variant) => variant.in_stock)
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+        url: `${base}/products/${product.handle}`,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${base}/` },
+        { "@type": "ListItem", position: 2, name: "Shop", item: `${base}/shop` },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: product.title,
+          item: `${base}/products/${product.handle}`,
+        },
+      ],
+    },
+  ];
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <ScaleFrame height={2501} background="#FCFAF7" fontClass={inter.className}>
-      <PromoBar />
+      <PromoBar slogan={promo.text} isDefault={promo.isDefault} />
       <VHeader backHref="/shop" right="heart" />
 
       {/* 03 · Hero */}
       <Section x={16} y={94} w={398} h={281} radius={15} clip>
         <img
           src="/veloria/detail-hero.png"
-          alt={product.alt}
+          alt={product.images[0]?.alt ?? product.title}
           width={398}
           height={250}
           style={{ ...abs(0, 8, 398, 250), display: "block" }}
@@ -486,7 +559,7 @@ export default async function ProductDetailPage({
         ].map((card, i) => (
           <Link
             key={card.name}
-            href={`/products/${products[i % products.length].handle}`}
+            href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"}
             style={{
               ...abs(card.x, 49, 116, 184),
               display: "block",
