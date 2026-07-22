@@ -1694,3 +1694,8 @@ unconfirmed business assumptions).
   login page (hosted only, Supabase signUp), "awaiting approval" login
   state, Settings → Team page to approve/remove (requireRealAdmin — the
   nickname guest 404s; verified vs hosted). e2e: team spec added.
+- Mode decision (owner): live-like from now — no ADMIN_OPEN_ACCESS on
+  Vercel; testers sign up + get approved. Forum no longer bounces logged-in
+  accounts without a nickname — they post under their email name
+  (getForumIdentity), nickname popup stays as optional display name. Forum
+  e2e updated accordingly.

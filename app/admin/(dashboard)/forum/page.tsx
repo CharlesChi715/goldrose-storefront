@@ -6,14 +6,14 @@
  */
 
 import { redirect } from "next/navigation";
-import { getForumNickname } from "@/lib/admin/forum";
+import { getForumIdentity } from "@/lib/admin/forum";
 import { getStore } from "@/lib/supabase/store.ts";
 import { ForumList, type ThreadItem } from "./ForumList";
 
 export const dynamic = "force-dynamic";
 
 export default async function ForumPage() {
-  const nickname = await getForumNickname();
+  const nickname = await getForumIdentity();
   if (!nickname) {
     redirect("/admin/login");
   }

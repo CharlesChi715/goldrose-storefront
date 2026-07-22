@@ -9,6 +9,7 @@
 
 import "server-only";
 import { cookies } from "next/headers";
+import { getAdminSession, OPEN_ACCESS_GUEST } from "./auth";
 
 export const FORUM_NICKNAME_COOKIE = "forum_nickname";
 export const NICKNAME_MAX = 40;
@@ -22,6 +23,24 @@ export function cleanNickname(raw: unknown): string {
 export async function getForumNickname(): Promise<string | null> {
   const value = cleanNickname((await cookies()).get(FORUM_NICKNAME_COOKIE)?.value);
   return value || null;
+}
+
+/**
+ * Who you post as (everyone-logs-in mode, owner decision 2026-07-22):
+ * explicit nickname first; otherwise a real account posts under its email
+ * name — no forced trip back to the login page. Nickname-less guests
+ * (open-access testing only) still get null → forum sends them to log in.
+ */
+export async function getForumIdentity(): Promise<string | null> {
+  const nickname = await getForumNickname();
+  if (nickname) {
+    return nickname;
+  }
+  const session = await getAdminSession();
+  if (session && session.userId !== OPEN_ACCESS_GUEST.userId) {
+    return cleanNickname(session.email.split("@")[0]) || session.email;
+  }
+  return null;
 }
 
 export async function setForumNickname(nickname: string): Promise<void> {

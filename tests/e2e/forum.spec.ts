@@ -29,13 +29,14 @@ async function logIn(page: Page, nickname?: string) {
   await page.waitForURL(/\/admin$/);
 }
 
-test("the forum requires a nickname — without one you land back on login", async ({
+test("a logged-in account without a nickname posts under its email name", async ({
   page,
 }) => {
   await logIn(page);
   await page.goto("/admin/forum");
-  await page.waitForURL(/\/admin\/login/);
-  await expect(page.getByLabel("Nickname")).toBeVisible();
+  // Everyone-logs-in mode (owner decision): no forced trip back to login —
+  // the account's email name is the default forum identity.
+  await expect(page.getByText("Posting as: owner")).toBeVisible();
 });
 
 test("start a discussion, reply, see it in the list, then delete it", async ({ page }) => {

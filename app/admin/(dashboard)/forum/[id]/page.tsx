@@ -5,7 +5,7 @@
  */
 
 import { notFound, redirect } from "next/navigation";
-import { getForumNickname } from "@/lib/admin/forum";
+import { getForumIdentity } from "@/lib/admin/forum";
 import { getStore } from "@/lib/supabase/store.ts";
 import { ThreadView, type PostItem } from "./ThreadView";
 
@@ -16,7 +16,7 @@ export default async function ForumThreadPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const nickname = await getForumNickname();
+  const nickname = await getForumIdentity();
   if (!nickname) {
     redirect("/admin/login");
   }

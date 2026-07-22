@@ -12,7 +12,7 @@ import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
-import { cleanNickname, getForumNickname, setForumNickname } from "@/lib/admin/forum";
+import { cleanNickname, getForumIdentity, setForumNickname } from "@/lib/admin/forum";
 import { getStore } from "@/lib/supabase/store.ts";
 
 const id = z.string().min(1).max(64);
@@ -22,7 +22,7 @@ const bodySchema = z.string().trim().min(1).max(5000);
 export type ForumFormState = { error: string | null };
 
 async function author(): Promise<string> {
-  const nickname = await getForumNickname();
+  const nickname = await getForumIdentity();
   if (!nickname) {
     redirect("/admin/login");
   }
