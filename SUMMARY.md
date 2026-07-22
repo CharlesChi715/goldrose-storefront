@@ -4,40 +4,29 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 
 ## Goal
 
-- Sell the 24K gold-dipped rose gift line direct-to-consumer — **international, not US-only (decided 2026-07-21); USD-only pricing V1, storefront stays English** — via this custom Next.js storefront. Brand: **GoldRose** (renamed from AUREÀ 2026-07-21).
-- Payments: Shopify hosted checkout still wired but slated for deletion; the admin build ships a native checkout per [docs/admin-design.md](docs/admin-design.md). **Provider undecided since 2026-07-22 (OQ-1): PayPal is the working assumption; schema is provider-neutral.**
+- Sell the 24K gold-dipped rose gift line direct-to-consumer — **international, USD-only V1, storefront in English** — via this custom Next.js storefront + our own Shopify-clone admin. Brand: **GoldRose**.
+- Payments: **native checkout, PayPal Orders v2 (sandbox until launch)**; provider choice stays OQ-1 (schema is provider-neutral). Shopify code is fully removed; the subscription is cancelled by the owner **after** the §14.3 walkthrough.
 
-## Current state (2026-07-21)
+## Current state (2026-07-22)
 
-- **No customers yet — still testing.** The live site is a test deployment; no real traffic, orders, or shopper data to preserve (breaking changes are fine).
-- **Live** at <https://goldrose-storefront.vercel.app> (Vercel, deploys from `main`).
-- **Redesign (2026-07-21)**: all three pages are pixel-exact Figma imports — `/` (home), `/shop` (VELORIA "Frame 26"), `/products/[slug]` (VELORIA 详情页; every product shows the same placeholder design for now). Cards link to product pages; all three pages share the same fixed white bottom nav (Home/Shop wired, active tab per page). Concierge chatbox (mascot + green bar) floats fixed above the nav on all pages — clicking opens a placeholder panel; real chat widget TBD. Old storefront UI deleted (backup: branch `gold-rose-v0`).
-- Pixel-verified vs Figma renders: shop 98.6% / detail 96.6% visually identical (residual = text antialiasing). Symbol glyphs (✦◯▣★●…) served as exact pixel crops from the frame render (`public/veloria/glyph-*.png`).
-- **Deployed**: redesign pushed to `main` 2026-07-21 → live on Vercel. Working back button on all headers; chatbox on all pages.
-- **Checkout backend intact but unreachable from UI**: the Shopify cart-permalink flow (`/checkout`, PayPal confirmed 2026-07-15) still works, but ADD TO CART / BUY NOW on the new product page aren't wired to it yet — the live site currently can't take an order.
-- Local dev defaults to **mock checkout** — fully clickable, no money moves.
-- Step-by-step status of the whole buyer flow: [docs/flow-map.md](docs/flow-map.md).
+- **ADMIN BUILD COMPLETE — stages 0–9 all merged to `main`** per [docs/admin-design.md](docs/admin-design.md) §0 autonomous run. Full report + **owner activation checklist**: [docs/BUILD-REPORT.md](docs/BUILD-REPORT.md).
+- `/admin` is a bilingual (EN/中文) Polaris Shopify-clone: Home dashboard, Orders (drafts, abandoned, fulfill/refund/cancel, timeline), Products (variants, media, inventory + movement log), Customers, Content (slots + files), Analytics (first-party beacon: sessions/funnel/live visitors), Discounts, Settings (zones, tax, notifications, policies, Search engine & AI), ⌘K search.
+- **Storefront reads the DB** (catalog view, revalidate 300); pixel-exact Figma design intact — home byte-exact, shop/product gated by masked pixel-diff (only the designated text boxes show live data). SEO/GEO live: sitemap, robots (AI-crawler toggle), /llms.txt, Product JSON-LD.
+- **Running in §0.2 fallback mode**: local file db (`.data/db.json`, auto-seeded), dev admin login (`ADMIN_DEV_PASSWORD`, default `goldrose-admin`), console emails, fixture-tested PayPal. Hosted Supabase + PayPal sandbox = activation checklist (no code changes).
+- Tests: 43 e2e (Playwright vs production build) + 9 unit — all green. `npm run seed -- --reset` restores a pristine local db.
+- Live deploy at <https://goldrose-storefront.vercel.app> still runs the **pre-build** commit until Vercel env vars are set (build works with none, but checkout there is mock-mode).
 
 ## Key facts / constraints
 
-- Shopify store: `goldrose-9372.myshopify.com` (Advanced plan, on trial).
-- Env switches: `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` turns on live permalink checkout; `SHOPIFY_MODE=live` + Storefront API token would activate the dormant API path (`lib/shopify/client.ts`).
-- Owner ideas are captured verbatim in [docs/ideas.md](docs/ideas.md) — don't expand them.
+- All money integer cents; orders never hard-deleted; admin strings all go through `t()` (EN + Shopify 中文); service key only server-side; sandbox/mock money only — `PAYPAL_ENV=live` is owner-only.
+- Design doc [docs/admin-design.md](docs/admin-design.md) is the spec (§0 guardrails restored 2026-07-22 after an accidental deletion).
+- Owner ideas verbatim in [docs/ideas.md](docs/ideas.md) — don't expand them.
 
-## Custom admin (decided 2026-07-21, design approved, build not started)
+## Open questions (§4)
 
-- **Charles is dropping Shopify — no transition phase** (no customers yet, nothing to protect). One build: Supabase-backed admin + native PayPal checkout (sandbox first); Shopify code deleted in the same build (Stage 4); the subscription is cancelled **last** (live admin = visual reference).
-- **Rev 3 (2026-07-21, owner request): the admin UX is a screen-for-screen Shopify-admin clone** — built with Shopify's Polaris, same nav/screens/wording in EN + Shopify's own 中文 terms; only the appearance/Online-Store features (themes, pages, blog…) are dropped. Parity additions: variants, customers, discounts, drafts, abandoned checkouts, analytics, settings, timeline, refunds, order emails.
-- **Rev 4 (2026-07-21): international.** Markets settings page (adapt), zone-based shipping (seed: US · Rest of world), ship-to country selector at checkout, customs fields on products; duties on buyer, per-market pricing/multi-currency V2.
-- **Rev 4.1 (2026-07-22): closer Shopify parity** — Duplicate product, buyer gift message → order Notes, customer Timeline + export, 2FA; returns/partial fulfillment/bulk editor/saved views/template editing explicitly V2.
-- **Rev 4.2 (2026-07-22): visitor behavior in V1** — first-party page_views beacon → Supabase (no external provider): sessions, conversion funnel, traffic sources, live-visitor card, order Conversion summary. Anonymous/cookieless. GA4/Meta Pixel deferred until paid ads start (then + consent banner).
-- **Rev 4.3 (2026-07-22): SEO + GEO in V1** — DB-driven sitemap/robots/canonicals/OG + Product JSON-LD; Settings → Search engine & AI (homepage listing, AI-crawler toggle); /llms.txt for AI assistants; every PNG-pixel fact must also exist machine-readably; checkout country defaults via geo-IP.
-- **Rev 4.4 (2026-07-22): §0 one-shot autonomous build directive** — Charles authorizes an agent to build the whole backend unattended: decide within guardrails, mock missing resources (local Supabase, fixture-tested PayPal), sandbox money only, one commit per stage, deliver docs/BUILD-REPORT.md + owner activation checklist.
-- Full design: [docs/admin-design.md](docs/admin-design.md) — fidelity cut list, schema, security model, screen-by-screen clone spec, checkout/webhook flows, staged rollout (stages 0–9). Restructured 2026-07-22 as a formal design doc: ToC, agent guide (§2), open questions OQ-1..4 (§4), alternatives (§5), changelog (§17).
-- Waiting on (= the doc's open questions §4): payment provider decision (OQ-1); ship-to country list + international rates (OQ-2); Charles's real product info (OQ-3); Supabase project creation (OQ-4).
+- OQ-1 payment provider (PayPal working assumption — built), OQ-2 real shipping rates (RoW $19.95 is a placeholder), OQ-3 real product info (seed placeholders live in the designated boxes), OQ-4 Supabase project (checklist step 1).
 
 ## Next steps
 
-- Start admin build per [docs/admin-design.md](docs/admin-design.md) stages 0–2 (test baseline → Supabase schema → admin auth shell).
-- Charles: revoke the Figma token (imports done); real product info for the catalog.
-- Wire ADD TO CART / BUY NOW into checkout (folds into admin build Stage 4).
+- **Charles: run the activation checklist** in [docs/BUILD-REPORT.md](docs/BUILD-REPORT.md) §5 (Supabase → PayPal sandbox → walkthrough → screenshots → cancel Shopify → revoke Figma token).
+- Then: real rates (OQ-2), real product content (OQ-3), launch checklist items.

@@ -1595,3 +1595,20 @@ unconfirmed business assumptions).
 - Owner request: an agent should build the whole backend in one unattended run — no questions, no approvals; owner returns to a finished build.
 - Added §0 (ToC item 0): decision authority (doc → live Shopify → closest-to-Shopify + record), OQs resolve to working assumptions, resource-fallback table (local Supabase via CLI/Docker or adapter; PayPal routes verified by mock + fixtures; console emails; build-with/without-DB-env), hard guardrails (sandbox/mock money only; owner-only actions → checklist, never performed; main never broken; no new paid deps; no secrets committed), execution order (stages 0→8 one commit each, stage 9 wired with seed data), deliverables (BUILD-REPORT.md with per-stage verification + decisions + mocks + owner activation checklist).
 - Header Status/Audience/Version updated; §2 cross-ref; changelog 4.4. Preserved Charles's own header edits (Owner "store dev", Users "Charles' teammates").
+
+## 2026-07-22 — One-shot autonomous admin build (stages 0–9)
+
+- Restored accidentally-deleted §0.1–0.5 of docs/admin-design.md, then executed
+  the §0 one-shot build: 10 stage commits on main (0 test baseline → 1 schema +
+  data layer → 2 auth/Polaris shell → 3 products/inventory/files → 4 native
+  checkout + Shopify removal → 5 orders/customers/webhook → 6 discounts/drafts/
+  abandoned → 7 Home/Analytics/beacon/⌘K → 8 settings/content/SEO-GEO +
+  catalog cutover → 9 live data in the designated pixel boxes).
+- §0.2 fallbacks used: local file db behind lib/supabase (no Docker), dev admin
+  login, console emails, fixture-tested PayPal (no sandbox credentials).
+- Deleted: lib/shopify/*, permalink checkout, shop_pay, SHOPIFY_* env vars,
+  lib/products.ts (storefront now reads the DB), stray Figma token line.
+- Verification: 43 Playwright e2e (production build; home pixel-exact,
+  shop/product masked) + 9 Node unit tests, all green at every stage commit.
+- Deliverables: docs/BUILD-REPORT.md (decisions, mocks, gaps, owner activation
+  checklist), refreshed SUMMARY.md.
