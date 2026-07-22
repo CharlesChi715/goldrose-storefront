@@ -189,7 +189,7 @@ export default async function ProductDetailPage({
       />
       <ScaleFrame height={2501} background="#FCFAF7" fontClass={inter.className}>
       <PromoBar slogan={promo.text} isDefault={promo.isDefault} />
-      <VHeader backHref="/shop" right="heart" />
+      <VHeader backHref="/shop" right="heart" wishlistSlug={product.handle} />
 
       {/* 03 · Hero */}
       <Section x={16} y={94} w={398} h={281} radius={15} clip>

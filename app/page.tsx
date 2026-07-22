@@ -53,34 +53,6 @@ const GREY = "#555555";
 
 /* ---------- Inline SVG icons (exported from Figma, format=svg) ---------- */
 
-const MenuIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M0.306763 12H15.9824" stroke="#14142B" />
-    <path d="M0.306641 5H23.6931" stroke="#14142B" />
-    <path d="M0.306641 19H23.6931" stroke="#14142B" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M11 20C15.9706 20 20 15.9706 20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20Z"
-      stroke="#14142B"
-    />
-    <path d="M22 21.9999L18.7823 18.7822" stroke="#14142B" />
-  </svg>
-);
-
-const BagIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M20.6592 6.7207L21.4756 23.2803H3.49512L4.31152 6.7207H20.6592Z" stroke="#14142B" />
-    <path
-      d="M8.1604 10.1491L8.1604 5.55139C8.1604 4.40438 8.61605 3.30434 9.42711 2.49328C10.2382 1.68221 11.3382 1.22656 12.4852 1.22656C13.6322 1.22656 14.7323 1.68221 15.5433 2.49328C16.3544 3.30434 16.8101 4.40438 16.8101 5.55139V10.1491"
-      stroke="#14142B"
-    />
-  </svg>
-);
-
 const DownIcon = () => (
   <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
     <g opacity="0.5">
@@ -316,14 +288,11 @@ export default async function HomePage() {
             sits at the integer position with a 0.5px translate (rasterized
             sub-pixel, i.e. exactly 1 device px at 2x) instead. */}
         <header style={{ ...abs(3, 4, 369, 62), background: "#FCF8F4" }}>
-          <span style={{ ...abs(6, 19, 24, 24), transform: "translateX(0.5px)" }}>
-            <MenuIcon />
-          </span>
-          <BackButton
-            fallback="/"
-            src="/home/back.png"
-            style={{ ...abs(61, 19, 24, 24), transform: "translateX(0.5px)" }}
-          />
+          {/* Owner-supplied top-nav art (public/top-nav/*), cropped to content;
+              each box is centred on the old 24×24 Figma icon position. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/top-nav/menu.png" alt="" style={{ ...abs(1.5, 18, 33, 26), objectFit: "contain" }} />
+          <BackButton fallback="/" style={{ ...abs(66, 18, 14, 26) }} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/home/logo.png"
@@ -332,12 +301,10 @@ export default async function HomePage() {
             height={39}
             style={{ ...abs(116, 11, 136, 39), transform: "translate(0.5px, 0.5px)", objectFit: "cover" }}
           />
-          <span style={{ ...abs(283, 19, 24, 24), transform: "translateX(0.5px)" }}>
-            <SearchIcon />
-          </span>
-          <span style={{ ...abs(338, 19, 24, 24), transform: "translateX(0.5px)" }}>
-            <BagIcon />
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/top-nav/search.png" alt="" style={{ ...abs(279, 18, 32, 26), objectFit: "contain" }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/top-nav/cart.png" alt="" style={{ ...abs(333.5, 18, 33, 26), objectFit: "contain" }} />
         </header>
 
         {/* Filter bar: count, sort pill, view/filter buttons */}

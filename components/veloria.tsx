@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
+import { WishlistButton } from "@/components/WishlistButton";
 import { inter } from "@/lib/fonts";
 import NoCalcScale from "@/components/NoCalcScale";
 
@@ -50,34 +51,6 @@ export const txt = (
 });
 
 /* ---------- Inline SVG icons (Figma node renders, format=svg) ---------- */
-
-export const MenuIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M0.306763 12H15.9824" stroke="#14142B" />
-    <path d="M0.306641 5H23.6931" stroke="#14142B" />
-    <path d="M0.306641 19H23.6931" stroke="#14142B" />
-  </svg>
-);
-
-export const SearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M11 20C15.9706 20 20 15.9706 20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20Z"
-      stroke="#14142B"
-    />
-    <path d="M22 21.9999L18.7823 18.7822" stroke="#14142B" />
-  </svg>
-);
-
-export const BagIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M20.6592 6.7207L21.4756 23.2803H3.49512L4.31152 6.7207H20.6592Z" stroke="#14142B" />
-    <path
-      d="M8.1604 10.1491L8.1604 5.55139C8.1604 4.40438 8.61605 3.30434 9.42711 2.49328C10.2382 1.68221 11.3382 1.22656 12.4852 1.22656C13.6322 1.22656 14.7323 1.68221 15.5433 2.49328C16.3544 3.30434 16.8101 4.40438 16.8101 5.55139V10.1491"
-      stroke="#14142B"
-    />
-  </svg>
-);
 
 // 24×24 heart node; the export canvas is 25×26 because the centred 1px
 // stroke bleeds past the node bounds — place at (x-0.5, y-0.5).
@@ -187,28 +160,33 @@ export function PromoBar({
  * 02 · Header — menu, back arrow, logo, right-side icon (search on /shop,
  * heart on the product page), shopping bag.
  */
-export function VHeader({ backHref, right }: { backHref: string; right: "search" | "heart" }) {
+export function VHeader({
+  backHref,
+  right,
+  wishlistSlug,
+}: {
+  backHref: string;
+  right: "search" | "heart";
+  /** Product handle for the heart's wishlist toggle (right="heart" only). */
+  wishlistSlug?: string;
+}) {
   return (
     <>
       <div style={{ ...abs(0, 32, 430, 62), background: "#FCF8F4" }} />
-      <span style={abs(9, 51, 24, 24)}>
-        <MenuIcon />
-      </span>
-      <BackButton fallback={backHref} style={abs(78, 51, 24, 24)} />
+      {/* Owner-supplied top-nav art (public/top-nav/*), cropped to content;
+          each box is centred on the old 24×24 Figma icon position. */}
+      <img src="/top-nav/menu.png" alt="" style={{ ...abs(4.5, 50, 33, 26), objectFit: "contain" }} />
+      <BackButton fallback={backHref} style={abs(83, 50, 14, 26)} />
       <Link href="/" style={{ ...abs(147, 43.5, 136, 39), display: "block" }} aria-label="Home">
         <img src="/veloria/logo.png" alt="VELORIA" width={136} height={39} style={{ display: "block", width: 136, height: 39 }} />
       </Link>
       {right === "search" ? (
-        <span style={abs(328, 51, 24, 24)}>
-          <SearchIcon />
-        </span>
+        <img src="/top-nav/search.png" alt="" style={{ ...abs(324, 50, 32, 26), objectFit: "contain" }} />
       ) : (
-        <span style={abs(327.5, 50.5, 25, 26)}>
-          <HeartIcon />
-        </span>
+        <WishlistButton slug={wishlistSlug ?? ""} style={abs(322.5, 50.5, 35, 26)} />
       )}
-      <Link href="/checkout" style={{ ...abs(397, 51, 24, 24), display: "block" }} aria-label="Cart">
-        <BagIcon />
+      <Link href="/checkout" style={{ ...abs(392.5, 50, 33, 26), display: "block" }} aria-label="Cart">
+        <img src="/top-nav/cart.png" alt="" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
       </Link>
     </>
   );
@@ -222,19 +200,19 @@ type Tab = {
   label: string;
 };
 
-// Owner-supplied button art (public/nav/*): icon + label baked into one PNG,
+// Owner-supplied button art (public/bottom-nav/*): icon + label baked into one PNG,
 // `-active` = colored variant shown on the tab's own page.
 const TABS: Tab[] = [
   { href: "/", img: "home", label: "Home" },
   { href: "/shop", img: "shop", label: "Shop" },
   { img: "wholesale", label: "Wholesale" },
-  { img: "me", label: "Me" },
+  { href: "/account", img: "me", label: "Me" },
 ];
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
   return (
     <img
-      src={`/nav/${tab.img}${isActive ? "-active" : ""}.png`}
+      src={`/bottom-nav/${tab.img}${isActive ? "-active" : ""}.png`}
       alt={tab.label}
       style={{ ...abs(0, 4, 70, 48), objectFit: "contain" }}
     />

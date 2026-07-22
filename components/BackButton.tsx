@@ -18,7 +18,7 @@ const VISITED_KEY = "goldrose-visited";
 
 export function BackButton({
   fallback,
-  src = "/veloria/back.png",
+  src = "/top-nav/back.png",
   style,
 }: {
   /** Where to go when there's no on-site history (e.g. the page was opened directly). */
@@ -58,7 +58,7 @@ export function BackButton({
         ...style,
       }}
     >
-      <img src={src} alt="" width={24} height={24} style={{ display: "block", width: 24, height: 24 }} />
+      <img src={src} alt="" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
     </button>
   );
 }
