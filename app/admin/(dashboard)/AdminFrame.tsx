@@ -17,6 +17,7 @@ import {
   BlockStack,
   Box,
   Frame,
+  InlineStack,
   Modal,
   Navigation,
   Text,
@@ -240,11 +241,44 @@ export function AdminFrame({
     />
   );
 
+  // Owner request (2026-07-23): the EN/中文 switch lives visibly in the top
+  // bar (and stays in the account menu too).
+  const secondaryMenu = (
+    <InlineStack gap="100" blockAlign="center" wrap={false}>
+      {/* Native button: Polaris Button text is dark and vanishes on the dark
+          top bar — white text + subtle hover to match the bell. */}
+      <button
+        type="button"
+        onClick={toggleLang}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: "#FFFFFF",
+          fontSize: 13,
+          fontWeight: 600,
+          padding: "6px 12px",
+          borderRadius: 8,
+          cursor: "pointer",
+          whiteSpace: "nowrap",
+        }}
+        onMouseEnter={(event) => {
+          event.currentTarget.style.background = "rgba(255,255,255,0.12)";
+        }}
+        onMouseLeave={(event) => {
+          event.currentTarget.style.background = "transparent";
+        }}
+      >
+        {t("topbar.account.language")}
+      </button>
+      {alertsMenu}
+    </InlineStack>
+  );
+
   const topBar = (
     <TopBar
       showNavigationToggle
       userMenu={userMenu}
-      secondaryMenu={alertsMenu}
+      secondaryMenu={secondaryMenu}
       searchField={
         <TopBar.SearchField
           placeholder={`${t("topbar.search.placeholder")} (⌘K)`}

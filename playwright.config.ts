@@ -28,7 +28,7 @@ export default defineConfig({
     },
   },
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3001",
     // The VELORIA design frames are authored at 430px wide (mobile). A fixed
     // viewport + scale factor keeps snapshots byte-stable across runs.
     viewport: { width: 430, height: 932 },
@@ -36,8 +36,10 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run build && npm run start",
-    url: "http://localhost:3000",
+    // Port 3001: the suite must never collide with (or reuse) the owner's
+    // `npm run dev` on 3000 — dev-mode compiles blow the test timeouts.
+    command: "npm run build && npx next start -p 3001",
+    url: "http://localhost:3001",
     // Reuse a manually started `next start` during development; CI always
     // builds fresh.
     reuseExistingServer: !process.env.CI,
