@@ -1667,3 +1667,7 @@ unconfirmed business assumptions).
 - Follow-up: guide page now renders EN and 中文 as side-by-side columns
   (owner request) — one column per "# " heading in USER-GUIDE.md, stacking
   on narrow screens.
+- Docs: backup plan recorded in docs/Database.md (owner request) — Supabase
+  Free + nightly pg_dump→S3 with lifecycle + restore drills; Pro at launch;
+  raw RDS/Azure and self-hosting rejected. (Discussion also settled: company
+  -owned Supabase account, passkeys via Supabase beta after activation.)
