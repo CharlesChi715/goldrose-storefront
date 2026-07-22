@@ -31,6 +31,11 @@ export async function proxy(request: NextRequest) {
   const hosted = Boolean(url && anonKey);
 
   if (!hosted) {
+    // Testing-phase open access: no Supabase and no ADMIN_DEV_PASSWORD →
+    // no login required (see lib/admin/auth.ts isOpenAccess).
+    if (!process.env.ADMIN_DEV_PASSWORD?.trim()) {
+      return NextResponse.next();
+    }
     if (!request.cookies.get(SESSION_COOKIE)) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = LOGIN_PATH;

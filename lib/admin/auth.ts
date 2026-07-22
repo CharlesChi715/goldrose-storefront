@@ -38,6 +38,17 @@ export type AdminSession = {
 /* ---------- Local (file adapter) sessions ---------- */
 
 /**
+ * TESTING-PHASE OPEN ACCESS (owner decision 2026-07-23): while the store has
+ * no real data — no Supabase configured AND no ADMIN_DEV_PASSWORD set — the
+ * admin requires no login at all; everyone is the local owner. Setting
+ * ADMIN_DEV_PASSWORD turns the password gate back on; configuring Supabase
+ * switches to full real auth (email + password + admin_users allowlist).
+ */
+export function isOpenAccess(): boolean {
+  return !getSupabaseEnv().hosted && !process.env.ADMIN_DEV_PASSWORD?.trim();
+}
+
+/**
  * The dev-login password. The "goldrose-admin" default exists ONLY in
  * development: on a production deployment with no Supabase configured, the
  * fallback login stays disabled unless ADMIN_DEV_PASSWORD is explicitly set
@@ -153,10 +164,16 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
   if (!env.hosted) {
     const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
-    if (!token) {
-      return null;
+    if (token) {
+      const session = await verifyLocalToken(token);
+      if (session) {
+        return session;
+      }
     }
-    return verifyLocalToken(token);
+    if (isOpenAccess()) {
+      return { userId: LOCAL_OWNER.user_id, email: LOCAL_OWNER.email };
+    }
+    return null;
   }
 
   const supabase = await supabaseAuthClient();
