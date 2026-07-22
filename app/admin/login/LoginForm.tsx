@@ -24,7 +24,13 @@ import { loginAction, type LoginState } from "./actions";
 
 const INITIAL_STATE: LoginState = { error: null };
 
-export function LoginForm({ showDevHint }: { showDevHint: boolean }) {
+export function LoginForm({
+  showDevHint,
+  nicknameOnly,
+}: {
+  showDevHint: boolean;
+  nicknameOnly: boolean;
+}) {
   const t = useAdminT();
   const [state, formAction, pending] = useActionState(loginAction, INITIAL_STATE);
   const [nickname, setNickname] = useState("");
@@ -63,7 +69,7 @@ export function LoginForm({ showDevHint }: { showDevHint: boolean }) {
                   onChange={setNickname}
                   autoComplete="nickname"
                   maxLength={40}
-                  helpText={t("login.nickname.help")}
+                  helpText={nicknameOnly ? t("login.nickname.help") : t("login.nickname.helpLocked")}
                 />
                 <Divider />
                 <TextField

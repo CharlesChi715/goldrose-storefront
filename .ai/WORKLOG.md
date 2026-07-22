@@ -1685,3 +1685,6 @@ unconfirmed business assumptions).
   skip, launch-checklist reminder in BUILD-REPORT §5.7. Playwright webServer
   env now blanks Supabase keys + override so e2e can never touch the real
   db. Verified against hosted: ON→200/forum works, OFF→redirect to login.
+- Login-page fix: the "nickname only is enough" helper now shows only when
+  open access is actually on; locked mode shows "optional display name,
+  email+password required" (EN + 中文) — owner was misled locally.

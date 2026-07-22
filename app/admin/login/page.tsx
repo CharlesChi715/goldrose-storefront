@@ -8,7 +8,7 @@
  */
 
 import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/admin/auth";
+import { getAdminSession, isOpenAccess } from "@/lib/admin/auth";
 import { getForumNickname } from "@/lib/admin/forum";
 import { getSupabaseEnv } from "@/lib/supabase/env.ts";
 import { LoginForm } from "./LoginForm";
@@ -19,5 +19,12 @@ export default async function AdminLoginPage() {
   if (session && nickname) {
     redirect("/admin");
   }
-  return <LoginForm showDevHint={!getSupabaseEnv().hosted} />;
+  return (
+    <LoginForm
+      showDevHint={!getSupabaseEnv().hosted}
+      // The "nickname only is enough" helper is true only in open access —
+      // with real auth locked on, showing it just misleads (owner hit this).
+      nicknameOnly={isOpenAccess()}
+    />
+  );
 }
