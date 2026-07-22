@@ -43,27 +43,47 @@ export function ResetPasswordForm() {
       return;
     }
     let cancelled = false;
-    // The recovery code exchange happens asynchronously on load — poll
-    // briefly for the session instead of racing it.
-    const started = Date.now();
-    const timer = setInterval(async () => {
+
+    // Recovery links can arrive three ways depending on how the email was
+    // generated: tokens in the hash (#access_token=…, implicit flow — ours,
+    // since the server requests the email), a ?code= param (PKCE), or an
+    // explicit error (#error_description=… when the link truly expired).
+    // Handle all three instead of trusting auto-detection.
+    async function establishSession() {
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const query = new URLSearchParams(window.location.search);
+
+      if (hash.get("error_description") || query.get("error_description")) {
+        return false;
+      }
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { error } = await supabase!.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        return !error;
+      }
+      const code = query.get("code");
+      if (code) {
+        const { error } = await supabase!.auth.exchangeCodeForSession(code);
+        return !error;
+      }
+      // Nothing in the URL — maybe auto-detection already stored a session.
       const {
         data: { session },
-      } = await supabase.auth.getSession();
-      if (cancelled) {
-        return;
+      } = await supabase!.auth.getSession();
+      return Boolean(session);
+    }
+
+    establishSession().then((ok) => {
+      if (!cancelled) {
+        setPhase(ok ? "ready" : "expired");
       }
-      if (session) {
-        clearInterval(timer);
-        setPhase("ready");
-      } else if (Date.now() - started > 5000) {
-        clearInterval(timer);
-        setPhase("expired");
-      }
-    }, 300);
+    });
     return () => {
       cancelled = true;
-      clearInterval(timer);
     };
   }, [supabase]);
 
