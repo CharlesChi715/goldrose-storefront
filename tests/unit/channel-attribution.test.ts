@@ -30,6 +30,7 @@ test("utm_source spellings collapse into the owner's channels", () => {
     ["google", "Google"],
     ["fb", "Facebook"],
     ["facebook", "Facebook"],
+    ["fbclid", "Facebook"],
     ["ig", "Instagram"],
     ["instagram", "Instagram"],
     ["tiktok", "TikTok"],
