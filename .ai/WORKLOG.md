@@ -1717,3 +1717,9 @@ unconfirmed business assumptions).
   only, proxy-exempt); login page keeps two plain links. Reset page fix:
   handles hash tokens / PKCE code / explicit error params (server-initiated
   recovery emails deliver tokens in the hash — page previously missed them).
+
+## 2026-07-22 — Team access revocation is owner-only
+
+- Settings → Team already gated mutations to real Supabase admins, but ANY approved member could remove any other (incl. the owner). Owner request: only the registered admin (owner) may revoke.
+- New `lib/admin/team-owner.ts` (pure, unit-testable): owner = earliest-created APPROVED account; local adapter (no auth timestamps) falls back to the first allowlist row. Server-side gate in `removeMemberAction`; UI hides Remove for non-owners, shows an "Owner" badge + owner-only note (EN + 中文 keys added).
+- Tests: 5 new unit tests (14 total green), team e2e asserts the Owner badge; full suite 52 e2e green. tsc + lint unchanged.
