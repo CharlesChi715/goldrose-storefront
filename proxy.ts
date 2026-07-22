@@ -72,6 +72,18 @@ export async function proxy(request: NextRequest) {
     (process.env.ADMIN_OPEN_ACCESS ?? "").trim().toLowerCase(),
   );
 
+  // Owner request 2026-07-22: during open-access testing, everyone still
+  // funnels through the login page — a nickname is the minimum identity.
+  if (!user && openAccess && !request.cookies.get("forum_nickname")?.value) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = LOGIN_PATH;
+    const redirect = NextResponse.redirect(loginUrl);
+    for (const cookie of response.cookies.getAll()) {
+      redirect.cookies.set(cookie);
+    }
+    return redirect;
+  }
+
   if (!user && !openAccess) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;

@@ -35,7 +35,9 @@ export async function loginAction(
       return { error: "invalid" };
     }
     await setForumNickname(nickname);
-    redirect("/admin/forum");
+    // Nickname is the general testing-phase entry (owner request) — land on
+    // the dashboard like any other login, not just the forum.
+    redirect("/admin");
   }
 
   if (!email || !password) {

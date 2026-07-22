@@ -63,7 +63,7 @@ export function isOpenAccess(): boolean {
 }
 
 /** The synthetic identity open-access visitors act as on hosted Supabase. */
-const OPEN_ACCESS_GUEST: AdminSession = {
+export const OPEN_ACCESS_GUEST: AdminSession = {
   userId: "00000000-0000-4000-8000-0000000000ff",
   email: "tester@goldrose.testing",
 };
