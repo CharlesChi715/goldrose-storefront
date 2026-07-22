@@ -50,7 +50,3 @@ export const COUNTRIES: Array<{ code: string; name: string }> = [
   { code: "GB", name: "United Kingdom" },
   { code: "VN", name: "Vietnam" },
 ];
-
-export function isCountryCode(value: string): boolean {
-  return COUNTRIES.some((country) => country.code === value);
-}

@@ -1859,3 +1859,24 @@ Explain why mock code remains in lib/checkout
   docs/archive/ paths (no spec content or numbering touched).
 - Left alone by design: admin-design.md (spec), ideas.md (verbatim), USER-GUIDE.md
   (rendered at /admin/guide), Database.md content, seo-roadmap.md.
+
+## 2026-07-23 — Lint zeroed with real refactors (commit 88ffaed)
+
+- Fixed all 11 eslint problems (8 errors, 3 warnings) with proper refactors, no rule disables:
+  - `WishlistButton` → `useSyncExternalStore` (hearts now sync across components/tabs; privacy-mode fallback kept).
+  - `BackButton` → ref instead of state (one less render); `SalesChart` → hydration idiom via `useSyncExternalStore`.
+  - `AttachmentsField` → hook owns only `File[]` state; component mirrors it into the hidden input via effect.
+  - `CheckoutClient` → latest-ref updated in an effect; escaped apostrophe in `ConciergeChat`; removed 3 dead vars/imports.
+- Verified: eslint 0 problems, tsc clean, 20/20 unit, prod build green, 18/18 targeted e2e (incl. all 3 pixel baselines).
+- Note: a concurrent session was editing `lib/` + `package.json` ("type": "module", deleted `lib/business.ts`) during this work; committed only my 9 files via `git commit -- <paths>`.
+
+## 2026-07-23 — Repo health sweep: silent-truncation fix, auth fail-closed, perf (Charles: "find anything obviously improvable")
+
+- **RemoteStore.all() paginates** (`lib/supabase/remote.ts`): PostgREST silently caps a bare select at ~1000 rows — analytics/orders would have gone quietly wrong once `page_views` passed 1000. Now pages via range() with a stable per-table order key. New `where()` on TableStore (both adapters) pushes equality filters down to SQL; order-detail `conversionFor` no longer drags the whole page_views table.
+- **Auth fail-closed** (`lib/admin/auth.ts`): partial Supabase config (URL set, service key missing) used to fall OPEN to the no-login testing mode — now any configured URL locks the admin. Intentional no-env demo mode unchanged.
+- **Team roster paginated** (`lib/admin/team.ts`): listUsers read only page 1 (200); storefront customer accounts share auth.users, so admins (and owner detection gating Remove) could silently drop off. Now loops all pages.
+- **Perf**: map-indexed joins in listOrders/listCustomers (were O(n×m)); `getCatalog` wrapped in React cache() (metadata + page body fetched it twice per product render).
+- **channelOf**: `fbclid` now buckets as Facebook (mirrors gclid→Google) + unit case.
+- **Housekeeping**: deleted Shopify-era `lib/business.ts` (unimported; decisions preserved in docs/archive/launch-checklist.md) and unused `isCountryCode`; `"type": "module"` in package.json (kills node --test warnings; configs already ESM); SUMMARY test counts corrected (55 e2e + 20 unit).
+- Verified: tsc clean, build clean, 20 unit + 55 e2e green (one flake retried clean).
+- Reported-not-fixed (need owner/design decisions): PayPal capture amount-mismatch only logs; customer auto-link race (wants unique constraint); tax base vs discount apportionment (latent, tax=0); adminAlerts full-table reads on every admin navigation; page_views has no retention policy.

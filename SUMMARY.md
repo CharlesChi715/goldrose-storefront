@@ -16,7 +16,7 @@ goldrose-storefront/
 ├── lib/                 # Domain logic: admin/, checkout/, supabase/ (2 backends: hosted / .data file adapter), account/, cart/
 ├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth)
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
-├── tests/               # 52 Playwright e2e (production build, port 3001, file adapter) + 14 unit — green
+├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 20 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
 ├── assets/              # Raw owner art (not served; cropped copies go to public/)
 ├── docs/                # admin-design.md (SPEC), USER-GUIDE.md (rendered at /admin/guide), Database.md, ideas.md, seo-roadmap.md, archive/
