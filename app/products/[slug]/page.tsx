@@ -28,6 +28,7 @@ import { getCatalog, getCatalogProduct } from "@/lib/supabase/catalog.ts";
 import { getPromoSlogan } from "@/lib/content";
 import { fileUrl } from "@/lib/files-url";
 import { siteBaseUrl } from "@/lib/admin/settings";
+import { formatMoney } from "@/lib/money";
 
 // Re-check the DB catalog every 5 minutes so admin edits reach buyers
 // without a redeploy (§8).
@@ -214,9 +215,17 @@ export default async function ProductDetailPage({
         </div>
         <div
           className={cormorant.className}
-          style={{ ...abs(0, 36, 398), ...txt(25, 32, "#152C27"), fontWeight: 600 }}
+          data-live-text
+          style={{
+            ...abs(0, 36, 398),
+            ...txt(25, 32, "#152C27"),
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
         >
-          Artisan 24K Gold-Dipped Eternal Rose
+          {product.title}
         </div>
         <div style={{ ...abs(0, 75, 398), ...txt(13, 15.733, "#7C7369") }}>
           Real Rose · Hand-Finished · Made to Last
@@ -231,16 +240,20 @@ export default async function ProductDetailPage({
         <div style={{ ...abs(76, 99, 112), ...txt(12, 14.523, "#6E6A64") }}>{"4.9 · 286 Reviews \u00A0›"}</div>
         <div
           className={notoSC.className}
-          style={{ ...abs(0, 122, 116, 36), ...txt(30, 36, "#073A31"), fontWeight: 700 }}
+          data-live-text
+          style={{ ...abs(0, 122, 116, 36), ...txt(30, 36, "#073A31"), fontWeight: 700, whiteSpace: "nowrap" }}
         >
-          $159.00
+          {formatMoney(defaultVariant?.price_cents ?? 0)}
         </div>
-        <div
-          className={notoSC.className}
-          style={{ ...abs(128, 131.5), ...txt(14, 16.8, "#918A83"), textDecoration: "line-through" }}
-        >
-          $189.00
-        </div>
+        {defaultVariant?.compare_at_price_cents != null ? (
+          <div
+            className={notoSC.className}
+            data-live-text
+            style={{ ...abs(128, 131.5), ...txt(14, 16.8, "#918A83"), textDecoration: "line-through" }}
+          >
+            {formatMoney(defaultVariant.compare_at_price_cents)}
+          </div>
+        ) : null}
         <div style={{ ...abs(191, 128.5, 70, 23), background: "#F6EBDD", borderRadius: 99 }}>
           <div style={{ ...abs(10, 4, 50), ...txt(12, 14.523, "#B67923"), fontWeight: 500 }}>15% OFF</div>
         </div>
@@ -439,7 +452,10 @@ export default async function ProductDetailPage({
 
       {/* 07 · Checkout actions — wired to the v2 cart (Stage 4) */}
       <Section x={16} y={1321} w={398} h={144} radius={18} stroke="#E8E0D7">
-        <BuyButtons variantId={variantId} />
+        <BuyButtons
+          variantId={variantId}
+          priceLabel={formatMoney(defaultVariant?.price_cents ?? 0)}
+        />
         <div style={{ ...abs(16, 85, 232), ...txt(11, 13.312, "#8C857D") }}>
           Secure Checkout · Multiple Payment Options
         </div>

@@ -1,25 +1,15 @@
 /**
  * ROLE OF THIS FILE
- * Stage 0 pixel baseline: full-page screenshots of the three pixel-exact
- * Figma pages. Any later stage that changes a single storefront pixel fails
- * here — the storefront must keep rendering byte-identically until the owner
- * edits content (design doc §3.1 goal 4).
+ * The pixel regression net, Stage 9 edition (§14.2). Home is still a
+ * byte-exact full-page snapshot (it keeps design text — §8). /shop and the
+ * product page now render LIVE catalog values inside their designated text
+ * boxes, so those two run as MASKED snapshots: every [data-live-text] box
+ * is masked out, and everything else must stay byte-identical to the Figma
+ * baseline. Any pixel change outside a designated box still fails here.
  */
 
 import { test, expect, type Page } from "@playwright/test";
 
-const PAGES = [
-  { path: "/", name: "home" },
-  { path: "/shop", name: "shop" },
-  { path: "/products/signature-24k-gold-rose", name: "product-detail" },
-] as const;
-
-/**
- * Force every lazy asset to load before capturing: scroll to the bottom in
- * viewport-sized steps (triggering next/image lazy loading), then back to the
- * top so fixed chrome (bottom nav, concierge chat) sits where a fresh visit
- * puts it.
- */
 async function settlePage(page: Page) {
   await page.evaluate(async () => {
     await document.fonts.ready;
@@ -33,10 +23,22 @@ async function settlePage(page: Page) {
   await page.waitForLoadState("networkidle");
 }
 
-for (const { path, name } of PAGES) {
-  test(`pixel baseline: ${name}`, async ({ page }) => {
+test("pixel baseline: home (exact)", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await settlePage(page);
+  await expect(page).toHaveScreenshot("home.png", { fullPage: true });
+});
+
+for (const { path, name } of [
+  { path: "/shop", name: "shop" },
+  { path: "/products/signature-24k-gold-rose", name: "product-detail" },
+] as const) {
+  test(`pixel baseline: ${name} (masked live-text boxes)`, async ({ page }) => {
     await page.goto(path, { waitUntil: "networkidle" });
     await settlePage(page);
-    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
+    await expect(page).toHaveScreenshot(`${name}-masked.png`, {
+      fullPage: true,
+      mask: [page.locator("[data-live-text]")],
+    });
   });
 }

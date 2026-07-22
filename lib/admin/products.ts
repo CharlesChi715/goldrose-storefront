@@ -47,6 +47,9 @@ export function revalidateStorefront(): void {
   revalidatePath("/");
   revalidatePath("/shop");
   revalidatePath("/products/[slug]", "page");
+  // The discovery layer regenerates with the catalog (§8.1).
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/llms.txt");
 }
 
 export async function listProducts(): Promise<ProductListRow[]> {

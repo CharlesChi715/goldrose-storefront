@@ -13,7 +13,14 @@ import { useRouter } from "next/navigation";
 import { abs, txt } from "@/components/veloria";
 import { addToCart } from "@/lib/cart/store";
 
-export function BuyButtons({ variantId }: { variantId: string | null }) {
+export function BuyButtons({
+  variantId,
+  priceLabel,
+}: {
+  variantId: string | null;
+  /** Live price for the BUY NOW label; null keeps the design text. */
+  priceLabel?: string | null;
+}) {
   const router = useRouter();
 
   function buy() {
@@ -66,8 +73,18 @@ export function BuyButtons({ variantId }: { variantId: string | null }) {
           cursor: variantId ? "pointer" : "default",
         }}
       >
-        <div style={{ ...abs(27, 19, 124), ...txt(13, 15.733, "#FFFFFF"), fontWeight: 500 }}>
-          BUY NOW · $159.00
+        <div
+          data-live-text
+          style={{
+            ...abs(27, 19, 124),
+            ...txt(13, 15.733, "#FFFFFF"),
+            fontWeight: 500,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {priceLabel ? `BUY NOW · ${priceLabel}` : "BUY NOW · $159.00"}
         </div>
       </div>
     </>

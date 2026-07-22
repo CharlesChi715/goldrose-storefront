@@ -11,6 +11,9 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // One shared screenshot dir: the Stage 9 spec gates against the SAME
+  // masked baselines as pixels.spec.ts.
+  snapshotPathTemplate: "{testDir}/__screenshots__/{arg}-{platform}{ext}",
   // The mock-checkout test writes to .data/orders.json; keep runs serial so
   // suites never race on shared server state.
   fullyParallel: false,

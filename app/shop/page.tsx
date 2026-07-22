@@ -26,6 +26,7 @@ import {
 } from "@/components/veloria";
 import { cormorant, notoSC, tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
+import { formatMoney } from "@/lib/money";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { siteBaseUrl } from "@/lib/admin/settings";
 
@@ -54,7 +55,18 @@ const CARDS = [
   { x: 221, y: 1410, img: "card-8" },
 ];
 
-function ProductCard({ card, href }: { card: (typeof CARDS)[number]; href: string }) {
+type CardData = { shortName: string; price: string; compareAt: string | null } | null;
+
+function ProductCard({
+  card,
+  href,
+  data,
+}: {
+  card: (typeof CARDS)[number];
+  href: string;
+  /** Live catalog values for the designated text boxes; null = design text. */
+  data: CardData;
+}) {
   return (
     <Link
       href={href}
@@ -79,22 +91,34 @@ function ProductCard({ card, href }: { card: (typeof CARDS)[number]; href: strin
       </span>
       <div
         className={cormorant.className}
-        style={{ ...abs(19.5, 257.5, 165), ...txt(25, 32, "#152C27", "center"), fontWeight: 600 }}
+        data-live-text
+        style={{
+          ...abs(19.5, 257.5, 165),
+          ...txt(25, 32, "#152C27", "center"),
+          fontWeight: 600,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
       >
-        Artisan
+        {data?.shortName ?? "Artisan"}
       </div>
       <div
         className={notoSC.className}
+        data-live-text
         style={{ ...abs(42.5, 293.5), ...txt(16, 19.2, "#073A31"), fontWeight: 700 }}
       >
-        $159.00
+        {data?.price ?? "$159.00"}
       </div>
-      <div
-        className={notoSC.className}
-        style={{ ...abs(110.5, 294.5), ...txt(14, 16.8, "#918A83"), textDecoration: "line-through" }}
-      >
-        $189.00
-      </div>
+      {data === null || data.compareAt !== null ? (
+        <div
+          className={notoSC.className}
+          data-live-text
+          style={{ ...abs(110.5, 294.5), ...txt(14, 16.8, "#918A83"), textDecoration: "line-through" }}
+        >
+          {data?.compareAt ?? "$189.00"}
+        </div>
+      ) : null}
     </Link>
   );
 }
@@ -104,10 +128,21 @@ function ProductCard({ card, href }: { card: (typeof CARDS)[number]; href: strin
 export default async function ShopPage() {
   // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
   let handles: string[] = [];
+  let cardData: Array<{ handle: string; shortName: string; price: string; compareAt: string | null }> = [];
   let promo = { text: "", isDefault: true };
   try {
+    // Card order = active products by position (§8); cards cycle the catalog.
     const catalog = await getCatalog();
     handles = catalog.map((product) => product.handle);
+    cardData = catalog.map((product) => ({
+      handle: product.handle,
+      shortName: product.short_name || product.title,
+      price: formatMoney(product.variants[0]?.price_cents ?? 0),
+      compareAt:
+        product.variants[0]?.compare_at_price_cents != null
+          ? formatMoney(product.variants[0].compare_at_price_cents)
+          : null,
+    }));
     promo = await getPromoSlogan();
   } catch {
     // fixed design still renders
@@ -175,7 +210,12 @@ export default async function ShopPage() {
 
       {/* Product grid — each card routes to its product detail page. */}
       {CARDS.map((card, i) => (
-        <ProductCard key={i} card={card} href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"} />
+        <ProductCard
+          key={i}
+          card={card}
+          href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"}
+          data={cardData.length ? cardData[i % cardData.length] : null}
+        />
       ))}
 
       {/* Pagination */}
