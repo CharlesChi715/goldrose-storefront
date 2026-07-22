@@ -1733,3 +1733,8 @@ unconfirmed business assumptions).
   funnel, layout guest display, and the playwright env blank all removed;
   requireRealAdmin kept as the named gate (now = requireAdmin). Open access
   remains only in the local no-Supabase dev mode.
+- Perf (owner report: language toggle very slow on live): vercel.json pins
+  functions to syd1 (same region as the Supabase project — was iad1, ~250ms
+  per query across the Pacific); getAdminSession wrapped in React cache()
+  so layout/page/actions share one auth round trip per request. (Also:
+  auto-approve toggle was started and fully reverted on owner's nvm.)

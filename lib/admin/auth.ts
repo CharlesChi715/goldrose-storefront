@@ -16,6 +16,7 @@
  */
 
 import "server-only";
+import { cache } from "react";
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
@@ -164,8 +165,12 @@ async function isAllowlisted(userId: string): Promise<boolean> {
 
 /* ---------- Public API ---------- */
 
-/** The current admin session, or null. Never throws. */
-export async function getAdminSession(): Promise<AdminSession | null> {
+/**
+ * The current admin session, or null. Never throws. Wrapped in React
+ * cache(): layout + page + actions all call this in one request, and each
+ * uncached call costs a Supabase auth round trip (Sydney) — dedupe it.
+ */
+export const getAdminSession = cache(async (): Promise<AdminSession | null> => {
   const env = getSupabaseEnv();
 
   if (!env.hosted) {
@@ -200,7 +205,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
         ? user.user_metadata.nickname
         : null,
   };
-}
+});
 
 /**
  * Gate for every admin page and server action. Non-admins see a plain 404 —
