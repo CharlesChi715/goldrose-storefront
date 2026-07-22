@@ -1627,3 +1627,19 @@ unconfirmed business assumptions).
   to migration/types/seed) → admin Content → Ideas (list + delete). e2e added.
 - Cleared all Next dev-overlay issues; EN/中文 toggle as a white top-bar button;
   Playwright moved to port 3001 (no clash with the owner's dev server).
+
+## 2026-07-22 — Testing forum + nickname login + Supabase decision
+
+- Owner confirmed database choice: Supabase (docs/Database.md option 1) — no
+  self-hosted Postgres; activation checklist unchanged (BUILD-REPORT §5).
+- Forum in the admin (owner request): /admin/forum thread list + new-thread
+  form, /admin/forum/[id] posts + reply + delete; nav item "Forum" (EN/中文).
+  Tables forum_threads/forum_posts added to types, seed, and the SQL migration
+  (RLS enabled, service-role only like feedback).
+- Login page: nickname field added above the untouched email/password fields.
+  Nickname-only submit (open-access testing phase only) sets a 90-day
+  forum_nickname cookie and goes straight to the forum; with real auth active
+  nickname-only is rejected. Forum pages redirect to /admin/login when no
+  nickname is set.
+- Tests: forum e2e spec (nickname gate, thread/reply/delete flow, nickname-only
+  rejection under password gate); unit + full e2e suite green.

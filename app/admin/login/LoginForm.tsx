@@ -3,7 +3,9 @@
 /**
  * ROLE OF THIS FILE
  * The Polaris login card. Uses useActionState around the login server
- * action; the error message stays deliberately vague (§9.2).
+ * action; the error message stays deliberately vague (§9.2). During the
+ * testing phase a nickname field on top lets anyone join the forum with no
+ * credentials (owner request 2026-07-22) — email + password stay as-is.
  */
 
 import { useActionState, useState } from "react";
@@ -13,6 +15,7 @@ import {
   Box,
   Button,
   Card,
+  Divider,
   Text,
   TextField,
 } from "@shopify/polaris";
@@ -24,6 +27,7 @@ const INITIAL_STATE: LoginState = { error: null };
 export function LoginForm({ showDevHint }: { showDevHint: boolean }) {
   const t = useAdminT();
   const [state, formAction, pending] = useActionState(loginAction, INITIAL_STATE);
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -41,12 +45,27 @@ export function LoginForm({ showDevHint }: { showDevHint: boolean }) {
           </BlockStack>
 
           {state.error ? (
-            <Banner tone="critical">{t("login.error.invalid")}</Banner>
+            <Banner tone="critical">
+              {state.error === "nickname"
+                ? t("login.error.nickname")
+                : t("login.error.invalid")}
+            </Banner>
           ) : null}
 
           <Card>
             <form action={formAction}>
               <BlockStack gap="400">
+                <TextField
+                  label={t("login.nickname")}
+                  type="text"
+                  name="nickname"
+                  value={nickname}
+                  onChange={setNickname}
+                  autoComplete="nickname"
+                  maxLength={40}
+                  helpText={t("login.nickname.help")}
+                />
+                <Divider />
                 <TextField
                   label={t("login.email")}
                   type="email"

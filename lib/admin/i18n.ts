@@ -29,6 +29,7 @@ const en = {
   "nav.content.ideas": "Ideas",
   "nav.analytics": "Analytics",
   "nav.discounts": "Discounts",
+  "nav.forum": "Forum",
   "nav.settings": "Settings",
 
   // Top bar
@@ -48,8 +49,28 @@ const en = {
   "login.subtitle": "Continue to GoldRose admin",
   "login.email": "Email",
   "login.password": "Password",
+  "login.nickname": "Nickname",
+  "login.nickname.help":
+    "Testing phase: enter just a nickname to join the forum — no email or password needed.",
   "login.submit": "Log in",
   "login.error.invalid": "Your email or password is incorrect.",
+  "login.error.nickname": "Please enter a nickname.",
+
+  // Forum (testing phase)
+  "forum.postingAs": "Posting as",
+  "forum.changeNickname": "Change nickname",
+  "forum.newThread.title": "Start a discussion",
+  "forum.newThread.titleField": "Title",
+  "forum.newThread.messageField": "Message",
+  "forum.newThread.submit": "Post",
+  "forum.empty": "No discussions yet — start the first one.",
+  "forum.replies": "replies",
+  "forum.reply.label": "Reply",
+  "forum.reply.submit": "Reply",
+  "forum.delete": "Delete",
+  "forum.deleteThread": "Delete discussion",
+  "forum.error.empty": "Please fill in both a title and a message.",
+  "forum.error.emptyReply": "Please write a message first.",
   "login.devHint":
     "Local development login — no Supabase configured. Use any email with the dev password (ADMIN_DEV_PASSWORD).",
 
@@ -453,6 +474,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.content.ideas": "想法",
   "nav.analytics": "分析",
   "nav.discounts": "折扣",
+  "nav.forum": "论坛",
   "nav.settings": "设置",
 
   "topbar.search.placeholder": "搜索",
@@ -469,8 +491,27 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "login.subtitle": "继续访问 GoldRose 后台",
   "login.email": "邮箱",
   "login.password": "密码",
+  "login.nickname": "昵称",
+  "login.nickname.help": "测试阶段：只需填写昵称即可进入论坛，无需邮箱和密码。",
   "login.submit": "登录",
   "login.error.invalid": "邮箱或密码不正确。",
+  "login.error.nickname": "请输入昵称。",
+
+  // Forum (testing phase)
+  "forum.postingAs": "发帖身份",
+  "forum.changeNickname": "更改昵称",
+  "forum.newThread.title": "发起讨论",
+  "forum.newThread.titleField": "标题",
+  "forum.newThread.messageField": "内容",
+  "forum.newThread.submit": "发布",
+  "forum.empty": "还没有讨论 — 来发起第一个吧。",
+  "forum.replies": "条回复",
+  "forum.reply.label": "回复",
+  "forum.reply.submit": "回复",
+  "forum.delete": "删除",
+  "forum.deleteThread": "删除讨论",
+  "forum.error.empty": "请填写标题和内容。",
+  "forum.error.emptyReply": "请先输入内容。",
   "login.devHint":
     "本地开发登录 — 未配置 Supabase。使用任意邮箱和开发密码（ADMIN_DEV_PASSWORD）。",
 

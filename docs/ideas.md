@@ -26,6 +26,14 @@ turn it into a real task.
   replace the Shopify backend gradually to achieve fully autonomous.
 - 🆕 We decide to use paypal as only method to do the first round test. and add my account as payee.
 
+## From boss — 2026-07-22
+
+- ✅ okay just use Supabase. and add the forum in this admin for everyone to
+  discuss. and add login page but only require nickname for forum use. its in
+  testing phase we need places to discuss but no credientials needed just
+  nickname to tell whos who. leave the email and password as it is just add
+  nickanme field in login page.
+
 ## General / unsorted
 
 - 🆕 _(anything that doesn't fit a list above)_

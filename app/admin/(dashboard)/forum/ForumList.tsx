@@ -1,0 +1,128 @@
+"use client";
+
+/**
+ * ROLE OF THIS FILE
+ * Client half of /admin/forum: "posting as" banner, new-thread form, and
+ * the thread list (newest activity first).
+ */
+
+import { useActionState, useState } from "react";
+import Link from "next/link";
+import {
+  BlockStack,
+  Banner,
+  Button,
+  Card,
+  InlineStack,
+  Page,
+  Text,
+  TextField,
+} from "@shopify/polaris";
+import { formatDateTime } from "@/lib/dates";
+import { useAdminT } from "../../PolarisShell";
+import { createThreadAction, type ForumFormState } from "./actions";
+
+export type ThreadItem = {
+  id: string;
+  title: string;
+  nickname: string;
+  createdAt: string;
+  replyCount: number;
+  lastPostAt: string;
+};
+
+const INITIAL_STATE: ForumFormState = { error: null };
+
+function NewThreadForm() {
+  const t = useAdminT();
+  const [state, formAction, pending] = useActionState(createThreadAction, INITIAL_STATE);
+
+  return (
+    <Card>
+      <form action={formAction}>
+        <BlockStack gap="300">
+          <Text as="h2" variant="headingSm">
+            {t("forum.newThread.title")}
+          </Text>
+          {state.error ? <Banner tone="critical">{t("forum.error.empty")}</Banner> : null}
+          <NewThreadFields pending={pending} />
+        </BlockStack>
+      </form>
+    </Card>
+  );
+}
+
+/* Polaris TextField is controlled; keep field state local to this child so
+   the useActionState re-render doesn't clear what's being typed. */
+function NewThreadFields({ pending }: { pending: boolean }) {
+  const t = useAdminT();
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  return (
+    <>
+      <TextField
+        label={t("forum.newThread.titleField")}
+        name="title"
+        value={title}
+        onChange={setTitle}
+        autoComplete="off"
+        maxLength={200}
+      />
+      <TextField
+        label={t("forum.newThread.messageField")}
+        name="body"
+        value={body}
+        onChange={setBody}
+        autoComplete="off"
+        multiline={3}
+        maxLength={5000}
+      />
+      <InlineStack align="end">
+        <Button submit variant="primary" loading={pending}>
+          {t("forum.newThread.submit")}
+        </Button>
+      </InlineStack>
+    </>
+  );
+}
+
+export function ForumList({ items, nickname }: { items: ThreadItem[]; nickname: string }) {
+  const t = useAdminT();
+
+  return (
+    <Page
+      title={t("nav.forum")}
+      subtitle={`${t("forum.postingAs")}: ${nickname}`}
+      secondaryActions={[{ content: t("forum.changeNickname"), url: "/admin/login" }]}
+    >
+      <BlockStack gap="400">
+        <NewThreadForm />
+        {items.length === 0 ? (
+          <Card>
+            <Text as="p" tone="subdued">
+              {t("forum.empty")}
+            </Text>
+          </Card>
+        ) : (
+          <BlockStack gap="300">
+            {items.map((item) => (
+              <Card key={item.id}>
+                <BlockStack gap="100">
+                  <Link href={`/admin/forum/${item.id}`} style={{ textDecoration: "none" }}>
+                    <Text as="h3" variant="headingSm">
+                      {item.title}
+                    </Text>
+                  </Link>
+                  <Text as="span" tone="subdued" variant="bodySm">
+                    {item.nickname} · {formatDateTime(item.createdAt)} · {item.replyCount}{" "}
+                    {t("forum.replies")}
+                  </Text>
+                </BlockStack>
+              </Card>
+            ))}
+          </BlockStack>
+        )}
+      </BlockStack>
+    </Page>
+  );
+}

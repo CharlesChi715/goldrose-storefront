@@ -293,6 +293,27 @@ create table feedback (
 );
 
 -- ----------------------------------------------------------------------------
+-- Testing-phase discussion forum (owner request 2026-07-22): threads +
+-- replies inside the admin, identified by nickname only. Written server-side
+-- (service role) like feedback — no anon policies.
+-- ----------------------------------------------------------------------------
+
+create table forum_threads (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  nickname text not null,
+  created_at timestamptz not null default now()
+);
+
+create table forum_posts (
+  id uuid primary key default gen_random_uuid(),
+  thread_id uuid not null references forum_threads(id) on delete cascade,
+  nickname text not null,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+-- ----------------------------------------------------------------------------
 -- Site content slots (§7.9) + settings (§7.10) + admin allowlist (§7.11)
 -- ----------------------------------------------------------------------------
 
@@ -396,6 +417,8 @@ alter table checkouts enable row level security;
 alter table discounts enable row level security;
 alter table page_views enable row level security;
 alter table feedback enable row level security;
+alter table forum_threads enable row level security;
+alter table forum_posts enable row level security;
 alter table site_content enable row level security;
 alter table settings enable row level security;
 alter table admin_users enable row level security;

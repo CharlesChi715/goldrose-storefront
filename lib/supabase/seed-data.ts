@@ -812,6 +812,8 @@ export function buildSeedTables(
       variants.map((variant) => ({ ...variant, product_id: product.id })),
     ),
     inventory_movements: [],
+    forum_threads: [],
+    forum_posts: [],
     ...demo,
     site_content: [
       {

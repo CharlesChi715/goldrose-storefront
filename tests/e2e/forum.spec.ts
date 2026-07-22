@@ -1,0 +1,78 @@
+/**
+ * ROLE OF THIS FILE
+ * Testing-phase forum (owner request 2026-07-22): nickname-gated access,
+ * starting a discussion, replying, and the thread list. Runs with
+ * ADMIN_DEV_PASSWORD set (playwright.config.ts), so the admin itself still
+ * needs the dev login and nickname-only submits are rejected — the
+ * nickname-only path is live only in open-access mode.
+ */
+
+import { test, expect, type Page } from "@playwright/test";
+import { ADMIN_VIEWPORT, DEV_PASSWORD } from "./helpers";
+
+test.use({ viewport: ADMIN_VIEWPORT });
+test.describe.configure({ mode: "serial" });
+
+const TITLE = `Shipping box ideas (e2e ${Date.now()})`;
+const OPENING = "Should we use magnetic gift boxes?";
+const REPLY = "Yes — magnetic lids feel premium.";
+
+async function logIn(page: Page, nickname?: string) {
+  await page.goto("/admin/login");
+  if (nickname) {
+    await page.getByLabel(/Nickname|昵称/).fill(nickname);
+  }
+  await page.getByLabel(/^Email$|邮箱/).fill("owner@goldrose.local");
+  await page.getByLabel(/Password|密码/).fill(DEV_PASSWORD);
+  await page.getByRole("button", { name: /Log in|登录/ }).click();
+  await page.waitForURL(/\/admin$/);
+}
+
+test("the forum requires a nickname — without one you land back on login", async ({
+  page,
+}) => {
+  await logIn(page);
+  await page.goto("/admin/forum");
+  await page.waitForURL(/\/admin\/login/);
+  await expect(page.getByLabel("Nickname")).toBeVisible();
+});
+
+test("start a discussion, reply, see it in the list, then delete it", async ({ page }) => {
+  await logIn(page, "Charlie");
+
+  await page.getByRole("navigation").getByRole("link", { name: "Forum" }).click();
+  await page.waitForURL(/\/admin\/forum$/);
+  await expect(page.getByText("Posting as: Charlie")).toBeVisible();
+
+  await page.getByLabel("Title").fill(TITLE);
+  await page.getByLabel("Message").fill(OPENING);
+  await page.getByRole("button", { name: "Post", exact: true }).click();
+  await page.waitForURL(/\/admin\/forum\/[0-9a-f-]+$/);
+  await expect(page.getByText(OPENING)).toBeVisible();
+
+  await page.getByLabel("Reply").fill(REPLY);
+  await page.getByRole("button", { name: "Reply", exact: true }).click();
+  // The box clears after a successful reply; only then is the posted copy
+  // unambiguous (while typing, the textarea itself matches the text too).
+  await expect(page.getByLabel("Reply")).toHaveValue("");
+  await expect(page.getByText(REPLY)).toBeVisible();
+
+  await page.goto("/admin/forum");
+  await expect(page.getByText(TITLE)).toBeVisible();
+  await expect(page.getByText(/Charlie · .+ · 1 replies/).first()).toBeVisible();
+
+  // Clean up: delete the whole discussion from the thread page.
+  await page.getByText(TITLE).click();
+  await page.waitForURL(/\/admin\/forum\/[0-9a-f-]+$/);
+  await page.getByRole("button", { name: "Delete discussion" }).click();
+  await page.waitForURL(/\/admin\/forum$/);
+  await expect(page.getByText(TITLE)).toHaveCount(0);
+});
+
+test("nickname-only login is rejected while the password gate is on", async ({ page }) => {
+  await page.goto("/admin/login");
+  await page.getByLabel(/Nickname|昵称/).fill("Visitor");
+  await page.getByRole("button", { name: /Log in|登录/ }).click();
+  await expect(page.getByText("Your email or password is incorrect.")).toBeVisible();
+  expect(page.url()).toContain("/admin/login");
+});

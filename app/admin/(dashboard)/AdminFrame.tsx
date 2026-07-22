@@ -26,6 +26,7 @@ import {
 } from "@shopify/polaris";
 import {
   ChartVerticalFilledIcon,
+  ChatIcon,
   ContentIcon,
   DiscountIcon,
   HomeIcon,
@@ -176,6 +177,12 @@ export function AdminFrame({
             label: t("nav.discounts"),
             icon: DiscountIcon,
             selected: selected("/admin/discounts"),
+          },
+          {
+            url: "/admin/forum",
+            label: t("nav.forum"),
+            icon: ChatIcon,
+            selected: selected("/admin/forum"),
           },
         ]}
       />

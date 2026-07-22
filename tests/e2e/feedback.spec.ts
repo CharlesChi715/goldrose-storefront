@@ -33,8 +33,11 @@ test("the idea appears in Content → Ideas and can be deleted", async ({ page }
   await expect(page.getByText(IDEA)).toBeVisible();
   await expect(page.getByText(/idea-fan@example\.com · \/shop/).first()).toBeVisible();
 
-  // Clean up: delete our test idea.
-  const card = page.locator(".Polaris-Card, [class*=Card]").filter({ hasText: IDEA }).first();
-  await card.getByRole("button", { name: "Delete" }).click();
+  // Clean up: delete our test idea. Polaris 13 Cards render no "Card" class
+  // (ShadowBevel + Box), so scope by position instead: the list is
+  // newest-first and our idea was just created — it is the top card, so the
+  // first Delete button is its own.
+  await expect(page.getByText(IDEA)).toBeVisible();
+  await page.getByRole("button", { name: "Delete" }).first().click();
   await expect(page.getByText(IDEA)).toHaveCount(0);
 });

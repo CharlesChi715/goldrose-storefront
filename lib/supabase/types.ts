@@ -253,6 +253,26 @@ export type FeedbackRow = {
   created_at: string;
 };
 
+/**
+ * Testing-phase discussion forum (owner request 2026-07-22): threads +
+ * replies inside the admin, identified by nickname only (no credentials).
+ * A thread's opening message is its first forum_posts row.
+ */
+export type ForumThreadRow = {
+  id: string;
+  title: string;
+  nickname: string;
+  created_at: string;
+};
+
+export type ForumPostRow = {
+  id: string;
+  thread_id: string;
+  nickname: string;
+  body: string;
+  created_at: string;
+};
+
 export type SettingRow = {
   key: string;
   value: unknown;
@@ -278,6 +298,8 @@ export type DbTables = {
   discounts: DiscountRow;
   page_views: PageViewRow;
   feedback: FeedbackRow;
+  forum_threads: ForumThreadRow;
+  forum_posts: ForumPostRow;
   site_content: SiteContentRow;
   settings: SettingRow;
   admin_users: AdminUserRow;
@@ -299,6 +321,8 @@ export const TABLE_NAMES: TableName[] = [
   "discounts",
   "page_views",
   "feedback",
+  "forum_threads",
+  "forum_posts",
   "site_content",
   "settings",
   "admin_users",
