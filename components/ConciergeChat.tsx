@@ -15,6 +15,7 @@
 import { useState } from "react";
 import { inter } from "@/lib/fonts";
 import { abs, txt } from "@/components/veloria";
+import NoCalcScale from "@/components/NoCalcScale";
 
 const CHAT_H = 106; // mascot top → bar bottom
 
@@ -306,19 +307,7 @@ export function ConciergeChat({
         {mascotOnTop ? [bar, mascot] : [mascot, bar]}
       </div>
       {/* No-calc fallback: scale the chat stage via zoom/transform. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{" +
-            "if(window.CSS&&CSS.supports&&CSS.supports('transform','scale(calc(100vw / 430px))'))return;" +
-            "var nv=document.querySelector('.figv-chatstage');if(!nv)return;" +
-            "function fit(){var s=Math.min(window.innerWidth,480)/430;" +
-            "if('zoom' in nv.style){nv.style.zoom=s;}" +
-            "else{nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}}" +
-            "fit();window.addEventListener('resize',fit);" +
-            "}catch(e){}})();",
-        }}
-      />
+      <NoCalcScale base={430} stage=".figv-chatstage" origin="bottom center" />
     </div>
   );
 }

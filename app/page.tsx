@@ -15,6 +15,7 @@ import { Tenor_Sans } from "next/font/google";
 import { BackButton } from "@/components/BackButton";
 import { ConciergeChat } from "@/components/ConciergeChat";
 import { BottomNav } from "@/components/veloria";
+import NoCalcScale from "@/components/NoCalcScale";
 import type { Metadata } from "next";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
@@ -440,21 +441,12 @@ export default async function HomePage() {
           engines, e.g. old Android WebViews / in-app browsers): apply the same
           scale via `zoom` (or transform where zoom is unsupported) so narrow
           screens never scroll sideways. No-op on modern browsers. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{" +
-            "if(window.CSS&&CSS.supports&&CSS.supports('transform','scale(calc(100vw / 375px))'))return;" +
-            "var z='zoom' in document.documentElement.style;" +
-            "function fit(){var s=Math.min(window.innerWidth,480)/375;" +
-            "var st=document.querySelector('.fighome-stage');" +
-            "var wr=document.querySelector('.fighome-wrap');if(!st)return;" +
-            "if(z){st.style.zoom=s;}" +
-            "else{st.style.transform='scale('+s+')';st.style.transformOrigin='top center';" +
-            "if(wr){wr.style.height=1690*s+'px';wr.style.overflow='hidden';}}}" +
-            "fit();window.addEventListener('resize',fit);" +
-            "}catch(e){}})();",
-        }}
+      <NoCalcScale
+        base={375}
+        stage=".fighome-stage"
+        origin="top center"
+        wrap=".fighome-wrap"
+        height={1690}
       />
     </div>
   );

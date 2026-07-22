@@ -12,6 +12,7 @@
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
 import { inter } from "@/lib/fonts";
+import NoCalcScale from "@/components/NoCalcScale";
 
 /* ---------- Style helpers ---------- */
 
@@ -296,19 +297,7 @@ export function BottomNav({
         </nav>
       </div>
       {/* No-calc fallback: scale the nav stage via zoom/transform. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{" +
-            "if(window.CSS&&CSS.supports&&CSS.supports('transform','scale(calc(100vw / 430px))'))return;" +
-            "var nv=document.querySelector('.figv-navstage');if(!nv)return;" +
-            "function fit(){var s=Math.min(window.innerWidth,480)/430;" +
-            "if('zoom' in nv.style){nv.style.zoom=s;}" +
-            "else{nv.style.transform='scale('+s+')';nv.style.transformOrigin='bottom center';}}" +
-            "fit();window.addEventListener('resize',fit);" +
-            "}catch(e){}})();",
-        }}
-      />
+      <NoCalcScale base={430} stage=".figv-navstage" origin="bottom center" />
     </div>
   );
 }
@@ -362,21 +351,12 @@ export function ScaleFrame({
       <BottomNav bottomGap={navGap} />
       {/* Fallback for browsers without calc() length division: apply the same
           scale via `zoom`/transform so narrow screens never scroll sideways. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{" +
-            "if(window.CSS&&CSS.supports&&CSS.supports('transform','scale(calc(100vw / 430px))'))return;" +
-            "var z='zoom' in document.documentElement.style;" +
-            "function fit(){var s=Math.min(window.innerWidth,480)/430;" +
-            "var st=document.querySelector('.figv-stage');" +
-            "var wr=document.querySelector('.figv-wrap');if(!st)return;" +
-            "if(z){st.style.zoom=s;}" +
-            "else{st.style.transform='scale('+s+')';st.style.transformOrigin='top center';" +
-            `if(wr){wr.style.height=${height}*s+'px';wr.style.overflow='hidden';}}}` +
-            "fit();window.addEventListener('resize',fit);" +
-            "}catch(e){}})();",
-        }}
+      <NoCalcScale
+        base={430}
+        stage=".figv-stage"
+        origin="top center"
+        wrap=".figv-wrap"
+        height={height}
       />
     </div>
   );
