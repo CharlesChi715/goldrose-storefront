@@ -117,6 +117,14 @@ class LocalStore implements TableStore {
     });
   }
 
+  where<T extends TableName>(table: T, match: Match<T>): Promise<DbTables[T][]> {
+    return this.locked(async () => {
+      const db = await this.load();
+      const rows = db.tables[table] as DbTables[T][];
+      return structuredClone(rows.filter((row) => matches<T>(row, match)));
+    });
+  }
+
   insert<T extends TableName>(table: T, rows: DbTables[T][]): Promise<void> {
     return this.locked(async () => {
       const db = await this.load();

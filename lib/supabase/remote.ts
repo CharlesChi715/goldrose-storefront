@@ -16,6 +16,13 @@ import type {
   TableStore,
 } from "./types.ts";
 
+/** Stable pagination key per table — "id" everywhere it exists. */
+const PAGE_ORDER: Partial<Record<TableName, string>> = {
+  settings: "key",
+  site_content: "key",
+  admin_users: "user_id",
+};
+
 class RemoteStore implements TableStore {
   backend = "supabase" as const;
 
@@ -31,12 +38,50 @@ class RemoteStore implements TableStore {
     });
   }
 
+  /**
+   * PostgREST silently truncates a bare select at its max-rows cap (1000 by
+   * default) — `all()` must mean ALL, so page through with range() until a
+   * short page arrives.
+   */
   async all<T extends TableName>(table: T): Promise<DbTables[T][]> {
-    const { data, error } = await this.client.from(table).select("*");
-    if (error) {
-      throw new Error(`supabase select ${table}: ${error.message}`);
+    const pageSize = 1000;
+    const rows: DbTables[T][] = [];
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await this.client
+        .from(table)
+        .select("*")
+        .order(PAGE_ORDER[table] ?? "id", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) {
+        throw new Error(`supabase select ${table}: ${error.message}`);
+      }
+      const page = (data ?? []) as DbTables[T][];
+      rows.push(...page);
+      if (page.length < pageSize) {
+        return rows;
+      }
     }
-    return (data ?? []) as DbTables[T][];
+  }
+
+  async where<T extends TableName>(table: T, match: Match<T>): Promise<DbTables[T][]> {
+    const pageSize = 1000;
+    const rows: DbTables[T][] = [];
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await this.client
+        .from(table)
+        .select("*")
+        .match(match as Record<string, unknown>)
+        .order(PAGE_ORDER[table] ?? "id", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) {
+        throw new Error(`supabase select ${table}: ${error.message}`);
+      }
+      const page = (data ?? []) as DbTables[T][];
+      rows.push(...page);
+      if (page.length < pageSize) {
+        return rows;
+      }
+    }
   }
 
   async insert<T extends TableName>(table: T, rows: DbTables[T][]): Promise<void> {

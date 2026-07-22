@@ -358,6 +358,9 @@ export interface TableStore {
   /** Which backend is live — "supabase" (hosted) or "local" (file adapter). */
   backend: "supabase" | "local";
   all<T extends TableName>(table: T): Promise<DbTables[T][]>;
+  /** Rows matching an equality filter — pushed down to SQL in hosted mode,
+   * so hot paths don't drag whole growing tables over the wire. */
+  where<T extends TableName>(table: T, match: Match<T>): Promise<DbTables[T][]>;
   insert<T extends TableName>(table: T, rows: DbTables[T][]): Promise<void>;
   update<T extends TableName>(
     table: T,
