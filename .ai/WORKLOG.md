@@ -1674,3 +1674,9 @@ unconfirmed business assumptions).
 - Housekeeping: cat-button source art moved from gitignored temp/ into
   tracked assets/nav-buttons/ (owner request — masters now backed up in git;
   public/nav/ keeps the optimized web copies).
+- Supabase activation (with owner): project created on company guidance,
+  0001_init.sql run, security-definer advisor warning triaged (by design),
+  clean seed to hosted + one-off insert of the two forum announcements,
+  verified anon sees only catalog/site_content (orders 401), bucket exists.
+  Local .env.local switched to hosted. Remaining: owner auth user +
+  admin_users row, Vercel env vars + redeploy, ADMIN_OPEN_ACCESS decision.
