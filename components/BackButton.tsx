@@ -8,7 +8,7 @@
  */
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 // sessionStorage marker: set once this tab has rendered any page of ours, so
 // "back" only walks history when the previous entry is our own site (a fresh
@@ -27,11 +27,13 @@ export function BackButton({
   style?: React.CSSProperties;
 }) {
   const router = useRouter();
-  const [canGoBack, setCanGoBack] = useState(false);
+  // A ref, not state: the value is only read in the click handler, so there is
+  // no need to re-render when it's learned.
+  const canGoBack = useRef(false);
 
   useEffect(() => {
     try {
-      if (sessionStorage.getItem(VISITED_KEY)) setCanGoBack(true);
+      canGoBack.current = sessionStorage.getItem(VISITED_KEY) !== null;
       sessionStorage.setItem(VISITED_KEY, "1");
     } catch {
       // sessionStorage unavailable (privacy mode) — fallback link still works.
@@ -43,7 +45,7 @@ export function BackButton({
       type="button"
       aria-label="Back"
       onClick={() => {
-        if (canGoBack && window.history.length > 1) {
+        if (canGoBack.current && window.history.length > 1) {
           router.back();
         } else {
           router.push(fallback);

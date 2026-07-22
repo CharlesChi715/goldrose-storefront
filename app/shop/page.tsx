@@ -28,7 +28,6 @@ import { cormorant, notoSC, tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
 import { formatMoney } from "@/lib/money";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
-import { siteBaseUrl } from "@/lib/admin/settings";
 
 // DB-backed data (card links, promo slogan) refreshes without a redeploy (§8).
 export const revalidate = 300;

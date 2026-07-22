@@ -147,7 +147,7 @@ function IdeaForm() {
         }}
       >
         <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
-          Hi! Live chat is <strong>coming soon</strong> — meanwhile, we'd love your
+          Hi! Live chat is <strong>coming soon</strong> — meanwhile, we&apos;d love your
           <strong> ideas and feedback</strong>. What would make GoldRose better?
         </div>
       </div>

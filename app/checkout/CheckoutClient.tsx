@@ -96,8 +96,12 @@ function PayPalSdkButtons({
   onFail: (message: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Latest-ref: the PayPal SDK callbacks below outlive any single render, so
+  // they read the current payload builder through this ref.
   const payloadRef = useRef(buildPayload);
-  payloadRef.current = buildPayload;
+  useEffect(() => {
+    payloadRef.current = buildPayload;
+  });
 
   useEffect(() => {
     let cancelled = false;

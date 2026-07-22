@@ -15,7 +15,6 @@ import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
 test.use({ viewport: ADMIN_VIEWPORT });
 test.describe.configure({ mode: "serial" });
 
-const SIGNATURE_VARIANT = "0a2b1a10-4b7e-4d7a-9d24-000000000101";
 const BUYER_EMAIL = `stage7-buyer-${Date.now()}@example.com`;
 
 let orderName = "";

@@ -8,18 +8,51 @@
  * No account or backend yet: the list lives in localStorage only.
  */
 
-import { useEffect, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 const KEY = "goldrose-wishlist";
 
-function readList(): string[] {
+// Same-tab writes don't fire the browser's `storage` event, so hearts notify
+// each other through this set; cross-tab updates still arrive via `storage`.
+const listeners = new Set<() => void>();
+// In-memory copy so the heart still toggles when localStorage is unavailable
+// (privacy mode) — the list then only lasts for this page view.
+let memoryRaw = "[]";
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
+}
+
+function readRaw(): string {
   try {
-    const raw = localStorage.getItem(KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
+    return localStorage.getItem(KEY) ?? memoryRaw;
+  } catch {
+    return memoryRaw;
+  }
+}
+
+function parseList(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
+}
+
+function writeList(list: string[]) {
+  memoryRaw = JSON.stringify(list);
+  try {
+    localStorage.setItem(KEY, memoryRaw);
+  } catch {
+    // Privacy mode — the in-memory copy above still updates.
+  }
+  for (const listener of listeners) listener();
 }
 
 export function WishlistButton({
@@ -30,25 +63,16 @@ export function WishlistButton({
   slug: string;
   style?: React.CSSProperties;
 }) {
-  // Render the idle heart on the server / first paint, then reflect storage
-  // after mount (keeps SSR markup deterministic and the pixel baseline idle).
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    setSaved(readList().includes(slug));
-  }, [slug]);
+  // Server snapshot is always the empty list, so SSR / first paint shows the
+  // idle heart (keeps markup deterministic and the pixel baseline idle);
+  // storage is reflected right after hydration.
+  const raw = useSyncExternalStore(subscribe, readRaw, () => "[]");
+  const saved = useMemo(() => parseList(raw).includes(slug), [raw, slug]);
 
   const toggle = () => {
-    const next = !saved;
-    setSaved(next);
-    try {
-      const list = readList().filter((s) => s !== slug);
-      if (next) list.push(slug);
-      localStorage.setItem(KEY, JSON.stringify(list));
-    } catch {
-      // localStorage unavailable (privacy mode) — the heart still toggles
-      // visually for this page view.
-    }
+    const list = parseList(readRaw()).filter((s) => s !== slug);
+    if (!saved) list.push(slug);
+    writeList(list);
   };
 
   return (

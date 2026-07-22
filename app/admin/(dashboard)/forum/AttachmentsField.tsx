@@ -8,7 +8,7 @@
  * DataTransfer so the plain form-action submit carries the files.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BlockStack, Button, InlineStack, Text } from "@shopify/polaris";
 import { useAdminT } from "../../PolarisShell";
 
@@ -16,37 +16,24 @@ const ACCEPT =
   ".jpg,.jpeg,.png,.gif,.webp,.avif,.svg,.pdf,.txt,.md,.csv,.zip,.doc,.docx,.xls,.xlsx,.mp4,.mov";
 
 export function useAttachments() {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
 
-  /** State is the source of truth; mirror it into the hidden input. */
-  const sync = (next: File[]) => {
-    setFiles(next);
-    if (inputRef.current) {
-      const transfer = new DataTransfer();
-      for (const file of next) {
-        transfer.items.add(file);
-      }
-      inputRef.current.files = transfer.files;
-    }
-  };
-
   return {
-    inputRef,
     files,
-    /** From the picker: the input already holds ONLY the new selection —
+    /** From the picker: the input holds ONLY the new selection —
      * merge it with what state remembers. */
-    onPick: (picked: File[]) => sync([...files, ...picked]),
+    onPick: (picked: File[]) => setFiles((prev) => [...prev, ...picked]),
     /** Screenshots and copied images paste as files. */
     onPaste: (event: React.ClipboardEvent) => {
       const pasted = Array.from(event.clipboardData?.files ?? []);
       if (pasted.length > 0) {
         event.preventDefault();
-        sync([...files, ...pasted]);
+        setFiles((prev) => [...prev, ...pasted]);
       }
     },
-    removeAt: (index: number) => sync(files.filter((_, i) => i !== index)),
-    reset: () => sync([]),
+    removeAt: (index: number) =>
+      setFiles((prev) => prev.filter((_, i) => i !== index)),
+    reset: () => setFiles([]),
   };
 }
 
@@ -56,11 +43,24 @@ export function AttachmentsField({
   attachments: ReturnType<typeof useAttachments>;
 }) {
   const t = useAdminT();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // State is the source of truth; mirror it into the hidden input so the
+  // plain form submit carries exactly the files state remembers.
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    const transfer = new DataTransfer();
+    for (const file of attachments.files) {
+      transfer.items.add(file);
+    }
+    input.files = transfer.files;
+  }, [attachments.files]);
 
   return (
     <BlockStack gap="150">
       <input
-        ref={attachments.inputRef}
+        ref={inputRef}
         type="file"
         name="files"
         multiple
@@ -69,7 +69,7 @@ export function AttachmentsField({
         onChange={(event) => attachments.onPick(Array.from(event.target.files ?? []))}
       />
       <InlineStack gap="200" blockAlign="center">
-        <Button onClick={() => attachments.inputRef.current?.click()}>
+        <Button onClick={() => inputRef.current?.click()}>
           {t("forum.attach")}
         </Button>
         <Text as="span" tone="subdued" variant="bodySm">

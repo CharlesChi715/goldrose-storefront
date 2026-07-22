@@ -6,18 +6,24 @@
  * (§1 rule 2) so the admin's charts have Shopify's literal look.
  */
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { LineChart, PolarisVizProvider } from "@shopify/polaris-viz";
 import "@shopify/polaris-viz/build/esm/styles.css";
+
+const emptySubscribe = () => () => {};
 
 export function SalesChart({
   data,
 }: {
   data: Array<{ date: string; salesCents: number }>;
 }) {
-  // polaris-viz touches `window` during render — client-only (§15 risk note).
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // polaris-viz touches `window` during render — client-only (§15 risk note):
+  // false on the server and during hydration, true right after.
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   if (!mounted) {
     return <div style={{ height: 220 }} />;
   }

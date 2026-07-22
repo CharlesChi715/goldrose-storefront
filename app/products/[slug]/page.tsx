@@ -113,8 +113,6 @@ function Section({
   );
 }
 
-const SYMBOL_STYLE = { fontWeight: 500 } as const;
-
 /* ---------- Page ---------- */
 
 export default async function ProductDetailPage({
