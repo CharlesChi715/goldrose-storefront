@@ -34,6 +34,7 @@ import {
   OrderIcon,
   PersonIcon,
   ProductIcon,
+  QuestionCircleIcon,
   SettingsIcon,
 } from "@shopify/polaris-icons";
 import { searchAdminAction, setAdminLangAction, signOutAction } from "../actions";
@@ -183,6 +184,12 @@ export function AdminFrame({
             label: t("nav.forum"),
             icon: ChatIcon,
             selected: selected("/admin/forum"),
+          },
+          {
+            url: "/admin/guide",
+            label: t("nav.guide"),
+            icon: QuestionCircleIcon,
+            selected: selected("/admin/guide"),
           },
         ]}
       />

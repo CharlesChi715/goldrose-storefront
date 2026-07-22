@@ -30,6 +30,7 @@ const en = {
   "nav.analytics": "Analytics",
   "nav.discounts": "Discounts",
   "nav.forum": "Forum",
+  "nav.guide": "Guide",
   "nav.settings": "Settings",
 
   // Top bar
@@ -73,6 +74,9 @@ const en = {
   "forum.deleteThread": "Delete discussion",
   "forum.error.empty": "Please fill in both a title and a message.",
   "forum.error.emptyReply": "Please write a message first.",
+
+  // Guide
+  "guide.missing": "The guide file (docs/USER-GUIDE.md) is missing from this deployment.",
   "login.devHint":
     "Local development login — no Supabase configured. Use any email with the dev password (ADMIN_DEV_PASSWORD).",
 
@@ -477,6 +481,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.analytics": "分析",
   "nav.discounts": "折扣",
   "nav.forum": "论坛",
+  "nav.guide": "使用指南",
   "nav.settings": "设置",
 
   "topbar.search.placeholder": "搜索",
@@ -516,6 +521,9 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "forum.deleteThread": "删除讨论",
   "forum.error.empty": "请填写标题和内容。",
   "forum.error.emptyReply": "请先输入内容。",
+
+  // Guide
+  "guide.missing": "本部署缺少指南文件（docs/USER-GUIDE.md）。",
   "login.devHint":
     "本地开发登录 — 未配置 Supabase。使用任意邮箱和开发密码（ADMIN_DEV_PASSWORD）。",
 

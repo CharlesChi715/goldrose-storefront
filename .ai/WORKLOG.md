@@ -1655,3 +1655,8 @@ unconfirmed business assumptions).
   locally and on live, excluded from clean hosted activation. Post editing
   added (owner question): Edit button on your own posts (nickname match,
   server-checked), edited_at column + "edited" marker; e2e extended.
+- Follow-up: dev console error "Encountered a script tag while rendering React component" — the 4 inline no-calc-fallback `<script>` tags (home page, BottomNav, ScaleFrame, ConciergeChat) never execute after client-side navigation (now common via the tab bar). Replaced all with `components/NoCalcScale.tsx`, a client component running the same zoom/transform fit in a `useEffect`. Behavior identical on modern browsers (pure-CSS path); on pre-2024 engines the fit now lands post-hydration. tsc clean, 48 e2e green against unchanged pixel baselines (zero visual delta).
+- Follow-up: tester guide (owner request) — docs/USER-GUIDE.md (EN + 中文,
+  owner-editable markdown) rendered at /admin/guide via a tiny built-in
+  parser (headings/bullets/paragraphs, no new dependency); "Guide" nav item;
+  guide e2e spec added.
