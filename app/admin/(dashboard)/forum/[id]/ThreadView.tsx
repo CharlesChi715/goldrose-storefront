@@ -19,6 +19,8 @@ import {
   TextField,
 } from "@shopify/polaris";
 import { formatDateTime } from "@/lib/dates";
+import { fileUrl } from "@/lib/files-url";
+import type { ForumAttachment } from "@/lib/supabase/types.ts";
 import { useAdminT } from "../../../PolarisShell";
 import {
   deletePostAction,
@@ -27,6 +29,7 @@ import {
   updatePostAction,
   type ForumFormState,
 } from "../actions";
+import { AttachmentsField, useAttachments } from "../AttachmentsField";
 
 export type PostItem = {
   id: string;
@@ -34,7 +37,34 @@ export type PostItem = {
   body: string;
   createdAt: string;
   editedAt: string | null;
+  attachments: ForumAttachment[];
 };
+
+/** Images render inline; everything else is a download link. */
+function Attachments({ attachments }: { attachments: ForumAttachment[] }) {
+  if (attachments.length === 0) {
+    return null;
+  }
+  return (
+    <BlockStack gap="200">
+      {attachments.map((attachment, index) =>
+        attachment.type.startsWith("image/") ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={index}
+            src={fileUrl(attachment.path)}
+            alt={attachment.name}
+            style={{ maxWidth: "100%", maxHeight: 480, borderRadius: 8, alignSelf: "flex-start" }}
+          />
+        ) : (
+          <a key={index} href={fileUrl(attachment.path)} target="_blank" rel="noreferrer">
+            📎 {attachment.name}
+          </a>
+        ),
+      )}
+    </BlockStack>
+  );
+}
 
 const INITIAL_STATE: ForumFormState = { error: null };
 
@@ -43,6 +73,7 @@ function ReplyForm({ threadId }: { threadId: string }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(replyAction, INITIAL_STATE);
   const [body, setBody] = useState("");
+  const attachments = useAttachments();
   const submitted = useRef(false);
 
   // After a successful reply, clear the box and pull in the new post.
@@ -50,8 +81,10 @@ function ReplyForm({ threadId }: { threadId: string }) {
     if (!pending && submitted.current && !state.error) {
       submitted.current = false;
       setBody("");
+      attachments.reset();
       router.refresh();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pending, state, router]);
 
   return (
@@ -59,18 +92,23 @@ function ReplyForm({ threadId }: { threadId: string }) {
       <form action={formAction} onSubmit={() => (submitted.current = true)}>
         <BlockStack gap="300">
           {state.error ? (
-            <Banner tone="critical">{t("forum.error.emptyReply")}</Banner>
+            <Banner tone="critical">
+              {state.error === "files" ? t("forum.error.files") : t("forum.error.emptyReply")}
+            </Banner>
           ) : null}
           <input type="hidden" name="threadId" value={threadId} />
-          <TextField
-            label={t("forum.reply.label")}
-            name="body"
-            value={body}
-            onChange={setBody}
-            autoComplete="off"
-            multiline={3}
-            maxLength={5000}
-          />
+          <div onPaste={attachments.onPaste}>
+            <TextField
+              label={t("forum.reply.label")}
+              name="body"
+              value={body}
+              onChange={setBody}
+              autoComplete="off"
+              multiline={3}
+              maxLength={5000}
+            />
+          </div>
+          <AttachmentsField attachments={attachments} />
           <InlineStack align="end">
             <Button submit variant="primary" loading={pending}>
               {t("forum.reply.submit")}
@@ -157,6 +195,7 @@ export function ThreadView({
                     <Text as="p">{post.body}</Text>
                   </div>
                 )}
+                <Attachments attachments={post.attachments} />
                 <InlineStack align="space-between" blockAlign="center">
                   <Text as="span" tone="subdued" variant="bodySm">
                     {post.nickname} · {formatDateTime(post.createdAt)}

@@ -12,6 +12,8 @@ import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin, updateAccountNickname } from "@/lib/admin/auth";
+import { uploadAttachment } from "@/lib/admin/files";
+import type { ForumAttachment } from "@/lib/supabase/types.ts";
 import {
   cleanNickname,
   clearForumNickname,
@@ -25,6 +27,31 @@ const titleSchema = z.string().trim().min(1).max(200);
 const bodySchema = z.string().trim().min(1).max(5000);
 
 export type ForumFormState = { error: string | null };
+
+const MAX_FILES = 5;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Pull attachments out of the form and store them. Throws "files" (caught
+ * by the caller into the form error) on limit/type violations.
+ */
+async function storeAttachments(formData: FormData): Promise<ForumAttachment[]> {
+  const files = formData
+    .getAll("files")
+    .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  if (files.length === 0) {
+    return [];
+  }
+  if (files.length > MAX_FILES || files.some((file) => file.size > MAX_FILE_BYTES)) {
+    throw new Error("files");
+  }
+  const attachments: ForumAttachment[] = [];
+  for (const file of files) {
+    const stored = await uploadAttachment(file); // throws on bad type
+    attachments.push({ path: stored.path, name: file.name, type: file.type || "application/octet-stream" });
+  }
+  return attachments;
+}
 
 async function author(): Promise<string> {
   const nickname = await getForumIdentity();
@@ -47,6 +74,13 @@ export async function createThreadAction(
     return { error: "empty" };
   }
 
+  let attachments: ForumAttachment[];
+  try {
+    attachments = await storeAttachments(formData);
+  } catch {
+    return { error: "files" };
+  }
+
   const threadId = randomUUID();
   const now = new Date().toISOString();
   const store = getStore();
@@ -61,6 +95,7 @@ export async function createThreadAction(
       body: body.data,
       created_at: now,
       edited_at: null,
+      attachments,
     },
   ]);
   redirect(`/admin/forum/${threadId}`);
@@ -79,6 +114,13 @@ export async function replyAction(
     return { error: "empty" };
   }
 
+  let attachments: ForumAttachment[];
+  try {
+    attachments = await storeAttachments(formData);
+  } catch {
+    return { error: "files" };
+  }
+
   await getStore().insert("forum_posts", [
     {
       id: randomUUID(),
@@ -87,6 +129,7 @@ export async function replyAction(
       body: body.data,
       created_at: new Date().toISOString(),
       edited_at: null,
+      attachments,
     },
   ]);
   return { error: null };

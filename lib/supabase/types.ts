@@ -265,6 +265,14 @@ export type ForumThreadRow = {
   created_at: string;
 };
 
+export type ForumAttachment = {
+  /** Servable path (see lib/files-url fileUrl): local /api/files/… or a Storage key. */
+  path: string;
+  name: string;
+  /** MIME type — image/* renders inline, everything else as a link. */
+  type: string;
+};
+
 export type ForumPostRow = {
   id: string;
   thread_id: string;
@@ -273,6 +281,9 @@ export type ForumPostRow = {
   created_at: string;
   /** Set when the author edits the post; shows an "edited" marker. */
   edited_at: string | null;
+  /** Pasted images / uploaded files (owner request 2026-07-22). Optional:
+   * rows written before the column existed simply have none. */
+  attachments?: ForumAttachment[];
 };
 
 export type SettingRow = {

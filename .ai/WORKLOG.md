@@ -1742,3 +1742,10 @@ unconfirmed business assumptions).
   ACCOUNT nickname (auth.updateUser user_metadata) on hosted — permanent,
   visible on Team — and clears the old cookie override; local file mode
   keeps the cookie fallback.
+- Forum attachments (owner request): paste images into the message box or
+  "Attach files" (≤5 files, ≤5 MB each; images + common docs whitelist).
+  Storage reuses product-images bucket under forum/ keys (local: .data/
+  uploads via /api/files). forum_posts.attachments jsonb column (migration
+  updated; LIVE DB needs one-line ALTER — owner). Images render inline,
+  other files as links. serverActions bodySizeLimit raised to 30mb.
+  e2e: reply-with-image coverage.

@@ -59,12 +59,25 @@ test("start a discussion, reply, edit, see it in the list, then delete it", asyn
   await page.waitForURL(/\/admin\/forum\/[0-9a-f-]+$/);
   await expect(page.getByText(OPENING)).toBeVisible();
 
+  // Attach an image to the reply (the hidden files input drives uploads).
+  await page.locator('input[name="files"]').setInputFiles({
+    name: "screenshot.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "base64",
+    ),
+  });
+  await expect(page.getByText("📎 screenshot.png")).toBeVisible();
+
   await page.getByLabel("Reply").fill(REPLY);
   await page.getByRole("button", { name: "Reply", exact: true }).click();
   // The box clears after a successful reply; only then is the posted copy
   // unambiguous (while typing, the textarea itself matches the text too).
   await expect(page.getByLabel("Reply")).toHaveValue("");
   await expect(page.getByText(REPLY)).toBeVisible();
+  // The uploaded image renders inline on the posted reply.
+  await expect(page.getByRole("img", { name: "screenshot.png" })).toBeVisible();
 
   // Edit your own post: both posts are the owner's, take the reply (last).
   await page.getByRole("button", { name: "Edit", exact: true }).last().click();

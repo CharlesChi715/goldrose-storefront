@@ -47,6 +47,60 @@ export function isAllowedImageName(fileName: string): boolean {
   return path.extname(fileName).toLowerCase() in EXTENSION_TYPES;
 }
 
+/** Forum attachments (owner request 2026-07-22): images + common documents. */
+const ATTACHMENT_TYPES: Record<string, string> = {
+  ...EXTENSION_TYPES,
+  ".pdf": "application/pdf",
+  ".txt": "text/plain",
+  ".md": "text/markdown",
+  ".csv": "text/csv",
+  ".zip": "application/zip",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".mp4": "video/mp4",
+  ".mov": "video/quicktime",
+};
+
+export function attachmentTypeFor(fileName: string): string | null {
+  return ATTACHMENT_TYPES[path.extname(fileName).toLowerCase()] ?? null;
+}
+
+/**
+ * Store a forum attachment. Same backends as product media, but a broader
+ * type whitelist and a "forum/"-prefixed key so the bucket stays tidy.
+ */
+export async function uploadAttachment(file: File): Promise<StoredFile> {
+  const contentType = attachmentTypeFor(file.name);
+  if (!contentType) {
+    throw new Error(`Unsupported file type: ${file.name}`);
+  }
+  const key = `forum/${safeKey(file.name)}`;
+  const bytes = Buffer.from(await file.arrayBuffer());
+
+  if (getSupabaseEnv().hosted) {
+    const { error } = await storageClient()
+      .storage.from(BUCKET)
+      .upload(key, bytes, { contentType });
+    if (error) {
+      throw new Error(`storage upload: ${error.message}`);
+    }
+    return { path: key, name: file.name, size: bytes.length, uploadedAt: new Date().toISOString() };
+  }
+
+  // Local: flatten the prefix into the filename (uploads dir is flat).
+  const localKey = key.replace("/", "-");
+  await fs.mkdir(UPLOADS_DIR, { recursive: true });
+  await fs.writeFile(path.join(UPLOADS_DIR, localKey), bytes);
+  return {
+    path: `${LOCAL_PREFIX}${localKey}`,
+    name: file.name,
+    size: bytes.length,
+    uploadedAt: new Date().toISOString(),
+  };
+}
+
 export { fileUrl } from "@/lib/files-url";
 
 function storageClient() {

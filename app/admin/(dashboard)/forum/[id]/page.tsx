@@ -41,6 +41,7 @@ export default async function ForumThreadPage({
       body: post.body,
       createdAt: post.created_at,
       editedAt: post.edited_at ?? null,
+      attachments: post.attachments ?? [],
     }));
 
   return (

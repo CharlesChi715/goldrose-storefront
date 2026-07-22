@@ -117,6 +117,10 @@ const en = {
   "forum.deleteThread": "Delete discussion",
   "forum.error.empty": "Please fill in both a title and a message.",
   "forum.error.emptyReply": "Please write a message first.",
+  "forum.error.files": "Attachments: up to 5 files, 5 MB each, images or common documents.",
+  "forum.attach": "Attach files",
+  "forum.attach.hint": "You can also paste images straight into the message box.",
+  "forum.attach.remove": "Remove",
 
   // Guide
   "guide.missing": "The guide file (docs/USER-GUIDE.md) is missing from this deployment.",
@@ -604,6 +608,10 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "forum.deleteThread": "删除讨论",
   "forum.error.empty": "请填写标题和内容。",
   "forum.error.emptyReply": "请先输入内容。",
+  "forum.error.files": "附件最多 5 个，每个不超过 5 MB，限图片或常见文档。",
+  "forum.attach": "添加附件",
+  "forum.attach.hint": "也可以直接把图片粘贴到输入框。",
+  "forum.attach.remove": "移除",
 
   // Guide
   "guide.missing": "本部署缺少指南文件（docs/USER-GUIDE.md）。",

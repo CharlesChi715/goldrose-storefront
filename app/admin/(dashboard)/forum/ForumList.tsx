@@ -23,6 +23,7 @@ import {
 import { formatDateTime } from "@/lib/dates";
 import { useAdminT } from "../../PolarisShell";
 import { changeNicknameAction, createThreadAction, type ForumFormState } from "./actions";
+import { AttachmentsField, useAttachments } from "./AttachmentsField";
 
 export type ThreadItem = {
   id: string;
@@ -46,7 +47,11 @@ function NewThreadForm() {
           <Text as="h2" variant="headingSm">
             {t("forum.newThread.title")}
           </Text>
-          {state.error ? <Banner tone="critical">{t("forum.error.empty")}</Banner> : null}
+          {state.error ? (
+            <Banner tone="critical">
+              {state.error === "files" ? t("forum.error.files") : t("forum.error.empty")}
+            </Banner>
+          ) : null}
           <NewThreadFields pending={pending} />
         </BlockStack>
       </form>
@@ -60,6 +65,7 @@ function NewThreadFields({ pending }: { pending: boolean }) {
   const t = useAdminT();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const attachments = useAttachments();
   return (
     <>
       <TextField
@@ -70,15 +76,19 @@ function NewThreadFields({ pending }: { pending: boolean }) {
         autoComplete="off"
         maxLength={200}
       />
-      <TextField
-        label={t("forum.newThread.messageField")}
-        name="body"
-        value={body}
-        onChange={setBody}
-        autoComplete="off"
-        multiline={3}
-        maxLength={5000}
-      />
+      {/* Pasting a screenshot while typing attaches it (bubbles up here). */}
+      <div onPaste={attachments.onPaste}>
+        <TextField
+          label={t("forum.newThread.messageField")}
+          name="body"
+          value={body}
+          onChange={setBody}
+          autoComplete="off"
+          multiline={3}
+          maxLength={5000}
+        />
+      </div>
+      <AttachmentsField attachments={attachments} />
       <InlineStack align="end">
         <Button submit variant="primary" loading={pending}>
           {t("forum.newThread.submit")}

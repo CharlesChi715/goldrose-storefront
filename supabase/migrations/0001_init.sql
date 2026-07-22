@@ -311,7 +311,11 @@ create table forum_posts (
   nickname text not null,
   body text not null,
   created_at timestamptz not null default now(),
-  edited_at timestamptz
+  edited_at timestamptz,
+  -- Pasted images / uploaded files: [{path, name, type}] (2026-07-22).
+  -- Databases created before this column: alter table forum_posts add
+  -- column attachments jsonb not null default '[]'::jsonb;
+  attachments jsonb not null default '[]'::jsonb
 );
 
 -- ----------------------------------------------------------------------------
