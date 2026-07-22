@@ -216,7 +216,8 @@ export async function analyticsSummary(
   const byCampaign = new Map<string, number>();
   for (const sessionId of currentSessions) {
     const landing = firstViewBySession.get(sessionId);
-    byChannel.set(channelOf(landing), (byChannel.get(channelOf(landing)) ?? 0) + 1);
+    const channel = channelOf(landing);
+    byChannel.set(channel, (byChannel.get(channel) ?? 0) + 1);
     const geo = landing?.country ?? "Unknown";
     byGeoCountry.set(geo, (byGeoCountry.get(geo) ?? 0) + 1);
     const campaign = landing?.utm?.utm_campaign;
@@ -256,7 +257,8 @@ export async function analyticsSummary(
   const liveByCountry = new Map<string, number>();
   for (const view of liveSessionByVisitor.values()) {
     const landing = firstViewBySession.get(view.session_id) ?? view;
-    liveByChannel.set(channelOf(landing), (liveByChannel.get(channelOf(landing)) ?? 0) + 1);
+    const channel = channelOf(landing);
+    liveByChannel.set(channel, (liveByChannel.get(channel) ?? 0) + 1);
     const geo = landing.country ?? view.country ?? "Unknown";
     liveByCountry.set(geo, (liveByCountry.get(geo) ?? 0) + 1);
   }

@@ -41,8 +41,7 @@ export type OrderDetail = {
   sellerProtection: string | null;
 };
 
-function customerLabel(order: OrderRow, customers: CustomerRow[]): string {
-  const customer = customers.find((row) => row.id === order.customer_id);
+function customerLabel(order: OrderRow, customer: CustomerRow | undefined): string {
   if (customer && (customer.first_name || customer.last_name)) {
     return `${customer.first_name} ${customer.last_name}`.trim();
   }
@@ -56,14 +55,23 @@ export async function listOrders(): Promise<OrderListRow[]> {
     store.all("order_lines"),
     store.all("customers"),
   ]);
+  const customerById = new Map(customers.map((row) => [row.id, row]));
+  const itemCountByOrder = new Map<string, number>();
+  for (const line of lines) {
+    itemCountByOrder.set(
+      line.order_id,
+      (itemCountByOrder.get(line.order_id) ?? 0) + line.quantity,
+    );
+  }
   return orders
     .sort((a, b) => b.number - a.number)
     .map((order) => ({
       order,
-      customerLabel: customerLabel(order, customers),
-      itemCount: lines
-        .filter((line) => line.order_id === order.id)
-        .reduce((sum, line) => sum + line.quantity, 0),
+      customerLabel: customerLabel(
+        order,
+        order.customer_id ? customerById.get(order.customer_id) : undefined,
+      ),
+      itemCount: itemCountByOrder.get(order.id) ?? 0,
     }));
 }
 
@@ -90,9 +98,9 @@ async function conversionFor(visitorId: string | null): Promise<ConversionSummar
   if (!visitorId) {
     return null;
   }
-  const views = (await getStore().all("page_views"))
-    .filter((view) => view.visitor_id === visitorId)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const views = (await getStore().where("page_views", { visitor_id: visitorId })).sort(
+    (a, b) => a.created_at.localeCompare(b.created_at),
+  );
   if (views.length === 0) {
     return null;
   }
@@ -347,10 +355,18 @@ export async function listCustomers(): Promise<CustomerListRow[]> {
     store.all("customers"),
     store.all("orders"),
   ]);
+  const ordersByCustomer = new Map<string, OrderRow[]>();
+  for (const order of orders) {
+    if (order.customer_id) {
+      const list = ordersByCustomer.get(order.customer_id) ?? [];
+      list.push(order);
+      ordersByCustomer.set(order.customer_id, list);
+    }
+  }
   return customers
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .map((customer) => {
-      const own = orders.filter((order) => order.customer_id === customer.id);
+      const own = ordersByCustomer.get(customer.id) ?? [];
       const address = customer.default_address;
       return {
         customer,

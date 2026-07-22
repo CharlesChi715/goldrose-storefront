@@ -7,12 +7,17 @@
  * mode computes the identical shape from the file store.
  */
 
+import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "./env.ts";
 import { getStore } from "./store.ts";
 import type { CatalogProduct } from "./types.ts";
 
-export async function getCatalog(): Promise<CatalogProduct[]> {
+/**
+ * cache(): generateMetadata and the page body both call this during one
+ * product render — dedupe to a single fetch per request.
+ */
+export const getCatalog = cache(async (): Promise<CatalogProduct[]> => {
   const env = getSupabaseEnv();
 
   if (env.hosted && env.anonKey) {
@@ -72,7 +77,7 @@ export async function getCatalog(): Promise<CatalogProduct[]> {
             variant.inventory_on_hand > 0,
         })),
     }));
-}
+});
 
 /** Find one catalog product by URL handle (product detail pages). */
 export async function getCatalogProduct(handle: string): Promise<CatalogProduct | null> {
