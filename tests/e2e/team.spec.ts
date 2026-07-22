@@ -14,8 +14,10 @@ test("team page lists the owner as approved", async ({ page }) => {
   await adminLogin(page);
   await page.goto("/admin/settings/team");
   await expect(page.getByRole("heading", { name: "Team" })).toBeVisible();
-  await expect(page.getByText("owner@goldrose.local")).toBeVisible();
-  await expect(page.getByText("Approved")).toBeVisible();
+  // Scope to the main pane — the top bar shows the owner email too.
+  const main = page.locator("#AppFrameMain");
+  await expect(main.getByText("owner@goldrose.local")).toBeVisible();
+  await expect(main.getByText("Approved")).toBeVisible();
 });
 
 test("request-access sign-up is not offered in local mode", async ({ page }) => {
