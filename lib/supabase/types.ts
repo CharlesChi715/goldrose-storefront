@@ -271,6 +271,8 @@ export type ForumPostRow = {
   nickname: string;
   body: string;
   created_at: string;
+  /** Set when the author edits the post; shows an "edited" marker. */
+  edited_at: string | null;
 };
 
 export type SettingRow = {

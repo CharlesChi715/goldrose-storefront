@@ -361,6 +361,8 @@ function buildDemoRows(now: string): Pick<
   | "discounts"
   | "page_views"
   | "feedback"
+  | "forum_threads"
+  | "forum_posts"
 > {
   const ago = (hours: number) =>
     new Date(new Date(now).getTime() - hours * 60 * 60 * 1000).toISOString();
@@ -730,6 +732,58 @@ function buildDemoRows(now: string): Pick<
         status: "completed",
         created_at: ago(24 * 3),
         completed_at: ago(24 * 3),
+      },
+    ],
+    // Testing-phase forum announcements (owner request 2026-07-22): pinned-by
+    // -recency welcome threads so testers know how the forum works.
+    forum_threads: [
+      {
+        id: demoId("a01"),
+        title: "📢 Welcome to the GoldRose testing forum",
+        nickname: "GoldRose Team",
+        created_at: ago(48),
+      },
+      {
+        id: demoId("a02"),
+        title: "📢 What to test — and what to expect",
+        nickname: "GoldRose Team",
+        created_at: ago(47),
+      },
+    ],
+    forum_posts: [
+      {
+        id: demoId("b01"),
+        thread_id: demoId("a01"),
+        nickname: "GoldRose Team",
+        body: [
+          "Welcome! This forum is for everyone helping test the GoldRose store.",
+          "",
+          "How it works:",
+          "• You only need a nickname — no email or password. Pick one on the login page.",
+          "• Start a discussion for anything: bugs, questions, ideas, opinions.",
+          "• Everyone can read and reply, so sign your posts with the nickname you picked.",
+          "",
+          "欢迎！这里是 GoldRose 测试论坛。在登录页填写昵称即可发帖，无需邮箱和密码。Bug、疑问、想法都欢迎讨论。",
+        ].join("\n"),
+        created_at: ago(48),
+        edited_at: null,
+      },
+      {
+        id: demoId("b02"),
+        thread_id: demoId("a02"),
+        nickname: "GoldRose Team",
+        body: [
+          "A few things to know while we test:",
+          "",
+          "• The whole admin is open — click around, nothing here is real money.",
+          "• Try the storefront too (home, shop, product pages, checkout). Payments are simulated; no card is ever charged.",
+          "• On the live site, data (including forum posts) occasionally resets until the real database is activated — don't be surprised if something disappears.",
+          "• Found a bug or have an idea? Post it here, or use the chat bubble on the storefront.",
+          "",
+          "测试须知：后台完全开放，付款均为模拟，不会产生真实扣款；正式数据库启用前，线上数据（含论坛帖子）可能会被重置；发现问题请在这里发帖，或使用店面右下角的聊天气泡反馈。",
+        ].join("\n"),
+        created_at: ago(47),
+        edited_at: null,
       },
     ],
     feedback: [

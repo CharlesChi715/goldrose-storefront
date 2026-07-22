@@ -24,6 +24,7 @@ import {
   deletePostAction,
   deleteThreadAction,
   replyAction,
+  updatePostAction,
   type ForumFormState,
 } from "../actions";
 
@@ -32,6 +33,7 @@ export type PostItem = {
   nickname: string;
   body: string;
   createdAt: string;
+  editedAt: string | null;
 };
 
 const INITIAL_STATE: ForumFormState = { error: null };
@@ -94,6 +96,9 @@ export function ThreadView({
   const t = useAdminT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // Inline edit: which post is being edited, and its draft text.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
 
   return (
     <Page
@@ -117,27 +122,74 @@ export function ThreadView({
           {posts.map((post) => (
             <Card key={post.id}>
               <BlockStack gap="200">
-                <div style={{ whiteSpace: "pre-wrap" }}>
-                  <Text as="p">{post.body}</Text>
-                </div>
+                {editingId === post.id ? (
+                  <BlockStack gap="200">
+                    <TextField
+                      label={t("forum.edit")}
+                      labelHidden
+                      value={draft}
+                      onChange={setDraft}
+                      autoComplete="off"
+                      multiline={3}
+                      maxLength={5000}
+                    />
+                    <InlineStack align="end" gap="200">
+                      <Button onClick={() => setEditingId(null)} disabled={pending}>
+                        {t("common.cancel")}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        loading={pending}
+                        onClick={() =>
+                          startTransition(async () => {
+                            await updatePostAction(post.id, draft);
+                            setEditingId(null);
+                            router.refresh();
+                          })
+                        }
+                      >
+                        {t("common.save")}
+                      </Button>
+                    </InlineStack>
+                  </BlockStack>
+                ) : (
+                  <div style={{ whiteSpace: "pre-wrap" }}>
+                    <Text as="p">{post.body}</Text>
+                  </div>
+                )}
                 <InlineStack align="space-between" blockAlign="center">
                   <Text as="span" tone="subdued" variant="bodySm">
                     {post.nickname} · {formatDateTime(post.createdAt)}
+                    {post.editedAt ? ` · ${t("forum.edited")}` : ""}
                   </Text>
-                  <Button
-                    size="micro"
-                    tone="critical"
-                    variant="plain"
-                    loading={pending}
-                    onClick={() =>
-                      startTransition(async () => {
-                        await deletePostAction(post.id);
-                        router.refresh();
-                      })
-                    }
-                  >
-                    {t("forum.delete")}
-                  </Button>
+                  <InlineStack gap="200">
+                    {post.nickname === nickname && editingId !== post.id ? (
+                      <Button
+                        size="micro"
+                        variant="plain"
+                        onClick={() => {
+                          setEditingId(post.id);
+                          setDraft(post.body);
+                        }}
+                      >
+                        {t("forum.edit")}
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="micro"
+                      tone="critical"
+                      variant="plain"
+                      loading={pending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          await deletePostAction(post.id);
+                          router.refresh();
+                        })
+                      }
+                    >
+                      {t("forum.delete")}
+                    </Button>
+                  </InlineStack>
                 </InlineStack>
               </BlockStack>
             </Card>

@@ -49,7 +49,14 @@ export async function createThreadAction(
     { id: threadId, title: title.data, nickname, created_at: now },
   ]);
   await store.insert("forum_posts", [
-    { id: randomUUID(), thread_id: threadId, nickname, body: body.data, created_at: now },
+    {
+      id: randomUUID(),
+      thread_id: threadId,
+      nickname,
+      body: body.data,
+      created_at: now,
+      edited_at: null,
+    },
   ]);
   redirect(`/admin/forum/${threadId}`);
 }
@@ -74,9 +81,30 @@ export async function replyAction(
       nickname,
       body: body.data,
       created_at: new Date().toISOString(),
+      edited_at: null,
     },
   ]);
   return { error: null };
+}
+
+/**
+ * Edit your own post: the author check is nickname-vs-cookie — honest users
+ * only, which is all the open testing phase promises. Editing another
+ * nickname's post is silently refused.
+ */
+export async function updatePostAction(postId: string, body: string): Promise<void> {
+  await requireAdmin();
+  const nickname = await author();
+  const parsedId = id.parse(postId);
+  const parsedBody = bodySchema.safeParse(body);
+  if (!parsedBody.success) {
+    return;
+  }
+  await getStore().update(
+    "forum_posts",
+    { id: parsedId, nickname },
+    { body: parsedBody.data, edited_at: new Date().toISOString() },
+  );
 }
 
 export async function deleteThreadAction(threadId: string): Promise<void> {

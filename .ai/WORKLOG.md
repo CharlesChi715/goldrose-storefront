@@ -1643,3 +1643,15 @@ unconfirmed business assumptions).
   nickname is set.
 - Tests: forum e2e spec (nickname gate, thread/reply/delete flow, nickname-only
   rejection under password gate); unit + full e2e suite green.
+
+## 2026-07-22 — Bottom nav: owner's cat-button art
+
+- Owner supplied 8 PNG buttons (zip in `temp/`, extracted + renamed to `temp/bottom-menu-buttons/`, git-ignored).
+- Relocated into repo at `public/nav/` (downscaled 1733×1958 → 216px, ~25 KB each): `home|shop|wholesale|me.png` + `-active` colored variants.
+- `components/veloria.tsx` BottomNav: tabs now render the PNG art (icon+label baked in); colored `-active` variant shows on the tab's own page. Tabs renamed Business→Wholesale, Account→Me (still no routes → non-links). Fixed latent case bug: default `active` was `"shop"` which never matched label `"Shop"`, so shop/product pages showed no active tab; now product+shop pages highlight Shop.
+- Pixel baselines regenerated (home exact, shop/product masked). Lint clean for touched files (4 pre-existing errors elsewhere untouched); 9 unit + 48 e2e green.
+- Follow-up (same day): two seeded 📢 announcement threads ("Welcome" + "What
+  to test", EN + 中文, nickname "GoldRose Team") in the demo seed — appear
+  locally and on live, excluded from clean hosted activation. Post editing
+  added (owner question): Edit button on your own posts (nickname match,
+  server-checked), edited_at column + "edited" marker; e2e extended.

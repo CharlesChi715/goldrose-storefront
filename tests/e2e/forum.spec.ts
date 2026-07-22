@@ -16,6 +16,7 @@ test.describe.configure({ mode: "serial" });
 const TITLE = `Shipping box ideas (e2e ${Date.now()})`;
 const OPENING = "Should we use magnetic gift boxes?";
 const REPLY = "Yes — magnetic lids feel premium.";
+const EDITED = "Edit: brushed gold magnetic lids, even better.";
 
 async function logIn(page: Page, nickname?: string) {
   await page.goto("/admin/login");
@@ -44,6 +45,10 @@ test("start a discussion, reply, see it in the list, then delete it", async ({ p
   await page.waitForURL(/\/admin\/forum$/);
   await expect(page.getByText("Posting as: Charlie")).toBeVisible();
 
+  // The seeded announcement threads greet testers.
+  await expect(page.getByText("📢 Welcome to the GoldRose testing forum")).toBeVisible();
+  await expect(page.getByText("📢 What to test — and what to expect")).toBeVisible();
+
   await page.getByLabel("Title").fill(TITLE);
   await page.getByLabel("Message").fill(OPENING);
   await page.getByRole("button", { name: "Post", exact: true }).click();
@@ -56,6 +61,13 @@ test("start a discussion, reply, see it in the list, then delete it", async ({ p
   // unambiguous (while typing, the textarea itself matches the text too).
   await expect(page.getByLabel("Reply")).toHaveValue("");
   await expect(page.getByText(REPLY)).toBeVisible();
+
+  // Edit your own post: both posts are Charlie's, take the reply (last).
+  await page.getByRole("button", { name: "Edit", exact: true }).last().click();
+  await page.getByLabel("Edit", { exact: true }).fill(EDITED);
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText(EDITED)).toBeVisible();
+  await expect(page.getByText(/Charlie · .+ · edited/).first()).toBeVisible();
 
   await page.goto("/admin/forum");
   await expect(page.getByText(TITLE)).toBeVisible();

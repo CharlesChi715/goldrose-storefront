@@ -310,7 +310,8 @@ create table forum_posts (
   thread_id uuid not null references forum_threads(id) on delete cascade,
   nickname text not null,
   body text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  edited_at timestamptz
 );
 
 -- ----------------------------------------------------------------------------

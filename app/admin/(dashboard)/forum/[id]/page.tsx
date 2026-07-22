@@ -40,6 +40,7 @@ export default async function ForumThreadPage({
       nickname: post.nickname,
       body: post.body,
       createdAt: post.created_at,
+      editedAt: post.edited_at ?? null,
     }));
 
   return (

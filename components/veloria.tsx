@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
-import { inter, notoSC } from "@/lib/fonts";
+import { inter } from "@/lib/fonts";
 
 /* ---------- Style helpers ---------- */
 
@@ -217,44 +217,26 @@ export function VHeader({ backHref, right }: { backHref: string; right: "search"
 
 type Tab = {
   href?: string;
-  icon: string;
-  iconX: number;
-  iconW: number;
+  img: string;
   label: string;
-  labelX: number;
-  labelW: number;
 };
 
-// Geometry from the Figma nav frame: tabs are 70×54 at x 18/126/234/342,
-// sitting 2.5px above the nav frame top (clipped by it, as in Figma).
+// Owner-supplied button art (public/nav/*): icon + label baked into one PNG,
+// `-active` = colored variant shown on the tab's own page.
 const TABS: Tab[] = [
-  { href: "/", icon: "⌂", iconX: 27.5, iconW: 15, label: "Home", labelX: 19.5, labelW: 31 },
-  { href: "/shop", icon: "◆", iconX: 25, iconW: 20, label: "Shop", labelX: 21, labelW: 28 },
-  { icon: "□", iconX: 25, iconW: 20, label: "Business", labelX: 11.5, labelW: 47 },
-  { icon: "○", iconX: 25, iconW: 20, label: "Account", labelX: 13, labelW: 44 },
+  { href: "/", img: "home", label: "Home" },
+  { href: "/shop", img: "shop", label: "Shop" },
+  { img: "wholesale", label: "Wholesale" },
+  { img: "me", label: "Me" },
 ];
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
-  const color = isActive ? "#0A3B31" : "#66706B";
   return (
-    <>
-      <div
-        className={notoSC.className}
-        style={{ ...abs(tab.iconX, 7, tab.iconW, 24), ...txt(20, 24, color), fontWeight: 500 }}
-      >
-        {tab.icon}
-      </div>
-      <div
-        className={inter.className}
-        style={{
-          ...abs(tab.labelX, 34, tab.labelW, 13),
-          ...txt(11, 13.312, color),
-          fontWeight: isActive ? 700 : 400,
-        }}
-      >
-        {tab.label}
-      </div>
-    </>
+    <img
+      src={`/nav/${tab.img}${isActive ? "-active" : ""}.png`}
+      alt={tab.label}
+      style={{ ...abs(0, 4, 70, 48), objectFit: "contain" }}
+    />
   );
 }
 
@@ -266,10 +248,10 @@ function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
  * in the design, the detail canvas is flush.
  */
 export function BottomNav({
-  active = "shop",
+  active = "Shop",
   bottomGap = 0,
 }: {
-  active?: "Home" | "Shop" | (string & {});
+  active?: "Home" | "Shop" | "Wholesale" | "Me" | (string & {});
   bottomGap?: number;
 }) {
   return (
