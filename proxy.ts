@@ -16,13 +16,16 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const LOGIN_PATH = "/admin/login";
+// Password-recovery landing page — the email link arrives logged-out by
+// definition; the page itself validates the recovery code.
+const RESET_PATH = "/admin/reset-password";
 const SESSION_COOKIE = "admin_session";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // The login screen itself is the one unauthenticated admin page.
-  if (pathname === LOGIN_PATH) {
+  // The only unauthenticated admin pages: login + recovery landing.
+  if (pathname === LOGIN_PATH || pathname === RESET_PATH) {
     return NextResponse.next();
   }
 

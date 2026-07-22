@@ -19,6 +19,18 @@ import { cleanNickname, setForumNickname } from "@/lib/admin/forum";
 export type LoginState = { error: string | null };
 export type SignUpState = { status: "idle" | "done"; error: string | null };
 
+export type ForgotState = { status: "idle" | "sent" };
+
+/** Password recovery: always answers "sent" — never confirms an account. */
+export async function forgotPasswordAction(
+  _previous: ForgotState,
+  formData: FormData,
+): Promise<ForgotState> {
+  const { sendPasswordReset } = await import("@/lib/admin/team");
+  await sendPasswordReset(String(formData.get("email") ?? "").trim());
+  return { status: "sent" };
+}
+
 /** "Request access" sign-up (owner approves in Settings → Team). */
 export async function requestAccessAction(
   _previous: SignUpState,
@@ -27,7 +39,8 @@ export async function requestAccessAction(
   const { signUpForApproval } = await import("@/lib/admin/team");
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const result = await signUpForApproval(email, password);
+  const nickname = String(formData.get("nickname") ?? "");
+  const result = await signUpForApproval(email, password, nickname);
   if (!result.ok) {
     return { status: "idle", error: result.error };
   }

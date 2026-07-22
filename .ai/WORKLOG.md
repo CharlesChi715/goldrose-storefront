@@ -1699,3 +1699,10 @@ unconfirmed business assumptions).
   accounts without a nickname — they post under their email name
   (getForumIdentity), nickname popup stays as optional display name. Forum
   e2e updated accordingly.
+- Sign-up nickname now mandatory (owner request) — stored in auth
+  user_metadata, shown on Team page, and used as the forum identity
+  (cookie popup = optional override). Password recovery (owner request):
+  forgot-password card on login (always-neutral reply), Supabase reset
+  email → /admin/reset-password (proxy-exempt, PKCE code exchange in the
+  browser client, 8+ char double-entry form, sign-out after update).
+  Owner must add redirect URLs in Supabase Auth → URL Configuration.

@@ -21,20 +21,65 @@ import {
 } from "@shopify/polaris";
 import { useAdminT } from "../PolarisShell";
 import {
+  forgotPasswordAction,
   loginAction,
   requestAccessAction,
+  type ForgotState,
   type LoginState,
   type SignUpState,
 } from "./actions";
 
 const INITIAL_STATE: LoginState = { error: null };
 const SIGNUP_INITIAL: SignUpState = { status: "idle", error: null };
+const FORGOT_INITIAL: ForgotState = { status: "idle" };
+
+/** "Forgot password?" — email in, always the same neutral confirmation. */
+function ForgotPassword() {
+  const t = useAdminT();
+  const [state, formAction, pending] = useActionState(forgotPasswordAction, FORGOT_INITIAL);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+
+  if (!open) {
+    return (
+      <Button variant="plain" onClick={() => setOpen(true)}>
+        {t("login.forgot.open")}
+      </Button>
+    );
+  }
+  if (state.status === "sent") {
+    return <Banner tone="success">{t("login.forgot.done")}</Banner>;
+  }
+  return (
+    <Card>
+      <form action={formAction}>
+        <BlockStack gap="300">
+          <Text as="h2" variant="headingSm">
+            {t("login.forgot.title")}
+          </Text>
+          <TextField
+            label={t("login.email")}
+            type="email"
+            name="email"
+            value={email}
+            onChange={setEmail}
+            autoComplete="email"
+          />
+          <Button submit loading={pending} fullWidth>
+            {t("login.forgot.submit")}
+          </Button>
+        </BlockStack>
+      </form>
+    </Card>
+  );
+}
 
 /** "Request access" sign-up card (hosted only; owner approves in Team). */
 function RequestAccess() {
   const t = useAdminT();
   const [state, formAction, pending] = useActionState(requestAccessAction, SIGNUP_INITIAL);
   const [open, setOpen] = useState(false);
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -59,9 +104,22 @@ function RequestAccess() {
             <Banner tone="critical">
               {state.error === "exists"
                 ? t("login.signup.error.exists")
-                : t("login.signup.error.invalid")}
+                : state.error === "nickname"
+                  ? t("login.signup.error.nickname")
+                  : t("login.signup.error.invalid")}
             </Banner>
           ) : null}
+          <TextField
+            label={t("login.nickname")}
+            type="text"
+            name="nickname"
+            value={nickname}
+            onChange={setNickname}
+            autoComplete="nickname"
+            maxLength={40}
+            requiredIndicator
+            helpText={t("login.signup.nicknameHelp")}
+          />
           <TextField
             label={t("login.email")}
             type="email"
@@ -163,7 +221,12 @@ export function LoginForm({
             </form>
           </Card>
 
-          {signupEnabled ? <RequestAccess /> : null}
+          {signupEnabled ? (
+            <BlockStack gap="300" inlineAlign="center">
+              <ForgotPassword />
+              <RequestAccess />
+            </BlockStack>
+          ) : null}
 
           {showDevHint ? (
             <Text as="p" tone="subdued" variant="bodySm" alignment="center">

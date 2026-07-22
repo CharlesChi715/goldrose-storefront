@@ -53,7 +53,7 @@ export function TeamView({
                 <BlockStack gap="050">
                   <InlineStack gap="200" blockAlign="center">
                     <Text as="span" fontWeight="semibold">
-                      {member.email}
+                      {member.nickname ? `${member.nickname} · ${member.email}` : member.email}
                     </Text>
                     {member.approved ? (
                       <Badge tone="success">{t("team.approved")}</Badge>

@@ -27,18 +27,23 @@ export async function getForumNickname(): Promise<string | null> {
 
 /**
  * Who you post as (everyone-logs-in mode, owner decision 2026-07-22):
- * explicit nickname first; otherwise a real account posts under its email
- * name — no forced trip back to the login page. Nickname-less guests
- * (open-access testing only) still get null → forum sends them to log in.
+ * an explicit popup override (cookie) wins, then the account's sign-up
+ * nickname (user_metadata — mandatory at sign-up), then the email name for
+ * accounts created before nicknames existed. Nickname-less guests
+ * (open-access testing only) get null → log in first.
  */
 export async function getForumIdentity(): Promise<string | null> {
-  const nickname = await getForumNickname();
-  if (nickname) {
-    return nickname;
+  const cookieNickname = await getForumNickname();
+  if (cookieNickname) {
+    return cookieNickname;
   }
   const session = await getAdminSession();
   if (session && session.userId !== OPEN_ACCESS_GUEST.userId) {
-    return cleanNickname(session.email.split("@")[0]) || session.email;
+    return (
+      cleanNickname(session.nickname) ||
+      cleanNickname(session.email.split("@")[0]) ||
+      session.email
+    );
   }
   return null;
 }

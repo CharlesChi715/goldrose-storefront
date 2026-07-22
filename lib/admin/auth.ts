@@ -33,6 +33,8 @@ const SECRET_FILE = path.join(process.cwd(), ".data", "admin-secret");
 export type AdminSession = {
   userId: string;
   email: string;
+  /** Account nickname (sign-up user_metadata) — the forum identity. */
+  nickname?: string | null;
 };
 
 /* ---------- Local (file adapter) sessions ---------- */
@@ -208,7 +210,14 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     // Logged in but not an admin → 404, unless the testing override is on.
     return isOpenAccess() ? OPEN_ACCESS_GUEST : null;
   }
-  return { userId: user.id, email: user.email ?? "" };
+  return {
+    userId: user.id,
+    email: user.email ?? "",
+    nickname:
+      typeof user.user_metadata?.nickname === "string"
+        ? user.user_metadata.nickname
+        : null,
+  };
 }
 
 /**

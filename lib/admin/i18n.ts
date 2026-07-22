@@ -68,6 +68,26 @@ const en = {
     "Request sent — you can log in as soon as the owner approves your account.",
   "login.signup.error.exists": "An account with this email already exists.",
   "login.signup.error.invalid": "Please enter a valid email and a password of 8+ characters.",
+  "login.signup.error.nickname": "Please choose a nickname — it's your name on the forum.",
+  "login.signup.nicknameHelp": "Required — this is how teammates will see you on the forum.",
+  "login.forgot.open": "Forgot password?",
+  "login.forgot.title": "Reset your password",
+  "login.forgot.submit": "Send reset link",
+  "login.forgot.done":
+    "If that account exists, a reset email is on its way. During the testing phase emails can take a while — the owner can also reset your password directly.",
+
+  // Reset-password page
+  "reset.title": "Set a new password",
+  "reset.checking": "Checking your reset link…",
+  "reset.password": "New password",
+  "reset.confirm": "Repeat new password",
+  "reset.submit": "Update password",
+  "reset.done": "Password updated — you can log in with it now.",
+  "reset.error.short": "Password must be at least 8 characters.",
+  "reset.error.mismatch": "The two passwords don't match.",
+  "reset.error.expired":
+    "This reset link is invalid or has expired. Request a new one from the login page (use the same browser).",
+  "reset.backToLogin": "Back to log in",
 
   // Settings → Team
   "team.title": "Team",
@@ -536,6 +556,24 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "login.signup.done": "申请已提交——店主批准后即可登录。",
   "login.signup.error.exists": "该邮箱已注册。",
   "login.signup.error.invalid": "请输入有效邮箱和至少 8 位的密码。",
+  "login.signup.error.nickname": "请填写昵称——这是你在论坛上的名字。",
+  "login.signup.nicknameHelp": "必填——队友将在论坛上以此昵称认识你。",
+  "login.forgot.open": "忘记密码？",
+  "login.forgot.title": "重置密码",
+  "login.forgot.submit": "发送重置链接",
+  "login.forgot.done": "如果该账号存在，重置邮件已在路上。测试阶段邮件可能较慢——也可以请店主直接重置密码。",
+
+  // Reset-password page
+  "reset.title": "设置新密码",
+  "reset.checking": "正在检查重置链接…",
+  "reset.password": "新密码",
+  "reset.confirm": "再次输入新密码",
+  "reset.submit": "更新密码",
+  "reset.done": "密码已更新——现在可以用它登录了。",
+  "reset.error.short": "密码至少 8 个字符。",
+  "reset.error.mismatch": "两次输入的密码不一致。",
+  "reset.error.expired": "重置链接无效或已过期。请在登录页重新申请（请使用同一浏览器打开）。",
+  "reset.backToLogin": "返回登录",
 
   // Settings → Team
   "team.title": "团队",
