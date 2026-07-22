@@ -1671,3 +1671,6 @@ unconfirmed business assumptions).
   Free + nightly pg_dump→S3 with lifecycle + restore drills; Pro at launch;
   raw RDS/Azure and self-hosting rejected. (Discussion also settled: company
   -owned Supabase account, passkeys via Supabase beta after activation.)
+- Housekeeping: cat-button source art moved from gitignored temp/ into
+  tracked assets/nav-buttons/ (owner request — masters now backed up in git;
+  public/nav/ keeps the optimized web copies).
