@@ -22,8 +22,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env.ts";
+import { supabaseServerAuthClient } from "@/lib/supabase/server-auth.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import { LOCAL_OWNER } from "@/lib/supabase/seed-data.ts";
 
@@ -131,32 +131,9 @@ async function verifyLocalToken(token: string): Promise<AdminSession | null> {
 
 /* ---------- Hosted Supabase sessions ---------- */
 
-/**
- * Auth client bound to the request's cookies — the current @supabase/ssr
- * getAll/setAll pattern (§15: use it exactly; older get/set silently breaks
- * session refresh). setAll throws inside a Server Component render; that's
- * expected and safe to swallow — the middleware refreshes cookies instead.
- */
-async function supabaseAuthClient() {
-  const env = getSupabaseEnv();
-  const cookieStore = await cookies();
-  return createServerClient(env.url, env.anonKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        try {
-          for (const { name, value, options } of cookiesToSet) {
-            cookieStore.set(name, value, options);
-          }
-        } catch {
-          // Server Component render — middleware owns the refresh.
-        }
-      },
-    },
-  });
-}
+// Cookie-bound auth client — shared with the customer account layer, see
+// lib/supabase/server-auth.ts for the §15 getAll/setAll pattern notes.
+const supabaseAuthClient = supabaseServerAuthClient;
 
 async function isAllowlisted(userId: string): Promise<boolean> {
   const admins = await getStore().all("admin_users");
@@ -257,6 +234,31 @@ export async function signInWithPassword(
     await supabase.auth.signOut();
     // Correct password but not approved yet (sign-up flow) — saying so is
     // fine: this branch is only reachable by someone who owns the account.
+    return { ok: false, error: "pending" };
+  }
+  return { ok: true };
+}
+
+/**
+ * Post-passkey-login gate (owner request 2026-07-23). The WebAuthn ceremony
+ * runs entirely in the browser, so the allowlist can only be checked after
+ * the session cookie lands. Non-admins — e.g. a customer whose passkey also
+ * opens the storefront account — are signed straight back out; "pending"
+ * is safe to show because only the account's owner can reach this branch.
+ */
+export async function confirmPasskeySignIn(): Promise<SignInResult> {
+  if (!getSupabaseEnv().hosted) {
+    return { ok: false, error: "invalid" };
+  }
+  const supabase = await supabaseAuthClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "invalid" };
+  }
+  if (!(await isAllowlisted(user.id))) {
+    await supabase.auth.signOut();
     return { ok: false, error: "pending" };
   }
   return { ok: true };

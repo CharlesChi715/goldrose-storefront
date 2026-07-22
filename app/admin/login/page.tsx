@@ -27,6 +27,8 @@ export default async function AdminLoginPage() {
       nicknameOnly={isOpenAccess()}
       // Self-service sign-up needs a real auth server (hosted only).
       signupEnabled={getSupabaseEnv().hosted}
+      // Same for passkeys (owner request 2026-07-23).
+      passkeyEnabled={getSupabaseEnv().hosted}
     />
   );
 }

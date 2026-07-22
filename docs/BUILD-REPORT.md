@@ -68,17 +68,24 @@ Do these in order; everything else already works.
    - [ ] Auth → Users → **Add user**: your email + a strong password. Then SQL Editor: `insert into admin_users (user_id, email) select id, email from auth.users where email = 'YOUR-EMAIL';`
    - [ ] Auth → enable **MFA (TOTP)** on your account (§9.2).
    - [ ] Storage: confirm the public `product-images` bucket exists (the migration creates it).
-2. **PayPal sandbox**（约 10 分钟）
+2. **Login options — passkeys + customer Google/Apple sign-in**（2026-07-23 加入，约 20 分钟 + Apple 开发者账号）
+   - [ ] First run `supabase/migrations/0002_customer_auth.sql` in the SQL Editor (adds the `customers.auth_user_id` link column; safe to re-run).
+   - [ ] **Passkeys** (admins at Settings → Security, customers at /account): Supabase Dashboard → Authentication → **Passkeys** → enable; Relying Party Display Name `GoldRose`, Relying Party ID `goldrose-storefront.vercel.app`, Origins `https://goldrose-storefront.vercel.app`. ⚠️ Changing the RP ID later (e.g. moving to a custom domain) **breaks every enrolled passkey** — if the custom domain is close, wait and use it as the RP ID from day one. Passkeys only work on that domain (not localhost).
+   - [ ] **Google sign-in** (customers): Google Cloud Console → create an OAuth client (web) → authorized origin `https://goldrose-storefront.vercel.app`, redirect URI = the callback URL shown on Supabase's Google provider page → paste client id + secret into Supabase → Authentication → Providers → Google.
+   - [ ] **Apple sign-in** (customers): needs a paid Apple Developer account. Create App ID + **Services ID** + signing key (.p8), configure the Services ID with domain `cfvsvgbldnzkcjvbwnjp.supabase.co` and Supabase's callback URL, generate the client secret, paste into Supabase → Providers → Apple. ⚠️ Apple's client secret **expires every 6 months** — set a calendar reminder to regenerate it.
+   - [ ] Supabase → Authentication → URL Configuration → add redirect URLs: `https://goldrose-storefront.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`.
+   - [ ] Try it: storefront **Me** tab → Continue with Google → account appears (orders placed with that email show up) → Add a passkey → sign out → sign back in with the passkey. Then in the admin: Settings → Security → add a passkey → log out → "Sign in with a passkey".
+3. **PayPal sandbox**（约 10 分钟）
    - [ ] developer.paypal.com → My Apps → create an app → copy client id + secret into `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_ID`; set `PAYPAL_ENV=sandbox`.
    - [ ] Same app → Webhooks → add `https://goldrose-storefront.vercel.app/api/webhooks/paypal`, subscribe to `PAYMENT.CAPTURE.COMPLETED` + `PAYMENT.CAPTURE.REFUNDED`, copy the id into `PAYPAL_WEBHOOK_ID`.
    - [ ] Run the deferred sandbox E2E: buy with a sandbox buyer account → order arrives “Paid” with a stock movement → refund it from the order page.
-3. **Optional email**: create a Resend key → `RESEND_API_KEY` (and `RESEND_FROM` once you have a domain).
-4. **Final walkthrough (§14.3, 中文)**: log in → add a product with photos and a variant → receive stock → create a discount → place a sandbox payment with the code → watch it arrive Paid with a movement and a customer profile → fulfill with tracking → refund → edit the slogan → reset it.
-5. **Shopify shutdown (§12)** — only after the walkthrough passes:
+4. **Optional email**: create a Resend key → `RESEND_API_KEY` (and `RESEND_FROM` once you have a domain).
+5. **Final walkthrough (§14.3, 中文)**: log in → add a product with photos and a variant → receive stock → create a discount → place a sandbox payment with the code → watch it arrive Paid with a movement and a customer profile → fulfill with tracking → refund → edit the slogan → reset it.
+6. **Shopify shutdown (§12)** — only after the walkthrough passes:
    - [ ] Screenshot every Shopify admin screen we clone, in **EN and 中文**, into `docs/shopify-reference/`.
    - [ ] Cancel the Shopify trial/subscription. (Nothing to migrate.)
-6. **Figma token**: the stray token was deleted from `.env.local` (Stage 4) — **revoke it** in Figma → Settings → Personal access tokens.
-7. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **turn Supabase Auth "Confirm email" back ON** once Resend is connected (it's off during testing — sign-up emails wouldn't deliver without SMTP) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
+7. **Figma token**: the stray token was deleted from `.env.local` (Stage 4) — **revoke it** in Figma → Settings → Personal access tokens.
+8. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **turn Supabase Auth "Confirm email" back ON** once Resend is connected (it's off during testing — sign-up emails wouldn't deliver without SMTP) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
 
 ## 6. How to run
 

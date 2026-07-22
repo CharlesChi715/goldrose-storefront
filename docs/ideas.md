@@ -26,6 +26,16 @@ turn it into a real task.
   replace the Shopify backend gradually to achieve fully autonomous.
 - 🆕 We decide to use paypal as only method to do the first round test. and add my account as payee.
 
+## From me — 2026-07-22
+
+- ✅ User log in method: there should be diff login method for users.
+
+## From me — 2026-07-23
+
+- 🚧 yes. for customer. and add passkey feature for both admins and customers
+  plz. and for customers i am thinking to provide diff login options: google,
+  apple, ... do these two first
+
 ## From boss — 2026-07-22
 
 - ✅ okay just use Supabase. and add the forum in this admin for everyone to
@@ -34,8 +44,12 @@ turn it into a real task.
   nickname to tell whos who. leave the email and password as it is just add
   nickanme field in login page.
 
-- 🔍 well i think how about keep the email and password fucntions really. and
+- ✅ well i think how about keep the email and password fucntions really. and
   add passkeys for log in.
+
+- ✅ 营销渠道准备用google ，然后内容素材制作后发布在Facebook，tiktok，ins，
+  pinterest，youtube。能否归因板块看到每时每刻有多少用户分别从什么渠道进来的
+  还有什么国家 这样我就能有效判断素材的成效了 这个板块很重要
 
 ## General / unsorted
 

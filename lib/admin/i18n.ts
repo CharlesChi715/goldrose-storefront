@@ -33,6 +33,7 @@ const en = {
   "nav.guide": "Guide",
   "nav.settings": "Settings",
   "nav.settings.team": "Team",
+  "nav.settings.security": "Security",
 
   // Top bar
   "topbar.search.placeholder": "Search",
@@ -73,6 +74,9 @@ const en = {
   "login.forgot.submit": "Send reset link",
   "login.forgot.done":
     "If that account exists, a reset email is on its way. During the testing phase emails can take a while — the owner can also reset your password directly.",
+  "login.passkey": "Sign in with a passkey",
+  "login.passkey.error":
+    "Passkey sign-in didn't complete — try again or use your password.",
 
   // Reset-password page
   "reset.title": "Set a new password",
@@ -99,6 +103,25 @@ const en = {
   "team.remove": "Remove access",
   "team.owner": "Owner",
   "team.ownerOnly": "Only the store owner can remove a member's access.",
+
+  // Settings → Security (passkeys, owner request 2026-07-23)
+  "security.title": "Security",
+  "security.subtitle": "Sign in faster with passkeys.",
+  "security.intro":
+    "Passkeys let you sign in with Face ID, Touch ID, or your device PIN instead of a password. Add one on each device you use.",
+  "security.hostedOnly":
+    "Passkeys need the hosted Supabase backend — they aren't available in local dev mode.",
+  "security.unsupported": "This browser doesn't support passkeys.",
+  "security.add": "Add a passkey on this device",
+  "security.addBusy": "Follow your device's prompts…",
+  "security.empty": "You haven't added any passkeys yet.",
+  "security.unnamed": "Passkey",
+  "security.added": "Added",
+  "security.lastUsed": "Last used",
+  "security.rename": "Rename",
+  "security.renameLabel": "Passkey name",
+  "security.remove": "Remove",
+  "security.error": "That didn't work — please try again.",
 
   // Forum (testing phase)
   "forum.postingAs": "Posting as",
@@ -421,6 +444,13 @@ const en = {
   "analytics.card.conversion": "Conversion rate",
   "analytics.card.salesBySource": "Sales by traffic source",
   "analytics.card.visitorsNow": "Visitors right now",
+  "analytics.card.sessionsByChannel": "Sessions by channel",
+  "analytics.card.sessionsByCountry": "Sessions by visitor country",
+  "analytics.card.sessionsByCampaign": "Sessions by campaign",
+  "analytics.channel.direct": "Direct",
+  "analytics.unknown": "Unknown",
+  "analytics.live.autoRefresh": "Updates every 30 seconds",
+  "analytics.emptyCampaign": "No tagged visits yet — add utm_campaign to your links",
   "analytics.funnel.sessions": "Sessions",
   "analytics.funnel.checkout": "Reached checkout",
   "analytics.funnel.purchased": "Purchased",
@@ -531,6 +561,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.guide": "使用指南",
   "nav.settings": "设置",
   "nav.settings.team": "团队",
+  "nav.settings.security": "安全",
 
   "topbar.search.placeholder": "搜索",
   "topbar.notifications": "提醒",
@@ -565,6 +596,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "login.forgot.title": "重置密码",
   "login.forgot.submit": "发送重置链接",
   "login.forgot.done": "如果该账号存在，重置邮件已在路上。测试阶段邮件可能较慢——也可以请店主直接重置密码。",
+  "login.passkey": "使用通行密钥登录",
+  "login.passkey.error": "通行密钥登录未完成——请重试或改用密码登录。",
 
   // Reset-password page
   "reset.title": "设置新密码",
@@ -590,6 +623,24 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "team.remove": "移除权限",
   "team.owner": "店主",
   "team.ownerOnly": "只有店主可以移除成员的权限。",
+
+  // Settings → Security (passkeys)
+  "security.title": "安全",
+  "security.subtitle": "使用通行密钥更快登录。",
+  "security.intro":
+    "通行密钥让你用 Face ID、Touch ID 或设备 PIN 登录，无需输入密码。请在每台常用设备上各添加一个。",
+  "security.hostedOnly": "通行密钥需要托管的 Supabase 后端——本地开发模式不可用。",
+  "security.unsupported": "此浏览器不支持通行密钥。",
+  "security.add": "在此设备上添加通行密钥",
+  "security.addBusy": "请按设备提示操作……",
+  "security.empty": "你还没有添加通行密钥。",
+  "security.unnamed": "通行密钥",
+  "security.added": "添加于",
+  "security.lastUsed": "最近使用",
+  "security.rename": "重命名",
+  "security.renameLabel": "通行密钥名称",
+  "security.remove": "移除",
+  "security.error": "操作失败——请重试。",
 
   // Forum (testing phase)
   "forum.postingAs": "发帖身份",
@@ -897,6 +948,13 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.card.conversion": "转化率",
   "analytics.card.salesBySource": "按流量来源划分的销售额",
   "analytics.card.visitorsNow": "当前访客",
+  "analytics.card.sessionsByChannel": "按渠道划分的会话",
+  "analytics.card.sessionsByCountry": "按访客国家/地区划分的会话",
+  "analytics.card.sessionsByCampaign": "按营销活动划分的会话",
+  "analytics.channel.direct": "直接访问",
+  "analytics.unknown": "未知",
+  "analytics.live.autoRefresh": "每 30 秒自动刷新",
+  "analytics.emptyCampaign": "暂无带标签的访问——请在链接中加上 utm_campaign",
   "analytics.funnel.sessions": "会话",
   "analytics.funnel.checkout": "进入结账",
   "analytics.funnel.purchased": "已购买",

@@ -21,6 +21,7 @@ import {
 } from "@shopify/polaris";
 import { useAdminT } from "../PolarisShell";
 import { loginAction, type LoginState } from "./actions";
+import { PasskeyLoginButton } from "./PasskeyLoginButton";
 
 const INITIAL_STATE: LoginState = { error: null };
 
@@ -28,10 +29,13 @@ export function LoginForm({
   showDevHint,
   nicknameOnly,
   signupEnabled,
+  passkeyEnabled,
 }: {
   showDevHint: boolean;
   nicknameOnly: boolean;
   signupEnabled: boolean;
+  /** Hosted Supabase only — passkeys need a real auth server. */
+  passkeyEnabled: boolean;
 }) {
   const t = useAdminT();
   const [state, formAction, pending] = useActionState(loginAction, INITIAL_STATE);
@@ -105,6 +109,14 @@ export function LoginForm({
                 </Button>
               </BlockStack>
             </form>
+            {passkeyEnabled ? (
+              <Box paddingBlockStart="400">
+                <BlockStack gap="400">
+                  <Divider />
+                  <PasskeyLoginButton />
+                </BlockStack>
+              </Box>
+            ) : null}
           </Card>
 
           {signupEnabled ? (

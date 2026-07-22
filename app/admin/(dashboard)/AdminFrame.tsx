@@ -207,6 +207,7 @@ export function AdminFrame({
             selected: selected("/admin/settings"),
             subNavigationItems: [
               { url: "/admin/settings/team", label: t("nav.settings.team") },
+              { url: "/admin/settings/security", label: t("nav.settings.security") },
             ],
           },
         ]}

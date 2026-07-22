@@ -13,7 +13,12 @@
  */
 
 import { redirect } from "next/navigation";
-import { isOpenAccess, signInWithPassword } from "@/lib/admin/auth";
+import {
+  confirmPasskeySignIn,
+  isOpenAccess,
+  signInWithPassword,
+  type SignInResult,
+} from "@/lib/admin/auth";
 import { cleanNickname, setForumNickname } from "@/lib/admin/forum";
 
 export type LoginState = { error: string | null };
@@ -45,6 +50,15 @@ export async function requestAccessAction(
     return { status: "idle", error: result.error };
   }
   return { status: "done", error: null };
+}
+
+/**
+ * Called right after a browser-side passkey ceremony succeeds (owner request
+ * 2026-07-23): verifies the fresh session is actually allowlisted, signing
+ * non-admins straight back out.
+ */
+export async function confirmPasskeyLoginAction(): Promise<SignInResult> {
+  return confirmPasskeySignIn();
 }
 
 export async function loginAction(

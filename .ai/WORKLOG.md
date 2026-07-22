@@ -1756,3 +1756,53 @@ unconfirmed business assumptions).
   client state (PolarisShell useState + SetLangContext) so the flip is
   instant; cookie written fire-and-forget without auth gate; analytics
   reads deduped per request via React cache (cachedAll).
+
+## 2026-07-22 — Header icon assets relocated
+- Unzipped owner's `temp/上部菜单按钮.zip` (top-bar button art, 6 PNGs 349×375).
+- Web copies → `public/header/`: back, search, wishlist, cart, menu, wishlist-active (= `color.png` gold heart, assumed active state).
+- Raw originals archived → `assets/header-buttons/` (mirrors nav-buttons convention). Zip kept in `temp/`.
+- Not wired into `VHeader` yet — awaiting owner's go-ahead.
+
+## 2026-07-22 — Matched nav folder names (owner request)
+- `public/nav/` → `public/bottom-nav/`, new header set → `public/top-nav/`;
+  raw archives likewise `assets/bottom-nav-buttons/` + `assets/top-nav-buttons/`.
+- Updated the single code reference in `components/veloria.tsx` (BottomNav img path).
+- Grep confirms no stale `/nav/` or `/header/` references in app/components/lib/tests.
+
+## 2026-07-22 — Product-page wishlist heart is now a real toggle
+
+- `components/WishlistButton.tsx` (new): client button that swaps `public/top-nav/wishlist.png` ↔ `wishlist-active.png` (gold heart) on tap; list persisted in localStorage (`goldrose-wishlist`, per product handle) — no backend/account yet.
+- `VHeader` heart branch now renders it (takes optional `wishlistSlug`); product page passes `product.handle`. Shop keeps the search icon.
+- Idle state renders identical pixels → pixel baselines untouched. Verified: tsc clean, 14 unit + 52 e2e green (incl. 3 pixel baselines).
+
+## 2026-07-22 — Idea captured: user login methods
+- Added to `docs/ideas.md` (From me — 2026-07-22, verbatim): "User log in method: there should be diff login method for users."
+
+## 2026-07-22 — Header wired to owner's top-nav art
+- All storefront headers (home + VHeader on shop/product) now use `public/top-nav/` PNGs:
+  menu, back (BackButton default), search, cart; product page heart = WishlistButton
+  (built in a parallel session — outline↔gold toggle, localStorage).
+- Public icons cropped to content +12px margin via sharp (sips --cropOffset silently
+  center-crops — first attempt clipped the menu bow); raws untouched in assets/.
+- Deleted superseded Figma icon SVGs (Menu/Search/Bag in page.tsx + veloria.tsx) and
+  `public/home/back.png` + `public/veloria/back.png`.
+- Pixel baselines regenerated (home exact, shop/product masked); 52 e2e + 14 unit green.
+
+## 2026-07-22 — Marketing attribution in Analytics (owner request)
+
+- Owner (via Charles): marketing = Google ads + content on FB/TikTok/Ins/Pinterest/YouTube; wants to see, moment to moment, how many users arrive per channel and per country to judge creative effectiveness.
+- Beacon/DB already captured referrer + full UTM + geo country (`page_views.country` from `x-vercel-ip-country`) — the gap was read-side only.
+- New `lib/admin/channels.ts`: `channelOf()` collapses utm_source spellings + referrer hostnames into canonical channels (YouTube before Google; l.facebook.com/fb/vm.tiktok.com/pin.it etc.). `sourceOf` moved here (alias-free so `node --test` loads it); analytics.ts re-exports.
+- `analyticsSummary()` additions: `trafficByChannel` / `trafficByCountry` (geo-IP, session landing view) / `trafficByCampaign` (utm_campaign per creative) / `liveVisitors` {total, byChannel, byCountry} (5-min window, channel from the live session's landing view). `salesBySource` labels now normalized via `channelOf`.
+- Dashboard: live card shows per-channel + per-country rows and auto-refreshes every 30 s (visible tab only); three new list cards (channel / visitor country / campaign); country codes localized via `Intl.DisplayNames` (EN/zh-CN); new i18n keys both languages.
+- Tests: new `tests/unit/channel-attribution.test.ts` (5 cases); analytics e2e updated for the new cards. 20 unit + 52 e2e green vs production build.
+- Docs: idea logged verbatim in docs/ideas.md; USER-GUIDE gains bilingual "Marketing links" section (UTM tagging is required — in-app browsers strip referrers, untagged = "Direct"); SUMMARY updated.
+
+## 2026-07-23 — Login methods: passkeys (admin + customer) & customer Google/Apple sign-in
+- Owner request: customer accounts with multiple login options — Google + Apple first — plus passkeys for both admins and customers.
+- Storefront: new /account page (Me tab now links to it) — Continue with Google/Apple (OAuth PKCE via new /auth/callback route), passkey sign-in/enroll/remove, order history matched by provider-verified email. `customers.auth_user_id` link column (migration 0002_customer_auth.sql). Local mode degrades to a "sign-in unavailable" card.
+- Admin: "Sign in with a passkey" on /admin/login (allowlist re-checked server-side after the WebAuthn ceremony; non-admins signed back out) + new Settings → Security page to add/rename/remove passkeys (EN/中文, hosted-only).
+- Shared plumbing: lib/supabase/server-auth.ts (one cookie-bound server client), lib/supabase/browser-auth.ts (browser client with Supabase's experimental passkey flag + useWebAuthnSupported hook).
+- Security note: password-account emails are NOT trusted for order linking (auto-confirm is on) — only Google/Apple-verified emails claim checkout history.
+- Dormant until owner runs BUILD-REPORT §5 item 2 (enable Passkeys RP + Google/Apple providers + redirect URLs; Apple secret rotates 6-monthly; RP ID change breaks enrolled passkeys).
+- Tests: 55 e2e + 20 unit green (new account.spec.ts); home pixel baseline still byte-exact.

@@ -204,6 +204,10 @@ export type CustomerRow = {
   note: string;
   tags: string[];
   created_at: string;
+  /** Supabase Auth user this customer signed in as (Google/Apple/passkey
+   * accounts, owner request 2026-07-23). Optional: rows written before the
+   * column existed — and checkout-only customers — simply have none. */
+  auth_user_id?: string | null;
 };
 
 export type DiscountType = "percentage" | "fixed_amount" | "free_shipping";
