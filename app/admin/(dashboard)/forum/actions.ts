@@ -12,7 +12,7 @@ import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
-import { getForumNickname } from "@/lib/admin/forum";
+import { cleanNickname, getForumNickname, setForumNickname } from "@/lib/admin/forum";
 import { getStore } from "@/lib/supabase/store.ts";
 
 const id = z.string().min(1).max(64);
@@ -105,6 +105,16 @@ export async function updatePostAction(postId: string, body: string): Promise<vo
     { id: parsedId, nickname },
     { body: parsedBody.data, edited_at: new Date().toISOString() },
   );
+}
+
+/** Change the forum nickname in place (the popup on /admin/forum). */
+export async function changeNicknameAction(nickname: string): Promise<void> {
+  await requireAdmin();
+  const clean = cleanNickname(nickname);
+  if (!clean) {
+    return;
+  }
+  await setForumNickname(clean);
 }
 
 export async function deleteThreadAction(threadId: string): Promise<void> {

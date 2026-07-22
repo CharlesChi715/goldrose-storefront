@@ -1660,3 +1660,7 @@ unconfirmed business assumptions).
   owner-editable markdown) rendered at /admin/guide via a tiny built-in
   parser (headings/bullets/paragraphs, no new dependency); "Guide" nav item;
   guide e2e spec added.
+- Follow-up: "Change nickname" is now an in-place popup on /admin/forum
+  (owner request; the old login-page link bounced already-identified
+  visitors straight back). Announcement seeds made fully bilingual — titles
+  and bodies EN + 中文 (owner request). e2e: nickname-popup test added.

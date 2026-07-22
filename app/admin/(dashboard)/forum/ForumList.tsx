@@ -6,21 +6,23 @@
  * the thread list (newest activity first).
  */
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   BlockStack,
   Banner,
   Button,
   Card,
   InlineStack,
+  Modal,
   Page,
   Text,
   TextField,
 } from "@shopify/polaris";
 import { formatDateTime } from "@/lib/dates";
 import { useAdminT } from "../../PolarisShell";
-import { createThreadAction, type ForumFormState } from "./actions";
+import { changeNicknameAction, createThreadAction, type ForumFormState } from "./actions";
 
 export type ThreadItem = {
   id: string;
@@ -88,12 +90,33 @@ function NewThreadFields({ pending }: { pending: boolean }) {
 
 export function ForumList({ items, nickname }: { items: ThreadItem[]; nickname: string }) {
   const t = useAdminT();
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  // "Change nickname" popup (owner request 2026-07-22): in-place modal —
+  // routing through the login page bounced already-identified visitors.
+  const [nicknameOpen, setNicknameOpen] = useState(false);
+  const [nicknameDraft, setNicknameDraft] = useState(nickname);
+
+  const saveNickname = () =>
+    startTransition(async () => {
+      await changeNicknameAction(nicknameDraft);
+      setNicknameOpen(false);
+      router.refresh();
+    });
 
   return (
     <Page
       title={t("nav.forum")}
       subtitle={`${t("forum.postingAs")}: ${nickname}`}
-      secondaryActions={[{ content: t("forum.changeNickname"), url: "/admin/login" }]}
+      secondaryActions={[
+        {
+          content: t("forum.changeNickname"),
+          onAction: () => {
+            setNicknameDraft(nickname);
+            setNicknameOpen(true);
+          },
+        },
+      ]}
     >
       <BlockStack gap="400">
         <NewThreadForm />
@@ -123,6 +146,32 @@ export function ForumList({ items, nickname }: { items: ThreadItem[]; nickname: 
           </BlockStack>
         )}
       </BlockStack>
+
+      <Modal
+        open={nicknameOpen}
+        onClose={() => setNicknameOpen(false)}
+        title={t("forum.changeNickname")}
+        primaryAction={{
+          content: t("common.save"),
+          loading: pending,
+          disabled: !nicknameDraft.trim(),
+          onAction: saveNickname,
+        }}
+        secondaryActions={[
+          { content: t("common.cancel"), onAction: () => setNicknameOpen(false) },
+        ]}
+      >
+        <Modal.Section>
+          <TextField
+            label={t("login.nickname")}
+            value={nicknameDraft}
+            onChange={setNicknameDraft}
+            autoComplete="nickname"
+            maxLength={40}
+            autoFocus
+          />
+        </Modal.Section>
+      </Modal>
     </Page>
   );
 }

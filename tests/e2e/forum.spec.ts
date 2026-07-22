@@ -81,6 +81,17 @@ test("start a discussion, reply, see it in the list, then delete it", async ({ p
   await expect(page.getByText(TITLE)).toHaveCount(0);
 });
 
+test("change nickname via the popup on the forum page", async ({ page }) => {
+  await logIn(page, "Charlie");
+  await page.goto("/admin/forum");
+
+  await page.getByRole("button", { name: "Change nickname" }).click();
+  const modal = page.getByRole("dialog");
+  await modal.getByLabel("Nickname").fill("Chuck");
+  await modal.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("Posting as: Chuck")).toBeVisible();
+});
+
 test("nickname-only login is rejected while the password gate is on", async ({ page }) => {
   await page.goto("/admin/login");
   await page.getByLabel(/Nickname|昵称/).fill("Visitor");
