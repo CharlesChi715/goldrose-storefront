@@ -7,6 +7,7 @@
  * the live "Visitors right now" card.
  */
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Badge,
@@ -21,7 +22,7 @@ import {
 } from "@shopify/polaris";
 import { formatMoney } from "@/lib/money";
 import type { AnalyticsSummary, MetricPair, RangeKey } from "@/lib/admin/analytics";
-import { useAdminT } from "../../PolarisShell";
+import { useAdminLang, useAdminT } from "../../PolarisShell";
 import { SalesChart } from "../SalesChart";
 
 function DeltaBadge({ pair }: { pair: MetricPair }) {
@@ -106,7 +107,37 @@ export function AnalyticsDashboard({
   summary: AnalyticsSummary;
 }) {
   const t = useAdminT();
+  const lang = useAdminLang();
   const router = useRouter();
+
+  // The beacon stores ISO country codes ("US"); seeds may hold full names,
+  // which DisplayNames rejects — show those (and anything unparseable) as-is.
+  const countryName = (code: string): string => {
+    if (code === "Unknown") {
+      return t("analytics.unknown");
+    }
+    try {
+      return (
+        new Intl.DisplayNames([lang === "zh" ? "zh-CN" : "en"], { type: "region" }).of(code) ??
+        code
+      );
+    } catch {
+      return code;
+    }
+  };
+  const channelName = (channel: string): string =>
+    channel === "Direct" ? t("analytics.channel.direct") : channel;
+
+  // Live attribution card: re-pull server data every 30s while the tab is
+  // visible so "who is on the site right now" stays current without F5.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        router.refresh();
+      }
+    }, 30_000);
+    return () => clearInterval(id);
+  }, [router]);
 
   return (
     <Page
@@ -206,9 +237,72 @@ export function AnalyticsDashboard({
               </BlockStack>
             </BlockStack>
           </Card>
-          <StatCard
-            title={t("analytics.card.visitorsNow")}
-            value={String(summary.visitorsRightNow)}
+          <Card>
+            <BlockStack gap="200">
+              <Text as="h3" variant="headingSm" tone="subdued">
+                {t("analytics.card.visitorsNow")}
+              </Text>
+              <Text as="p" variant="headingLg">
+                {String(summary.liveVisitors.total)}
+              </Text>
+              {summary.liveVisitors.total > 0 ? (
+                <>
+                  <Divider />
+                  <BlockStack gap="100">
+                    {summary.liveVisitors.byChannel.slice(0, 4).map((row) => (
+                      <InlineStack key={row.channel} align="space-between">
+                        <Text as="span" variant="bodySm">
+                          {channelName(row.channel)}
+                        </Text>
+                        <Text as="span" variant="bodySm" numeric>
+                          {row.visitors}
+                        </Text>
+                      </InlineStack>
+                    ))}
+                    {summary.liveVisitors.byCountry.slice(0, 4).map((row) => (
+                      <InlineStack key={row.country} align="space-between">
+                        <Text as="span" variant="bodySm">
+                          {countryName(row.country)}
+                        </Text>
+                        <Text as="span" variant="bodySm" numeric>
+                          {row.visitors}
+                        </Text>
+                      </InlineStack>
+                    ))}
+                  </BlockStack>
+                </>
+              ) : null}
+              <Text as="p" variant="bodySm" tone="subdued">
+                {t("analytics.live.autoRefresh")}
+              </Text>
+            </BlockStack>
+          </Card>
+        </InlineGrid>
+
+        <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
+          <ListCard
+            title={t("analytics.card.sessionsByChannel")}
+            empty={t("analytics.empty")}
+            rows={summary.trafficByChannel.map((row) => ({
+              label: channelName(row.channel),
+              value: String(row.sessions),
+            }))}
+          />
+          <ListCard
+            title={t("analytics.card.sessionsByCountry")}
+            empty={t("analytics.empty")}
+            rows={summary.trafficByCountry.map((row) => ({
+              label: countryName(row.country),
+              value: String(row.sessions),
+            }))}
+          />
+          <ListCard
+            title={t("analytics.card.sessionsByCampaign")}
+            empty={t("analytics.emptyCampaign")}
+            rows={summary.trafficByCampaign.map((row) => ({
+              label: row.campaign,
+              value: String(row.sessions),
+            }))}
           />
         </InlineGrid>
 

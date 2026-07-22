@@ -49,6 +49,22 @@ real money.
   forum posts) can occasionally reset. Don't be surprised if something
   disappears — it's expected during testing.
 
+## Marketing links (for the owner)
+
+- Analytics shows where visitors come from: **Sessions by channel**
+  (Google / Facebook / TikTok / Instagram / Pinterest / YouTube), **Sessions
+  by visitor country**, live **Visitors right now** split the same way, and
+  **Sessions by campaign** for judging each piece of content.
+- When posting content, always use a **tagged link** — many apps (TikTok,
+  Instagram) hide the "came from" signal, so a plain link counts as "Direct":
+
+  `https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_campaign=rose-video-1`
+
+- `utm_source` = the platform (google / facebook / tiktok / instagram /
+  pinterest / youtube). `utm_campaign` = your own name for that piece of
+  content — each name becomes a row in "Sessions by campaign".
+- For Google ads, add the same tags to the ad's final URL.
+
 # 中文指南
 
 欢迎！这是 GoldRose 商店的测试版本，这里不涉及任何真实付款。
@@ -88,3 +104,19 @@ real money.
 
 - 正式数据库启用前，线上数据（包括论坛帖子）可能会不定期重置，属于测试阶段
   的正常现象。
+
+## 营销链接（店主必读）
+
+- 分析页可以看到访客来源：**按渠道划分的会话**（Google / Facebook / TikTok /
+  Instagram / Pinterest / YouTube）、**按访客国家/地区划分的会话**、**当前
+  访客**（实时，同样按渠道和国家拆分，每 30 秒自动刷新），以及**按营销活动
+  划分的会话**——用来判断每条素材的成效。
+- 发布内容时请务必使用**带标签的链接**——很多 App（TikTok、Instagram）会隐藏
+  "从哪里来"的信息，普通链接会被算成"直接访问"：
+
+  `https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_campaign=rose-video-1`
+
+- `utm_source` = 平台名（google / facebook / tiktok / instagram / pinterest /
+  youtube）。`utm_campaign` = 你给这条素材起的名字——每个名字会在"按营销活动
+  划分的会话"里单独成行。
+- 投 Google 广告时，在广告的最终到达网址上加同样的标签。

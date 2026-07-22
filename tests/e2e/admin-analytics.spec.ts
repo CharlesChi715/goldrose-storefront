@@ -106,6 +106,9 @@ test("analytics cards compute for a chosen range with live visitors", async ({ p
     "Conversion rate",
     "Sales by traffic source",
     "Visitors right now",
+    "Sessions by channel",
+    "Sessions by visitor country",
+    "Sessions by campaign",
   ]) {
     await expect(page.getByText(card, { exact: true }).first()).toBeVisible();
   }
@@ -113,12 +116,12 @@ test("analytics cards compute for a chosen range with live visitors", async ({ p
   // Funnel from the beacon: sessions ≥ 1, reached checkout ≥ 1, purchased ≥ 1.
   await expect(page.getByText("Reached checkout")).toBeVisible();
   await expect(page.getByText("Purchased")).toBeVisible();
-  // Live-visitor card reflects the storefront visit minutes ago.
-  const visitorsCard = page
-    .locator("div")
-    .filter({ hasText: /^Visitors right now\d+$/ })
-    .last();
-  await expect(visitorsCard).toBeVisible();
+  // Live-visitor card reflects the storefront visit minutes ago, split by
+  // channel/country; local browsing has no referrer or geo header, so the
+  // attribution rows read Direct / Unknown.
+  await expect(page.getByText("Updates every 30 seconds")).toBeVisible();
+  await expect(page.getByText("Direct", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Unknown", { exact: true }).first()).toBeVisible();
 
   // Range picker navigates.
   await page.getByLabel("Date range").selectOption("today");

@@ -7,6 +7,7 @@
  */
 
 import { cache } from "react";
+import { channelOf } from "./channels.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type {
   DbTables,
@@ -68,23 +69,7 @@ function netSales(orders: OrderRow[]): number {
   return orders.reduce((sum, order) => sum + order.total_cents - order.refunded_cents, 0);
 }
 
-export function sourceOf(view: PageViewRow | undefined): string {
-  if (!view) {
-    return "Direct";
-  }
-  if (view.utm?.utm_source) {
-    return view.utm.utm_source;
-  }
-  if (view.referrer) {
-    try {
-      const host = new URL(view.referrer).hostname;
-      return host || "Direct";
-    } catch {
-      return view.referrer;
-    }
-  }
-  return "Direct";
-}
+export { channelOf, sourceOf } from "./channels.ts";
 
 export type MetricPair = { current: number; previous: number };
 
@@ -106,6 +91,14 @@ export type AnalyticsSummary = {
   salesBySource: Array<{ source: string; orders: number; salesCents: number }>;
   salesOverTime: Array<{ date: string; salesCents: number }>;
   visitorsRightNow: number;
+  trafficByChannel: Array<{ channel: string; sessions: number }>;
+  trafficByCountry: Array<{ country: string; sessions: number }>;
+  trafficByCampaign: Array<{ campaign: string; sessions: number }>;
+  liveVisitors: {
+    total: number;
+    byChannel: Array<{ channel: string; visitors: number }>;
+    byCountry: Array<{ country: string; visitors: number }>;
+  };
 };
 
 export async function analyticsSummary(
@@ -192,21 +185,44 @@ export async function analyticsSummary(
   }
 
   // Sales by traffic source: attribute each order to its visitor's first view.
+  // Landing view per session drives the traffic/attribution cards: the first
+  // view of a session is the one that still carries the referrer / UTM tags.
   const firstViewByVisitor = new Map<string, PageViewRow>();
+  const firstViewBySession = new Map<string, PageViewRow>();
   for (const view of [...views].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
     if (!firstViewByVisitor.has(view.visitor_id)) {
       firstViewByVisitor.set(view.visitor_id, view);
+    }
+    if (!firstViewBySession.has(view.session_id)) {
+      firstViewBySession.set(view.session_id, view);
     }
   }
   const bySource = new Map<string, { orders: number; salesCents: number }>();
   for (const order of currentOrders) {
     const source = order.visitor_id
-      ? sourceOf(firstViewByVisitor.get(order.visitor_id))
+      ? channelOf(firstViewByVisitor.get(order.visitor_id))
       : "Unattributed";
     const entry = bySource.get(source) ?? { orders: 0, salesCents: 0 };
     entry.orders += 1;
     entry.salesCents += order.total_cents - order.refunded_cents;
     bySource.set(source, entry);
+  }
+
+  // Traffic attribution (owner request 2026-07-22): sessions in range grouped
+  // by marketing channel, visitor country (geo-IP header on the beacon), and
+  // utm_campaign — so each posted creative can be measured by its campaign tag.
+  const byChannel = new Map<string, number>();
+  const byGeoCountry = new Map<string, number>();
+  const byCampaign = new Map<string, number>();
+  for (const sessionId of currentSessions) {
+    const landing = firstViewBySession.get(sessionId);
+    byChannel.set(channelOf(landing), (byChannel.get(channelOf(landing)) ?? 0) + 1);
+    const geo = landing?.country ?? "Unknown";
+    byGeoCountry.set(geo, (byGeoCountry.get(geo) ?? 0) + 1);
+    const campaign = landing?.utm?.utm_campaign;
+    if (campaign) {
+      byCampaign.set(campaign, (byCampaign.get(campaign) ?? 0) + 1);
+    }
   }
 
   // Sales over time: one bucket per day of the current range.
@@ -222,12 +238,29 @@ export async function analyticsSummary(
     buckets.set(bucket, (buckets.get(bucket) ?? 0) + order.total_cents - order.refunded_cents);
   }
 
+  // Live view (owner request 2026-07-22): who is on the site right now,
+  // split by channel and country. A visitor's channel comes from the landing
+  // view of their latest session (the recent views themselves have no UTM).
   const fiveMinutesAgo = now.getTime() - 5 * 60 * 1000;
-  const visitorsRightNow = new Set(
-    views
-      .filter((view) => new Date(view.created_at).getTime() >= fiveMinutesAgo)
-      .map((view) => view.visitor_id),
-  ).size;
+  const liveSessionByVisitor = new Map<string, PageViewRow>();
+  for (const view of views) {
+    if (new Date(view.created_at).getTime() < fiveMinutesAgo) {
+      continue;
+    }
+    const seen = liveSessionByVisitor.get(view.visitor_id);
+    if (!seen || view.created_at > seen.created_at) {
+      liveSessionByVisitor.set(view.visitor_id, view);
+    }
+  }
+  const liveByChannel = new Map<string, number>();
+  const liveByCountry = new Map<string, number>();
+  for (const view of liveSessionByVisitor.values()) {
+    const landing = firstViewBySession.get(view.session_id) ?? view;
+    liveByChannel.set(channelOf(landing), (liveByChannel.get(channelOf(landing)) ?? 0) + 1);
+    const geo = landing.country ?? view.country ?? "Unknown";
+    liveByCountry.set(geo, (liveByCountry.get(geo) ?? 0) + 1);
+  }
+  const visitorsRightNow = liveSessionByVisitor.size;
 
   const currentAov =
     currentOrders.length > 0 ? Math.round(netSales(currentOrders) / currentOrders.length) : 0;
@@ -269,6 +302,24 @@ export async function analyticsSummary(
       .sort((a, b) => b.salesCents - a.salesCents),
     salesOverTime: [...buckets.entries()].map(([date, salesCents]) => ({ date, salesCents })),
     visitorsRightNow,
+    trafficByChannel: [...byChannel.entries()]
+      .map(([channel, sessions]) => ({ channel, sessions }))
+      .sort((a, b) => b.sessions - a.sessions),
+    trafficByCountry: [...byGeoCountry.entries()]
+      .map(([country, sessions]) => ({ country, sessions }))
+      .sort((a, b) => b.sessions - a.sessions),
+    trafficByCampaign: [...byCampaign.entries()]
+      .map(([campaign, sessions]) => ({ campaign, sessions }))
+      .sort((a, b) => b.sessions - a.sessions),
+    liveVisitors: {
+      total: visitorsRightNow,
+      byChannel: [...liveByChannel.entries()]
+        .map(([channel, visitors]) => ({ channel, visitors }))
+        .sort((a, b) => b.visitors - a.visitors),
+      byCountry: [...liveByCountry.entries()]
+        .map(([country, visitors]) => ({ country, visitors }))
+        .sort((a, b) => b.visitors - a.visitors),
+    },
   };
 }
 
