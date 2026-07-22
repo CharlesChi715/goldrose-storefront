@@ -1706,3 +1706,14 @@ unconfirmed business assumptions).
   email → /admin/reset-password (proxy-exempt, PKCE code exchange in the
   browser client, 8+ char double-entry form, sign-out after update).
   Owner must add redirect URLs in Supabase Auth → URL Configuration.
+
+## 2026-07-22 — Supabase activated + `--demo` seed flag
+
+- Discovered (read-only checks): owner connected hosted Supabase — keys in `.env.local` and Vercel, live /admin auto-locked, `admin_users` has owner email, catalog + forum announcements already seeded hosted; orders/customers/etc. empty.
+- `scripts/seed.ts`: new `--demo` flag for hosted seeding (plan-approved). Seeds the testing-phase demo store on an empty db OR tops up an existing catalog; hard-refuses if any orders exist; per-table skip-if-non-empty (idempotent, forum announcements survive). tsc + 9 unit tests green.
+- Running `npm run seed -- --demo` against the live db was blocked by the permission classifier — owner to run it (`! npm run seed -- --demo`).
+- Login screen decluttered (owner request): sign-up and forgot-password
+  moved to their own pages (/admin/signup, /admin/forgot-password, hosted-
+  only, proxy-exempt); login page keeps two plain links. Reset page fix:
+  handles hash tokens / PKCE code / explicit error params (server-initiated
+  recovery emails deliver tokens in the hash — page previously missed them).
