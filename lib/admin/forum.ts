@@ -9,7 +9,7 @@
 
 import "server-only";
 import { cookies } from "next/headers";
-import { getAdminSession, OPEN_ACCESS_GUEST } from "./auth";
+import { getAdminSession } from "./auth";
 
 export const FORUM_NICKNAME_COOKIE = "forum_nickname";
 export const NICKNAME_MAX = 40;
@@ -29,8 +29,7 @@ export async function getForumNickname(): Promise<string | null> {
  * Who you post as (everyone-logs-in mode, owner decision 2026-07-22):
  * an explicit popup override (cookie) wins, then the account's sign-up
  * nickname (user_metadata — mandatory at sign-up), then the email name for
- * accounts created before nicknames existed. Nickname-less guests
- * (open-access testing only) get null → log in first.
+ * accounts created before nicknames existed.
  */
 export async function getForumIdentity(): Promise<string | null> {
   const cookieNickname = await getForumNickname();
@@ -38,7 +37,7 @@ export async function getForumIdentity(): Promise<string | null> {
     return cookieNickname;
   }
   const session = await getAdminSession();
-  if (session && session.userId !== OPEN_ACCESS_GUEST.userId) {
+  if (session) {
     return (
       cleanNickname(session.nickname) ||
       cleanNickname(session.email.split("@")[0]) ||

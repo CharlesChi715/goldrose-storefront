@@ -1728,3 +1728,8 @@ unconfirmed business assumptions).
   open-access mode). USER-GUIDE "Getting in" + seeded welcome announcement
   rewritten for sign-up + approval flow; hosted welcome post updated
   in-place; forum e2e rewritten for account-identity behavior.
+- ADMIN_OPEN_ACCESS override DELETED (owner choice, option 2): hosted
+  Supabase now always means real accounts — guest identity, proxy nickname
+  funnel, layout guest display, and the playwright env blank all removed;
+  requireRealAdmin kept as the named gate (now = requireAdmin). Open access
+  remains only in the local no-Supabase dev mode.

@@ -73,25 +73,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // ADMIN_OPEN_ACCESS=1 (testing-phase override, see lib/admin/auth.ts):
-  // keep the admin open on hosted Supabase; remove the env var at launch.
-  const openAccess = ["1", "true"].includes(
-    (process.env.ADMIN_OPEN_ACCESS ?? "").trim().toLowerCase(),
-  );
-
-  // Owner request 2026-07-22: during open-access testing, everyone still
-  // funnels through the login page — a nickname is the minimum identity.
-  if (!user && openAccess && !request.cookies.get("forum_nickname")?.value) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = LOGIN_PATH;
-    const redirect = NextResponse.redirect(loginUrl);
-    for (const cookie of response.cookies.getAll()) {
-      redirect.cookies.set(cookie);
-    }
-    return redirect;
-  }
-
-  if (!user && !openAccess) {
+  if (!user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;
     const redirect = NextResponse.redirect(loginUrl);

@@ -56,7 +56,6 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
-      ADMIN_OPEN_ACCESS: "",
       // Known password for the local-adapter admin login tests.
       ADMIN_DEV_PASSWORD: "stage2-test-password",
     },

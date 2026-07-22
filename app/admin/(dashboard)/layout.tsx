@@ -6,8 +6,7 @@
  * route group.
  */
 
-import { OPEN_ACCESS_GUEST, requireAdmin } from "@/lib/admin/auth";
-import { getForumNickname } from "@/lib/admin/forum";
+import { requireAdmin } from "@/lib/admin/auth";
 import { adminAlerts } from "@/lib/admin/analytics";
 import { AdminFrame, type PaymentMode } from "./AdminFrame";
 
@@ -25,13 +24,8 @@ export default async function DashboardLayout({
 }) {
   const session = await requireAdmin();
   const alerts = await adminAlerts();
-  // Testing-phase guests have no email — show their forum nickname instead.
-  const display =
-    session.email === OPEN_ACCESS_GUEST.email
-      ? ((await getForumNickname()) ?? session.email)
-      : session.email;
   return (
-    <AdminFrame email={display} paymentMode={currentPaymentMode()} alerts={alerts}>
+    <AdminFrame email={session.email} paymentMode={currentPaymentMode()} alerts={alerts}>
       {children}
     </AdminFrame>
   );

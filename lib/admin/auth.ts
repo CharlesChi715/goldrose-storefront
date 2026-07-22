@@ -46,29 +46,13 @@ export type AdminSession = {
  * ADMIN_DEV_PASSWORD turns the password gate back on; configuring Supabase
  * switches to full real auth (email + password + admin_users allowlist).
  *
- * ADMIN_OPEN_ACCESS=1 (owner decision 2026-07-22, Supabase activation):
- * explicit override that keeps the admin + nickname forum open EVEN WITH
- * hosted Supabase configured, so testers need no accounts while data is now
- * persistent. Real logins still work on top (and show their own email).
- * REMOVE THIS ENV VAR AT LAUNCH — BUILD-REPORT §5.7 go-live list.
+ * (The hosted ADMIN_OPEN_ACCESS override from earlier in the testing phase
+ * was DELETED on owner decision 2026-07-22 — hosted Supabase always means
+ * real accounts; open access exists only in the local no-Supabase mode.)
  */
-function openAccessOverride(): boolean {
-  const value = process.env.ADMIN_OPEN_ACCESS?.trim().toLowerCase();
-  return value === "1" || value === "true";
-}
-
 export function isOpenAccess(): boolean {
-  if (openAccessOverride()) {
-    return true;
-  }
   return !getSupabaseEnv().hosted && !process.env.ADMIN_DEV_PASSWORD?.trim();
 }
-
-/** The synthetic identity open-access visitors act as on hosted Supabase. */
-export const OPEN_ACCESS_GUEST: AdminSession = {
-  userId: "00000000-0000-4000-8000-0000000000ff",
-  email: "tester@goldrose.testing",
-};
 
 /**
  * The dev-login password. The "goldrose-admin" default exists ONLY in
@@ -203,12 +187,10 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    // Testing-phase override: visitors without a login act as the guest.
-    return isOpenAccess() ? OPEN_ACCESS_GUEST : null;
+    return null;
   }
   if (!(await isAllowlisted(user.id))) {
-    // Logged in but not an admin → 404, unless the testing override is on.
-    return isOpenAccess() ? OPEN_ACCESS_GUEST : null;
+    return null; // logged in, but not an admin → treated as no session (404)
   }
   return {
     userId: user.id,

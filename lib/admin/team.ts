@@ -11,10 +11,9 @@
 
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
-import { notFound } from "next/navigation";
 import { getSupabaseEnv } from "@/lib/supabase/env.ts";
 import { getStore } from "@/lib/supabase/store.ts";
-import { OPEN_ACCESS_GUEST, requireAdmin, type AdminSession } from "./auth";
+import { requireAdmin, type AdminSession } from "./auth";
 import { siteBaseUrl } from "./settings";
 
 /** Admin-API client (service role) — server only, never cached in globals. */
@@ -26,15 +25,11 @@ function adminAuthClient() {
 }
 
 /**
- * Like requireAdmin, but rejects the open-access guest: approval and
- * removal stay owner-only even while the testing override is on.
+ * Historically stricter than requireAdmin (it rejected the deleted
+ * open-access guest); kept as the named gate for team mutations.
  */
 export async function requireRealAdmin(): Promise<AdminSession> {
-  const session = await requireAdmin();
-  if (session.userId === OPEN_ACCESS_GUEST.userId) {
-    notFound();
-  }
-  return session;
+  return await requireAdmin();
 }
 
 export type TeamMember = {

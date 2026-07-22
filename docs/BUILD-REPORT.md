@@ -78,7 +78,7 @@ Do these in order; everything else already works.
    - [ ] Screenshot every Shopify admin screen we clone, in **EN and 中文**, into `docs/shopify-reference/`.
    - [ ] Cancel the Shopify trial/subscription. (Nothing to migrate.)
 6. **Figma token**: the stray token was deleted from `.env.local` (Stage 4) — **revoke it** in Figma → Settings → Personal access tokens.
-7. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **remove `ADMIN_OPEN_ACCESS` from Vercel if it was ever set** (testing-phase override; owner chose live-like mode so it's normally unset), **turn Supabase Auth "Confirm email" back ON** once Resend is connected (it's off during testing — sign-up emails wouldn't deliver without SMTP) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
+7. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **turn Supabase Auth "Confirm email" back ON** once Resend is connected (it's off during testing — sign-up emails wouldn't deliver without SMTP) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
 
 ## 6. How to run
 
