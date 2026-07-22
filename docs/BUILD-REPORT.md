@@ -78,7 +78,7 @@ Do these in order; everything else already works.
    - [ ] Screenshot every Shopify admin screen we clone, in **EN and 中文**, into `docs/shopify-reference/`.
    - [ ] Cancel the Shopify trial/subscription. (Nothing to migrate.)
 6. **Figma token**: the stray token was deleted from `.env.local` (Stage 4) — **revoke it** in Figma → Settings → Personal access tokens.
-7. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
+7. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **remove `ADMIN_OPEN_ACCESS` from Vercel** (testing-phase override — admin must lock at launch) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
 
 ## 6. How to run
 

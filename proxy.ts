@@ -66,7 +66,13 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  // ADMIN_OPEN_ACCESS=1 (testing-phase override, see lib/admin/auth.ts):
+  // keep the admin open on hosted Supabase; remove the env var at launch.
+  const openAccess = ["1", "true"].includes(
+    (process.env.ADMIN_OPEN_ACCESS ?? "").trim().toLowerCase(),
+  );
+
+  if (!user && !openAccess) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = LOGIN_PATH;
     const redirect = NextResponse.redirect(loginUrl);

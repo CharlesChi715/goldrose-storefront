@@ -1680,3 +1680,8 @@ unconfirmed business assumptions).
   verified anon sees only catalog/site_content (orders 401), bucket exists.
   Local .env.local switched to hosted. Remaining: owner auth user +
   admin_users row, Vercel env vars + redeploy, ADMIN_OPEN_ACCESS decision.
+- ADMIN_OPEN_ACCESS=1 override (owner decision): admin + nickname forum stay
+  open on hosted Supabase during testing; guest session on hosted, proxy
+  skip, launch-checklist reminder in BUILD-REPORT §5.7. Playwright webServer
+  env now blanks Supabase keys + override so e2e can never touch the real
+  db. Verified against hosted: ON→200/forum works, OFF→redirect to login.

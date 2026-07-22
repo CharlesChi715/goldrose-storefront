@@ -50,6 +50,13 @@ export default defineConfig({
       PAYPAL_CLIENT_ID: "",
       PAYPAL_SECRET: "",
       NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
+      // Likewise: never let the suite touch a hosted Supabase project (the
+      // owner's .env.local carries real keys post-activation) — tests always
+      // run against the local file adapter.
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      ADMIN_OPEN_ACCESS: "",
       // Known password for the local-adapter admin login tests.
       ADMIN_DEV_PASSWORD: "stage2-test-password",
     },
