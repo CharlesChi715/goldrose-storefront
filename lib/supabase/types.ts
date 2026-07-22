@@ -244,6 +244,15 @@ export type SiteContentRow = {
   updated_at: string;
 };
 
+export type FeedbackRow = {
+  id: string;
+  name: string;
+  email: string | null;
+  message: string;
+  path: string | null;
+  created_at: string;
+};
+
 export type SettingRow = {
   key: string;
   value: unknown;
@@ -268,6 +277,7 @@ export type DbTables = {
   checkouts: CheckoutRow;
   discounts: DiscountRow;
   page_views: PageViewRow;
+  feedback: FeedbackRow;
   site_content: SiteContentRow;
   settings: SettingRow;
   admin_users: AdminUserRow;
@@ -288,6 +298,7 @@ export const TABLE_NAMES: TableName[] = [
   "checkouts",
   "discounts",
   "page_views",
+  "feedback",
   "site_content",
   "settings",
   "admin_users",

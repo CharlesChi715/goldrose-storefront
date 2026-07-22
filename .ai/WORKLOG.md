@@ -1612,3 +1612,18 @@ unconfirmed business assumptions).
   shop/product masked) + 9 Node unit tests, all green at every stage commit.
 - Deliverables: docs/BUILD-REPORT.md (decisions, mocks, gaps, owner activation
   checklist), refreshed SUMMARY.md.
+
+## 2026-07-23 — Testing-phase polish + visitor ideas (Deliveries)
+
+- Fixed the failed Vercel deploy (.npmrc legacy-peer-deps); live site now runs
+  the admin build. Read-only-fs resilience: local store + auth degrade to
+  in-memory demo mode on serverless.
+- Security: default dev password disabled in production; then (owner decision)
+  testing-phase OPEN ACCESS — /admin needs no login while no Supabase and no
+  ADMIN_DEV_PASSWORD; auto-locks when either exists.
+- Demo store seed (orders #901–905 in all states, 3 customers, GOLD10,
+  abandoned checkout, page views) — local + live; hosted activation seeds clean.
+- Visitor ideas: concierge panel form → /api/feedback → feedback table (added
+  to migration/types/seed) → admin Content → Ideas (list + delete). e2e added.
+- Cleared all Next dev-overlay issues; EN/中文 toggle as a white top-bar button;
+  Playwright moved to port 3001 (no clash with the owner's dev server).

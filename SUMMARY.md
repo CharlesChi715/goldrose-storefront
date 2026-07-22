@@ -13,8 +13,10 @@ Single source of truth for anyone (human or agent) working here. Read first; kee
 - `/admin` is a bilingual (EN/中文) Polaris Shopify-clone: Home dashboard, Orders (drafts, abandoned, fulfill/refund/cancel, timeline), Products (variants, media, inventory + movement log), Customers, Content (slots + files), Analytics (first-party beacon: sessions/funnel/live visitors), Discounts, Settings (zones, tax, notifications, policies, Search engine & AI), ⌘K search.
 - **Storefront reads the DB** (catalog view, revalidate 300); pixel-exact Figma design intact — home byte-exact, shop/product gated by masked pixel-diff (only the designated text boxes show live data). SEO/GEO live: sitemap, robots (AI-crawler toggle), /llms.txt, Product JSON-LD.
 - **Running in §0.2 fallback mode**: local file db (`.data/db.json`, auto-seeded), dev admin login (`ADMIN_DEV_PASSWORD`, default `goldrose-admin`), console emails, fixture-tested PayPal. Hosted Supabase + PayPal sandbox = activation checklist (no code changes).
-- Tests: 43 e2e (Playwright vs production build) + 9 unit — all green. `npm run seed -- --reset` restores a pristine local db.
-- Live deploy at <https://goldrose-storefront.vercel.app> still runs the **pre-build** commit until Vercel env vars are set (build works with none, but checkout there is mock-mode).
+- **Visitor ideas (2026-07-23)**: the concierge chat bubble now collects ideas/feedback (`/api/feedback` → `feedback` table); owner reads/deletes them at Content → Ideas. Persists locally; on live it's ephemeral until Supabase activation (same as all data).
+- **Testing-phase conveniences (2026-07-23)**: /admin needs NO login while no Supabase + no ADMIN_DEV_PASSWORD (auto-locks when either exists); demo store data seeds locally + on live (orders #901–905, customers, GOLD10, analytics) — hosted activation seeds clean; EN/中文 toggle is a visible top-bar button.
+- Tests: 45 e2e (Playwright vs production build, own port 3001) + 9 unit — green. `npm run seed -- --reset` restores a pristine local db.
+- Live deploy at <https://goldrose-storefront.vercel.app> now runs the build (fixed via .npmrc legacy-peer-deps): open demo admin, seeded demo store, mock checkout. Ephemeral until Supabase env vars are set.
 
 ## Key facts / constraints
 

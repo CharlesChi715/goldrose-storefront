@@ -278,6 +278,21 @@ from page_views
 group by visitor_id, session_id;
 
 -- ----------------------------------------------------------------------------
+-- Visitor feedback / ideas (owner request 2026-07-23): submitted from the
+-- storefront's concierge panel via /api/feedback (service role — no anon
+-- write policy), read in the admin under Content → Ideas.
+-- ----------------------------------------------------------------------------
+
+create table feedback (
+  id uuid primary key default gen_random_uuid(),
+  name text not null default '',
+  email text,
+  message text not null,
+  path text,
+  created_at timestamptz not null default now()
+);
+
+-- ----------------------------------------------------------------------------
 -- Site content slots (§7.9) + settings (§7.10) + admin allowlist (§7.11)
 -- ----------------------------------------------------------------------------
 
@@ -380,6 +395,7 @@ alter table order_events enable row level security;
 alter table checkouts enable row level security;
 alter table discounts enable row level security;
 alter table page_views enable row level security;
+alter table feedback enable row level security;
 alter table site_content enable row level security;
 alter table settings enable row level security;
 alter table admin_users enable row level security;

@@ -360,6 +360,7 @@ function buildDemoRows(now: string): Pick<
   | "checkouts"
   | "discounts"
   | "page_views"
+  | "feedback"
 > {
   const ago = (hours: number) =>
     new Date(new Date(now).getTime() - hours * 60 * 60 * 1000).toISOString();
@@ -731,6 +732,16 @@ function buildDemoRows(now: string): Pick<
         completed_at: ago(24 * 3),
       },
     ],
+    feedback: [
+      {
+        id: demoId("f01"),
+        name: "Sophie",
+        email: "sophie.brown@example.com",
+        message: "Would love an option to add a handwritten card in Chinese!",
+        path: "/products/signature-24k-gold-rose",
+        created_at: ago(30),
+      },
+    ],
     discounts: [
       {
         id: demoId("d01"),
@@ -783,6 +794,7 @@ export function buildSeedTables(
         checkouts: [],
         discounts: [],
         page_views: [],
+        feedback: [],
       };
   return {
     products: SEED_PRODUCTS.map(({ product }) => ({

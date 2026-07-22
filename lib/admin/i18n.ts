@@ -26,6 +26,7 @@ const en = {
   "nav.customers": "Customers",
   "nav.content": "Content",
   "nav.content.files": "Files",
+  "nav.content.ideas": "Ideas",
   "nav.analytics": "Analytics",
   "nav.discounts": "Discounts",
   "nav.settings": "Settings",
@@ -415,6 +416,14 @@ const en = {
   "content.saved": "Content saved",
   "content.slot.help.promo": "✦ symbols may look slightly different from the original design once edited",
 
+  // Content → Ideas (visitor feedback)
+  "ideas.column.message": "Idea",
+  "ideas.column.from": "From",
+  "ideas.column.page": "Page",
+  "ideas.column.date": "Date",
+  "ideas.delete": "Delete",
+  "ideas.empty": "No ideas yet — visitors share them from the storefront chat bubble",
+
   // Content → Files (§9.8)
   "files.upload": "Upload files",
   "files.copyUrl": "Copy URL",
@@ -441,6 +450,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.customers": "客户",
   "nav.content": "内容",
   "nav.content.files": "文件",
+  "nav.content.ideas": "想法",
   "nav.analytics": "分析",
   "nav.discounts": "折扣",
   "nav.settings": "设置",
@@ -808,6 +818,13 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "content.reset": "恢复原始内容",
   "content.saved": "内容已保存",
   "content.slot.help.promo": "编辑后 ✦ 符号可能与原设计略有差异",
+
+  "ideas.column.message": "想法",
+  "ideas.column.from": "来自",
+  "ideas.column.page": "页面",
+  "ideas.column.date": "日期",
+  "ideas.delete": "删除",
+  "ideas.empty": "暂无想法 — 访客可通过店面聊天气泡提交",
 
   "files.upload": "上传文件",
   "files.copyUrl": "复制链接",

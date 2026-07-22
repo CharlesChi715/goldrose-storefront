@@ -162,6 +162,7 @@ export function AdminFrame({
             selected: selected("/admin/content"),
             subNavigationItems: [
               { url: "/admin/content/files", label: t("nav.content.files") },
+              { url: "/admin/content/ideas", label: t("nav.content.ideas") },
             ],
           },
           {

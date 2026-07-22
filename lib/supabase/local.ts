@@ -11,6 +11,7 @@
 
 import { promises as fs } from "fs";
 import path from "path";
+import { TABLE_NAMES } from "./types.ts";
 import type {
   DbTables,
   InventoryReason,
@@ -63,6 +64,13 @@ class LocalStore implements TableStore {
     }
     try {
       this.cache = JSON.parse(await fs.readFile(DB_FILE, "utf8")) as DbFile;
+      // Schema growth: a db file written before a table existed gets that
+      // table backfilled as empty instead of crashing on insert.
+      for (const table of TABLE_NAMES) {
+        if (!Array.isArray(this.cache.tables[table])) {
+          (this.cache.tables as Record<string, unknown[]>)[table] = [];
+        }
+      }
     } catch {
       // Missing or unreadable → fresh seed (first run in a clean checkout).
       this.cache = buildFreshDb();

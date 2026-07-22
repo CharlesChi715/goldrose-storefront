@@ -71,54 +71,157 @@ function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void })
           ×
         </button>
       </div>
-      <div style={{ padding: "20px 18px 14px" }}>
+      <IdeaForm />
+    </div>
+  );
+}
+
+/**
+ * Share-your-ideas form (owner request 2026-07-23): live chat is still
+ * coming, so the panel collects visitor ideas/feedback instead — POSTed to
+ * /api/feedback and read in the admin under Content → Ideas.
+ */
+function IdeaForm() {
+  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function submit() {
+    if (message.trim().length < 2 || state === "sending") {
+      return;
+    }
+    setState("sending");
+    setError("");
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: message.trim(),
+          ...(email.trim() ? { email: email.trim() } : {}),
+          path: window.location.pathname,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        setError(result.error ?? "Could not send — please try again.");
+        setState("error");
+        return;
+      }
+      setState("sent");
+    } catch {
+      setError("Could not send — please try again.");
+      setState("error");
+    }
+  }
+
+  if (state === "sent") {
+    return (
+      <div style={{ padding: "20px 18px 18px" }}>
         <div
           style={{
             background: "#F6F3EE",
             borderRadius: "14px 14px 14px 4px",
             padding: "10px 14px",
-            maxWidth: 300,
           }}
         >
           <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
-            Hi! Our concierge chat is <strong>coming soon</strong> — we're putting the finishing
-            touches on it.
+            <strong>Thank you!</strong> Your idea is on its way to us — it truly helps us
+            shape GoldRose. 🌹
           </div>
         </div>
-        <div
-          style={{
-            ...txt(11, 15, "#7C7369"),
-            whiteSpace: "normal",
-            marginTop: 10,
-          }}
-        >
-          In the meantime, every rose ships with our gift guarantee.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "20px 18px 14px" }}>
+      <div
+        style={{
+          background: "#F6F3EE",
+          borderRadius: "14px 14px 14px 4px",
+          padding: "10px 14px",
+          maxWidth: 300,
+        }}
+      >
+        <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
+          Hi! Live chat is <strong>coming soon</strong> — meanwhile, we'd love your
+          <strong> ideas and feedback</strong>. What would make GoldRose better?
         </div>
-        {/* Mock composer — disabled until the real widget lands */}
-        <div
+      </div>
+      <textarea
+        value={message}
+        onChange={(event) => setMessage(event.target.value.slice(0, 2000))}
+        placeholder="Share an idea, a wish, or anything we should know…"
+        rows={3}
+        aria-label="Your idea"
+        style={{
+          marginTop: 12,
+          width: "100%",
+          boxSizing: "border-box",
+          background: "#F6F3EE",
+          border: "1px solid #E8E0D7",
+          borderRadius: 12,
+          padding: "10px 12px",
+          resize: "none",
+          outline: "none",
+          fontFamily: "inherit",
+          fontSize: 12.5,
+          lineHeight: "18px",
+          color: "#263530",
+        }}
+      />
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        <input
+          value={email}
+          onChange={(event) => setEmail(event.target.value.slice(0, 254))}
+          placeholder="Email (optional)"
+          inputMode="email"
+          aria-label="Email (optional)"
           style={{
-            marginTop: 14,
-            height: 40,
+            flex: 1,
+            minWidth: 0,
+            height: 36,
+            boxSizing: "border-box",
             background: "#F6F3EE",
+            border: "1px solid #E8E0D7",
             borderRadius: 99,
-            position: "relative",
+            padding: "0 14px",
+            outline: "none",
+            fontFamily: "inherit",
+            fontSize: 12,
+            color: "#263530",
+          }}
+        />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={state === "sending" || message.trim().length < 2}
+          style={{
+            height: 36,
+            padding: "0 18px",
+            background: "#C89236",
+            border: "none",
+            borderRadius: 99,
+            color: "#FFFFFF",
+            fontFamily: "inherit",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+            opacity: state === "sending" || message.trim().length < 2 ? 0.6 : 1,
           }}
         >
-          <div style={{ ...abs(16, 12), ...txt(12, 16, "#A9A29A") }}>Type a message…</div>
-          <div
-            style={{
-              ...abs(326, 4, 32, 32),
-              background: "#C89236",
-              borderRadius: "50%",
-              color: "#FFFFFF",
-              fontSize: 14,
-              lineHeight: "32px",
-              textAlign: "center",
-            }}
-          >
-            ›
-          </div>
+          {state === "sending" ? "Sending…" : "Send"}
+        </button>
+      </div>
+      {state === "error" ? (
+        <div style={{ ...txt(11, 15, "#B3473F"), whiteSpace: "normal", marginTop: 8 }}>
+          {error}
         </div>
+      ) : null}
+      <div style={{ ...txt(11, 15, "#7C7369"), whiteSpace: "normal", marginTop: 10 }}>
+        Every rose ships with our gift guarantee.
       </div>
     </div>
   );
