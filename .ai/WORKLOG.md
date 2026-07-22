@@ -1688,3 +1688,9 @@ unconfirmed business assumptions).
 - Login-page fix: the "nickname only is enough" helper now shows only when
   open access is actually on; locked mode shows "optional display name,
   email+password required" (EN + 中文) — owner was misled locally.
+- Login funnel (owner request): open-access visitors without a nickname are
+  redirected to /admin/login; nickname enters the whole admin and shows in
+  the top bar. Sign-up + approval (owner yes): "Request access" card on the
+  login page (hosted only, Supabase signUp), "awaiting approval" login
+  state, Settings → Team page to approve/remove (requireRealAdmin — the
+  nickname guest 404s; verified vs hosted). e2e: team spec added.

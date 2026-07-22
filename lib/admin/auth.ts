@@ -223,7 +223,9 @@ export async function requireAdmin(): Promise<AdminSession> {
   return session;
 }
 
-export type SignInResult = { ok: true } | { ok: false; error: "invalid" };
+export type SignInResult =
+  | { ok: true }
+  | { ok: false; error: "invalid" | "pending" };
 
 /** Email + password sign-in for both modes. Errors stay deliberately vague. */
 export async function signInWithPassword(
@@ -257,7 +259,9 @@ export async function signInWithPassword(
   }
   if (!(await isAllowlisted(data.user.id))) {
     await supabase.auth.signOut();
-    return { ok: false, error: "invalid" };
+    // Correct password but not approved yet (sign-up flow) — saying so is
+    // fine: this branch is only reachable by someone who owns the account.
+    return { ok: false, error: "pending" };
   }
   return { ok: true };
 }

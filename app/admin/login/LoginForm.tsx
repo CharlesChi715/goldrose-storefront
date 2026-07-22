@@ -20,16 +20,82 @@ import {
   TextField,
 } from "@shopify/polaris";
 import { useAdminT } from "../PolarisShell";
-import { loginAction, type LoginState } from "./actions";
+import {
+  loginAction,
+  requestAccessAction,
+  type LoginState,
+  type SignUpState,
+} from "./actions";
 
 const INITIAL_STATE: LoginState = { error: null };
+const SIGNUP_INITIAL: SignUpState = { status: "idle", error: null };
+
+/** "Request access" sign-up card (hosted only; owner approves in Team). */
+function RequestAccess() {
+  const t = useAdminT();
+  const [state, formAction, pending] = useActionState(requestAccessAction, SIGNUP_INITIAL);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  if (!open) {
+    return (
+      <Button variant="plain" onClick={() => setOpen(true)}>
+        {t("login.signup.open")}
+      </Button>
+    );
+  }
+  if (state.status === "done") {
+    return <Banner tone="success">{t("login.signup.done")}</Banner>;
+  }
+  return (
+    <Card>
+      <form action={formAction}>
+        <BlockStack gap="300">
+          <Text as="h2" variant="headingSm">
+            {t("login.signup.title")}
+          </Text>
+          {state.error ? (
+            <Banner tone="critical">
+              {state.error === "exists"
+                ? t("login.signup.error.exists")
+                : t("login.signup.error.invalid")}
+            </Banner>
+          ) : null}
+          <TextField
+            label={t("login.email")}
+            type="email"
+            name="email"
+            value={email}
+            onChange={setEmail}
+            autoComplete="email"
+          />
+          <TextField
+            label={t("login.password")}
+            type="password"
+            name="password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+            helpText={t("login.signup.passwordHelp")}
+          />
+          <Button submit loading={pending} fullWidth>
+            {t("login.signup.submit")}
+          </Button>
+        </BlockStack>
+      </form>
+    </Card>
+  );
+}
 
 export function LoginForm({
   showDevHint,
   nicknameOnly,
+  signupEnabled,
 }: {
   showDevHint: boolean;
   nicknameOnly: boolean;
+  signupEnabled: boolean;
 }) {
   const t = useAdminT();
   const [state, formAction, pending] = useActionState(loginAction, INITIAL_STATE);
@@ -51,10 +117,12 @@ export function LoginForm({
           </BlockStack>
 
           {state.error ? (
-            <Banner tone="critical">
+            <Banner tone={state.error === "pending" ? "warning" : "critical"}>
               {state.error === "nickname"
                 ? t("login.error.nickname")
-                : t("login.error.invalid")}
+                : state.error === "pending"
+                  ? t("login.error.pending")
+                  : t("login.error.invalid")}
             </Banner>
           ) : null}
 
@@ -94,6 +162,8 @@ export function LoginForm({
               </BlockStack>
             </form>
           </Card>
+
+          {signupEnabled ? <RequestAccess /> : null}
 
           {showDevHint ? (
             <Text as="p" tone="subdued" variant="bodySm" alignment="center">

@@ -25,6 +25,8 @@ export default async function AdminLoginPage() {
       // The "nickname only is enough" helper is true only in open access —
       // with real auth locked on, showing it just misleads (owner hit this).
       nicknameOnly={isOpenAccess()}
+      // Self-service sign-up needs a real auth server (hosted only).
+      signupEnabled={getSupabaseEnv().hosted}
     />
   );
 }

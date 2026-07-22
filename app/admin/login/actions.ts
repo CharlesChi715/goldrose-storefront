@@ -17,6 +17,22 @@ import { isOpenAccess, signInWithPassword } from "@/lib/admin/auth";
 import { cleanNickname, setForumNickname } from "@/lib/admin/forum";
 
 export type LoginState = { error: string | null };
+export type SignUpState = { status: "idle" | "done"; error: string | null };
+
+/** "Request access" sign-up (owner approves in Settings → Team). */
+export async function requestAccessAction(
+  _previous: SignUpState,
+  formData: FormData,
+): Promise<SignUpState> {
+  const { signUpForApproval } = await import("@/lib/admin/team");
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const result = await signUpForApproval(email, password);
+  if (!result.ok) {
+    return { status: "idle", error: result.error };
+  }
+  return { status: "done", error: null };
+}
 
 export async function loginAction(
   _previous: LoginState,
@@ -46,7 +62,7 @@ export async function loginAction(
 
   const result = await signInWithPassword(email, password);
   if (!result.ok) {
-    return { error: "invalid" };
+    return { error: result.error };
   }
 
   if (nickname) {

@@ -32,6 +32,7 @@ const en = {
   "nav.forum": "Forum",
   "nav.guide": "Guide",
   "nav.settings": "Settings",
+  "nav.settings.team": "Team",
 
   // Top bar
   "topbar.search.placeholder": "Search",
@@ -58,6 +59,26 @@ const en = {
   "login.submit": "Log in",
   "login.error.invalid": "Your email or password is incorrect.",
   "login.error.nickname": "Please enter a nickname.",
+  "login.error.pending": "Your account exists but hasn't been approved yet — ask the owner.",
+  "login.signup.open": "Need an account? Request access",
+  "login.signup.title": "Request access",
+  "login.signup.passwordHelp": "At least 8 characters.",
+  "login.signup.submit": "Sign up",
+  "login.signup.done":
+    "Request sent — you can log in as soon as the owner approves your account.",
+  "login.signup.error.exists": "An account with this email already exists.",
+  "login.signup.error.invalid": "Please enter a valid email and a password of 8+ characters.",
+
+  // Settings → Team
+  "team.title": "Team",
+  "team.subtitle": "Approve sign-ups and manage who can access this admin.",
+  "team.empty": "No accounts yet.",
+  "team.approved": "Approved",
+  "team.pending": "Awaiting approval",
+  "team.you": "You",
+  "team.signedUp": "Signed up",
+  "team.approve": "Approve",
+  "team.remove": "Remove access",
 
   // Forum (testing phase)
   "forum.postingAs": "Posting as",
@@ -485,6 +506,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.forum": "论坛",
   "nav.guide": "使用指南",
   "nav.settings": "设置",
+  "nav.settings.team": "团队",
 
   "topbar.search.placeholder": "搜索",
   "topbar.notifications": "提醒",
@@ -506,6 +528,25 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "login.submit": "登录",
   "login.error.invalid": "邮箱或密码不正确。",
   "login.error.nickname": "请输入昵称。",
+  "login.error.pending": "账号已存在，但尚未获得批准——请联系店主。",
+  "login.signup.open": "需要账号？申请访问",
+  "login.signup.title": "申请访问",
+  "login.signup.passwordHelp": "至少 8 个字符。",
+  "login.signup.submit": "注册",
+  "login.signup.done": "申请已提交——店主批准后即可登录。",
+  "login.signup.error.exists": "该邮箱已注册。",
+  "login.signup.error.invalid": "请输入有效邮箱和至少 8 位的密码。",
+
+  // Settings → Team
+  "team.title": "团队",
+  "team.subtitle": "批准注册申请，管理谁可以访问后台。",
+  "team.empty": "还没有账号。",
+  "team.approved": "已批准",
+  "team.pending": "待批准",
+  "team.you": "你",
+  "team.signedUp": "注册时间",
+  "team.approve": "批准",
+  "team.remove": "移除权限",
 
   // Forum (testing phase)
   "forum.postingAs": "发帖身份",
