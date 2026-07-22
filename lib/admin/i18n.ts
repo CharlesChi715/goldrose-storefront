@@ -54,8 +54,6 @@ const en = {
   "login.nickname": "Nickname",
   "login.nickname.help":
     "Testing phase: enter just a nickname to join the forum — no email or password needed.",
-  "login.nickname.helpLocked":
-    "Optional — your display name on the forum. Email and password below are required.",
   "login.submit": "Log in",
   "login.error.invalid": "Your email or password is incorrect.",
   "login.error.nickname": "Please enter a nickname.",
@@ -546,7 +544,6 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "login.password": "密码",
   "login.nickname": "昵称",
   "login.nickname.help": "测试阶段：只需填写昵称即可进入论坛，无需邮箱和密码。",
-  "login.nickname.helpLocked": "选填——论坛显示名称。下方邮箱和密码为必填。",
   "login.submit": "登录",
   "login.error.invalid": "邮箱或密码不正确。",
   "login.error.nickname": "请输入昵称。",

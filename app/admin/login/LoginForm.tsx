@@ -65,17 +65,25 @@ export function LoginForm({
           <Card>
             <form action={formAction}>
               <BlockStack gap="400">
-                <TextField
-                  label={t("login.nickname")}
-                  type="text"
-                  name="nickname"
-                  value={nickname}
-                  onChange={setNickname}
-                  autoComplete="nickname"
-                  maxLength={40}
-                  helpText={nicknameOnly ? t("login.nickname.help") : t("login.nickname.helpLocked")}
-                />
-                <Divider />
+                {/* Nickname entry exists ONLY in open-access mode (the
+                    dormant testing escape hatch). With real auth, the
+                    nickname is bound to the account at sign-up (owner
+                    request 2026-07-22) — nothing to retype here. */}
+                {nicknameOnly ? (
+                  <>
+                    <TextField
+                      label={t("login.nickname")}
+                      type="text"
+                      name="nickname"
+                      value={nickname}
+                      onChange={setNickname}
+                      autoComplete="nickname"
+                      maxLength={40}
+                      helpText={t("login.nickname.help")}
+                    />
+                    <Divider />
+                  </>
+                ) : null}
                 <TextField
                   label={t("login.email")}
                   type="email"

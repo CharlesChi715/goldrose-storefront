@@ -1723,3 +1723,8 @@ unconfirmed business assumptions).
 - Settings → Team already gated mutations to real Supabase admins, but ANY approved member could remove any other (incl. the owner). Owner request: only the registered admin (owner) may revoke.
 - New `lib/admin/team-owner.ts` (pure, unit-testable): owner = earliest-created APPROVED account; local adapter (no auth timestamps) falls back to the first allowlist row. Server-side gate in `removeMemberAction`; UI hides Remove for non-owners, shows an "Owner" badge + owner-only note (EN + 中文 keys added).
 - Tests: 5 new unit tests (14 total green), team e2e asserts the Owner badge; full suite 52 e2e green. tsc + lint unchanged.
+- Nickname entry removed from the login page (owner request): identity is
+  the sign-up nickname bound to the account (field renders only in dormant
+  open-access mode). USER-GUIDE "Getting in" + seeded welcome announcement
+  rewritten for sign-up + approval flow; hosted welcome post updated
+  in-place; forum e2e rewritten for account-identity behavior.

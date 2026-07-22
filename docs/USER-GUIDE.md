@@ -6,11 +6,13 @@ real money.
 
 ## Getting in
 
-- Open the login page and enter just a **nickname** — no email or password
-  needed during the testing phase.
-- Your nickname is how everyone recognizes you on the forum, so pick one and
-  keep it.
-- The email and password fields are for the store owner; you can ignore them.
+- On the login page, click **"Need an account? Request access"** and sign up
+  with a **nickname**, your email, and a password (8+ characters).
+- The owner approves new accounts — until then, logging in shows "awaiting
+  approval." Ping the owner if you're waiting.
+- Your nickname is bound to your account and is automatically your name on
+  the forum — you never retype it.
+- Forgot your password? Use the **"Forgot password?"** link on the login page.
 
 ## The admin (this dashboard)
 
@@ -53,9 +55,11 @@ real money.
 
 ## 如何进入
 
-- 在登录页只需填写**昵称**即可，测试阶段无需邮箱和密码。
-- 昵称是论坛上大家认识你的方式，请选一个并保持不变。
-- 邮箱和密码栏是店主使用的，可以忽略。
+- 在登录页点击**"需要账号？申请访问"**，用**昵称**、邮箱和密码（至少 8 位）
+  注册。
+- 新账号需店主批准——批准前登录会显示"待批准"，请联系店主。
+- 昵称与账号绑定，自动作为你在论坛上的名字，无需重复填写。
+- 忘记密码？使用登录页的**"忘记密码？"**链接。
 
 ## 后台（当前界面）
 

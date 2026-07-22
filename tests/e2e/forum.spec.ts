@@ -1,10 +1,10 @@
 /**
  * ROLE OF THIS FILE
- * Testing-phase forum (owner request 2026-07-22): nickname-gated access,
- * starting a discussion, replying, and the thread list. Runs with
- * ADMIN_DEV_PASSWORD set (playwright.config.ts), so the admin itself still
- * needs the dev login and nickname-only submits are rejected — the
- * nickname-only path is live only in open-access mode.
+ * Forum flows (owner requests 2026-07-22): identity comes from the account
+ * (sign-up nickname, else email name) — the login page carries no nickname
+ * field outside open-access mode. Covers posting, replying, editing,
+ * deleting, and the display-name popup. Runs with ADMIN_DEV_PASSWORD set
+ * (playwright.config.ts), i.e. locked mode on the local file adapter.
  */
 
 import { test, expect, type Page } from "@playwright/test";
@@ -18,33 +18,36 @@ const OPENING = "Should we use magnetic gift boxes?";
 const REPLY = "Yes — magnetic lids feel premium.";
 const EDITED = "Edit: brushed gold magnetic lids, even better.";
 
-async function logIn(page: Page, nickname?: string) {
+async function logIn(page: Page) {
   await page.goto("/admin/login");
-  if (nickname) {
-    await page.getByLabel(/Nickname|昵称/).fill(nickname);
-  }
   await page.getByLabel(/^Email$|邮箱/).fill("owner@goldrose.local");
   await page.getByLabel(/Password|密码/).fill(DEV_PASSWORD);
   await page.getByRole("button", { name: /Log in|登录/ }).click();
   await page.waitForURL(/\/admin$/);
 }
 
-test("a logged-in account without a nickname posts under its email name", async ({
+test("the login page has no nickname field outside open-access mode", async ({ page }) => {
+  await page.goto("/admin/login");
+  await expect(page.getByLabel(/Nickname|昵称/)).toHaveCount(0);
+});
+
+test("a logged-in account posts under its account name — nothing to retype", async ({
   page,
 }) => {
   await logIn(page);
   await page.goto("/admin/forum");
-  // Everyone-logs-in mode (owner decision): no forced trip back to login —
-  // the account's email name is the default forum identity.
+  // Identity is bound to the account (sign-up nickname, else email name).
   await expect(page.getByText("Posting as: owner")).toBeVisible();
 });
 
-test("start a discussion, reply, see it in the list, then delete it", async ({ page }) => {
-  await logIn(page, "Charlie");
+test("start a discussion, reply, edit, see it in the list, then delete it", async ({
+  page,
+}) => {
+  await logIn(page);
 
   await page.getByRole("navigation").getByRole("link", { name: "Forum" }).click();
   await page.waitForURL(/\/admin\/forum$/);
-  await expect(page.getByText("Posting as: Charlie")).toBeVisible();
+  await expect(page.getByText("Posting as: owner")).toBeVisible();
 
   // The seeded announcement threads greet testers.
   await expect(page.getByText("📢 Welcome to the GoldRose testing forum")).toBeVisible();
@@ -63,16 +66,16 @@ test("start a discussion, reply, see it in the list, then delete it", async ({ p
   await expect(page.getByLabel("Reply")).toHaveValue("");
   await expect(page.getByText(REPLY)).toBeVisible();
 
-  // Edit your own post: both posts are Charlie's, take the reply (last).
+  // Edit your own post: both posts are the owner's, take the reply (last).
   await page.getByRole("button", { name: "Edit", exact: true }).last().click();
   await page.getByLabel("Edit", { exact: true }).fill(EDITED);
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText(EDITED)).toBeVisible();
-  await expect(page.getByText(/Charlie · .+ · edited/).first()).toBeVisible();
+  await expect(page.getByText(/owner · .+ · edited/).first()).toBeVisible();
 
   await page.goto("/admin/forum");
   await expect(page.getByText(TITLE)).toBeVisible();
-  await expect(page.getByText(/Charlie · .+ · 1 replies/).first()).toBeVisible();
+  await expect(page.getByText(/owner · .+ · 1 replies/).first()).toBeVisible();
 
   // Clean up: delete the whole discussion from the thread page.
   await page.getByText(TITLE).click();
@@ -82,8 +85,8 @@ test("start a discussion, reply, see it in the list, then delete it", async ({ p
   await expect(page.getByText(TITLE)).toHaveCount(0);
 });
 
-test("change nickname via the popup on the forum page", async ({ page }) => {
-  await logIn(page, "Charlie");
+test("the display-name popup overrides the account identity", async ({ page }) => {
+  await logIn(page);
   await page.goto("/admin/forum");
 
   await page.getByRole("button", { name: "Change nickname" }).click();
@@ -91,12 +94,4 @@ test("change nickname via the popup on the forum page", async ({ page }) => {
   await modal.getByLabel("Nickname").fill("Chuck");
   await modal.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Posting as: Chuck")).toBeVisible();
-});
-
-test("nickname-only login is rejected while the password gate is on", async ({ page }) => {
-  await page.goto("/admin/login");
-  await page.getByLabel(/Nickname|昵称/).fill("Visitor");
-  await page.getByRole("button", { name: /Log in|登录/ }).click();
-  await expect(page.getByText("Your email or password is incorrect.")).toBeVisible();
-  expect(page.url()).toContain("/admin/login");
 });
