@@ -29,6 +29,7 @@ testing/startup phase:
 - **At launch:** upgrade to Pro anyway (never-pauses + managed one-click
   restores + support) and keep the S3 pipeline as the independent second
   copy.
+- **After S3 pipeline mature** Cancel Supabase Pro to save money. (S3 pipeline is way more cheaper)
 
 Also considered and rejected: raw AWS RDS / Azure Postgres (no free tier,
 loses Supabase Auth/API — weeks of rebuild), self-hosting the Supabase stack
