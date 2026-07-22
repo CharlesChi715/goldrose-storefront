@@ -7,6 +7,7 @@
  */
 
 import { requireAdmin } from "@/lib/admin/auth";
+import { adminAlerts } from "@/lib/admin/analytics";
 import { AdminFrame, type PaymentMode } from "./AdminFrame";
 
 function currentPaymentMode(): PaymentMode {
@@ -22,8 +23,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await requireAdmin();
+  const alerts = await adminAlerts();
   return (
-    <AdminFrame email={session.email} paymentMode={currentPaymentMode()}>
+    <AdminFrame email={session.email} paymentMode={currentPaymentMode()} alerts={alerts}>
       {children}
     </AdminFrame>
   );

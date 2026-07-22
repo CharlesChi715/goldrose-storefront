@@ -10,9 +10,19 @@
  * shows trial banners).
  */
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Banner, Box, Frame, Navigation, Text, TopBar } from "@shopify/polaris";
+import {
+  Banner,
+  BlockStack,
+  Box,
+  Frame,
+  Modal,
+  Navigation,
+  Text,
+  TextField,
+  TopBar,
+} from "@shopify/polaris";
 import {
   ChartVerticalFilledIcon,
   ContentIcon,
@@ -24,18 +34,24 @@ import {
   ProductIcon,
   SettingsIcon,
 } from "@shopify/polaris-icons";
-import { setAdminLangAction, signOutAction } from "../actions";
+import { searchAdminAction, setAdminLangAction, signOutAction } from "../actions";
 import { useAdminLang, useAdminT } from "../PolarisShell";
+import type { AdminAlert } from "@/lib/admin/analytics";
+import type { SearchResults } from "@/lib/admin/analytics";
 
 export type PaymentMode = "mock" | "sandbox" | "live";
+
+const EMPTY_RESULTS: SearchResults = { orders: [], products: [], customers: [] };
 
 export function AdminFrame({
   email,
   paymentMode,
+  alerts = [],
   children,
 }: {
   email: string;
   paymentMode: PaymentMode;
+  alerts?: AdminAlert[];
   children: React.ReactNode;
 }) {
   const t = useAdminT();
@@ -48,6 +64,44 @@ export function AdminFrame({
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+
+  // ⌘K global search (§9.1): modal opened by the shortcut or the top-bar field.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResults>(EMPTY_RESULTS);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const runSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    if (searchTimer.current) {
+      clearTimeout(searchTimer.current);
+    }
+    searchTimer.current = setTimeout(async () => {
+      if (!query.trim()) {
+        setSearchResults(EMPTY_RESULTS);
+        return;
+      }
+      setSearchResults(await searchAdminAction(query));
+    }, 200);
+  }, []);
+
+  function openResult(url: string) {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults(EMPTY_RESULTS);
+    router.push(url);
+  }
 
   const toggleLang = useCallback(() => {
     startTransition(async () => {
@@ -169,7 +223,20 @@ export function AdminFrame({
       open={alertsOpen}
       onOpen={() => setAlertsOpen(true)}
       onClose={() => setAlertsOpen(false)}
-      actions={[{ items: [{ content: t("topbar.notifications.empty") }] }]}
+      actions={[
+        {
+          items:
+            alerts.length > 0
+              ? alerts.map((alert) => ({
+                  content: alert.message,
+                  onAction: () => {
+                    setAlertsOpen(false);
+                    router.push(alert.url);
+                  },
+                }))
+              : [{ content: t("topbar.notifications.empty") }],
+        },
+      ]}
     />
   );
 
@@ -180,9 +247,10 @@ export function AdminFrame({
       secondaryMenu={alertsMenu}
       searchField={
         <TopBar.SearchField
-          placeholder={t("topbar.search.placeholder")}
+          placeholder={`${t("topbar.search.placeholder")} (⌘K)`}
           value={searchValue}
           onChange={setSearchValue}
+          onFocus={() => setSearchOpen(true)}
         />
       }
       onNavigationToggle={() => setMobileNavOpen((open) => !open)}
@@ -212,6 +280,74 @@ export function AdminFrame({
         <Banner tone={bannerTone}>{bannerText}</Banner>
       </Box>
       {children}
+
+      {/* ⌘K search modal (§9.1) — results grouped like Shopify's */}
+      <Modal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        title={t("topbar.search.placeholder")}
+      >
+        <Modal.Section>
+          <BlockStack gap="300">
+            <TextField
+              label={t("topbar.search.placeholder")}
+              labelHidden
+              autoFocus
+              placeholder={t("topbar.search.placeholder")}
+              value={searchQuery}
+              onChange={runSearch}
+              autoComplete="off"
+              clearButton
+              onClearButtonClick={() => runSearch("")}
+            />
+            {(
+              [
+                ["search.group.orders", searchResults.orders, "/admin/orders/"],
+                ["search.group.products", searchResults.products, "/admin/products/"],
+                ["search.group.customers", searchResults.customers, "/admin/customers/"],
+              ] as const
+            ).map(([labelKey, hits, prefix]) =>
+              hits.length > 0 ? (
+                <BlockStack key={labelKey} gap="150">
+                  <Text as="h3" variant="headingSm" tone="subdued">
+                    {t(labelKey)}
+                  </Text>
+                  {hits.map((hit) => (
+                    <button
+                      key={hit.id}
+                      type="button"
+                      onClick={() => openResult(`${prefix}${hit.id}`)}
+                      style={{
+                        textAlign: "left",
+                        background: "none",
+                        border: "none",
+                        padding: "6px 4px",
+                        cursor: "pointer",
+                        borderRadius: 8,
+                      }}
+                    >
+                      <Text as="span" fontWeight="semibold">
+                        {hit.label}
+                      </Text>{" "}
+                      <Text as="span" tone="subdued" variant="bodySm">
+                        {hit.sublabel}
+                      </Text>
+                    </button>
+                  ))}
+                </BlockStack>
+              ) : null,
+            )}
+            {searchQuery.trim() &&
+            searchResults.orders.length === 0 &&
+            searchResults.products.length === 0 &&
+            searchResults.customers.length === 0 ? (
+              <Text as="p" tone="subdued">
+                {t("search.empty")}
+              </Text>
+            ) : null}
+          </BlockStack>
+        </Modal.Section>
+      </Modal>
     </Frame>
   );
 }

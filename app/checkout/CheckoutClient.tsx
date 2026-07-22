@@ -18,6 +18,7 @@ import { useCart, type CartLine } from "@/lib/cart/store";
 import { computeShipping, zoneForCountry, type ShippingZone } from "@/lib/checkout/zones";
 import { expressMethods } from "@/lib/checkout/methods";
 import { fileUrl } from "@/lib/files-url";
+import { getVisitorId } from "@/components/Beacon";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 import type { CatalogProduct } from "@/lib/supabase/types.ts";
 
@@ -279,6 +280,9 @@ export function CheckoutClient({
       country,
       ...(note.trim() ? { note: note.trim() } : {}),
       ...(discount ? { discountCode: discount.code } : {}),
+      ...(typeof window !== "undefined" && getVisitorId()
+        ? { visitorId: getVisitorId() }
+        : {}),
     };
   }
 

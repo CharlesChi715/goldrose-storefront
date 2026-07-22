@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import { Beacon } from "@/components/Beacon";
 
 // Exporting `metadata` is the App Router way to set <title>, description,
 // and social-share (Open Graph) tags. The `template` makes child pages render
@@ -52,7 +53,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* First-party visitor beacon (§7.12) — renders nothing, skips /admin */}
+        <Beacon />
+      </body>
     </html>
   );
 }
