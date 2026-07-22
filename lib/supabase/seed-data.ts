@@ -346,8 +346,19 @@ const V_SIG = "0a2b1a10-4b7e-4d7a-9d24-000000000101"; // Signature / Gift box
 const V_BOX = "0a2b1a10-4b7e-4d7a-9d24-000000000201"; // Boxed / Valentine card
 const V_BND = "0a2b1a10-4b7e-4d7a-9d24-000000000301"; // Bundle / Gift message
 
+// uuid columns accept hex only (0-9a-f) — Postgres rejects the mnemonic tail
+// letters k/o/p/v (the local file adapter never validated, which is how
+// "do01" reached the live db as an insert error on 2026-07-22). Each non-hex
+// letter gets a fixed digit; the digit slots can't collide with the letter
+// tails (k01→d101 vs c01→dc01).
+const DEMO_TAIL_HEX: Record<string, string> = { k: "1", l: "2", o: "0", p: "9", v: "5" };
+
 function demoId(tail: string): string {
-  return `0a2b1a10-4b7e-4d7a-9d24-00000000d${tail}`;
+  const hexTail = tail.replace(/[a-z]/g, (ch) => DEMO_TAIL_HEX[ch] ?? ch);
+  if (!/^[0-9a-f]{3}$/.test(hexTail)) {
+    throw new Error(`demoId tail is not uuid-safe: "${tail}"`);
+  }
+  return `0a2b1a10-4b7e-4d7a-9d24-00000000d${hexTail}`;
 }
 
 function buildDemoRows(now: string): Pick<
