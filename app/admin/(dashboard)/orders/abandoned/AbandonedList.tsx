@@ -8,6 +8,7 @@
 import { Banner, BlockStack, Card, IndexTable, Page, Text } from "@shopify/polaris";
 import { formatMoney } from "@/lib/money";
 import { useAdminT } from "../../../PolarisShell";
+import { formatDateTime } from "@/lib/dates";
 
 export type AbandonedItem = {
   id: string;
@@ -50,7 +51,7 @@ export function AbandonedList({ items }: { items: AbandonedItem[] }) {
             {items.map((item, index) => (
               <IndexTable.Row id={item.id} key={item.id} position={index}>
                 <IndexTable.Cell>
-                  {new Date(item.createdAt).toLocaleString()} ({item.ageHours}h)
+                  {formatDateTime(item.createdAt)} ({item.ageHours}h)
                 </IndexTable.Cell>
                 <IndexTable.Cell>{item.email ?? "—"}</IndexTable.Cell>
                 <IndexTable.Cell>{item.itemsLabel}</IndexTable.Cell>

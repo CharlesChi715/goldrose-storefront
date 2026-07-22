@@ -1,6 +1,7 @@
 /**
  * ROLE OF THIS FILE
- * Auth middleware (§9.2). Matcher covers ONLY /admin and /api/admin —
+ * Auth proxy (Next 16 name for middleware, §9.2). Matcher covers ONLY
+ * /admin and /api/admin —
  * storefront routes stay static, and the payment webhook + beacon routes
  * stay open (signature verification is their auth).
  *
@@ -17,7 +18,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const LOGIN_PATH = "/admin/login";
 const SESSION_COOKIE = "admin_session";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // The login screen itself is the one unauthenticated admin page.

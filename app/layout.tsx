@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import { siteBaseUrl } from "@/lib/admin/settings";
 import { Beacon } from "@/components/Beacon";
 
 // Exporting `metadata` is the App Router way to set <title>, description,
@@ -14,7 +15,9 @@ import { Beacon } from "@/components/Beacon";
 // as "Checkout | GoldRose" etc.
 // metadataBase: never fill anything in, even after buying a real domain. Vercel maintains a built-in variable (VERCEL_PROJECT_PRODUCTION_URL) that always holds your site's current production address. Today that's goldrose-storefront.vercel.app; the moment you connect a custom domain in Vercel's dashboard, that variable becomes the custom domain automatically
 export const metadata: Metadata = {
-  // metadataBase: new URL("https://goldrose.example"),
+  // Resolves OG/twitter image URLs; follows NEXT_PUBLIC_SITE_URL, then
+  // Vercel's production-domain variable, then localhost.
+  metadataBase: new URL(siteBaseUrl()),
   title: {
     default: "GoldRose | 24K Gold Dipped Rose Gifts",
     template: "%s | GoldRose",
@@ -52,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body>
         {children}
         {/* First-party visitor beacon (§7.12) — renders nothing, skips /admin */}

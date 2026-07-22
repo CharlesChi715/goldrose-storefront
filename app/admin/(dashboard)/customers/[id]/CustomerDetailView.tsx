@@ -25,6 +25,7 @@ import {
 import { formatMoney } from "@/lib/money";
 import type { Address, CustomerRow } from "@/lib/supabase/types.ts";
 import { useAdminT } from "../../../PolarisShell";
+import { formatDateTime } from "@/lib/dates";
 import {
   addCustomerCommentAction,
   saveCustomerNoteAction,
@@ -116,7 +117,7 @@ export function CustomerDetailView({
                         {lastOrder.name}
                       </PolarisLink>
                       <Text as="span" tone="subdued" variant="bodySm">
-                        {new Date(lastOrder.placedAt).toLocaleString()}
+                        {formatDateTime(lastOrder.placedAt)}
                       </Text>
                     </BlockStack>
                     <Text as="span" fontWeight="semibold" numeric>
@@ -188,7 +189,7 @@ export function CustomerDetailView({
                         {event.message}
                       </Text>
                       <Text as="span" tone="subdued" variant="bodySm">
-                        {new Date(event.created_at).toLocaleString()}
+                        {formatDateTime(event.created_at)}
                         {event.created_by ? ` · ${event.created_by}` : ""}
                       </Text>
                     </BlockStack>

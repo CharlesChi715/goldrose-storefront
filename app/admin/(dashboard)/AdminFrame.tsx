@@ -271,10 +271,6 @@ export function AdminFrame({
       navigation={navigation}
       showMobileNavigation={mobileNavOpen}
       onNavigationDismiss={() => setMobileNavOpen(false)}
-      logo={{
-        topBarSource: undefined,
-        accessibilityLabel: "GoldRose",
-      }}
     >
       <Box paddingBlockEnd="200" paddingInlineStart="400" paddingInlineEnd="400" paddingBlockStart="200">
         <Banner tone={bannerTone}>{bannerText}</Banner>

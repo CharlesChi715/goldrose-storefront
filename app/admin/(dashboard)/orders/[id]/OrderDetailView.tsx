@@ -45,6 +45,7 @@ import {
   saveOrderTagsAction,
 } from "../actions";
 import { markDraftPaidAction } from "../drafts/actions";
+import { formatDateTime } from "@/lib/dates";
 
 type CustomerSummary = {
   id: string;
@@ -163,7 +164,7 @@ export function OrderDetailView({
     <Page
       title={order.name}
       backAction={{ url: "/admin/orders" }}
-      subtitle={new Date(order.placed_at).toLocaleString()}
+      subtitle={formatDateTime(order.placed_at)}
       primaryAction={
         isPendingDraft
           ? {
@@ -396,7 +397,7 @@ export function OrderDetailView({
                           {event.message}
                         </Text>
                         <Text as="span" tone="subdued" variant="bodySm">
-                          {new Date(event.created_at).toLocaleString()}
+                          {formatDateTime(event.created_at)}
                           {event.created_by ? ` · ${event.created_by}` : ""}
                         </Text>
                       </BlockStack>

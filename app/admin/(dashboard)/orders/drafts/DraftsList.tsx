@@ -10,6 +10,7 @@ import { Badge, Card, IndexTable, Page, Text } from "@shopify/polaris";
 import { formatMoney } from "@/lib/money";
 import { interpolate } from "@/lib/admin/i18n";
 import { useAdminT } from "../../../PolarisShell";
+import { formatDate } from "@/lib/dates";
 
 export type DraftListItem = {
   id: string;
@@ -65,7 +66,7 @@ export function DraftsList({ items }: { items: DraftListItem[] }) {
                 </Text>
               </IndexTable.Cell>
               <IndexTable.Cell>
-                {new Date(item.placedAt).toLocaleDateString()}
+                {formatDate(item.placedAt)}
               </IndexTable.Cell>
               <IndexTable.Cell>{item.customerLabel}</IndexTable.Cell>
               <IndexTable.Cell>

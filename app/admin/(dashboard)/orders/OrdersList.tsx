@@ -23,6 +23,7 @@ import { formatMoney } from "@/lib/money";
 import { interpolate } from "@/lib/admin/i18n";
 import { useAdminT } from "../../PolarisShell";
 import { archiveOrdersAction } from "./actions";
+import { formatShortDateTime } from "@/lib/dates";
 
 export type OrderListItem = {
   id: string;
@@ -147,12 +148,7 @@ export function OrdersList({ items }: { items: OrderListItem[] }) {
                 </Text>
               </IndexTable.Cell>
               <IndexTable.Cell>
-                {new Date(item.placedAt).toLocaleString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
+                {formatShortDateTime(item.placedAt)}
               </IndexTable.Cell>
               <IndexTable.Cell>{item.customerLabel}</IndexTable.Cell>
               <IndexTable.Cell>

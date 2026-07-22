@@ -25,6 +25,7 @@ import {
 import { INVENTORY_REASONS, type InventoryReason } from "@/lib/supabase/types.ts";
 import { useAdminT } from "../../../PolarisShell";
 import { adjustInventoryAction, movementsAction, type MovementView } from "../actions";
+import { formatDateTime } from "@/lib/dates";
 
 export type InventoryItem = {
   variantId: string;
@@ -223,7 +224,7 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
                       {t(`reason.${movement.reason as InventoryReason}`)}
                     </Text>
                     <Text as="span" tone="subdued" variant="bodySm">
-                      {new Date(movement.created_at).toLocaleString()}
+                      {formatDateTime(movement.created_at)}
                       {movement.created_by ? ` · ${movement.created_by}` : ""}
                       {movement.note ? ` · ${movement.note}` : ""}
                     </Text>
