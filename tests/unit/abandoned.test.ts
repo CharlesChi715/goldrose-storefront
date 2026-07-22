@@ -45,9 +45,14 @@ before(async () => {
 
 test("only open checkouts older than 1 hour are abandoned", async () => {
   const abandoned = await listAbandonedCheckouts();
-  assert.equal(abandoned.length, 1);
-  assert.equal(abandoned[0].checkout.id, "old-open");
-  assert.equal(abandoned[0].itemCount, 2);
-  assert.match(abandoned[0].itemsLabel, /2 × GoldRose Signature 24K Gold Rose/);
-  assert.ok(abandoned[0].ageHours >= 2);
+  const ids = abandoned.map((entry) => entry.checkout.id);
+  // Our aged open checkout qualifies; fresh/completed ones never do. (The
+  // seed also ships one demo abandoned checkout — filtered by id here.)
+  assert.ok(ids.includes("old-open"));
+  assert.ok(!ids.includes("fresh-open"));
+  assert.ok(!ids.includes("old-completed"));
+  const oldOpen = abandoned.find((entry) => entry.checkout.id === "old-open")!;
+  assert.equal(oldOpen.itemCount, 2);
+  assert.match(oldOpen.itemsLabel, /2 × GoldRose Signature 24K Gold Rose/);
+  assert.ok(oldOpen.ageHours >= 2);
 });

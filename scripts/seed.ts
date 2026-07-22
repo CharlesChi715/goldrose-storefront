@@ -92,7 +92,8 @@ async function seedHosted(): Promise<void> {
     return;
   }
 
-  const tables = buildSeedTables(new Date().toISOString());
+  // Real store: no demo data (that exists for the testing phase only).
+  const tables = buildSeedTables(new Date().toISOString(), { includeDemo: false });
   // FK-safe insert order; admin_users deliberately skipped for hosted (see header).
   await store.insert("products", tables.products);
   await store.insert("product_images", tables.product_images);

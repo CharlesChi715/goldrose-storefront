@@ -40,7 +40,7 @@ export function buildFreshDb(now = new Date().toISOString()): DbFile {
   return {
     seeded_at: now,
     next_order_number: 1001,
-    tables: buildSeedTables(now),
+    tables: buildSeedTables(now, { includeLocalAdmin: true }),
   };
 }
 

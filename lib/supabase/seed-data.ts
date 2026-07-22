@@ -333,15 +333,457 @@ export const SEED_SETTINGS: SettingsShape = {
   },
 };
 
+/* ----------------------------------------------------------------------------
+ * DEMO DATA (testing phase, owner request 2026-07-23): sample orders in every
+ * state, customers, a discount, an abandoned checkout, and visitor sessions —
+ * so the admin demonstrates end to end on a fresh seed (e.g. the live site
+ * before Supabase activation). Order numbers 901–905 sit BELOW the real
+ * sequence (#1001+), so demo rows can never collide with real orders. Hosted
+ * activation seeds WITHOUT demo data.
+ * ------------------------------------------------------------------------- */
+
+const V_SIG = "0a2b1a10-4b7e-4d7a-9d24-000000000101"; // Signature / Gift box
+const V_BOX = "0a2b1a10-4b7e-4d7a-9d24-000000000201"; // Boxed / Valentine card
+const V_BND = "0a2b1a10-4b7e-4d7a-9d24-000000000301"; // Bundle / Gift message
+
+function demoId(tail: string): string {
+  return `0a2b1a10-4b7e-4d7a-9d24-00000000d${tail}`;
+}
+
+function buildDemoRows(now: string): Pick<
+  { [T in keyof DbTables]: DbTables[T][] },
+  | "customers"
+  | "customer_events"
+  | "orders"
+  | "order_lines"
+  | "order_events"
+  | "checkouts"
+  | "discounts"
+  | "page_views"
+> {
+  const ago = (hours: number) =>
+    new Date(new Date(now).getTime() - hours * 60 * 60 * 1000).toISOString();
+
+  const emily = {
+    id: demoId("c01"),
+    email: "emily.chen@example.com",
+    first_name: "Emily",
+    last_name: "Chen",
+    phone: "+1 212 555 0117",
+    default_address: {
+      name: "Emily Chen",
+      address1: "150 W 25th St",
+      city: "New York",
+      state: "NY",
+      postal_code: "10001",
+      country: "US",
+    },
+    note: "Repeat gift buyer — prefers discreet packaging.",
+    tags: ["vip"],
+    created_at: ago(24 * 6),
+  };
+  const james = {
+    id: demoId("c02"),
+    email: "james.wilson@example.com",
+    first_name: "James",
+    last_name: "Wilson",
+    phone: null,
+    default_address: {
+      name: "James Wilson",
+      address1: "22 Portobello Road",
+      city: "London",
+      state: "",
+      postal_code: "W11 3DH",
+      country: "GB",
+    },
+    note: "",
+    tags: [],
+    created_at: ago(24 * 3),
+  };
+  const mia = {
+    id: demoId("c03"),
+    email: "mia.tanaka@example.com",
+    first_name: "Mia",
+    last_name: "Tanaka",
+    phone: null,
+    default_address: {
+      name: "Mia Tanaka",
+      address1: "2-11-3 Meguro",
+      city: "Tokyo",
+      state: "",
+      postal_code: "153-0063",
+      country: "JP",
+    },
+    note: "",
+    tags: [],
+    created_at: ago(24 * 2),
+  };
+
+  type OrderSeed = DbTables["orders"];
+  const orders: OrderSeed[] = [
+    {
+      // Fulfilled, discount applied, free US shipping.
+      id: demoId("o01"),
+      number: 901,
+      name: "#901",
+      source: "mock",
+      customer_id: emily.id,
+      payment_provider: "mock",
+      provider_order_id: null,
+      provider_capture_id: null,
+      email: emily.email,
+      phone: emily.phone,
+      shipping_address: emily.default_address,
+      billing_address: emily.default_address,
+      subtotal_cents: 11498, // Signature 49.99 + Boxed 64.99
+      discount_code: "GOLD10",
+      discount_cents: 1150,
+      shipping_cents: 0,
+      shipping_free: true,
+      tax_cents: 0,
+      total_cents: 10348,
+      currency: "USD",
+      financial_status: "paid",
+      refunded_cents: 0,
+      fulfillment_status: "fulfilled",
+      tracking_number: "DEMO-1Z999AA10123456784",
+      tracking_url: "https://example.com/track/DEMO-1Z999AA10123456784",
+      shipped_at: ago(24 * 5),
+      cancelled_at: null,
+      cancel_reason: null,
+      visitor_id: "demo-visitor-emily",
+      note: "Anniversary gift — please include a blank card.",
+      tags: ["demo"],
+      archived_at: null,
+      placed_at: ago(24 * 6),
+      raw: null,
+    },
+    {
+      // Paid, awaiting fulfillment, international (Rest of world rate).
+      id: demoId("o02"),
+      number: 902,
+      name: "#902",
+      source: "mock",
+      customer_id: james.id,
+      payment_provider: "mock",
+      provider_order_id: null,
+      provider_capture_id: null,
+      email: james.email,
+      phone: null,
+      shipping_address: james.default_address,
+      billing_address: james.default_address,
+      subtotal_cents: 7999,
+      discount_code: null,
+      discount_cents: 0,
+      shipping_cents: 1995,
+      shipping_free: false,
+      tax_cents: 0,
+      total_cents: 9994,
+      currency: "USD",
+      financial_status: "paid",
+      refunded_cents: 0,
+      fulfillment_status: "unfulfilled",
+      tracking_number: null,
+      tracking_url: null,
+      shipped_at: null,
+      cancelled_at: null,
+      cancel_reason: null,
+      visitor_id: "demo-visitor-james",
+      note: "Gift wrap please — it's our anniversary!",
+      tags: ["demo"],
+      archived_at: null,
+      placed_at: ago(24 * 3),
+      raw: null,
+    },
+    {
+      // Fulfilled, then partially refunded.
+      id: demoId("o03"),
+      number: 903,
+      name: "#903",
+      source: "mock",
+      customer_id: mia.id,
+      payment_provider: "mock",
+      provider_order_id: null,
+      provider_capture_id: null,
+      email: mia.email,
+      phone: null,
+      shipping_address: mia.default_address,
+      billing_address: mia.default_address,
+      subtotal_cents: 12998, // Boxed ×2
+      discount_code: null,
+      discount_cents: 0,
+      shipping_cents: 1995,
+      shipping_free: false,
+      tax_cents: 0,
+      total_cents: 14993,
+      currency: "USD",
+      financial_status: "partially_refunded",
+      refunded_cents: 2000,
+      fulfillment_status: "fulfilled",
+      tracking_number: "DEMO-RR123456785JP",
+      tracking_url: null,
+      shipped_at: ago(24),
+      cancelled_at: null,
+      cancel_reason: null,
+      visitor_id: null,
+      note: "",
+      tags: ["demo"],
+      archived_at: null,
+      placed_at: ago(24 * 2),
+      raw: null,
+    },
+    {
+      // Cancelled + fully refunded.
+      id: demoId("o04"),
+      number: 904,
+      name: "#904",
+      source: "mock",
+      customer_id: emily.id,
+      payment_provider: "mock",
+      provider_order_id: null,
+      provider_capture_id: null,
+      email: emily.email,
+      phone: emily.phone,
+      shipping_address: emily.default_address,
+      billing_address: emily.default_address,
+      subtotal_cents: 4999,
+      discount_code: null,
+      discount_cents: 0,
+      shipping_cents: 595,
+      shipping_free: false,
+      tax_cents: 0,
+      total_cents: 5594,
+      currency: "USD",
+      financial_status: "refunded",
+      refunded_cents: 5594,
+      fulfillment_status: "unfulfilled",
+      tracking_number: null,
+      tracking_url: null,
+      shipped_at: null,
+      cancelled_at: ago(20),
+      cancel_reason: "Customer changed their mind",
+      visitor_id: "demo-visitor-emily",
+      note: "",
+      tags: ["demo"],
+      archived_at: null,
+      placed_at: ago(22),
+      raw: null,
+    },
+    {
+      // Pending draft (shows under Orders → Drafts, "Mark as paid" works).
+      id: demoId("o05"),
+      number: 905,
+      name: "#905",
+      source: "draft",
+      customer_id: james.id,
+      payment_provider: "mock",
+      provider_order_id: null,
+      provider_capture_id: null,
+      email: james.email,
+      phone: null,
+      shipping_address: null,
+      billing_address: null,
+      subtotal_cents: 7999,
+      discount_code: null,
+      discount_cents: 0,
+      shipping_cents: 0,
+      shipping_free: false,
+      tax_cents: 0,
+      total_cents: 7999,
+      currency: "USD",
+      financial_status: "pending",
+      refunded_cents: 0,
+      fulfillment_status: "unfulfilled",
+      tracking_number: null,
+      tracking_url: null,
+      shipped_at: null,
+      cancelled_at: null,
+      cancel_reason: null,
+      visitor_id: null,
+      note: "Phone order — awaiting bank transfer.",
+      tags: ["demo"],
+      archived_at: null,
+      placed_at: ago(4),
+      raw: null,
+    },
+  ];
+
+  const line = (
+    tail: string,
+    orderId: string,
+    variantId: string,
+    productId: string,
+    sku: string,
+    name: string,
+    option: string,
+    quantity: number,
+    unit: number,
+  ): DbTables["order_lines"] => ({
+    id: demoId(tail),
+    order_id: orderId,
+    variant_id: variantId,
+    product_id: productId,
+    sku,
+    name,
+    option,
+    quantity,
+    unit_amount_cents: unit,
+    line_total_cents: unit * quantity,
+  });
+
+  const event = (
+    tail: string,
+    orderId: string,
+    kind: "system" | "comment",
+    message: string,
+    createdAt: string,
+    createdBy: string | null = null,
+  ): DbTables["order_events"] => ({
+    id: demoId(tail),
+    order_id: orderId,
+    kind,
+    message,
+    created_by: createdBy,
+    created_at: createdAt,
+  });
+
+  const view = (
+    tail: string,
+    visitorId: string,
+    sessionId: string,
+    path: string,
+    createdAt: string,
+    referrer: string | null,
+    utm: Record<string, string> | null,
+    country: string,
+  ): DbTables["page_views"] => ({
+    id: demoId(tail),
+    visitor_id: visitorId,
+    session_id: sessionId,
+    path,
+    referrer,
+    utm,
+    country,
+    created_at: createdAt,
+  });
+
+  return {
+    customers: [emily, james, mia],
+    customer_events: [
+      { id: demoId("e01"), customer_id: emily.id, kind: "system", message: "Customer created", created_by: null, created_at: ago(24 * 6) },
+      { id: demoId("e02"), customer_id: emily.id, kind: "system", message: "Placed order #901", created_by: null, created_at: ago(24 * 6) },
+      { id: demoId("e03"), customer_id: emily.id, kind: "system", message: "Placed order #904", created_by: null, created_at: ago(22) },
+      { id: demoId("e04"), customer_id: emily.id, kind: "comment", message: "Asked about engraving options for next order.", created_by: LOCAL_OWNER.email, created_at: ago(24 * 4) },
+      { id: demoId("e05"), customer_id: james.id, kind: "system", message: "Customer created", created_by: null, created_at: ago(24 * 3) },
+      { id: demoId("e06"), customer_id: james.id, kind: "system", message: "Placed order #902", created_by: null, created_at: ago(24 * 3) },
+      { id: demoId("e07"), customer_id: mia.id, kind: "system", message: "Customer created", created_by: null, created_at: ago(24 * 2) },
+      { id: demoId("e08"), customer_id: mia.id, kind: "system", message: "Placed order #903", created_by: null, created_at: ago(24 * 2) },
+    ],
+    orders,
+    order_lines: [
+      line("l01", demoId("o01"), V_SIG, "signature-gold-rose", "GR-SIG-001-1", "GoldRose Signature 24K Gold Rose", "Gift box included", 1, 4999),
+      line("l02", demoId("o01"), V_BOX, "boxed-keepsake-rose", "GR-BOX-002-1", "GoldRose Boxed Keepsake Rose", "Valentine card", 1, 6499),
+      line("l03", demoId("o02"), V_BND, "premium-gift-bundle", "GR-BND-003-1", "GoldRose Premium Gift Bundle", "Gift message", 1, 7999),
+      line("l04", demoId("o03"), V_BOX, "boxed-keepsake-rose", "GR-BOX-002-1", "GoldRose Boxed Keepsake Rose", "Valentine card", 2, 6499),
+      line("l05", demoId("o04"), V_SIG, "signature-gold-rose", "GR-SIG-001-1", "GoldRose Signature 24K Gold Rose", "Gift box included", 1, 4999),
+      line("l06", demoId("o05"), V_BND, "premium-gift-bundle", "GR-BND-003-1", "GoldRose Premium Gift Bundle", "Gift message", 1, 7999),
+    ],
+    order_events: [
+      event("v01", demoId("o01"), "system", "Order placed (mock)", ago(24 * 6)),
+      event("v02", demoId("o01"), "system", "Payment of $103.48 captured via mock", ago(24 * 6)),
+      event("v03", demoId("o01"), "system", "Order fulfilled — tracking DEMO-1Z999AA10123456784", ago(24 * 5)),
+      event("v04", demoId("o01"), "comment", "Included a handwritten thank-you note.", ago(24 * 5), LOCAL_OWNER.email),
+      event("v05", demoId("o02"), "system", "Order placed (mock)", ago(24 * 3)),
+      event("v06", demoId("o02"), "system", "Payment of $99.94 captured via mock", ago(24 * 3)),
+      event("v07", demoId("o03"), "system", "Order placed (mock)", ago(24 * 2)),
+      event("v08", demoId("o03"), "system", "Payment of $149.93 captured via mock", ago(24 * 2)),
+      event("v09", demoId("o03"), "system", "Order fulfilled — tracking DEMO-RR123456785JP", ago(24)),
+      event("v10", demoId("o03"), "system", "Refunded $20.00", ago(12), LOCAL_OWNER.email),
+      event("v11", demoId("o04"), "system", "Order placed (mock)", ago(22)),
+      event("v12", demoId("o04"), "system", "Payment of $55.94 captured via mock", ago(22)),
+      event("v13", demoId("o04"), "system", "Order cancelled — Customer changed their mind, payment refunded, items restocked", ago(20), LOCAL_OWNER.email),
+      event("v14", demoId("o05"), "system", "Order placed (draft)", ago(4)),
+    ],
+    checkouts: [
+      {
+        // Abandoned: open and 2 h old → shows on Orders → Abandoned checkouts.
+        id: demoId("k01"),
+        cart: { lines: [{ variant_id: V_SIG, quantity: 1 }], country: "US" },
+        email: "sophie.brown@example.com",
+        discount_code: null,
+        subtotal_cents: 4999,
+        total_cents: 5594,
+        provider_order_id: null,
+        status: "open",
+        created_at: ago(2),
+        completed_at: null,
+      },
+      {
+        id: demoId("k02"),
+        cart: { lines: [{ variant_id: V_BND, quantity: 1 }], country: "GB", visitor_id: "demo-visitor-james" },
+        email: james.email,
+        discount_code: null,
+        subtotal_cents: 7999,
+        total_cents: 9994,
+        provider_order_id: null,
+        status: "completed",
+        created_at: ago(24 * 3),
+        completed_at: ago(24 * 3),
+      },
+    ],
+    discounts: [
+      {
+        id: demoId("d01"),
+        code: "GOLD10",
+        type: "percentage",
+        value: 10,
+        applies_to: null,
+        min_purchase_cents: null,
+        usage_limit: null,
+        once_per_customer: false,
+        used_count: 1,
+        starts_at: ago(24 * 30),
+        ends_at: null,
+        created_at: ago(24 * 30),
+      },
+    ],
+    page_views: [
+      view("p01", "demo-visitor-emily", "demo-session-e1", "/", ago(24 * 6 + 1), "https://www.google.com/", null, "US"),
+      view("p02", "demo-visitor-emily", "demo-session-e1", "/shop", ago(24 * 6 + 0.9), "https://www.google.com/", null, "US"),
+      view("p03", "demo-visitor-emily", "demo-session-e1", "/products/signature-24k-gold-rose", ago(24 * 6 + 0.8), null, null, "US"),
+      view("p04", "demo-visitor-emily", "demo-session-e1", "/checkout", ago(24 * 6 + 0.5), null, null, "US"),
+      view("p05", "demo-visitor-james", "demo-session-j1", "/shop", ago(24 * 3 + 1), null, { utm_source: "instagram", utm_campaign: "gifts" }, "GB"),
+      view("p06", "demo-visitor-james", "demo-session-j1", "/products/premium-gold-rose-gift-bundle", ago(24 * 3 + 0.8), null, { utm_source: "instagram", utm_campaign: "gifts" }, "GB"),
+      view("p07", "demo-visitor-james", "demo-session-j1", "/checkout", ago(24 * 3 + 0.4), null, null, "GB"),
+      view("p08", "demo-visitor-window", "demo-session-w1", "/", ago(5), null, null, "AU"),
+      view("p09", "demo-visitor-window", "demo-session-w1", "/shop", ago(4.9), null, null, "AU"),
+    ],
+  };
+}
+
 /**
  * Build a full set of seed tables. `includeLocalAdmin` seeds the dev owner
  * login row — local backend only; on hosted Supabase the admin_users row must
- * reference a real auth.users uid (activation checklist).
+ * reference a real auth.users uid (activation checklist). `includeDemo`
+ * (default true) adds the sample store above — hosted activation passes
+ * false so the real store starts clean.
  */
 export function buildSeedTables(
   now: string,
-  options: { includeLocalAdmin?: boolean } = {},
+  options: { includeLocalAdmin?: boolean; includeDemo?: boolean } = {},
 ): { [T in keyof DbTables]: DbTables[T][] } {
+  const demo = (options.includeDemo ?? true)
+    ? buildDemoRows(now)
+    : {
+        customers: [],
+        customer_events: [],
+        orders: [],
+        order_lines: [],
+        order_events: [],
+        checkouts: [],
+        discounts: [],
+        page_views: [],
+      };
   return {
     products: SEED_PRODUCTS.map(({ product }) => ({
       ...product,
@@ -358,14 +800,7 @@ export function buildSeedTables(
       variants.map((variant) => ({ ...variant, product_id: product.id })),
     ),
     inventory_movements: [],
-    customers: [],
-    customer_events: [],
-    orders: [],
-    order_lines: [],
-    order_events: [],
-    checkouts: [],
-    discounts: [],
-    page_views: [],
+    ...demo,
     site_content: [
       {
         key: "promo.slogan",

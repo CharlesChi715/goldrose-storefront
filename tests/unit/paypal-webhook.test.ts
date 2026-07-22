@@ -87,7 +87,8 @@ test("capture webhook repairs a missing order from the checkout row", async () =
   assert.equal(order.provider_capture_id, "3C679366HH908993F");
 
   const checkouts = await getStore().all("checkouts");
-  assert.equal(checkouts[0].status, "completed");
+  const own = checkouts.find((row) => row.id === "11111111-1111-4111-8111-111111111111");
+  assert.equal(own?.status, "completed");
 });
 
 test("a replayed capture webhook never duplicates the order", async () => {
