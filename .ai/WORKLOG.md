@@ -1738,3 +1738,7 @@ unconfirmed business assumptions).
   per query across the Pacific); getAdminSession wrapped in React cache()
   so layout/page/actions share one auth round trip per request. (Also:
   auto-approve toggle was started and fully reverted on owner's nvm.)
+- Nickname change is now real (owner request): the forum popup updates the
+  ACCOUNT nickname (auth.updateUser user_metadata) on hosted — permanent,
+  visible on Team — and clears the old cookie override; local file mode
+  keeps the cookie fallback.

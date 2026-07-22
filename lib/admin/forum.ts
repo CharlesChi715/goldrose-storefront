@@ -47,6 +47,11 @@ export async function getForumIdentity(): Promise<string | null> {
   return null;
 }
 
+/** Drop the display-name override so the account nickname shows again. */
+export async function clearForumNickname(): Promise<void> {
+  (await cookies()).delete(FORUM_NICKNAME_COOKIE);
+}
+
 export async function setForumNickname(nickname: string): Promise<void> {
   (await cookies()).set(FORUM_NICKNAME_COOKIE, cleanNickname(nickname), {
     httpOnly: true,

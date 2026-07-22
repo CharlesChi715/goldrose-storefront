@@ -262,6 +262,26 @@ export async function signInWithPassword(
   return { ok: true };
 }
 
+/**
+ * Change the signed-in account's own nickname (user_metadata) — the forum
+ * identity (owner request 2026-07-22). Hosted only: the local file mode
+ * has no auth server, callers fall back to the display-name cookie there.
+ */
+export async function updateAccountNickname(nickname: string): Promise<boolean> {
+  if (!getSupabaseEnv().hosted) {
+    return false;
+  }
+  const supabase = await supabaseAuthClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return false;
+  }
+  const { error } = await supabase.auth.updateUser({ data: { nickname } });
+  return !error;
+}
+
 export async function signOut(): Promise<void> {
   const env = getSupabaseEnv();
   if (env.hosted) {

@@ -11,8 +11,13 @@
 import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/admin/auth";
-import { cleanNickname, getForumIdentity, setForumNickname } from "@/lib/admin/forum";
+import { requireAdmin, updateAccountNickname } from "@/lib/admin/auth";
+import {
+  cleanNickname,
+  clearForumNickname,
+  getForumIdentity,
+  setForumNickname,
+} from "@/lib/admin/forum";
 import { getStore } from "@/lib/supabase/store.ts";
 
 const id = z.string().min(1).max(64);
@@ -107,14 +112,23 @@ export async function updatePostAction(postId: string, body: string): Promise<vo
   );
 }
 
-/** Change the forum nickname in place (the popup on /admin/forum). */
+/**
+ * Change your nickname (the popup on /admin/forum). On hosted Supabase this
+ * updates the ACCOUNT nickname (user_metadata) — permanent, shows on the
+ * Team page too — and drops any old display-name override so the new value
+ * is what renders. Local mode has no auth server → cookie fallback.
+ */
 export async function changeNicknameAction(nickname: string): Promise<void> {
   await requireAdmin();
   const clean = cleanNickname(nickname);
   if (!clean) {
     return;
   }
-  await setForumNickname(clean);
+  if (await updateAccountNickname(clean)) {
+    await clearForumNickname();
+  } else {
+    await setForumNickname(clean);
+  }
 }
 
 export async function deleteThreadAction(threadId: string): Promise<void> {
