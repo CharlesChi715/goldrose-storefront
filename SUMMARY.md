@@ -36,6 +36,7 @@ goldrose-storefront/
 - **Tester tooling**: forum `/admin/forum` (threads/replies, attachments ≤5×5 MB, edit-own, nickname popup); guide `/admin/guide` renders [docs/USER-GUIDE.md](docs/USER-GUIDE.md) (owner-editable, EN+中文 columns). Visitor ideas via storefront chat bubble → `feedback` table → Content → Ideas.
 - **Live deploy** <https://goldrose-storefront.vercel.app> — still ephemeral (demo mode) until owner sets the 3 Supabase env vars in Vercel + redeploys, and in Supabase Auth: confirm-email OFF + redirect URLs (live + localhost `/admin/reset-password`, `/auth/callback`).
 - `npm run seed -- --reset` restores a pristine local db.
+- **"read:" comments (2026-07-23)**: `// read: "…"` one-liners after hard-to-read TypeScript syntax — near-literal wording keeping the code's own words (Charles's convention, see agent memory). Pilot: `lib/supabase/types.ts`; extend only to files Charles names.
 
 ## Key facts / constraints
 

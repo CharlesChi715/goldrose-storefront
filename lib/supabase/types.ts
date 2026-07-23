@@ -76,6 +76,7 @@ export const INVENTORY_REASONS = [
 ] as const;
 
 export type InventoryReason = (typeof INVENTORY_REASONS)[number];
+// read: "InventoryReason = typeof INVENTORY_REASONS, indexed at any number"
 
 export type InventoryMovementRow = {
   id: string;
@@ -235,6 +236,7 @@ export type PageViewRow = {
   path: string;
   referrer: string | null;
   utm: Record<string, string> | null;
+  // read: "utm: a Record from string to string, or null"
   country: string | null;
   created_at: string;
 };
@@ -347,6 +349,7 @@ export const TABLE_NAMES: TableName[] = [
 
 /** Equality filter: every provided key must match exactly. */
 export type Match<T extends TableName> = Partial<DbTables[T]>;
+// read: "Match of T, where T extends TableName, = a Partial of DbTables at T"
 
 /**
  * The primitive persistence interface both backends implement. Anything
@@ -358,16 +361,21 @@ export interface TableStore {
   /** Which backend is live — "supabase" (hosted) or "local" (file adapter). */
   backend: "supabase" | "local";
   all<T extends TableName>(table: T): Promise<DbTables[T][]>;
+  // read: "all, for T extends TableName: takes (table: T), returns a Promise of an array of DbTables[T]"
   /** Rows matching an equality filter — pushed down to SQL in hosted mode,
    * so hot paths don't drag whole growing tables over the wire. */
   where<T extends TableName>(table: T, match: Match<T>): Promise<DbTables[T][]>;
+  // read: "where: takes (table: T, match: Match of T), returns a Promise of an array of DbTables[T]"
   insert<T extends TableName>(table: T, rows: DbTables[T][]): Promise<void>;
+  // read: "insert: takes (table: T, rows: an array of DbTables[T]), returns a Promise of void"
   update<T extends TableName>(
     table: T,
     match: Match<T>,
     patch: Partial<DbTables[T]>,
   ): Promise<number>;
+  // read: "update: takes (table: T, match: Match of T, patch: Partial of DbTables[T]), returns a Promise of number"
   remove<T extends TableName>(table: T, match: Match<T>): Promise<number>;
+  // read: "remove: takes (table: T, match: Match of T), returns a Promise of number"
   /** Atomic stock adjust + movement log (§7.3 adjust_inventory). */
   adjustInventory(input: {
     variantId: string;

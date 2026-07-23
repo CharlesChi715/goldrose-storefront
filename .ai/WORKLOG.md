@@ -1929,3 +1929,8 @@ docs: add first feature learning doc (trial)
 - This is a sample for Charles to review the format before more
   features are generated. SUMMARY.md and README.md left untouched
   pending approval of the format.
+
+## 2026-07-23 — "read:" comments pilot in types.ts (redone after accidental reset)
+- Added 8 `// read: "…"` one-liners in `lib/supabase/types.ts` after TypeScript lines that can't be read left-to-right (generics, `(typeof X)[number]`, `Record`, `Partial`).
+- Style per Charles: near-literal verbalization keeping the code's own words, minimal English glue; naturally-readable lines get no comment. Style rule saved to agent memory.
+- First application was lost to a working-tree reset; re-applied and committed this time.
