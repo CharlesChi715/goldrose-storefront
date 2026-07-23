@@ -24,6 +24,13 @@ function textOf(value: unknown): string {
     : "";
 }
 
+/**
+ * Shape a raw site_content row into a ContentSlot, deriving isDefault by
+ * comparing the current text against default_value's text.
+ *
+ * @param row - The site_content row to convert.
+ * @returns The slot with text, defaultText, isDefault, label, and help.
+ */
 function toSlot(row: SiteContentRow): ContentSlot {
   const text = textOf(row.value);
   const defaultText = textOf(row.default_value);
@@ -37,18 +44,36 @@ function toSlot(row: SiteContentRow): ContentSlot {
   };
 }
 
+/**
+ * Load every site_content row and return the slots sorted by key.
+ *
+ * @returns All content slots, ordered alphabetically by key.
+ */
 export async function listContentSlots(): Promise<ContentSlot[]> {
   const rows = await getStore().all("site_content");
   return rows.sort((a, b) => a.key.localeCompare(b.key)).map(toSlot);
 }
 
+/**
+ * Look up a single content slot by its key.
+ *
+ * @param key - The slot key, e.g. "promo.slogan".
+ * @returns The slot, or null when no row has that key.
+ */
 export async function getContentSlot(key: string): Promise<ContentSlot | null> {
   const rows = await getStore().all("site_content");
   const row = rows.find((entry) => entry.key === key);
   return row ? toSlot(row) : null;
 }
 
-/** Save a slot's text; creates policy-style slots on first save. */
+/**
+ * Save a slot's text to the store (DB write); creates policy-style slots on
+ * first save when no row exists yet.
+ *
+ * @param key - The slot key to write.
+ * @param text - The new owner-edited text.
+ * @param fallback - Label and help used only when the row is created fresh.
+ */
 export async function saveContentText(
   key: string,
   text: string,
@@ -74,7 +99,12 @@ export async function saveContentText(
   ]);
 }
 
-/** One-click "Reset to original" (§7.9): value returns to default_value. */
+/**
+ * One-click "Reset to original" (§7.9): overwrite the slot's value with its
+ * stored default_value (DB write). No-op when the key doesn't exist.
+ *
+ * @param key - The slot key to reset.
+ */
 export async function resetContent(key: string): Promise<void> {
   const store = getStore();
   const rows = await store.all("site_content");
@@ -88,7 +118,13 @@ export async function resetContent(key: string): Promise<void> {
   }
 }
 
-/** The promo-bar slogan slot driving the §11 PNG-vs-text rule. */
+/**
+ * Read the promo-bar slogan slot driving the §11 PNG-vs-text rule. Never
+ * throws — a missing slot or store error falls back to { text: "",
+ * isDefault: true }, which serves the original PNG crop.
+ *
+ * @returns The slogan text and whether it still equals the default.
+ */
 export async function getPromoSlogan(): Promise<{ text: string; isDefault: boolean }> {
   try {
     const slot = await getContentSlot("promo.slogan");

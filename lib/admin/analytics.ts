@@ -23,6 +23,7 @@ import type {
  * cache() collapses identical reads within a single request.
  */
 const cachedAllUntyped = cache((table: TableName) => getStore().all(table));
+/** Typed wrapper over the cached table reader — same promise, narrowed row type. */
 function cachedAll<T extends TableName>(table: T): Promise<DbTables[T][]> {
   return cachedAllUntyped(table) as Promise<DbTables[T][]>;
 }
@@ -31,6 +32,14 @@ export type RangeKey = "today" | "7d" | "30d" | "90d";
 
 export type DateRange = { start: Date; end: Date };
 
+/**
+ * Builds the date range for a preset key plus the equal-length previous
+ * period immediately before it (Shopify's compare-to-previous).
+ *
+ * @param key - "today" (since local midnight) or a trailing 7/30/90-day window.
+ * @param now - Range end; defaults to the current time (injectable for tests).
+ * @returns The `current` range and the same-length `previous` range before it.
+ */
 export function rangesFor(key: RangeKey, now = new Date()): {
   current: DateRange;
   previous: DateRange;
@@ -50,6 +59,7 @@ export function rangesFor(key: RangeKey, now = new Date()): {
   };
 }
 
+/** True when the ISO timestamp falls in the range (start inclusive, end exclusive). */
 function within(iso: string, range: DateRange): boolean {
   const time = new Date(iso).getTime();
   return time >= range.start.getTime() && time < range.end.getTime();
@@ -65,6 +75,7 @@ function salesOrders(orders: OrderRow[], range: DateRange): OrderRow[] {
   );
 }
 
+/** Sum of order totals minus refunds, in cents. */
 function netSales(orders: OrderRow[]): number {
   return orders.reduce((sum, order) => sum + order.total_cents - order.refunded_cents, 0);
 }
@@ -101,6 +112,15 @@ export type AnalyticsSummary = {
   };
 };
 
+/**
+ * Computes every §9.9 analytics number for one date range: sales metrics
+ * from orders, sessions/conversion/attribution from page_views, plus the
+ * live-visitor snapshot (activity in the last 5 minutes). Every headline
+ * metric is paired with the previous period's value.
+ *
+ * @param key - Date-range preset (today / 7d / 30d / 90d).
+ * @param now - Range end; defaults to the current time (injectable for tests).
+ */
 export async function analyticsSummary(
   key: RangeKey,
   now = new Date(),
@@ -333,6 +353,13 @@ export type HomeFeed = {
   abandonedLastDay: number;
 };
 
+/**
+ * The Home dashboard's "things to do" numbers: unfulfilled paid orders, the
+ * 5 lowest-stock tracked variants at or under the low_stock_threshold
+ * setting, and checkouts abandoned in the last day (open for 1–24 hours).
+ *
+ * @param now - Reference time; defaults to the current time.
+ */
 export async function homeFeed(now = new Date()): Promise<HomeFeed> {
   const [orders, variants, products, checkouts, settings] = await Promise.all([
     cachedAll("orders"),
@@ -380,6 +407,13 @@ export type SearchResults = {
   customers: Array<{ id: string; label: string; sublabel: string }>;
 };
 
+/**
+ * ⌘K global search: case-insensitive substring match over orders (name,
+ * number, email), products (title or variant SKU), and customers (name or
+ * email) — up to 5 hits per group.
+ *
+ * @param query - Raw search text; blank returns three empty lists.
+ */
 export async function searchAdmin(query: string): Promise<SearchResults> {
   const needle = query.trim().toLowerCase();
   if (!needle) {
@@ -442,6 +476,10 @@ export async function searchAdmin(query: string): Promise<SearchResults> {
 
 export type AdminAlert = { message: string; url: string };
 
+/**
+ * Notification-bell feed: the 5 newest system order events (prefixed with
+ * the order name) plus up to 3 low-stock warnings, capped at 8 alerts.
+ */
 export async function adminAlerts(): Promise<AdminAlert[]> {
   const [orders, events] = await Promise.all([
     cachedAll("orders"),

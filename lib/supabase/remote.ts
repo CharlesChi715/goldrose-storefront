@@ -147,6 +147,11 @@ class RemoteStore implements TableStore {
   }
 }
 
+/**
+ * Create the hosted-Supabase TableStore using the service-role key. Throws
+ * when the Supabase env vars are not configured — lib/supabase/store.ts only
+ * calls this in hosted mode, and caches the instance per process.
+ */
 export function createRemoteStore(): RemoteStore {
   return new RemoteStore();
 }

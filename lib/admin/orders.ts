@@ -41,6 +41,7 @@ export type OrderDetail = {
   sellerProtection: string | null;
 };
 
+/** Display name for an order's customer: customer name ▸ order email ▸ shipping name ▸ "—". */
 function customerLabel(order: OrderRow, customer: CustomerRow | undefined): string {
   if (customer && (customer.first_name || customer.last_name)) {
     return `${customer.first_name} ${customer.last_name}`.trim();
@@ -48,6 +49,10 @@ function customerLabel(order: OrderRow, customer: CustomerRow | undefined): stri
   return order.email ?? order.shipping_address?.name ?? "—";
 }
 
+/**
+ * All orders for the list screen, newest first (by order number), each with
+ * a customer display label and its total item count.
+ */
 export async function listOrders(): Promise<OrderListRow[]> {
   const store = getStore();
   const [orders, lines, customers] = await Promise.all([
@@ -75,6 +80,7 @@ export async function listOrders(): Promise<OrderListRow[]> {
     }));
 }
 
+/** Traffic-source label for a page view: utm_source ▸ referrer hostname ▸ "Direct" ("—" with no view). */
 function sourceLabel(view: PageViewRow | undefined): string {
   if (!view) {
     return "—";
@@ -93,7 +99,11 @@ function sourceLabel(view: PageViewRow | undefined): string {
   return "Direct";
 }
 
-/** Sessions-before-purchase + first/last traffic source (§9.4, from §7.12). */
+/**
+ * Sessions-before-purchase + first/last traffic source (§9.4, from §7.12).
+ *
+ * @param visitorId - The order's visitor id; null (or no recorded views) returns null.
+ */
 async function conversionFor(visitorId: string | null): Promise<ConversionSummary | null> {
   if (!visitorId) {
     return null;
@@ -113,6 +123,13 @@ async function conversionFor(visitorId: string | null): Promise<ConversionSummar
   };
 }
 
+/**
+ * Full order detail: lines, timeline events (newest first), the customer
+ * with their lifetime order count, the conversion summary, and the PayPal
+ * seller-protection status dug out of the raw capture payload.
+ *
+ * @param id - Order id; unknown ids return null.
+ */
 export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
   const store = getStore();
   const [orders, lines, events, customers] = await Promise.all([
@@ -147,6 +164,7 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
   };
 }
 
+/** Appends a "system" event to the order's timeline. */
 async function addSystemEvent(orderId: string, message: string, actor: string | null) {
   await getStore().insert("order_events", [
     {
@@ -160,6 +178,7 @@ async function addSystemEvent(orderId: string, message: string, actor: string | 
   ]);
 }
 
+/** The order by id; throws "Unknown order" when it doesn't exist. */
 async function mustGetOrder(id: string): Promise<OrderRow> {
   const order = (await getStore().all("orders")).find((row) => row.id === id);
   if (!order) {
@@ -168,7 +187,13 @@ async function mustGetOrder(id: string): Promise<OrderRow> {
   return order;
 }
 
-/** "Fulfill items" (§9.4): single fulfillment, tracking, shipping email. */
+/**
+ * "Fulfill items" (§9.4): single fulfillment, tracking, shipping email.
+ * Marks the whole order fulfilled, logs a timeline event, then sends the
+ * shipping confirmation. Throws when already fulfilled or cancelled.
+ *
+ * @param input - Order id, optional tracking number/URL, and the acting admin.
+ */
 export async function fulfillOrder(input: {
   id: string;
   trackingNumber: string;
@@ -203,6 +228,7 @@ export async function fulfillOrder(input: {
   await sendShippingConfirmationEmail(updated, lines);
 }
 
+/** Returns every line's quantity to stock as 'return_restock' movements (refund/cancel flows). */
 async function restockLines(orderId: string, orderName: string, actor: string) {
   const lines = (await getStore().all("order_lines")).filter(
     (line) => line.order_id === orderId,
@@ -224,6 +250,9 @@ async function restockLines(orderId: string, orderName: string, actor: string) {
  * Refund (§9.4): custom amount + optional restock. Real PayPal orders hit
  * the provider refund API via provider_capture_id; mock orders record the
  * refund locally only. The §10.5 webhook independently confirms status.
+ * Throws when the amount is out of range or the order can't be refunded.
+ *
+ * @param input - Order id, refund amount in cents, restock flag, and the acting admin.
  */
 export async function refundOrder(input: {
   id: string;
@@ -267,7 +296,13 @@ export async function refundOrder(input: {
   );
 }
 
-/** Cancel (§9.4): unfulfilled only; optional full refund of the remainder + restock. */
+/**
+ * Cancel (§9.4): unfulfilled only; optional full refund of the remainder +
+ * restock. Real PayPal payments refund through the provider API; a timeline
+ * event records what was done. Throws when fulfilled or already cancelled.
+ *
+ * @param input - Order id, optional reason, refund/restock flags, and the acting admin.
+ */
 export async function cancelOrder(input: {
   id: string;
   reason: string;
@@ -311,6 +346,12 @@ export async function cancelOrder(input: {
   );
 }
 
+/**
+ * Archives or unarchives orders by stamping/clearing archived_at.
+ *
+ * @param ids - Order ids to update.
+ * @param archived - True to archive, false to unarchive.
+ */
 export async function setOrdersArchived(ids: string[], archived: boolean): Promise<void> {
   const store = getStore();
   const now = new Date().toISOString();
@@ -319,6 +360,13 @@ export async function setOrdersArchived(ids: string[], archived: boolean): Promi
   }
 }
 
+/**
+ * Adds an admin comment to the order's timeline.
+ *
+ * @param id - Order id.
+ * @param message - Comment text.
+ * @param actor - Admin name shown on the event.
+ */
 export async function addOrderComment(id: string, message: string, actor: string): Promise<void> {
   await getStore().insert("order_events", [
     {
@@ -332,10 +380,22 @@ export async function addOrderComment(id: string, message: string, actor: string
   ]);
 }
 
+/**
+ * Overwrites the order's admin note.
+ *
+ * @param id - Order id.
+ * @param note - New note text.
+ */
 export async function saveOrderNote(id: string, note: string): Promise<void> {
   await getStore().update("orders", { id }, { note });
 }
 
+/**
+ * Replaces the order's tag list.
+ *
+ * @param id - Order id.
+ * @param tags - Full new tag list.
+ */
 export async function saveOrderTags(id: string, tags: string[]): Promise<void> {
   await getStore().update("orders", { id }, { tags });
 }
@@ -349,6 +409,11 @@ export type CustomerListRow = {
   location: string;
 };
 
+/**
+ * All customers, newest first, each with order count, lifetime spend
+ * (derived on the fly, refunds excluded — §7.7), and a "City, Country"
+ * label from the default address.
+ */
 export async function listCustomers(): Promise<CustomerListRow[]> {
   const store = getStore();
   const [customers, orders] = await Promise.all([
@@ -388,6 +453,12 @@ export type CustomerDetail = {
   totalSpentCents: number;
 };
 
+/**
+ * One customer with their orders (newest first), timeline events, and
+ * derived lifetime spend (refunds excluded).
+ *
+ * @param id - Customer id; unknown ids return null.
+ */
 export async function getCustomerDetail(id: string): Promise<CustomerDetail | null> {
   const store = getStore();
   const [customers, orders, events] = await Promise.all([
@@ -415,6 +486,13 @@ export async function getCustomerDetail(id: string): Promise<CustomerDetail | nu
   };
 }
 
+/**
+ * Adds an admin comment to the customer's timeline.
+ *
+ * @param id - Customer id.
+ * @param message - Comment text.
+ * @param actor - Admin name shown on the event.
+ */
 export async function addCustomerComment(
   id: string,
   message: string,
@@ -432,10 +510,22 @@ export async function addCustomerComment(
   ]);
 }
 
+/**
+ * Overwrites the customer's admin note.
+ *
+ * @param id - Customer id.
+ * @param note - New note text.
+ */
 export async function saveCustomerNote(id: string, note: string): Promise<void> {
   await getStore().update("customers", { id }, { note });
 }
 
+/**
+ * Replaces the customer's tag list.
+ *
+ * @param id - Customer id.
+ * @param tags - Full new tag list.
+ */
 export async function saveCustomerTags(id: string, tags: string[]): Promise<void> {
   await getStore().update("customers", { id }, { tags });
 }

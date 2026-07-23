@@ -16,6 +16,13 @@ type NotificationToggles = {
   new_order_alert: boolean;
 };
 
+/**
+ * Read the notification toggles, store name, and owner contact email from
+ * the settings table, defaulting every toggle to on and the store name to
+ * "GoldRose" when unset.
+ *
+ * @returns The toggles plus storeName and ownerEmail.
+ */
 async function getEmailSettings(): Promise<{
   toggles: NotificationToggles;
   storeName: string;
@@ -43,6 +50,15 @@ function money(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
+/**
+ * Send one plain-text email via Resend's REST API, or log it to the console
+ * when RESEND_API_KEY is unset (the §0.2 dev fallback). Never throws — send
+ * failures are logged so an email problem can't break an order.
+ *
+ * @param to - Recipient email address.
+ * @param subject - Email subject line.
+ * @param text - Plain-text body.
+ */
 async function deliver(to: string, subject: string, text: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
@@ -72,6 +88,14 @@ async function deliver(to: string, subject: string, text: string): Promise<void>
   }
 }
 
+/**
+ * Build the plain-text order summary shared by every order email: one line
+ * per item, then subtotal, discount (if any), shipping, tax, and total.
+ *
+ * @param order - The order row with the money totals.
+ * @param lines - The order's snapshot line items.
+ * @returns The multi-line summary text.
+ */
 function orderSummaryText(order: OrderRow, lines: OrderLineRow[]): string {
   const rows = lines
     .map(
@@ -85,7 +109,14 @@ function orderSummaryText(order: OrderRow, lines: OrderLineRow[]): string {
   return `Order ${order.name}\n\n${rows}\n\nSubtotal: ${money(order.subtotal_cents)}${discount}\nShipping: ${order.shipping_free ? "Free" : money(order.shipping_cents)}\nTax: ${money(order.tax_cents)}\nTotal: ${money(order.total_cents)} ${order.currency}`;
 }
 
-/** Buyer confirmation + owner alert, right after an order lands (§10.1). */
+/**
+ * Send the buyer's order confirmation and the owner's new-order alert,
+ * right after an order lands (§10.1). Each email is skipped when its
+ * settings toggle is off or the recipient address is missing.
+ *
+ * @param order - The freshly created order row.
+ * @param lines - The order's snapshot line items.
+ */
 export async function sendOrderPlacedEmails(
   order: OrderRow,
   lines: OrderLineRow[],
@@ -109,7 +140,14 @@ export async function sendOrderPlacedEmails(
   }
 }
 
-/** Shipping confirmation with tracking, sent by the fulfill flow (§9.4). */
+/**
+ * Send the buyer's shipping confirmation with tracking number and link when
+ * present, triggered by the fulfill flow (§9.4). Skipped when the toggle is
+ * off or the order has no email.
+ *
+ * @param order - The order row, including any tracking fields.
+ * @param lines - The order's snapshot line items.
+ */
 export async function sendShippingConfirmationEmail(
   order: OrderRow,
   lines: OrderLineRow[],

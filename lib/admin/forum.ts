@@ -15,6 +15,11 @@ export const FORUM_NICKNAME_COOKIE = "forum_nickname";
 export const NICKNAME_MAX = 40;
 const NICKNAME_DAYS = 90;
 
+/**
+ * Normalizes a raw nickname value: stringified, trimmed, capped at 40 chars.
+ *
+ * @param raw - Any user-supplied value; null/undefined become "".
+ */
 export function cleanNickname(raw: unknown): string {
   return String(raw ?? "").trim().slice(0, NICKNAME_MAX);
 }
@@ -52,6 +57,11 @@ export async function clearForumNickname(): Promise<void> {
   (await cookies()).delete(FORUM_NICKNAME_COOKIE);
 }
 
+/**
+ * Sets the forum display-name override cookie (httpOnly, 90 days).
+ *
+ * @param nickname - Display name; cleaned before storing.
+ */
 export async function setForumNickname(nickname: string): Promise<void> {
   (await cookies()).set(FORUM_NICKNAME_COOKIE, cleanNickname(nickname), {
     httpOnly: true,

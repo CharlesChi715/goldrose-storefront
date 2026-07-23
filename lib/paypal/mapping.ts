@@ -41,6 +41,14 @@ export type PayPalCaptureResponse = {
   }>;
 };
 
+/**
+ * Convert a PayPal name + address pair to our Address shape, preferring
+ * full_name and otherwise joining given/surname.
+ *
+ * @param name - PayPal name object, if present.
+ * @param address - PayPal address object; null result when absent.
+ * @returns Our Address, or null when PayPal sent no address.
+ */
 function mapAddress(name: PayPalName | undefined, address: PayPalAddress | undefined): Address | null {
   if (!address) {
     return null;
@@ -71,7 +79,16 @@ export type MappedCapture = {
   shipToCountry: string | null;
 };
 
-/** Pull everything an order row needs out of a capture response. */
+/**
+ * Pull everything an order row needs out of a capture response: ids and
+ * statuses, payer email/phone, shipping + billing addresses, and the captured
+ * amount converted to cents (e.g. "49.99" → 4999). `completed` is true only
+ * when both the order and its first capture are COMPLETED; every missing
+ * field maps to null.
+ *
+ * @param response - Raw JSON from PayPal's capture endpoint.
+ * @returns Flat provider-neutral fields ready for the order row.
+ */
 export function mapCaptureResponse(response: PayPalCaptureResponse): MappedCapture {
   const unit = response.purchase_units?.[0];
   const capture = unit?.payments?.captures?.[0];

@@ -16,6 +16,7 @@ export type PaymentMethod = {
   color: string;
 };
 
+/** Every checkout method the UI can render, in display order. */
 export const paymentMethods: PaymentMethod[] = [
   {
     id: "paypal",
@@ -33,14 +34,27 @@ export const paymentMethods: PaymentMethod[] = [
   },
 ];
 
+/** Just the express-kind methods (the top-of-checkout buttons, i.e. PayPal). */
 export const expressMethods = paymentMethods.filter((method) => method.kind === "express");
 
 const methodsById = new Map(paymentMethods.map((method) => [method.id, method]));
 
+/**
+ * Type guard for untrusted input (e.g. a request body field): true only for
+ * a string matching a registered payment method id.
+ *
+ * @param value - Unknown value to check.
+ */
 export function isPaymentMethodId(value: unknown): value is PaymentMethodId {
   return typeof value === "string" && methodsById.has(value as PaymentMethodId);
 }
 
+/**
+ * Look up a payment method by id; throws if the id isn't registered.
+ *
+ * @param id - A payment method id ("paypal" or "card").
+ * @returns The method's registry entry (label, kind, button colors).
+ */
 export function getPaymentMethod(id: PaymentMethodId): PaymentMethod {
   const method = methodsById.get(id);
   if (!method) {

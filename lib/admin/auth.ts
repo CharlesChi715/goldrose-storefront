@@ -74,6 +74,13 @@ function devPassword(): string | null {
 
 let memorySecret: string | null = null;
 
+/**
+ * The HMAC secret for local session cookies. With ADMIN_DEV_PASSWORD set,
+ * derived from it so sessions survive serverless instance churn (no shared
+ * disk there); otherwise read from — or first written to — the
+ * .data/admin-secret file, falling back to an in-memory secret when the
+ * filesystem is read-only.
+ */
 async function localSecret(): Promise<string> {
   // With ADMIN_DEV_PASSWORD set, derive a stable secret from it so sessions
   // survive serverless instance churn (no shared disk there).
@@ -107,6 +114,12 @@ function safeEqual(a: string, b: string): boolean {
   return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
 }
 
+/**
+ * Builds a signed local session token — base64url(email).expiry.HMAC —
+ * valid for 30 days.
+ *
+ * @param email - Email to embed as the session identity.
+ */
 async function makeLocalToken(email: string): Promise<string> {
   const secret = await localSecret();
   const expires = Date.now() + LOCAL_SESSION_DAYS * 24 * 60 * 60 * 1000;
@@ -114,6 +127,12 @@ async function makeLocalToken(email: string): Promise<string> {
   return `${payload}.${sign(secret, payload)}`;
 }
 
+/**
+ * Verifies a local session token's shape, HMAC, and expiry; returns the
+ * session (always the seeded local owner's user id) or null when invalid.
+ *
+ * @param token - The admin_session cookie value.
+ */
 async function verifyLocalToken(token: string): Promise<AdminSession | null> {
   const parts = token.split(".");
   if (parts.length !== 3) {
@@ -138,6 +157,7 @@ async function verifyLocalToken(token: string): Promise<AdminSession | null> {
 // lib/supabase/server-auth.ts for the §15 getAll/setAll pattern notes.
 const supabaseAuthClient = supabaseServerAuthClient;
 
+/** True when the user id has a row in the admin_users allowlist. */
 async function isAllowlisted(userId: string): Promise<boolean> {
   const admins = await getStore().all("admin_users");
   return admins.some((row) => row.user_id === userId);
@@ -203,7 +223,15 @@ export type SignInResult =
   | { ok: true }
   | { ok: false; error: "invalid" | "pending" };
 
-/** Email + password sign-in for both modes. Errors stay deliberately vague. */
+/**
+ * Email + password sign-in for both modes. Errors stay deliberately vague.
+ * Success sets the session (local: signed cookie; hosted: Supabase Auth);
+ * a correct hosted password without allowlist approval is signed straight
+ * back out with "pending".
+ *
+ * @param email - Login email; local mode falls back to the seeded owner's when blank.
+ * @param password - Password to verify.
+ */
 export async function signInWithPassword(
   email: string,
   password: string,
@@ -271,6 +299,9 @@ export async function confirmPasskeySignIn(): Promise<SignInResult> {
  * Change the signed-in account's own nickname (user_metadata) — the forum
  * identity (owner request 2026-07-22). Hosted only: the local file mode
  * has no auth server, callers fall back to the display-name cookie there.
+ *
+ * @param nickname - New nickname to store in user_metadata.
+ * @returns True when the update succeeded.
  */
 export async function updateAccountNickname(nickname: string): Promise<boolean> {
   if (!getSupabaseEnv().hosted) {
@@ -287,6 +318,7 @@ export async function updateAccountNickname(nickname: string): Promise<boolean> 
   return !error;
 }
 
+/** Ends the admin session: Supabase sign-out when hosted, otherwise deletes the local session cookie. */
 export async function signOut(): Promise<void> {
   const env = getSupabaseEnv();
   if (env.hosted) {

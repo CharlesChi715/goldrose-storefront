@@ -13,6 +13,14 @@ import type { TableStore } from "./types.ts";
 
 const GLOBAL_KEY = "__goldrose_table_store__";
 
+/**
+ * Hand out the one TableStore for this process: hosted Supabase when its env
+ * vars are set, the local file adapter otherwise. First call creates the
+ * store and caches it on globalThis; later calls (and dev hot reloads) reuse
+ * the same instance, keeping the local adapter's write queue intact.
+ *
+ * @returns The process-wide TableStore singleton.
+ */
 export function getStore(): TableStore {
   const holder = globalThis as Record<string, unknown>;
   if (!holder[GLOBAL_KEY]) {

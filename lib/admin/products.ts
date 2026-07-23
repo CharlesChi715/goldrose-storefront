@@ -52,6 +52,11 @@ export function revalidateStorefront(): void {
   revalidatePath("/llms.txt");
 }
 
+/**
+ * All products for the list screen, in storefront position order, each with
+ * its first image path, variant count, summed on-hand stock, and whether
+ * any variant tracks quantity.
+ */
 export async function listProducts(): Promise<ProductListRow[]> {
   const store = getStore();
   const [products, variants, images] = await Promise.all([
@@ -76,6 +81,11 @@ export async function listProducts(): Promise<ProductListRow[]> {
     });
 }
 
+/**
+ * One product with its images and variants, both in position order.
+ *
+ * @param id - Product id; unknown ids return null.
+ */
 export async function getProductDetail(id: string): Promise<ProductDetail | null> {
   const store = getStore();
   const [products, variants, images] = await Promise.all([
@@ -98,6 +108,7 @@ export async function getProductDetail(id: string): Promise<ProductDetail | null
   };
 }
 
+/** URL-safe slug from a title, e.g. "Gold Rose 24K" → "gold-rose-24k" (max 60 chars, never empty). */
 function slugify(value: string): string {
   return (
     value
@@ -108,7 +119,13 @@ function slugify(value: string): string {
   );
 }
 
-/** A unique product id/handle derived from the title. */
+/**
+ * A unique product id/handle derived from the title — appends -2, -3, …
+ * until it clashes with no other product's handle or id.
+ *
+ * @param title - Product title to slugify.
+ * @param ignoreId - Product whose own handle/id shouldn't count as a clash (editing).
+ */
 export async function uniqueHandle(title: string, ignoreId?: string): Promise<string> {
   const products = await getStore().all("products");
   const base = slugify(title);
@@ -162,7 +179,13 @@ export type SaveProductInput = {
 /**
  * Create or update a product with its variants and image rows. Variant
  * inventory changes made through the form become "correction" movements so
- * the log stays complete (§7.3: stock is never edited silently).
+ * the log stays complete (§7.3: stock is never edited silently). Variants
+ * missing from the input are deleted; image rows are fully replaced; the
+ * storefront is revalidated afterwards.
+ *
+ * @param input - Full form payload; id null = create.
+ * @param actor - Admin name recorded on inventory movements.
+ * @returns The saved product's id (derived from the title on create).
  */
 export async function saveProduct(
   input: SaveProductInput,
@@ -293,7 +316,14 @@ export async function saveProduct(
   return id;
 }
 
-/** Shopify's Duplicate action: full copy (variants + media) as a new draft. */
+/**
+ * Shopify's Duplicate action: full copy (variants + media) as a new draft
+ * with zeroed inventory. Throws on an unknown product.
+ *
+ * @param id - Product to copy.
+ * @param copySuffix - Localized "Copy of" text put before the new title.
+ * @returns The new product's id.
+ */
 export async function duplicateProduct(id: string, copySuffix: string): Promise<string> {
   const detail = await getProductDetail(id);
   if (!detail) {
@@ -338,6 +368,12 @@ export async function duplicateProduct(id: string, copySuffix: string): Promise<
   return newId;
 }
 
+/**
+ * Bulk status change (active / draft / archived); revalidates the storefront.
+ *
+ * @param ids - Product ids to update.
+ * @param status - New status for all of them.
+ */
 export async function setProductStatus(ids: string[], status: ProductStatus): Promise<void> {
   const store = getStore();
   const now = new Date().toISOString();
@@ -349,7 +385,10 @@ export async function setProductStatus(ids: string[], status: ProductStatus): Pr
 
 /**
  * Shopify's red-confirm Delete: really deletes. Order history is safe —
- * order lines snapshot name/sku and null their variant FK (§7.1).
+ * order lines snapshot name/sku and null their variant FK (§7.1). Variants,
+ * inventory movements, and image rows go too; the storefront is revalidated.
+ *
+ * @param ids - Product ids to delete.
  */
 export async function deleteProducts(ids: string[]): Promise<void> {
   const store = getStore();
@@ -426,6 +465,12 @@ export async function listVariantInventory(): Promise<VariantInventoryRow[]> {
     );
 }
 
+/**
+ * Manual stock adjustment from the Inventory screen: writes an inventory
+ * movement through the store and revalidates the storefront.
+ *
+ * @param input - Variant id, signed delta, reason, optional note, and the acting admin.
+ */
 export async function adjustVariantInventory(input: {
   variantId: string;
   delta: number;
@@ -443,6 +488,11 @@ export async function adjustVariantInventory(input: {
   revalidateStorefront();
 }
 
+/**
+ * A variant's inventory movement history, newest first.
+ *
+ * @param variantId - Variant to look up.
+ */
 export async function variantMovements(variantId: string): Promise<InventoryMovementRow[]> {
   const movements = await getStore().all("inventory_movements");
   return movements

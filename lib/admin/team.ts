@@ -88,6 +88,13 @@ export async function listTeam(): Promise<TeamMember[]> {
     .sort((a, b) => Number(a.approved) - Number(b.approved) || a.email.localeCompare(b.email));
 }
 
+/**
+ * Adds the account to the admin_users allowlist, granting admin access.
+ * No-op when already approved.
+ *
+ * @param userId - Auth user id to approve.
+ * @param email - Email stored alongside for display.
+ */
 export async function approveMember(userId: string, email: string): Promise<void> {
   const existing = await getStore().all("admin_users");
   if (existing.some((row) => row.user_id === userId)) {
@@ -96,7 +103,11 @@ export async function approveMember(userId: string, email: string): Promise<void
   await getStore().insert("admin_users", [{ user_id: userId, email }]);
 }
 
-/** Remove from the allowlist (the auth account itself stays — re-approvable). */
+/**
+ * Remove from the allowlist (the auth account itself stays — re-approvable).
+ *
+ * @param userId - Auth user id to remove.
+ */
 export async function removeMember(userId: string): Promise<void> {
   await getStore().remove("admin_users", { user_id: userId });
 }
@@ -107,6 +118,8 @@ export async function removeMember(userId: string): Promise<void> {
  * message, so this can't be used to probe which emails have accounts.
  * NOTE: until real SMTP (Resend) is connected, Supabase's built-in mailer
  * is rate-limited to a handful of emails per hour.
+ *
+ * @param email - Address to send the reset link to; silently ignored when not hosted or malformed.
  */
 export async function sendPasswordReset(email: string): Promise<void> {
   if (!getSupabaseEnv().hosted || !email.includes("@")) {
@@ -129,6 +142,11 @@ export type SignUpResult =
  * Self-service sign-up from the login page. Hosted only. Nickname is
  * MANDATORY (owner request 2026-07-22) — it lives in the account's
  * user_metadata and is the member's forum identity.
+ *
+ * @param email - New account's email.
+ * @param password - Password, minimum 8 characters.
+ * @param nickname - Forum display name; trimmed and capped at 40 chars.
+ * @returns Success flag, or a coded error for the login page to translate.
  */
 export async function signUpForApproval(
   email: string,

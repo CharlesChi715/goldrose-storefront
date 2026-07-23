@@ -1042,21 +1042,42 @@ const DICTIONARIES: Record<AdminLang, Record<string, string>> = {
   zh: zh as Record<string, string>,
 };
 
-/** Translate one key; zh falls back to en so blanks can never render. */
+/**
+ * Translate one key; zh falls back to en so blanks can never render.
+ *
+ * @param lang - Admin language to render in.
+ * @param key - Message key to look up.
+ */
 export function t(lang: AdminLang, key: AdminMessageKey): string {
   return DICTIONARIES[lang][key] ?? en[key];
 }
 
-/** Bind the language once, e.g. `const tr = makeT(lang); tr("nav.home")`. */
+/**
+ * Bind the language once, e.g. `const tr = makeT(lang); tr("nav.home")`.
+ *
+ * @param lang - Admin language to bind.
+ * @returns A t() with the language pre-applied.
+ */
 export function makeT(lang: AdminLang) {
   return (key: AdminMessageKey) => t(lang, key);
 }
 
+/**
+ * Type guard: true only for the exact values "en" and "zh".
+ *
+ * @param value - Anything, typically a raw cookie value.
+ */
 export function isAdminLang(value: unknown): value is AdminLang {
   return value === "en" || value === "zh";
 }
 
-/** Fill {name} placeholders: interpolate(t(lang, key), { name: "…" }). */
+/**
+ * Fill {name} placeholders: interpolate(t(lang, key), { name: "…" }).
+ * Placeholders with no matching var are left as-is.
+ *
+ * @param template - Translated string containing {name} slots.
+ * @param vars - Replacement values keyed by placeholder name.
+ */
 export function interpolate(
   template: string,
   vars: Record<string, string | number>,

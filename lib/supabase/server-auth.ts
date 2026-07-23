@@ -14,6 +14,14 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env.ts";
 
+/**
+ * Create the cookie-bound Supabase auth client for server code, wired to the
+ * Next.js cookie store via the @supabase/ssr getAll/setAll pattern. Cookie
+ * writes that fail inside a Server Component render are swallowed on purpose
+ * — middleware / server actions own the session refresh.
+ *
+ * @returns A Supabase server client bound to this request's cookies.
+ */
 export async function supabaseServerAuthClient() {
   const env = getSupabaseEnv();
   const cookieStore = await cookies();

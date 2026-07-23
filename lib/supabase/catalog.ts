@@ -14,8 +14,15 @@ import { getStore } from "./store.ts";
 import type { CatalogProduct } from "./types.ts";
 
 /**
- * cache(): generateMetadata and the page body both call this during one
- * product render — dedupe to a single fetch per request.
+ * Fetch the full storefront catalog: active products with safe columns only
+ * (no costs, no stock counts). Hosted mode reads the catalog_products SQL
+ * view with the public anon key and throws on a query error; local mode
+ * computes the identical projection from the file store.
+ *
+ * Wrapped in cache(): generateMetadata and the page body both call this
+ * during one product render — dedupe to a single fetch per request.
+ *
+ * @returns Catalog products sorted by position.
  */
 export const getCatalog = cache(async (): Promise<CatalogProduct[]> => {
   const env = getSupabaseEnv();
@@ -79,7 +86,12 @@ export const getCatalog = cache(async (): Promise<CatalogProduct[]> => {
     }));
 });
 
-/** Find one catalog product by URL handle (product detail pages). */
+/**
+ * Find one catalog product by URL handle (product detail pages).
+ *
+ * @param handle - The product's URL handle, e.g. "signature-24k-gold-rose".
+ * @returns The matching catalog product, or null if none is active.
+ */
 export async function getCatalogProduct(handle: string): Promise<CatalogProduct | null> {
   const catalog = await getCatalog();
   return catalog.find((product) => product.handle === handle) ?? null;

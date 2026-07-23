@@ -14,6 +14,13 @@ export type SupabaseEnv = {
   hosted: boolean;
 };
 
+/**
+ * Read and trim the Supabase env vars. `hosted` is true only when both the
+ * project URL and the service-role key are set — that flag is what flips the
+ * data layer from the local file adapter to hosted Supabase.
+ *
+ * @returns The trimmed env values plus the derived `hosted` flag.
+ */
 export function getSupabaseEnv(): SupabaseEnv {
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
   const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();

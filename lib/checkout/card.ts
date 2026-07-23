@@ -18,11 +18,17 @@ export type CardValidation = {
 };
 
 /**
+ * Detect the card brand from a digits-only number via prefix/length patterns
+ * (e.g. "4242424242424242" → "Visa"), falling back to the generic "Card".
+ *
  * Card validation is FORMAT-ONLY and exists purely to make the mock checkout
  * feel real and to fail fast on obvious typos. It never proves a card can be
  * charged — that is the payment provider's job. The PAN is reduced to a brand
  * and last-four for the receipt and then discarded by the caller; it is never
  * stored. Test numbers like 4242 4242 4242 4242 pass.
+ *
+ * @param digits - Card number with all non-digits already stripped.
+ * @returns The matched brand, or "Card" when no pattern matches.
  */
 export function detectBrand(digits: string): CardBrand {
   if (/^4\d{12}(\d{3})?$/.test(digits)) {
@@ -44,6 +50,9 @@ export function detectBrand(digits: string): CardBrand {
  * The Luhn checksum every real card number satisfies: walking right-to-left,
  * double every second digit (subtracting 9 if that passes 9) and the grand
  * total must end in 0. It catches typos, not fake cards.
+ *
+ * @param digits - Digits-only card number.
+ * @returns True when non-empty and the checksum holds.
  */
 function passesLuhn(digits: string): boolean {
   let sum = 0;
@@ -62,7 +71,12 @@ function passesLuhn(digits: string): boolean {
   return digits.length > 0 && sum % 10 === 0;
 }
 
-/** Parse "MM/YY" or "MM/YYYY" and check the date is this month or later (within 20 years). */
+/**
+ * Parse "MM/YY" or "MM/YYYY" and check the date is this month or later
+ * (within 20 years).
+ *
+ * @param expiry - Raw expiry text as typed in the form.
+ */
 function expiryInFuture(expiry: string): boolean {
   const match = expiry.trim().match(/^(\d{1,2})\s*\/\s*(\d{2}|\d{4})$/);
   if (!match) {
@@ -92,6 +106,10 @@ function expiryInFuture(expiry: string): boolean {
  * Run all the format checks on a card form and collect per-field error
  * messages. Returns the detected brand and last four digits so a receipt can
  * say "Visa ····4242" without ever keeping the full number.
+ *
+ * @param card - The raw card form fields (number, expiry, cvc, name).
+ * @returns Overall validity, brand, last four digits, and per-field errors
+ *   keyed by form field name (cardName, cardNumber, cardExpiry, cardCvc).
  */
 export function validateCard(card: CardInput): CardValidation {
   const fieldErrors: Record<string, string> = {};

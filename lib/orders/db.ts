@@ -44,6 +44,16 @@ export type CreateOrderInput = {
   decrementStock?: boolean;
 };
 
+/**
+ * Create or update the customer for an incoming order (DB writes): an
+ * existing email match gets its phone and default address refreshed, a new
+ * email gets a fresh customer row; either way a "Placed order" customer
+ * event is recorded.
+ *
+ * @param input - The order input carrying email, phone, and shipping address.
+ * @param orderName - The display name of the order (e.g. "#1042") for the event message.
+ * @returns The customer id, or null when the order has no email.
+ */
 async function upsertCustomer(input: CreateOrderInput, orderName: string): Promise<string | null> {
   const email = input.email?.trim().toLowerCase();
   if (!email) {
@@ -112,6 +122,11 @@ async function upsertCustomer(input: CreateOrderInput, orderName: string): Promi
   return customer.id;
 }
 
+/**
+ * Read the owner's order-number prefix from settings, defaulting to "#".
+ *
+ * @returns The prefix put before the order number, e.g. "#" in "#1042".
+ */
 async function orderNumberPrefix(): Promise<string> {
   const settings = await getStore().all("settings");
   const store = settings.find((row) => row.key === "store")?.value as
@@ -120,8 +135,18 @@ async function orderNumberPrefix(): Promise<string> {
   return store?.order_number_prefix ?? "#";
 }
 
-/** Create an order from a server-priced cart. Returns the existing order
- * when provider_order_id already landed (idempotency). */
+/**
+ * Create an order from a server-priced cart — the one path every completed
+ * checkout goes through. Writes the order and snapshot lines, upserts the
+ * customer, decrements stock with visible 'order' movements (unless
+ * decrementStock is false), records timeline events, completes the
+ * checkouts row, and — when paid — bumps discount usage and sends the
+ * order emails.
+ *
+ * @param input - The priced cart plus source, payment, contact, and address details.
+ * @returns The new order row — or the existing one when provider_order_id
+ * already landed (idempotency, §10.5).
+ */
 export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
   const store = getStore();
   const now = new Date().toISOString();

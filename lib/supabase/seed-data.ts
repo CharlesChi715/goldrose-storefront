@@ -353,6 +353,14 @@ const V_BND = "0a2b1a10-4b7e-4d7a-9d24-000000000301"; // Bundle / Gift message
 // tails (k01→d101 vs c01→dc01).
 const DEMO_TAIL_HEX: Record<string, string> = { k: "1", l: "2", o: "0", p: "9", v: "5" };
 
+/**
+ * Build a deterministic uuid for a demo row from a 3-character mnemonic tail
+ * (e.g. "o01" = order 1), mapping non-hex letters via DEMO_TAIL_HEX above.
+ * Throws if the mapped tail still isn't valid hex.
+ *
+ * @param tail - Three-character mnemonic, lowercase letters/digits.
+ * @returns A Postgres-safe uuid ending in "d" + the hex tail.
+ */
 function demoId(tail: string): string {
   const hexTail = tail.replace(/[a-z]/g, (ch) => DEMO_TAIL_HEX[ch] ?? ch);
   if (!/^[0-9a-f]{3}$/.test(hexTail)) {
@@ -361,6 +369,15 @@ function demoId(tail: string): string {
   return `0a2b1a10-4b7e-4d7a-9d24-00000000d${hexTail}`;
 }
 
+/**
+ * Build the demo dataset described above: three customers, orders #901–#905
+ * covering every state (fulfilled/unfulfilled/refunded/cancelled/draft) with
+ * their lines and events, checkouts, a discount, page views, feedback, and
+ * the bilingual forum welcome threads. Pure — returns rows, writes nothing.
+ *
+ * @param now - ISO timestamp all relative "hours ago" times are computed from.
+ * @returns The demo rows keyed by table name (demo tables only).
+ */
 function buildDemoRows(now: string): Pick<
   { [T in keyof DbTables]: DbTables[T][] },
   | "customers"
@@ -848,11 +865,18 @@ function buildDemoRows(now: string): Pick<
 }
 
 /**
- * Build a full set of seed tables. `includeLocalAdmin` seeds the dev owner
- * login row — local backend only; on hosted Supabase the admin_users row must
- * reference a real auth.users uid (activation checklist). `includeDemo`
- * (default true) adds the sample store above — hosted activation passes
- * false so the real store starts clean.
+ * Build a full set of seed tables: the three placeholder products with their
+ * images and variants, default settings, the site-content slots, and
+ * (optionally) the demo store. Pure — scripts/seed.ts and the local
+ * adapter's first-run auto-seed do the actual writing.
+ *
+ * @param now - ISO timestamp stamped on created_at/updated_at columns.
+ * @param options - `includeLocalAdmin` seeds the dev owner login row — local
+ *   backend only; on hosted Supabase the admin_users row must reference a
+ *   real auth.users uid (activation checklist). `includeDemo` (default true)
+ *   adds the sample store above — hosted activation passes false so the real
+ *   store starts clean.
+ * @returns Every table's seed rows, keyed by table name.
  */
 export function buildSeedTables(
   now: string,

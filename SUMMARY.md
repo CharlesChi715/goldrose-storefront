@@ -37,6 +37,7 @@ goldrose-storefront/
 - **Live deploy** <https://goldrose-storefront.vercel.app> — still ephemeral (demo mode) until owner sets the 3 Supabase env vars in Vercel + redeploys, and in Supabase Auth: confirm-email OFF + redirect URLs (live + localhost `/admin/reset-password`, `/auth/callback`).
 - `npm run seed -- --reset` restores a pristine local db.
 - **"read:" comments (2026-07-23)**: `// read: "…"` one-liners after hard-to-read TypeScript syntax — near-literal wording keeping the code's own words (Charles's convention, see agent memory). Pilot: `lib/supabase/types.ts`; extend only to files Charles names.
+- **JSDoc (2026-07-23)**: all exported functions in `lib/` have `/** … */` hover docs (summary + `@param`/`@returns`, side effects, cents units). Keep new `lib/` functions documented in this style; distinct from `read:` comments.
 
 ## Key facts / constraints
 

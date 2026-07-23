@@ -11,6 +11,13 @@
 import { useSyncExternalStore } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
+/**
+ * Create the browser-side Supabase auth client with the experimental passkey
+ * flag enabled. Returns null when the public env vars are missing (local file
+ * mode) so callers can show their "needs hosted Supabase" state instead.
+ *
+ * @returns The browser client, or null when hosted Supabase is not configured.
+ */
 export function supabaseBrowserAuthClient() {
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
   const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();

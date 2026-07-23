@@ -18,6 +18,10 @@ export type DiscountErrorReason =
   | "min_purchase"
   | "once_per_customer";
 
+/**
+ * Error thrown when a discount code can't apply; `reason` is machine-readable
+ * for tests/branching, `message` is the buyer-safe text shown in checkout.
+ */
 // No TS parameter properties here — Node type stripping can't erase them,
 // and this module is imported by Node-run unit tests (§0.2).
 export class DiscountError extends Error {
@@ -29,7 +33,13 @@ export class DiscountError extends Error {
   }
 }
 
-/** Derived list status, like Shopify's badges (§9.10). */
+/**
+ * Derived list status, like Shopify's badges (§9.10): "scheduled" before the
+ * start date, "expired" past the end date or usage limit, else "active".
+ *
+ * @param discount - The discount row to classify.
+ * @param now - Reference time (defaults to the current time; injectable for tests).
+ */
 export function discountStatus(
   discount: DiscountRow,
   now = new Date(),
@@ -53,8 +63,15 @@ export type AppliedDiscount = {
 };
 
 /**
- * Validate a code against the current cart and compute its value. Throws
- * DiscountError with a buyer-safe message when the code can't apply.
+ * Validate a code against the current cart and compute its value. Reads
+ * discounts (and, for once-per-customer codes, orders) from the store; throws
+ * DiscountError with a buyer-safe message when the code can't apply. Code
+ * matching is case-insensitive.
+ *
+ * @param input - Trimmed code, server-priced lines, subtotal in cents, and
+ *   the buyer's email (for once-per-customer checks) if known.
+ * @returns The matched discount row, its computed value in cents (0 for
+ *   free-shipping codes), and a free_shipping flag.
  */
 export async function applyDiscountCode(input: {
   code: string;
@@ -126,7 +143,13 @@ export async function applyDiscountCode(input: {
   return { discount, discount_cents: discountCents, free_shipping: freeShipping };
 }
 
-/** Called when a paid order lands with this code (§9.10 used-count). */
+/**
+ * Called when a paid order lands with this code (§9.10 used-count): bumps the
+ * discount's used_count by one in the store. Silently does nothing for an
+ * unknown code.
+ *
+ * @param code - The discount code as stored on the order (case-insensitive match).
+ */
 export async function incrementDiscountUsage(code: string): Promise<void> {
   const store = getStore();
   const discounts = await store.all("discounts");

@@ -35,6 +35,12 @@ export type WebhookOutcome =
   | "duplicate"
   | "ignored";
 
+/**
+ * Parse a PayPal decimal amount string into cents, e.g. "49.99" → 4999.
+ *
+ * @param value - PayPal amount string, if present.
+ * @returns Cents, or null when missing/unparseable.
+ */
 function centsFrom(value: string | undefined): number | null {
   if (value === undefined) {
     return null;
@@ -43,6 +49,13 @@ function centsFrom(value: string | undefined): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+/**
+ * Insert a system-kind entry into order_events (the order's timeline in the
+ * admin).
+ *
+ * @param orderId - The order the event belongs to.
+ * @param message - Timeline text; refund handling also greps these for dedupe.
+ */
 async function addEvent(orderId: string, message: string): Promise<void> {
   await getStore().insert("order_events", [
     {
@@ -56,6 +69,17 @@ async function addEvent(orderId: string, message: string): Promise<void> {
   ]);
 }
 
+/**
+ * Handle PAYMENT.CAPTURE.COMPLETED. Three paths: an existing pending order is
+ * marked paid ("confirmed"); an already-paid order is a "duplicate"
+ * redelivery; and when no order exists, the order is rebuilt from the saved
+ * checkout via a fresh server re-price ("repaired", §10.5.3 — the buyer's
+ * browser died between approval and our capture response). Writes orders and
+ * order_events; "ignored" when the event carries no order id or no matching
+ * checkout exists.
+ *
+ * @param event - The verified webhook event payload.
+ */
 async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<WebhookOutcome> {
   const providerOrderId = event.resource?.supplementary_data?.related_ids?.order_id;
   if (!providerOrderId) {
@@ -112,6 +136,15 @@ async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<Webhoo
   return "repaired";
 }
 
+/**
+ * Handle PAYMENT.CAPTURE.REFUNDED: sync the order's refunded_cents (capped at
+ * the order total) and set financial_status to refunded / partially_refunded.
+ * Prefers PayPal's cumulative total_refunded_amount; dedupes redeliveries by
+ * refund id via the order-events timeline. Writes orders and order_events;
+ * "ignored" when no matching order exists.
+ *
+ * @param event - The verified webhook event payload.
+ */
 async function handleCaptureRefunded(event: PayPalWebhookEvent): Promise<WebhookOutcome> {
   const providerOrderId = event.resource?.supplementary_data?.related_ids?.order_id;
   if (!providerOrderId) {
@@ -158,6 +191,16 @@ async function handleCaptureRefunded(event: PayPalWebhookEvent): Promise<Webhook
   return "refund_synced";
 }
 
+/**
+ * Route an already-verified PayPal webhook event to its handler: capture
+ * completed or capture refunded; anything else is "ignored". Safe to call on
+ * redeliveries — both handlers are idempotent.
+ *
+ * @param event - Parsed webhook body (signature must be verified by the route
+ *   before calling this).
+ * @returns What happened: "confirmed", "repaired", "refund_synced",
+ *   "duplicate", or "ignored".
+ */
 export async function handlePayPalEvent(event: PayPalWebhookEvent): Promise<WebhookOutcome> {
   switch (event.event_type) {
     case "PAYMENT.CAPTURE.COMPLETED":

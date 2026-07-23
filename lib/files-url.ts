@@ -8,6 +8,15 @@
 
 const BUCKET = "product-images";
 
+/**
+ * Resolve a stored image path to a browser-usable URL. Paths starting with
+ * "/" or "http" pass through unchanged; a bare key becomes a public
+ * Supabase Storage URL in the product-images bucket, e.g.
+ * "abc.jpg" → "<SUPABASE_URL>/storage/v1/object/public/product-images/abc.jpg".
+ *
+ * @param storedPath - The path as stored in product_images.path.
+ * @returns A URL the browser can load directly.
+ */
 export function fileUrl(storedPath: string): string {
   if (storedPath.startsWith("/") || storedPath.startsWith("http")) {
     return storedPath;

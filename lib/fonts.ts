@@ -8,16 +8,21 @@
 
 import { Tenor_Sans, Inter, Cormorant_Garamond, Noto_Sans_SC } from "next/font/google";
 
+/** Tenor Sans 400 — the VELORIA display/headline face. */
 export const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
 
+/** Inter 400–700 — the general UI/body face. */
 export const inter = Inter({ weight: ["400", "500", "600", "700"], subsets: ["latin"] });
 
+/** Cormorant Garamond 600 — the serif accent face. */
 export const cormorant = Cormorant_Garamond({ weight: "600", subsets: ["latin"] });
 
-// Used for prices, star glyphs, and the geometric icon glyphs (⌂ ◆ ✦ …) the
-// design sets in Noto Sans SC. The symbol glyphs live outside the latin
-// subset; next/font still emits every unicode-range slice, so browsers fetch
-// the symbol slices on demand.
+/**
+ * Used for prices, star glyphs, and the geometric icon glyphs (⌂ ◆ ✦ …) the
+ * design sets in Noto Sans SC. The symbol glyphs live outside the latin
+ * subset; next/font still emits every unicode-range slice, so browsers fetch
+ * the symbol slices on demand.
+ */
 export const notoSC = Noto_Sans_SC({
   weight: ["400", "500", "700"],
   subsets: ["latin"],

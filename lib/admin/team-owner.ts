@@ -19,6 +19,9 @@ export type OwnerCandidate = {
  * Earliest-created approved member, or null with no approved members.
  * Local adapter rows carry no createdAt — there the first allowlist row
  * wins (the seeded dev owner; local mode is single-admin anyway).
+ *
+ * @param members - Candidate accounts with approval state and auth creation time.
+ * @returns The owner's user id, or null when nobody is approved.
  */
 export function teamOwnerId(members: OwnerCandidate[]): string | null {
   const approved = members.filter((member) => member.approved);

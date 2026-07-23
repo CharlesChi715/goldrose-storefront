@@ -46,13 +46,24 @@ export type PricedCart = {
 
 const MAX_QUANTITY = 20;
 
+/**
+ * Load the shipping zones from the "shipping_zones" settings row in the
+ * store; returns an empty array when unset or malformed.
+ */
 export async function getShippingZones(): Promise<ShippingZone[]> {
   const settings = await getStore().all("settings");
   const zones = settings.find((row) => row.key === "shipping_zones")?.value;
   return Array.isArray(zones) ? (zones as ShippingZone[]) : [];
 }
 
-/** Countries the store ships to (drives the checkout selector). */
+/**
+ * Countries the store ships to (drives the checkout selector): the full
+ * COUNTRIES list when any zone has the "*" Rest-of-world wildcard, otherwise
+ * only countries some zone explicitly lists.
+ *
+ * @param zones - Active shipping zones.
+ * @returns Code/name pairs in COUNTRIES display order.
+ */
 export function servedCountries(zones: ShippingZone[]): Array<{ code: string; name: string }> {
   const hasRestOfWorld = zones.some((zone) => zone.countries.includes("*"));
   if (hasRestOfWorld) {
@@ -62,6 +73,10 @@ export function servedCountries(zones: ShippingZone[]): Array<{ code: string; na
   return COUNTRIES.filter((country) => codes.has(country.code));
 }
 
+/**
+ * Read the tax rate (a percentage, e.g. 8.5) from the "tax" settings row;
+ * falls back to 0 when unset or invalid.
+ */
 export async function getTaxRatePercent(): Promise<number> {
   const settings = await getStore().all("settings");
   const tax = settings.find((row) => row.key === "tax")?.value as
@@ -72,8 +87,15 @@ export async function getTaxRatePercent(): Promise<number> {
 }
 
 /**
- * Price a cart end to end. Throws on unknown variants, empty carts, or a
+ * Price a cart end to end from the database — lines, discount, shipping, tax,
+ * total, all in cents. Throws on unknown/inactive variants, empty carts, or a
  * ship-to country no active zone serves (capture re-verifies this, §10.3).
+ * Quantities are clamped to 1..MAX_QUANTITY; DiscountError propagates from a
+ * bad code.
+ *
+ * @param input - Variant-id lines from the client cart, ship-to country code,
+ *   and optional discount code + buyer email.
+ * @returns The fully priced cart, including the matched shipping zone.
  */
 export async function priceCart(input: {
   lines: CartLineInput[];

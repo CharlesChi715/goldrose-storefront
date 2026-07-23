@@ -12,6 +12,10 @@ import { SEED_SETTINGS, type SettingsShape } from "@/lib/supabase/seed-data.ts";
 
 export type { SettingsShape };
 
+/**
+ * Every setting as one typed object, with seed defaults papering over any
+ * missing key so a partially seeded database can never crash a page.
+ */
 export async function getSettingsMap(): Promise<SettingsShape> {
   const rows = await getStore().all("settings");
   const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
@@ -28,6 +32,12 @@ export async function getSettingsMap(): Promise<SettingsShape> {
   };
 }
 
+/**
+ * Upserts one settings row (update when the key exists, insert otherwise).
+ *
+ * @param key - Settings key to write.
+ * @param value - New value for that key.
+ */
 export async function saveSetting<K extends keyof SettingsShape>(
   key: K,
   value: SettingsShape[K],
@@ -41,7 +51,11 @@ export async function saveSetting<K extends keyof SettingsShape>(
   }
 }
 
-/** Base URL for sitemap/canonicals/llms.txt — env-driven, never hardcoded. */
+/**
+ * Base URL for sitemap/canonicals/llms.txt — env-driven, never hardcoded:
+ * NEXT_PUBLIC_SITE_URL (trailing slashes stripped) ▸ the Vercel production
+ * URL ▸ http://localhost:3000.
+ */
 export function siteBaseUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (explicit) {

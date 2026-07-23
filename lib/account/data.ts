@@ -44,6 +44,13 @@ export type AccountOverview = {
   orders: AccountOrder[];
 };
 
+/**
+ * True when at least one of the user's auth providers actually verified
+ * their email (Google / Apple OAuth). Password accounts fail this check —
+ * see the SECURITY note in the file header.
+ *
+ * @param user - The signed-in Supabase auth user.
+ */
 function emailVerifiedByProvider(user: User): boolean {
   const providers: unknown[] = Array.isArray(user.app_metadata?.providers)
     ? user.app_metadata.providers
@@ -53,6 +60,13 @@ function emailVerifiedByProvider(user: User): boolean {
   );
 }
 
+/**
+ * Pick a display name from the user's metadata (full_name, name, nickname —
+ * first non-empty wins), falling back to the email's local part, then "there".
+ *
+ * @param user - The signed-in Supabase auth user.
+ * @returns A trimmed, never-empty display name.
+ */
 function displayNameOf(user: User): string {
   const meta = user.user_metadata ?? {};
   for (const key of ["full_name", "name", "nickname"]) {
@@ -63,7 +77,15 @@ function displayNameOf(user: User): string {
   return (user.email ?? "").split("@")[0] || "there";
 }
 
-/** Find (and lazily link) the customers row for this auth user. */
+/**
+ * Find (and lazily link) the customers row for this auth user. An already
+ * linked row is returned as-is; otherwise, for provider-verified emails
+ * only, the existing email-keyed row is claimed (DB write + customer event)
+ * or a fresh customer row is created. Unverified emails get null.
+ *
+ * @param user - The signed-in Supabase auth user.
+ * @returns The linked customer row, or null when linking isn't allowed.
+ */
 async function linkedCustomer(user: User): Promise<CustomerRow | null> {
   const store = getStore();
   const customers = await store.all("customers");
@@ -129,7 +151,15 @@ async function linkedCustomer(user: User): Promise<CustomerRow | null> {
   return customer;
 }
 
-/** The signed-in customer's account view, or null when signed out. */
+/**
+ * Build the signed-in customer's account view for the /account page: link
+ * the auth user to a customers row, then collect their orders (matched by
+ * customer_id, plus by email when the provider verified it), newest first.
+ * May write to the DB via the lazy customer linking.
+ *
+ * @returns The account overview, or null when signed out or not on hosted
+ * Supabase (local file mode has no customer auth).
+ */
 export async function getAccountOverview(): Promise<AccountOverview | null> {
   if (!getSupabaseEnv().hosted) {
     return null;

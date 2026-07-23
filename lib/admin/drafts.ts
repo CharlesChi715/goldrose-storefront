@@ -15,7 +15,13 @@ import { createOrder } from "../orders/db.ts";
 import { getStore } from "../supabase/store.ts";
 import type { CheckoutRow, OrderRow } from "../supabase/types.ts";
 
-/** Price a draft: normal DB pricing, but drafts carry no shipping charge. */
+/**
+ * Price a draft: normal DB pricing, but drafts carry no shipping charge.
+ *
+ * @param lines - Variant + quantity pairs to price.
+ * @param discountCode - Optional code to apply.
+ * @param email - Customer email, used by once-per-customer discount checks.
+ */
 async function priceDraft(
   lines: Array<{ variantId: string; quantity: number }>,
   discountCode: string | null,
@@ -30,6 +36,13 @@ async function priceDraft(
   };
 }
 
+/**
+ * Creates a draft: an order row with source='draft' and a pending financial
+ * status — no stock touched, no emails (both happen at markDraftPaid).
+ *
+ * @param input - Lines, optional email/note/discount code, and the acting admin.
+ * @returns The created order row.
+ */
 export async function createDraftOrder(input: {
   lines: Array<{ variantId: string; quantity: number }>;
   email: string | null;
@@ -50,7 +63,15 @@ export async function createDraftOrder(input: {
   });
 }
 
-/** Shopify's "Mark as paid": the draft becomes a real order (§9.4). */
+/**
+ * Shopify's "Mark as paid": the draft becomes a real order (§9.4) — status
+ * flips to paid, stock decrements with 'order' movements, discount usage
+ * counts, and the order emails go out. Throws unless the order is a
+ * pending draft.
+ *
+ * @param id - Draft order id.
+ * @param actor - Admin name recorded on the movements and timeline event.
+ */
 export async function markDraftPaid(id: string, actor: string): Promise<void> {
   const store = getStore();
   const order = (await store.all("orders")).find((row) => row.id === id);
@@ -99,6 +120,13 @@ export type AbandonedCheckout = {
 
 const ABANDONED_AFTER_MS = 60 * 60 * 1000; // 1 hour (§7.6)
 
+/**
+ * Open checkouts older than 1 hour, newest first, each with a readable
+ * items label (e.g. "2 × Gold Rose"), total item count, and age in hours
+ * (1 decimal).
+ *
+ * @param now - Reference time; defaults to the current time.
+ */
 export async function listAbandonedCheckouts(
   now = new Date(),
 ): Promise<AbandonedCheckout[]> {

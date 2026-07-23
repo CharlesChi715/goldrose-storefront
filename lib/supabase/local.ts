@@ -31,12 +31,27 @@ type DbFile = {
   tables: { [T in TableName]: DbTables[T][] };
 };
 
+/**
+ * Test a row against an equality filter — every key in `match` must equal the
+ * row's value exactly (the local stand-in for PostgREST's .match()).
+ *
+ * @param row - The table row to test.
+ * @param match - Column/value pairs that must all match.
+ */
 function matches<T extends TableName>(row: DbTables[T], match: Match<T>): boolean {
   return Object.entries(match).every(
     ([key, value]) => (row as Record<string, unknown>)[key] === value,
   );
 }
 
+/**
+ * Build a brand-new db.json value: seed tables (with the local dev owner
+ * account), order counter at 1001, and `seeded_at` stamped. Pure — nothing
+ * is written to disk here.
+ *
+ * @param now - ISO timestamp to stamp on the seed rows (defaults to now).
+ * @returns The complete in-memory database file shape.
+ */
 export function buildFreshDb(now = new Date().toISOString()): DbFile {
   return {
     seeded_at: now,
@@ -209,6 +224,11 @@ class LocalStore implements TableStore {
   }
 }
 
+/**
+ * Create the local file-adapter TableStore backed by .data/db.json —
+ * auto-seeds on first access and falls back to in-memory when the filesystem
+ * is read-only. lib/supabase/store.ts caches the instance per process.
+ */
 export function createLocalStore(): LocalStore {
   return new LocalStore();
 }

@@ -1945,3 +1945,9 @@ docs: add first feature learning doc (trial)
 - Added 8 `// read: "…"` one-liners in `lib/supabase/types.ts` after TypeScript lines that can't be read left-to-right (generics, `(typeof X)[number]`, `Record`, `Partial`).
 - Style per Charles: near-literal verbalization keeping the code's own words, minimal English glue; naturally-readable lines get no comment. Style rule saved to agent memory.
 - First application was lost to a working-tree reset; re-applied and committed this time.
+
+## 2026-07-23 — JSDoc pass over all of lib/
+- Added `/** ... */` JSDoc to every exported function and significant helper across all of `lib/` (Charles approved scope "all of lib/"): admin/ 79, checkout+cart+paypal 38, root+account+orders 27, supabase/ 13 — ~157 symbols, 39 files changed.
+- Style: one-sentence behavior summary (+ side effects: DB writes, emails, throws, cents units), `@param`/`@returns` without repeating TS types, tiny examples where helpful (4999 → "$49.99").
+- Existing comments merged into the new blocks, no text lost; ROLE OF THIS FILE headers and `// read:` comments untouched; zero code changes (final combined check: `tsc --noEmit` clean, 20/20 unit tests pass, diff comment-only +949/-54 — every removed line was an old comment expanded into JSDoc).
+- `lib/supabase/types.ts` untouched (types only, `read:` pilot preserved); `lib/checkout/countries.ts` and `checkout/types.ts` already adequately covered.

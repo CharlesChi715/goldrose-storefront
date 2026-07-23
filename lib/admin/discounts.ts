@@ -15,6 +15,7 @@ export type DiscountListRow = {
   status: "active" | "scheduled" | "expired";
 };
 
+/** All discounts, newest first, each with its derived status badge (active / scheduled / expired). */
 export async function listDiscounts(): Promise<DiscountListRow[]> {
   const discounts = await getStore().all("discounts");
   return discounts
@@ -22,6 +23,11 @@ export async function listDiscounts(): Promise<DiscountListRow[]> {
     .map((discount) => ({ discount, status: discountStatus(discount) }));
 }
 
+/**
+ * One discount by id, or null when it doesn't exist.
+ *
+ * @param id - Discount row id.
+ */
 export async function getDiscount(id: string): Promise<DiscountRow | null> {
   return (await getStore().all("discounts")).find((row) => row.id === id) ?? null;
 }
@@ -39,6 +45,14 @@ export type SaveDiscountInput = {
   endsAt: string | null;
 };
 
+/**
+ * Creates or updates a discount (input.id null = create). Throws when the
+ * code is already used by another discount (case-insensitive); edits keep
+ * the existing used_count and created_at.
+ *
+ * @param input - Form values; id decides create vs update.
+ * @returns The saved discount's id.
+ */
 export async function saveDiscount(input: SaveDiscountInput): Promise<string> {
   const store = getStore();
   const discounts = await store.all("discounts");
@@ -73,6 +87,11 @@ export async function saveDiscount(input: SaveDiscountInput): Promise<string> {
   return row.id;
 }
 
+/**
+ * Deletes the given discount rows.
+ *
+ * @param ids - Discount ids to remove.
+ */
 export async function deleteDiscounts(ids: string[]): Promise<void> {
   for (const id of ids) {
     await getStore().remove("discounts", { id });

@@ -10,6 +10,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { ADMIN_LANG_COOKIE, isAdminLang, type AdminLang } from "./i18n";
 
+/** The admin UI language from the admin_lang cookie; missing or invalid values default to "en". */
 export async function getAdminLang(): Promise<AdminLang> {
   const store = await cookies();
   const value = store.get(ADMIN_LANG_COOKIE)?.value;

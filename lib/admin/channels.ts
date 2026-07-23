@@ -9,7 +9,11 @@
 
 import type { PageViewRow } from "../supabase/types.ts";
 
-/** Raw source: utm_source ▸ referrer hostname ▸ "Direct". */
+/**
+ * Raw source: utm_source ▸ referrer hostname ▸ "Direct".
+ *
+ * @param view - The session's landing page view; undefined counts as "Direct".
+ */
 export function sourceOf(view: PageViewRow | undefined): string {
   if (!view) {
     return "Direct";
@@ -43,6 +47,13 @@ const CHANNEL_PATTERNS: Array<{ pattern: RegExp; channel: string }> = [
   { pattern: /bing/, channel: "Bing" },
 ];
 
+/**
+ * Marketing channel for a page view: takes sourceOf(view) and collapses it
+ * through CHANNEL_PATTERNS (e.g. "fb" and "l.facebook.com" → "Facebook").
+ * Unrecognized sources pass through as the raw label.
+ *
+ * @param view - The session's landing page view; undefined counts as "Direct".
+ */
 export function channelOf(view: PageViewRow | undefined): string {
   const raw = sourceOf(view);
   const needle = raw.toLowerCase();
