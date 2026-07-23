@@ -1888,3 +1888,22 @@ Explain why mock code remains in lib/checkout
 - Noted in SUMMARY.md that public/ is canonical.
 - Known remaining dup: `public/home/logo.png` = `public/veloria/logo.png` (kept — each
   Figma-imported page references its own path).
+## 2026-07-23 — AI-search product-recommendation research
+
+- Deep-research run (105 agents; 23 sources; 25 claims adversarially verified → 20 confirmed / 5 refuted) on how AI search (ChatGPT, Google AI Overviews/AI Mode, Perplexity, Copilot) discovers & recommends products, and what a custom non-Shopify store must do.
+- Delivered: [docs/geo.md](../docs/geo.md) — per-platform mechanisms, confirmed vs refuted ranking factors, GoldRose action plan (feed generator + 4 free merchant programs), agentic-commerce/PayPal landscape.
+- SUMMARY.md updated (docs listing + current-state pointer).
+## 2026-07-23 — AI product-discovery research
+
+- Created `docs/geo-codex.md`: source-led explanation of AI product retrieval/recommendation, platform comparison, GoldRose storefront audit, myths, measurement plan, and phased merchant-feed/commerce roadmap.
+- Verified 57 unique sources across OpenAI, Google, Microsoft, Perplexity, PayPal, Amazon, Anthropic, Meta, and independent research; updated `SUMMARY.md`.
+
+## 2026-07-23 — Full-repo review (4-dimension audit)
+- Ran parallel security / data-layer / code-quality / tests-tooling review; consolidated 22 findings into docs/repo-review-2026-07-23.md (tiered).
+- Tier 1 (pre-activation): anon EXECUTE on adjust_inventory RPC, mock checkout mints paid orders when PayPal unset, refund double-spend race, oversell (no stock check), non-transactional order creation.
+- Also: no CI/typecheck gate; PayPal + hosted-Supabase paths have zero test coverage (e2e runs file adapter only); JSON-LD stored XSS; CSV formula injection; unbounded page_views.
+- No code changed — review only.
+
+## 2026-07-23 — Merged second (Codex) review into repo-review doc
+- Spot-verified Codex's unique finds: capture re-price mismatch (records total ≠ captured), inventory double-count (on_hand − committed after already decrementing), variant display/purchase mismatch, mock card PAN collection. All confirmed; added as Addendum A1–A10 to docs/repo-review-2026-07-23.md.
+- Codex missed: refund double-spend race, JSON-LD stored XSS, file-adapter test masking, fulfill/cancel race. Both reviews agree on top 2 (anon RPC EXECUTE, mock checkout fail-open).
