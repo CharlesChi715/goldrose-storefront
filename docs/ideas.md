@@ -12,10 +12,6 @@ turn it into a real task.
 
 ## From boss — 2026-06-28
 
-- 🆕 **SEO (Search Engine Optimization)** 
-
-- 🆕 **GEO (Generative Engine Optimization)** 
-
 - redirect customer from other AI generated videos to this website and finishes the final episode to bring more views of this website
 
 - 🆕 Analytics about behavior of the viewer in this website.
@@ -51,6 +47,8 @@ turn it into a real task.
   pinterest，youtube。能否归因板块看到每时每刻有多少用户分别从什么渠道进来的
   还有什么国家 这样我就能有效判断素材的成效了 这个板块很重要
 
-## General / unsorted
+## From boss - 07-23
 
-- 🆕 _(anything that doesn't fit a list above)_
+- 归因的话还要加个分析，比如TikTok 有好几个账号发布内容，要能知道是从哪个账号过来的，客户在独立站下单了也要追溯到具体从哪个账号引流过来的. 这样我就可以给销售算提成了
+
+- 比如客户点击了这个图片，最上面的轮播图片就要变成这个sku的一系列图片
