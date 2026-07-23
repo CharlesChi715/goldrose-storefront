@@ -1907,3 +1907,18 @@ Explain why mock code remains in lib/checkout
 ## 2026-07-23 — Merged second (Codex) review into repo-review doc
 - Spot-verified Codex's unique finds: capture re-price mismatch (records total ≠ captured), inventory double-count (on_hand − committed after already decrementing), variant display/purchase mismatch, mock card PAN collection. All confirmed; added as Addendum A1–A10 to docs/repo-review-2026-07-23.md.
 - Codex missed: refund double-spend race, JSON-LD stored XSS, file-adapter test masking, fulfill/cancel race. Both reviews agree on top 2 (anon RPC EXECUTE, mock checkout fail-open).
+
+## 2026-07-23 18:10 AEST
+
+docs: add first feature learning doc (trial)
+
+- Create docs/learning/01-add-to-cart-checkout.md following the new
+  docs/learning-docs-guideline.md: an end-to-end trace of Add to Cart →
+  /checkout → mock order creation (BuyButtons → cart store →
+  CheckoutClient → /api/checkout → priceCart → createOrder → success
+  page), with an ASCII flow chart, file:line links, jargon notes
+  calibrated to Charles's skill profile, the PayPal-branch contrast,
+  and the e2e/unit tests covering the path.
+- This is a sample for Charles to review the format before more
+  features are generated. SUMMARY.md and README.md left untouched
+  pending approval of the format.
