@@ -1880,3 +1880,11 @@ Explain why mock code remains in lib/checkout
 - **Housekeeping**: deleted Shopify-era `lib/business.ts` (unimported; decisions preserved in docs/archive/launch-checklist.md) and unused `isCountryCode`; `"type": "module"` in package.json (kills node --test warnings; configs already ESM); SUMMARY test counts corrected (55 e2e + 20 unit).
 - Verified: tsc clean, build clean, 20 unit + 55 e2e green (one flake retried clean).
 - Reported-not-fixed (need owner/design decisions): PayPal capture amount-mismatch only logs; customer auto-link race (wants unique constraint); tax base vs discount apportionment (latent, tax=0); adminAlerts full-table reads on every admin navigation; page_views has no retention policy.
+
+## 2026-07-23 — Dedupe assets/ vs public/
+- Deleted `assets/product-photos/` (9 files, ~2 MB): every file was a byte-identical
+  copy of a `public/products/` image. Verified zero code references (only an archived
+  doc mention). `assets/` now holds only the raw nav-icon originals.
+- Noted in SUMMARY.md that public/ is canonical.
+- Known remaining dup: `public/home/logo.png` = `public/veloria/logo.png` (kept — each
+  Figma-imported page references its own path).

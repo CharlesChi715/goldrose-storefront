@@ -18,7 +18,7 @@ goldrose-storefront/
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
 ├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 20 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
-├── assets/              # Raw owner art (not served; cropped copies go to public/)
+├── assets/              # Raw owner nav-icon art only (not served; public/ holds the canonical processed copies)
 ├── docs/                # admin-design.md (SPEC), USER-GUIDE.md (rendered at /admin/guide), Database.md, ideas.md, seo-roadmap.md, archive/
 └── SUMMARY.md           # this file
 ```
