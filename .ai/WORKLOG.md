@@ -1958,3 +1958,17 @@ docs: add first feature learning doc (trial)
 - `next.config.ts`: added `Cache-Control: public, max-age=604800, stale-while-revalidate=2592000` for `/veloria|home|products|top-nav|bottom-nav/*` (was default max-age=0 → revalidate every view).
 - Added `fetchPriority="high"` to the three LCP hero `<img>`s (home banner, shop hero, product-detail hero).
 - Verified: 20 unit tests green; pixel-diff + stage9 screenshot e2e green (6/6); production build clean. Tools installed with `--no-save`, node_modules restored after.
+
+## 2026-07-23 — SUMMARY.md freshness pass
+- Added missing top-level items to the file chart: `proxy.ts` (auth middleware), `temp/` (owner upload scratch), `docs/learning/` mention.
+- Noted today's perf commit (2ffcdcf: PNG shrink, asset cache headers, hero fetchPriority) under Current state.
+- Left uncommitted per-account attribution WIP (lib/admin/analytics.ts, channels.ts) out of SUMMARY until it lands.
+
+## 2026-07-23 — Per-account attribution for commissions (ideas.md item)
+- Owner idea (verbatim in docs/ideas.md): multiple TikTok accounts post content; trace traffic AND orders back to the specific account so sales commission can be calculated.
+- Convention: `utm_content` = posting-account name (beacon already captured it). New `accountOf()` in lib/admin/channels.ts → "TikTok · amy" labels (channel-prefixed so same-named accounts on different platforms stay separate).
+- Analytics (lib/admin/analytics.ts + dashboard): new cards "Sessions by posting account" and "Sales by posting account (for commissions)" (orders + net sales per account, first-touch via visitor's first view).
+- Order detail: Conversion summary now shows "Referred by account" (EN/中文 i18n added).
+- Docs: USER-GUIDE "Marketing links" EN+中文 explain the utm_content convention with example link. Demo seed tags James's Instagram visits with an account.
+- Verified: 23 unit tests (3 new accountOf), tsc clean, eslint clean, admin-analytics e2e extended (tagged landing link → order traces to "TikTok · amy") — 5/5 pass.
+- Left uncommitted on main per session scope; ideas.md untouched (stays raw).

@@ -508,6 +508,11 @@ export function OrderDetailView({
                     <Text as="p" tone="subdued" variant="bodySm">
                       {t("order.conversion.last")}: {conversion.lastSource}
                     </Text>
+                    {conversion.account ? (
+                      <Text as="p" tone="subdued" variant="bodySm">
+                        {t("order.conversion.account")}: {conversion.account}
+                      </Text>
+                    ) : null}
                   </BlockStack>
                 ) : (
                   <Text as="p" tone="subdued">

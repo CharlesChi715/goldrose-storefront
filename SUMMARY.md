@@ -16,17 +16,19 @@ goldrose-storefront/
 ├── lib/                 # Domain logic: admin/, checkout/, supabase/ (2 backends: hosted / .data file adapter), account/, cart/
 ├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth)
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
+├── proxy.ts             # Auth middleware (Next 16 name, §9.2) — guards /admin + /api/admin only
 ├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 20 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
 ├── assets/              # Raw owner nav-icon art only (not served; public/ holds the canonical processed copies)
-├── docs/                # Specs/guides, unified search plan, SEO/GEO research, repo review, and archive/
+├── docs/                # Specs/guides, learning/ walkthroughs, SEO/GEO research, repo review, and archive/
+├── temp/                # Owner's raw upload zips (nav-button art) — scratch, not served
 └── SUMMARY.md           # this file
 ```
 
 ## Current state (2026-07-23)
 
 - **Admin build COMPLETE** — stages 0–9 on `main` per §0 one-shot run. Historical report: [docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) — its **§5 owner activation checklist is still the live to-do list**.
-- `/admin` = bilingual (EN/中文, visible top-bar toggle) Polaris Shopify-clone: Home, Orders (drafts/abandoned/fulfill/refund/cancel/timeline), Products (variants, media, inventory + movements), Customers, Content (slots/files/Ideas), Analytics (first-party beacon; channel + country + UTM attribution — owner must use UTM-tagged links, see USER-GUIDE "Marketing links"), Discounts, Settings, ⌘K search.
+- `/admin` = bilingual (EN/中文, visible top-bar toggle) Polaris Shopify-clone: Home, Orders (drafts/abandoned/fulfill/refund/cancel/timeline), Products (variants, media, inventory + movements), Customers, Content (slots/files/Ideas), Analytics (first-party beacon; channel + country + UTM + posting-account attribution — `utm_content` = account, sessions/sales per account for commissions, order detail shows "Referred by account"; owner must use UTM-tagged links, see USER-GUIDE "Marketing links"), Discounts, Settings, ⌘K search.
 - **Storefront reads the DB** (revalidate 300). Pixel-exact Figma design guarded by pixel-diff; only designated text boxes show live data. SEO/GEO baseline live: sitemap, robots (AI-crawler toggle), /llms.txt, JSON-LD.
 - **SUPABASE ACTIVE (hosted, ref `cfvsvgbldnzkcjvbwnjp`)**: migrations run, clean seed + announcements, verified. ⚠️ **local dev writes the SAME live db** (e2e stays on the file adapter). `npm run seed -- --demo` tops up demo store data (refuses if orders exist) — owner still to run it.
 - **Admin auth = live-like**: everyone logs in (open-access override deleted; local no-Supabase dev stays open). "Request access" sign-up → owner approves at Settings → Team; **sign-up nickname mandatory** = forum identity; "Forgot password?" → `/admin/reset-password`. Team **Remove is owner-only** (earliest approved account, `lib/admin/team-owner.ts`).
@@ -35,6 +37,7 @@ goldrose-storefront/
 - `npm run seed -- --reset` restores a pristine local db.
 - **"read:" comments (2026-07-23)**: `// read: "…"` one-liners after hard-to-read TypeScript syntax — near-literal wording keeping the code's own words (Charles's convention, see agent memory). Pilot: `lib/supabase/types.ts`; extend only to files Charles names.
 - **JSDoc (2026-07-23)**: all exported functions in `lib/` have `/** … */` hover docs (summary + `@param`/`@returns`, side effects, cents units). Keep new `lib/` functions documented in this style; distinct from `read:` comments.
+- **Perf (2026-07-23)**: lossless PNG shrink (nav/hero), long-cache asset headers in `next.config.ts`, hero `fetchPriority`.
 
 ## Key facts / constraints
 

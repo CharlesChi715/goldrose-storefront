@@ -67,3 +67,23 @@ export function channelOf(view: PageViewRow | undefined): string {
   }
   return raw;
 }
+
+/**
+ * Posting-account label (owner request 2026-07-23): the owner runs several
+ * accounts per platform (e.g. multiple TikTok accounts, one per salesperson)
+ * and pays commission by which account brought the buyer. The account name
+ * travels in the link's `utm_content` tag; the label is prefixed with the
+ * channel so same-named accounts on different platforms stay separate.
+ *
+ * @param view - The session's landing page view.
+ * @returns "TikTok · amy"-style label, or null when the visit carried no
+ *   utm_content tag.
+ */
+export function accountOf(view: PageViewRow | undefined): string | null {
+  const account = view?.utm?.utm_content?.trim();
+  if (!account) {
+    return null;
+  }
+  const channel = channelOf(view);
+  return channel === "Direct" ? account : `${channel} · ${account}`;
+}

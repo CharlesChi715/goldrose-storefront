@@ -304,6 +304,14 @@ export function AnalyticsDashboard({
               value: String(row.sessions),
             }))}
           />
+          <ListCard
+            title={t("analytics.card.sessionsByAccount")}
+            empty={t("analytics.emptyAccount")}
+            rows={summary.trafficByAccount.map((row) => ({
+              label: row.account,
+              value: String(row.sessions),
+            }))}
+          />
         </InlineGrid>
 
         <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
@@ -336,6 +344,14 @@ export function AnalyticsDashboard({
             empty={t("analytics.empty")}
             rows={summary.salesBySource.map((row) => ({
               label: `${row.source} (${row.orders})`,
+              value: formatMoney(row.salesCents),
+            }))}
+          />
+          <ListCard
+            title={t("analytics.card.salesByAccount")}
+            empty={t("analytics.emptyAccount")}
+            rows={summary.salesByAccount.map((row) => ({
+              label: `${row.account} (${row.orders})`,
               value: formatMoney(row.salesCents),
             }))}
           />

@@ -8,6 +8,7 @@
  */
 
 import { randomUUID } from "crypto";
+import { accountOf } from "./channels.ts";
 import { sendShippingConfirmationEmail } from "@/lib/email";
 import { getPayPalConfig, refundPayPalCapture } from "@/lib/paypal/client";
 import { getStore } from "@/lib/supabase/store.ts";
@@ -29,6 +30,8 @@ export type ConversionSummary = {
   sessionCount: number;
   firstSource: string;
   lastSource: string;
+  /** Posting account that brought the buyer (utm_content on the first view) — commission basis. */
+  account: string | null;
   pageViews: number;
 };
 
@@ -119,6 +122,7 @@ async function conversionFor(visitorId: string | null): Promise<ConversionSummar
     sessionCount: sessions.size,
     firstSource: sourceLabel(views[0]),
     lastSource: sourceLabel(views[views.length - 1]),
+    account: accountOf(views[0]),
     pageViews: views.length,
   };
 }

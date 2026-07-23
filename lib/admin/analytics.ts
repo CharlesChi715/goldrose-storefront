@@ -7,7 +7,7 @@
  */
 
 import { cache } from "react";
-import { channelOf } from "./channels.ts";
+import { accountOf, channelOf } from "./channels.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type {
   DbTables,
@@ -100,11 +100,13 @@ export type AnalyticsSummary = {
   salesByCountry: Array<{ country: string; orders: number; salesCents: number }>;
   salesByDiscount: Array<{ code: string; orders: number; salesCents: number }>;
   salesBySource: Array<{ source: string; orders: number; salesCents: number }>;
+  salesByAccount: Array<{ account: string; orders: number; salesCents: number }>;
   salesOverTime: Array<{ date: string; salesCents: number }>;
   visitorsRightNow: number;
   trafficByChannel: Array<{ channel: string; sessions: number }>;
   trafficByCountry: Array<{ country: string; sessions: number }>;
   trafficByCampaign: Array<{ campaign: string; sessions: number }>;
+  trafficByAccount: Array<{ account: string; sessions: number }>;
   liveVisitors: {
     total: number;
     byChannel: Array<{ channel: string; visitors: number }>;
@@ -218,14 +220,24 @@ export async function analyticsSummary(
     }
   }
   const bySource = new Map<string, { orders: number; salesCents: number }>();
+  // Sales by posting account (owner request 2026-07-23): trace each order back
+  // to the specific account that brought the buyer (utm_content on the
+  // visitor's first view) so per-salesperson commission can be worked out.
+  const byAccountSales = new Map<string, { orders: number; salesCents: number }>();
   for (const order of currentOrders) {
-    const source = order.visitor_id
-      ? channelOf(firstViewByVisitor.get(order.visitor_id))
-      : "Unattributed";
+    const firstView = order.visitor_id ? firstViewByVisitor.get(order.visitor_id) : undefined;
+    const source = order.visitor_id ? channelOf(firstView) : "Unattributed";
     const entry = bySource.get(source) ?? { orders: 0, salesCents: 0 };
     entry.orders += 1;
     entry.salesCents += order.total_cents - order.refunded_cents;
     bySource.set(source, entry);
+    const account = accountOf(firstView);
+    if (account) {
+      const accountEntry = byAccountSales.get(account) ?? { orders: 0, salesCents: 0 };
+      accountEntry.orders += 1;
+      accountEntry.salesCents += order.total_cents - order.refunded_cents;
+      byAccountSales.set(account, accountEntry);
+    }
   }
 
   // Traffic attribution (owner request 2026-07-22): sessions in range grouped
@@ -234,6 +246,7 @@ export async function analyticsSummary(
   const byChannel = new Map<string, number>();
   const byGeoCountry = new Map<string, number>();
   const byCampaign = new Map<string, number>();
+  const byAccountSessions = new Map<string, number>();
   for (const sessionId of currentSessions) {
     const landing = firstViewBySession.get(sessionId);
     const channel = channelOf(landing);
@@ -243,6 +256,10 @@ export async function analyticsSummary(
     const campaign = landing?.utm?.utm_campaign;
     if (campaign) {
       byCampaign.set(campaign, (byCampaign.get(campaign) ?? 0) + 1);
+    }
+    const account = accountOf(landing);
+    if (account) {
+      byAccountSessions.set(account, (byAccountSessions.get(account) ?? 0) + 1);
     }
   }
 
@@ -322,6 +339,9 @@ export async function analyticsSummary(
     salesBySource: [...bySource.entries()]
       .map(([source, entry]) => ({ source, ...entry }))
       .sort((a, b) => b.salesCents - a.salesCents),
+    salesByAccount: [...byAccountSales.entries()]
+      .map(([account, entry]) => ({ account, ...entry }))
+      .sort((a, b) => b.salesCents - a.salesCents),
     salesOverTime: [...buckets.entries()].map(([date, salesCents]) => ({ date, salesCents })),
     visitorsRightNow,
     trafficByChannel: [...byChannel.entries()]
@@ -332,6 +352,9 @@ export async function analyticsSummary(
       .sort((a, b) => b.sessions - a.sessions),
     trafficByCampaign: [...byCampaign.entries()]
       .map(([campaign, sessions]) => ({ campaign, sessions }))
+      .sort((a, b) => b.sessions - a.sessions),
+    trafficByAccount: [...byAccountSessions.entries()]
+      .map(([account, sessions]) => ({ account, sessions }))
       .sort((a, b) => b.sessions - a.sessions),
     liveVisitors: {
       total: visitorsRightNow,

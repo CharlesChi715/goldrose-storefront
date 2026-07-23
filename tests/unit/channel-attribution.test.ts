@@ -8,7 +8,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { channelOf } from "../../lib/admin/channels.ts";
+import { accountOf, channelOf } from "../../lib/admin/channels.ts";
 import type { PageViewRow } from "../../lib/supabase/types.ts";
 
 function view(patch: Partial<PageViewRow>): PageViewRow {
@@ -77,4 +77,30 @@ test("no signal means Direct; unknown sources pass through unchanged", () => {
   assert.equal(channelOf(view({})), "Direct");
   assert.equal(channelOf(view({ utm: { utm_source: "Newsletter" } })), "Newsletter");
   assert.equal(channelOf(view({ referrer: "https://example.com/blog" })), "example.com");
+});
+
+test("accountOf labels the posting account from utm_content, prefixed with the channel", () => {
+  assert.equal(
+    accountOf(view({ utm: { utm_source: "tiktok", utm_content: "amy" } })),
+    "TikTok · amy",
+  );
+  assert.equal(
+    accountOf(view({ utm: { utm_source: "tiktok", utm_content: "ben" } })),
+    "TikTok · ben",
+  );
+  assert.equal(
+    accountOf(view({ utm: { utm_source: "instagram", utm_content: "amy" } })),
+    "Instagram · amy",
+  );
+});
+
+test("accountOf without a channel signal falls back to the bare account name", () => {
+  assert.equal(accountOf(view({ utm: { utm_content: "amy" } })), "amy");
+});
+
+test("accountOf is null without a utm_content tag", () => {
+  assert.equal(accountOf(undefined), null);
+  assert.equal(accountOf(view({})), null);
+  assert.equal(accountOf(view({ utm: { utm_source: "tiktok" } })), null);
+  assert.equal(accountOf(view({ utm: { utm_source: "tiktok", utm_content: "  " } })), null);
 });

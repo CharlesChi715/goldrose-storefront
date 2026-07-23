@@ -22,9 +22,11 @@ let orderName = "";
 test("browsing the storefront writes page views and checkout carries the visitor", async ({
   page,
 }) => {
-  // Browse: the beacon posts one view per page.
+  // Browse: the beacon posts one view per page. The landing link is tagged
+  // like an owner marketing link — utm_content names the posting account so
+  // the order can be traced back to it (commission attribution).
   const beacon = page.waitForResponse("**/api/beacon");
-  await page.goto("/shop");
+  await page.goto("/shop?utm_source=tiktok&utm_content=amy&utm_campaign=stage7-video");
   await beacon;
   const beacon2 = page.waitForResponse("**/api/beacon");
   await page.goto("/products/signature-24k-gold-rose");
@@ -76,6 +78,8 @@ test("the completed order shows its Conversion summary", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Conversion summary" })).toBeVisible();
   await expect(page.getByText(/\d+ sessions before this order/)).toBeVisible();
   await expect(page.getByText(/First visit: /)).toBeVisible();
+  // Commission attribution: the order traces back to the posting account.
+  await expect(page.getByText("Referred by account: TikTok · amy")).toBeVisible();
 });
 
 test("Home shows metric cards, chart and the things-to-do feed", async ({ page }) => {
@@ -108,9 +112,16 @@ test("analytics cards compute for a chosen range with live visitors", async ({ p
     "Sessions by channel",
     "Sessions by visitor country",
     "Sessions by campaign",
+    "Sessions by posting account",
+    "Sales by posting account (for commissions)",
   ]) {
     await expect(page.getByText(card, { exact: true }).first()).toBeVisible();
   }
+
+  // Account attribution from the tagged landing link: the session and the
+  // sale both roll up under the posting account.
+  await expect(page.getByText("TikTok · amy").first()).toBeVisible();
+  await expect(page.getByText(/TikTok · amy \(\d+\)/).first()).toBeVisible();
 
   // Funnel from the beacon: sessions ≥ 1, reached checkout ≥ 1, purchased ≥ 1.
   await expect(page.getByText("Reached checkout")).toBeVisible();
