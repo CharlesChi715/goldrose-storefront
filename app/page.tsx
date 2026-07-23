@@ -280,6 +280,7 @@ export default async function HomePage() {
           alt="This week's pick: Sapphire Blue Forever Rose — limited offer, 15% off"
           width={372}
           height={172}
+          fetchPriority="high"
           style={{ ...abs(0, 60, 372, 172), objectFit: "cover" }}
         />
 

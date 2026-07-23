@@ -196,6 +196,7 @@ export default async function ProductDetailPage({
           alt={product.images[0]?.alt ?? product.title}
           width={398}
           height={250}
+          fetchPriority="high"
           style={{ ...abs(0, 8, 398, 250), display: "block" }}
         />
         <div style={{ ...abs(0, 268, 18, 7), background: "#153C34", borderRadius: 3.5 }} />

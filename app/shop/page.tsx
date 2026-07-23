@@ -157,6 +157,7 @@ export default async function ShopPage() {
         alt="Featured collection"
         width={444}
         height={202}
+        fetchPriority="high"
         style={{ ...abs(-7, 94, 444, 202), display: "block", maxWidth: "none" }}
       />
 

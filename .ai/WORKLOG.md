@@ -1951,3 +1951,10 @@ docs: add first feature learning doc (trial)
 - Style: one-sentence behavior summary (+ side effects: DB writes, emails, throws, cents units), `@param`/`@returns` without repeating TS types, tiny examples where helpful (4999 → "$49.99").
 - Existing comments merged into the new blocks, no text lost; ROLE OF THIS FILE headers and `// read:` comments untouched; zero code changes (final combined check: `tsc --noEmit` clean, 20/20 unit tests pass, diff comment-only +949/-54 — every removed line was an old comment expanded into JSDoc).
 - `lib/supabase/types.ts` untouched (types only, `read:` pilot preserved); `lib/checkout/countries.ts` and `checkout/types.ts` already adequately covered.
+
+## 2026-07-23 — Obvious repo optimizations (perf pass)
+
+- Losslessly recompressed all 51 PNGs in `public/` (sharp zlib pass + oxipng via @napi-rs/image, pixel-identity verified before each write): 5.46 MB → 4.79 MB (−12%). `assets/` originals untouched.
+- `next.config.ts`: added `Cache-Control: public, max-age=604800, stale-while-revalidate=2592000` for `/veloria|home|products|top-nav|bottom-nav/*` (was default max-age=0 → revalidate every view).
+- Added `fetchPriority="high"` to the three LCP hero `<img>`s (home banner, shop hero, product-detail hero).
+- Verified: 20 unit tests green; pixel-diff + stage9 screenshot e2e green (6/6); production build clean. Tools installed with `--no-save`, node_modules restored after.
