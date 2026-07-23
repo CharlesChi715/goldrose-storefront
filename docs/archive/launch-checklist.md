@@ -31,7 +31,7 @@ you can confirm. Nothing technical, but everything downstream depends on them.
 ## Phase 2 — Set up Shopify (the checkout engine)
 
 > **⚠️ Superseded (2026-07-21):** Shopify is being removed — the custom admin
-> + native checkout per [admin-design.md](admin-design.md) replaces this
+> + native checkout per [admin-design.md](../admin-design.md) replaces this
 > phase. Kept for historical context; details archived in
 > `docs/archive/checkout.md` and `docs/archive/shopify-integration.md`.
 

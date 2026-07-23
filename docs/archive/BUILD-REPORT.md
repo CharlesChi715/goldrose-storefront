@@ -4,7 +4,7 @@
 
 # GoldRose Admin Build — Report (§0.5)
 
-**Build:** one-shot autonomous run per [docs/admin-design.md](admin-design.md) §0, stages 0–9, one commit per stage on `main`.
+**Build:** one-shot autonomous run per [docs/admin-design.md](../admin-design.md) §0, stages 0–9, one commit per stage on `main`.
 **Date:** 2026-07-22 · **Builder:** Claude (autonomous, §0.4 authority)
 **State:** all stages green — `next build` passes, 43 e2e + 9 unit tests pass, storefront pixel baselines intact (home byte-exact; shop/product masked per §14.2 Stage 9).
 
@@ -59,7 +59,7 @@
 - Hosted-only paths not exercisable locally: Supabase Auth login/MFA, RLS/grants, storage bucket, the real PayPal network calls (fixture-tested instead), geo-IP headers (Vercel-only).
 - Non-admin-user → 404 is enforced in code (`requireAdmin`) but only meaningful with hosted auth (local dev login is inherently owner-only).
 - First e2e-suite caveat: tests mutate the local db (orders, movements accumulate). `npm run seed -- --reset` restores a pristine db (stop the dev server first).
-- `docs/flow-map.md` and README still describe some Shopify-era flow; superseded by this report and the design doc.
+- `docs/archive/flow-map.md` and README still describe some Shopify-era flow; superseded by this report and the design doc.
 
 ## 5. Owner activation checklist（激活清单）
 
@@ -89,7 +89,7 @@ Do these in order; everything else already works.
    - [ ] Screenshot every Shopify admin screen we clone, in **EN and 中文**, into `docs/shopify-reference/`.
    - [ ] Cancel the Shopify trial/subscription. (Nothing to migrate.)
 7. **Figma token**: the stray token was deleted from `.env.local` (Stage 4) — **revoke it** in Figma → Settings → Personal access tokens.
-8. **Go-live later** (from `docs/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **turn Supabase Auth "Confirm email" back ON** once Resend is connected (it's off during testing — sign-up emails wouldn't deliver without SMTP) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
+8. **Go-live later** (from `docs/archive/launch-checklist.md`): real zone rates (OQ-2), tax approach, real product content (OQ-3), custom domain, policy pages, consent wording review, **turn Supabase Auth "Confirm email" back ON** once Resend is connected (it's off during testing — sign-up emails wouldn't deliver without SMTP) — and flipping `PAYPAL_ENV=live` is **yours alone** (§0.3).
 
 ## 6. How to run
 

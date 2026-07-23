@@ -1,8 +1,8 @@
 # How AI search recommends products — research report (2026-07-23)
 
-_Deep-research run (105 agents, 23 sources fetched, 25 top claims adversarially verified: 20 confirmed / 5 refuted). Prioritized primary sources — OpenAI, Google, Perplexity, Microsoft official docs — over SEO-blog speculation. Companion to [seo-roadmap.md](seo-roadmap.md); this file covers the AI-search/GEO side specifically. Claims marked **[confirmed]** survived 3-vote verification against live primary sources; everything else is flagged._
+_Deep-research run (105 agents, 23 sources fetched, 25 top claims adversarially verified: 20 confirmed / 5 refuted). Prioritized primary sources — OpenAI, Google, Perplexity, Microsoft official docs — over SEO-blog speculation. Companion to [seo-intro.md](../seo-intro.md); this file covers the AI-search/GEO side specifically. Claims marked **[confirmed]** survived 3-vote verification against live primary sources; everything else is flagged._
 
-> **See also [geo-codex.md](geo-codex.md)** — the deeper primary doc: same core findings plus a GoldRose storefront audit (P0 data-trust fixes), Claude/Amazon/Meta coverage, and **PayPal Store Sync** (our closest-fit program), which this file missed. This file remains the quick summary.
+> **See also [geo-intro.md](../geo-intro.md)** (formerly `geo-codex.md`) — the deeper primary doc: same core findings plus a GoldRose storefront audit (P0 data-trust fixes), Claude/Amazon/Meta coverage, and **PayPal Store Sync** (our closest-fit program), which this file missed. This file remains the quick summary.
 
 ## TL;DR
 AI shopping surfaces run on **two parallel discovery channels**:
@@ -65,7 +65,7 @@ Prereqs shared by everything below: real product content (OQ-3) and live Supabas
 3. **Build one feed generator** (e.g. `/api/feeds/google.xml|csv` from Supabase products): Google-Shopping-format covers **Google Merchant Center + Perplexity + Microsoft MMC**; OpenAI needs its own flat-file variant of the same data.
 4. **Sign up**: Google Merchant Center free listings (also unlocks the AI-performance report when it reaches us) → Perplexity Merchant Program (free) → Microsoft Merchant Center → apply at chatgpt.com/merchants (US waitlist).
 5. **Google Search Console + Bing Webmaster Tools** — the instrument panels (Bing matters more than usual because ChatGPT leans on it).
-6. **Conversational copy**: write titles/descriptions the way buyers ask AI ("anniversary gift for wife", "preserved rose that lasts forever") — this is Google's only stated content-side AI lever, and it aligns with seo-roadmap.md §1.
+6. **Conversational copy**: write titles/descriptions the way buyers ask AI ("anniversary gift for wife", "preserved rose that lasts forever") — this is Google's only stated content-side AI lever, and it aligns with seo-intro.md §1.
 7. **Later — agentic checkout**: when live, revisit Copilot Checkout via **PayPal as PSP** (we're PayPal-native, owner has a business account) and OpenAI's `is_eligible_checkout` tier. US/USD-only today; check owner's merchant-of-record eligibility first.
 
 ## 4. Agentic commerce landscape (context for OQ-1/PayPal)

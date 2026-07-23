@@ -7,7 +7,7 @@
 | **Users** | Charles' teammates |
 | **Audience** | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below |
 | **Version** | Rev 4.4 · 2026-07-22 — full history in §17 |
-| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/flow-map.md` · `docs/launch-checklist.md` · `docs/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
+| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/archive/flow-map.md` · `docs/archive/launch-checklist.md` · `docs/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
 
 ## Table of contents
 

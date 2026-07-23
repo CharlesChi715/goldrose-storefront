@@ -15,7 +15,7 @@ checkout hands the cart to Shopify's hosted checkout via a cart permalink.
 Locally, everything still runs in **mock (development) mode** by default, so
 the whole flow is clickable without any real account, money, or order.
 Nothing is charged in mock mode and no card number is ever stored. See
-`docs/web-app-learning-guide.md` for why storing card numbers is never done.
+`docs/archive/web-app-learning-guide.md` for why storing card numbers is never done.
 
 ## Why one Shopify checkout powers all three
 

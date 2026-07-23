@@ -7,7 +7,7 @@
 This is the operational plan for making GoldRose discoverable in conventional
 search, shopping surfaces, and AI-assisted product discovery. Use
 [geo-intro.md](geo-intro.md) for the research and platform background, and
-[seo-roadmap.md](seo-roadmap.md) for the concise opportunity map. Do not track
+[seo-intro.md](seo-intro.md) for the concise opportunity map. Do not track
 implementation in those supporting documents.
 
 ## 1. Why SEO and GEO share one plan
