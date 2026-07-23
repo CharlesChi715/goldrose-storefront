@@ -53,6 +53,12 @@ function getSessionId(): string | null {
 }
 
 export function Beacon() {
+  // 1. Next.js updates the router state
+  // 2. React schedules Beacon to render again
+  // 3. React calls Beacon()
+  // 4. Beacon starts executing from top to bottom
+  // 5. Beacon calls usePathname()
+  // 6. usePathname() returns the updated pathname
   const pathname = usePathname();
 
   useEffect(() => {
@@ -64,6 +70,11 @@ export function Beacon() {
     if (!visitorId || !sessionId) {
       return;
     }
+    
+    // For this URL:
+    // https://goldrose.com/shop?utm_source=instagram&utm_medium=social
+    // window.location.search is:
+    // ?utm_source=instagram&utm_medium=social
     const params = new URLSearchParams(window.location.search);
     const utm: Record<string, string> = {};
     for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
