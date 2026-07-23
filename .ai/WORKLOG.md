@@ -1930,12 +1930,6 @@ docs: add first feature learning doc (trial)
   features are generated. SUMMARY.md and README.md left untouched
   pending approval of the format.
 
-<<<<<<< HEAD
-## 2026-07-23 — "read:" comments pilot in types.ts (redone after accidental reset)
-- Added 8 `// read: "…"` one-liners in `lib/supabase/types.ts` after TypeScript lines that can't be read left-to-right (generics, `(typeof X)[number]`, `Record`, `Partial`).
-- Style per Charles: near-literal verbalization keeping the code's own words, minimal English glue; naturally-readable lines get no comment. Style rule saved to agent memory.
-- First application was lost to a working-tree reset; re-applied and committed this time.
-=======
 ## 2026-07-23 — Renamed seo-roadmap.md → seo-intro.md
 - File itself was already renamed (staged); fixed all stale references:
   README.md, SUMMARY.md, docs/search-discovery-implementation.md,
@@ -1946,4 +1940,8 @@ docs: add first feature learning doc (trial)
 - Scanned every tracked/untracked .md for file-path references that no longer resolve (script checked links, backticks, bare paths against repo root + each file's dir).
 - Fixed 11 broken navigational links/pointers: admin-design "Related docs" (flow-map & launch-checklist → docs/archive/), BUILD-REPORT (admin-design link, flow-map + launch-checklist paths), geo-claude (geo-codex.md → ../geo-intro.md), flow-map "Related docs" (../admin-design.md, ../ideas.md, sibling checkout/shopify-integration), launch-checklist (../admin-design.md), archive/checkout (web-app-learning-guide → archive path), learning/01 (guideline now sibling in docs/learning/).
 - Left intentionally-historical mentions untouched: deleted Shopify-era code (`lib/products.ts`, `lib/shopify/*`, `components/Storefront.tsx`…) in archive prose and the spec's before/after + stage tables; site routes like `/llms.txt` are not repo files. WORKLOG itself untouched (history).
->>>>>>> 8c9462c (docs: rename seo-roadmap to seo-intro; fix stale cross-references)
+
+## 2026-07-23 — "read:" comments pilot in types.ts (redone after accidental reset)
+- Added 8 `// read: "…"` one-liners in `lib/supabase/types.ts` after TypeScript lines that can't be read left-to-right (generics, `(typeof X)[number]`, `Record`, `Partial`).
+- Style per Charles: near-literal verbalization keeping the code's own words, minimal English glue; naturally-readable lines get no comment. Style rule saved to agent memory.
+- First application was lost to a working-tree reset; re-applied and committed this time.
