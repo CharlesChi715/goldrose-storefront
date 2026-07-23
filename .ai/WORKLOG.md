@@ -1908,6 +1908,13 @@ Explain why mock code remains in lib/checkout
 - Spot-verified Codex's unique finds: capture re-price mismatch (records total ≠ captured), inventory double-count (on_hand − committed after already decrementing), variant display/purchase mismatch, mock card PAN collection. All confirmed; added as Addendum A1–A10 to docs/repo-review-2026-07-23.md.
 - Codex missed: refund double-spend race, JSON-LD stored XSS, file-adapter test masking, fulfill/cancel race. Both reviews agree on top 2 (anon RPC EXECUTE, mock checkout fail-open).
 
+## 2026-07-23 — Unified SEO/GEO implementation documentation
+
+- Added `docs/search-discovery-implementation.md` as the operational source of truth for search, AI discovery, merchant feeds, measurement, gates, and acceptance criteria.
+- Verified and corrected `docs/seo-roadmap.md`; removed overclaims about page coverage, programmatic SEO, rich results, free listings, and setup timing.
+- Reframed `docs/geo-intro.md` as research and replaced its duplicate implementation/checklist sections with a handoff to the unified plan.
+- Updated documentation references in `README.md`, `SUMMARY.md`, and `docs/admin-design.md` for the `geo-intro.md` rename and the unified plan.
+
 ## 2026-07-23 18:10 AEST
 
 docs: add first feature learning doc (trial)

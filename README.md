@@ -80,5 +80,7 @@ Env vars live in the Vercel dashboard; changes need a redeploy.
 | [docs/USER-GUIDE.md](docs/USER-GUIDE.md) | Tester guide, rendered at `/admin/guide` |
 | [docs/Database.md](docs/Database.md) | DB hosting + backup decisions |
 | [docs/ideas.md](docs/ideas.md) | Owner's ideas, verbatim |
-| [docs/seo-roadmap.md](docs/seo-roadmap.md) | Post-launch SEO/GEO levers |
+| [docs/search-discovery-implementation.md](docs/search-discovery-implementation.md) | SEO/GEO implementation source of truth |
+| [docs/seo-roadmap.md](docs/seo-roadmap.md) | Concise, verified SEO opportunity map |
+| [docs/geo-intro.md](docs/geo-intro.md) | AI-search/GEO research and platform background |
 | [docs/archive/](docs/archive/) | Historical: build report (§5 activation checklist still live), Shopify-era docs, old flow map |

@@ -1,8 +1,11 @@
 # How AI Search Finds and Recommends Products
 
-**GoldRose research and implementation guide — verified 23 July 2026**
+**GoldRose research report — verified 23 July 2026**
 
 AI shopping changes quickly. This report separates confirmed platform documentation from emerging research and inference. It is a broad, source-led review, not a claim that every proprietary ranking factor is known.
+
+Implementation is tracked only in
+[search-discovery-implementation.md](search-discovery-implementation.md).
 
 ## Executive summary
 
@@ -282,113 +285,20 @@ Treat these categories separately:
 
 Never use `robots.txt` to protect private data. Authentication and authorisation must do that.
 
-## 5. Recommended implementation plan
+## 5. Implementation handoff
 
-### Phase 0 — make every claim defensible
+This report's audit and evidence inform the unified
+[search-discovery implementation plan](search-discovery-implementation.md).
+That document owns:
 
-1. Replace every placeholder product claim and option with database-backed values, or remove it.
-2. Do not display a discount unless the comparison price is real and policy-compliant.
-3. Remove all ratings/review counts until genuine reviews exist.
-4. Show the real product description, material/process wording, dimensions, weight, contents, care, origin, current availability, and variant choices.
-5. Calculate delivery windows from actual shipping zones and services. Do not promise a US warehouse unless it is true.
-6. Add real Contact, Shipping, Returns/Refunds, Privacy, and Terms pages. Put the same support identity in the footer, checkout, schema, feeds, and `llms.txt`.
-7. Confirm each claim about “24K gold,” preservation, and longevity with supplier documentation. Use exact, non-ambiguous wording.
+- the truth and commerce-integrity launch gate;
+- the canonical product-record and platform-feed architecture;
+- Google, OpenAI, and Microsoft delivery sequencing;
+- content, review, and measurement work;
+- backlog IDs, dependencies, tests, exit criteria, and operating cadence.
 
-**Exit condition:** a human can compare the page, checkout, order data, and policies without finding a contradictory commercial fact.
-
-### Phase 1 — create one canonical commerce record
-
-Build a normalized export from Supabase, then derive platform formats from it:
-
-```text
-Supabase product + variants + inventory + shipping + returns
-                              │
-                 Canonical commerce record
-                 ├── Product JSON-LD
-                 ├── Google Merchant Center feed
-                 ├── Microsoft Merchant Center import/feed
-                 ├── OpenAI feed when admitted
-                 └── PayPal Store Sync catalog
-```
-
-Recommended schema improvements:
-
-- expose barcode/weight only through the secure server export, not unnecessarily in the public catalog API;
-- add `brand`, `mpn`/`gtin` policy, material, dimensions, package contents, condition, and variant-group identifiers;
-- model shipping and returns as structured records with country scope;
-- store absolute canonical image URLs;
-- record feed update time and validation errors;
-- distinguish product-level stock from exact variant availability.
-
-Upgrade Product structured data to use an absolute image URL and truthful `ProductGroup`/`hasVariant` or variant-specific Product/Offer records. Include seller/brand, variant SKU, legitimate identifiers, shipping details, and merchant return policy where supported. Add `aggregateRating` only when genuine, visible reviews support it. Validate with Google’s Rich Results Test and schema validation.
-
-### Phase 2 — submit the clean catalog
-
-1. Verify Google Search Console and create Google Merchant Center.
-2. Submit the feed for free listings; Australia is supported.
-3. Import the Google feed into Microsoft Merchant Center, then monitor approval and free-listing performance.
-4. Apply to the OpenAI merchant program. Its application accepts Australian-headquartered merchants, while the current shopping experience remains US-focused.
-5. Request PayPal Store Sync access after the catalog is clean. GoldRose’s existing Orders v2 integration makes this the most natural agentic-commerce experiment.
-6. Join Google UCP or other checkout waitlists only after discovery and feed quality are stable.
-
-Do not build multiple independent feeds by hand. Generate them from the same canonical source, validate them automatically, and refresh the full feed daily with inventory/price updates during the day where supported.
-
-### Phase 3 — cover real shopper decisions
-
-Start with a small set of authoritative pages:
-
-- anniversary gift guide for a wife or partner;
-- Valentine’s Day lasting-rose gift guide;
-- Mother’s Day keepsake guide;
-- an accurate comparison of gold-dipped, gold-plated, preserved, artificial, and fresh roses;
-- product care, display, construction/process, and expected longevity;
-- shipping deadline and returns FAQ.
-
-Each page should:
-
-- answer the primary question in the first paragraph;
-- state who the product is and is not suitable for;
-- use tables only for genuine comparisons;
-- cite primary sources for material or technical claims;
-- link to relevant products and policies;
-- include unique, descriptive images with useful alt text;
-- avoid fabricated expertise, reviews, or urgency.
-
-### Phase 4 — reviews and third-party evidence
-
-- Send a post-delivery review request to verified buyers.
-- Publish moderation and verification rules.
-- Keep the original review text, product/variant association, rating, date, and verification state.
-- Syndicate reviews only through compliant platform programs.
-- Seek legitimate gift-guide, creator, or publisher coverage based on the actual product—not paid link schemes or AI-generated review sites.
-
-### Phase 5 — measurement
-
-Add explicit channel rules for at least:
-
-- `chatgpt.com` and `utm_source=chatgpt.com`;
-- Perplexity;
-- Claude;
-- Microsoft Copilot/Bing;
-- Gemini/Google;
-- Meta AI.
-
-Track the complete funnel by source:
-
-```text
-AI referral → landing page → product view → add to cart
-            → checkout start → approved payment → refund/return
-```
-
-Use:
-
-- Search Console search and, when available to the property, generative-AI performance reporting;
-- Merchant Center performance and the AI performance-insights pilot when eligible;
-- Microsoft Product performance reports;
-- feed approval, rejection, and freshness logs;
-- first-party sessions, conversion rate, revenue, cancellation, and return rate.
-
-Maintain a monthly, versioned prompt test set across platforms—for example recipient × occasion × budget × country—but treat answer presence and rank as noisy diagnostics, not a KPI. Use a clean account and a personalised account separately, record location/date/model, and verify the recommended merchant and exact offer. ([Google generative-AI reports](https://developers.google.com/search/blog/2026/06/gen-ai-performance-reports), [Google Merchant Center AI insights](https://support.google.com/merchants/answer/17200695?hl=en))
+Keeping the actions there prevents the platform research in this report from
+becoming a second, drifting roadmap.
 
 ## 6. Myths and risky tactics
 
@@ -405,19 +315,13 @@ Maintain a monthly, versioned prompt test set across platforms—for example rec
 | “Fake reviews are acceptable until real reviews arrive.” | False and high risk. They mislead users, feeds, search systems, and regulators. |
 | “Agentic checkout should be built before catalog quality.” | Backwards. Reliable discovery, policies, stock, pricing, and order handling are prerequisites. |
 
-## 7. Practical success criteria
+## 7. Readiness handoff
 
-GoldRose is ready for merchant submission when:
-
-- every visible commercial claim is real and database-backed;
-- product, variant, feed, schema, inventory, shipping, and checkout values agree;
-- all required policy and contact pages are public and accurate;
-- search crawlers can reach the catalog while private routes remain protected;
-- every feed item has stable IDs, absolute URLs, valid images, price, stock, country scope, and policies;
-- Google Rich Results and merchant-feed validations pass;
-- no fabricated reviews, identifiers, comparison prices, origin, or delivery claims remain;
-- AI referrals and resulting sales can be attributed;
-- a human owner is responsible for monitoring feed errors and generated representations.
+The authoritative readiness gates and success measures are in
+[search-discovery-implementation.md](search-discovery-implementation.md).
+The central conclusion from this research remains: GoldRose is not ready for
+merchant submission until its visible claims, product data, inventory,
+checkout, policies, structured data, and feeds agree.
 
 ## 8. Source library
 

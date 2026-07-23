@@ -7,7 +7,7 @@
 | **Users** | Charles' teammates |
 | **Audience** | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below |
 | **Version** | Rev 4.4 · 2026-07-22 — full history in §17 |
-| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/flow-map.md` · `docs/launch-checklist.md` · `docs/seo-roadmap.md` (post-launch SEO/GEO) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
+| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/flow-map.md` · `docs/launch-checklist.md` · `docs/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
 
 ## Table of contents
 
@@ -1028,8 +1028,8 @@ Explicitly out of scope for this build:
   hit GA hardest) and no consent-banner burden.
 - SEO/GEO extensions: content/landing pages, FAQ & review structured data
   (needs reviews first), `hreflang` when storefront translations arrive;
-  prioritized post-launch roadmap (Search Console, Merchant Center,
-  programmatic occasion pages) in `docs/seo-roadmap.md`.
+  sequencing and acceptance criteria in
+  `docs/search-discovery-implementation.md`.
 - Full Markets parity: per-market pricing, multi-currency (PayPal supports
   it), storefront translations, duties/taxes calculated at checkout.
 - Collections & storefront navigation (only if the storefront design ever
