@@ -1493,6 +1493,42 @@ unconfirmed business assumptions).
   teach the dev-mode mechanism and remain accurate.
 - Markdown-only changes; README.md already reflects this state.
 
+## 2026-07-15 17:06 AEST
+
+Finish stalled rebase, commit docs refresh, push main
+
+The owner asked to add/commit/push. Found the repo detached mid-
+interactive-rebase: the session's code changes were already committed
+by the owner (26419b5 "updated .ai/WORKLOG.md") and the rebase onto
+origin's 888d801 was paused at an edit stop on its final commit.
+
+- Committed the staged docs refresh + worklog entries as a new
+  commit (b0ecaee "Refresh docs to reflect live-payment status") at
+  the edit stop rather than amending the owner's commit (permission
+  denied for history rewriting, and only add/commit/push was asked).
+- Ran `git rebase --continue` — rebase completed and main updated.
+- Pushed main to origin (888d801..b0ecaee); working tree clean and
+  in sync. Vercel deploy applies the restored $49.99 price and the
+  mock-copy cleanup to the live site.
+- Advised: if `git status` ever shows "(no branch, rebasing main)",
+  finish with `git rebase --continue` or back out with
+  `git rebase --abort` before further work.
+
+## 2026-07-15 17:08 AEST
+
+Explain why mock code remains in lib/checkout
+
+- Owner asked why a "Mock express" comment still exists in
+  lib/checkout/process.ts. Explained the deliberate split: mock
+  wording shown to customers and stale docs claims were removed,
+  while the mock code path itself is kept as the local development
+  sandbox (npm run dev with no env vars simulates checkout safely;
+  the deployed site always uses the live permalink path).
+- Offered the alternative of stripping mock mode entirely (live-only
+  checkout) and its tradeoff: local testing would hit the real
+  Shopify checkout. Awaiting owner preference; no changes made.
+- No code or docs modified; README.md remains accurate.
+
 ## 2026-07-20 — Figma "Home page" imported as /shop (pixel-exact)
 - Built `app/shop/page.tsx` from the Figma file (Open Fashion kit, GoldRose-customized), frame `418:616`, via the Figma REST API using a read-only token Charles created (he should now revoke it in Figma Settings → Security).
 - All coordinates/colors/fonts taken from API data (font: Tenor Sans via next/font). Image assets are Figma-rendered node exports at 2x in `public/shop/`.
