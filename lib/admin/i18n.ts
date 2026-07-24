@@ -456,7 +456,7 @@ const en = {
   "analytics.live.autoRefresh": "Updates every 30 seconds",
   "analytics.emptyCampaign": "No tagged visits yet — add utm_campaign to your links",
   "analytics.emptyAccount":
-    "No account-tagged visits yet — add utm_content=account-name to each account's links",
+    "No account-tagged visits yet — add utm_acc=account-name to each account's links",
   "analytics.funnel.sessions": "Sessions",
   "analytics.funnel.checkout": "Reached checkout",
   "analytics.funnel.purchased": "Purchased",
@@ -965,7 +965,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.unknown": "未知",
   "analytics.live.autoRefresh": "每 30 秒自动刷新",
   "analytics.emptyCampaign": "暂无带标签的访问——请在链接中加上 utm_campaign",
-  "analytics.emptyAccount": "暂无带账号标签的访问——请在每个账号的链接中加上 utm_content=账号名",
+  "analytics.emptyAccount": "暂无带账号标签的访问——请在每个账号的链接中加上 utm_acc=账号名",
   "analytics.funnel.sessions": "会话",
   "analytics.funnel.checkout": "进入结账",
   "analytics.funnel.purchased": "已购买",

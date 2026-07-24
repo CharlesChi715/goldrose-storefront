@@ -2025,3 +2025,15 @@ docs: add first feature learning doc (trial)
 ## 2026-07-24 — Scalable feature-progress plan
 
 - Updated `docs/Improvement-plan.md` so the proposed tracking system supports sustained growth through distributed per-feature records, recursive discovery, sharded generated views, relationship validation, scalable CLI queries, and a 1,000-feature test fixture; removed the monolithic `roadmap.yaml` design.
+
+## 2026-07-24 — Posting-account tag: utm_content → utm_acc (no fallback)
+
+- Implemented docs/features/posting-account-attribution.md plan; owner named the tag `utm_acc` (drafted as `acct=`).
+- Beacon captures utm_acc; accountOf() reads only utm_acc (utm_content deliberately ignored — new unit test pins this).
+- Updated: seed demo data, i18n empty-states (EN+中文), TESTER-GUIDE link recipe + click-test tip (EN+中文), learning doc 02 addendum, features README status → TESTING.
+- Verified: 28/28 unit tests, 5/5 admin-analytics e2e green.
+
+## 2026-07-24 — Rename STABLE status to DONE in docs/features
+- docs/features/README.md: lifecycle vocabulary, status-line example, meter legend, and all Status-tree leaves now say DONE instead of STABLE (9 spots).
+- docs/features/posting-account-attribution.md: status line pipeline updated to match.
+- Left untouched: docs/Improvement-plan.md (historical proposal text) and WORKLOG history.

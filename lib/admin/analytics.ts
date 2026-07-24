@@ -221,7 +221,7 @@ export async function analyticsSummary(
   }
   const bySource = new Map<string, { orders: number; salesCents: number }>();
   // Sales by posting account (owner request 2026-07-23): trace each order back
-  // to the specific account that brought the buyer (utm_content on the
+  // to the specific account that brought the buyer (utm_acc on the
   // visitor's first view) so per-salesperson commission can be worked out.
   const byAccountSales = new Map<string, { orders: number; salesCents: number }>();
   for (const order of currentOrders) {

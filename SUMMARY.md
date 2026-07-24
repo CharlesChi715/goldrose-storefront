@@ -17,7 +17,7 @@ goldrose-storefront/
 ├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth)
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
 ├── proxy.ts             # Auth middleware (Next 16 name, §9.2) — guards /admin + /api/admin only
-├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 20 unit — green
+├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 28 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
 ├── assets/              # Raw owner nav-icon art only (not served; public/ holds the canonical processed copies)
 ├── docs/                # Specs/guides, features/ decision records, learning/ walkthroughs, SEO/GEO research, repo review, and archive/

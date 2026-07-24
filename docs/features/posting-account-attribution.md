@@ -1,6 +1,10 @@
 # Posting-account attribution — link tag for commissions
 
-Status: BACKLOG → **READY** → IN PROGRESS → TESTING → STABLE · 2026-07-24, not yet implemented (current code still reads `utm_content`).
+Status: BACKLOG → READY → IN PROGRESS → **TESTING** → DONE · implemented 2026-07-24 (code reads `utm_acc`; unit + e2e green).
+
+> Naming note: drafted as `acct=`; owner chose **`utm_acc`** at implementation
+> time (2026-07-24) — same family look as the other tags, still not a standard
+> UTM param, so ad tools won't touch it. Everything below reads `utm_acc`.
 
 ## Context
 
@@ -10,7 +14,7 @@ Status: BACKLOG → **READY** → IN PROGRESS → TESTING → STABLE · 2026-07-
 
 ## Decision
 
-Move the account name to a **dedicated `acct=` query tag** (`...?utm_source=tiktok&acct=amy`).
+Move the account name to a **dedicated `utm_acc=` query tag** (`...?utm_source=tiktok&utm_acc=amy`).
 `utm_content` returns to its conventional "ad variant" meaning. Clean switch, **no fallback** to `utm_content`.
 
 ## Options considered
@@ -23,15 +27,17 @@ Move the account name to a **dedicated `acct=` query tag** (`...?utm_source=tikt
 
 ## Plan (work items)
 
+All done 2026-07-24 (tag named `utm_acc`):
+
 | # | File | Change |
 |---|---|---|
-| 1 | `components/Beacon.tsx` (~line 80) | Add `"acct"` to the captured query keys |
-| 2 | `lib/admin/channels.ts` `accountOf()` | Read `utm.acct` instead of `utm_content`; update doc comment |
-| 3 | `lib/admin/orders.ts`, `lib/admin/analytics.ts` | Comment wording only — logic already goes through `accountOf()` |
-| 4 | `lib/admin/i18n.ts` | Update any `utm_content` mention in admin strings (EN + 中文) |
-| 5 | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | Switch test/demo links to `acct=` |
-| 6 | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md | Owner's link recipe becomes `...&acct=amy`; add click-test tip |
-| 7 | — | Run unit tests + analytics e2e spec, confirm green |
+| 1 | `components/Beacon.tsx` (~line 80) | ✅ Added `"utm_acc"` to the captured query keys |
+| 2 | `lib/admin/channels.ts` `accountOf()` | ✅ Reads `utm.utm_acc` instead of `utm_content`; doc comment updated |
+| 3 | `lib/admin/orders.ts`, `lib/admin/analytics.ts` | ✅ Comment wording only — logic already goes through `accountOf()` |
+| 4 | `lib/admin/i18n.ts` | ✅ `analytics.emptyAccount` EN + 中文 now say `utm_acc` |
+| 5 | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | ✅ Switched to `utm_acc`; new unit test pins "utm_content is ignored" |
+| 6 | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
+| 7 | — | ✅ Unit tests + analytics e2e spec green |
 
 ## Related
 

@@ -69,15 +69,19 @@ real money.
   content — each name becomes a row in "Sessions by campaign".
 - **Tracking which account brought the sale (commissions):** if several
   accounts post on the same platform (e.g. multiple TikTok accounts, one per
-  salesperson), give each account its own `utm_content` tag and reuse it in
+  salesperson), give each account its own `utm_acc` tag and reuse it in
   every link that account posts:
 
-  `https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_content=amy&utm_campaign=rose-video-1`
+  `https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_acc=amy&utm_campaign=rose-video-1`
 
   Analytics then shows **Sessions by posting account** and **Sales by posting
   account (for commissions)** — e.g. "TikTok · amy" — and each order's page
   shows **Referred by account**, so you can trace any order back to the
   account that brought the buyer and work out that salesperson's commission.
+  `utm_acc` is our own tag (only this store reads it), so ad tools that
+  auto-fill the standard tags will never overwrite it. When you post a link
+  in a new place, click it once yourself and check the account shows up
+  under **Visitors right now** / **Sessions by posting account**.
 - For Google ads, add the same tags to the ad's final URL.
 
 # 中文指南
@@ -138,12 +142,15 @@ real money.
   youtube）。`utm_campaign` = 你给这条素材起的名字——每个名字会在"按营销活动
   划分的会话"里单独成行。
 - **追踪订单来自哪个账号（算提成）：** 同一平台有多个账号发内容时（比如几个
-  TikTok 账号、每个销售一个），给每个账号定一个专属的 `utm_content` 标签，该
+  TikTok 账号、每个销售一个），给每个账号定一个专属的 `utm_acc` 标签，该
   账号发的所有链接都带上它：
 
-  `https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_content=amy&utm_campaign=rose-video-1`
+  `https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_acc=amy&utm_campaign=rose-video-1`
 
   之后分析页会显示**按发布账号划分的会话**和**按发布账号划分的销售额（用于算
   提成）**——例如"TikTok · amy"；每个订单详情页也会显示**引流账号**，任何一笔
   订单都能追溯到具体引流账号，直接按账号给销售算提成。
+  `utm_acc` 是我们自己的标签（只有本店会读取），广告工具自动填写标准标签时
+  不会覆盖它。在新的地方发链接时，请自己先点一次，确认账号出现在**当前访客**
+  / **按发布账号划分的会话**里。
 - 投 Google 广告时，在广告的最终到达网址上加同样的标签。

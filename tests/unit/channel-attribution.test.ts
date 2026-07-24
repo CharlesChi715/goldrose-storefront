@@ -79,28 +79,38 @@ test("no signal means Direct; unknown sources pass through unchanged", () => {
   assert.equal(channelOf(view({ referrer: "https://example.com/blog" })), "example.com");
 });
 
-test("accountOf labels the posting account from utm_content, prefixed with the channel", () => {
+test("accountOf labels the posting account from utm_acc, prefixed with the channel", () => {
   assert.equal(
-    accountOf(view({ utm: { utm_source: "tiktok", utm_content: "amy" } })),
+    accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "amy" } })),
     "TikTok · amy",
   );
   assert.equal(
-    accountOf(view({ utm: { utm_source: "tiktok", utm_content: "ben" } })),
+    accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "ben" } })),
     "TikTok · ben",
   );
   assert.equal(
-    accountOf(view({ utm: { utm_source: "instagram", utm_content: "amy" } })),
+    accountOf(view({ utm: { utm_source: "instagram", utm_acc: "amy" } })),
     "Instagram · amy",
   );
 });
 
 test("accountOf without a channel signal falls back to the bare account name", () => {
-  assert.equal(accountOf(view({ utm: { utm_content: "amy" } })), "amy");
+  assert.equal(accountOf(view({ utm: { utm_acc: "amy" } })), "amy");
 });
 
-test("accountOf is null without a utm_content tag", () => {
+test("accountOf is null without a utm_acc tag", () => {
   assert.equal(accountOf(undefined), null);
   assert.equal(accountOf(view({})), null);
   assert.equal(accountOf(view({ utm: { utm_source: "tiktok" } })), null);
-  assert.equal(accountOf(view({ utm: { utm_source: "tiktok", utm_content: "  " } })), null);
+  assert.equal(accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "  " } })), null);
+});
+
+test("accountOf ignores utm_content — ad-variant values must never become accounts", () => {
+  // Decision 2026-07-24 (docs/features/posting-account-attribution.md): no
+  // fallback, so a tool-filled utm_content=banner_a can't corrupt commissions.
+  assert.equal(accountOf(view({ utm: { utm_source: "tiktok", utm_content: "banner_a" } })), null);
+  assert.equal(
+    accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "amy", utm_content: "banner_a" } })),
+    "TikTok · amy",
+  );
 });

@@ -3,6 +3,13 @@
 Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
 Commit: `17730c3 feat(analytics): per-account attribution for sales commissions`.
 
+> **Update 2026-07-24** — the account tag moved from `utm_content` to our own
+> **`utm_acc`** param, with no fallback (`utm_content` could be auto-filled by
+> ad tools with ad-variant values and corrupt the commission report; decision
+> record: [../features/posting-account-attribution.md](../features/posting-account-attribution.md)).
+> The trace below still reads exactly the same — only the tag name changed:
+> wherever this doc says `utm_content`, the code now reads `utm_acc`.
+
 ## Feature Summary
 
 **What it does**

@@ -24,18 +24,18 @@ docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md "Next steps"  →  
 
 Line 1 of every feature file, bold, fixed vocabulary:
 
-**BACKLOG → READY → IN PROGRESS → TESTING → STABLE** (+ **DROPPED**, exit from any state)
+**BACKLOG → READY → IN PROGRESS → TESTING → DONE** (+ **DROPPED**, exit from any state)
 
 - BACKLOG — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a feature file is born BACKLOG)
 - READY — approach chosen (options + pros/cons recorded)
 - IN PROGRESS — being built
 - TESTING — live on production, **awaiting human verification** (a queue, not an activity — dormant/sandbox features sit here too; automated tests were already green to land)
-- STABLE — **works well on the live site, verified by a human** (owner/Charles clicked through it); nothing known to fix — only future improvements remain possible
+- DONE — **works well on the live site, verified by a human** (owner/Charles clicked through it); nothing known to fix — only future improvements remain possible
 - DROPPED — considered and rejected; keep the file, the "why not" is the value
 
 Format — full pipeline with the **current stage bold**, then date + qualifier:
 
-`Status: BACKLOG → **READY** → IN PROGRESS → TESTING → STABLE · 2026-07-24, not yet implemented`
+`Status: BACKLOG → **READY** → IN PROGRESS → TESTING → DONE · 2026-07-24, not yet implemented`
 
 (DROPPED replaces the whole pipeline: `Status: **DROPPED** · date, why`.)
 
@@ -62,7 +62,7 @@ is maintained directly here until a new decision earns it a file.
 Meter = milestones completed after planning. BACKLOG is the empty meter — on 
 the roadmap, nothing started; a filled dot always means a real step happened:
 
-`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ TESTING · ●●●● STABLE · ✕ DROPPED`
+`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ TESTING · ●●●● DONE · ✕ DROPPED`
 
 Text after the status ONLY when the bare status would mislead (e.g. deployed
 but dormant/sandbox) or to name the blocker to the next stage — never to
@@ -74,9 +74,9 @@ restate the status.
 
 ```text
 Figma pixel-exact pages
-├── / (home) ●●●● STABLE
-├── /shop ●●●● STABLE
-├── /products/[slug] ●●●● STABLE
+├── / (home) ●●●● DONE
+├── /shop ●●●● DONE
+├── /products/[slug] ●●●● DONE
 └── wishlist button ●●●○ TESTING
 
 Native checkout (PayPal Orders v2)
@@ -123,7 +123,7 @@ Admin suite (EN/中文) — §14.3 owner walkthrough pending
 └── Analytics
     ├── first-party beacon ●●●○ TESTING
     ├── channel/UTM/country reports ●●●○ TESTING
-    └── posting-account-attribution.md ●○○○ READY — acct= tag
+    └── posting-account-attribution.md ●●●○ TESTING — utm_acc tag
 
 Admin auth
 ├── login + access approvals ●●●○ TESTING
@@ -136,8 +136,8 @@ Order emails (Resend) — console fallback until RESEND_API_KEY set
 └── owner new-order alert ●●●○ TESTING
 
 Supabase hosted DB
-├── migrations (0001, 0002) ●●●● STABLE
-├── seed (--reset / --demo) ●●●● STABLE — owner's --demo run pending
+├── migrations (0001, 0002) ●●●● DONE
+├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
 └── nightly pg_dump→S3 backup ○○○○ BACKLOG — Database.md
 ```
 

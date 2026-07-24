@@ -30,7 +30,7 @@ export type ConversionSummary = {
   sessionCount: number;
   firstSource: string;
   lastSource: string;
-  /** Posting account that brought the buyer (utm_content on the first view) — commission basis. */
+  /** Posting account that brought the buyer (utm_acc on the first view) — commission basis. */
   account: string | null;
   pageViews: number;
 };

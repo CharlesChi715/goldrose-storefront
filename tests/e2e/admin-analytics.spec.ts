@@ -23,10 +23,10 @@ test("browsing the storefront writes page views and checkout carries the visitor
   page,
 }) => {
   // Browse: the beacon posts one view per page. The landing link is tagged
-  // like an owner marketing link — utm_content names the posting account so
+  // like an owner marketing link — utm_acc names the posting account so
   // the order can be traced back to it (commission attribution).
   const beacon = page.waitForResponse("**/api/beacon");
-  await page.goto("/shop?utm_source=tiktok&utm_content=amy&utm_campaign=stage7-video");
+  await page.goto("/shop?utm_source=tiktok&utm_acc=amy&utm_campaign=stage7-video");
   await beacon;
   const beacon2 = page.waitForResponse("**/api/beacon");
   await page.goto("/products/signature-24k-gold-rose");
