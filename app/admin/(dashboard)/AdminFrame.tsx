@@ -13,6 +13,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Badge,
   Banner,
   BlockStack,
   Box,
@@ -41,6 +42,12 @@ import { searchAdminAction, setAdminLangAction, signOutAction } from "../actions
 import { useAdminLang, useAdminT, useSetAdminLang } from "../PolarisShell";
 import type { AdminAlert } from "@/lib/admin/analytics";
 import type { SearchResults } from "@/lib/admin/analytics";
+import {
+  FORUM_READ_EVENT,
+  getReadMarks,
+  totalUnread,
+  type ForumThreadActivity,
+} from "@/lib/forum-unread";
 
 export type PaymentMode = "mock" | "sandbox" | "live";
 
@@ -50,11 +57,15 @@ export function AdminFrame({
   email,
   paymentMode,
   alerts = [],
+  forumActivity = [],
+  forumIdentity = "",
   children,
 }: {
   email: string;
   paymentMode: PaymentMode;
   alerts?: AdminAlert[];
+  forumActivity?: ForumThreadActivity[];
+  forumIdentity?: string;
   children: React.ReactNode;
 }) {
   const t = useAdminT();
@@ -105,6 +116,18 @@ export function AdminFrame({
     setSearchResults(EMPTY_RESULTS);
     router.push(url);
   }
+
+  // Forum unread badge: read marks are localStorage, so count only after
+  // mount (server render shows no badge — no hydration mismatch) and recount
+  // whenever a thread page records a read.
+  const [forumUnread, setForumUnread] = useState(0);
+  useEffect(() => {
+    const recount = () =>
+      setForumUnread(totalUnread(forumActivity, getReadMarks(), forumIdentity));
+    recount();
+    window.addEventListener(FORUM_READ_EVENT, recount);
+    return () => window.removeEventListener(FORUM_READ_EVENT, recount);
+  }, [forumActivity, forumIdentity]);
 
   const setLang = useSetAdminLang();
   const toggleLang = useCallback(() => {
@@ -187,6 +210,8 @@ export function AdminFrame({
             label: t("nav.forum"),
             icon: ChatIcon,
             selected: selected("/admin/forum"),
+            badge:
+              forumUnread > 0 ? <Badge tone="new">{String(forumUnread)}</Badge> : undefined,
           },
           {
             url: "/admin/guide",

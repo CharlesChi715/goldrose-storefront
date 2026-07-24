@@ -36,6 +36,10 @@ real money.
   posts show an "edited" mark.
 - **Delete** is open to everyone during testing — please only delete your own
   posts.
+- **New messages**: the Forum item in the left menu shows how many messages
+  you haven't read, and each thread in the list carries an "n new" badge.
+  Opening a thread marks it read. The count is remembered per browser, so a
+  new device starts with everything unread; your own posts never count.
 
 ## Reporting bugs and ideas
 
@@ -105,6 +109,9 @@ real money.
 - 在帖子页底部**回复**任何讨论。
 - 自己昵称发的帖子会显示**编辑**按钮，编辑过的帖子会有"已编辑"标记。
 - 测试期间**删除**对所有人开放，请只删除自己的帖子。
+- **新消息**：左侧菜单的"论坛"会显示未读消息数量，列表里每个讨论也有
+  "n 条新消息"标记。打开讨论即视为已读。未读状态按浏览器记忆——换设备后
+  会重新显示全部未读；自己发的帖子不算未读。
 
 ## 反馈问题和想法
 

@@ -98,6 +98,39 @@ test("start a discussion, reply, edit, see it in the list, then delete it", asyn
   await expect(page.getByText(TITLE)).toHaveCount(0);
 });
 
+test("unread badges count new messages and clear after reading", async ({ page }) => {
+  await logIn(page);
+
+  // Fresh browser context = nothing read yet on this device, so the seeded
+  // announcement threads (posted by "GoldRose Team") are unread: the Forum
+  // nav item carries a count badge.
+  const forumNavLink = page.getByRole("navigation").getByRole("link", { name: /Forum/ });
+  const navBadge = forumNavLink.getByText(/^\d+$/);
+  await expect(navBadge).toBeVisible();
+  const initialUnread = Number(await navBadge.innerText());
+  expect(initialUnread).toBeGreaterThan(0);
+
+  // The thread list shows a per-thread "n new" badge.
+  await forumNavLink.click();
+  await page.waitForURL(/\/admin\/forum$/);
+  await expect(page.getByText(/\d+ new/).first()).toBeVisible();
+
+  // Read every thread: opening a thread marks it read on this device.
+  const threadTitles = [
+    "📢 Welcome to the GoldRose testing forum",
+    "📢 What to test — and what to expect",
+  ];
+  for (const title of threadTitles) {
+    await page.getByText(title).click();
+    await page.waitForURL(/\/admin\/forum\/[0-9a-f-]+$/);
+    await page.goto("/admin/forum");
+  }
+
+  // Everything read: no per-thread badges, no nav count.
+  await expect(page.getByText(/\d+ new/)).toHaveCount(0);
+  await expect(forumNavLink.getByText(/^\d+$/)).toHaveCount(0);
+});
+
 test("the display-name popup overrides the account identity", async ({ page }) => {
   await logIn(page);
   await page.goto("/admin/forum");

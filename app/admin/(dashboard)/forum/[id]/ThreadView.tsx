@@ -20,6 +20,7 @@ import {
 } from "@shopify/polaris";
 import { formatDateTime } from "@/lib/dates";
 import { fileUrl } from "@/lib/files-url";
+import { markThreadRead } from "@/lib/forum-unread";
 import type { ForumAttachment } from "@/lib/supabase/types.ts";
 import { useAdminT } from "../../../PolarisShell";
 import {
@@ -137,6 +138,16 @@ export function ThreadView({
   // Inline edit: which post is being edited, and its draft text.
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+
+  // Being on the thread means reading it: move this device's read mark to
+  // the newest post on screen (also fires after replies arrive), which
+  // updates the nav badge and the list's "new" badges.
+  const latestPostAt = posts.length > 0 ? posts[posts.length - 1].createdAt : null;
+  useEffect(() => {
+    if (latestPostAt) {
+      markThreadRead(threadId, latestPostAt);
+    }
+  }, [threadId, latestPostAt]);
 
   return (
     <Page

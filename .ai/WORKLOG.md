@@ -1972,3 +1972,41 @@ docs: add first feature learning doc (trial)
 - Docs: USER-GUIDE "Marketing links" EN+中文 explain the utm_content convention with example link. Demo seed tags James's Instagram visits with an account.
 - Verified: 23 unit tests (3 new accountOf), tsc clean, eslint clean, admin-analytics e2e extended (tagged landing link → order traces to "TikTok · amy") — 5/5 pass.
 - Left uncommitted on main per session scope; ideas.md untouched (stays raw).
+
+## 2026-07-23 — Forum unread badges (owner request)
+- Owner ask: forum should show new (unread) messages and their count; design left to me.
+- Design: per-device read marks in localStorage (`lib/forum-unread.ts`) — one "read up to" timestamp per thread; mirrors the forum's cookie-based identity, zero schema migration, works on hosted Supabase + file adapter immediately. Own posts never count as unread.
+- Nav: dashboard layout ships thread/post stamps into AdminFrame → "Forum" nav item shows a Polaris `tone="new"` badge with total unread; recounts live via a window event when a thread is read.
+- Thread list: per-thread "{n} new" / "{n} 条新消息" badge. Opening a thread marks it read up to its newest post.
+- Docs: USER-GUIDE forum sections (EN/中文) explain the badges and the per-browser caveat.
+- Verified: 27 unit tests (4 new for unread counting), tsc + eslint clean, full e2e 56/56 (new test: badges count seeded announcements, clear after reading both threads).
+
+## 2026-07-24 — Learning doc 02: posting-account attribution
+
+- Added docs/learning/02-posting-account-attribution.md per learning-docs-guideline.md:
+  end-to-end trace of commit 17730c3 (utm_content link → Beacon → page_views →
+  orders.visitor_id → accountOf() → Analytics cards + order "Referred by account").
+
+## 2026-07-24 — docs/features/ decision records started
+- Created `docs/features/` (one file per feature: decision + pros/cons + plan; README has convention + index).
+- First record: `posting-account-attribution.md` — DECIDED to move salesperson tag from `utm_content=amy` to dedicated `acct=amy` (prevents future ad-tool `utm_content` collisions corrupting commission report). Not yet implemented; plan table in the record.
+- SUMMARY.md file map updated to mention features/.
+
+## 2026-07-24 — features/ lifecycle codified
+- `docs/features/README.md` now defines the docs lifecycle (ideas.md → features/ → SUMMARY next-steps → WORKLOG), the fixed status vocabulary (IDEA→PLANNED→DECIDED→IN PROGRESS→SHIPPED→DROPPED), and the rule that a status change updates both the file's status line and the README index line in the same commit. Index doubles as roadmap.
+
+## 2026-07-24 — run skills (repo-local + global)
+- Created `.claude/skills/run-goldrose-storefront/` (SKILL.md + driver.mjs): verified safe launch on port 3001 in file-adapter mode (Supabase/PayPal env blanked), storefront/admin/mock-checkout flows all green; local db reset afterwards. Stays gitignored per owner's request (`.gitignore` edit undone).
+- Created global `~/.claude/skills/run-anywhere/` (SKILL.md + webshot.mjs): safety-first launch playbook + generic Playwright screenshot driver for any repo; tested against the running GoldRose server. Live db/PayPal never touched.
+- Status vocabulary revised per Charles: PLANNED → DECIDED → IN PROGRESS → DEPLOYED → TESTED (+ DROPPED exit); TESTED = human-verified on live site, IDEA state removed (ideas.md is the inbox).
+- (later same day) Owner asked to undo: both run skills deleted (repo-local + global run-anywhere). No git changes remain from this work.
+- README Index replaced by a Status tree (Frontend/Backend branches, status on leaves only), seeded with the project's real features and SUMMARY-derived statuses; sync rule now points at the tree leaf.
+- Status display finalized: feature files show the full pipeline with current stage bold; tree leaves use a ●●○○○ progress meter + stage name (markdown can't render bold inside the code-block tree).
+- Meter reworked to 4 dots = milestones after planning; PLANNED is now the empty meter ○○○○ (was ●○○○○, which wrongly implied progress).
+- Leaf qualifiers pruned: keep only when the bare status would mislead (dormant/sandbox) or to name the blocker to the next stage; rule added above the tree.
+- Status tree reshaped per Charles: Frontend/Backend as ### sections, each feature its own mini-tree root with the status as leaf — max line width ~55 chars so nothing wraps in narrow views.
+- Tree geometry v3 per Charles: feature = root, functions = child leaves (recursive, e.g. Admin suite → Analytics → posting-account-attribution.md), status meter inline at end of every leaf; roots carry shared caveats only. Functions decomposed from SUMMARY.
+- Status tree completeness audit (repo-verified): added wishlist button, checkout discount codes + shipping placeholder (OQ-2) + PayPal webhooks, guest order lookup /orders, concierge chat (feedback panel DEPLOYED, real widget PLANNED), product feeds PLANNED, order emails via Resend (console fallback), nightly pg_dump→S3 backup PLANNED.
+- Renamed final status TESTED → STABLE per Charles (works well live, human-verified, open to future improvement); pipeline, legend, tree leaves, and the attribution file's status line all updated.
+- Renamed DEPLOYED → TESTING per Charles (emphasizes what still needs human verification); definition clarifies it's a queue state, dormant/sandbox included.
+- Tree shorthand refs (§14.3, OQ-2, Database.md, dormant/owner-config, search-discovery) now resolve to real links in a Refs block under the tree (links can't render inside code fences); USER-GUIDE Marketing-links anchor linked from the attribution record.
