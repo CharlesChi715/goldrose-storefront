@@ -2021,3 +2021,7 @@ docs: add first feature learning doc (trial)
 ## 2026-07-24 — Feature status vocabulary rename
 
 - Renamed two statuses across docs/features/: PLANNED → BACKLOG, DECIDED → READY (lifecycle ladder, meter legend, status tree, and posting-account-attribution.md status line). Other statuses unchanged.
+
+## 2026-07-24 — Scalable feature-progress plan
+
+- Updated `docs/Improvement-plan.md` so the proposed tracking system supports sustained growth through distributed per-feature records, recursive discovery, sharded generated views, relationship validation, scalable CLI queries, and a 1,000-feature test fixture; removed the monolithic `roadmap.yaml` design.
