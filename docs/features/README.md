@@ -125,6 +125,9 @@ Admin suite (EN/中文) — §14.3 owner walkthrough pending
     ├── channel/UTM/country reports ●●●○ TESTING
     └── posting-account-attribution.md ●●●○ TESTING — utm_acc tag
 
+Product content — 120 SKUs (OQ-3)
+└── product-content-pipeline.md ○○○○ BACKLOG — live-wire pages + CSV/image import
+
 Admin auth
 ├── login + access approvals ●●●○ TESTING
 ├── password reset ●●●○ TESTING
@@ -146,6 +149,6 @@ here):
 
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
 - **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
-- **OQ-2** → [SUMMARY.md · Open questions](../../SUMMARY.md)
+- **OQ-2 / OQ-3** → [SUMMARY.md · Open questions](../../SUMMARY.md)
 - **Database.md** → [Database.md backup plan](../Database.md)
 - **search-discovery-implementation.md** → [search-discovery-implementation.md](../search-discovery-implementation.md)

@@ -52,3 +52,9 @@ turn it into a real task.
 - 归因的话还要加个分析，比如TikTok 有好几个账号发布内容，要能知道是从哪个账号过来的，客户在独立站下单了也要追溯到具体从哪个账号引流过来的. 这样我就可以给销售算提成了
 
 - 比如客户点击了这个图片，最上面的轮播图片就要变成这个sku的一系列图片
+
+## From boss — 2026-07-24
+
+- 🆕 we already get stocks in US and going to find the 达人 over US social
+  platforms to help promote the product. also we going to make video by AI and
+  let the last piece of video only available in this website to boost views.

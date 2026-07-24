@@ -35,3 +35,21 @@ Also considered and rejected: raw AWS RDS / Azure Postgres (no free tier,
 loses Supabase Auth/API — weeks of rebuild), self-hosting the Supabase stack
 (we become the ops team). Supabase hosted runs on AWS anyway and is standard
 Postgres underneath — data migrates out cleanly if ever needed.
+
+## SKU rules (2026-07-24)
+
+- **One physical item ↔ one SKU.** Never reuse a retired SKU (recycling mixes
+  two items in sales history).
+- **One listing (product page) per physical item.** Two listings sharing a SKU
+  would need a shared-inventory layer we don't have — each variant row keeps its
+  own `inventory_on_hand`, so counts drift and we oversell. Don't do it.
+- **Bundles = new shelf item.** A gift set (rose + box + card) is pre-packed,
+  physically separated stock → own SKU (e.g. `GR-SET-VAL`), own count. Rule:
+  one undivided pile = one SKU; physically separated stock = new SKU.
+- ⚠️ **Not yet enforced.** Schema mirrors Shopify's permissive behavior:
+  `product_variants.sku` defaults `''`, no unique constraint (0001), and
+  Duplicate copies SKUs verbatim (`lib/admin/products.ts`). Planned once
+  confirmed: `0003` partial unique index (`where sku <> ''`), the same check in
+  `lib/admin` (the local file adapter has no Postgres index), Duplicate clears
+  copied SKUs, friendly admin validation + an activation gate (active products
+  need non-blank SKUs; drafts may stay blank).

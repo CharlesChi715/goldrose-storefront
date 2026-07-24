@@ -3,6 +3,7 @@ Help me learn the project by tracing features end to end from the user entry poi
 Goal:
 - Understand how a feature is implemented.
 - Follow the code path through UI, components, handlers, services, APIs, files, data, and tests.
+- Add reason why designed like this as needed to better explain.
 
 Format for each feature:
 ## Feature Summary

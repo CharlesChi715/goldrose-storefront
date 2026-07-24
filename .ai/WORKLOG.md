@@ -2037,3 +2037,37 @@ docs: add first feature learning doc (trial)
 - docs/features/README.md: lifecycle vocabulary, status-line example, meter legend, and all Status-tree leaves now say DONE instead of STABLE (9 spots).
 - docs/features/posting-account-attribution.md: status line pipeline updated to match.
 - Left untouched: docs/Improvement-plan.md (historical proposal text) and WORKLOG history.
+
+## 2026-07-24 — Owner idea captured (US stock + 达人 promotion + AI video finale)
+
+- Appended owner idea verbatim to docs/ideas.md ("From boss — 2026-07-24"): US stock ready; recruit 达人 on US social platforms; AI-made video series with the final piece exclusive to the website to boost views.
+- No code changes; idea only. Related: per-account attribution (utm_acc) already shipped for commission tracking.
+
+## 2026-07-24 — Migrated posting-account-attribution.md to the new feature-record template
+
+- Rewrote docs/features/posting-account-attribution.md into the Improvement-plan §6 format: YAML front matter (id, kind, parent, area, delivery: uat, rollout: test-deployment, verification refs) replaces the body status line as the only status source.
+- Preserved all original content (naming note, context, decision, options table, work items, links); added acceptance criteria, blockers section, and a human-verification placeholder (owner click-test pending).
+- First migrated record; README status tree untouched until the generator exists. Judgment calls flagged in-file discussion: priority p1, target v1-launch, parent admin-analytics (group record not yet created).
+- Added docs/features/TEMPLATE.md: canonical front matter with all §5 fields (optional ones commented out), section prompts as HTML comments, dependency-id single-source rule, and "don't retro-edit Plan" note.
+- Implemented first §8 CLI command: scripts/features/cli.mjs `new` + package.json script `features:new`. Scaffolds a record from TEMPLATE.md (id/parent/area/order/date/title substituted), enforces kebab-case ids, valid areas, and global id uniqueness by scanning all front matter. Other four commands stubbed with a "not built yet" pointer. Tested happy path + 5 error guards; test artifact removed.
+
+## 2026-07-24 — Teammate ask captured + feasibility answer (admin content editing / bulk import for 120 SKUs)
+
+- Appended teammate request verbatim to docs/ideas.md ("From teammate (relayed) — 2026-07-24"): edit page content in the admin with frontend auto-sync, or batch-import uniformly named files for 120 SKUs.
+- Investigated current wiring: admin→storefront sync already live for title/price/compare-at/slogan/SEO (on-demand revalidation, lib/admin/products.ts); images + all other page copy still baked-in Figma pixels; admin has CSV export but NO import; seed.ts is clean-slate only.
+- Answered feasibility: partially works today; full plan needs (a) wiring more page areas to DB, (b) building CSV+image-folder bulk import (Shopify-style). No code changes.
+
+## 2026-07-24 — Delivery: feature doc product-content-pipeline.md
+
+- Created docs/features/product-content-pipeline.md (BACKLOG): admin content editing + 120-SKU CSV/image bulk import; options table, acceptance criteria, 5-step plan; recommendation = live-wire pages then Shopify-style import, pending owner confirmation.
+- Idea graduated per lifecycle: teammate section removed from docs/ideas.md; Status-tree leaf added in docs/features/README.md (Backend > Product content — 120 SKUs); SUMMARY.md pointer updated to the feature file.
+
+## 2026-07-24 — Delivery: feature doc sku-integrity.md
+
+- Created docs/features/sku-integrity.md (BACKLOG) from the schema-review discussion: SKU = business identity of a physical shelf item; one item = one SKU, no reuse; one listing per item; bundles pre-packed = own SKU. Recommended enforcement: 0003 partial unique index (sku <> ''), same check in lib/admin for the file adapter, duplicateProduct clears SKUs, admin validation + activation gate.
+- Cross-linked: product-content-pipeline.md now dependsOn sku-integrity (import upserts by SKU); Status-tree leaf added under "Product content — 120 SKUs"; SUMMARY pointer extended.
+
+## 2026-07-24 — Correction: SKU rules moved to docs/Database.md (owner request)
+
+- Charles preferred Database.md over a feature file. Added "## SKU rules (2026-07-24)" section there: SKU = business identity of a physical shelf item, one item = one SKU / no reuse, one listing per item, bundles pre-packed = own SKU, naming scheme, plus the not-yet-enforced note and planned enforcement (0003 partial unique index, lib/admin mirror check, Duplicate clears SKUs, admin validation + activation gate).
+- Cleanup: deleted docs/features/sku-integrity.md, reverted its roadmap leaf and product-content-pipeline dependsOn; pipeline blockers + SUMMARY now point at Database.md instead.

@@ -1,6 +1,29 @@
-# Posting-account attribution — link tag for commissions
+---
+schemaVersion: 1
+id: posting-account-attribution
+kind: feature
+parent: admin-analytics
+area: backend
+order: 30
 
-Status: BACKLOG → READY → IN PROGRESS → **TESTING** → DONE · implemented 2026-07-24 (code reads `utm_acc`; unit + e2e green).
+delivery: uat
+rollout: test-deployment
+priority: p1
+target: v1-launch
+owner: charles
+statusChangedAt: 2026-07-24
+
+dependsOn: []
+blockedBy: []
+
+verification:
+  automated:
+    - tests/unit/channel-attribution.test.ts
+    - tests/e2e/admin-analytics.spec.ts
+  human: null
+---
+
+# Posting-account attribution — link tag for commissions
 
 > Naming note: drafted as `acct=`; owner chose **`utm_acc`** at implementation
 > time (2026-07-24) — same family look as the other tags, still not a standard
@@ -25,7 +48,16 @@ Move the account name to a **dedicated `utm_acc=` query tag** (`...?utm_source=t
 | Dedicated `acct=amy` | Collision with ad tools impossible by construction; ~10-line change; rides in the beacon's existing `utm` JSON blob — no schema change, no migration; `utm_content` freed for real ad variants | Non-standard param — a rare link-sanitizing app could strip it where it keeps `utm_*` (mitigation: owner click-tests each new link once, checks it appears in Analytics) | ✅ **chosen** |
 | `acct=` with `utm_content` fallback | Old links keep working | Fallback re-opens the exact ad-variant corruption being fixed; there are no live links to preserve anyway | ❌ |
 
-## Plan (work items)
+## Acceptance criteria
+
+- [x] A visit via `...?utm_acc=amy` records `amy` as the posting account on the session and any resulting order.
+- [x] `utm_content` is ignored for account attribution (pinned by a unit test).
+- [x] Admin Analytics groups sales/commission figures by posting account.
+- [x] The empty-account label in Analytics says `utm_acc` in both EN and 中文.
+- [x] Owner's link recipe in TESTER-GUIDE reads `...&utm_acc=amy` with the click-test tip.
+- [ ] Owner builds one real `utm_acc` link, clicks it, and sees the account appear in Analytics (human acceptance → VERIFIED).
+
+## Plan
 
 All done 2026-07-24 (tag named `utm_acc`):
 
@@ -39,7 +71,16 @@ All done 2026-07-24 (tag named `utm_acc`):
 | 6 | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
 | 7 | — | ✅ Unit tests + analytics e2e spec green |
 
-## Related
+## Blockers and dependencies
+
+None. The only step left is human acceptance (owner click-test), which is the UAT → VERIFIED gate, not a blocker.
+
+## Verification evidence
+
+- Automated: `tests/unit/channel-attribution.test.ts` and `tests/e2e/admin-analytics.spec.ts` green on 2026-07-24 (includes the "utm_content is ignored" pin).
+- Human: pending — owner to click a real `utm_acc` link on the test deployment and confirm the account shows in Admin → Analytics. Record verifier, date, and environment here when done.
+
+## Related links
 
 - Walkthrough: [../learning/02-posting-account-attribution.md](../learning/02-posting-account-attribution.md)
 - Owner instructions: [TESTER-GUIDE → "Marketing links"](../TESTER-GUIDE.md#marketing-links-for-the-owner)
