@@ -80,7 +80,7 @@ Key jargon used below:
 
 ### Step 1 — Entry point: the tagged link and the beacon
 
-The feature "starts" outside the code: the owner tags each account's links per the convention in [docs/USER-GUIDE.md](../USER-GUIDE.md) ("Marketing links", EN + 中文) — same `utm_content` in every link that account posts.
+The feature "starts" outside the code: the owner tags each account's links per the convention in [docs/TESTER-GUIDE.md](../TESTER-GUIDE.md) ("Marketing links", EN + 中文) — same `utm_content` in every link that account posts.
 
 [components/Beacon.tsx](../../components/Beacon.tsx) is a client component rendered on every storefront page (never `/admin`). On each navigation it reads the five standard UTM params from the URL — `utm_content` included, values capped at 120 chars ([Beacon.tsx:78-85](../../components/Beacon.tsx#L78-L85)) — and fire-and-forgets a POST to `/api/beacon` with the visitor/session IDs ([Beacon.tsx:94-99](../../components/Beacon.tsx#L94-L99)). Fire-and-forget means a failed beacon never breaks browsing, and cached pages stay cached because tracking happens client-side after render.
 

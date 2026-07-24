@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * The tester guide (owner request 2026-07-22): /admin/guide renders
- * docs/USER-GUIDE.md — both language sections — behind the normal admin
+ * docs/TESTER-GUIDE.md — both language sections — behind the normal admin
  * session (no forum nickname needed).
  */
 

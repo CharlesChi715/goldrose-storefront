@@ -2,7 +2,7 @@
 
 /**
  * ROLE OF THIS FILE
- * Renders docs/USER-GUIDE.md with Polaris typography. Tiny renderer on
+ * Renders docs/TESTER-GUIDE.md with Polaris typography. Tiny renderer on
  * purpose — the guide sticks to headings (#/##), bullets (-) and paragraphs,
  * so no markdown dependency is needed. Each top-level "# " heading starts a
  * language version; versions render as side-by-side columns (owner request

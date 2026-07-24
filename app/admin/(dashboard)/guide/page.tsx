@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * /admin/guide — the tester-facing user guide (owner request 2026-07-22).
- * Content lives in docs/USER-GUIDE.md (plain markdown the owner edits);
+ * Content lives in docs/TESTER-GUIDE.md (plain markdown the owner edits);
  * this page reads and renders it. No nickname gate — it's documentation.
  */
 
@@ -15,7 +15,7 @@ export default async function GuidePage() {
   let markdown = "";
   try {
     markdown = await fs.readFile(
-      path.join(process.cwd(), "docs", "USER-GUIDE.md"),
+      path.join(process.cwd(), "docs", "TESTER-GUIDE.md"),
       "utf8",
     );
   } catch {

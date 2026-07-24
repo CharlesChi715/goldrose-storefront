@@ -147,7 +147,7 @@ const en = {
   "forum.attach.remove": "Remove",
 
   // Guide
-  "guide.missing": "The guide file (docs/USER-GUIDE.md) is missing from this deployment.",
+  "guide.missing": "The guide file (docs/TESTER-GUIDE.md) is missing from this deployment.",
   "login.devHint":
     "Local development login — no Supabase configured. Use any email with the dev password (ADMIN_DEV_PASSWORD).",
 
@@ -672,7 +672,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "forum.attach.remove": "移除",
 
   // Guide
-  "guide.missing": "本部署缺少指南文件（docs/USER-GUIDE.md）。",
+  "guide.missing": "本部署缺少指南文件（docs/TESTER-GUIDE.md）。",
   "login.devHint":
     "本地开发登录 — 未配置 Supabase。使用任意邮箱和开发密码（ADMIN_DEV_PASSWORD）。",
 

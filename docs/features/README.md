@@ -24,10 +24,10 @@ docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md "Next steps"  →  
 
 Line 1 of every feature file, bold, fixed vocabulary:
 
-**PLANNED → DECIDED → IN PROGRESS → TESTING → STABLE** (+ **DROPPED**, exit from any state)
+**BACKLOG → READY → IN PROGRESS → TESTING → STABLE** (+ **DROPPED**, exit from any state)
 
-- PLANNED — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a feature file is born PLANNED)
-- DECIDED — approach chosen (options + pros/cons recorded)
+- BACKLOG — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a feature file is born BACKLOG)
+- READY — approach chosen (options + pros/cons recorded)
 - IN PROGRESS — being built
 - TESTING — live on production, **awaiting human verification** (a queue, not an activity — dormant/sandbox features sit here too; automated tests were already green to land)
 - STABLE — **works well on the live site, verified by a human** (owner/Charles clicked through it); nothing known to fix — only future improvements remain possible
@@ -35,7 +35,7 @@ Line 1 of every feature file, bold, fixed vocabulary:
 
 Format — full pipeline with the **current stage bold**, then date + qualifier:
 
-`Status: PLANNED → **DECIDED** → IN PROGRESS → TESTING → STABLE · 2026-07-24, not yet implemented`
+`Status: BACKLOG → **READY** → IN PROGRESS → TESTING → STABLE · 2026-07-24, not yet implemented`
 
 (DROPPED replaces the whole pipeline: `Status: **DROPPED** · date, why`.)
 
@@ -46,7 +46,7 @@ never disagree.
 ## File format
 
 Status line → Context → Decision → Options considered (pros/cons table) →
-Plan (work items) → Related links (learning/, USER-GUIDE, spec §).
+Plan (work items) → Related links (learning/, TESTER-GUIDE, spec §).
 
 ## Status tree (= roadmap)
 
@@ -59,14 +59,16 @@ A node named `*.md` is a tracked record in this folder (its inline status
 synced with the file's status line); everything else predates this system and
 is maintained directly here until a new decision earns it a file.
 
-Meter = milestones completed after planning. PLANNED is the empty meter — on 
+Meter = milestones completed after planning. BACKLOG is the empty meter — on 
 the roadmap, nothing started; a filled dot always means a real step happened:
 
-`○○○○ PLANNED · ●○○○ DECIDED · ●●○○ IN PROGRESS · ●●●○ TESTING · ●●●● STABLE · ✕ DROPPED`
+`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ TESTING · ●●●● STABLE · ✕ DROPPED`
 
 Text after the status ONLY when the bare status would mislead (e.g. deployed
 but dormant/sandbox) or to name the blocker to the next stage — never to
 restate the status.
+
+
 
 ### Frontend (storefront)
 
@@ -95,14 +97,14 @@ Customer accounts /account — dormant: owner config pending
 
 Concierge chat (mascot + bar overlay)
 ├── feedback panel → admin Ideas ●●●○ TESTING
-└── real chat widget ○○○○ PLANNED
+└── real chat widget ○○○○ BACKLOG
 
 SEO/GEO baseline
 ├── sitemap ●●●○ TESTING
 ├── robots + AI-crawler toggle ●●●○ TESTING
 ├── /llms.txt ●●●○ TESTING
 ├── JSON-LD ●●●○ TESTING
-└── product feeds ○○○○ PLANNED — search-discovery-implementation.md
+└── product feeds ○○○○ BACKLOG — search-discovery-implementation.md
 ```
 
 ### Backend (admin + data)
@@ -121,7 +123,7 @@ Admin suite (EN/中文) — §14.3 owner walkthrough pending
 └── Analytics
     ├── first-party beacon ●●●○ TESTING
     ├── channel/UTM/country reports ●●●○ TESTING
-    └── posting-account-attribution.md ●○○○ DECIDED — acct= tag
+    └── posting-account-attribution.md ●○○○ READY — acct= tag
 
 Admin auth
 ├── login + access approvals ●●●○ TESTING
@@ -136,7 +138,7 @@ Order emails (Resend) — console fallback until RESEND_API_KEY set
 Supabase hosted DB
 ├── migrations (0001, 0002) ●●●● STABLE
 ├── seed (--reset / --demo) ●●●● STABLE — owner's --demo run pending
-└── nightly pg_dump→S3 backup ○○○○ PLANNED — Database.md
+└── nightly pg_dump→S3 backup ○○○○ BACKLOG — Database.md
 ```
 
 Refs (links can't render inside the code blocks, so shorthands above resolve

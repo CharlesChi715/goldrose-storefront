@@ -1,6 +1,6 @@
 # Posting-account attribution — link tag for commissions
 
-Status: PLANNED → **DECIDED** → IN PROGRESS → TESTING → STABLE · 2026-07-24, not yet implemented (current code still reads `utm_content`).
+Status: BACKLOG → **READY** → IN PROGRESS → TESTING → STABLE · 2026-07-24, not yet implemented (current code still reads `utm_content`).
 
 ## Context
 
@@ -30,10 +30,10 @@ Move the account name to a **dedicated `acct=` query tag** (`...?utm_source=tikt
 | 3 | `lib/admin/orders.ts`, `lib/admin/analytics.ts` | Comment wording only — logic already goes through `accountOf()` |
 | 4 | `lib/admin/i18n.ts` | Update any `utm_content` mention in admin strings (EN + 中文) |
 | 5 | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | Switch test/demo links to `acct=` |
-| 6 | USER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md | Owner's link recipe becomes `...&acct=amy`; add click-test tip |
+| 6 | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md | Owner's link recipe becomes `...&acct=amy`; add click-test tip |
 | 7 | — | Run unit tests + analytics e2e spec, confirm green |
 
 ## Related
 
 - Walkthrough: [../learning/02-posting-account-attribution.md](../learning/02-posting-account-attribution.md)
-- Owner instructions: [USER-GUIDE → "Marketing links"](../USER-GUIDE.md#marketing-links-for-the-owner)
+- Owner instructions: [TESTER-GUIDE → "Marketing links"](../TESTER-GUIDE.md#marketing-links-for-the-owner)

@@ -77,7 +77,7 @@ Env vars live in the Vercel dashboard; changes need a redeploy.
 |---|---|
 | [SUMMARY.md](SUMMARY.md) | Current state, constraints, next steps |
 | [docs/admin-design.md](docs/admin-design.md) | The spec (all § references) |
-| [docs/USER-GUIDE.md](docs/USER-GUIDE.md) | Tester guide, rendered at `/admin/guide` |
+| [docs/TESTER-GUIDE.md](docs/TESTER-GUIDE.md) | Tester guide, rendered at `/admin/guide` |
 | [docs/Database.md](docs/Database.md) | DB hosting + backup decisions |
 | [docs/ideas.md](docs/ideas.md) | Owner's ideas, verbatim |
 | [docs/search-discovery-implementation.md](docs/search-discovery-implementation.md) | SEO/GEO implementation source of truth |

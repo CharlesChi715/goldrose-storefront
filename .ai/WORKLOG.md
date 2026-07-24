@@ -2010,3 +2010,14 @@ docs: add first feature learning doc (trial)
 - Renamed final status TESTED → STABLE per Charles (works well live, human-verified, open to future improvement); pipeline, legend, tree leaves, and the attribution file's status line all updated.
 - Renamed DEPLOYED → TESTING per Charles (emphasizes what still needs human verification); definition clarifies it's a queue state, dormant/sandbox included.
 - Tree shorthand refs (§14.3, OQ-2, Database.md, dormant/owner-config, search-discovery) now resolve to real links in a Refs block under the tree (links can't render inside code fences); USER-GUIDE Marketing-links anchor linked from the attribution record.
+- /tidy apply (naming): `docs/USER-GUIDE.md` → `docs/TESTER-GUIDE.md` (content is the Tester Guide); all 9 referencing files updated (guide page path, EN/中文 i18n strings, README/SUMMARY/docs links); guide e2e green.
+
+## 2026-07-24 — SUMMARY.md status correction (testing-only, ship date)
+
+- Marked Current state as testing-only: sandbox PayPal, placeholder products, no real marketing links; all data = test data.
+- Recorded ship target 2026-07-30; "Live deploy" reworded to "Deployed (testing)".
+- /tidy apply (agent-context): SUMMARY.md "Current state" compressed to 6 high-level bullets (testing status, deploy, live-db warning, mock-mode recipe, BUILD-REPORT §5 pointer, Status-tree pointer); storefront/DB + read:/JSDoc rules moved to Key facts; per-feature detail now lives ONLY in docs/features/README.md Status tree + feature docs (verified: every dropped fact has a home in spec/code/BUILD-REPORT). Status tree untouched per owner (no text after status).
+
+## 2026-07-24 — Feature status vocabulary rename
+
+- Renamed two statuses across docs/features/: PLANNED → BACKLOG, DECIDED → READY (lifecycle ladder, meter legend, status tree, and posting-account-attribution.md status line). Other statuses unchanged.
