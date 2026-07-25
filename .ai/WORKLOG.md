@@ -2420,3 +2420,27 @@ intuitive picture… `temp/PlaceholderPicture.png`… replace all placeholder."
   Substituting the card there would destroy the pixel-exact import, so they
   were left alone.
 - Slide 1 untouched → home pixel baseline unchanged. 62 e2e + 35 unit green.
+
+## 2026-07-25 — Carousel: continuous slide, faster auto-play, /placeholder
+
+Owner: repeat the first card to show auto-play, faster, dots clickable, click
+through to a placeholder route, and "swipe continues like the first img goes
+left and comes second img from right".
+
+- `components/home/Carousel.tsx` is now the shared rail: a translating track
+  (outgoing slide travels left, next arrives from the right) instead of the
+  crossfade, clickable dots with wrap-around, touch swipe, auto-play at
+  **1800ms** (was 2200ms), paused on hover/touch.
+- New route **`/placeholder`** — the named stand-in destination for cards whose
+  real target is undecided (OQ-3). Cards link there rather than nowhere.
+- Hero (H-03) repeats its first card ×4, which is what makes the motion
+  visible. Slide 1 keeps the design's bleed framing → home pixel baseline
+  unchanged (auto-play still honours reduced-motion, which the suite pins).
+- Verified in-browser: dot 2 → `translateX(-430px)`, dot 4 → `-1290px`.
+- 63 e2e + 35 unit green.
+
+STILL TO DO — the other six rails are not converted yet: A2 `377:190`,
+A3 `378:214` + `378:229`, A5 `429:149`, A6 `440:149` + `442:161`. The shared
+Carousel makes each a mechanical change (supply its window + dot geometry),
+but each rail's cards are bespoke absolute JSX on pixel-gated modules, so they
+need converting and re-diffing one at a time.

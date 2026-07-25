@@ -3,156 +3,52 @@
 /**
  * ROLE OF THIS FILE
  * H-03 · the homepage hero carousel and its pagination dots (Figma 153:63 +
- * 549:97). The import rendered both as static art — one photo and four inert
- * ellipses — so the spec's swipe, dot taps, wrap-around and auto-play were all
- * missing (owner report, 2026-07-25).
+ * 549:97), built on the shared Carousel. The import rendered both as static
+ * art — one photo and four inert ellipses.
  *
- * ⚠️ PLACEHOLDER DATA. The design ships a single hero photo but four dots, and
- * H-03 says the dot count comes from carousel data that does not exist yet
- * (OQ-3, real product content). Slides 2–4 therefore show the owner's
- * "PlaceHolder" card rather than borrowed catalog photography, so nobody
- * mistakes them for real content, and every slide links to /shop rather than
- * to "the corresponding product detail page" — that mapping is not decided.
- * Replace SLIDES when the real carousel content lands.
- *
- * Slide 1 keeps the design's exact framing (the source crop bleeds 343px above
- * the window), so the pixel baseline is unaffected while the carousel rests at
+ * ⚠️ PLACEHOLDER: the design ships one hero photo against four dots, so slides
+ * 2–4 repeat the first card, which is what makes the auto-play visible. Slide
+ * 1 keeps the design's exact bleed framing (the crop overhangs 343px above the
+ * window), so the home pixel baseline is unaffected while the track rests at
  * its first slide.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Carousel } from "@/components/home/Carousel";
 import { abs } from "@/components/veloria";
-
-type Slide = {
-  src: string;
-  alt: string;
-  /** Slide 1 reproduces the design's oversized bleed crop. */
-  bleed?: boolean;
-};
-
-/** The shared "PlaceHolder" card — see the placeholder rule in SUMMARY.md. */
-const PLACEHOLDER = "/placeholder.png";
-
-const SLIDES: Slide[] = [
-  { src: "/veloria/home/153-64.png", alt: "Gold-dipped rose in a gift box", bleed: true },
-  { src: PLACEHOLDER, alt: "Placeholder — hero slide 2" },
-  { src: PLACEHOLDER, alt: "Placeholder — hero slide 3" },
-  { src: PLACEHOLDER, alt: "Placeholder — hero slide 4" },
-];
 
 // 549:97 — the design draws the active dot at 9px and the rest at 7px, at
 // fixed x positions. Only the colour changes as the slide advances; moving or
 // resizing the dots would drift from the frame.
 const DOTS = [
-  { x: 184, size: 9 },
-  { x: 203, size: 7 },
-  { x: 220, size: 7 },
-  { x: 237, size: 7 },
+  { x: 184, y: 365, size: 9 },
+  { x: 203, y: 365, size: 7 },
+  { x: 220, y: 365, size: 7 },
+  { x: 237, y: 365, size: 7 },
 ];
-
-const AUTOPLAY_MS = 2200;
 
 /**
  * The hero photo window plus its pagination dots, as an interactive carousel.
  *
- * @returns The clipped hero window and the four dots.
+ * @returns The clipped hero track and the four dots.
  */
 export function HeroCarousel() {
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const touchStartX = useRef<number | null>(null);
-
-  const go = useCallback((next: number) => {
-    // Wrap around at both ends, per H-03.
-    setIndex((next + SLIDES.length) % SLIDES.length);
-  }, []);
-
-  useEffect(() => {
-    if (paused) return;
-    // Respect reduced-motion: no auto-play. This also keeps the pixel-diff
-    // suite deterministic, which pins reducedMotion.
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setInterval(() => go(index + 1), AUTOPLAY_MS);
-    return () => window.clearInterval(timer);
-  }, [index, paused, go]);
-
   return (
-    <>
-      {/* 153:63 hero photo window — the frame clips the bleeding crop. */}
-      <div
-        style={{ ...abs(-1, 66, 430, 317), overflow: "hidden" }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onTouchStart={(e) => {
-          setPaused(true);
-          touchStartX.current = e.touches[0]?.clientX ?? null;
-        }}
-        onTouchEnd={(e) => {
-          const start = touchStartX.current;
-          touchStartX.current = null;
-          setPaused(false);
-          if (start === null) return;
-          const dx = (e.changedTouches[0]?.clientX ?? start) - start;
-          // Ignore taps and tiny drags; 40px is a deliberate swipe.
-          if (Math.abs(dx) < 40) return;
-          go(index + (dx < 0 ? 1 : -1));
-        }}
-      >
-        {SLIDES.map((slide, i) => (
-          <Link
-            key={slide.src + i}
-            href="/shop"
-            aria-hidden={i !== index}
-            tabIndex={i === index ? 0 : -1}
-            style={{
-              ...abs(0, 0, 430, 317),
-              display: "block",
-              opacity: i === index ? 1 : 0,
-              // Only the visible slide takes pointer events, so the hidden
-              // ones cannot swallow a swipe.
-              pointerEvents: i === index ? "auto" : "none",
-              transition: "opacity 300ms ease",
-              // Placeholder slides sit on the design's cream so the card reads
-              // as a deliberate stand-in rather than a broken image.
-              background: slide.bleed ? undefined : "#FFF6EC",
-            }}
-          >
-            <img
-              src={slide.src}
-              alt={i === index ? slide.alt : ""}
-              width={430}
-              height={slide.bleed ? 1003 : 317}
-              style={
-                slide.bleed
-                  ? { ...abs(0, -343, 430, 1003), display: "block" }
-                  : // `contain`, not `cover` — the placeholder card is small and
-                    // cropping it would hide the word it exists to show.
-                    { ...abs(0, 0, 430, 317), display: "block", objectFit: "contain" }
-              }
-            />
-          </Link>
-        ))}
-      </div>
-
-      {/* 549:97 pagination dots. */}
-      {DOTS.map((dot, i) => (
-        <button
-          key={dot.x}
-          type="button"
-          onClick={() => go(i)}
-          aria-label={`Show hero slide ${i + 1}`}
-          aria-current={i === index}
-          style={{
-            ...abs(dot.x, 365, dot.size, dot.size),
-            background: i === index ? "#D4AF37" : "#FFF6EC",
-            borderRadius: 9999,
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-          }}
+    <Carousel
+      window={{ left: -1, top: 66, width: 430, height: 317 }}
+      count={DOTS.length}
+      dots={DOTS}
+      activeColor="#D4AF37"
+      idleColor="#FFF6EC"
+      label="hero slide"
+      renderSlide={() => (
+        <img
+          src="/veloria/home/153-64.png"
+          alt="Gold-dipped rose in a gift box"
+          width={430}
+          height={1003}
+          style={{ ...abs(0, -343, 430, 1003), display: "block" }}
         />
-      ))}
-    </>
+      )}
+    />
   );
 }

@@ -27,11 +27,22 @@ test.describe("H-03 · hero carousel and pagination dots", () => {
     await expect(dots.nth(0)).toHaveAttribute("aria-current", "true");
   });
 
-  test("the visible slide links into the shop", async ({ page }) => {
+  test("cards lead to the placeholder destination", async ({ page }) => {
     await page.goto("/");
     // Placeholder target: H-03 wants the matching product detail page, but
     // that mapping is undecided (OQ-3).
-    const active = page.locator('a[href="/shop"]:not([aria-hidden="true"])').first();
-    await expect(active).toBeVisible();
+    await page.getByRole("link", { name: "hero slide 1" }).click();
+    await expect(page).toHaveURL(/\/placeholder$/);
+    await expect(page.getByRole("heading", { name: "Placeholder page" })).toBeVisible();
+  });
+
+  test("the track slides horizontally rather than crossfading", async ({ page }) => {
+    await page.goto("/");
+    const track = page.getByRole("link", { name: "hero slide 1" }).locator("..");
+    await expect(track).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+    await page.getByRole("button", { name: "Show hero slide 2" }).click();
+    // One window width to the left — the outgoing slide travels off, the next
+    // arrives from the right.
+    await expect(track).toHaveCSS("transform", "matrix(1, 0, 0, 1, -430, 0)");
   });
 });
