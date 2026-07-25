@@ -2463,3 +2463,11 @@ need converting and re-diffing one at a time.
   1274–1316, 1582–1624) — nothing else on the page moved.
 - Checks: 63/63 Playwright e2e green, `tsc --noEmit` clean, lint clean (one
   pre-existing warning in `app/page.tsx`).
+
+## 2026-07-26 · Deliveries — the remaining Figma screens
+- Imported the last 7 VELORIA frames, pixel-exact (7 parallel builder agents, then verification/fix rounds by me): `/bag` (B-1), `/business/partnerships` (B-3), `/business/wholesale` (B-4, real inputs + placeholder submit), `/orders/track` (C-1), C-2 → `/checkout/success` restyle (keeps param validation + noindex), C-3 → slide-out menu drawer behind the header menu button (makes IxD H-01 work at last), B-2 → live `/checkout` restyle (markup only).
+- Pixel-diff vs Figma frame renders: partnerships 1.39%, tracking 1.09%, confirmation 1.35%, wholesale 1.62%, menu drawer 1.11%, bag 2.23% (font AA).
+- Bugs found and fixed en route: menu drawer lost the z-order fight to the tab bar (ScaleFrame's transformed stage traps `position:fixed` → portal to `<body>`, 16.2% → 1.11%); login "VIEW MY ORDER" pointed at `/orders`, which redirects shoppers into `/admin/orders` (→ `/orders/track`); Apple Pay + ✉ glyphs missing from Figma's node SVG exports (→ frame-render crops); confirmation screen's Home tab was dead.
+- Owner decision (asked, because it is the money path 4 days before ship): full B-2 fidelity with decorative gaps. Implemented, with one safety exception I held — card inputs render only in the mock branch, since a card-number field that goes nowhere is a PCI/security hazard; PayPal's own button occupies that area live.
+- Verified: 35 unit + 73 e2e green (incl. 5 new screen smoke tests + 15 money-path specs); PayPal branch driven in a browser with a sandbox id (real line item, $49.99 + $5.95 = $55.94, no dead card fields, no hydration errors); pixel baselines regenerated. Rebased onto main over another session's page-fade work (one `veloria.tsx` conflict, resolved keeping both).
+- NOT done, deliberately: `/bag` → live cart wiring, guest order-lookup backend for C-1, per-method shipping rates. All flagged in SUMMARY + docs/ixd.

@@ -101,3 +101,51 @@ match the mock — but DARKEN is a workaround, not a cutout:
 channel, no checkerboard) and drop the blend mode. Then the art can sit on
 any background, the checkerboard disappears, and the pixel net can cover it
 again. Same applies to any new mascot art in the screens still in progress.
+
+## B/C screen imports — 2026-07-26 developer findings
+
+All seven remaining frames are now implemented (B-1 bag, B-2 checkout, B-3
+partnerships, B-4 wholesale, C-1 tracking, C-2 confirmation, C-3 menu drawer).
+Things found while transcribing them, for the design team to decide on:
+
+**Two visual languages are now in the codebase.** B-1/B-2 use the palette the
+live homepage and shop already use (`#FFF6EC` / `#3B2F2F` / `#D4AF37`, the
+owner's logo art). C-1/C-2/C-3 use a newer one (`#FFFBF6` / `#09442E` /
+`#D18005`) and set the brand as *text* — "VELORIA" on C-1/C-2, "GoldRose" on
+C-3 — instead of the logo image. Which one is the target? Everything shipped
+verbatim, so the site currently changes character between pages.
+
+**Tab bars disagree.** The live bar is Home / Shop / Wholesale / Login (the
+owner's art). C-1 and C-2 each draw their own glyph bar, and C-2 marks *Help*
+as the active tab on a confirmation screen. B-3/B-4 have no bar at all. Those
+routes therefore opt out of the shared bar to avoid two bars stacking.
+
+**Mockup artifacts / asset bugs** (all left verbatim except where noted):
+- C-3 contains an iPhone status bar ("9:41"). Not implemented — it would put a
+  fake clock on the site.
+- C-2's `✉` and B-1's `Pay` mark export as a `.notdef` square / lose the
+  Apple glyph. Both are served as crops of Figma's frame render instead.
+- B-1's GoldRose wordmark starts 4.5px above its clipping parent, so its top
+  row is cut off in the design itself.
+- B-1 FAQ rows carry a hairline colour with `strokeWeight: 0` (no divider
+  renders); the same component in B-2 has `individualStrokeWeights.bottom: 1`.
+  One of the two is wrong.
+- B-1's gift add-ons look swapped: "Rose Bouquet" shows a gift card, "Personal
+  Card" shows a boxed rose set.
+- B-4's hero image is a "MORI'S RECOMMENDATION" box and its product photo is a
+  blue rose — stock/dev art on a wholesale application.
+- C-2's chip labels (ORDER/SHIP/PIN/CARD/GIFT/HELP) sit at the top of their
+  38px badges rather than centred.
+
+**B-2 checkout has controls with nothing behind them.** The Standard /
+Express / Next-Day picker cannot price per method (shipping is zone-priced
+from the country), and the card / Shop Pay / Apple Pay rows are not live
+providers — PayPal is. Per the owner's decision the picker ships as a cosmetic
+control; card inputs are shown only in mock/dev mode, because a card-number
+field that goes nowhere is a security hazard. To make either real, the design
+needs backend work: per-method shipping rates, and a card provider.
+
+**Placeholder data.** B-1's line items, C-1's whole tracking timeline
+(#VL20250821, the UPS number, the dates) and C-2's product/address rows are
+the mocks' own strings. `/bag` is not yet wired to the live cart, so the cart
+icon still points at `/checkout`, which is the real basket.
