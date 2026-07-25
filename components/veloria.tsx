@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import { AccountTabArt } from "@/components/AccountTab";
+import { FadeLink, PageFade } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
 import { WishlistButton } from "@/components/WishlistButton";
 import { inter } from "@/lib/fonts";
@@ -345,9 +346,10 @@ export function BottomNav({
                 <TabContent tab={tab} isActive={tab.id === active} />
               );
             return tab.href ? (
-              <Link key={tab.id} href={tab.href} style={style}>
+              // FadeLink, not Link: switching tabs cross-fades the canvas.
+              <FadeLink key={tab.id} href={tab.href} style={style}>
                 {content}
-              </Link>
+              </FadeLink>
             ) : (
               <div key={tab.id} style={style}>
                 {content}
@@ -411,6 +413,8 @@ export function ScaleFrame({
         </div>
       </div>
       <BottomNav active={navActive} bottomGap={navGap} />
+      {/* Tab switches cross-fade the canvas above; the nav stays put. */}
+      <PageFade />
       {/* Fallback for browsers without calc() length division: apply the same
           scale via `zoom`/transform so narrow screens never scroll sideways. */}
       <NoCalcScale
