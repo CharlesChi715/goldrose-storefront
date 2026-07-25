@@ -10,6 +10,7 @@
  */
 
 import Link from "next/link";
+import { AccountTabArt } from "@/components/AccountTab";
 import { BackButton } from "@/components/BackButton";
 import { WishlistButton } from "@/components/WishlistButton";
 import { inter } from "@/lib/fonts";
@@ -243,7 +244,13 @@ export function ShopHeader() {
 
 /* ---------- 13 · Bottom navigation (fixed overlay) ---------- */
 
+// Tabs are identified by a stable id rather than by their label, because the
+// account tab's label is not fixed: it reads "Login" or "Me" depending on the
+// visitor (see AccountTabArt).
+type TabId = "Home" | "Shop" | "Wholesale" | "Account";
+
 type Tab = {
+  id: TabId;
   href?: string;
   img: string;
   activeImg?: string;
@@ -251,15 +258,25 @@ type Tab = {
 };
 
 // Redesign nav art (2026-07-25): 2x renders of the frames' own tab images
-// (nodes 763:113…763:129) — outline mascots, label baked in, "Login" on the
-// account tab. The design ships active variants only for Home and Shop; the
-// other tabs keep their single state when active.
+// (nodes 763:113…763:129) — outline mascots, label baked in. The design ships
+// active variants only for Home and Shop; the other tabs keep their single
+// state when active. The account tab instead ships two labels — "Login"
+// (763:119) and "Me" (763:129) — swapped in the browser by AccountTabArt.
 const TABS: Tab[] = [
-  { href: "/", img: "763-123", activeImg: "763-113", label: "Home" },
-  { href: "/shop", img: "763-115", activeImg: "763-125", label: "Shop" },
-  { img: "763-117", label: "Wholesale" },
-  { href: "/account", img: "763-119", label: "Login" },
+  { id: "Home", href: "/", img: "763-123", activeImg: "763-113", label: "Home" },
+  { id: "Shop", href: "/shop", img: "763-115", activeImg: "763-125", label: "Shop" },
+  { id: "Wholesale", img: "763-117", label: "Wholesale" },
+  { id: "Account", href: "/account", img: "763-119", label: "Login" },
 ];
+
+// The "Me" counterpart of the account tab's "Login" art, and the filled
+// "Login" the design uses while the account tab is the current section
+// (763:149, from the sign-in frame 74:53).
+const ACCOUNT_SIGNED_IN_IMG = "763-129";
+const ACCOUNT_ACTIVE_IMG = "763-149";
+
+// Every tab's art sits at the same spot inside its 70×59 hit area.
+const TAB_ART_STYLE: React.CSSProperties = { ...abs(10, 1, 50, 57), display: "block" };
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
   return (
@@ -268,7 +285,7 @@ function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
       alt={tab.label}
       width={50}
       height={57}
-      style={{ ...abs(10, 1, 50, 57), display: "block" }}
+      style={TAB_ART_STYLE}
     />
   );
 }
@@ -284,7 +301,7 @@ export function BottomNav({
   active = "Shop",
   bottomGap = 0,
 }: {
-  active?: "Home" | "Shop" | "Wholesale" | "Login" | (string & {});
+  active?: TabId | (string & {});
   bottomGap?: number;
 }) {
   return (
@@ -315,13 +332,24 @@ export function BottomNav({
           {TABS.map((tab, i) => {
             const x = [18, 126, 234, 342][i];
             const style: React.CSSProperties = { ...abs(x, 0, 70, 59), display: "block" };
-            const content = <TabContent tab={tab} isActive={tab.label === active} />;
+            const content =
+              tab.id === "Account" ? (
+                <AccountTabArt
+                  signedOutImg={tab.img}
+                  signedInImg={ACCOUNT_SIGNED_IN_IMG}
+                  activeImg={ACCOUNT_ACTIVE_IMG}
+                  isActive={tab.id === active}
+                  style={TAB_ART_STYLE}
+                />
+              ) : (
+                <TabContent tab={tab} isActive={tab.id === active} />
+              );
             return tab.href ? (
-              <Link key={tab.label} href={tab.href} style={style}>
+              <Link key={tab.id} href={tab.href} style={style}>
                 {content}
               </Link>
             ) : (
-              <div key={tab.label} style={style}>
+              <div key={tab.id} style={style}>
                 {content}
               </div>
             );
@@ -354,7 +382,7 @@ export function ScaleFrame({
   background: string;
   fontClass: string;
   navGap?: number;
-  navActive?: "Home" | "Shop" | "Wholesale" | "Login" | (string & {});
+  navActive?: TabId | (string & {});
   children: React.ReactNode;
 }) {
   const ratio = (height / 430).toFixed(7);

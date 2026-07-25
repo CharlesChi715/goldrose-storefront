@@ -2216,3 +2216,99 @@ signed in, "Login" otherwise).
   signed out → Login, signed in → Me, /shop signed in → Me, after logout →
   Login. Full suite green: 57 e2e + 35 unit, pixel baselines unchanged.
 - Bug found by owner + fixed same day: the MORI mascot art painted an opaque near-white box over its surroundings (A-4: truncated the panel copy, covered half the FIND A GIFT card). Root cause = Figma fill `blendMode: DARKEN` on 4 image nodes (380:242, 386:251, 420:262, 472:150), which the import ignored; fix = `mixBlendMode: "darken"` + `data-blend` so the home pixel snapshot masks them (GPU blending isn't bit-deterministic → snapshot flake). A-4 diff 2.34%→1.30%, A-8 1.70%→1.43%; 35 unit + 57 e2e green twice. main `0a9cbf6`. Asked the design team (docs/ixd/README.md) to re-export the mascots as real transparent PNGs so the blend hack can go away.
+
+## 2026-07-25 19:19 AEST
+
+- **Supabase CLI wired up for migrations — no more pasting SQL into the web editor.**
+  `supabase login` was already valid, but the repo was never linked here (link is
+  per-directory; Charles had linked a different folder). Ran
+  `supabase link --project-ref cfvsvgbldnzkcjvbwnjp` from the repo root.
+- Found the real problem: hosted `supabase_migrations.schema_migrations` was
+  **empty** — 0001–0003 had all been applied by hand in the dashboard SQL editor,
+  so Supabase had no record of them. A future `db push` would have tried to
+  re-run 0001 from scratch against live data.
+- Audited what is actually on hosted before touching anything: all 18 tables with
+  live rows (5 orders, 3 customers, 169 page_views); 0003's `orders.tracking_carrier`
+  column and all 10 indexes (`product_variants_sku_unique` + 9 FK indexes) present.
+- `discounts_value_range` verified by probe (owner's call): POST a `value = -1`
+  discount via PostgREST → rejected `23514 ... violates check constraint
+  "discounts_value_range"`. Insert rejected ⇒ no row created, nothing to clean up;
+  `discounts` re-checked after, still GOLD10 only. **So 0003 was already fully live** —
+  the SUMMARY "run 0003 on hosted BEFORE deploy" to-do was stale.
+- `supabase migration repair --status applied 0001 0002 0003` (writes only the
+  tracking table — no schema or data change). Now `migration list` shows
+  local == remote for all three and `db push --dry-run` reports
+  "Remote database is up to date."
+- Gitignored `supabase/.temp/` — the link wrote per-machine state (project ref,
+  pooler url) into the working tree as untracked files.
+- Two environment limits worth knowing: `supabase db dump`/`db diff` need Docker,
+  and Docker is unusable for this user — `/var/run/docker.sock` symlinks into
+  `/Users/heidiwang/.docker/`, a different macOS account. Reading the CLI's
+  keychain token to reach the Management API SQL endpoint was blocked by the
+  permission classifier (credential exploration) and not worked around. Net: DDL
+  and migrations work from here; ad-hoc SELECT still needs Docker or a PAT.
+
+## 2026-07-25 19:43 AEST
+
+- Wrote [docs/learning/05-verifying-the-hosted-database.md](../docs/learning/05-verifying-the-hosted-database.md)
+  — Charles asked to be walked through the constraint probe ("i have bearly idea
+  about supabase"). Calibrated to his skills file: SQL 3 and Database systems 2,
+  but **API development 1**, so REST/curl/headers/status codes are all explained
+  from scratch while basic SQL is assumed.
+- Follows learning-docs-guideline.md: Feature Summary + Code Trace with an ASCII
+  chart, 8 steps, Recap. Traces the operator path terminal -> curl -> PostgREST
+  -> Postgres -> CHECK -> rollback -> HTTP 400 / SQLSTATE 23514.
+- Best find while writing it: `saveDiscount()` (lib/admin/discounts.ts#L56-L88)
+  validates duplicate **codes** but never range-checks **value** — it passes
+  `input.value` straight to the store. So `discounts_value_range` is not
+  redundant; on hosted it is the only thing stopping a mistyped `-50` discount.
+  The local file adapter has no constraint engine and would accept it, so
+  "it worked locally" proves nothing about data integrity. That became the
+  doc's central lesson: app validation is UX, DB constraints are the guarantee.
+- Also corrected guidance I had given earlier in the session: the dashboard SQL
+  editor is fine for **reads** (`select … from pg_constraint` is the proper way
+  to check a constraint). It was the hand-applied **schema changes** that left
+  `schema_migrations` empty. Doc states the read/write split as a table.
+- All 9 relative links verified to resolve; dropped the link to `.env.local`
+  (gitignored, would 404 on GitHub) and left it as inline code instead.
+
+## 2026-07-25 — Import 登录界面 74:53; storefront sign-in becomes an emailed code
+
+Owner confirmed the design team shipped the login page, and answered "no
+passkey" on how to reconcile it with the working auth UI.
+
+- **Docs corrected first.** SUMMARY.md had lumped the login screen in with the
+  美化未完成 deferrals. It was never blocked on design: 74:53/74:55 were 已完成
+  and held back only because they replace working auth.
+- **The design chooses a different auth model.** Frame 74:53 has exactly one
+  sign-in method — an emailed one-time code. Scanned every layer name and text
+  node: no Google, no Apple, no passkey. Per the owner's "no passkey", the
+  storefront now offers OTP only (`signInWithOtp` / `verifyOtp`). The auth
+  helpers and /auth/callback are untouched and still serve the admin, so
+  restoring a method is a UI change.
+- Imported six modules pixel-exact into `components/login/ShoppingLogin.tsx`;
+  `/account` renders it signed out and keeps the hand-built view signed in
+  (the design ships no signed-in frame). Assets in `public/veloria/login/`.
+- Band diff vs the Figma render: 1.6–4.5% (font AA) per module, nav 0.02%,
+  whole page 2.82%. Three real bugs the diff caught:
+  - membership card is #F3C6D1 at **fill opacity 0.23**, not solid pink (78% → 3.6%);
+  - the ✉ SVG export degrades to a solid filled box (Figma can't outline a
+    fallback-font glyph) — use the PNG node render instead;
+  - the account nav tab has an **active (filled) variant, 763:149**, which the
+    shared BottomNav lacked; added, and the nav band went 5.29% → 0.02%.
+- 58 e2e + 35 unit green; home/shop/product pixel baselines unchanged.
+
+New gotchas for the import pipeline:
+- Read `fills[].opacity` as well as the color. A 0.23 fill opacity reads as a
+  completely different flat color and is invisible in the node dump otherwise.
+- Figma SVG exports of TEXT nodes whose glyph comes from a *fallback* font
+  come back as a solid filled rectangle. Check tiny SVGs for a single
+  rect-shaped path; fall back to a PNG node render.
+- Don't centre ink-cropped SVG text in its node box — measure the ink origin
+  in the frame render. Centring landed glyphs 1–6px off here.
+- A section frame that only exists in one screen can still reveal shared-chrome
+  state variants (763:149 = the account tab's active art).
+
+Still open: 74:55 (Business · Procurement) not imported; email OTP needs the
+Supabase template to emit `{{ .Token }}` and real SMTP before it survives
+traffic — until then sign-in is the only way in and is rate-limited.

@@ -90,10 +90,14 @@ Guest order lookup
 └── /orders ●●●○ UAT
 
 Customer accounts /account — dormant: owner config pending
-├── Google OAuth ●●●○ UAT
-├── Apple OAuth ●●●○ UAT
-├── passkeys ●●●○ UAT
-└── order matching (verified email) ●●●○ UAT
+├── email one-time code ●●○○ IN PROGRESS — needs Supabase OTP template + SMTP
+├── Google OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
+├── Apple OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
+├── passkeys ✕ DROPPED — owner 07-25 "no passkey" (storefront only; admin keeps them)
+├── order matching (verified email) ●●●○ UAT
+├── nav tab "Login" ⇄ "Me" ●●●○ UAT
+├── login screen 74:53 ●●●○ UAT — imported pixel-exact 07-25
+└── login screen 74:55 (B2B) ○○○○ BACKLOG — static + email the request
 
 Concierge chat (mascot + bar overlay)
 ├── feedback panel → admin Ideas ●●●○ UAT
