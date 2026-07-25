@@ -2312,3 +2312,15 @@ New gotchas for the import pipeline:
 Still open: 74:55 (Business · Procurement) not imported; email OTP needs the
 Supabase template to emit `{{ .Token }}` and real SMTP before it survives
 traffic — until then sign-in is the only way in and is rate-limited.
+
+### Delivery — 2026-07-25
+
+Shipped to production: `ea6baa6` on `main` → Vercel. Verified in a real
+browser at <https://goldrose-storefront.vercel.app/account>: the imported
+frame renders and the old passkey/OAuth buttons are gone.
+
+⚠️ The page is live but **no customer can sign in yet**. Email OTP is now the
+only method, and it needs the Supabase email provider enabled, the template
+changed to emit `{{ .Token }}` (Supabase sends a magic link by default, not a
+code), and SMTP for anything past a few sends an hour. Tracked in SUMMARY
+"Next steps".
