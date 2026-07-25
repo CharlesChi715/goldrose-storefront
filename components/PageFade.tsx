@@ -71,23 +71,28 @@ export function PageFade() {
 }
 
 /**
- * A bottom-nav tab link that fades the canvas out before it navigates.
+ * A tab link that fades the canvas out before it navigates. Used by the
+ * bottom-nav tabs and by the /account account-type tabs (Gift Shopping ↔
+ * Business & Partnerships), which are two routes rather than one toggle.
  *
  * Falls back to a plain `Link` for same-tab taps, modified clicks (new tab,
  * new window) and reduced motion.
  *
  * @param href - Tab destination.
  * @param style - Positioning for the tab's hit area.
+ * @param ariaLabel - Accessible name, for tabs whose label is baked into art.
  * @param children - The tab's art.
  * @returns The tab link.
  */
 export function FadeLink({
   href,
   style,
+  ariaLabel,
   children,
 }: {
   href: string;
   style?: React.CSSProperties;
+  ariaLabel?: string;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -97,6 +102,7 @@ export function FadeLink({
     <Link
       href={href}
       style={style}
+      aria-label={ariaLabel}
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
         if (href === pathname || !wantsMotion()) return;

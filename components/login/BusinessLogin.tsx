@@ -21,6 +21,7 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { abs, txt, ScaleFrame } from "@/components/veloria";
+import { FadeLink } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
 import { cormorant, inter } from "@/lib/fonts";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
@@ -66,13 +67,15 @@ function ProcurementHero() {
 function AccountTypeTabs() {
   return (
     <div style={{ ...abs(16, 324, 398, 54), background: CARD, borderRadius: 12 }}>
-      <Link
+      {/* Cross-fades the canvas on the way back to the shopping frame, the
+          same treatment the bottom-nav tabs get (owner, 2026-07-26). */}
+      <FadeLink
         href="/account"
         style={{ ...abs(0, 0, 196, 54), background: CARD, borderRadius: 10, display: "block" }}
-        aria-label="Gift Shopping"
+        ariaLabel="Gift Shopping"
       >
         <Glyph src={`${A}/77-61.svg`} left={48} top={22} width={100} height={13} />
-      </Link>
+      </FadeLink>
       {/* Business & Partnerships — the active tab on this frame. */}
       <div
         style={{ ...abs(202, 0, 196, 54), background: INK, borderRadius: 12 }}

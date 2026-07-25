@@ -26,7 +26,12 @@ import Link from "next/link";
 import { abs } from "@/components/veloria";
 
 /** Where a carousel's cards live on the module canvas. */
-export type Window = { left: number; top: number; width: number; height: number };
+export type Window = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
 
 /** One pagination dot, at the exact position/size the design draws it. */
 export type Dot = { x: number; y: number; size: number };
@@ -35,6 +40,14 @@ export type Dot = { x: number; y: number; size: number };
 export const AUTOPLAY_MS = 1800;
 
 const SLIDE_MS = 420;
+
+/**
+ * Best Sellers advances one card at a time and the owner asked for it to move
+ * SLOWLY (2026-07-26), so that rail overrides both timings: a long pause on
+ * each card and a long glide between them.
+ */
+export const RAIL_AUTOPLAY_MS = 4200;
+export const RAIL_SLIDE_MS = 900;
 
 /** Release travel that commits to the neighbouring slide; less springs back. */
 const SWIPE_PX = 40;
@@ -52,6 +65,10 @@ const EDGE_RESISTANCE = 3;
  * coordinates (0,0 is the cell's own top-left). The track translates so the
  * active cell fills the window.
  *
+ * A rail (several cards visible, advancing one card at a time) sets
+ * `cellWidth`/`step` smaller than the window: the window then shows the active
+ * card plus the edge of the next one, exactly as the design draws it.
+ *
  * @param window - Position and size of the clipped viewport on the canvas.
  * @param count - Number of slides.
  * @param dots - Dot positions/sizes, verbatim from the design.
@@ -62,6 +79,10 @@ const EDGE_RESISTANCE = 3;
  * @param name - Element-name prefix (docs/ixd/element-names.md), e.g.
  * `HOME-HERO`. Stamps `data-el` on the window (`-MEDIA`), each slide
  * (`-SLIDE-n`) and each dot (`-DOT-n`). Omit to leave the rail untagged.
+ * @param cellWidth - Width of one slide; defaults to the whole window.
+ * @param step - Distance the track travels per slide; defaults to `cellWidth`.
+ * @param autoplayMs - Pause on each slide before advancing.
+ * @param slideMs - Duration of the slide animation itself.
  * @param renderSlide - Draws slide `i` inside its cell.
  * @returns The clipped track plus its dots.
  */
@@ -74,6 +95,10 @@ export function Carousel({
   href = "/placeholder",
   label,
   name,
+  cellWidth,
+  step,
+  autoplayMs = AUTOPLAY_MS,
+  slideMs = SLIDE_MS,
   renderSlide,
 }: {
   window: Window;
@@ -84,8 +109,14 @@ export function Carousel({
   href?: string;
   label: string;
   name?: string;
+  cellWidth?: number;
+  step?: number;
+  autoplayMs?: number;
+  slideMs?: number;
   renderSlide: (index: number) => React.ReactNode;
 }) {
+  const cell = cellWidth ?? win.width;
+  const pitch = step ?? cell;
   const [index, setIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
   // Live pointer offset in px; null = no pointer down, so it doubles as the
@@ -113,10 +144,11 @@ export function Carousel({
     if (paused) return;
     // Reduced motion disables auto-play; the pixel suite pins it, so baselines
     // stay parked on slide 1.
-    if (globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = globalThis.setInterval(() => go(index + 1), AUTOPLAY_MS);
+    if (globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches)
+      return;
+    const timer = globalThis.setInterval(() => go(index + 1), autoplayMs);
     return () => globalThis.clearInterval(timer);
-  }, [index, paused, go]);
+  }, [index, paused, go, autoplayMs]);
 
   return (
     <>
@@ -170,11 +202,11 @@ export function Carousel({
             position: "absolute",
             left: 0,
             top: 0,
-            width: win.width * count,
+            width: pitch * (count - 1) + cell,
             height: win.height,
-            transform: `translateX(${-index * win.width + (drag ?? 0)}px)`,
+            transform: `translateX(${-index * pitch + (drag ?? 0)}px)`,
             // While held, the track IS the finger — easing it would lag behind.
-            transition: drag === null ? `transform ${SLIDE_MS}ms ease` : "none",
+            transition: drag === null ? `transform ${slideMs}ms ease` : "none",
             userSelect: "none",
           }}
         >
@@ -187,9 +219,9 @@ export function Carousel({
               tabIndex={i === index ? 0 : -1}
               style={{
                 position: "absolute",
-                left: i * win.width,
+                left: i * pitch,
                 top: 0,
-                width: win.width,
+                width: cell,
                 height: win.height,
                 display: "block",
                 overflow: "hidden",

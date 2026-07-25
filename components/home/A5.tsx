@@ -2,16 +2,17 @@
 /**
  * ROLE OF THIS FILE
  * Module A-5 · "Shop by Occasion" of the VELORIA homepage frame (Figma node
- * 138:61, [0,3204 430×558]): ornamented title, static occasion filter chips,
- * a clipped horizontal rail of occasion/recipient cards (each → /shop),
+ * 138:61, [0,3204 430×558]): ornamented title, occasion filter chips (each →
+ * /shop), an auto-sliding horizontal rail of recipient cards (each → /shop),
  * carousel dots, and the "Just Because" note card. All coordinates, colors
  * and type values are verbatim from the Figma REST data; rail items past
  * x=430 are intentionally clipped by the module frame.
  */
 
 import Link from "next/link";
+import { OccasionRail } from "@/components/home/OccasionRail";
 import { abs } from "@/components/veloria";
-import { playfair, notoSC, goudy } from "@/lib/fonts";
+import { playfair, notoSC } from "@/lib/fonts";
 
 export function A5() {
   return (
@@ -58,11 +59,17 @@ export function A5() {
         Find a GoldRose for every meaningful moment.
       </div>
 
-      {/* 417:261 · occasion filter chips (static, non-clickable) */}
+      {/*
+        417:261 · occasion filter chips. Per-occasion filtering does not exist
+        yet, so every chip lands on the full shop; the design's selected state
+        (425:150) stays purely visual.
+      */}
       {/* 425:150 · Valentine's Day (selected) */}
-      <div
+      <Link
+        href="/shop"
         style={{
           ...abs(12, 91, 118, 30),
+          display: "block",
           background: "#FFF9F0",
           boxShadow: "inset 0 0 0 1px #C77D2B",
           borderRadius: 999,
@@ -87,11 +94,13 @@ export function A5() {
         >
           Valentine&apos;s Day
         </div>
-      </div>
+      </Link>
       {/* 162:103 · Mother's Day */}
-      <div
+      <Link
+        href="/shop"
         style={{
           ...abs(135, 91, 86, 30),
+          display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
           borderRadius: 999,
@@ -111,11 +120,13 @@ export function A5() {
         >
           Mother&apos;s Day
         </div>
-      </div>
+      </Link>
       {/* 162:105 · Birthday */}
-      <div
+      <Link
+        href="/shop"
         style={{
           ...abs(226, 91, 70, 30),
+          display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
           borderRadius: 999,
@@ -135,11 +146,13 @@ export function A5() {
         >
           Birthday
         </div>
-      </div>
+      </Link>
       {/* 162:107 · Wedding */}
-      <div
+      <Link
+        href="/shop"
         style={{
           ...abs(301, 91, 70, 30),
+          display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
           borderRadius: 999,
@@ -159,11 +172,13 @@ export function A5() {
         >
           Wedding
         </div>
-      </div>
+      </Link>
       {/* 162:109 · Graduation (clipped at the module's right edge) */}
-      <div
+      <Link
+        href="/shop"
         style={{
           ...abs(376, 91, 82, 30),
+          display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
           borderRadius: 999,
@@ -183,7 +198,7 @@ export function A5() {
         >
           Graduation
         </div>
-      </div>
+      </Link>
       {/* 162:111 · Anniversary (fully off-canvas in the rail) */}
       <div
         style={{
@@ -286,223 +301,7 @@ export function A5() {
         />
       </Link>
 
-      {/* 436:319 · recipient card rail */}
-      {/* 436:277 · Recipient Card · Gifts for Wife */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(15, 142, 176, 257),
-          display: "block",
-          background: "#FFFBF6",
-          boxShadow: "inset 0 0 0 1px #E5D1B8",
-          borderRadius: 10,
-          overflow: "hidden",
-        }}
-      >
-        {/* 436:278 · image well; 436:279 is a shared bleed crop (negative offsets verbatim) */}
-        <div
-          style={{
-            ...abs(0, 0, 176, 156),
-            background: "#F3C6D1",
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/veloria/home/436-279.png"
-            alt="Gold-dipped rose gift"
-            style={{ ...abs(-25.4, -210.82, 546.1, 911.9), display: "block", maxWidth: "none" }}
-          />
-        </div>
-        {/* 436:281 · title */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 159, 152),
-            fontSize: 16,
-            lineHeight: "21px",
-            color: "#3B2F2F",
-            fontWeight: 500,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {"Valentine's Day\nGifts"}
-        </div>
-        {/* 436:282 · copy (Goudy is single-weight; design's 500 not applied) */}
-        <div
-          className={goudy.className}
-          style={{
-            ...abs(27, 206, 122),
-            fontSize: 8,
-            lineHeight: "12px",
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          For the one who means everything.
-        </div>
-        {/* 436:283 · card ornament */}
-        <img
-          src="/veloria/home/436-283.svg"
-          alt=""
-          style={{ ...abs(61.233, 223, 53.534, 12.818), display: "block" }}
-        />
-        {/* 436:290 · CTA (rendered strip) */}
-        <img
-          src="/veloria/home/191-154.svg"
-          alt="SHOP WIFE GIFTS →"
-          width={152}
-          height={13}
-          style={{ ...abs(12, 240.82, 152, 13), display: "block", objectFit: "none", objectPosition: "center center" }}
-        />
-      </Link>
-
-      {/* 436:291 · Recipient Card · Thoughtful Gifts She'll Love */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(201, 142, 176, 257),
-          display: "block",
-          background: "#FFFBF6",
-          boxShadow: "inset 0 0 0 1px #E5D1B8",
-          borderRadius: 10,
-          overflow: "hidden",
-        }}
-      >
-        {/* 436:292 · image well; 436:293 same bleed crop, shifted */}
-        <div
-          style={{
-            ...abs(0, 0, 176, 156),
-            background: "#F3C6D1",
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/veloria/home/436-293.png"
-            alt="Gold-dipped rose gift"
-            style={{ ...abs(-241.3, -210.82, 546.1, 911.9), display: "block", maxWidth: "none" }}
-          />
-        </div>
-        {/* 436:295 · title */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 161, 152),
-            fontSize: 16,
-            lineHeight: "21px",
-            color: "#3B2F2F",
-            fontWeight: 500,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {"Valentine's Day\nGifts"}
-        </div>
-        {/* 436:296 · copy */}
-        <div
-          className={goudy.className}
-          style={{
-            ...abs(12, 208, 152),
-            fontSize: 8,
-            lineHeight: "12px",
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Romantic gifts to make her feel cherished.
-        </div>
-        {/* 436:297 · card ornament */}
-        <img
-          src="/veloria/home/436-283.svg"
-          alt=""
-          style={{ ...abs(61.233, 225, 53.534, 12.818), display: "block" }}
-        />
-        {/* 436:304 · CTA (rendered strip) */}
-        <img
-          src="/veloria/home/191-154.svg"
-          alt="SHOP WIFE GIFTS →"
-          width={152}
-          height={13}
-          style={{ ...abs(12, 242.82, 152, 13), display: "block", objectFit: "none", objectPosition: "center center" }}
-        />
-      </Link>
-
-      {/* 436:305 · Recipient Card · Anniversary Gifts for Wife (mostly clipped) */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(387, 142, 176, 257),
-          display: "block",
-          background: "#FFFBF6",
-          boxShadow: "inset 0 0 0 1px #E5D1B8",
-          borderRadius: 10,
-          overflow: "hidden",
-        }}
-      >
-        {/* 436:306 · image well; 436:307 same bleed crop, shifted */}
-        <div
-          style={{
-            ...abs(0, 0, 176, 156),
-            background: "#F3C6D1",
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/veloria/home/436-307.png"
-            alt="Gold-dipped rose gift"
-            style={{ ...abs(-457.2, -210.82, 546.1, 911.9), display: "block", maxWidth: "none" }}
-          />
-        </div>
-        {/* 436:308 · title */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 166, 152),
-            fontSize: 16,
-            lineHeight: "18px",
-            color: "#3B2F2F",
-            fontWeight: 500,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {"Anniversary Gifts\nfor Wife"}
-        </div>
-        {/* 436:309 · copy */}
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(14, 207, 148),
-            fontSize: 9,
-            lineHeight: "12px",
-            color: "#3B2F2F",
-            fontWeight: 400,
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Celebrate your love with a timeless gift.
-        </div>
-        {/* 436:311 · card ornament */}
-        <img
-          src="/veloria/home/436-283.svg"
-          alt=""
-          style={{ ...abs(61.233, 236, 53.534, 12.818), display: "block" }}
-        />
-        {/* 436:310 · CTA (rendered strip) */}
-        <img
-          src="/veloria/home/191-154.svg"
-          alt="SHOP WIFE GIFTS →"
-          width={152}
-          height={13}
-          style={{ ...abs(12, 261, 152, 13), display: "block", objectFit: "none", objectPosition: "center center" }}
-        />
-      </Link>
+      <OccasionRail />
 
       {/* 429:149 · carousel dots */}
       <div style={{ ...abs(145, 424, 135, 10), overflow: "hidden" }}>

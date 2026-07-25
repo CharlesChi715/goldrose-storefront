@@ -10,7 +10,9 @@
 
 import { test, expect } from "@playwright/test";
 
-test("the bag screen renders and its checkout CTA reaches /checkout", async ({ page }) => {
+test("the bag screen renders and its checkout CTA reaches /checkout", async ({
+  page,
+}) => {
   await page.goto("/bag");
   await expect(page.getByText("Shopping Bag", { exact: true })).toBeVisible();
   // The bag's line items are the design's placeholder rows for now; the CTA is
@@ -19,7 +21,9 @@ test("the bag screen renders and its checkout CTA reaches /checkout", async ({ p
   await expect(page).toHaveURL(/\/checkout$/);
 });
 
-test("business partnerships links to the wholesale application", async ({ page }) => {
+test("business partnerships links to the wholesale application", async ({
+  page,
+}) => {
   await page.goto("/business/partnerships");
   await page.getByRole("link", { name: /APPLY FOR WHOLESALE/i }).click();
   await expect(page).toHaveURL(/\/business\/wholesale$/);
@@ -36,12 +40,16 @@ test("the wholesale form takes input but does not submit", async ({ page }) => {
 
 test("guest order tracking renders the C-1 timeline", async ({ page }) => {
   await page.goto("/orders/track");
-  await expect(page.getByText("Track Your Order", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Track Your Order", { exact: true }),
+  ).toBeVisible();
   // Nothing here is a real order yet — the frame ships placeholder tracking data.
   await expect(page.getByText("#VL20250821")).toBeVisible();
 });
 
-test("the header menu opens the drawer, navigates, and closes on Escape", async ({ page }) => {
+test("the header menu opens the drawer, navigates, and closes on Escape", async ({
+  page,
+}) => {
   await page.goto("/");
   const menu = page.getByRole("button", { name: "Open menu" });
   await menu.click();
@@ -56,4 +64,55 @@ test("the header menu opens the drawer, navigates, and closes on Escape", async 
   await drawer.getByRole("link", { name: "SHOP" }).click();
   await expect(page).toHaveURL(/\/shop$/);
   await expect(page.getByRole("dialog", { name: "Menu" })).toHaveCount(0);
+});
+
+test("the shop pagination walks pages and reorders the placeholder cards", async ({
+  page,
+}) => {
+  await page.goto("/shop");
+  const firstOnPageOne = await page
+    .locator(".gr-card-zoom .gr-photo")
+    .first()
+    .getAttribute("src");
+
+  await page.getByRole("link", { name: "Page 3" }).click();
+  await expect(page).toHaveURL(/\/shop\?page=3$/);
+  await expect(page.getByRole("link", { name: "Page 3" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  // Same eight placeholder products, rotated into different slots (OQ-3).
+  const firstOnPageThree = await page
+    .locator(".gr-card-zoom .gr-photo")
+    .first()
+    .getAttribute("src");
+  expect(firstOnPageThree).not.toBe(firstOnPageOne);
+
+  // The next-page arrow is inert on the last page, as the design draws it.
+  await page.goto("/shop?page=5");
+  await expect(page.getByRole("link", { name: "Next page" })).toHaveCount(0);
+});
+
+test("the account type tabs are links between the two imported frames", async ({
+  page,
+}) => {
+  await page.goto("/account");
+  await page.getByRole("link", { name: "Business & Partnerships" }).click();
+  await expect(page).toHaveURL(/\/account\/business$/);
+  // And back — the fade itself is motion-gated, so only the routing is asserted.
+  await page.getByRole("link", { name: "Gift Shopping" }).click();
+  await expect(page).toHaveURL(/\/account$/);
+});
+
+test("the homepage gift-path cards reach the shop and the on-page sections", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator("#personalize")).toHaveCount(1);
+  await expect(page.locator("#craft")).toHaveCount(1);
+  await expect(page.locator('a[href="#personalize"]')).toHaveCount(1);
+  await expect(page.locator('a[href="#craft"]')).toHaveCount(1);
+  await expect(
+    page.getByRole("link", { name: /Valentine/i }).first(),
+  ).toBeVisible();
 });

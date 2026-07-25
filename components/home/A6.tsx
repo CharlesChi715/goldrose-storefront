@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { ReviewsRail } from "@/components/home/ReviewsRail";
 import { abs } from "@/components/veloria";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
@@ -23,72 +24,6 @@ const CHIPS = [
   { x: 289, w: 48, stroke: "#E5D6C2", labelX: 298.5, labelW: 29, label: "Clients", color: "#3B2E2E" },
   { x: 342, w: 62, stroke: "#E5D6C2", labelX: 350, labelW: 46, label: "Employees", color: "#3B2E2E" },
 ] as const;
-
-/* Review cards 1–3 (nodes 163:99, 193:150, 193:155) — identical structure;
-   photoBox is the photo's rect relative to the clipping image frame. */
-function ReviewCard({
-  x,
-  photo,
-  photoBox,
-  photoAlt,
-  quote,
-  quoteX,
-}: {
-  x: number;
-  photo: string;
-  photoBox: readonly [number, number, number, number];
-  photoAlt: string;
-  quote: string;
-  quoteX: number;
-}) {
-  return (
-    <div
-      style={{
-        ...abs(x, 4384, 122, 124),
-        background: "#FFFBF6",
-        borderRadius: 10,
-        boxShadow: "inset 0 0 0 1px #E5D1B8",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ ...abs(0, 0, 122, 69), background: "#F3C6D1", borderRadius: 10, overflow: "hidden" }}>
-        <img
-          src={photo}
-          alt={photoAlt}
-          width={photoBox[2]}
-          height={photoBox[3]}
-          style={{ ...abs(photoBox[0], photoBox[1], photoBox[2], photoBox[3]), display: "block", objectFit: "cover" }}
-        />
-      </div>
-      <div
-        className={playfair.className}
-        style={{ ...abs(quoteX, 72, 106), fontSize: 8.5, lineHeight: "10px", fontWeight: 500, color: "#3B2F2F" }}
-      >
-        {quote}
-      </div>
-      <img
-        src="/veloria/home/163-103.svg"
-        alt="★★★★★"
-        width={106}
-        height={11}
-        style={{ ...abs(8, 95, 106, 11), display: "block", objectFit: "none", objectPosition: "left center" }}
-      />
-      <img
-        src="/veloria/home/442-149.svg"
-        alt=""
-        width={12}
-        height={12}
-        style={{ ...abs(8, 109, 12, 12), display: "block" }}
-      />
-      <div
-        className={notoSC.className}
-        style={{ ...abs(23, 109, 57), fontSize: 7, lineHeight: "10px", fontWeight: 400, color: "#3B2E2E", whiteSpace: "nowrap" }}
-      >
-        Verified Purchase
-      </div>
-    </div>
-  );
-}
 
 export function A6() {
   return (
@@ -451,39 +386,11 @@ export function A6() {
         Loved by thousands, given with meaning.
       </div>
 
-      {/* Review cards (163:99, 193:150, 193:155) — static */}
-      <ReviewCard
-        x={22}
-        photo="/veloria/home/163-101.png"
-        photoBox={[0, -55, 132, 170]}
-        photoAlt="Customer photo of a gold rose gift"
-        quote="“The most beautiful gift I’ve ever received.”"
-        quoteX={8}
-      />
-      <ReviewCard
-        x={156}
-        photo="/veloria/home/193-152.png"
-        photoBox={[0, 0, 122, 69]}
-        photoAlt="Customer photo of a gold rose gift"
-        quote="“My wife was speechless on our anniversary.”"
-        quoteX={8}
-      />
-      <ReviewCard
-        x={290}
-        photo="/veloria/home/193-157.png"
-        photoBox={[0, 0, 122, 69]}
-        photoAlt="Customer photo of a gold rose gift"
-        quote="“Elegant and meaningful for our client.”"
-        quoteX={9}
-      />
+      <ReviewsRail />
 
-      {/* Review carousel dots · four (442:161) */}
-      <div style={{ ...abs(184, 4522, 62, 8), overflow: "hidden" }}>
-        <div style={{ ...abs(0, 0, 8, 8), background: "#C46E29", borderRadius: 9999 }} />
-        <div style={{ ...abs(19, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
-        <div style={{ ...abs(37, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
-        <div style={{ ...abs(55, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
-      </div>
+      {/* 442:165 · the design's fourth review dot — there is no fourth review,
+          so it stays static art rather than pointing at a missing slide. */}
+      <div style={{ ...abs(239, 4522.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
 
       {/* Button · Read Customer Stories (163:111) — placeholder, not clickable */}
       <div style={{ ...abs(92, 4553, 246, 33), background: "#2E1C12", borderRadius: 7 }}>

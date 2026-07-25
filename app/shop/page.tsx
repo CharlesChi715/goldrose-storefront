@@ -33,11 +33,25 @@ import { getCatalog } from "@/lib/supabase/catalog.ts";
 // DB-backed data (card links, promo slogan) refreshes without a redeploy (§8).
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description: "Shop the GoldRose 24K gold dipped rose collection.",
-  alternates: { canonical: "/shop" },
-};
+/**
+ * Pages 2-5 are the same eight placeholder products in a different order, so
+ * they are kept out of search results until real paging exists; page 1 stays
+ * the canonical /shop listing.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}): Promise<Metadata> {
+  const requested = Number((await searchParams).page);
+  const paged = Number.isInteger(requested) && requested > 1 && requested <= PAGE_COUNT;
+  return {
+    title: paged ? `Shop · page ${requested}` : "Shop",
+    description: "Shop the GoldRose 24K gold dipped rose collection.",
+    alternates: { canonical: "/shop" },
+    ...(paged ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 // Redesign palette (2026-07-25 frame edit)
 const INK = "#3B2F2F";
@@ -61,6 +75,20 @@ const CARDS = [
   { x: 219, y: 1332.5, w: 204, img: "58-158", stars: "58-94", starsW: 186 },
 ];
 
+/**
+ * Pagination is placeholder depth: the design draws five pages, and there is
+ * only one page of real products (OQ-3). Every page therefore shows the SAME
+ * eight cards, rotated into different grid slots so the pages are visibly
+ * distinct — page 1 keeps the design's exact order.
+ */
+const PAGE_COUNT = 5;
+const ROTATE_PER_PAGE = 3;
+
+/** Which card's content belongs in grid slot `slot` on `page`. */
+function contentIndex(slot: number, page: number) {
+  return (slot + (page - 1) * ROTATE_PER_PAGE) % CARDS.length;
+}
+
 type CardData = { shortName: string; price: string; compareAt: string | null } | null;
 
 function ProductCard({
@@ -77,6 +105,7 @@ function ProductCard({
   return (
     <Link
       href={href}
+      className="gr-card-zoom"
       style={{
         ...abs(card.x, card.y, card.w, 297),
         display: "block",
@@ -87,6 +116,7 @@ function ProductCard({
       }}
     >
       <img
+        className="gr-photo"
         src={`/veloria/home/${card.img}.png`}
         alt="Artisan 24K gold-dipped eternal rose"
         width={card.w}
@@ -158,7 +188,14 @@ function ProductCard({
 
 /* ---------- Page ---------- */
 
-export default async function ShopPage() {
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const requested = Number((await searchParams).page);
+  const page =
+    Number.isInteger(requested) && requested >= 1 && requested <= PAGE_COUNT ? requested : 1;
   // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
   let handles: string[] = [];
   let cardData: Array<{ handle: string; shortName: string; price: string; compareAt: string | null }> = [];
@@ -243,45 +280,66 @@ export default async function ShopPage() {
         </div>
       ))}
 
-      {/* Product grid — each card routes to its product detail page. */}
-      {CARDS.map((card, i) => (
-        <ProductCard
-          key={i}
-          card={card}
-          href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"}
-          data={cardData.length ? cardData[i % cardData.length] : null}
-        />
-      ))}
+      {/* Product grid — slot geometry is the design's; which card sits in each
+          slot rotates per page (placeholder paging, see PAGE_COUNT). */}
+      {CARDS.map((slot, i) => {
+        const c = contentIndex(i, page);
+        return (
+          <ProductCard
+            key={i}
+            card={{ ...slot, img: CARDS[c].img }}
+            href={handles.length ? `/products/${handles[c % handles.length]}` : "/shop"}
+            data={cardData.length ? cardData[c % cardData.length] : null}
+          />
+        );
+      })}
 
-      {/* Pagination */}
-      {[
-        { x: 110, label: "1", active: true },
-        { x: 154, label: "2", active: false },
-        { x: 198, label: "3", active: false },
-        { x: 242, label: "4", active: false },
-        { x: 286, label: "5", active: false },
-      ].map((p) => (
-        <div
-          key={p.label}
-          style={{ ...abs(p.x, 1656.5, 32, 32), background: p.active ? INK : "rgba(184,166,154,0.10)" }}
-        >
-          <div
+      {/* Pagination — page 1 keeps the bare /shop URL so the canonical page
+          has no query string. */}
+      {[110, 154, 198, 242, 286].map((x, i) => {
+        const n = i + 1;
+        const active = n === page;
+        return (
+          <Link
+            key={n}
+            href={n === 1 ? "/shop" : `/shop?page=${n}`}
+            aria-label={`Page ${n}`}
+            aria-current={active ? "page" : undefined}
             style={{
-              position: "absolute",
-              left: 0,
-              top: 4.76,
-              width: "100%",
-              textAlign: "center",
-              ...txt(16, 24, p.active ? "#FFF6EC" : INK_SOFT),
+              ...abs(x, 1656.5, 32, 32),
+              display: "block",
+              background: active ? INK : "rgba(184,166,154,0.10)",
             }}
           >
-            {p.label}
-          </div>
-        </div>
-      ))}
-      <span style={abs(327.052, 1660.59, 24, 24)}>
-        <ForwardIcon color={INK} />
-      </span>
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 4.76,
+                width: "100%",
+                textAlign: "center",
+                ...txt(16, 24, active ? "#FFF6EC" : INK_SOFT),
+              }}
+            >
+              {n}
+            </div>
+          </Link>
+        );
+      })}
+      {/* Next page; inert on the last one, exactly as the design draws it. */}
+      {page < PAGE_COUNT ? (
+        <Link
+          href={`/shop?page=${page + 1}`}
+          aria-label="Next page"
+          style={{ ...abs(327.052, 1660.59, 24, 24), display: "block" }}
+        >
+          <ForwardIcon color={INK} />
+        </Link>
+      ) : (
+        <span style={abs(327.052, 1660.59, 24, 24)}>
+          <ForwardIcon color={INK} />
+        </span>
+      )}
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the

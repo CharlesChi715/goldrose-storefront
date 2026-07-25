@@ -4,10 +4,12 @@
  * Homepage module A-4 — Figma node 138:60 "Real Rose Story and MORI Entry"
  * of the VELORIA homepage frame: the real-rose → GoldRose three-step story
  * strip with quote pill, and the MORI gift-finder panel with three path
- * cards. Coordinates/colors are verbatim Figma REST values; the path cards
- * are pixel-exact non-clickable placeholders per the route table.
+ * cards. Coordinates/colors are verbatim Figma REST values; the three path
+ * cards are wired per the route table (H-15 → /shop, H-16/H-17 → the A-8/A-9
+ * sections on this same page).
  */
 
+import Link from "next/link";
 import { abs } from "@/components/veloria";
 import { playfair, playfairSC, notoSC, goudy } from "@/lib/fonts";
 
@@ -179,10 +181,14 @@ export function A4() {
           Choose a path to begin.
         </div>
 
-        {/* 393:150 — Gift Path Card · Find a Gift (selected/dark state) — placeholder */}
-        <div
+        {/* 393:150 — Gift Path Card · Find a Gift (selected/dark state)
+            H-15 → /shop: the gift finder has no page yet, and browsing the
+            catalogue is the closest honest destination. */}
+        <Link
+          href="/shop"
           style={{
             ...abs(21, 226, 285, 64),
+            display: "block",
             background: "#271C15",
             borderRadius: 11,
             // 1.25px inside stroke + Figma INNER_SHADOW
@@ -232,12 +238,16 @@ export function A4() {
             height={18}
             style={{ ...abs(263, 23, 10, 18), display: "block" }}
           />
-        </div>
+        </Link>
 
-        {/* 394:150 — Gift Path Card · Personalize Your Rose — placeholder */}
-        <div
+        {/* 394:150 — Gift Path Card · Personalize Your Rose
+            H-16 → #personalize: no personalization page exists yet, but module
+            A-8 further down this page IS that content, so we scroll to it. */}
+        <Link
+          href="#personalize"
           style={{
             ...abs(21, 296, 310, 64),
+            display: "block",
             background: "#FFF9F0",
             borderRadius: 11,
             boxShadow: "inset 0 0 0 1px #E3C294, 0px 2px 5px rgba(74,48,26,0.07)",
@@ -286,12 +296,16 @@ export function A4() {
             height={18}
             style={{ ...abs(290, 23, 10, 18), display: "block" }}
           />
-        </div>
+        </Link>
 
-        {/* 396:150 — Gift Path Card · Explore Our Craft — placeholder */}
-        <div
+        {/* 396:150 — Gift Path Card · Explore Our Craft
+            H-17 → #craft: same reasoning as H-16 — module A-9 on this page is
+            the craft/workshop content, so we scroll there. */}
+        <Link
+          href="#craft"
           style={{
             ...abs(21, 366, 335, 64),
+            display: "block",
             background: "#FFF9F0",
             borderRadius: 11,
             boxShadow: "inset 0 0 0 1px #E3C294, 0px 2px 5px rgba(74,48,26,0.07)",
@@ -340,7 +354,7 @@ export function A4() {
             height={18}
             style={{ ...abs(313, 23, 10, 18), display: "block" }}
           />
-        </div>
+        </Link>
       </div>
 
       {/* 380:242 — pink wave ribbon, bleeds 15px past the left edge (frame clips).

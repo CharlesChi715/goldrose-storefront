@@ -93,7 +93,8 @@ const BENEFITS = [
 
 export function A9() {
   return (
-    <div style={{ ...abs(0, 6141, 430, 1011), background: "#3B2F2F", overflow: "hidden" }}>
+    // id="craft" — scroll target for the A-4 "EXPLORE OUR CRAFT" card (H-17).
+    <div id="craft" style={{ ...abs(0, 6141, 430, 1011), background: "#3B2F2F", overflow: "hidden" }}>
       {/* 165:137 · eyebrow */}
       <div
         className={notoSC.className}

@@ -60,7 +60,8 @@ export function A8() {
   return (
     // 138:64 -- module root; children below are frame-absolute minus (0, 5336).
     // Eyebrow 165:99, tag 165:104 and steps-title 165:106 are HIDDEN in Figma.
-    <div style={{ ...abs(0, 5336, 430, 805), background: "#FBF4EE", overflow: "hidden" }}>
+    // id="personalize" — scroll target for the A-4 "PERSONALIZE YOUR ROSE" card (H-16).
+    <div id="personalize" style={{ ...abs(0, 5336, 430, 805), background: "#FBF4EE", overflow: "hidden" }}>
       {/* 165:101 · A8 Intro */}
       <div
         className={goudy.className}

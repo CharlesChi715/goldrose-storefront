@@ -92,6 +92,17 @@ H-33 corporate, H-34 story, Wholesale tab — renders pixel-exact but is
 **not clickable** until its target page exists (per the "leave placeholder"
 instruction above).
 
+**Update 2026-07-26 — the three A-4 MORI gift-path cards are now wired.**
+H-15 "FIND A GIFT" → `/shop` (no gift-finder page yet; the catalogue is the
+closest honest destination). H-16 "PERSONALIZE YOUR ROSE" → `#personalize` and
+H-17 "EXPLORE OUR CRAFT" → `#craft` — in-page anchors that scroll to modules
+A-8 ("Personalized Gold Rose Gifts") and A-9 ("Craft, Workshop and Patents")
+further down the same homepage, which are literally that content. All three
+still count as **pending real pages**: a dedicated MORI gift finder,
+personalization flow and craft page supersede these when they exist. The
+remaining H-16/H-17 siblings (H-08/H-28/H-29/H-30/H-37, H-31) and H-26 stay
+inert. No coordinates or styles changed — the cards are pixel-identical.
+
 ## `⚠️ Developer note` · mascot artwork needs transparent PNGs
 
 The four AI-generated illustrations on the homepage (the MORI cat and the

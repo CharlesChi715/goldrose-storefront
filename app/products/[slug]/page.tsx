@@ -85,6 +85,7 @@ function Section({
   strokeWidth = 1,
   background = "#FFFFFF",
   clip = false,
+  className,
   children,
 }: {
   x: number;
@@ -96,10 +97,13 @@ function Section({
   strokeWidth?: number;
   background?: string;
   clip?: boolean;
+  /** Optional hook class (e.g. the hover-zoom wrapper). */
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
     <div
+      className={className}
       style={{
         ...abs(x, y, w, h),
         background,
@@ -190,8 +194,11 @@ export default async function ProductDetailPage({
       <VHeader backHref="/shop" right="heart" wishlistSlug={product.handle} />
 
       {/* 03 · Hero */}
-      <Section x={16} y={94} w={398} h={281} radius={15} clip>
+      {/* The hero photo zooms inside its clipped frame on hover (gr-card-zoom
+          + gr-photo, app/globals.css) — pointer devices only. */}
+      <Section x={16} y={94} w={398} h={281} radius={15} clip className="gr-card-zoom">
         <img
+          className="gr-photo"
           src="/veloria/detail-hero.png"
           alt={product.images[0]?.alt ?? product.title}
           width={398}
