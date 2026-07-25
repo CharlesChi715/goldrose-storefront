@@ -189,6 +189,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     financial_status: input.financial_status ?? "paid",
     refunded_cents: 0,
     fulfillment_status: "unfulfilled",
+    tracking_carrier: null,
     tracking_number: null,
     tracking_url: null,
     shipped_at: null,

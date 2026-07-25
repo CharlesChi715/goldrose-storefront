@@ -34,8 +34,10 @@ export type AccountOrder = {
   currency: string;
   financial_status: FinancialStatus;
   fulfillment_status: FulfillmentStatus;
+  tracking_carrier: string | null;
   tracking_number: string | null;
   tracking_url: string | null;
+  cancelled: boolean;
 };
 
 export type AccountOverview = {
@@ -190,8 +192,10 @@ export async function getAccountOverview(): Promise<AccountOverview | null> {
       currency: order.currency,
       financial_status: order.financial_status,
       fulfillment_status: order.fulfillment_status,
+      tracking_carrier: order.tracking_carrier,
       tracking_number: order.tracking_number,
       tracking_url: order.tracking_url,
+      cancelled: Boolean(order.cancelled_at),
     }));
 
   return {

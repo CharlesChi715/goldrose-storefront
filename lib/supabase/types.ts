@@ -126,6 +126,7 @@ export type OrderRow = {
   financial_status: FinancialStatus;
   refunded_cents: number;
   fulfillment_status: FulfillmentStatus;
+  tracking_carrier: string | null;
   tracking_number: string | null;
   tracking_url: string | null;
   shipped_at: string | null;

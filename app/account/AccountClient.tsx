@@ -15,8 +15,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowserAuthClient, useWebAuthnSupported } from "@/lib/supabase/browser-auth";
 import { formatMoney } from "@/lib/money";
+import { carrierLabel } from "@/lib/shipping/carriers";
 import { accountOverviewAction } from "./actions";
-import type { AccountOverview } from "@/lib/account/data.ts";
+import type { AccountOrder, AccountOverview } from "@/lib/account/data.ts";
 
 const brandName = "GoldRose";
 
@@ -35,6 +36,29 @@ const FINANCIAL_LABEL: Record<string, string> = {
   partially_refunded: "Partially refunded",
   refunded: "Refunded",
 };
+
+/**
+ * Delivery-status pill for an order in the "Your orders" list (Level 1
+ * tracking, owner request 2026-07-25): cancelled → fulfilled ("Shipped via
+ * UPS" when the carrier is known) → still preparing. Live carrier scans stay
+ * behind the "Track" link-out for now.
+ */
+function deliveryStatus(order: AccountOrder): { label: string; className: string } {
+  if (order.cancelled) {
+    return { label: "Cancelled", className: "border-[#cbbfa6] bg-[#f1eadb] text-[#7c6e50]" };
+  }
+  if (order.fulfillment_status === "fulfilled") {
+    const carrier = carrierLabel(order.tracking_carrier);
+    return {
+      label: carrier ? `Shipped via ${carrier}` : "Shipped",
+      className: "border-[#b5cc8e] bg-[#eff5e3] text-[#4d6b1e]",
+    };
+  }
+  return {
+    label: "Preparing your order",
+    className: "border-[#d7c28a] bg-[#fdf6e4] text-[#8a6a22]",
+  };
+}
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -298,35 +322,44 @@ export function AccountClient() {
                 </p>
               ) : (
                 <ul className="mt-4 divide-y divide-[#e7d9b8]">
-                  {overview.orders.map((order) => (
-                    <li key={order.name} className="flex flex-wrap items-baseline justify-between gap-2 py-3">
-                      <div>
-                        <p className="text-sm font-bold">{order.name}</p>
-                        <p className="text-xs text-[#7c6e50]">
-                          {formatDate(order.placed_at)} · {FINANCIAL_LABEL[order.financial_status] ?? order.financial_status}
-                          {order.fulfillment_status === "fulfilled" ? " · Shipped" : ""}
+                  {overview.orders.map((order) => {
+                    const status = deliveryStatus(order);
+                    return (
+                      <li key={order.name} className="py-3">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="text-sm font-bold">{order.name}</p>
+                          <p className="text-sm font-bold">{formatMoney(order.total_cents)}</p>
+                        </div>
+                        <p className="mt-0.5 text-xs text-[#7c6e50]">
+                          {formatDate(order.placed_at)} ·{" "}
+                          {FINANCIAL_LABEL[order.financial_status] ?? order.financial_status}
+                        </p>
+                        <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+                          <span
+                            className={`rounded-full border px-2.5 py-0.5 font-bold uppercase tracking-[0.08em] ${status.className}`}
+                          >
+                            {status.label}
+                          </span>
                           {order.tracking_number ? (
-                            <>
-                              {" · "}
-                              {order.tracking_url ? (
-                                <a
-                                  href={order.tracking_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="underline underline-offset-4"
-                                >
-                                  Track {order.tracking_number}
-                                </a>
-                              ) : (
-                                `Tracking ${order.tracking_number}`
-                              )}
-                            </>
+                            order.tracking_url ? (
+                              <a
+                                href={order.tracking_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[#8a6a22] underline underline-offset-4 hover:text-[#9a7826]"
+                              >
+                                Track {order.tracking_number}
+                              </a>
+                            ) : (
+                              <span className="text-[#7c6e50]">
+                                Tracking {order.tracking_number}
+                              </span>
+                            )
                           ) : null}
                         </p>
-                      </div>
-                      <p className="text-sm font-bold">{formatMoney(order.total_cents)}</p>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>

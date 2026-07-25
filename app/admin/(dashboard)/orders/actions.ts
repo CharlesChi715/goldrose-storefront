@@ -29,6 +29,7 @@ const id = z.string().min(1).max(64);
 
 export async function fulfillOrderAction(payload: {
   id: string;
+  carrier: "ups" | "usps" | null;
   trackingNumber: string;
   trackingUrl: string;
 }): Promise<ActionResult> {
@@ -36,6 +37,7 @@ export async function fulfillOrderAction(payload: {
   try {
     await fulfillOrder({
       id: id.parse(payload.id),
+      carrier: z.enum(["ups", "usps"]).nullable().parse(payload.carrier),
       trackingNumber: z.string().trim().max(120).parse(payload.trackingNumber),
       trackingUrl: z.string().trim().max(500).parse(payload.trackingUrl),
       actor: session.email,

@@ -186,6 +186,7 @@ export type SaveProductInput = {
  * @param input - Full form payload; id null = create.
  * @param actor - Admin name recorded on inventory movements.
  * @returns The saved product's id (derived from the title on create).
+ *   Throws when a non-blank SKU is already taken (SKU rules, Database.md).
  */
 export async function saveProduct(
   input: SaveProductInput,
@@ -201,6 +202,23 @@ export async function saveProduct(
   }
 
   const id = existing?.id ?? (await uniqueHandle(input.title));
+
+  // SKU rules (docs/Database.md): non-blank SKUs are unique storewide. The
+  // 0003 partial index enforces this on Postgres; this check covers the
+  // local file adapter and turns the violation into a readable error.
+  const incomingSkus = input.variants.map((variant) => variant.sku).filter((sku) => sku !== "");
+  const duplicateSku = incomingSkus.find((sku, index) => incomingSkus.indexOf(sku) !== index);
+  if (duplicateSku) {
+    throw new Error(`SKU "${duplicateSku}" is used twice on this product.`);
+  }
+  if (incomingSkus.length > 0) {
+    const taken = (await store.all("product_variants")).find(
+      (variant) => variant.product_id !== id && incomingSkus.includes(variant.sku),
+    );
+    if (taken) {
+      throw new Error(`SKU "${taken.sku}" is already used by another product.`);
+    }
+  }
   const handle = existing
     ? (input.handle?.trim() || existing.handle)
     : (input.handle?.trim() || id);
@@ -318,7 +336,8 @@ export async function saveProduct(
 
 /**
  * Shopify's Duplicate action: full copy (variants + media) as a new draft
- * with zeroed inventory. Throws on an unknown product.
+ * with zeroed inventory and cleared SKUs (non-blank SKUs are unique
+ * storewide — SKU rules, Database.md). Throws on an unknown product.
  *
  * @param id - Product to copy.
  * @param copySuffix - Localized "Copy of" text put before the new title.

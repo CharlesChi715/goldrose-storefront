@@ -2172,3 +2172,18 @@ docs: add first feature learning doc (trial)
 - Read VELORIA Figma file (updated 07-25 07:25 UTC) + repo; inventory of 10 new screens (homepage A-1…A-11, C-3 menu, logins, B-1…B-4, C-1/C-2) saved to agent memory `figma-import-pipeline`; shop frame 24:396 edited upstream (430×1822, was 1938) → implemented /shop now stale vs Figma.
 - docs/ixd/README.md: per owner, **Source:** now headlines homepage.md + shop.md; `temp/主页_shop页机制.numbers` demoted to "design team's editable original".
 - Answered owner's items-to-confirm #5 inline (third-party tell = non-GoldRose "VILOW… ROSE" wordmark on the N-07 gift box; same image is the live /shop hero `public/veloria/shop-hero.png`; swap = same-size asset replacement, needs OQ-3 photo).
+
+## 2026-07-25 · Order tracking Option B + Me-section status (bg session)
+
+- Boss ask (via Charles): customers see delivery status in the Me section;
+  carriers UPS + USPS only; Level 1 (carrier link-out) confirmed.
+- Built: `lib/shipping/carriers.ts` (UPS/USPS URL templates), migration
+  `0003_tracking_carrier_and_hardening.sql` (tracking_carrier + agreed
+  hardening: SKU partial unique index, FK indexes, discounts.value check),
+  fulfill-dialog carrier dropdown (EN/中文, "Other" = manual URL), auto-built
+  tracking link, "Carrier: UPS" in the shipping email, `/account`
+  delivery-status pill (Preparing / Shipped via X / Cancelled), saveProduct
+  SKU-taken guard + Duplicate now clears copied SKUs.
+- Tests: 35 unit (7 new), 57 e2e — all green; eslint + tsc clean.
+- Shipped from worktree branch `worktree-order-tracking` (draft PR).
+  ⚠️ Apply 0003 on hosted Supabase BEFORE deploying this code.

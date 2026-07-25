@@ -26,11 +26,13 @@ import {
   Link as PolarisLink,
   Modal,
   Page,
+  Select,
   Text,
   TextField,
   Toast,
 } from "@shopify/polaris";
 import { formatMoney } from "@/lib/money";
+import { CARRIERS, carrierLabel } from "@/lib/shipping/carriers";
 import { interpolate } from "@/lib/admin/i18n";
 import type { Address, OrderEventRow, OrderLineRow, OrderRow } from "@/lib/supabase/types.ts";
 import type { ConversionSummary } from "@/lib/admin/orders";
@@ -104,6 +106,7 @@ export function OrderDetailView({
   const [toast, setToast] = useState<string | null>(null);
 
   const [fulfillOpen, setFulfillOpen] = useState(false);
+  const [carrier, setCarrier] = useState<string>("ups");
   const [tracking, setTracking] = useState("");
   const [trackingUrl, setTrackingUrl] = useState("");
 
@@ -254,6 +257,9 @@ export function OrderDetailView({
                     <Divider />
                     <Text as="p">
                       {t("order.fulfilled.trackingLabel")}:{" "}
+                      {carrierLabel(order.tracking_carrier)
+                        ? `${carrierLabel(order.tracking_carrier)} · `
+                        : null}
                       {order.tracking_url ? (
                         <PolarisLink url={order.tracking_url} target="_blank">
                           {order.tracking_number}
@@ -570,6 +576,7 @@ export function OrderDetailView({
             run(async () => {
               const result = await fulfillOrderAction({
                 id: order.id,
+                carrier: carrier === "other" ? null : (carrier as "ups" | "usps"),
                 trackingNumber: tracking,
                 trackingUrl,
               });
@@ -583,6 +590,18 @@ export function OrderDetailView({
       >
         <Modal.Section>
           <BlockStack gap="300">
+            <Select
+              label={t("order.fulfill.carrier")}
+              options={[
+                ...Object.entries(CARRIERS).map(([value, def]) => ({
+                  label: def.label,
+                  value,
+                })),
+                { label: t("order.fulfill.carrier.other"), value: "other" },
+              ]}
+              value={carrier}
+              onChange={setCarrier}
+            />
             <TextField
               label={t("order.fulfill.tracking")}
               value={tracking}
@@ -593,6 +612,7 @@ export function OrderDetailView({
               label={t("order.fulfill.trackingUrl")}
               value={trackingUrl}
               onChange={setTrackingUrl}
+              helpText={carrier === "other" ? undefined : t("order.fulfill.trackingUrl.help")}
               autoComplete="off"
             />
           </BlockStack>
