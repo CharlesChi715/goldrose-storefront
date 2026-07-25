@@ -187,7 +187,7 @@ export function VHeader({
       <img src="/top-nav/menu.png" alt="" style={{ ...abs(4.5, 50, 33, 26), objectFit: "contain" }} />
       <BackButton fallback={backHref} style={abs(83, 50, 14, 26)} />
       <Link href="/" style={{ ...abs(147, 43.5, 136, 39), display: "block" }} aria-label="Home">
-        <img src="/veloria/logo.png" alt="VELORIA" width={136} height={39} style={{ display: "block", width: 136, height: 39 }} />
+        <img src="/veloria/logo.png" alt="GoldRose" width={136} height={39} style={{ display: "block", width: 136, height: 39 }} />
       </Link>
       {right === "search" ? (
         <img src="/top-nav/search.png" alt="" style={{ ...abs(324, 50, 32, 26), objectFit: "contain" }} />

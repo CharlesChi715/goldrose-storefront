@@ -13,8 +13,9 @@
 # testing
 /coverage
 
-# next.js
-/.next/
+# next.js — unanchored, so nested build dirs are caught too. A leading slash
+# here once let app/admin/(dashboard)/.next/ be committed by accident.
+.next/
 /out/
 
 # production
@@ -45,7 +46,7 @@ next-env.d.ts
 temp/
 .claude/
 
-# local demo order-capture log (see lib/orders/store.ts)
+# local file-adapter database and its uploads (see lib/orders/db.ts)
 .data/
 
 # playwright
