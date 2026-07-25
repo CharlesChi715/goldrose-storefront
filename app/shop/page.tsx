@@ -113,35 +113,38 @@ function ProductCard({
         height={11}
         style={{ ...abs(9, 234, card.starsW, 11), display: "block" }}
       />
+      {/* Price pair. The frame gives each price its own fixed box (48 / 51
+          wide) because the mock text is the short "$219"; real prices carry
+          cents and overflow that, so the two flow in one row that ends short
+          of the heart — same origin as the design, no overlap. */}
       <div
         className={notoSC.className}
         data-live-text
         style={{
-          ...abs(9, 249, 48, 43),
-          ...txt(20, 24, INK),
-          fontWeight: 700,
+          ...abs(9, 249, heartX - 13, 43),
           display: "flex",
           alignItems: "center",
+          gap: 6,
+          overflow: "hidden",
         }}
       >
-        {data?.price ?? "$219"}
+        <span style={{ ...txt(20, 24, INK), fontWeight: 700, flexShrink: 0 }}>
+          {data?.price ?? "$219"}
+        </span>
+        {data === null || data.compareAt !== null ? (
+          <span
+            style={{
+              ...txt(14, 16.8, MUTED),
+              textDecoration: "line-through",
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {data?.compareAt ?? "$189.00"}
+          </span>
+        ) : null}
       </div>
-      {data === null || data.compareAt !== null ? (
-        <div
-          className={notoSC.className}
-          data-live-text
-          style={{
-            ...abs(63, 249, 51, 43),
-            ...txt(14, 16.8, MUTED, "center"),
-            textDecoration: "line-through",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {data?.compareAt ?? "$189.00"}
-        </div>
-      ) : null}
       <img
         src="/veloria/home/58-86.png"
         alt=""

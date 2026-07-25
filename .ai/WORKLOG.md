@@ -2444,3 +2444,22 @@ A3 `378:214` + `378:229`, A5 `429:149`, A6 `440:149` + `442:161`. The shared
 Carousel makes each a mechanical change (supply its window + dot geometry),
 but each rail's cards are bespoke absolute JSX on pixel-gated modules, so they
 need converting and re-diffing one at a time.
+
+## 2026-07-25 — /shop price tag overlap fixed
+
+- Bug: on `/shop`, each card's live price painted on top of its struck-through
+  compare-at price (e.g. "$49.99" over "$89.99").
+- Cause: the Figma frame gives each price its own fixed absolute box (48px and
+  51px wide) sized for the mock's short "$219"; `formatMoney` emits cents
+  ("$49.99" ≈ 68px at 20px bold) and `txt()` sets `white-space: nowrap`, so the
+  price overflowed its box into the compare-at box 6px to its right.
+- Fix (`app/shop/page.tsx`): the pair now flows in one absolutely-positioned
+  flex row at the design origin (9, 249), width stopping short of the heart art,
+  `gap: 6`, compare-at ellipsizes and the row clips — no overlap at any price
+  length.
+- Pixel net: `[data-live-text]` mask rect changed shape, so
+  `tests/e2e/__screenshots__/shop-masked-darwin.png` was regenerated. Verified
+  the pre-update diff was confined to the four price rows (y 658–700, 966–1008,
+  1274–1316, 1582–1624) — nothing else on the page moved.
+- Checks: 63/63 Playwright e2e green, `tsc --noEmit` clean, lint clean (one
+  pre-existing warning in `app/page.tsx`).
