@@ -343,13 +343,22 @@ export function A4() {
         </div>
       </div>
 
-      {/* 380:242 — pink wave ribbon, bleeds 15px past the left edge (frame clips) */}
+      {/* 380:242 — pink wave ribbon, bleeds 15px past the left edge (frame clips).
+          Figma gives this fill blendMode DARKEN: the source art is an opaque
+          near-white bitmap and DARKEN is what keys its background out. Without
+          the blend, that white box hides whatever it overlaps. */}
       <img
         src="/veloria/home/380-242.png"
+        data-blend
         alt=""
         width={445}
         height={82}
-        style={{ ...abs(-15, 275, 445, 82), display: "block", maxWidth: "none" }}
+        style={{
+          ...abs(-15, 275, 445, 82),
+          display: "block",
+          maxWidth: "none",
+          mixBlendMode: "darken",
+        }}
       />
 
       {/* 380:238/239/241 — gold step arrows: 19x0 line nodes whose arrowhead
@@ -388,13 +397,16 @@ export function A4() {
       />
 
       {/* 386:251 — MORI, drawn above the panel and first path card ("Card Overlap");
-          right edge runs past x=430, clipped by the module frame. */}
+          right edge runs past x=430, clipped by the module frame. DARKEN fill
+          blend (see 380:242) — it is what lets the panel copy and the FIND A
+          GIFT card stay legible under the art's white background. */}
       <img
         src="/veloria/home/386-251.png"
+        data-blend
         alt="MORI, the GoldRose gift-box cat mascot holding a gold rose"
         width={237}
         height={237}
-        style={{ ...abs(205, 379, 237, 237), display: "block" }}
+        style={{ ...abs(205, 379, 237, 237), display: "block", mixBlendMode: "darken" }}
       />
     </div>
   );

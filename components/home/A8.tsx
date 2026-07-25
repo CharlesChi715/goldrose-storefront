@@ -253,13 +253,21 @@ export function A8() {
         {"Personalized Gold Rose Gifts,\nMade for Their Story"}
       </div>
 
-      {/* 472:150 · mascot, painted above the intro/ornament layer */}
+      {/* 472:150 · mascot, painted above the intro/ornament layer. Figma fill
+          blendMode DARKEN (see A4/A7) keys out the opaque near-white
+          background baked into the source art. */}
       <img
         src="/veloria/home/472-150.png"
+        data-blend
         alt="Mascot with a speech bubble reading 'Let's make it yours.'"
         width={109}
         height={84}
-        style={{ ...abs(283, 98, 109, 84), display: "block", objectFit: "cover" }}
+        style={{
+          ...abs(283, 98, 109, 84),
+          display: "block",
+          objectFit: "cover",
+          mixBlendMode: "darken",
+        }}
       />
     </div>
   );

@@ -128,13 +128,21 @@ export function A7() {
       >
         {"Tell MORI who the gift is for and what you're celebrating, and we'll help you find the best match."}
       </div>
-      {/* Illustration bleeds 10px past the left edge; the module frame clips it. */}
+      {/* Illustration bleeds 10px past the left edge; the module frame clips it.
+          Figma fill blendMode DARKEN keys out the art's opaque near-white
+          background — without it the box covers the section behind it. */}
       <img
         src="/veloria/home/420-262.png"
+        data-blend
         alt="MORI, the GoldRose gift-finder companion"
         width={246}
         height={246}
-        style={{ ...abs(-10, 210, 246, 246), objectFit: "cover", display: "block" }}
+        style={{
+          ...abs(-10, 210, 246, 246),
+          objectFit: "cover",
+          display: "block",
+          mixBlendMode: "darken",
+        }}
       />
 
       {/* Steps + criteria chips (static; a hidden step-three label in the design is omitted) */}
