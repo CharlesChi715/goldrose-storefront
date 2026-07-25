@@ -20,6 +20,15 @@ source wins.
   Chinese (translation pending)
 - `assets/` — 52 annotated screenshots (red box = the element for that entry);
   filename = entry ID; JPEG-compressed from the originals
+- [figma-naming-guide.md](figma-naming-guide.md) — the owner's UI naming guide,
+  transcribed **verbatim** from `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`:
+  the PAGE / SECTION / FUNCTION / TYPE vocabulary plus 13 worked examples
+- [element-names.md](element-names.md) — the naming convention we actually
+  apply: grammar, 6 rules, and the vocabulary with our additions and removals.
+  Every visible element carries its name in `data-el`; guarded by
+  `tests/unit/element-names.test.ts`
+- [bottom-nav-buttons.md](bottom-nav-buttons.md), [login-import.md](login-import.md)
+  — per-import notes for the nav art and the 登录界面 frame
 
 ## How to reference an entry
 

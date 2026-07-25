@@ -73,7 +73,9 @@ domain
 
 - meeting 25 July
 美化未完成可以做吗
+figma 英语命名 统一
 
 首页
 admin passkey
-email
+email tracking order 
+supabase CLI

@@ -59,6 +59,9 @@ const EDGE_RESISTANCE = 3;
  * @param idleColor - Dot colour when not current.
  * @param href - Destination for a card tap.
  * @param label - Human name used in the dots' accessible labels.
+ * @param name - Element-name prefix (docs/ixd/element-names.md), e.g.
+ * `HOME-HERO`. Stamps `data-el` on the window (`-MEDIA`), each slide
+ * (`-SLIDE-n`) and each dot (`-DOT-n`). Omit to leave the rail untagged.
  * @param renderSlide - Draws slide `i` inside its cell.
  * @returns The clipped track plus its dots.
  */
@@ -70,6 +73,7 @@ export function Carousel({
   idleColor,
   href = "/placeholder",
   label,
+  name,
   renderSlide,
 }: {
   window: Window;
@@ -79,6 +83,7 @@ export function Carousel({
   idleColor: string;
   href?: string;
   label: string;
+  name?: string;
   renderSlide: (index: number) => React.ReactNode;
 }) {
   const [index, setIndex] = useState(0);
@@ -116,6 +121,7 @@ export function Carousel({
   return (
     <>
       <div
+        data-el={name && `${name}-MEDIA`}
         style={{
           ...abs(win.left, win.top, win.width, win.height),
           overflow: "hidden",
@@ -175,6 +181,7 @@ export function Carousel({
           {Array.from({ length: count }, (_, i) => (
             <Link
               key={i}
+              data-el={name && `${name}-SLIDE-${i + 1}`}
               href={href}
               aria-label={`${label} ${i + 1}`}
               tabIndex={i === index ? 0 : -1}
@@ -197,6 +204,7 @@ export function Carousel({
       {dots.map((dot, i) => (
         <button
           key={`${dot.x}-${dot.y}`}
+          data-el={name && `${name}-DOT-${i + 1}`}
           type="button"
           onClick={() => go(i)}
           aria-label={`Show ${label} ${i + 1}`}

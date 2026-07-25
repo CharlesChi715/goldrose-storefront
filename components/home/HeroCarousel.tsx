@@ -40,6 +40,7 @@ export function HeroCarousel() {
       activeColor="#D4AF37"
       idleColor="#FFF6EC"
       label="hero slide"
+      name="HOME-HERO"
       renderSlide={() => (
         <img
           src="/veloria/home/153-64.png"

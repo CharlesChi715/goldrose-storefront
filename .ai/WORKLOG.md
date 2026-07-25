@@ -2471,3 +2471,58 @@ need converting and re-diffing one at a time.
 - Owner decision (asked, because it is the money path 4 days before ship): full B-2 fidelity with decorative gaps. Implemented, with one safety exception I held — card inputs render only in the mock branch, since a card-number field that goes nowhere is a PCI/security hazard; PayPal's own button occupies that area live.
 - Verified: 35 unit + 73 e2e green (incl. 5 new screen smoke tests + 15 money-path specs); PayPal branch driven in a browser with a sandbox id (real line item, $49.99 + $5.95 = $55.94, no dead card fields, no hydration errors); pixel baselines regenerated. Rebased onto main over another session's page-fade work (one `veloria.tsx` conflict, resolved keeping both).
 - NOT done, deliberately: `/bag` → live cart wiring, guest order-lookup backend for C-1, per-method shipping rates. All flagged in SUMMARY + docs/ixd.
+## 2026-07-25 — hero swipe follows the finger; bottom-nav cross-fade
+
+Owner asks: "the img follow my swipe, i pause anywhere in the middle it pause"
+and "fade in fade out when switch pages by bottom nav buttons".
+
+- `components/home/Carousel.tsx`: swipe was threshold-only (touchstart X vs
+  touchend X — the slide never moved until release). Now pointer-driven: the
+  track translates pixel-for-pixel with the pointer, transition off while held,
+  so resting mid-swipe parks the slide exactly where the finger stopped and
+  auto-play stays paused. Release commits past 40px, otherwise springs back;
+  pulls past the first/last cell are damped 3:1; `touch-action: pan-y` keeps
+  vertical page scroll.
+  - Bug caught in test: capturing the pointer on `pointerdown` retargets the
+    click to the window, so a plain tap stopped opening the card. Capture is
+    now deferred until the gesture passes the 6px tap slop.
+- `components/PageFade.tsx` (new) + `ScaleFrame`/`BottomNav`: tapping a tab
+  fades `.figv-wrap` out (150ms), commits the route, then fades the new canvas
+  in; the tab bar sits outside the fade and never blinks. State is a class on
+  `<html>` because the two halves span two pages, with a 2s safety timer so a
+  failed navigation can never leave the canvas invisible. Reduced motion opts
+  out of both halves.
+  - React 19.2 stable ships no `<ViewTransition>`, so Next's experimental
+    viewTransition flag was not an option; this is the no-experimental route.
+- Verified on a production build: touch drag follows the finger and holds at
+  -110px through 2.2s (auto-play is 1800ms), lift advances, vertical swipe still
+  scrolls, tap still opens the card. Fade: out by 187ms, only ~47ms fully dark,
+  route commits at 206ms.
+- Checks: 68/68 e2e green (5 new — 2 carousel drag, 3 nav fade), typecheck and
+  lint clean.
+
+## 2026-07-26 — UI element naming convention
+
+- Transcribed the owner's `temp/Figma_UI_Naming_Guide_GoldRose.xlsx` verbatim to
+  `docs/ixd/figma-naming-guide.md` (5 sheets: PAGE/SECTION/FUNCTION/TYPE + 13
+  examples). Metadata shows `dc:creator = openpyxl`, created and modified one
+  second apart — the guide was script-generated, not hand-authored, which is why
+  its word lists describe a generic store rather than GoldRose.
+- Wrote the applied convention at `docs/ixd/element-names.md`: the guide's
+  `PAGE-SECTION-[QUALIFIER]-TYPE` grammar kept verbatim, carried in a `data-el`
+  attribute, plus 6 rules (role-not-appearance; index for fixed repeats vs
+  `data-key` for data-driven lists; don't name decoration; Figma node ids stay in
+  comments; reuse the existing `data-live-text`; unique per page).
+- Vocabulary corrections: removed `BUY-NOW` (owner's call — duplicates `BUY`);
+  proposed removing `CART` (no cart route by design); proposed ~20 additions
+  including `PRICE`, which the guide's own example `PDP-PRODUCT-PRICE` uses but
+  its TYPE sheet omits.
+- Enforcement: `tests/unit/element-names.test.ts` parses the vocabulary out of
+  the doc (so code and guide cannot drift) and fails on malformed names, unknown
+  words and duplicates. Verified it catches all four violation classes.
+- Pilot tagging applied to `components/home/A1–A3` and the shared `Carousel`
+  (new optional `name` prop derives `-MEDIA`/`-SLIDE-n`/`-DOT-n`). Pixel
+  baselines home/shop/product-detail all passed — `data-el` is inert.
+- ⚠️ Open: A-4…A-11 not tagged (their section names are all new vocabulary,
+  pending owner sign-off). 3 behavioural e2e failures (2 carousel-drag, 1
+  nav-fade) remain unattributed — baseline comparison was interrupted.

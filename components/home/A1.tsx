@@ -39,9 +39,13 @@ const TILES = [
 export function A1() {
   return (
     // 138:57 module frame — children below are positioned relative to it.
-    <div style={{ ...abs(0, 32, 430, 811), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      data-el="HOME-HERO-SECTION"
+      style={{ ...abs(0, 32, 430, 811), background: "#FFF6EC", overflow: "hidden" }}
+    >
       {/* 153:65 eyebrow — space runs kept via nbsp so HTML doesn't collapse them */}
       <div
+        data-el="HOME-HERO-EYEBROW-TEXT"
         className={notoSC.className}
         style={{
           ...abs(115, 402, 200),
@@ -58,6 +62,7 @@ export function A1() {
 
       {/* 153:66 hero title */}
       <div
+        data-el="HOME-HERO-TITLE"
         className={playfair.className}
         style={{
           ...abs(34, 429, 362),
@@ -75,6 +80,7 @@ export function A1() {
 
       {/* 153:67 hero subtitle */}
       <div
+        data-el="HOME-HERO-SUBTITLE"
         className={playfair.className}
         style={{
           ...abs(68, 517, 294),
@@ -91,6 +97,7 @@ export function A1() {
 
       {/* 153:68 hero body — wraps naturally inside its 306px box */}
       <div
+        data-el="HOME-HERO-BODY-TEXT"
         className={notoSC.className}
         style={{
           ...abs(62, 548, 306),
@@ -107,10 +114,12 @@ export function A1() {
 
       {/* 155:53 CTA · Shop Gold-Dipped Roses */}
       <Link
+        data-el="HOME-HERO-SHOP-BTN"
         href="/shop"
         style={{ ...abs(32, 598, 366, 44), display: "block", background: "#3B2F2F", borderRadius: 10 }}
       >
         <div
+          data-el="HOME-HERO-SHOP-TEXT"
           className={notoSC.className}
           style={{
             ...abs(79, 15, 181),
@@ -129,6 +138,7 @@ export function A1() {
 
       {/* 155:56 CTA · Create Personalized Rose Gift (placeholder, not clickable) */}
       <div
+        data-el="HOME-HERO-PERSONALIZE-BTN"
         style={{
           ...abs(31, 654, 366, 44),
           background: "#FFF6EC",
@@ -137,6 +147,7 @@ export function A1() {
         }}
       >
         <div
+          data-el="HOME-HERO-PERSONALIZE-TEXT"
           className={notoSC.className}
           style={{
             ...abs(48.5, 15, 242),
@@ -154,9 +165,10 @@ export function A1() {
       </div>
 
       {/* 155:59 / 155:62 / 155:65 benefit tiles (placeholders, not clickable) */}
-      {TILES.map((t) => (
+      {TILES.map((t, i) => (
         <div
           key={t.x}
+          data-el={`HOME-HERO-BENEFIT-CARD-${i + 1}`}
           style={{
             ...abs(t.x, 710, 118, 62),
             background: "#FFF6EC",
@@ -166,6 +178,7 @@ export function A1() {
           }}
         >
           <img
+            data-el={`HOME-HERO-BENEFIT-ICON-${i + 1}`}
             src={t.icon.src}
             alt={t.icon.alt}
             width={t.icon.w}
@@ -173,6 +186,7 @@ export function A1() {
             style={{ ...abs(t.icon.x, 8.5, t.icon.w, 19), display: "block" }}
           />
           <div
+            data-el={`HOME-HERO-BENEFIT-TEXT-${i + 1}`}
             className={notoSC.className}
             style={{
               ...abs(t.label.x, 30.5, t.label.w),

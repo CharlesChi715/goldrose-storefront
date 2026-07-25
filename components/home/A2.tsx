@@ -14,9 +14,13 @@ import { playfair, notoSC } from "@/lib/fonts";
 export function A2() {
   return (
     // 138:58 module frame — children positioned relative to (0, 843)
-    <div style={{ ...abs(0, 843, 430, 641), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      data-el="HOME-FEATURED-SECTION"
+      style={{ ...abs(0, 843, 430, 641), background: "#FFF6EC", overflow: "hidden" }}
+    >
       {/* 157:57 ornament — Figma-rendered glyph strip (✿ hits fallback fonts) */}
       <img
+        data-el="HOME-FEATURED-ORNAMENT"
         src="/veloria/home/157-57.svg"
         alt="—   ✿   —"
         width={140}
@@ -26,6 +30,7 @@ export function A2() {
 
       {/* 157:58 section title */}
       <div
+        data-el="HOME-FEATURED-TITLE"
         className={playfair.className}
         style={{
           ...abs(38, 62, 354),
@@ -42,6 +47,7 @@ export function A2() {
 
       {/* 157:59 subtitle */}
       <div
+        data-el="HOME-FEATURED-SUBTITLE"
         className={notoSC.className}
         style={{
           ...abs(54, 112, 322),
@@ -58,6 +64,7 @@ export function A2() {
 
       {/* 157:60 "Best Sellers" heading */}
       <div
+        data-el="HOME-FEATURED-BESTSELLER-TITLE"
         className={playfair.className}
         style={{
           ...abs(20, 176, 220),
@@ -72,7 +79,11 @@ export function A2() {
       </div>
 
       {/* 157:61 "View all  →" — Figma-rendered strip, links to /shop */}
-      <Link href="/shop" style={{ ...abs(328, 184, 82, 22), display: "block" }}>
+      <Link
+        data-el="HOME-FEATURED-VIEW-ALL-LINK"
+        href="/shop"
+        style={{ ...abs(328, 184, 82, 22), display: "block" }}
+      >
         <img
           src="/veloria/home/157-61.svg"
           alt="View all →"
@@ -84,6 +95,7 @@ export function A2() {
 
       {/* 376:176 product card · Personalized Gold-Dipped Rose */}
       <Link
+        data-el="HOME-FEATURED-PRODUCT-CARD-1"
         href="/shop"
         style={{
           ...abs(18, 220, 250, 366),
@@ -99,12 +111,14 @@ export function A2() {
         {/* 376:178 content */}
         <div style={{ ...abs(0, 240, 250, 126), overflow: "hidden" }}>
           <div
+            data-el="HOME-FEATURED-PRODUCT-TITLE-1"
             className={playfair.className}
             style={{ ...abs(12, 12, 160), fontSize: 18, lineHeight: "22px", fontWeight: 500, color: "#3B2F2F" }}
           >
             Personalized Gold-Dipped Rose
           </div>
           <div
+            data-el="HOME-FEATURED-PRODUCT-PRICE-1"
             className={notoSC.className}
             style={{
               ...abs(12, 57, 45),
@@ -119,6 +133,7 @@ export function A2() {
             $79.00
           </div>
           <div
+            data-el="HOME-FEATURED-PRODUCT-NOTE-1"
             className={notoSC.className}
             style={{ ...abs(12, 75, 160), fontSize: 11, lineHeight: "16px", fontWeight: 400, color: "#D4AF37" }}
           >
@@ -126,6 +141,7 @@ export function A2() {
           </div>
           {/* 376:182 cta — Figma-rendered strip */}
           <img
+            data-el="HOME-FEATURED-PRODUCT-CTA-1"
             src="/veloria/home/376-182.svg"
             alt="View Product →"
             width={86}
@@ -137,6 +153,7 @@ export function A2() {
 
       {/* 157:76 photo frame over card 1's image area (rounded top corners) */}
       <Link
+        data-el="HOME-FEATURED-PRODUCT-IMG-1"
         href="/shop"
         style={{
           ...abs(18, 220, 250, 240),
@@ -162,14 +179,16 @@ export function A2() {
         />
       </Link>
 
-      {/* 377:190 carousel dots */}
-      <div style={{ ...abs(185, 619, 9, 9), background: "#D4AF37", borderRadius: 9999 }} />
-      <div style={{ ...abs(204, 619, 7, 7), background: "#E5D9C9", borderRadius: 9999 }} />
-      <div style={{ ...abs(221, 619, 7, 7), background: "#E5D9C9", borderRadius: 9999 }} />
-      <div style={{ ...abs(238, 619, 7, 7), background: "#E5D9C9", borderRadius: 9999 }} />
+      {/* 377:190 carousel dots — siblings with no wrapper, so indexed
+          individually rather than sharing one group name. */}
+      <div data-el="HOME-FEATURED-DOT-1" style={{ ...abs(185, 619, 9, 9), background: "#D4AF37", borderRadius: 9999 }} />
+      <div data-el="HOME-FEATURED-DOT-2" style={{ ...abs(204, 619, 7, 7), background: "#E5D9C9", borderRadius: 9999 }} />
+      <div data-el="HOME-FEATURED-DOT-3" style={{ ...abs(221, 619, 7, 7), background: "#E5D9C9", borderRadius: 9999 }} />
+      <div data-el="HOME-FEATURED-DOT-4" style={{ ...abs(238, 619, 7, 7), background: "#E5D9C9", borderRadius: 9999 }} />
 
       {/* 376:183 product card · Enchanted Rose with LED Light */}
       <Link
+        data-el="HOME-FEATURED-PRODUCT-CARD-2"
         href="/shop"
         style={{
           ...abs(285, 237, 184, 349),
@@ -182,6 +201,7 @@ export function A2() {
       >
         {/* 376:184 product image (STRETCH — exact box, no objectFit) */}
         <img
+          data-el="HOME-FEATURED-PRODUCT-IMG-2"
           src="/veloria/home/376-184.png"
           alt="Enchanted rose with LED light"
           width={184}
@@ -192,12 +212,14 @@ export function A2() {
             card's overflow hidden clips it */}
         <div style={{ ...abs(0, 222, 184, 160), overflow: "hidden" }}>
           <div
+            data-el="HOME-FEATURED-PRODUCT-TITLE-2"
             className={playfair.className}
             style={{ ...abs(12, 12, 160), fontSize: 18, lineHeight: "22px", fontWeight: 500, color: "#3B2F2F" }}
           >
             Enchanted Rose with LED Light
           </div>
           <div
+            data-el="HOME-FEATURED-PRODUCT-PRICE-2"
             className={notoSC.className}
             style={{
               ...abs(12, 57, 53),
@@ -211,6 +233,7 @@ export function A2() {
             $119.00
           </div>
           <div
+            data-el="HOME-FEATURED-PRODUCT-NOTE-2"
             className={notoSC.className}
             style={{ ...abs(12, 75, 160), fontSize: 11, lineHeight: "16px", fontWeight: 400, color: "#D4AF37" }}
           >
@@ -218,6 +241,7 @@ export function A2() {
           </div>
           {/* 376:189 cta — same rendered strip as card 1 */}
           <img
+            data-el="HOME-FEATURED-PRODUCT-CTA-2"
             src="/veloria/home/376-182.svg"
             alt="View Product →"
             width={86}
