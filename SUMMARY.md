@@ -14,10 +14,10 @@ goldrose-storefront/
 ├── app/                 # Next.js App Router: storefront (/, /shop, /products/[slug], /account), /admin, API routes, sitemap/robots/llms.txt
 ├── components/          # Storefront + shared UI (VHeader, BackButton, WishlistButton, NoCalcScale…)
 ├── lib/                 # Domain logic: admin/, checkout/, supabase/ (2 backends: hosted / .data file adapter), account/, cart/
-├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth)
+├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth, 0003 tracking carrier + hardening)
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
 ├── proxy.ts             # Auth middleware (Next 16 name, §9.2) — guards /admin + /api/admin only
-├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 28 unit — green
+├── tests/               # 57 Playwright e2e (production build, port 3001, file adapter) + 35 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
 ├── assets/              # Raw owner art, not served: nav icons (public/ holds processed copies) + supplier-color-charts/
 ├── docs/                # Specs/guides, ixd/ interaction specs (交互稿), features/ decision records, learning/ walkthroughs, SEO/GEO research, repo review, and archive/
@@ -51,7 +51,7 @@ goldrose-storefront/
 
 - **Charles: finish the activation checklist** ([docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) §5): Vercel env vars + redeploy → Supabase auth config → auth providers (passkeys RP, Google/Apple) → PayPal sandbox → §14.3 walkthrough → screenshots → cancel Shopify → revoke Figma token.
 - Then: real rates (OQ-2), real product content (OQ-3), launch checklist items, and DB backups at/near launch ([docs/features/backend/db-backups.md](docs/features/backend/db-backups.md) — live DB has no backups until then).
-- Boss asks 07-25, now feature files (BACKLOG, approach awaiting sign-off): [order-tracking](docs/features/backend/order-tracking.md) (UPS carrier + auto link; tracking email already built) · [promotion-emails](docs/features/backend/promotion-emails.md) (consent + Resend audience).
+- Boss asks 07-25: [order-tracking](docs/features/backend/order-tracking.md) **BUILT 07-25** (carrier dropdown UPS/USPS + auto link, /account status pill, 0003 bundles the agreed hardening) — merge PR, **run 0003 on hosted BEFORE deploy**, then owner UAT · [promotion-emails](docs/features/backend/promotion-emails.md) still BACKLOG (consent + Resend audience).
 - Design 07-25: homepage+shop redesign interaction spec (37+15 rows, annotated mobile Figma mocks) imported → [docs/ixd/](docs/ixd/README.md); mechanism-first build possible now, blocked items listed in its 待与设计确认.
 - Post-ship: owner's influencer campaign + website-exclusive video finale ([docs/ideas.md](docs/ideas.md) 07-24) — no influencer links before ship.
 - 120-SKU content pipeline (admin editing + bulk import): now a feature file, [docs/features/product-content-pipeline.md](docs/features/product-content-pipeline.md) — BACKLOG, after ship; SKU rules in [docs/Database.md](docs/Database.md). Supplier's full color catalog (124 colors: Y/YS/YC series) parsed in [docs/supplier-color-charts.md](docs/supplier-color-charts.md).

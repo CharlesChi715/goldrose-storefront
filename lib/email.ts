@@ -7,6 +7,7 @@
  * toggles live in settings (§9.11) and default to on.
  */
 
+import { carrierLabel } from "./shipping/carriers.ts";
 import { getStore } from "./supabase/store.ts";
 import type { OrderLineRow, OrderRow } from "./supabase/types.ts";
 
@@ -141,9 +142,9 @@ export async function sendOrderPlacedEmails(
 }
 
 /**
- * Send the buyer's shipping confirmation with tracking number and link when
- * present, triggered by the fulfill flow (§9.4). Skipped when the toggle is
- * off or the order has no email.
+ * Send the buyer's shipping confirmation with carrier, tracking number and
+ * link when present, triggered by the fulfill flow (§9.4). Skipped when the
+ * toggle is off or the order has no email.
  *
  * @param order - The order row, including any tracking fields.
  * @param lines - The order's snapshot line items.
@@ -156,8 +157,9 @@ export async function sendShippingConfirmationEmail(
   if (!toggles.shipping_confirmation || !order.email) {
     return;
   }
+  const carrier = carrierLabel(order.tracking_carrier);
   const tracking = order.tracking_number
-    ? `\nTracking number: ${order.tracking_number}${order.tracking_url ? `\nTrack it: ${order.tracking_url}` : ""}`
+    ? `${carrier ? `\nCarrier: ${carrier}` : ""}\nTracking number: ${order.tracking_number}${order.tracking_url ? `\nTrack it: ${order.tracking_url}` : ""}`
     : "";
   await deliver(
     order.email,

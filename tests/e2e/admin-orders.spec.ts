@@ -22,13 +22,16 @@ const GIFT_NOTE = "Stage5 gift note — handle with care";
 let orderName = "";
 let secondOrderName = "";
 
-async function placeMockOrder(request: APIRequestContext): Promise<string> {
+async function placeMockOrder(
+  request: APIRequestContext,
+  email: string = BUYER_EMAIL,
+): Promise<string> {
   const response = await request.post("/api/checkout", {
     data: {
       method: "card",
       lines: [{ variantId: SIGNATURE_VARIANT, quantity: 1 }],
       country: "US",
-      email: BUYER_EMAIL,
+      email,
       note: GIFT_NOTE,
       shipping: {
         name: "Stage Five",
@@ -113,6 +116,8 @@ test("fulfill flow stores tracking and flips status", async ({ page }) => {
 
   await page.getByRole("button", { name: "Fulfill items" }).first().click();
   const modal = page.getByRole("dialog");
+  // "Other" carrier: the pre-carrier path — admin pastes the full URL.
+  await modal.getByLabel("Carrier").selectOption("other");
   await modal.getByLabel("Tracking number").fill("TRACK-12345");
   await modal.getByLabel("Tracking URL (optional)").fill("https://example.com/track/TRACK-12345");
   await modal.getByRole("button", { name: "Fulfill items" }).click();
@@ -120,6 +125,31 @@ test("fulfill flow stores tracking and flips status", async ({ page }) => {
   await expect(page.getByText("Fulfilled").first()).toBeVisible();
   await expect(page.getByRole("link", { name: "TRACK-12345" })).toBeVisible();
   await expect(page.getByText(/Order fulfilled — tracking TRACK-12345/)).toBeVisible();
+});
+
+test("fulfill with the default UPS carrier auto-builds the tracking link", async ({
+  page,
+  request,
+}) => {
+  // Own buyer email: the customer test counts BUYER_EMAIL's orders (exactly 2).
+  const upsOrderName = await placeMockOrder(request, `ups-buyer-${Date.now()}@example.com`);
+  await adminLogin(page);
+  await openOrder(page, upsOrderName);
+
+  await page.getByRole("button", { name: "Fulfill items" }).first().click();
+  const modal = page.getByRole("dialog");
+  // Carrier dropdown defaults to UPS; the URL field stays blank on purpose —
+  // fulfillOrder builds it from the carrier template (order-tracking Option B).
+  await modal.getByLabel("Tracking number").fill("1Z999AA10123456784");
+  await modal.getByRole("button", { name: "Fulfill items" }).click();
+
+  await expect(page.getByText("Fulfilled").first()).toBeVisible();
+  await expect(page.getByText(/UPS ·/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "1Z999AA10123456784" })).toHaveAttribute(
+    "href",
+    "https://www.ups.com/track?tracknum=1Z999AA10123456784",
+  );
+  await expect(page.getByText(/Order fulfilled — UPS tracking 1Z999AA10123456784/)).toBeVisible();
 });
 
 test("refund: partial → partially refunded, remainder → refunded", async ({ page }) => {

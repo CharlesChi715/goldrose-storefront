@@ -11,6 +11,7 @@ import { randomUUID } from "crypto";
 import { accountOf } from "./channels.ts";
 import { sendShippingConfirmationEmail } from "@/lib/email";
 import { getPayPalConfig, refundPayPalCapture } from "@/lib/paypal/client";
+import { buildTrackingUrl, carrierLabel, type CarrierId } from "@/lib/shipping/carriers";
 import { getStore } from "@/lib/supabase/store.ts";
 import type {
   CustomerRow,
@@ -194,12 +195,16 @@ async function mustGetOrder(id: string): Promise<OrderRow> {
 /**
  * "Fulfill items" (§9.4): single fulfillment, tracking, shipping email.
  * Marks the whole order fulfilled, logs a timeline event, then sends the
- * shipping confirmation. Throws when already fulfilled or cancelled.
+ * shipping confirmation. When the URL is blank it is built from the
+ * carrier's template (order-tracking Option B), so the admin only pastes
+ * the number. Throws when already fulfilled or cancelled.
  *
- * @param input - Order id, optional tracking number/URL, and the acting admin.
+ * @param input - Order id, carrier (null = other/manual URL), optional
+ *   tracking number/URL, and the acting admin.
  */
 export async function fulfillOrder(input: {
   id: string;
+  carrier: CarrierId | null;
   trackingNumber: string;
   trackingUrl: string;
   actor: string;
@@ -210,20 +215,24 @@ export async function fulfillOrder(input: {
     throw new Error("Order can't be fulfilled");
   }
   const now = new Date().toISOString();
+  const trackingUrl =
+    input.trackingUrl || buildTrackingUrl(input.carrier, input.trackingNumber) || "";
   await store.update(
     "orders",
     { id: input.id },
     {
       fulfillment_status: "fulfilled",
+      tracking_carrier: input.carrier,
       tracking_number: input.trackingNumber || null,
-      tracking_url: input.trackingUrl || null,
+      tracking_url: trackingUrl || null,
       shipped_at: now,
     },
   );
+  const carrierName = carrierLabel(input.carrier);
   await addSystemEvent(
     input.id,
     input.trackingNumber
-      ? `Order fulfilled — tracking ${input.trackingNumber}`
+      ? `Order fulfilled — ${carrierName ? `${carrierName} tracking` : "tracking"} ${input.trackingNumber}`
       : "Order fulfilled",
     input.actor,
   );

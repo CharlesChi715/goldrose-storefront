@@ -139,13 +139,13 @@ Order emails (Resend) — console fallback until RESEND_API_KEY set
 └── owner new-order alert ●●●○ UAT
 
 Shipping & tracking
-└── order-tracking.md ○○○○ BACKLOG — carrier field + auto UPS link
+└── order-tracking.md ●●○○ IN PROGRESS — built; merge + 0003 on hosted pending
 
 Marketing
 └── promotion-emails.md ○○○○ BACKLOG — consent + unsubscribe first
 
 Supabase hosted DB
-├── migrations (0001, 0002) ●●●● DONE
+├── migrations (0001, 0002) ●●●● DONE — 0003 written, apply on hosted pending
 ├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
 └── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
 ```

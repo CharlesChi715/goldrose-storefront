@@ -61,12 +61,6 @@ turn it into a real task.
 
 - Add diff popular checkout types across countries in Euo and American.
 
-- Let people checkout the delivery info such as where the parcel in currently , and is that called
-UPS 
-USPS 
-Flow
-Follow??? 
-
 
 
 
