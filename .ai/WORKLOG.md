@@ -2379,3 +2379,24 @@ note how its get done from sources."
   every behaviour that is not in the design.
 - Tokens/`Glyph` factored into `components/login/shared.tsx` so both frames use
   one source. 60 e2e + 35 unit green.
+
+## 2026-07-25 — H-03 hero carousel made interactive
+
+Owner: "Carousel + pagination dots is not working H-03, add place holder to
+anything not sure."
+
+- The import had rendered 153:63 as one static photo and 549:97 as four inert
+  ellipses. `components/home/HeroCarousel.tsx` now implements H-03: dot taps,
+  touch swipe (40px threshold), wrap-around at both ends, and auto-play that
+  pauses on hover/touch.
+- ⚠️ PLACEHOLDER: the design ships one hero photo but four dots, and H-03 says
+  the dot count comes from carousel data that does not exist (OQ-3). Slides
+  2–4 reuse existing catalog photography and every slide links to /shop — the
+  "corresponding product detail page" mapping is undecided.
+- Slide 1 keeps the design's exact bleed framing, so the home pixel baseline is
+  untouched. Auto-play honours `prefers-reduced-motion`, and the Playwright
+  config now pins `contextOptions.reducedMotion` — `animations: "disabled"`
+  cannot stop a JS timer, so without this the baseline would flake.
+- Dots change colour only; the design draws dot 1 at 9px and the rest at 7px,
+  and moving/resizing them would drift from the frame.
+- 62 e2e (2 new, tests/e2e/homepage.spec.ts) + 35 unit green.

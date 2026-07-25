@@ -33,6 +33,10 @@ export default defineConfig({
     // viewport + scale factor keeps snapshots byte-stable across runs.
     viewport: { width: 430, height: 932 },
     deviceScaleFactor: 1,
+    // The hero carousel (H-03) auto-advances on a JS timer, which `animations:
+    // "disabled"` cannot stop. It honours reduced-motion, so pinning this
+    // keeps the hero parked on slide 1 and the pixel baselines deterministic.
+    contextOptions: { reducedMotion: "reduce" },
     trace: "retain-on-failure",
   },
   webServer: {
@@ -50,6 +54,9 @@ export default defineConfig({
       PAYPAL_CLIENT_ID: "",
       PAYPAL_SECRET: "",
       NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
+      // Same for the testing-phase skip-payment flag (.env.local): blank it so
+      // the suite always exercises the real express/card checkout UI.
+      CHECKOUT_SKIP_PAYMENT: "",
       // Likewise: never let the suite touch a hosted Supabase project (the
       // owner's .env.local carries real keys post-activation) — tests always
       // run against the local file adapter.

@@ -10,6 +10,7 @@
 
 import Link from "next/link";
 import { abs } from "@/components/veloria";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { notoSC, playfair } from "@/lib/fonts";
 
 // Both CTA arrows (I155:53;145:55 / I155:56;145:58) share one glyph render.
@@ -189,23 +190,10 @@ export function A1() {
         </div>
       ))}
 
-      {/* 153:63 hero photo window — the source crop (153:64) bleeds 343px above
-          the window and 1px past the left edge; the frame clips it. */}
-      <div style={{ ...abs(-1, 66, 430, 317), overflow: "hidden" }}>
-        <img
-          src="/veloria/home/153-64.png"
-          alt="Gold-dipped rose in a gift box"
-          width={430}
-          height={1003}
-          style={{ ...abs(0, -343, 430, 1003), display: "block" }}
-        />
-      </div>
-
-      {/* 549:97 carousel dots — static ellipses, no interactivity */}
-      <div style={{ ...abs(184, 365, 9, 9), background: "#D4AF37", borderRadius: 9999 }} />
-      <div style={{ ...abs(203, 365, 7, 7), background: "#FFF6EC", borderRadius: 9999 }} />
-      <div style={{ ...abs(220, 365, 7, 7), background: "#FFF6EC", borderRadius: 9999 }} />
-      <div style={{ ...abs(237, 365, 7, 7), background: "#FFF6EC", borderRadius: 9999 }} />
+      {/* 153:63 hero photo window + 549:97 dots — interactive per H-03; the
+          source crop (153:64) bleeds 343px above the window and 1px past the
+          left edge, and the frame clips it. */}
+      <HeroCarousel />
     </div>
   );
 }
