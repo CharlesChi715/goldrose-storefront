@@ -2145,3 +2145,30 @@ docs: add first feature learning doc (trial)
 - Updated all navigational links to the new paths: README.md docs table, docs/features/README.md, docs/admin-design.md (Related docs + §Markets note), docs/archive/flow-map.md, docs/archive/geo-claude.md.
 - Fixed the one now-broken relative link inside the moved files: search-discovery-implementation.md → `../repo-review-2026-07-23.md`. Sibling links between the three files unchanged (moved together).
 - WORKLOG history entries left as-is (historical paths).
+
+## 2026-07-25 — Backup plan graduated to feature record
+
+- Scaffolded `docs/features/backend/db-backups.md` via `npm run features:new`
+  (BACKLOG, parent group `supabase-db`): 2026-07-22 plan (Supabase Free +
+  nightly pg_dump→S3, 30-day lifecycle, restore drills, Pro at launch, cancel
+  Pro once pipeline proven) + rejected options, plus new scheduler options
+  (GitHub Actions proposed — awaiting sign-off), acceptance criteria, work items.
+- `docs/Database.md` backup section now a pointer to the record; synced the
+  features/README.md Status tree leaf + refs and both SUMMARY.md mentions.
+
+## 2026-07-25 — IxD spec imported to docs/ixd/ (frontend mechanism session)
+- Parsed design team's `temp/主页_shop页机制.numbers` (interaction spec: 37 homepage rows H-01…H-37 + 15 shop rows N-01…N-15) via numbers-parser.
+- Created `docs/ixd/`: README (provenance, status legend, 待与设计确认 list), homepage.md, shop.md — text verbatim; H-35 column shift realigned + noted; H-20/H-23 typo noted.
+- Extracted the 52 annotated Figma screenshots, renamed to row IDs (H-01.jpg…N-15.jpg), PNG→JPEG q85 (17 MB→5.7 MB), verified image↔row mapping on 13 samples.
+- SUMMARY.md: docs/ + temp/ lines updated; Next-steps entry added. Not committed (awaiting Charles).
+- Follow-up: added docs/ixd/homepage.en.md (English convenience translation, Chinese authoritative) + README link.
+
+## 2026-07-25 — IxD README English translation
+
+- Translated `docs/ixd/README.md` into natural English while preserving its Markdown structure, identifiers, source filename, and design-team questions.
+- Restructure: docs/ixd/ now English-first — homepage.en.md promoted to homepage.md; Chinese verbatim export archived as temp/homepage.zh.md (image links rewritten); README + headers updated; status labels aligned to README legend.
+
+## 2026-07-25 · frontend-working (bg session)
+- Read VELORIA Figma file (updated 07-25 07:25 UTC) + repo; inventory of 10 new screens (homepage A-1…A-11, C-3 menu, logins, B-1…B-4, C-1/C-2) saved to agent memory `figma-import-pipeline`; shop frame 24:396 edited upstream (430×1822, was 1938) → implemented /shop now stale vs Figma.
+- docs/ixd/README.md: per owner, **Source:** now headlines homepage.md + shop.md; `temp/主页_shop页机制.numbers` demoted to "design team's editable original".
+- Answered owner's items-to-confirm #5 inline (third-party tell = non-GoldRose "VILOW… ROSE" wordmark on the N-07 gift box; same image is the live /shop hero `public/veloria/shop-hero.png`; swap = same-size asset replacement, needs OQ-3 photo).

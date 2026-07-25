@@ -20,8 +20,8 @@ goldrose-storefront/
 ├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 28 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
 ├── assets/              # Raw owner art, not served: nav icons (public/ holds processed copies) + supplier-color-charts/
-├── docs/                # Specs/guides, features/ decision records, learning/ walkthroughs, SEO/GEO research, repo review, and archive/
-├── temp/                # Owner's raw upload zips (nav-button art) — scratch, not served
+├── docs/                # Specs/guides, ixd/ interaction specs (交互稿), features/ decision records, learning/ walkthroughs, SEO/GEO research, repo review, and archive/
+├── temp/                # Owner's raw uploads (nav-button art zips, IxD .numbers + archived zh spec export) — scratch, not served
 └── SUMMARY.md           # this file
 ```
 
@@ -41,7 +41,7 @@ goldrose-storefront/
 - Storefront reads the DB (revalidate 300); pixel-exact Figma design guarded by pixel-diff — only designated text boxes show live data.
 - `// read:` comments = near-literal verbalization, only in files Charles names (pilot: `lib/supabase/types.ts`); JSDoc required on every exported `lib/` function.
 - [docs/admin-design.md](docs/admin-design.md) is the spec — don't compress or renumber (§0 guardrails were once accidentally deleted and restored).
-- Owner ideas verbatim in [docs/ideas.md](docs/ideas.md) — don't expand. [docs/Database.md](docs/Database.md): Supabase Free + nightly pg_dump→S3 backup plan; edit only on request.
+- Owner ideas verbatim in [docs/ideas.md](docs/ideas.md) — don't expand. [docs/Database.md](docs/Database.md): DB platform decision + SKU rules; edit only on request (backup plan → [docs/features/backend/db-backups.md](docs/features/backend/db-backups.md)).
 
 ## Open questions (§4)
 
@@ -50,7 +50,8 @@ goldrose-storefront/
 ## Next steps
 
 - **Charles: finish the activation checklist** ([docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) §5): Vercel env vars + redeploy → Supabase auth config → auth providers (passkeys RP, Google/Apple) → PayPal sandbox → §14.3 walkthrough → screenshots → cancel Shopify → revoke Figma token.
-- Then: real rates (OQ-2), real product content (OQ-3), launch checklist items.
+- Then: real rates (OQ-2), real product content (OQ-3), launch checklist items, and DB backups at/near launch ([docs/features/backend/db-backups.md](docs/features/backend/db-backups.md) — live DB has no backups until then).
 - Boss asks 07-25, now feature files (BACKLOG, approach awaiting sign-off): [order-tracking](docs/features/backend/order-tracking.md) (UPS carrier + auto link; tracking email already built) · [promotion-emails](docs/features/backend/promotion-emails.md) (consent + Resend audience).
+- Design 07-25: homepage+shop redesign interaction spec (37+15 rows, annotated mobile Figma mocks) imported → [docs/ixd/](docs/ixd/README.md); mechanism-first build possible now, blocked items listed in its 待与设计确认.
 - Post-ship: owner's influencer campaign + website-exclusive video finale ([docs/ideas.md](docs/ideas.md) 07-24) — no influencer links before ship.
 - 120-SKU content pipeline (admin editing + bulk import): now a feature file, [docs/features/product-content-pipeline.md](docs/features/product-content-pipeline.md) — BACKLOG, after ship; SKU rules in [docs/Database.md](docs/Database.md). Supplier's full color catalog (124 colors: Y/YS/YC series) parsed in [docs/supplier-color-charts.md](docs/supplier-color-charts.md).

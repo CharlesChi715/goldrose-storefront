@@ -147,7 +147,7 @@ Marketing
 Supabase hosted DB
 ├── migrations (0001, 0002) ●●●● DONE
 ├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
-└── nightly pg_dump→S3 backup ○○○○ BACKLOG — Database.md
+└── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
 ```
 
 Refs (links can't render inside the code blocks, so shorthands above resolve
@@ -156,7 +156,7 @@ here):
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
 - **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
 - **OQ-2 / OQ-3** → [SUMMARY.md · Open questions](../../SUMMARY.md)
-- **Database.md** → [Database.md backup plan](../Database.md)
+- **db-backups.md** → [backend/db-backups.md](backend/db-backups.md)
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)
 - **order-tracking.md** → [backend/order-tracking.md](backend/order-tracking.md)
 - **promotion-emails.md** → [backend/promotion-emails.md](backend/promotion-emails.md)

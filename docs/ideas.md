@@ -60,3 +60,18 @@ turn it into a real task.
   let the last piece of video only available in this website to boost views.
 
 - Add diff popular checkout types across countries in Euo and American.
+
+- Let people checkout the delivery info such as where the parcel in currently , and is that called
+UPS 
+USPS 
+Flow
+Follow??? 
+
+
+
+
+## TODO from me:
+payment
+order tracking
+frontend ixd
+domain

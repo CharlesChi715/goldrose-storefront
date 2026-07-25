@@ -6,7 +6,15 @@
  * element to match the Figma node data exactly.
  */
 
-import { Tenor_Sans, Inter, Cormorant_Garamond, Noto_Sans_SC } from "next/font/google";
+import {
+  Tenor_Sans,
+  Inter,
+  Cormorant_Garamond,
+  Noto_Sans_SC,
+  Playfair_Display,
+  Playfair_Display_SC,
+  Sorts_Mill_Goudy,
+} from "next/font/google";
 
 /** Tenor Sans 400 — the VELORIA display/headline face. */
 export const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
@@ -28,3 +36,15 @@ export const notoSC = Noto_Sans_SC({
   subsets: ["latin"],
   preload: false,
 });
+
+/** Playfair Display 400/500 — the homepage-redesign display face. */
+export const playfair = Playfair_Display({ weight: ["400", "500"], subsets: ["latin"] });
+
+/** Playfair Display SC 400 — small-caps accent (single A-4 label). */
+export const playfairSC = Playfair_Display_SC({ weight: "400", subsets: ["latin"] });
+
+/**
+ * Sorts Mill Goudy 400 — Figma names it "OFL Sorts Mill Goudy TT" at weight
+ * 500, but the family ships one weight; 400 is the same outline set.
+ */
+export const goudy = Sorts_Mill_Goudy({ weight: "400", subsets: ["latin"] });
