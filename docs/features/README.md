@@ -97,7 +97,8 @@ Customer accounts /account — dormant: owner config pending
 ├── order matching (verified email) ●●●○ UAT
 ├── nav tab "Login" ⇄ "Me" ●●●○ UAT
 ├── login screen 74:53 ●●●○ UAT — imported pixel-exact 07-25
-└── login screen 74:55 (B2B) ○○○○ BACKLOG — static + email the request
+└── login screen 74:55 (B2B) ●●●○ UAT — imported 07-25; enquiries email the
+    owner, nothing persisted; needs RESEND_API_KEY + a store contact email
 
 Concierge chat (mascot + bar overlay)
 ├── feedback panel → admin Ideas ●●●○ UAT

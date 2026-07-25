@@ -6,6 +6,7 @@ Single source of truth. Read first; keep fresh. "§" = sections of the spec, [do
 
 - Sell the 24K gold-dipped rose gift line DTC — **international, USD-only V1, English storefront**. Brand: **GoldRose**.
 - **Native checkout, PayPal Orders v2 (sandbox until launch)**; provider choice = OQ-1 (schema provider-neutral). Shopify code fully removed; owner cancels the subscription **after** the §14.3 walkthrough.
+- Add placeholder/mocking data to anything not sure. 
 
 ## File structure
 
@@ -27,12 +28,14 @@ goldrose-storefront/
 
 ## Current state (2026-07-24) — high level
 
+- `FIGMA_TOKEN` in `.env.local` (gitignored) — scope must be exactly `file_content:read`; revoke after each import session. Import method + traps: [docs/ixd/login-import.md](docs/ixd/login-import.md)..env.local
 - **⚠️ EVERYTHING STILL TESTING — nothing live/reliable yet. Ship target: 2026-07-30.** Sandbox PayPal only, placeholder products (OQ-3), no real marketing links posted; treat all data (orders, analytics, UTM tags) as test data until ship.
 - **Deployed (testing)**: <https://goldrose-storefront.vercel.app> — build complete (stages 0–9 on `main`); awaiting the owner's §14.3 walkthrough.
-- **2026-07-25**: `/` + `/shop` rebuilt pixel-exact from the redesigned VELORIA 已完成 frames (homepage A-1…A-11 → `components/home/`, warm palette, new nav art, account tab reads "Login" signed out / "Me" signed in per [docs/ixd/bottom-nav-buttons.md](docs/ixd/bottom-nav-buttons.md), swapped client-side because the pages are ISR-cached); IxD routes decided → [docs/ixd/README.md](docs/ixd/README.md) route table; bag/checkout/orders/menu NOT imported (design 美化未完成). **登录界面 74:53 imported + deployed live 07-25** (`ea6baa6`) → `/account` signed-out is now pixel-exact (band diff ≤4.5%, nav 0.02%); its sign-in is an **emailed one-time code** — the design carries no Google/Apple/passkey buttons and the owner confirmed "no passkey", so the storefront now offers only OTP (auth libs kept, so it is reversible). Signed-in `/account` stays hand-built (design ships no signed-in frame). **74:55 (Business · Procurement) still NOT imported** — decided: import static + email the request.
+- **2026-07-25**: `/` + `/shop` rebuilt pixel-exact from the redesigned VELORIA 已完成 frames (homepage A-1…A-11 → `components/home/`, warm palette, new nav art, account tab reads "Login" signed out / "Me" signed in per [docs/ixd/bottom-nav-buttons.md](docs/ixd/bottom-nav-buttons.md), swapped client-side because the pages are ISR-cached); IxD routes decided → [docs/ixd/README.md](docs/ixd/README.md) route table; bag/checkout/orders/menu NOT imported (design 美化未完成). **登录界面 74:53 imported + deployed live 07-25** (`ea6baa6`) → `/account` signed-out is now pixel-exact (band diff ≤4.5%, nav 0.02%); its sign-in is an **emailed one-time code** — the design carries no Google/Apple/passkey buttons and the owner confirmed "no passkey", so the storefront now offers only OTP (auth libs kept, so it is reversible). Signed-in `/account` stays hand-built (design ships no signed-in frame). **74:55 (Business · Procurement) imported 07-25** → `/account/business` (whole page 3.44%); account-type tabs switch between the two frames; its request CTAs POST to `/api/business-request`, which emails the owner's contact address (nothing persisted — "static + email the request").
 - **Per-feature status: [docs/features/README.md](docs/features/README.md) Status tree** (= the roadmap). Open a feature's own file/docs/code only when working on that feature.
 - **⚠️ Hosted Supabase is LIVE data** (ref `cfvsvgbldnzkcjvbwnjp`) — local dev writes the SAME live db.
 - **Mock/local mode** (what e2e uses): blank the Supabase + PayPal env vars → file adapter `.data/db.json`; `npm run seed -- --reset` restores pristine; admin login is open-access unless `ADMIN_DEV_PASSWORD` is set; `/account` shows "sign-in unavailable".
+- **`CHECKOUT_SKIP_PAYMENT=1`** (TESTING ONLY; on in `.env.local`, add it in Vercel too if the deployed testing site should skip payment): `/checkout` drops the card form and all payment buttons for one **Place order** button — order recorded via the mock path (test badge, no money), overrides PayPal even with keys set. Real payment code is gated, not modified; unset it to restore normal checkout. **Must be off before launch** — `npm run build` hard-fails if it is set alongside `PAYPAL_ENV=live`.
 - Owner activation to-dos: [BUILD-REPORT §5](docs/archive/BUILD-REPORT.md) — still the live to-do list.
 
 ## Key facts / constraints

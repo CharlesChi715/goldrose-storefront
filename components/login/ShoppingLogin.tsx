@@ -25,41 +25,12 @@ import { abs, txt, ScaleFrame } from "@/components/veloria";
 import { BackButton } from "@/components/BackButton";
 import { cormorant, inter } from "@/lib/fonts";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
-
-/* ---------- Design tokens (verbatim from frame 74:53) ---------- */
-
-const INK = "#3B2F2F";
-const MUTED = "#B8A69A";
-const CARD = "#FFFBF6";
-const HAIRLINE = "#E5D9C9";
-const CANVAS = "#FFF6EC";
+import { INK, MUTED, CARD, HAIRLINE, CANVAS, Glyph } from "@/components/login/shared";
 
 const A = "/veloria/login";
 
 /** Non-breaking spaces: HTML collapses the design's double/triple spaces. */
 const NB = " ";
-
-/**
- * A glyph exported as SVG. Figma crops TEXT exports to ink extents, not the
- * node box, so `left`/`top` are the measured ink origin (taken from the frame
- * render, not the node box) and width/height are the export's intrinsic size.
- * Centring inside the node box instead lands these 1–6px off.
- */
-function Glyph({
-  src,
-  left,
-  top,
-  width,
-  height,
-}: {
-  src: string;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}) {
-  return <img src={src} alt="" style={{ ...abs(left, top, width, height), display: "block" }} />;
-}
 
 /* ---------- 01 · Welcome Hero (76:53, 430×310) ---------- */
 
@@ -107,15 +78,13 @@ function AccountTypeTabs() {
         <Glyph src={`${A}/76-61.svg`} left={46} top={22} width={104} height={13} />
         <span className="sr-only">Gift Shopping</span>
       </div>
-      {/* Business & Partnerships renders pixel-exact but is not clickable
-          until frame 74:55 is imported — the "leave placeholder" rule in
-          docs/ixd/README.md. */}
-      <div
-        style={{ ...abs(202, 0, 196, 54), background: CARD, borderRadius: 12 }}
+      <Link
+        href="/account/business"
+        style={{ ...abs(202, 0, 196, 54), background: CARD, borderRadius: 12, display: "block" }}
         aria-label="Business & Partnerships"
       >
         <Glyph src={`${A}/76-63.svg`} left={14} top={22} width={168} height={13} />
-      </div>
+      </Link>
     </div>
   );
 }

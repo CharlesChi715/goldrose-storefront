@@ -43,6 +43,31 @@ test.describe("customer account (local mode)", () => {
     await expect(page.getByText(/isn’t switched on in this environment/)).toBeVisible();
   });
 
+  test("the account-type tabs switch between the two imported frames", async ({ page }) => {
+    await page.goto("/account");
+    await page.getByLabel("Business & Partnerships").click();
+    await expect(page).toHaveURL(/\/account\/business$/);
+    // Frame 74:55 modules.
+    await expect(page.getByText("Better purchasing")).toBeVisible();
+    await expect(page.getByText("Procurement & partnership services")).toBeVisible();
+    await expect(page.getByRole("button", { name: /SUBMIT REQUEST/ })).toBeVisible();
+    // ...and back.
+    await page.getByLabel("Gift Shopping").click();
+    await expect(page).toHaveURL(/\/account$/);
+    await expect(page.getByText("Sign in and continue shopping")).toBeVisible();
+  });
+
+  test("a business enquiry needs an email and then reports success", async ({ page }) => {
+    await page.goto("/account/business");
+    await page.getByRole("button", { name: /SUBMIT REQUEST/ }).click();
+    await expect(page.getByText("Add your business email above")).toBeVisible();
+
+    await page.getByLabel("Business email").fill("buyer@example.com");
+    await page.getByRole("button", { name: "Corporate Gifts" }).click();
+    await page.getByRole("button", { name: /SUBMIT REQUEST/ }).click();
+    await expect(page.getByText("your request is with our team")).toBeVisible();
+  });
+
   test("admin login hides the passkey option in local mode", async ({ page }) => {
     await page.goto("/admin/login");
     await expect(page.getByLabel("Email")).toBeVisible();

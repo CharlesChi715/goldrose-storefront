@@ -2324,3 +2324,58 @@ only method, and it needs the Supabase email provider enabled, the template
 changed to emit `{{ .Token }}` (Supabase sends a magic link by default, not a
 code), and SMTP for anything past a few sends an hour. Tracked in SUMMARY
 "Next steps".
+
+## 2026-07-25 — Testing-phase skip-payment switch at checkout
+
+**Ask:** while testing, clicking checkout should place the order immediately —
+no card entry, no payment provider — without disturbing the payment code.
+
+**Built:** `CHECKOUT_SKIP_PAYMENT` env flag (`lib/checkout/mode.ts`, new).
+With it on, `/checkout` hides the card form and every payment button and shows
+a single **Place order · $X** button plus an optional email field; the order is
+recorded through the existing mock path (`source='mock'`, test badge, stock
+decrement, timeline, emails). `/api/checkout` accepts a new `method: "none"`
+and its "PayPal is configured" guard yields to the flag, so the switch also
+works once PayPal keys exist. Success-page copy no longer says "Your your
+selected method checkout completed" when the method is unnamed.
+
+**The payment code is gated, never modified** — PayPal create/capture/webhook
+and the card form are untouched; unset the flag and checkout is exactly as before.
+
+**Set in `.env.local` (local only).** Vercel needs the var added there too if
+the deployed testing site should skip payment. `playwright.config.ts` blanks
+the flag so the suite keeps exercising the real checkout UI.
+
+**Verified:** flag ON → checkout renders one button, no card/PayPal markup;
+POST placed order #1063 ($99.98) with lines, stock −2, customer, timeline,
+checkout row completed. Flag OFF → express + card UI restored, `method:"none"`
+rejected with "Payment is required.", existing mock path still places orders.
+`tsc` clean, eslint clean, 58/58 e2e, 35/35 unit. Test order rolled back.
+
+**Launch guard added** (`scripts/validate-env.mjs`): `npm run build` hard-fails
+if `CHECKOUT_SKIP_PAYMENT` is set while `PAYPAL_ENV=live` — free orders on a
+storefront taking real money. Warns (does not block) otherwise, with an extra
+warning on Vercel production, so the flag stays usable on the pre-launch
+testing deployment. Verified: live+flag → exit 1; vercel-prod+flag+sandbox →
+exit 0 with warnings; live+no-flag → exit 0.
+
+## 2026-07-25 — Import 74:55 (Business & Partnerships); tabs now switch
+
+Owner: "let Business & Partnerships clickable and switch to business section.
+note how its get done from sources."
+
+- `/account/business` = pixel-exact import of frame 74:55 (seven modules,
+  430×1614). Account-type tabs now switch both ways between the two frames.
+- Enquiry CTAs (SUBMIT REQUEST / BOOK CONSULTATION / ASK MORI / "Submit a
+  purchase request") POST to the new `/api/business-request`, which emails the
+  owner's contact address via `sendBusinessRequestEmail`. Nothing persisted —
+  the agreed "static + email the request". Sign-in reuses the emailed code.
+- Band diff vs the frame render: 2.97–4.65% per module, whole page 3.44% —
+  all font AA, no band over the ~5% bug threshold. No new export traps: all 15
+  glyph SVGs outlined correctly this time, and the ✉ PNG from 74:53 was reused.
+- **Method recorded in [docs/ixd/login-import.md](../docs/ixd/login-import.md)**
+  — sources, pipeline, the four traps (fill opacity, fallback-glyph SVG boxes,
+  ink-cropped text exports, shared chrome hiding a state variant), results, and
+  every behaviour that is not in the design.
+- Tokens/`Glyph` factored into `components/login/shared.tsx` so both frames use
+  one source. 60 e2e + 35 unit green.
