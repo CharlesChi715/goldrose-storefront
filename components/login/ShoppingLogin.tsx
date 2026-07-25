@@ -367,8 +367,11 @@ function FindExistingOrder() {
       >
         Check an order with your order number and email.
       </div>
+      {/* /orders redirects to the ADMIN order list — a shopper tapping this
+          landed in the back office. Point it at the customer tracking screen
+          (Figma C-1) instead. */}
       <Link
-        href="/orders"
+        href="/orders/track"
         style={{
           ...abs(257, 19, 136, 44),
           background: CARD,

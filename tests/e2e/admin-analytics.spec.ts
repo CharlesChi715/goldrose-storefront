@@ -50,7 +50,7 @@ test("browsing the storefront writes page views and checkout carries the visitor
   await page.fill("#card-cvc", "123");
   await page.getByRole("button", { name: /^Pay \$/ }).click();
   await page.waitForURL(/\/checkout\/success\?/);
-  orderName = (await page.locator("dd.font-mono").innerText()).trim();
+  orderName = (await page.locator("[data-order-name]").innerText()).trim();
 
   const db = JSON.parse(
     await fs.readFile(path.join(process.cwd(), ".data", "db.json"), "utf8"),

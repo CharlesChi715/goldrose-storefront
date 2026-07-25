@@ -26,9 +26,11 @@ test.describe("customer account (local mode)", () => {
     await expect(page.getByLabel("Email address")).toBeVisible();
     await expect(page.getByRole("button", { name: "SEND VERIFICATION CODE" })).toBeVisible();
     await expect(page.getByText("Benefits after sign-in")).toBeVisible();
+    // /orders redirects to the ADMIN list, so the shopper-facing button points
+    // at the customer tracking screen (Figma C-1) instead.
     await expect(page.getByRole("link", { name: /VIEW MY ORDER/ })).toHaveAttribute(
       "href",
-      "/orders",
+      "/orders/track",
     );
     // The owner dropped passkeys from the storefront; the design has no
     // Google/Apple buttons either.

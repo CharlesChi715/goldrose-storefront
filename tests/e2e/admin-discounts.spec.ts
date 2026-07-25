@@ -82,7 +82,7 @@ test("the code applies at checkout, server-priced, and counts usage", async ({ p
   await page.fill("#card-cvc", "123");
   await page.getByRole("button", { name: /^Pay \$/ }).click();
   await page.waitForURL(/\/checkout\/success\?/);
-  const orderName = (await page.locator("dd.font-mono").innerText()).trim();
+  const orderName = (await page.locator("[data-order-name]").innerText()).trim();
 
   const db = await readDb();
   const order = db.tables.orders.find((row) => row.name === orderName);

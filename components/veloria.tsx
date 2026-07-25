@@ -16,6 +16,7 @@ import { BackButton } from "@/components/BackButton";
 import { WishlistButton } from "@/components/WishlistButton";
 import { inter } from "@/lib/fonts";
 import NoCalcScale from "@/components/NoCalcScale";
+import { MenuButton } from "@/components/MenuButton";
 
 /* ---------- Style helpers ---------- */
 
@@ -210,11 +211,15 @@ export function HomeHeader() {
   return (
     <>
       <div style={{ ...abs(-1, 36, 430, 62), background: "#FFF6EC" }} />
-      <img src="/veloria/home/549-88.png" alt="" width={40} height={43} style={{ ...abs(6.5, 45.5, 40, 43), display: "block" }} />
+      <MenuButton style={abs(6.5, 45.5, 40, 43)} />
       <Link href="/" style={{ ...abs(145.5, 47, 136, 40), display: "block" }} aria-label="Home">
         <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
       </Link>
       <img src="/veloria/home/549-91.png" alt="" width={40} height={43} style={{ ...abs(311.5, 45.5, 40, 43), display: "block" }} />
+      {/* Cart art still goes to /checkout, which IS the live cart. /bag holds
+          the B-1 design but shows the mock's own line items — repointing the
+          icon there would hide the shopper's real basket. Swap once /bag reads
+          lib/cart/store.ts. */}
       <Link href="/checkout" style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }} aria-label="Cart">
         <img src="/veloria/home/549-92.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
       </Link>
@@ -230,7 +235,7 @@ export function ShopHeader() {
   return (
     <>
       <div style={{ ...abs(0, 32, 430, 62), background: "#FFF6EC" }} />
-      <img src="/veloria/home/549-88.png" alt="" width={40} height={43} style={{ ...abs(7, 41.5, 40, 43), display: "block" }} />
+      <MenuButton style={abs(7, 41.5, 40, 43)} />
       <BackButton fallback="/" src="/veloria/home/56-71.png" style={abs(77, 41.5, 40, 43)} />
       <Link href="/" style={{ ...abs(147, 43, 136, 40), display: "block" }} aria-label="Home">
         <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
@@ -378,6 +383,7 @@ export function ScaleFrame({
   fontClass,
   navGap = 0,
   navActive = "Shop",
+  nav = true,
   children,
 }: {
   height: number;
@@ -385,6 +391,13 @@ export function ScaleFrame({
   fontClass: string;
   navGap?: number;
   navActive?: TabId | (string & {});
+  /**
+   * Opt out of the shared tab bar. B-3/B-4 (business) show no tab bar at all;
+   * C-1/C-2 (tracking, confirmation) draw their OWN glyph nav band inside the
+   * frame, so the screen component renders it and the shared bar would double
+   * up. Both cases flagged to the design team in docs/ixd.
+   */
+  nav?: boolean;
   children: React.ReactNode;
 }) {
   const ratio = (height / 430).toFixed(7);
@@ -412,7 +425,7 @@ export function ScaleFrame({
           {children}
         </div>
       </div>
-      <BottomNav active={navActive} bottomGap={navGap} />
+      {nav ? <BottomNav active={navActive} bottomGap={navGap} /> : null}
       {/* Tab switches cross-fade the canvas above; the nav stays put. */}
       <PageFade />
       {/* Fallback for browsers without calc() length division: apply the same
