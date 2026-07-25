@@ -10,6 +10,11 @@
  * left while the next arrives from the right — rather than crossfading, which
  * is what the owner asked for (2026-07-25).
  *
+ * The track follows the finger: it tracks the pointer pixel-for-pixel while
+ * held, so pausing mid-swipe leaves the slide parked wherever the finger
+ * stopped, and only the release decides whether to advance or spring back
+ * (owner, 2026-07-25).
+ *
  * ⚠️ PLACEHOLDER: the rails repeat their first card, because the real carousel
  * content does not exist yet (OQ-3) and the design parks its extra rail items
  * off-canvas. Cards link to /placeholder because the IxD table's "corresponding
@@ -30,6 +35,15 @@ export type Dot = { x: number; y: number; size: number };
 export const AUTOPLAY_MS = 1800;
 
 const SLIDE_MS = 420;
+
+/** Release travel that commits to the neighbouring slide; less springs back. */
+const SWIPE_PX = 40;
+
+/** Pointer travel below this is a tap on the card, not a drag. */
+const TAP_SLOP = 6;
+
+/** Drag past the first/last cell is damped — there is no cell to reveal. */
+const EDGE_RESISTANCE = 3;
 
 /**
  * A horizontally sliding carousel with pagination dots.
@@ -68,13 +82,27 @@ export function Carousel({
   renderSlide: (index: number) => React.ReactNode;
 }) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const touchStartX = useRef<number | null>(null);
+  const [hovering, setHovering] = useState(false);
+  // Live pointer offset in px; null = no pointer down, so it doubles as the
+  // "is dragging" flag (a resting finger still holds a fixed offset).
+  const [drag, setDrag] = useState<number | null>(null);
+  const startX = useRef(0);
+  const dragged = useRef(false);
+
+  const paused = hovering || drag !== null;
 
   const go = useCallback(
     (next: number) => setIndex(((next % count) + count) % count),
     [count],
   );
+
+  /** Release: commit to the neighbour if the finger travelled far enough. */
+  const endDrag = () => {
+    if (drag === null) return;
+    const dx = drag;
+    setDrag(null);
+    if (Math.abs(dx) >= SWIPE_PX) go(index + (dx < 0 ? 1 : -1));
+  };
 
   useEffect(() => {
     if (paused) return;
@@ -88,22 +116,47 @@ export function Carousel({
   return (
     <>
       <div
-        style={{ ...abs(win.left, win.top, win.width, win.height), overflow: "hidden" }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onTouchStart={(e) => {
-          setPaused(true);
-          touchStartX.current = e.touches[0]?.clientX ?? null;
+        style={{
+          ...abs(win.left, win.top, win.width, win.height),
+          overflow: "hidden",
+          // Horizontal drags are ours; vertical ones must still scroll the page.
+          touchAction: "pan-y",
         }}
-        onTouchEnd={(e) => {
-          const start = touchStartX.current;
-          touchStartX.current = null;
-          setPaused(false);
-          if (start === null) return;
-          const dx = (e.changedTouches[0]?.clientX ?? start) - start;
-          if (Math.abs(dx) < 40) return; // a tap, not a swipe
-          go(index + (dx < 0 ? 1 : -1));
+        // pointerType-gated so a tap's emulated mouse events cannot leave a
+        // touch device stuck in the hover pause.
+        onPointerEnter={(e) => e.pointerType === "mouse" && setHovering(true)}
+        onPointerLeave={(e) => e.pointerType === "mouse" && setHovering(false)}
+        onPointerDown={(e) => {
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+          startX.current = e.clientX;
+          dragged.current = false;
+          setDrag(0);
         }}
+        onPointerMove={(e) => {
+          if (drag === null) return;
+          let dx = e.clientX - startX.current;
+          if (!dragged.current && Math.abs(dx) > TAP_SLOP) {
+            dragged.current = true;
+            // Capture only once it is a drag: a captured pointer retargets the
+            // click to this window, which would swallow a plain tap on a card.
+            e.currentTarget.setPointerCapture(e.pointerId);
+          }
+          if ((index === 0 && dx > 0) || (index === count - 1 && dx < 0)) {
+            dx /= EDGE_RESISTANCE;
+          }
+          setDrag(dx);
+        }}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        // A drag that ends on a card must not also open it.
+        onClickCapture={(e) => {
+          if (!dragged.current) return;
+          e.preventDefault();
+          e.stopPropagation();
+          dragged.current = false;
+        }}
+        // Otherwise the browser's own image drag hijacks a mouse swipe.
+        onDragStart={(e) => e.preventDefault()}
       >
         {/* The track: one cell per slide, shifted so the active cell shows. */}
         <div
@@ -113,8 +166,10 @@ export function Carousel({
             top: 0,
             width: win.width * count,
             height: win.height,
-            transform: `translateX(${-index * win.width}px)`,
-            transition: `transform ${SLIDE_MS}ms ease`,
+            transform: `translateX(${-index * win.width + (drag ?? 0)}px)`,
+            // While held, the track IS the finger — easing it would lag behind.
+            transition: drag === null ? `transform ${SLIDE_MS}ms ease` : "none",
+            userSelect: "none",
           }}
         >
           {Array.from({ length: count }, (_, i) => (
