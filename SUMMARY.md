@@ -19,7 +19,7 @@ goldrose-storefront/
 ├── proxy.ts             # Auth middleware (Next 16 name, §9.2) — guards /admin + /api/admin only
 ├── tests/               # 55 Playwright e2e (production build, port 3001, file adapter) + 28 unit — green
 ├── public/              # Served assets: bottom-nav/, top-nav/, veloria/, products/
-├── assets/              # Raw owner nav-icon art only (not served; public/ holds the canonical processed copies)
+├── assets/              # Raw owner art, not served: nav icons (public/ holds processed copies) + supplier-color-charts/
 ├── docs/                # Specs/guides, features/ decision records, learning/ walkthroughs, SEO/GEO research, repo review, and archive/
 ├── temp/                # Owner's raw upload zips (nav-button art) — scratch, not served
 └── SUMMARY.md           # this file
@@ -37,6 +37,7 @@ goldrose-storefront/
 ## Key facts / constraints
 
 - Money = integer cents; orders never hard-deleted; admin strings via `t()` (EN + Shopify 中文); service key server-side only; sandbox/mock money only — `PAYPAL_ENV=live` is owner-only.
+- `npm run build` validates Supabase env first: local/test may omit all 3; partial config fails with exact missing names; Vercel production requires URL + anon key + service-role key.
 - Storefront reads the DB (revalidate 300); pixel-exact Figma design guarded by pixel-diff — only designated text boxes show live data.
 - `// read:` comments = near-literal verbalization, only in files Charles names (pilot: `lib/supabase/types.ts`); JSDoc required on every exported `lib/` function.
 - [docs/admin-design.md](docs/admin-design.md) is the spec — don't compress or renumber (§0 guardrails were once accidentally deleted and restored).
@@ -50,5 +51,6 @@ goldrose-storefront/
 
 - **Charles: finish the activation checklist** ([docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) §5): Vercel env vars + redeploy → Supabase auth config → auth providers (passkeys RP, Google/Apple) → PayPal sandbox → §14.3 walkthrough → screenshots → cancel Shopify → revoke Figma token.
 - Then: real rates (OQ-2), real product content (OQ-3), launch checklist items.
+- Boss asks 07-25, now feature files (BACKLOG, approach awaiting sign-off): [order-tracking](docs/features/backend/order-tracking.md) (UPS carrier + auto link; tracking email already built) · [promotion-emails](docs/features/backend/promotion-emails.md) (consent + Resend audience).
 - Post-ship: owner's influencer campaign + website-exclusive video finale ([docs/ideas.md](docs/ideas.md) 07-24) — no influencer links before ship.
-- 120-SKU content pipeline (admin editing + bulk import): now a feature file, [docs/features/product-content-pipeline.md](docs/features/product-content-pipeline.md) — BACKLOG, after ship; SKU rules in [docs/Database.md](docs/Database.md).
+- 120-SKU content pipeline (admin editing + bulk import): now a feature file, [docs/features/product-content-pipeline.md](docs/features/product-content-pipeline.md) — BACKLOG, after ship; SKU rules in [docs/Database.md](docs/Database.md). Supplier's full color catalog (124 colors: Y/YS/YC series) parsed in [docs/supplier-color-charts.md](docs/supplier-color-charts.md).

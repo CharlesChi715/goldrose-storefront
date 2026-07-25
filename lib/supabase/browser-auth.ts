@@ -21,6 +21,19 @@ import { createBrowserClient } from "@supabase/ssr";
 export function supabaseBrowserAuthClient() {
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
   const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();
+  const missing = [
+    !url ? "NEXT_PUBLIC_SUPABASE_URL" : null,
+    !anonKey ? "NEXT_PUBLIC_SUPABASE_ANON_KEY" : null,
+  ].filter((name): name is string => name !== null);
+
+  // Both absent is the intentional local-file mode. Exactly one absent is a
+  // deployment mistake worth naming in the browser console.
+  if ((url || anonKey) && missing.length > 0) {
+    console.error(
+      `[supabase/auth] Missing environment variable: ${missing.join(", ")}`,
+    );
+  }
+
   if (!url || !anonKey) {
     return null;
   }

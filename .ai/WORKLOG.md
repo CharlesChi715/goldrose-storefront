@@ -2071,3 +2071,77 @@ docs: add first feature learning doc (trial)
 
 - Charles preferred Database.md over a feature file. Added "## SKU rules (2026-07-24)" section there: SKU = business identity of a physical shelf item, one item = one SKU / no reuse, one listing per item, bundles pre-packed = own SKU, naming scheme, plus the not-yet-enforced note and planned enforcement (0003 partial unique index, lib/admin mirror check, Duplicate clears SKUs, admin validation + activation gate).
 - Cleanup: deleted docs/features/sku-integrity.md, reverted its roadmap leaf and product-content-pipeline dependsOn; pipeline blockers + SUMMARY now point at Database.md instead.
+
+## 2026-07-24 — Status vocabulary rename: TESTING → UAT
+
+- docs/features/README.md: pipeline is now BACKLOG → READY → IN PROGRESS → UAT → DONE; definition, format example, meter legend, and all ~35 tree leaves updated. Aligns the prose vocabulary with the front-matter schema, which already used delivery: uat (TEMPLATE.md, posting-account-attribution.md).
+
+## 2026-07-24 — Delivery: docs/google-analytics-concepts.md (GA primer for Charles)
+
+- Wrote a GA4 concepts guide mapped to the GoldRose first-party analytics: event model, user/session/event identity layers, metric x dimension grammar, UTM/channel taxonomy, attribution models (ours = first-touch per visitor for commissions), e-commerce events + funnel as the next increment (matches boss viewer-behavior idea), engagement rate, realtime, and why first-party vs GA (consent/sampling/data ownership).
+
+## 2026-07-24 — Learning docs 03 & 04: database operations (docs/learning/)
+
+- Added `docs/learning/03-admin-product-crud.md` — write-path trace: admin add/edit/delete a product → ProductForm/ProductsList → server actions (`requireAdmin()` + zod) → `lib/admin/products.ts` → `TableStore` (hosted Supabase service key / `.data/db.json`); inventory as append-only movements via `adjust_inventory`; delete vs archive; what the schema itself enforces (constraints, trigger, RLS).
+- Added `docs/learning/04-how-pages-read-the-database.md` — read-path trace: storefront anon-key reads via the `catalog_products` view (active-only, safe columns) + the three cache layers (React `cache()`, `revalidate = 300`, `revalidatePath`), vs. admin service-key reads (`store.all()` + joins in TS, uncached).
+- Both follow `learning-docs-guideline.md` (Feature Summary + ASCII code trace, clickable file:line links); all relative links verified to resolve.
+
+## 2026-07-24 — Delivery: Chinese PDF translations of SEO/GEO research
+
+- Translated docs/seo-intro.md and docs/geo-intro.md fully into Chinese and rendered docs/seo-intro.zh.pdf + docs/geo-intro.zh.pdf (headless Chrome, PingFang typography; verified first pages visually). Each PDF opens with a translation notice; English .md stays canonical — regenerate on change (HTML sources in job tmp).
+
+## 2026-07-24 — Fix: visible URLs in Chinese PDF reference lists
+
+- User reported dead links in seo-intro.pdf. Verified structurally the PDFs were correct (page /Annots -> 8 Link objects with valid Rect+URI in seo; 111 in geo) — symptom consistent with Quick Look/chat-preview flattening, not the files.
+- Regenerated both PDFs to the user-renamed paths docs/seo-intro.pdf + docs/geo-intro.pdf with reference-list URLs printed visibly (CSS a::after attr(href)), so even non-interactive viewers show copyable addresses. Annotations still embedded (14 / 123).
+
+## 2026-07-25 — Deliveries
+
+- Graduated boss ideas (UPS, register-needs-email, order-tracking email) plus
+  Charles's promotion-email question into two feature records (both BACKLOG,
+  proposed decisions recorded, awaiting sign-off):
+  `docs/features/backend/order-tracking.md`,
+  `docs/features/backend/promotion-emails.md`. Added their Status-tree leaves
+  + refs in `docs/features/README.md`, removed the graduated lines from
+  `docs/ideas.md`, added a SUMMARY.md next-step line. Docs only — no code.
+
+## 2026-07-25 — Supabase environment validation
+
+- Added exact missing-name diagnostics for partial public Supabase auth configuration.
+- Added `scripts/validate-env.mjs` before `next build`: local/test all-absent mode remains valid; partial configurations and incomplete Vercel production configurations fail safely.
+- Verified complete/empty/partial/production cases, lint, 28 unit tests, TypeScript, and the production build.
+
+## 2026-07-25 — Deliveries (2)
+
+- Wrote the SKU naming convention into `docs/Database.md` (new section under
+  SKU rules): `GR-TYPE-COLOR[-VARIANT]` pattern, proposed code vocabulary
+  (pending boss's 120-SKU list), character rules incl. the Excel
+  leading-zero/CSV hazard, fixed segment order with tail-only optional
+  segments, immutable-facts-only, ≤20 chars, SKU ≠ barcode.
+
+## 2026-07-25 — Database SKU table Markdown
+
+- Converted the SKU fixed-vocabulary box table in `docs/Database.md` into a native Markdown table.
+
+## 2026-07-25 — Supplier color charts parsed into the repo
+
+- Parsed the 3 WeChat chart images in `temp/inventory/` (Style B 5-petal
+  gold-plated rose): full transcription in `docs/supplier-color-charts.md` —
+  124 colors total (Y classic ×29, YS star-glitter ×50, YC colorful ×45),
+  finish options (24k gold / silver full dip / silver trim), custom colors
+  available. Flagged chart typos (YS-1/Y-1 mislabel, duplicate names YC-16/17
+  and YC-1/36, "VelvGolden").
+- Copied the images to `assets/supplier-color-charts/` with series names
+  (temp/ is untracked scratch); SUMMARY updated (assets line + 120-SKU bullet
+  now links the parsed catalog — it's the product list behind the
+  product-content-pipeline feature and the SKU COLOR vocabulary).
+
+## 2026-07-25 — SKU pattern Markdown
+
+- Replaced the plain-text SKU segment diagram in `docs/Database.md` with concise native Markdown.
+
+## 2026-07-25 — Moved SEO/GEO docs into docs/seo-geo/
+- `git mv` of `seo-intro.md`, `geo-intro.md`, `search-discovery-implementation.md` from `docs/` → `docs/seo-geo/`.
+- Updated all navigational links to the new paths: README.md docs table, docs/features/README.md, docs/admin-design.md (Related docs + §Markets note), docs/archive/flow-map.md, docs/archive/geo-claude.md.
+- Fixed the one now-broken relative link inside the moved files: search-discovery-implementation.md → `../repo-review-2026-07-23.md`. Sibling links between the three files unchanged (moved together).
+- WORKLOG history entries left as-is (historical paths).

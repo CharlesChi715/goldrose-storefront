@@ -53,3 +53,37 @@ Postgres underneath — data migrates out cleanly if ever needed.
   `lib/admin` (the local file adapter has no Postgres index), Duplicate clears
   copied SKUs, friendly admin validation + an activation gate (active products
   need non-blank SKUs; drafts may stay blank).
+
+## SKU naming convention (2026-07-25)
+
+**Standard pattern:** `GR-TYPE-COLOR[-ATTRIBUTE]`
+
+For a 120-SKU line of gold-dipped roses that could look like:
+
+| Segment | Fixed vocabulary (examples) |
+| --- | --- |
+| Brand | `GR` always |
+| Type | `ROSE` single rose · `SET` gift set · `BOX` display box · `ACC` accessory |
+| Color | `RED`, `PNK`, `BLU`, `PUR`, `WHT`, `RNB` (rainbow), `GLD` |
+| ATTRIBUTE (only if needed) | `VAL` valentine, `ANN` anniversary, `L`/`S` size |
+
+- **Pattern** — fixed segments, general → specific: `GR-TYPE-COLOR[-VARIANT]`
+  (e.g. `GR-ROSE-RED`, `GR-ROSE-RNB-L`, `GR-SET-VAL`). Matches the existing
+  `GR-SET-VAL` example above.
+- **Vocabulary (proposed — finalize against the boss's 120-SKU product list):**
+  TYPE `ROSE` single rose · `SET` gift set · `BOX` display box · `ACC`
+  accessory; COLOR `RED` `PNK` `BLU` `PUR` `WHT` `GLD` `RNB` (rainbow);
+  VARIANT only when needed (`VAL` valentine, `ANN` anniversary, `L`/`S` size).
+  Always pick from this list — extend the list here first, never improvise a
+  code (`PNK`, never sometimes `PINK`).
+- **Characters:** uppercase A–Z + digits + hyphens only. No spaces/symbols. Ban
+  ambiguous chars in new codes (`O`↔`0`, `I`↔`1`). **Never start a SKU with
+  `0`** — Excel strips leading zeros and our 120-SKU pipeline is CSV-based.
+- **Segment order is fixed even when segments are absent**: optional segments
+  drop off the tail only (`GR-ROSE-RNB-L`, never `GR-ROSE-L-RNB`). Variable
+  section counts coexist fine — systems treat SKUs as opaque strings; the
+  consistent prefix is what makes `GR-ROSE-*` filtering work.
+- **Encode only permanent, pick-relevant facts.** Price, supplier, shelf
+  location change → DB columns, never the SKU. 3–4 segments max; a 5th–6th
+  segment means something belongs in a column. Keep ≤20 chars (marketplace/3PL
+  caps, e.g. Amazon 40).

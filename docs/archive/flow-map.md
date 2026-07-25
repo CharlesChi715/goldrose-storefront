@@ -23,7 +23,7 @@ Legend: ✅ real / live · 🟡 simulated (mock) · ⬜ not built yet · 💡 fu
   design reference page, not wired into the buying flow.
 - ⬜ Real domain (still on the vercel.app address) — launch checklist.
 - 💡 SEO/GEO baseline ships with the admin build ([admin-design.md](../admin-design.md) §8.1);
-  post-launch levers tracked in `docs/seo-intro.md`.
+  post-launch levers tracked in `docs/seo-geo/seo-intro.md`.
 
 ## 2. Browse products — ✅ real data
 
@@ -113,6 +113,6 @@ Legend: ✅ real / live · 🟡 simulated (mock) · ⬜ not built yet · 💡 fu
 
 - [admin-design.md](../admin-design.md) — **the authoritative design**: custom admin + native checkout replacing Shopify
 - [launch-checklist.md](launch-checklist.md) — the phased to-do list (tasks live there, not here)
-- [seo-intro.md](../seo-intro.md) — post-launch SEO/GEO levers
+- [seo-intro.md](../seo-geo/seo-intro.md) — post-launch SEO/GEO levers
 - [ideas.md](../ideas.md) — owner's raw future ideas
 - [checkout.md](checkout.md), [shopify-integration.md](shopify-integration.md) — historical (Shopify era)

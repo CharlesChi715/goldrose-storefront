@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
 const VISITOR_KEY = "goldrose-visitor-id";
 const SESSION_KEY = "goldrose-session-id";
 const SESSION_SEEN_KEY = "goldrose-session-seen";
-const SESSION_GAP_MS = 30 * 60 * 1000;
+const SESSION_GAP_MS = 30 * 60 * 1000;  // Google Analytics defaults to a 30-minute inactivity timeout
 
 function randomId(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 24);

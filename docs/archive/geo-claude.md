@@ -1,8 +1,8 @@
 # How AI search recommends products — research report (2026-07-23)
 
-_Deep-research run (105 agents, 23 sources fetched, 25 top claims adversarially verified: 20 confirmed / 5 refuted). Prioritized primary sources — OpenAI, Google, Perplexity, Microsoft official docs — over SEO-blog speculation. Companion to [seo-intro.md](../seo-intro.md); this file covers the AI-search/GEO side specifically. Claims marked **[confirmed]** survived 3-vote verification against live primary sources; everything else is flagged._
+_Deep-research run (105 agents, 23 sources fetched, 25 top claims adversarially verified: 20 confirmed / 5 refuted). Prioritized primary sources — OpenAI, Google, Perplexity, Microsoft official docs — over SEO-blog speculation. Companion to [seo-intro.md](../seo-geo/seo-intro.md); this file covers the AI-search/GEO side specifically. Claims marked **[confirmed]** survived 3-vote verification against live primary sources; everything else is flagged._
 
-> **See also [geo-intro.md](../geo-intro.md)** (formerly `geo-codex.md`) — the deeper primary doc: same core findings plus a GoldRose storefront audit (P0 data-trust fixes), Claude/Amazon/Meta coverage, and **PayPal Store Sync** (our closest-fit program), which this file missed. This file remains the quick summary.
+> **See also [geo-intro.md](../seo-geo/geo-intro.md)** (formerly `geo-codex.md`) — the deeper primary doc: same core findings plus a GoldRose storefront audit (P0 data-trust fixes), Claude/Amazon/Meta coverage, and **PayPal Store Sync** (our closest-fit program), which this file missed. This file remains the quick summary.
 
 ## TL;DR
 AI shopping surfaces run on **two parallel discovery channels**:

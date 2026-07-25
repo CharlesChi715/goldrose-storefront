@@ -24,18 +24,18 @@ docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md "Next steps"  →  
 
 Line 1 of every feature file, bold, fixed vocabulary:
 
-**BACKLOG → READY → IN PROGRESS → TESTING → DONE** (+ **DROPPED**, exit from any state)
+**BACKLOG → READY → IN PROGRESS → UAT → DONE** (+ **DROPPED**, exit from any state)
 
 - BACKLOG — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a feature file is born BACKLOG)
 - READY — approach chosen (options + pros/cons recorded)
 - IN PROGRESS — being built
-- TESTING — live on production, **awaiting human verification** (a queue, not an activity — dormant/sandbox features sit here too; automated tests were already green to land)
+- UAT (user acceptance testing) — live on production, **awaiting human verification** (a queue, not an activity — dormant/sandbox features sit here too; automated tests were already green to land)
 - DONE — **works well on the live site, verified by a human** (owner/Charles clicked through it); nothing known to fix — only future improvements remain possible
 - DROPPED — considered and rejected; keep the file, the "why not" is the value
 
 Format — full pipeline with the **current stage bold**, then date + qualifier:
 
-`Status: BACKLOG → **READY** → IN PROGRESS → TESTING → DONE · 2026-07-24, not yet implemented`
+`Status: BACKLOG → **READY** → IN PROGRESS → UAT → DONE · 2026-07-24, not yet implemented`
 
 (DROPPED replaces the whole pipeline: `Status: **DROPPED** · date, why`.)
 
@@ -62,7 +62,7 @@ is maintained directly here until a new decision earns it a file.
 Meter = milestones completed after planning. BACKLOG is the empty meter — on 
 the roadmap, nothing started; a filled dot always means a real step happened:
 
-`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ TESTING · ●●●● DONE · ✕ DROPPED`
+`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ UAT · ●●●● DONE · ✕ DROPPED`
 
 Text after the status ONLY when the bare status would mislead (e.g. deployed
 but dormant/sandbox) or to name the blocker to the next stage — never to
@@ -77,33 +77,33 @@ Figma pixel-exact pages
 ├── / (home) ●●●● DONE
 ├── /shop ●●●● DONE
 ├── /products/[slug] ●●●● DONE
-└── wishlist button ●●●○ TESTING
+└── wishlist button ●●●○ UAT
 
 Native checkout (PayPal Orders v2)
-├── cart ●●●○ TESTING
-├── discount codes ●●●○ TESTING
-├── shipping rates ●●●○ TESTING — RoW $19.95 placeholder (OQ-2)
-├── PayPal create/capture ●●●○ TESTING — sandbox until launch
-└── PayPal webhooks ●●●○ TESTING
+├── cart ●●●○ UAT
+├── discount codes ●●●○ UAT
+├── shipping rates ●●●○ UAT — RoW $19.95 placeholder (OQ-2)
+├── PayPal create/capture ●●●○ UAT — sandbox until launch
+└── PayPal webhooks ●●●○ UAT
 
 Guest order lookup
-└── /orders ●●●○ TESTING
+└── /orders ●●●○ UAT
 
 Customer accounts /account — dormant: owner config pending
-├── Google OAuth ●●●○ TESTING
-├── Apple OAuth ●●●○ TESTING
-├── passkeys ●●●○ TESTING
-└── order matching (verified email) ●●●○ TESTING
+├── Google OAuth ●●●○ UAT
+├── Apple OAuth ●●●○ UAT
+├── passkeys ●●●○ UAT
+└── order matching (verified email) ●●●○ UAT
 
 Concierge chat (mascot + bar overlay)
-├── feedback panel → admin Ideas ●●●○ TESTING
+├── feedback panel → admin Ideas ●●●○ UAT
 └── real chat widget ○○○○ BACKLOG
 
 SEO/GEO baseline
-├── sitemap ●●●○ TESTING
-├── robots + AI-crawler toggle ●●●○ TESTING
-├── /llms.txt ●●●○ TESTING
-├── JSON-LD ●●●○ TESTING
+├── sitemap ●●●○ UAT
+├── robots + AI-crawler toggle ●●●○ UAT
+├── /llms.txt ●●●○ UAT
+├── JSON-LD ●●●○ UAT
 └── product feeds ○○○○ BACKLOG — search-discovery-implementation.md
 ```
 
@@ -111,32 +111,38 @@ SEO/GEO baseline
 
 ```text
 Admin suite (EN/中文) — §14.3 owner walkthrough pending
-├── Home ●●●○ TESTING
-├── Orders lifecycle ●●●○ TESTING
-├── Products + inventory ●●●○ TESTING
-├── Customers ●●●○ TESTING
-├── Content (slots/files/Ideas) ●●●○ TESTING
-├── Discounts ●●●○ TESTING
-├── Settings + Team ●●●○ TESTING
-├── Forum (unread badges) ●●●○ TESTING
-├── ⌘K search ●●●○ TESTING
+├── Home ●●●○ UAT
+├── Orders lifecycle ●●●○ UAT
+├── Products + inventory ●●●○ UAT
+├── Customers ●●●○ UAT
+├── Content (slots/files/Ideas) ●●●○ UAT
+├── Discounts ●●●○ UAT
+├── Settings + Team ●●●○ UAT
+├── Forum (unread badges) ●●●○ UAT
+├── ⌘K search ●●●○ UAT
 └── Analytics
-    ├── first-party beacon ●●●○ TESTING
-    ├── channel/UTM/country reports ●●●○ TESTING
-    └── posting-account-attribution.md ●●●○ TESTING — utm_acc tag
+    ├── first-party beacon ●●●○ UAT
+    ├── channel/UTM/country reports ●●●○ UAT
+    └── posting-account-attribution.md ●●●○ UAT — utm_acc tag
 
 Product content — 120 SKUs (OQ-3)
 └── product-content-pipeline.md ○○○○ BACKLOG — live-wire pages + CSV/image import
 
 Admin auth
-├── login + access approvals ●●●○ TESTING
-├── password reset ●●●○ TESTING
-└── passkeys ●●●○ TESTING — dormant
+├── login + access approvals ●●●○ UAT
+├── password reset ●●●○ UAT
+└── passkeys ●●●○ UAT — dormant
 
 Order emails (Resend) — console fallback until RESEND_API_KEY set
-├── order confirmation ●●●○ TESTING
-├── shipping confirmation ●●●○ TESTING
-└── owner new-order alert ●●●○ TESTING
+├── order confirmation ●●●○ UAT
+├── shipping confirmation ●●●○ UAT
+└── owner new-order alert ●●●○ UAT
+
+Shipping & tracking
+└── order-tracking.md ○○○○ BACKLOG — carrier field + auto UPS link
+
+Marketing
+└── promotion-emails.md ○○○○ BACKLOG — consent + unsubscribe first
 
 Supabase hosted DB
 ├── migrations (0001, 0002) ●●●● DONE
@@ -151,4 +157,6 @@ here):
 - **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
 - **OQ-2 / OQ-3** → [SUMMARY.md · Open questions](../../SUMMARY.md)
 - **Database.md** → [Database.md backup plan](../Database.md)
-- **search-discovery-implementation.md** → [search-discovery-implementation.md](../search-discovery-implementation.md)
+- **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)
+- **order-tracking.md** → [backend/order-tracking.md](backend/order-tracking.md)
+- **promotion-emails.md** → [backend/promotion-emails.md](backend/promotion-emails.md)

@@ -58,3 +58,5 @@ turn it into a real task.
 - 🆕 we already get stocks in US and going to find the 达人 over US social
   platforms to help promote the product. also we going to make video by AI and
   let the last piece of video only available in this website to boost views.
+
+- Add diff popular checkout types across countries in Euo and American.
