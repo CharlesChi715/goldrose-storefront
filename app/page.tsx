@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
  * The homepage (`/`) — a pixel-exact implementation of the redesigned

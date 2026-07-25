@@ -10,7 +10,7 @@
  * Coordinates, colours and fonts are verbatim from the Figma REST data.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import NoCalcScale from "@/components/NoCalcScale";
@@ -102,6 +102,14 @@ const RESET: React.CSSProperties = {
   cursor: "pointer",
 };
 
+// The portal may only render once we are on the client, or the server markup
+// and the first client render disagree. Read that as an external "are we
+// hydrated yet" store rather than a setState inside an effect: the snapshot is
+// taken during render, so there is no second cascading render pass.
+const subscribeToNothing = () => () => {};
+const onTheClient = () => true;
+const onTheServer = () => false;
+
 export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   // The trigger lives inside ScaleFrame's `.figv-stage`, which is transformed.
   // A transform makes that stage the containing block AND the stacking context
@@ -109,8 +117,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   // would lose the z-order fight to the tab bar (z-index 10 outside the stage
   // beats anything inside it). Portal to <body> so `fixed` means the viewport
   // and z-index 40 actually wins — same reason BottomNav sits outside the stage.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeToNothing, onTheClient, onTheServer);
 
   // Escape closes, and the page behind must not scroll while the drawer is open.
   useEffect(() => {
