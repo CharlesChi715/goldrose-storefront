@@ -12,7 +12,7 @@ Single source of truth. Read first; keep fresh. "§" = sections of the spec, [do
 ```text
 goldrose-storefront/
 ├── app/                 # Next.js App Router: storefront (/, /shop, /products/[slug], /account), /admin, API routes, sitemap/robots/llms.txt
-├── components/          # Storefront + shared UI (VHeader, BackButton, WishlistButton, NoCalcScale…)
+├── components/          # Storefront + shared UI (home/ = homepage modules A1–A11, VHeader, BackButton…)
 ├── lib/                 # Domain logic: admin/, checkout/, supabase/ (2 backends: hosted / .data file adapter), account/, cart/
 ├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth, 0003 tracking carrier + hardening)
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
@@ -29,6 +29,7 @@ goldrose-storefront/
 
 - **⚠️ EVERYTHING STILL TESTING — nothing live/reliable yet. Ship target: 2026-07-30.** Sandbox PayPal only, placeholder products (OQ-3), no real marketing links posted; treat all data (orders, analytics, UTM tags) as test data until ship.
 - **Deployed (testing)**: <https://goldrose-storefront.vercel.app> — build complete (stages 0–9 on `main`); awaiting the owner's §14.3 walkthrough.
+- **2026-07-25**: `/` + `/shop` rebuilt pixel-exact from the redesigned VELORIA 已完成 frames (homepage A-1…A-11 → `components/home/`, warm palette, new nav art, Me→Login tab); IxD routes decided → [docs/ixd/README.md](docs/ixd/README.md) route table; bag/checkout/business/orders/menu + login screens NOT imported (design 美化未完成 / deferred).
 - **Per-feature status: [docs/features/README.md](docs/features/README.md) Status tree** (= the roadmap). Open a feature's own file/docs/code only when working on that feature.
 - **⚠️ Hosted Supabase is LIVE data** (ref `cfvsvgbldnzkcjvbwnjp`) — local dev writes the SAME live db.
 - **Mock/local mode** (what e2e uses): blank the Supabase + PayPal env vars → file adapter `.data/db.json`; `npm run seed -- --reset` restores pristine; admin login is open-access unless `ADMIN_DEV_PASSWORD` is set; `/account` shows "sign-in unavailable".
@@ -52,6 +53,6 @@ goldrose-storefront/
 - **Charles: finish the activation checklist** ([docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) §5): Vercel env vars + redeploy → Supabase auth config → auth providers (passkeys RP, Google/Apple) → PayPal sandbox → §14.3 walkthrough → screenshots → cancel Shopify → revoke Figma token.
 - Then: real rates (OQ-2), real product content (OQ-3), launch checklist items, and DB backups at/near launch ([docs/features/backend/db-backups.md](docs/features/backend/db-backups.md) — live DB has no backups until then).
 - Boss asks 07-25: [order-tracking](docs/features/backend/order-tracking.md) **BUILT 07-25** (carrier dropdown UPS/USPS + auto link, /account status pill, 0003 bundles the agreed hardening) — merge PR, **run 0003 on hosted BEFORE deploy**, then owner UAT · [promotion-emails](docs/features/backend/promotion-emails.md) still BACKLOG (consent + Resend audience).
-- Design 07-25: homepage+shop redesign interaction spec (37+15 rows, annotated mobile Figma mocks) imported → [docs/ixd/](docs/ixd/README.md); mechanism-first build possible now, blocked items listed in its 待与设计确认.
+- Design 07-25: homepage+shop redesign interaction spec (37+15 rows, annotated mobile Figma mocks) imported → [docs/ixd/](docs/ixd/README.md); homepage+shop pixel-imported and merged 2026-07-25 (routes: README route table); remaining blocked items in its 待与设计确认.
 - Post-ship: owner's influencer campaign + website-exclusive video finale ([docs/ideas.md](docs/ideas.md) 07-24) — no influencer links before ship.
 - 120-SKU content pipeline (admin editing + bulk import): now a feature file, [docs/features/product-content-pipeline.md](docs/features/product-content-pipeline.md) — BACKLOG, after ship; SKU rules in [docs/Database.md](docs/Database.md). Supplier's full color catalog (124 colors: Y/YS/YC series) parsed in [docs/supplier-color-charts.md](docs/supplier-color-charts.md).

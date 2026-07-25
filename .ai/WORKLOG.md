@@ -2173,6 +2173,13 @@ docs: add first feature learning doc (trial)
 - docs/ixd/README.md: per owner, **Source:** now headlines homepage.md + shop.md; `temp/主页_shop页机制.numbers` demoted to "design team's editable original".
 - Answered owner's items-to-confirm #5 inline (third-party tell = non-GoldRose "VILOW… ROSE" wordmark on the N-07 gift box; same image is the live /shop hero `public/veloria/shop-hero.png`; swap = same-size asset replacement, needs OQ-3 photo).
 
+## 2026-07-25 · frontend-working (bg session) — redesign import
+- Rebuilt `/` pixel-exact from VELORIA frame 138:55/138:56 (11 parallel module builders → components/home/A1–A11.tsx; chrome: PromoBar variant="brown", HomeHeader/ShopHeader, redesign bottom-nav art with per-frame active variants, Me→Login). Replaced the Open Fashion homepage.
+- Restyled `/shop` to the edited 24:396 frame (430×1822, warm palette, new cards/pagination/concierge; live catalog wiring kept, ratings/hearts static per owner's scope answer).
+- Routes per owner delegation: existing targets wired, everything unconfirmed left pixel-exact but non-clickable (recorded as a route table in docs/ixd/README.md).
+- Verified: per-module numpy pixel-diff vs Figma node renders (header/nav 0.0–0.3%, rest font-AA); fixed en route — dedup bug mapping different same-named icons to one asset, Figma SVG-text ink-crop stretching, homepage header z-order, 4 assets missing from worktree. 28 unit + 56 e2e green; pixel baselines regenerated; account/promo specs updated.
+- Landed on `main` 84e4232 (fast-forward, not pushed). Worktree flow forced by the new bg-isolation guard; agent scratch worktrees cleaned. NOT imported yet: B-1/B-2 bag+checkout, B-3/B-4 business, C-1/C-2 orders, C-3 menu (美化未完成), logins (deferred, touch live auth UI).
+
 ## 2026-07-25 · Order tracking Option B + Me-section status (bg session)
 
 - Boss ask (via Charles): customers see delivery status in the Me section;

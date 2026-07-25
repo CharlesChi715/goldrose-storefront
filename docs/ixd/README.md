@@ -68,3 +68,17 @@ Message from me to ai agents: leave placeholder in unsure things
 6. **Content:** Sources for the copy and images on target pages such as the
    blog, brand story, customer stories, and corporate partnerships remain to
    be determined. -- leave with placeholder.
+
+## Route table (decided by dev 2026-07-25, per owner delegation)
+
+Implemented in the 2026-07-25 homepage/shop import. Wired now (target exists):
+H-04 cart → `/checkout` · H-05 logo → `/` · H-07 hero CTA, H-09/H-12/H-14
+homepage product cards, H-10/H-13 view-all, H-19/H-22 occasion & recipient
+cards, H-27 Browse All Gifts, H-36 Shop All → `/shop` · shop grid cards (N-13)
+→ `/products/[slug]` (live catalog) · bottom nav Home `/`, Shop `/shop`,
+Login `/account`. Everything else — H-01 menu, H-06 search (dropped from the
+final header), H-08/H-16/H-28/H-29/H-30/H-37 personalization, H-15/H-26 MORI,
+H-17/H-31 craft, H-20/H-23/H-35 blog/FAQ, H-24 stories, H-32 workshop,
+H-33 corporate, H-34 story, Wholesale tab — renders pixel-exact but is
+**not clickable** until its target page exists (per the "leave placeholder"
+instruction above).
