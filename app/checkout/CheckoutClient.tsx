@@ -7,7 +7,9 @@
  * message (→ the order's Notes card), and payment. With PayPal configured
  * the real JS-SDK buttons drive /api/paypal/create + /capture; otherwise
  * the mock express button and the local card form drive /api/checkout —
- * full click-through, no money anywhere.
+ * full click-through, no money anywhere. With `skipPayment` (the testing
+ * CHECKOUT_SKIP_PAYMENT flag, §10.4) both of those are replaced by a single
+ * Place order button; the payment code below is untouched, only unrendered.
  */
 
 import Link from "next/link";
@@ -23,6 +25,9 @@ import type { PaymentMethodId } from "@/lib/checkout/types";
 import type { CatalogProduct } from "@/lib/supabase/types.ts";
 
 const brandName = "GoldRose";
+
+/** What /api/checkout accepts — "none" is the skip-payment testing flow. */
+type SubmitMethod = PaymentMethodId | "none";
 
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 19);
@@ -172,6 +177,7 @@ export function CheckoutClient({
   defaultCountry,
   paypalClientId,
   showDiscountField = true,
+  skipPayment = false,
 }: {
   catalog: CatalogProduct[];
   zones: ShippingZone[];
@@ -179,6 +185,7 @@ export function CheckoutClient({
   defaultCountry: string;
   paypalClientId: string | null;
   showDiscountField?: boolean;
+  skipPayment?: boolean;
 }) {
   const router = useRouter();
   const { lines, rawLines, subtotal, hydrated, changeQuantity, remove, clear } =
@@ -205,7 +212,7 @@ export function CheckoutClient({
   });
   const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
 
-  const [pendingMethod, setPendingMethod] = useState<PaymentMethodId | null>(null);
+  const [pendingMethod, setPendingMethod] = useState<SubmitMethod | null>(null);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -292,8 +299,8 @@ export function CheckoutClient({
     };
   }
 
-  /** Mock-mode submit for both methods (§10.4). */
-  async function submitMockCheckout(method: PaymentMethodId, withForm: boolean) {
+  /** Mock-mode submit for every method, including skip-payment (§10.4). */
+  async function submitMockCheckout(method: SubmitMethod, withForm: boolean) {
     if (rawLines.length === 0) {
       setError("Your cart is empty.");
       return;
@@ -321,6 +328,9 @@ export function CheckoutClient({
                 },
               }
             : {}),
+          // Skip-payment collects nothing but an optional email, so the test
+          // order still lands on a customer and in /account order history.
+          ...(method === "none" && email.trim() ? { email: email.trim() } : {}),
         }),
       });
       const result = await response.json();
@@ -379,9 +389,11 @@ export function CheckoutClient({
         <section className="order-2 lg:order-1">
           <h1 className="font-serif text-4xl font-medium leading-tight text-[#211a0e]">Checkout</h1>
           <p className="mt-2 text-sm leading-6 text-[#5c4f38]">
-            {paypalClientId
-              ? "Pay securely with PayPal — balance, linked bank, or card."
-              : "Pay with PayPal in one tap, or enter a card below."}
+            {skipPayment
+              ? "Test mode — review your order and place it. No payment is collected."
+              : paypalClientId
+                ? "Pay securely with PayPal — balance, linked bank, or card."
+                : "Pay with PayPal in one tap, or enter a card below."}
           </p>
 
           {/* Ship-to country: shipping is priced from its zone (§10.3) */}
@@ -429,6 +441,37 @@ export function CheckoutClient({
             />
           </div>
 
+          {/* Skip-payment (§10.4): one button, straight to a placed order. */}
+          {skipPayment ? (
+            <div className="mt-7 grid gap-4">
+              <Field
+                id="email"
+                label="Email (optional)"
+                value={email}
+                onChange={setEmail}
+                error={fieldErrors.email}
+                placeholder="you@example.com"
+                inputMode="email"
+                autoComplete="email"
+              />
+              {error ? (
+                <p className="rounded-[3px] border border-[#b3473f] bg-[#fbeae8] p-3 text-sm text-[#8a2f29]">{error}</p>
+              ) : null}
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={() => submitMockCheckout("none", false)}
+                className="inline-flex h-12 w-full items-center justify-center rounded-[3px] bg-[#c9a24b] px-7 text-sm font-bold uppercase tracking-[0.16em] text-[#211706] shadow-[0_14px_34px_rgba(184,146,46,0.32)] transition-colors hover:bg-[#9a7826] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {pendingMethod === "none" ? "Placing order…" : `Place order · ${formatMoney(total)}`}
+              </button>
+              <p className="text-center text-xs leading-5 text-[#9c9277]">
+                Testing phase — payment is switched off. The order is recorded in
+                the admin with a test badge and no money moves.
+              </p>
+            </div>
+          ) : (
+          <>
           {/* Express checkout */}
           <div className="mt-7">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-[#9a7826]">Express checkout</p>
@@ -604,6 +647,8 @@ export function CheckoutClient({
                 </p>
               </form>
             </>
+          )}
+          </>
           )}
 
           {paypalClientId && error ? (

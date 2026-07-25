@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { validateCard } from "@/lib/checkout/card";
+import { skipPaymentEnabled } from "@/lib/checkout/mode";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createOrder } from "@/lib/orders/db";
 import { getPayPalConfig } from "@/lib/paypal/client";
@@ -19,7 +20,8 @@ import { getStore } from "@/lib/supabase/store.ts";
 import type { Address } from "@/lib/supabase/types.ts";
 
 const requestSchema = z.object({
-  method: z.enum(["card", "paypal"]),
+  // "none" = the CHECKOUT_SKIP_PAYMENT flow: order placed with no payment step.
+  method: z.enum(["card", "paypal", "none"]),
   lines: z
     .array(
       z.object({
@@ -55,8 +57,10 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  // Mock checkout exists only while no real provider is configured (§10.4).
-  if (getPayPalConfig().configured) {
+  // Mock checkout exists only while no real provider is configured (§10.4) —
+  // or while the testing-phase skip-payment flag is deliberately on.
+  const skipPayment = skipPaymentEnabled();
+  if (getPayPalConfig().configured && !skipPayment) {
     return NextResponse.json(
       { ok: false, error: "Mock checkout is disabled — PayPal is configured." },
       { status: 400 },
@@ -68,6 +72,14 @@ export async function POST(request: Request) {
     parsed = requestSchema.parse(await request.json());
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+  }
+
+  // The no-payment method is unreachable unless the flag explicitly enables it.
+  if (parsed.method === "none" && !skipPayment) {
+    return NextResponse.json(
+      { ok: false, error: "Payment is required." },
+      { status: 400 },
+    );
   }
 
   try {

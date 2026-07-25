@@ -30,10 +30,12 @@ export default async function CheckoutSuccessPage({
 }) {
   const params = await searchParams;
   const isMock = params.mock === "1";
+  // Unknown/absent method (e.g. the skip-payment flow's "none") drops the
+  // "Your X checkout completed" clause rather than naming a phantom method.
   const methodLabel =
     params.method && isPaymentMethodId(params.method)
       ? getPaymentMethod(params.method).label
-      : "your selected method";
+      : null;
   const totalCents = Number(params.total);
   const hasTotal = Number.isFinite(totalCents) && totalCents > 0;
 
@@ -48,8 +50,9 @@ export default async function CheckoutSuccessPage({
           Thank you for your order.
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#5c4f38]">
-          Your {methodLabel} checkout completed. A confirmation email is on
-          its way, and tracking details will follow once your gift ships.
+          {methodLabel ? `Your ${methodLabel} checkout completed. ` : "Your order is confirmed. "}
+          A confirmation email is on its way, and tracking details will follow
+          once your gift ships.
         </p>
 
         <dl className="mx-auto mt-7 grid max-w-sm gap-2 text-left">

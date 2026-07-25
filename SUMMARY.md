@@ -6,7 +6,7 @@ Single source of truth. Read first; keep fresh. "§" = sections of the spec, [do
 
 - Sell the 24K gold-dipped rose gift line DTC — **international, USD-only V1, English storefront**. Brand: **GoldRose**.
 - **Native checkout, PayPal Orders v2 (sandbox until launch)**; provider choice = OQ-1 (schema provider-neutral). Shopify code fully removed; owner cancels the subscription **after** the §14.3 walkthrough.
-- Add placeholder/mocking data to anything not sure. 
+- Add intuitive placeholder/mocking data/img to anything not sure. path of placeholder img: `temp/PlaceholderPicture.png` which contains only the text: "PlaceHolder".
 
 ## File structure
 

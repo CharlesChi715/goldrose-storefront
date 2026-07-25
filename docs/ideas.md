@@ -69,3 +69,6 @@ payment
 order tracking
 frontend ixd
 domain
+
+
+- meeting 25 July

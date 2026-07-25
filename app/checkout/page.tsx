@@ -10,6 +10,7 @@ import { headers } from "next/headers";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getShippingZones, servedCountries } from "@/lib/checkout/pricing";
 import { getSettingsMap } from "@/lib/admin/settings";
+import { skipPaymentEnabled } from "@/lib/checkout/mode";
 import { CheckoutClient } from "./CheckoutClient";
 
 export const dynamic = "force-dynamic";
@@ -37,8 +38,11 @@ export default async function CheckoutPage() {
   const geo = (headerStore.get("x-vercel-ip-country") ?? "").toUpperCase();
   const defaultCountry = countries.some((country) => country.code === geo) ? geo : "US";
 
+  // Testing-phase switch: skip payment entirely, so the PayPal buttons must
+  // not mount even when the keys exist (§10.4, lib/checkout/mode.ts).
+  const skipPayment = skipPaymentEnabled();
   const paypalClientId =
-    process.env.PAYPAL_CLIENT_ID && process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    !skipPayment && process.env.PAYPAL_CLIENT_ID && process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
       ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
       : null;
 
@@ -50,6 +54,7 @@ export default async function CheckoutPage() {
       defaultCountry={defaultCountry}
       paypalClientId={paypalClientId}
       showDiscountField={showDiscountField}
+      skipPayment={skipPayment}
     />
   );
 }

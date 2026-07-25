@@ -51,3 +51,6 @@ temp/
 # playwright
 /test-results/
 /playwright-report/
+
+# supabase CLI per-machine link state (project ref, pooler url) — migrations stay tracked
+supabase/.temp/
