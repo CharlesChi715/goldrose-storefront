@@ -2,11 +2,11 @@
 /**
  * ROLE OF THIS FILE
  * Shared chrome for the pages imported from the VELORIA Figma file
- * (file 3CXNpmuuyNyCW70qOci0oM): /shop (Frame 26) and /products/[slug]
- * (frame 详情页). Both frames share a 430px-wide canvas, promo bar, header,
- * and the white bottom tab bar. All coordinates/colors come verbatim from the
- * Figma REST API. The bottom nav is fixed to the viewport (per Charles's
- * request) with Home/Shop tabs wired to routes.
+ * (file 3CXNpmuuyNyCW70qOci0oM): / (homepage redesign), /shop and
+ * /products/[slug] (frame 详情页). All frames share a 430px-wide canvas,
+ * promo bar, header, and the white bottom tab bar. All coordinates/colors
+ * come verbatim from the Figma REST API. The bottom nav is fixed to the
+ * viewport (per Charles's request) with Home/Shop tabs wired to routes.
  */
 
 import Link from "next/link";
@@ -63,86 +63,92 @@ export const HeartIcon = () => (
   </svg>
 );
 
-export const ListviewIcon = () => (
+export const ListviewIcon = ({ color = "#14142B" }: { color?: string } = {}) => (
   <svg width="26" height="24" viewBox="0 0 26 24" fill="none">
     <g opacity="0.5">
-      <path d="M12.7699 17H20.9011" stroke="#14142B" strokeWidth="1.00221" />
-      <path d="M12.794 6.99999H20.9252" stroke="#14142B" strokeWidth="1.00221" />
-      <rect x="2.60633" y="3.45509" width="7.37011" height="7.00001" stroke="#14142A" />
-      <rect x="2.60633" y="13.5144" width="7.37011" height="7.00001" stroke="#14142A" />
+      <path d="M12.7699 17H20.9011" stroke={color} strokeWidth="1.00221" />
+      <path d="M12.794 6.99999H20.9252" stroke={color} strokeWidth="1.00221" />
+      <rect x="2.60633" y="3.45509" width="7.37011" height="7.00001" stroke={color} />
+      <rect x="2.60633" y="13.5144" width="7.37011" height="7.00001" stroke={color} />
     </g>
   </svg>
 );
 
-export const DownIcon = () => (
+export const DownIcon = ({ color = "#1B362B" }: { color?: string } = {}) => (
   <svg width="21" height="20" viewBox="0 0 21 20" fill="none">
     <g opacity="0.5">
-      <path d="M8.35172 11.6087L4.73531 6.72329L11.9681 6.72329L8.35172 11.6087Z" fill="#1B362B" />
+      <path d="M8.35172 11.6087L4.73531 6.72329L11.9681 6.72329L8.35172 11.6087Z" fill={color} />
     </g>
   </svg>
 );
 
-export const FilterIcon = () => (
+export const FilterIcon = ({ color = "#DD8560" }: { color?: string } = {}) => (
   <svg width="26" height="24" viewBox="0 0 26 24" fill="none">
     <path
       fillRule="evenodd"
       clipRule="evenodd"
       d="M3.13876 7.5V8.5H21.9715V7.5H3.13876ZM10.4626 16.5H14.6477V15.5H10.4626V16.5ZM18.8327 12.5H6.27755V11.5H18.8327V12.5Z"
-      fill="#DD8560"
+      fill={color}
     />
   </svg>
 );
 
-export const CloseIcon = () => (
+export const CloseIcon = ({ color = "#555555" }: { color?: string } = {}) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M4 4.00002L12.5161 12.5161" stroke="#555555" strokeLinejoin="round" />
-    <path d="M4 12.5163L12.5161 4.00015" stroke="#555555" strokeLinejoin="round" />
+    <path d="M4 4.00002L12.5161 12.5161" stroke={color} strokeLinejoin="round" />
+    <path d="M4 12.5163L12.5161 4.00015" stroke={color} strokeLinejoin="round" />
   </svg>
 );
 
-export const ForwardIcon = () => (
+export const ForwardIcon = ({ color = "#14142B" }: { color?: string } = {}) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M9 5L15.9632 11.9632L9 18.9263" stroke="#14142B" />
+    <path d="M9 5L15.9632 11.9632L9 18.9263" stroke={color} />
   </svg>
 );
 
 /* ---------- Shared page sections ---------- */
 
 /**
- * 01 · Promo bar — dark green strip at the very top of both frames. The
- * slogan is served as Figma's own rendered pixels (cropped from the frame
- * render) because the ✦ glyphs hit different fallback fonts in browsers.
+ * 01 · Promo bar — strip at the very top of every frame. The default slogan
+ * is served as Figma's own rendered pixels (SVG/PNG export) because the ✦
+ * glyphs hit different fallback fonts in browsers. `variant`: "green" is the
+ * original PDP styling; "brown" is the 2026-07-25 redesign palette used by
+ * the homepage and /shop.
  */
 export function PromoBar({
   slogan,
   isDefault = true,
+  variant = "green",
 }: {
   slogan?: string;
   isDefault?: boolean;
+  variant?: "green" | "brown";
 } = {}) {
+  const brown = variant === "brown";
   return (
     <>
-      <div style={{ ...abs(0, 0, 430, 32), background: "#06372E" }} />
+      <div style={{ ...abs(0, 0, 430, 32), background: brown ? "#3B2F2F" : "#06372E" }} />
       {isDefault || !slogan ? (
         // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
         <img
-          src="/veloria/glyph-promo.png"
+          src={brown ? "/veloria/home/549-95.svg" : "/veloria/glyph-promo.png"}
           alt={slogan ?? "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"}
-          width={358}
-          height={20}
-          style={{ ...abs(36, 6, 358, 20), display: "block" }}
+          width={brown ? 352 : 358}
+          height={brown ? 10 : 20}
+          style={{ ...(brown ? abs(39, 11, 352, 10) : abs(36, 6, 358, 20)), display: "block" }}
         />
       ) : (
-        // Owner-edited → real text in the same 358×20 box; minor glyph drift
+        // Owner-edited → real text in the same box; minor glyph drift
         // accepted (the admin shows the caveat inline, §11).
         <div
           className={inter.className}
           style={{
-            ...abs(36, 6, 358, 20),
-            color: "#FFFFFF",
-            fontSize: 11,
+            ...(brown ? abs(39, 6, 352, 20) : abs(36, 6, 358, 20)),
+            color: brown ? "#D4AF37" : "#FFFFFF",
+            fontSize: brown ? 8.5 : 11,
+            fontWeight: brown ? 500 : undefined,
             lineHeight: "20px",
-            letterSpacing: 0.4,
+            letterSpacing: brown ? 0 : 0.4,
             textAlign: "center",
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -192,29 +198,77 @@ export function VHeader({
   );
 }
 
+/**
+ * 02 · Header (redesign, "No Menu/Search" variant) — the 2026-07-25 homepage
+ * header: menu art, centered logo, wishlist art, cart. Search and the back
+ * arrow are gone; menu and wishlist are static placeholders until their
+ * target designs leave 美化未完成 (IxD H-01) / wishlist enters scope.
+ */
+export function HomeHeader() {
+  return (
+    <>
+      <div style={{ ...abs(-1, 36, 430, 62), background: "#FFF6EC" }} />
+      <img src="/veloria/home/549-88.png" alt="" width={40} height={43} style={{ ...abs(6.5, 45.5, 40, 43), display: "block" }} />
+      <Link href="/" style={{ ...abs(145.5, 47, 136, 40), display: "block" }} aria-label="Home">
+        <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
+      </Link>
+      <img src="/veloria/home/549-91.png" alt="" width={40} height={43} style={{ ...abs(311.5, 45.5, 40, 43), display: "block" }} />
+      <Link href="/checkout" style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }} aria-label="Cart">
+        <img src="/veloria/home/549-92.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+      </Link>
+    </>
+  );
+}
+
+/**
+ * 02 · Header (redesign) for /shop — same "No Menu/Search" family as
+ * HomeHeader but keeps the back arrow between menu and logo (node 56:69).
+ */
+export function ShopHeader() {
+  return (
+    <>
+      <div style={{ ...abs(0, 32, 430, 62), background: "#FFF6EC" }} />
+      <img src="/veloria/home/549-88.png" alt="" width={40} height={43} style={{ ...abs(7, 41.5, 40, 43), display: "block" }} />
+      <BackButton fallback="/" src="/veloria/home/56-71.png" style={abs(77, 41.5, 40, 43)} />
+      <Link href="/" style={{ ...abs(147, 43, 136, 40), display: "block" }} aria-label="Home">
+        <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
+      </Link>
+      <img src="/veloria/home/549-91.png" alt="" width={40} height={43} style={{ ...abs(313, 41.5, 40, 43), display: "block" }} />
+      <Link href="/checkout" style={{ ...abs(383, 41.5, 40, 43), display: "block" }} aria-label="Cart">
+        <img src="/veloria/home/549-92.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+      </Link>
+    </>
+  );
+}
+
 /* ---------- 13 · Bottom navigation (fixed overlay) ---------- */
 
 type Tab = {
   href?: string;
   img: string;
+  activeImg?: string;
   label: string;
 };
 
-// Owner-supplied button art (public/bottom-nav/*): icon + label baked into one PNG,
-// `-active` = colored variant shown on the tab's own page.
+// Redesign nav art (2026-07-25): 2x renders of the frames' own tab images
+// (nodes 763:113…763:129) — outline mascots, label baked in, "Login" on the
+// account tab. The design ships active variants only for Home and Shop; the
+// other tabs keep their single state when active.
 const TABS: Tab[] = [
-  { href: "/", img: "home", label: "Home" },
-  { href: "/shop", img: "shop", label: "Shop" },
-  { img: "wholesale", label: "Wholesale" },
-  { href: "/account", img: "me", label: "Me" },
+  { href: "/", img: "763-123", activeImg: "763-113", label: "Home" },
+  { href: "/shop", img: "763-115", activeImg: "763-125", label: "Shop" },
+  { img: "763-117", label: "Wholesale" },
+  { href: "/account", img: "763-119", label: "Login" },
 ];
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
   return (
     <img
-      src={`/bottom-nav/${tab.img}${isActive ? "-active" : ""}.png`}
+      src={`/veloria/home/${isActive && tab.activeImg ? tab.activeImg : tab.img}.png`}
       alt={tab.label}
-      style={{ ...abs(0, 4, 70, 48), objectFit: "contain" }}
+      width={50}
+      height={57}
+      style={{ ...abs(10, 1, 50, 57), display: "block" }}
     />
   );
 }
@@ -230,7 +284,7 @@ export function BottomNav({
   active = "Shop",
   bottomGap = 0,
 }: {
-  active?: "Home" | "Shop" | "Wholesale" | "Me" | (string & {});
+  active?: "Home" | "Shop" | "Wholesale" | "Login" | (string & {});
   bottomGap?: number;
 }) {
   return (
@@ -260,7 +314,7 @@ export function BottomNav({
         >
           {TABS.map((tab, i) => {
             const x = [18, 126, 234, 342][i];
-            const style: React.CSSProperties = { ...abs(x, -2.5, 70, 54), display: "block" };
+            const style: React.CSSProperties = { ...abs(x, 0, 70, 59), display: "block" };
             const content = <TabContent tab={tab} isActive={tab.label === active} />;
             return tab.href ? (
               <Link key={tab.label} href={tab.href} style={style}>
@@ -293,12 +347,14 @@ export function ScaleFrame({
   background,
   fontClass,
   navGap = 0,
+  navActive = "Shop",
   children,
 }: {
   height: number;
   background: string;
   fontClass: string;
   navGap?: number;
+  navActive?: "Home" | "Shop" | "Wholesale" | "Login" | (string & {});
   children: React.ReactNode;
 }) {
   const ratio = (height / 430).toFixed(7);
@@ -326,7 +382,7 @@ export function ScaleFrame({
           {children}
         </div>
       </div>
-      <BottomNav bottomGap={navGap} />
+      <BottomNav active={navActive} bottomGap={navGap} />
       {/* Fallback for browsers without calc() length division: apply the same
           scale via `zoom`/transform so narrow screens never scroll sideways. */}
       <NoCalcScale

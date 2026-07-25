@@ -21,7 +21,7 @@ export default function AccountPage() {
   return (
     <>
       <AccountClient />
-      <BottomNav active="Me" />
+      <BottomNav active="Login" />
     </>
   );
 }

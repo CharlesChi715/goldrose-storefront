@@ -1,27 +1,37 @@
+/* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * The homepage (`/`) — a pixel-exact implementation of the "Home page" frame
- * (node 418:616) from the GoldRose Figma file (Open Fashion UI kit, customized).
- * Every coordinate, size, color, and font value below is taken verbatim from
- * the Figma REST API data, not eyeballed. The design canvas is 375 CSS px wide;
- * the whole page is absolutely positioned inside that canvas and centered on
- * wider screens. Photo assets in /public/home are pre-cropped to the exact
- * on-screen device-pixel size (2x) so browsers don't resample them.
- * It also carries the store's Schema.org structured data for search engines.
+ * The homepage (`/`) — a pixel-exact implementation of the redesigned
+ * "Homepage · Layered Editable" frame (nodes 138:55/138:56, modules
+ * A-1…A-11) from the VELORIA Figma file. Every coordinate, size, color, and
+ * font value comes verbatim from the Figma REST API data; each A-module
+ * lives in components/home/. The 430-wide canvas scales to the viewport
+ * (ScaleFrame); photo assets in /public/veloria/home are exact 2× node
+ * renders. It also carries the store's Schema.org structured data and the
+ * admin-editable promo slogan. Route wiring follows docs/ixd/ — unconfirmed
+ * targets stay pixel-exact but non-clickable.
  */
 
-import Link from "next/link";
-import { Tenor_Sans } from "next/font/google";
-import { BackButton } from "@/components/BackButton";
-import { ConciergeChat } from "@/components/ConciergeChat";
-import { BottomNav } from "@/components/veloria";
-import NoCalcScale from "@/components/NoCalcScale";
 import type { Metadata } from "next";
+import { ScaleFrame, PromoBar, HomeHeader } from "@/components/veloria";
+import { playfair } from "@/lib/fonts";
+import { A1 } from "@/components/home/A1";
+import { A2 } from "@/components/home/A2";
+import { A3 } from "@/components/home/A3";
+import { A4 } from "@/components/home/A4";
+import { A5 } from "@/components/home/A5";
+import { A6 } from "@/components/home/A6";
+import { A7 } from "@/components/home/A7";
+import { A8 } from "@/components/home/A8";
+import { A9 } from "@/components/home/A9";
+import { A10 } from "@/components/home/A10";
+import { A11 } from "@/components/home/A11";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
+import { getPromoSlogan } from "@/lib/content";
 import { fileUrl } from "@/lib/files-url";
 
-// DB-backed data (links, JSON-LD, search listing) refreshes without a redeploy (§8).
+// DB-backed data (promo slogan, JSON-LD, search listing) refreshes without a redeploy (§8).
 export const revalidate = 300;
 
 /** Homepage search listing — editable in Settings → Search engine & AI (§8.1). */
@@ -43,175 +53,24 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
-
-/* ---------- Design constants (Figma values) ---------- */
-
-const INK = "#1B362B"; // deep green (brand)
-const ACCENT = "#DD8560"; // warm copper accent
-const GREY = "#555555";
-
-/* ---------- Inline SVG icons (exported from Figma, format=svg) ---------- */
-
-const DownIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <g opacity="0.5">
-      <path d="M8.49998 11.8148L4.81937 6.84264L12.1806 6.84265L8.49998 11.8148Z" fill={INK} />
-    </g>
-  </svg>
-);
-
-const ListviewIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <g opacity="0.5">
-      <path d="M10.171 14.1667H16.6474" stroke="#14142B" />
-      <path d="M10.1902 5.83334H16.6667" stroke="#14142B" />
-      <rect x="2.17767" y="2.96255" width="5.66667" height="5.66667" stroke="#14142A" />
-      <rect x="2.17767" y="11.3453" width="5.66667" height="5.66667" stroke="#14142A" />
-    </g>
-  </svg>
-);
-
-const FilterIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M2.5 6.25V7.08333H17.5V6.25H2.5ZM8.33333 13.75H11.6667V12.9167H8.33333V13.75ZM15 10.4167H5V9.58333H15V10.4167Z"
-      fill={ACCENT}
-    />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M4 4.00002L12.5161 12.5161" stroke="#555555" strokeLinejoin="round" />
-    <path d="M4 12.5163L12.5161 4.00015" stroke="#555555" strokeLinejoin="round" />
-  </svg>
-);
-
-const HeartIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M1.84812 2.51477C0.272874 4.09002 0.272875 6.64401 1.84813 8.21926L7.95802 14.3292L8.00002 14.2872L8.04206 14.3292L14.152 8.21931C15.7272 6.64406 15.7272 4.09007 14.152 2.51482C12.5767 0.939572 10.0227 0.939573 8.44747 2.51482L8.35362 2.60867C8.15836 2.80393 7.84178 2.80393 7.64651 2.60867L7.55261 2.51477C5.97736 0.939521 3.42337 0.939521 1.84812 2.51477Z"
-      stroke={ACCENT}
-    />
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg width="13.513" height="13.513" viewBox="0 0 13 13" fill="none">
-    <path
-      d="M6.49999 0L8.27962 4.38505L13 4.72252L9.37949 7.7701L10.5172 12.3637L6.49999 9.86217L2.48278 12.3637L3.6205 7.7701L3.85867e-06 4.72252L4.72037 4.38505L6.49999 0Z"
-      fill={ACCENT}
-    />
-  </svg>
-);
-
-const ForwardIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M9 5L15.9632 11.9632L9 18.9263" stroke="#14142B" />
-  </svg>
-);
-
-/* ---------- Shared style helpers ---------- */
-
-const abs = (left: number, top: number, width?: number, height?: number): React.CSSProperties => ({
-  position: "absolute",
-  left,
-  top,
-  ...(width !== undefined ? { width } : {}),
-  ...(height !== undefined ? { height } : {}),
-});
-
-const text = (size: number, lineHeight: number, color: string): React.CSSProperties => ({
-  fontSize: size,
-  lineHeight: `${lineHeight}px`,
-  color,
-  whiteSpace: "nowrap",
-});
-
-/* ---------- Product card ---------- */
-
-type CardData = {
-  x: number;
-  y: number;
-  img: string;
-  showSubtitle: boolean;
-  showRating: boolean;
-  bg: string;
-};
-
-// Figma card instances, in frame order. Cards without subtitle/rating and the
-// one #F9F9F9 card match the design exactly (they differ card-to-card).
-const CARDS: CardData[] = [
-  { x: 16, y: 347, img: "/home/rose-red.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 194, y: 347, img: "/home/rose-gold.png", showSubtitle: false, showRating: false, bg: "#FFFFFF" },
-  { x: 16, y: 641, img: "/home/gift-box.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 195, y: 641, img: "/home/rose-white.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 16, y: 935, img: "/home/rose-red.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 194, y: 935, img: "/home/rose-gold.png", showSubtitle: false, showRating: false, bg: "#FFFFFF" },
-  { x: 16, y: 1229, img: "/home/gift-box.png", showSubtitle: true, showRating: true, bg: "#FFFFFF" },
-  { x: 195, y: 1229, img: "/home/rose-white.png", showSubtitle: true, showRating: true, bg: "#F9F9F9" },
-];
-
-function ProductCard({ card, href }: { card: CardData; href: string }) {
-  return (
-    <Link
-      href={href}
-      style={{
-        ...abs(card.x, card.y, 165, 285),
-        display: "block",
-        background: card.bg,
-        border: "1px solid #FDF2E4",
-        borderRadius: 15,
-      }}
-    >
-      <div style={{ ...abs(-1, -1, 165, 220), borderRadius: 15, background: "#FDF2E4", overflow: "hidden" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={card.img}
-          alt="redrei reversible angora cardigan"
-          width={165}
-          height={220}
-          style={{ display: "block", width: 165, height: 220, objectFit: "cover" }}
-        />
-      </div>
-      <span style={abs(139, 197, 16, 16)}>
-        <HeartIcon />
-      </span>
-      <div style={{ ...abs(3, 227), ...text(12, 18, "#000000") }}>redrei</div>
-      {card.showSubtitle && (
-        <div style={{ ...abs(3, 240), ...text(12, 18, GREY) }}>reversible angora cardigan</div>
-      )}
-      <div style={{ ...abs(3, 260), ...text(15, 24, ACCENT) }}>$120</div>
-      {card.showRating && (
-        <>
-          <span style={{ ...abs(73, 265.24), display: "block", height: 13.513 }}>
-            <StarIcon />
-          </span>
-          <div style={{ ...abs(89.51, 265), ...text(12, 14, GREY) }}>4.8 Ratings</div>
-        </>
-      )}
-    </Link>
-  );
-}
-
-/* ---------- Page ---------- */
-
 export default async function HomePage() {
   // Schema.org structured data from the LIVE catalog (§8.1): Organization +
   // WebSite + the store's offers, with price/availability from real stock.
   let catalog: Awaited<ReturnType<typeof getCatalog>> = [];
   let storeName = "GoldRose";
+  let promo = { text: "", isDefault: true };
   try {
     catalog = await getCatalog();
     storeName = (await getSettingsMap()).store.name;
   } catch {
     // fixed design still renders with no DB
   }
+  try {
+    promo = await getPromoSlogan();
+  } catch {
+    // default slogan (Figma pixels) still renders with no DB
+  }
   const base = siteBaseUrl();
-  const handles = catalog.map((product) => product.handle);
   const structuredData = [
     {
       "@context": "https://schema.org",
@@ -251,171 +110,26 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className={tenor.className} style={{ minHeight: "100vh", background: "#FCFCFC" }}>
+    <ScaleFrame height={8673} background="#FFF6EC" fontClass={playfair.className} navActive="Home">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      {/* Proportional scaling: the 375-wide canvas scales to the viewport width
-          (capped at 480px so desktop shows a phone-sized column). The wrapper
-          reserves the scaled layout height, since transform doesn't affect
-          layout. Browsers too old for length-division calc simply keep the
-          unscaled centered canvas. */}
-      <style>{`
-        html, body { overflow-x: hidden; }
-        @supports (transform: scale(calc(100vw / 375px))) {
-          .fighome-wrap { height: calc(min(100vw, 480px) * 4.5066667); overflow: hidden; }
-          .fighome-stage { transform: scale(calc(min(100vw, 480px) / 375px)); transform-origin: top center; }
-        }
-      `}</style>
-      <div className="fighome-wrap">
-        <div
-          className="fighome-stage"
-          style={{ position: "relative", width: 375, height: 1690, left: "calc((100% - 375px) / 2)", overflow: "hidden" }}
-        >
-        {/* Promo banner (sits underneath the header bar, exactly as in Figma) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/home/banner.png"
-          alt="This week's pick: Sapphire Blue Forever Rose — limited offer, 15% off"
-          width={372}
-          height={172}
-          fetchPriority="high"
-          style={{ ...abs(0, 60, 372, 172), objectFit: "cover" }}
-        />
-
-        {/* Header. The .5px positions come straight from Figma; Chrome rounds
-            a half-pixel `left` UP when painting, Figma doesn't, so each child
-            sits at the integer position with a 0.5px translate (rasterized
-            sub-pixel, i.e. exactly 1 device px at 2x) instead. */}
-        <header style={{ ...abs(3, 4, 369, 62), background: "#FCF8F4" }}>
-          {/* Owner-supplied top-nav art (public/top-nav/*), cropped to content;
-              each box is centred on the old 24×24 Figma icon position. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/top-nav/menu.png" alt="" style={{ ...abs(1.5, 18, 33, 26), objectFit: "contain" }} />
-          <BackButton fallback="/" style={{ ...abs(66, 18, 14, 26) }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/home/logo.png"
-            alt="GoldRose"
-            width={136}
-            height={39}
-            style={{ ...abs(116, 11, 136, 39), transform: "translate(0.5px, 0.5px)", objectFit: "cover" }}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/top-nav/search.png" alt="" style={{ ...abs(279, 18, 32, 26), objectFit: "contain" }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/top-nav/cart.png" alt="" style={{ ...abs(333.5, 18, 33, 26), objectFit: "contain" }} />
-        </header>
-
-        {/* Filter bar: count, sort pill, view/filter buttons */}
-        {/* +1.5px vs Figma node y: Chrome's baseline placement in the tight
-            14.84px line box sits 1.5px above Figma's — verified by pixel diff */}
-        <div style={{ ...abs(15.75, 256.89), ...text(14, 14.84, INK) }}>4500 APPAREL</div>
-        <div
-          style={{
-            ...abs(197.25, 242.89, 72.75, 36),
-            background: "rgba(196,196,196,0.10)",
-            borderRadius: 33,
-          }}
-        />
-        <div style={{ ...abs(212.78, 253.23), ...text(13, 13.78, GREY) }}>New</div>
-        <span style={abs(244.68, 252.11, 17, 17)}>
-          <DownIcon />
-        </span>
-        <div style={{ ...abs(278, 243.11, 36, 36), background: "rgba(196,196,196,0.10)", borderRadius: "50%" }} />
-        <span style={abs(286, 251.11, 20, 20)}>
-          <ListviewIcon />
-        </span>
-        <div style={{ ...abs(323, 243.11, 36, 36), background: "rgba(196,196,196,0.10)", borderRadius: "50%" }} />
-        <span style={abs(331, 253.11, 20, 20)}>
-          <FilterIcon />
-        </span>
-
-        {/* Active filter chips. Figma strokes are OUTSIDE-aligned on these
-            pills (verified against the render pixel profile), so the 1px ring
-            is a child div sitting 1px outside the chip box — a CSS border
-            would sit inside it. */}
-        {[
-          { x: 17, w: 95, label: "Women", closeX: 69 },
-          { x: 119, w: 116, label: "All apparel", closeX: 90 },
-        ].map((chip) => (
-          <div key={chip.label} style={abs(chip.x, 293, chip.w, 32)}>
-            <div
-              style={{
-                ...abs(-1, -1, chip.w + 2, 34),
-                border: "1px solid #DEDEDE",
-                borderRadius: 31,
-              }}
-            />
-            <div style={{ ...abs(10, 9), ...text(14, 16, INK), letterSpacing: 0.14 }}>{chip.label}</div>
-            <span style={abs(chip.closeX, 8, 16, 16)}>
-              <CloseIcon />
-            </span>
-          </div>
-        ))}
-
-        {/* Product grid — cards route to the product detail pages */}
-        {CARDS.map((card, i) => (
-          <ProductCard key={i} card={card} href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"} />
-        ))}
-
-        {/* Pagination */}
-        {[
-          { x: 64, label: "1", active: true },
-          { x: 108, label: "2", active: false },
-          { x: 152, label: "3", active: false },
-          { x: 196, label: "4", active: false },
-          { x: 240, label: "5", active: false },
-        ].map((p) => (
-          <div
-            key={p.label}
-            style={{
-              ...abs(p.x, 1553, 32, 32),
-              background: p.active ? INK : "rgba(136,136,136,0.10)",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 4.76,
-                width: "100%",
-                textAlign: "center",
-                ...text(16, 24, p.active ? "#FCFCFC" : GREY),
-              }}
-            >
-              {p.label}
-            </div>
-          </div>
-        ))}
-        <span style={abs(281.05, 1557.09, 24, 24)}>
-          <ForwardIcon />
-        </span>
-
-        </div>
-      </div>
-
-      {/* Bottom navigation — the shared white tab bar from the VELORIA design
-          (same as /shop and /products), fixed to the viewport bottom, with the
-          Home tab highlighted here. Replaces the old dark pill nav so all
-          pages navigate consistently. */}
-      <BottomNav active="Home" />
-
-      {/* Chatbox (mascot + bar), fixed above the nav — same as /shop. */}
-      <ConciergeChat navClearance={59} mascotOnTop />
-
-      {/* Fallback for browsers without calc() length division (pre-~2024
-          engines, e.g. old Android WebViews / in-app browsers): apply the same
-          scale via `zoom` (or transform where zoom is unsupported) so narrow
-          screens never scroll sideways. No-op on modern browsers. */}
-      <NoCalcScale
-        base={375}
-        stage=".fighome-stage"
-        origin="top center"
-        wrap=".fighome-wrap"
-        height={1690}
-      />
-    </div>
+      <PromoBar slogan={promo.text} isDefault={promo.isDefault} variant="brown" />
+      <A1 />
+      <A2 />
+      <A3 />
+      <A4 />
+      <A5 />
+      <A6 />
+      <A7 />
+      <A8 />
+      <A9 />
+      <A10 />
+      <A11 />
+      {/* Header last: A-1's opaque module background covers y32-98, and the
+          header (chrome, not part of any module) must paint above it. */}
+      <HomeHeader />
+    </ScaleFrame>
   );
 }

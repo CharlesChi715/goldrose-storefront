@@ -11,10 +11,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("customer account (local mode)", () => {
-  test("the Me tab links to /account", async ({ page }) => {
+  test("the Login tab links to /account", async ({ page }) => {
     await page.goto("/");
-    // exact: "Me" would otherwise substring-match the "Home" tab too.
-    await page.getByRole("link", { name: "Me", exact: true }).click();
+    // The redesign nav labels the account tab "Login" (art node 763:119).
+    await page.getByRole("link", { name: "Login", exact: true }).click();
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByRole("heading", { name: "My account" })).toBeVisible();
   });
