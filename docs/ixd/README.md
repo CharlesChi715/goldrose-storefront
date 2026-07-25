@@ -82,3 +82,22 @@ H-17/H-31 craft, H-20/H-23/H-35 blog/FAQ, H-24 stories, H-32 workshop,
 H-33 corporate, H-34 story, Wholesale tab — renders pixel-exact but is
 **not clickable** until its target page exists (per the "leave placeholder"
 instruction above).
+
+## `⚠️ Developer note` · mascot artwork needs transparent PNGs
+
+The four AI-generated illustrations on the homepage (the MORI cat and the
+pink ribbon strip) are **opaque bitmaps with a transparency checkerboard
+baked into the pixels**. The Figma file hides that background with a
+`DARKEN` fill blend mode, and the import now reproduces it, so the pages
+match the mock — but DARKEN is a workaround, not a cutout:
+
+- Anything lighter than the backdrop is darkened, so the same art breaks on
+  any dark or coloured section (it can only ever be placed on light cream).
+- A faint grey checkerboard is still visible in the mock and on the page.
+- Browsers composite blend modes on the GPU, so those four boxes are not
+  bit-reproducible and had to be excluded from the pixel-regression net.
+
+**Ask:** please re-export the mascot art as real transparent PNGs (alpha
+channel, no checkerboard) and drop the blend mode. Then the art can sit on
+any background, the checkerboard disappears, and the pixel net can cover it
+again. Same applies to any new mascot art in the screens still in progress.

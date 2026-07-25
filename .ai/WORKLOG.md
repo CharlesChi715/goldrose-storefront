@@ -2194,3 +2194,25 @@ docs: add first feature learning doc (trial)
 - Tests: 35 unit (7 new), 57 e2e — all green; eslint + tsc clean.
 - Shipped from worktree branch `worktree-order-tracking` (draft PR).
   ⚠️ Apply 0003 on hosted Supabase BEFORE deploying this code.
+
+## 2026-07-25 — Bottom nav account tab: "Login" ⇄ "Me"
+
+Implements `docs/ixd/bottom-nav-buttons.md` (right-most tab reads "Me" once
+signed in, "Login" otherwise).
+
+- The label is baked into the design PNG, so the state change is an art swap.
+  The "Me" render (node 763:129) already shipped with the 2026-07-25 redesign
+  import and was simply unused; no new assets were needed.
+- New `components/AccountTab.tsx` (client) resolves the session in the browser
+  via `getSession()` + `onAuthStateChange`. It must not run on the server: `/`,
+  `/shop` and `/products/[slug]` are ISR-cached (`revalidate = 300`), so a
+  server-rendered signed-in nav would bake one visitor's state into the shared
+  HTML. Signed-out art stays the SSR/hydration snapshot, so the pixel-gated
+  frames are unchanged.
+- `components/veloria.tsx`: tabs now carry a stable `id` and the active tab is
+  matched by id, not by label — the account tab's label is no longer fixed.
+  `app/account/page.tsx` passes `active="Account"`.
+- Verified against the running app (real Supabase env) in all four states:
+  signed out → Login, signed in → Me, /shop signed in → Me, after logout →
+  Login. Full suite green: 57 e2e + 35 unit, pixel baselines unchanged.
+- Bug found by owner + fixed same day: the MORI mascot art painted an opaque near-white box over its surroundings (A-4: truncated the panel copy, covered half the FIND A GIFT card). Root cause = Figma fill `blendMode: DARKEN` on 4 image nodes (380:242, 386:251, 420:262, 472:150), which the import ignored; fix = `mixBlendMode: "darken"` + `data-blend` so the home pixel snapshot masks them (GPU blending isn't bit-deterministic → snapshot flake). A-4 diff 2.34%→1.30%, A-8 1.70%→1.43%; 35 unit + 57 e2e green twice. main `0a9cbf6`. Asked the design team (docs/ixd/README.md) to re-export the mascots as real transparent PNGs so the blend hack can go away.
