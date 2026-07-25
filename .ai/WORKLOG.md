@@ -2400,3 +2400,23 @@ anything not sure."
 - Dots change colour only; the design draws dot 1 at 9px and the rest at 7px,
   and moving/resizing them would drift from the frame.
 - 62 e2e (2 new, tests/e2e/homepage.spec.ts) + 35 unit green.
+
+## 2026-07-25 — H-03: faster auto-play, owner's PlaceHolder card
+
+Owner: "make auto play of H-03 faster… replace the place holder as more
+intuitive picture… `temp/PlaceholderPicture.png`… replace all placeholder."
+
+- Auto-play 5000ms → **2200ms**, crossfade 400ms → 300ms.
+- Hero slides 2–4 now show the owner's PlaceHolder card instead of borrowed
+  catalog photography, so nothing reads as real content by mistake.
+- `temp/` is gitignored and **not served**, so the file is copied to
+  `public/placeholder.png`; that copy is what ships. Re-copy if the owner
+  updates the original.
+- Rendered with `object-fit: contain` on the design's cream — `cover` would
+  crop the one word the card exists to show.
+- Swept the storefront for other placeholders: the remaining ones (A4 gift-path
+  cards, A7 "Reveal My Gift Match", menu/wishlist, concierge panel) are
+  **non-clickable UI built from real design art**, not placeholder images.
+  Substituting the card there would destroy the pixel-exact import, so they
+  were left alone.
+- Slide 1 untouched → home pixel baseline unchanged. 62 e2e + 35 unit green.

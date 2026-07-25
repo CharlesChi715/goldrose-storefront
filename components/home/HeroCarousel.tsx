@@ -9,10 +9,11 @@
  *
  * ⚠️ PLACEHOLDER DATA. The design ships a single hero photo but four dots, and
  * H-03 says the dot count comes from carousel data that does not exist yet
- * (OQ-3, real product content). Slides 2–4 therefore reuse existing catalog
- * photography, and every slide links to /shop rather than to "the
- * corresponding product detail page" — that mapping is not decided. Replace
- * SLIDES when the real carousel content lands.
+ * (OQ-3, real product content). Slides 2–4 therefore show the owner's
+ * "PlaceHolder" card rather than borrowed catalog photography, so nobody
+ * mistakes them for real content, and every slide links to /shop rather than
+ * to "the corresponding product detail page" — that mapping is not decided.
+ * Replace SLIDES when the real carousel content lands.
  *
  * Slide 1 keeps the design's exact framing (the source crop bleeds 343px above
  * the window), so the pixel baseline is unaffected while the carousel rests at
@@ -26,15 +27,18 @@ import { abs } from "@/components/veloria";
 type Slide = {
   src: string;
   alt: string;
-  /** Slide 1 reproduces the design's oversized bleed crop; the rest cover. */
+  /** Slide 1 reproduces the design's oversized bleed crop. */
   bleed?: boolean;
 };
 
+/** The shared "PlaceHolder" card — see the placeholder rule in SUMMARY.md. */
+const PLACEHOLDER = "/placeholder.png";
+
 const SLIDES: Slide[] = [
   { src: "/veloria/home/153-64.png", alt: "Gold-dipped rose in a gift box", bleed: true },
-  { src: "/veloria/home/162-97.png", alt: "GoldRose gift for Valentine's Day" },
-  { src: "/veloria/home/436-279.png", alt: "GoldRose anniversary gift" },
-  { src: "/veloria/home/436-293.png", alt: "GoldRose birthday gift" },
+  { src: PLACEHOLDER, alt: "Placeholder — hero slide 2" },
+  { src: PLACEHOLDER, alt: "Placeholder — hero slide 3" },
+  { src: PLACEHOLDER, alt: "Placeholder — hero slide 4" },
 ];
 
 // 549:97 — the design draws the active dot at 9px and the rest at 7px, at
@@ -47,7 +51,7 @@ const DOTS = [
   { x: 237, size: 7 },
 ];
 
-const AUTOPLAY_MS = 5000;
+const AUTOPLAY_MS = 2200;
 
 /**
  * The hero photo window plus its pagination dots, as an interactive carousel.
@@ -108,7 +112,10 @@ export function HeroCarousel() {
               // Only the visible slide takes pointer events, so the hidden
               // ones cannot swallow a swipe.
               pointerEvents: i === index ? "auto" : "none",
-              transition: "opacity 400ms ease",
+              transition: "opacity 300ms ease",
+              // Placeholder slides sit on the design's cream so the card reads
+              // as a deliberate stand-in rather than a broken image.
+              background: slide.bleed ? undefined : "#FFF6EC",
             }}
           >
             <img
@@ -119,7 +126,9 @@ export function HeroCarousel() {
               style={
                 slide.bleed
                   ? { ...abs(0, -343, 430, 1003), display: "block" }
-                  : { ...abs(0, 0, 430, 317), display: "block", objectFit: "cover" }
+                  : // `contain`, not `cover` — the placeholder card is small and
+                    // cropping it would hide the word it exists to show.
+                    { ...abs(0, 0, 430, 317), display: "block", objectFit: "contain" }
               }
             />
           </Link>
