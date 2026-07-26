@@ -13,4 +13,4 @@ Format for each feature:
 ## Code Trace
 From Entry Point, Trace to each downstream function or module
    - With ASCII chat. 
-   - Where the feature starts in the app. The first user action or route that triggers it. Follow the implementation path step by step. 
+   - Where the feature starts in the app. The first user action or route that triggers it. Follow the implementation path step by step. Shows the code of each steps. 

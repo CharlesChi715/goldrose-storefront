@@ -61,7 +61,8 @@ turn it into a real task.
 
 - Add diff popular checkout types across countries in Euo and American.
 
-
+## From boss - 2026-07-25
+Build payments for US where we going to marketing frist: Visa、 PayPal、Mastercard
 
 
 ## TODO from me:

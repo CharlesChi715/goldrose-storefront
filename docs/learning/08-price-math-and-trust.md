@@ -66,6 +66,31 @@ Key jargon:
 
 Every money column in [0001_init.sql](../../supabase/migrations/0001_init.sql) is a plain `int` named `*_cents`: `price_cents`, `subtotal_cents`, `discount_cents`, `shipping_cents`, `tax_cents`, `total_cents`, `refunded_cents`. No `numeric`, no `float`, no decimal library.
 
+```sql
+-- supabase/migrations/0001_init.sql:158-168  (the orders table)
+  subtotal_cents int not null default 0,
+  discount_code text,
+  discount_cents int not null default 0,
+  shipping_cents int not null default 0,
+  shipping_free boolean not null default false,
+  tax_cents int not null default 0,
+  total_cents int not null default 0,
+  currency text not null default 'USD',
+  financial_status text not null default 'pending'
+    check (financial_status in ('pending', 'paid', 'partially_refunded', 'refunded')),
+  refunded_cents int not null default 0,
+```
+
+The price a variant is sold at is the same shape — one `int`:
+
+```sql
+-- supabase/migrations/0001_init.sql:61-64
+  price_cents int not null default 0,
+  compare_at_price_cents int,
+  -- "Cost per item" — PRIVATE: must never appear in catalog_products (§7.2).
+  cost_cents int,
+```
+
 **Why not just store 49.99?** Because binary floating point cannot represent most decimal fractions exactly. In any JavaScript console:
 
 ```js
@@ -80,15 +105,30 @@ The rule that follows: **convert to a decimal only at the very edges** — the p
 Out to the screen, one function, [lib/money.ts](../../lib/money.ts#L13-L20):
 
 ```ts
+// lib/money.ts:13-20
 export function formatMoney(cents: number) {
   return new Intl.NumberFormat("en-US", {
-    style: "currency", currency: "USD",
-    minimumFractionDigits: 2, maximumFractionDigits: 2,
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(cents / 100);
 }
 ```
 
-In from an admin form, always `Math.round(dollars * 100)` — e.g. [ProductForm.tsx](../../app/admin/%28dashboard%29/products/ProductForm.tsx#L103-L104). That `Math.round` is what turns the `1998.9999999999998` above back into `1999`. Every admin input in the repo does this correctly.
+In from an admin form, always `Math.round(dollars * 100)` — e.g. [ProductForm.tsx](../../app/admin/%28dashboard%29/products/ProductForm.tsx#L98-L105). That `Math.round` is what turns the `1998.9999999999998` above back into `1999`. Every admin input in the repo does this correctly.
+
+```ts
+// app/admin/(dashboard)/products/ProductForm.tsx:98-105
+function toCents(dollars: string): number | null {
+  const trimmed = dollars.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const value = Number(trimmed);
+  return Number.isFinite(value) && value >= 0 ? Math.round(value * 100) : null;
+}
+```
 
 ⚠️ Worth knowing: the display conversion is *not* actually centralised. A dozen files re-implement it as `` `$${(cents / 100).toFixed(2)}` `` — CSV exports, emails, PayPal, timeline strings. Harmless today because the inputs are integers, but it means a future currency change is a dozen-file edit rather than one.
 
@@ -97,15 +137,47 @@ In from an admin form, always `Math.round(dollars * 100)` — e.g. [ProductForm.
 [lib/cart/store.ts](../../lib/cart/store.ts) persists exactly this to `localStorage`:
 
 ```ts
-{ variantId: string; quantity: number }
+// lib/cart/store.ts:16-19
+export type CartLine = {
+  variantId: string;
+  quantity: number;
+};
 ```
 
 Prices are joined in at render time from the catalog that a *server* component fetched and passed down as a prop. So `useCart()` can show a subtotal ([:224](../../lib/cart/store.ts#L224)) without any price ever having been writable by the browser.
 
-It also re-clamps quantity on every read, not just on write ([:64-68](../../lib/cart/store.ts#L64-L68)):
+```ts
+// lib/cart/store.ts:205-224
+      lines
+        .map((line) => {
+          for (const product of catalog) {
+            const variant = product.variants.find((entry) => entry.id === line.variantId);
+            if (variant) {
+              return {
+                ...line,
+                product,
+                variant,
+                lineTotal: variant.price_cents * line.quantity,
+              };
+            }
+          }
+          return null;
+        })
+        .filter((line): line is CartLineView => Boolean(line)),
+    [lines, catalog],
+  );
+
+  const subtotal = lineViews.reduce((sum, line) => sum + line.lineTotal, 0);
+```
+
+It also re-clamps quantity on every read, not just on write ([:64-67](../../lib/cart/store.ts#L64-L67)):
 
 ```ts
-quantity: Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity))),
+// lib/cart/store.ts:64-67
+  const clean = parsed.filter(isCartLine).map((line) => ({
+    variantId: line.variantId,
+    quantity: Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity))),
+  }));
 ```
 
 `localStorage` is a text file the user can edit. Validating on the way *out* of storage, not only on the way in, is the habit worth stealing: **treat your own persisted data as untrusted input**, because a previous version of your code (or the user) may have written it.
@@ -115,45 +187,124 @@ quantity: Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity))),
 [lib/checkout/zones.ts](../../lib/checkout/zones.ts#L26-L32) is 48 lines of pure function — no I/O, so both server and browser can run it and get identical answers.
 
 ```ts
-return (
-  zones.find((zone) => zone.countries.includes(country)) ??
-  zones.find((zone) => zone.countries.includes("*")) ??
-  null
-);
+// lib/checkout/zones.ts:26-32
+export function zoneForCountry(zones: ShippingZone[], country: string): ShippingZone | null {
+  return (
+    zones.find((zone) => zone.countries.includes(country)) ??
+    zones.find((zone) => zone.countries.includes("*")) ??
+    null
+  );
+}
 ```
 
 Exact country match, else the `"*"` catch-all zone, else `null` → *"We don't ship to XX."* Today: `US` = $5.95 free over $75; `*` = $19.95, no free threshold ([seed-data.ts](../../lib/supabase/seed-data.ts#L302-L318)).
 
 ```ts
-const free = zone.free_over_cents !== null && subtotalCents >= zone.free_over_cents;
-return { amount: free ? 0 : zone.rate_cents, free };
+// lib/supabase/seed-data.ts:302-318
+  shipping_zones: [
+    {
+      id: "zone-us",
+      name: "United States",
+      countries: ["US"],
+      rate_cents: 595,
+      free_over_cents: 7500,
+    },
+    {
+      id: "zone-row",
+      name: "Rest of world",
+      countries: ["*"],
+      rate_cents: 1995,
+      free_over_cents: null,
+      placeholder: true,
+    },
+  ],
+```
+
+The rate itself is two lines:
+
+```ts
+// lib/checkout/zones.ts:42-48
+export function computeShipping(
+  zone: ShippingZone,
+  subtotalCents: number,
+): { amount: number; free: boolean } {
+  const free = zone.free_over_cents !== null && subtotalCents >= zone.free_over_cents;
+  return { amount: free ? 0 : zone.rate_cents, free };
+}
 ```
 
 Note `>=` — spend exactly $75.00 and shipping is free. Off-by-one decisions like this are worth being deliberate about; the inclusive form is what customers expect from "free over $75".
 
-Naming trap: `lib/checkout/methods.ts` is **payment** methods (PayPal / card), not shipping methods. And the Standard/Express/Next-Day picker on the checkout screen is *cosmetic* — a documented owner decision at [CheckoutClient.tsx:384-391](../../app/checkout/CheckoutClient.tsx#L384-L391). Every method ships at the zone rate. Knowing which controls are real is half of reading this repo.
+Naming trap: `lib/checkout/methods.ts` is **payment** methods (PayPal / card), not shipping methods. And the Standard/Express/Next-Day picker on the checkout screen is *cosmetic* — a documented owner decision at [CheckoutClient.tsx:383-391](../../app/checkout/CheckoutClient.tsx#L383-L391). Every method ships at the zone rate. Knowing which controls are real is half of reading this repo.
+
+```tsx
+// app/checkout/CheckoutClient.tsx:383-391
+  /**
+   * B-2's Standard / Express / Next-Day picker (755:101). Per-method shipping
+   * pricing has no backend yet — every method ships at the zone rate — so on
+   * the owner's explicit decision the control is cosmetic: this state moves its
+   * selected ring and nothing else. It never reaches a price, a total or a
+   * request body; the summary's shipping line and the total keep coming from
+   * `shippingInfo`/`total` below, and the rows show no per-method price.
+   */
+  const [shipMethod, setShipMethod] = useState(0);
+```
 
 ### Step 4 — Discounts: one code, checked in a fixed order
 
 [`applyDiscountCode()`](../../lib/checkout/discounts.ts#L76-L144) validates in sequence, throwing a typed `DiscountError` with a `reason` on the first failure: unknown code → not yet started → expired → usage limit reached → below minimum spend → already used by this customer. Typed reasons rather than bare strings mean the UI can phrase each case itself instead of pattern-matching on English.
 
+```ts
+// lib/checkout/discounts.ts:88-110
+  if (!discount) {
+    throw new DiscountError("unknown", "Enter a valid discount code.");
+  }
+
+  const now = new Date();
+  if (new Date(discount.starts_at) > now) {
+    throw new DiscountError("not_started", "This code isn't active yet.");
+  }
+  if (discount.ends_at && new Date(discount.ends_at) < now) {
+    throw new DiscountError("expired", "This code has expired.");
+  }
+  if (discount.usage_limit !== null && discount.used_count >= discount.usage_limit) {
+    throw new DiscountError("usage_limit", "This code has been fully redeemed.");
+  }
+  // … min_purchase_cents check, then the once_per_customer check
+```
+
 Then the math ([:127-141](../../lib/checkout/discounts.ts#L127-L141)):
 
 ```ts
-const eligible = input.lines
-  .filter((line) => !productIds || productIds.includes(line.product_id))
-  .reduce((sum, line) => sum + line.line_total_cents, 0);
+// lib/checkout/discounts.ts:127-141
+  // Eligible amount: whole order, or only the listed products.
+  const productIds = discount.applies_to?.product_ids ?? null;
+  const eligible = input.lines
+    .filter((line) => !productIds || productIds.includes(line.product_id))
+    .reduce((sum, line) => sum + line.line_total_cents, 0);
 
-if (discount.type === "percentage") {
-  discountCents = Math.round((eligible * Math.min(100, Math.max(0, discount.value))) / 100);
-} else if (discount.type === "fixed_amount") {
-  discountCents = Math.min(discount.value, eligible);
-} else {
-  freeShipping = true;
-}
+  let discountCents = 0;
+  let freeShipping = false;
+  if (discount.type === "percentage") {
+    discountCents = Math.round((eligible * Math.min(100, Math.max(0, discount.value))) / 100);
+  } else if (discount.type === "fixed_amount") {
+    discountCents = Math.min(discount.value, eligible);
+  } else {
+    freeShipping = true;
+  }
 ```
 
 `discounts.value` is deliberately overloaded — whole percent for `percentage`, cents for `fixed_amount`, unused for `free_shipping`. One column, three meanings, documented in [types.ts:221](../../lib/supabase/types.ts#L221). Compact, but it is exactly the kind of column that needs its comment.
+
+```ts
+// lib/supabase/types.ts:217-222
+export type DiscountRow = {
+  id: string;
+  code: string;
+  type: DiscountType;
+  /** percent (0-100) for "percentage", cents for "fixed_amount", unused for "free_shipping". */
+  value: number;
+```
 
 The percentage branch is the **only rounding in the discount path**: `4999 × 10 / 100 = 499.9 → 500`. `Math.round` is half-up, so a half-cent goes to the customer. Rounding *toward* the customer on a discount is the conventional choice — the alternative generates "you promised 10% and gave me 9.98%" support tickets.
 
@@ -162,7 +313,33 @@ The percentage branch is the **only rounding in the discount path**: `4999 × 10
 Two real weaknesses, both worth recognising as *patterns* rather than as this project's mistakes:
 
 - [`incrementDiscountUsage()`](../../lib/checkout/discounts.ts#L153-L164) reads `used_count`, adds one, writes it back. Two checkouts landing at the same instant both read `0` and both write `1`. A single-use code can be used twice. The database-side fix is `update … set used_count = used_count + 1`, which is atomic because Postgres performs the read and the write inside one statement. This is the classic **read-modify-write race**, and it appears in every codebase that has counters.
+
+  ```ts
+  // lib/checkout/discounts.ts:155-163
+    const discounts = await store.all("discounts");
+    const discount = discounts.find((row) => row.code.toLowerCase() === code.toLowerCase());
+    if (discount) {
+      await store.update(
+        "discounts",
+        { id: discount.id },
+        { used_count: discount.used_count + 1 },
+      );
+    }
+  ```
+
 - The `once_per_customer` check is skipped entirely when no email is supplied ([:111-125](../../lib/checkout/discounts.ts#L111-L125)), and email is optional on express payment paths. A guard with an escape hatch is not a guard.
+
+  ```ts
+  // lib/checkout/discounts.ts:111-118
+    if (discount.once_per_customer && input.email) {
+      const orders = await store.all("orders");
+      const used = orders.some(
+        (order) =>
+          order.email?.toLowerCase() === input.email!.toLowerCase() &&
+          order.discount_code?.toLowerCase() === discount.code.toLowerCase() &&
+          !order.cancelled_at,
+      );
+  ```
 
 ### Step 5 — Order of operations, and why it is the way it is
 
@@ -175,6 +352,60 @@ discountedSubtotal  = subtotal − discount
 shipping            = zone rate, free if discountedSubtotal ≥ threshold
 tax                 = round((taxable − discount) × rate / 100)   ← merchandise only
 total               = discountedSubtotal + shipping + tax
+```
+
+And that same sequence in the file itself:
+
+```ts
+// lib/checkout/pricing.ts:145-172
+  const subtotal = lines.reduce((sum, line) => sum + line.line_total_cents, 0);
+
+  // Discount code (§7.8) — validated server-side, never trusted from the client.
+  let discountCents = 0;
+  // … applyDiscountCode() runs here when input.discountCode is non-empty
+    discountCents = Math.min(applied.discount_cents, subtotal);
+
+  // Shipping thresholds apply to the discounted merchandise total.
+  const discountedSubtotal = subtotal - discountCents;
+  const shippingBase = computeShipping(zone, discountedSubtotal);
+  const shippingFree = discountFreeShipping || shippingBase.free;
+  const shipping = shippingFree ? 0 : shippingBase.amount;
+
+  const taxable = lines
+    .filter((line) => line.charge_tax)
+    .reduce((sum, line) => sum + line.line_total_cents, 0);
+  const tax = Math.round((Math.max(0, taxable - discountCents) * taxRate) / 100);
+```
+
+and the total is assembled once, on the way out:
+
+```ts
+// lib/checkout/pricing.ts:178-185
+    subtotal_cents: subtotal,
+    discount_code: discountCode,
+    discount_cents: discountCents,
+    shipping_cents: shipping,
+    shipping_free: shippingFree,
+    tax_cents: tax,
+    total_cents: discountedSubtotal + shipping + tax,
+    currency: "USD",
+```
+
+The per-line arithmetic feeding that subtotal is where the quantity clamp and the DB unit price meet:
+
+```ts
+// lib/checkout/pricing.ts:131-141
+    const quantity = Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity)));
+    return {
+      variant_id: variant.id,
+      product_id: product.id,
+      sku: variant.sku,
+      name: product.title,
+      option: variant.option_values.join(" / "),
+      quantity,
+      unit_amount_cents: variant.price_cents,
+      line_total_cents: variant.price_cents * quantity,
+      charge_tax: product.charge_tax,
 ```
 
 Three consequences that are policy decisions, not accidents:
@@ -193,26 +424,97 @@ Three server routes can price a cart. All three call `priceCart()`, and all thre
 | [app/api/paypal/create/route.ts](../../app/api/paypal/create/route.ts#L45-L50) | open a PayPal order |
 | [app/api/discount/route.ts](../../app/api/discount/route.ts#L38-L43) | preview a code (advisory only) |
 
+Here is the whole accepted shape of a checkout request — read the `lines` array and notice what is *not* in it:
+
+```ts
+// app/api/checkout/route.ts:22-38
+const requestSchema = z.object({
+  // "none" = the CHECKOUT_SKIP_PAYMENT flow: order placed with no payment step.
+  method: z.enum(["card", "paypal", "none"]),
+  lines: z
+    .array(
+      z.object({
+        variantId: z.string().min(1).max(120),
+        quantity: z.number().int().min(1).max(20),
+      }),
+    )
+    .min(1)
+    .max(50),
+  country: z.string().trim().length(2),
+  email: z.string().trim().email().max(254).optional(),
+  note: z.string().trim().max(1000).optional(),
+  discountCode: z.string().trim().max(64).optional(),
+  visitorId: z.string().trim().max(64).optional(),
+```
+
 zod strips unknown keys by default, so an injected `price_cents` is discarded before it reaches a single line of business logic. The defence isn't a check that could be forgotten — it's the *absence of a field*, which nobody can forget.
+
+Each route then hands those IDs straight to the pricer — the same four arguments every time:
+
+```ts
+// app/api/checkout/route.ts:86-92
+    // Server-side re-pricing: the request carries no prices at all (§8).
+    const priced = await priceCart({
+      lines: parsed.lines,
+      country: parsed.country.toUpperCase(),
+      discountCode: parsed.discountCode ?? null,
+      email: parsed.email ?? null,
+    });
+```
 
 And it is tested. [tests/e2e/checkout.spec.ts:130-153](../../tests/e2e/checkout.spec.ts#L130-L153) posts deliberate poison:
 
 ```ts
-lines: [{ variantId: SIGNATURE_VARIANT, quantity: 1,
-          price_cents: 1, unit_amount: 0.01 }],
-country: "US", total: 1, subtotal: 1,
-...
-expect(result.order.total).toBe(5594); // DB price, not the tampered one
+// tests/e2e/checkout.spec.ts:136-152
+      lines: [
+        {
+          variantId: SIGNATURE_VARIANT,
+          quantity: 1,
+          // Injected garbage a tamperer might try — the schema knows no prices.
+          price_cents: 1,
+          unit_amount: 0.01,
+        },
+      ],
+      country: "US",
+      total: 1,
+      subtotal: 1,
+    },
+  });
+  expect(response.ok()).toBe(true);
+  const result = await response.json();
+  expect(result.order.total).toBe(5594); // DB price, not the tampered one
 ```
 
 **Write the attack as a test.** A comment saying "we don't trust client prices" decays; a test that pays $0.01 and demands $55.94 does not.
 
-The strongest link is PayPal capture ([capture/route.ts:50-68](../../app/api/paypal/capture/route.ts#L50-L68)): it does not even trust the totals it stored minutes earlier at create time. It re-prices from the persisted cart, and it re-resolves the country from the address PayPal actually returned. If the recomputed total disagrees with what was captured, it logs and keeps going — money has already moved, so refusing is not on the menu:
+The strongest link is PayPal capture ([capture/route.ts:50-68](../../app/api/paypal/capture/route.ts#L50-L68)): it does not even trust the totals it stored minutes earlier at create time. It re-prices from the persisted cart, and it re-resolves the country from the address PayPal actually returned:
 
 ```ts
-if (mapped.amountCents !== null && mapped.amountCents !== priced.total_cents) {
-  console.error(`[paypal/capture] amount mismatch: captured ${mapped.amountCents}, priced ${priced.total_cents}`);
-}
+// app/api/paypal/capture/route.ts:50-61
+    // §10.3: verify the ship-to country is in a served zone; PayPal's
+    // shipping address wins over the pre-checkout selection when it differs.
+    const country = mapped.shipToCountry ?? checkout.cart.country ?? "US";
+    const priced = await priceCart({
+      lines: checkout.cart.lines.map((line) => ({
+        variantId: line.variant_id,
+        quantity: line.quantity,
+      })),
+      country,
+      discountCode: checkout.discount_code,
+      email: mapped.email ?? checkout.email,
+    });
+```
+
+If the recomputed total disagrees with what was captured, it logs and keeps going — money has already moved, so refusing is not on the menu:
+
+```ts
+// app/api/paypal/capture/route.ts:63-68
+    if (mapped.amountCents !== null && mapped.amountCents !== priced.total_cents) {
+      // Amount drift (e.g. price edited mid-checkout) — keep the record, flag it.
+      console.error(
+        `[paypal/capture] amount mismatch: captured ${mapped.amountCents}, priced ${priced.total_cents}`,
+      );
+    }
 ```
 
 That is the honest handling of a real distributed-systems problem: after an external side effect, you can detect divergence but not undo it. Detect, record, alert — never pretend.
@@ -221,10 +523,30 @@ That is the honest handling of a real distributed-systems problem: after an exte
 
 The checkout page recomputes the same numbers client-side so the total updates instantly as you change quantity or country ([CheckoutClient.tsx:407-421](../../app/checkout/CheckoutClient.tsx#L407-L421)). Duplicated logic is accepted here on purpose: the alternative is a network round trip on every keystroke. The safety net is that this copy is *display only* — the server re-prices regardless.
 
-But a mirror that drifts still shows the customer a wrong number:
+```tsx
+// app/checkout/CheckoutClient.tsx:407-421
+  const zone = useMemo(() => zoneForCountry(zones, country), [zones, country]);
+  const discountCents = discount ? Math.min(discount.discountCents, subtotal) : 0;
+  const shippingInfo = useMemo(() => {
+    if (subtotal === 0 || !zone) {
+      return { amount: 0, free: false };
+    }
+    // Display mirror of the server's rule: threshold on the discounted
+    // subtotal; free-shipping codes zero it out. The server re-prices anyway.
+    const base = computeShipping(zone, subtotal - discountCents);
+    if (discount?.shippingFree) {
+      return { amount: 0, free: true };
+    }
+    return base;
+  }, [zone, subtotal, discountCents, discount]);
+  const total = subtotal - discountCents + shippingInfo.amount;
+```
 
-```ts
-const total = subtotal - discountCents + shippingInfo.amount;   // ← no tax term
+But a mirror that drifts still shows the customer a wrong number. Look at that last line on its own — there is no tax term in it:
+
+```tsx
+// app/checkout/CheckoutClient.tsx:421
+  const total = subtotal - discountCents + shippingInfo.amount;
 ```
 
 The server total is `discountedSubtotal + shipping + tax`. The client's is the same **only while the tax rate is 0**. Set a non-zero rate in admin and the button reads `Pay $54.94 Securely` while PayPal charges more. Related: the applied discount is not re-validated when quantity or country changes — only the APPLY button refetches — so a stale discount can sit on screen until pay time.
@@ -238,7 +560,61 @@ A single unit test asserting `clientTotal(x) === priceCart(x).total_cents` over 
 ### Step 8 — Two side paths that quietly disagree
 
 - **Draft orders** ([lib/admin/drafts.ts:30-36](../../lib/admin/drafts.ts#L30-L36)) call `priceCart` then hand-rebuild the total, dropping shipping and hard-coding `country: "US"`. A second formula has already appeared.
+
+  ```ts
+  // lib/admin/drafts.ts:30-36
+    const priced = await priceCart({ lines, country: "US", discountCode, email });
+    return {
+      ...priced,
+      shipping_cents: 0,
+      shipping_free: false,
+      total_cents: priced.subtotal_cents - priced.discount_cents + priced.tax_cents,
+    };
+  ```
+
+  Put that last line next to the one every paying path uses and the divergence is a single missing term — `+ shipping`:
+
+  ```ts
+  // lib/checkout/pricing.ts:184
+      total_cents: discountedSubtotal + shipping + tax,
+  ```
+
 - **`/bag`** is pure Figma placeholder ([BagScreen.tsx](../../components/screens/BagScreen.tsx)) — it imports neither the cart nor `formatMoney`, and displays a hard-coded `$159.00` whatever is in your cart. Documented as such at the top of [app/bag/page.tsx](../../app/bag/page.tsx#L4-L7). The real bag lives in the checkout page's summary column.
+
+  Its whole import list — no cart, no money helper, nothing that could produce a real number:
+
+  ```tsx
+  // components/screens/BagScreen.tsx:14-17
+  import { Fragment } from "react";
+  import Link from "next/link";
+  import { abs } from "@/lib/figma-layout";
+  import { notoSC, playfair } from "@/lib/fonts";
+  ```
+
+  So its summary rows are literal strings:
+
+  ```tsx
+  // components/screens/BagScreen.tsx:67-69
+  const SUMMARY = [
+    { y: 42, label: "Merchandise", labelW: 72, valueX: 337, valueW: 45, value: "$159.00", valueColor: "#3B2F2F" },
+    { y: 71, label: "Gift services", labelW: 68, valueX: 351, valueW: 31, value: "$0.00", valueColor: "#3B2F2F" },
+  ```
+
+  The real summary, on the checkout page, feeds every row through `formatMoney` from live cart state:
+
+  ```tsx
+  // app/checkout/CheckoutClient.tsx:1064-1073
+          <CheckoutSummaryCta
+            top={T_SUMMARY}
+            subtotal={formatMoney(subtotal)}
+            discountLabel={discount ? `Discount (${discount.code})` : ""}
+            discount={discount ? `−${formatMoney(discountCents)}` : ""}
+            shippingLabel={`Shipping${zone ? ` (${zone.name})` : ""}`}
+            shipping={shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)}
+            shippingColor={shippingInfo.free ? GREEN : INK}
+            total={formatMoney(total)}
+            barTotal={formatMoney(total)}
+  ```
 
 ## Recap — the rules this feature is built on
 

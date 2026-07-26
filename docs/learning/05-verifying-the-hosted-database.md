@@ -80,6 +80,21 @@ echo "key length = ${#SUPABASE_SERVICE_ROLE_KEY}"     # ~200, never the value
 
 The three variables in `.env.local` (gitignored, so it exists only on your machine) are the same ones [lib/supabase/env.ts](../../lib/supabase/env.ts) validates at build time — blank them all and the app silently switches to the `.data/db.json` file adapter instead (that is how the e2e suite runs).
 
+```ts
+// lib/supabase/env.ts:25-33
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+  const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
+  return {
+    url,
+    anonKey,
+    serviceKey,
+    hosted: Boolean(url && serviceKey),
+  };
+```
+
+Two of those three are exactly what the `curl` probe below carries in its headers, so if the app can reach hosted Supabase, so can you.
+
 ### Step 2 — A harmless read first, to prove the pipe works
 
 ```bash
@@ -119,6 +134,26 @@ curl -s -w "\nHTTP %{http_code}\n" -X POST "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/di
 
 Only `code` and `type` are supplied because [0001_init.sql](../../supabase/migrations/0001_init.sql#L228-L241) declares everything else with a default. `value: -1` is the illegal part — that is the entire point.
 
+```sql
+-- supabase/migrations/0001_init.sql:228-241
+create table discounts (
+  id uuid primary key default gen_random_uuid(),
+  code text not null,
+  type text not null check (type in ('percentage', 'fixed_amount', 'free_shipping')),
+  value int not null default 0, -- percent (0-100) or cents, by type
+  applies_to jsonb, -- null = whole order; { product_ids: [...] } otherwise
+  min_purchase_cents int,
+  usage_limit int,
+  once_per_customer boolean not null default false,
+  used_count int not null default 0,
+  starts_at timestamptz not null default now(),
+  ends_at timestamptz,
+  created_at timestamptz not null default now()
+);
+```
+
+Note that `type` carries a CHECK of its own, written back in `0001` — so `'percentage'` in the probe body is a legal value and cannot be what the rejection is about.
+
 The name `__ZZ_CONSTRAINT_PROBE__` is chosen so it is impossible to confuse with real data, trivial to grep for, and sorts to the end of any list.
 
 ### Step 4 — Reading the verdict
@@ -144,13 +179,31 @@ HTTP 400
 Look at [`saveDiscount()`](../../lib/admin/discounts.ts#L56-L88), which every admin discount edit flows through:
 
 ```ts
-const clash = discounts.find((row) => row.code.toLowerCase() === input.code.toLowerCase() …);
-if (clash) throw new Error(`The code "${input.code}" is already in use.`);
-…
-value: input.value,          // ← passed straight through, never range-checked
+// lib/admin/discounts.ts:59-72
+  const clash = discounts.find(
+    (row) =>
+      row.code.toLowerCase() === input.code.toLowerCase() && row.id !== input.id,
+  );
+  if (clash) {
+    throw new Error(`The code "${input.code}" is already in use.`);
+  }
+  // …
+    value: input.value,
 ```
 
 Duplicate **codes** are rejected in TypeScript. The **value** is not validated anywhere — not for negatives, not for percentages above 100. So on hosted, `discounts_value_range` is not a redundant safety net; it is the *only* thing between a mistyped `-50` and a discount that pays customers to order.
+
+That constraint, in full, is the rule the probe was measuring:
+
+```sql
+-- supabase/migrations/0003_tracking_carrier_and_hardening.sql:31-34
+-- Percent discounts stay 0–100; every discount value is non-negative
+-- (value is cents for fixed_amount, a percent for percentage — §7.8).
+alter table discounts add constraint discounts_value_range
+  check (value >= 0 and (type <> 'percentage' or value <= 100));
+```
+
+Read it aloud: value must be at least 0, **and** if the type is `percentage` it must also be at most 100. The probe's `-1` fails the first half — which is why Postgres answered with that constraint's name.
 
 This is the general lesson, and it's why the audit added the constraint at all:
 
@@ -159,7 +212,20 @@ This is the general lesson, and it's why the audit added the constraint at all:
 > script, a direct SQL edit, or a second client written later. A constraint cannot
 > be bypassed by anything short of dropping it.
 
-Worth knowing: in **local/mock mode** the file adapter ([lib/supabase/local.ts](../../lib/supabase/local.ts)) is a plain JSON store with no constraint engine, so it *will* happily accept `-50`. Bad discount values are caught on hosted only. That asymmetry is a general property of the two-backend design, not a bug — but it means "it worked locally" proves nothing about data integrity.
+Worth knowing: in **local/mock mode** the file adapter ([lib/supabase/local.ts](../../lib/supabase/local.ts)) is a plain JSON store with no constraint engine, so it *will* happily accept `-50`. Its entire `insert` is a push onto an array:
+
+```ts
+// lib/supabase/local.ts:143-149
+  insert<T extends TableName>(table: T, rows: DbTables[T][]): Promise<void> {
+    return this.locked(async () => {
+      const db = await this.load();
+      db.tables[table].push(...structuredClone(rows));
+      await this.persist(db);
+    });
+  }
+```
+
+There is no place in those five lines where a CHECK could even be consulted. Bad discount values are caught on hosted only. That asymmetry is a general property of the two-backend design, not a bug — but it means "it worked locally" proves nothing about data integrity.
 
 ### Step 6 — Cleanup, run unconditionally
 
@@ -181,7 +247,21 @@ curl -s -X DELETE "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/discounts?code=eq.__ZZ_CONS
 
 ### Step 7 — When NOT to probe
 
-The probe is safe on `discounts` because that table is **inert**: nothing observes it, and a stray row causes no side effect.
+The probe is safe on `discounts` because that table is **inert**: nothing observes it, and a stray row causes no side effect. "Nothing observes it" is a claim you can check rather than assume — triggers are the database's own way of reacting to a write, so grep the migrations for them:
+
+```bash
+grep -n "create trigger" supabase/migrations/*.sql
+# supabase/migrations/0001_init.sql:457:create trigger products_touch_updated_at
+```
+
+One trigger in the whole schema, and it is on `products`, not `discounts`:
+
+```sql
+-- supabase/migrations/0001_init.sql:457-459
+create trigger products_touch_updated_at
+  before update on products
+  for each row execute function touch_updated_at();
+```
 
 Do **not** probe a table where a *successful* insert triggers something irreversible — an `orders` row that sends a confirmation email, charges a card, or fires a webhook. The whole method rests on "if the constraint is missing, the write goes through." When the write going through sends an email, you cannot roll that back.
 
@@ -213,7 +293,12 @@ where conrelid = 'discounts'::regclass;
 
 Schema changes belong in a numbered file under [supabase/migrations/](../../supabase/migrations/) applied with `supabase db push`. That is **infrastructure as code**: the schema lives in git, is reviewable in a PR, and can be replayed onto a fresh database in order. Clicking SQL into a dashboard leaves no trace of any of that — which is exactly why `schema_migrations` was empty and why this whole doc had to exist.
 
-The history was repaired on 2026-07-25 with `supabase migration repair --status applied 0001 0002 0003`, which writes only the bookkeeping table — no schema or data change. `supabase db push --dry-run` now reports *"Remote database is up to date."*
+The history was repaired on 2026-07-25 with two commands — the first writes only the bookkeeping table (no schema or data change), the second asks Supabase what it *would* push and gets back nothing:
+
+```bash
+supabase migration repair --status applied 0001 0002 0003
+supabase db push --dry-run     # → "Remote database is up to date."
+```
 
 ## Recap — verifying without a console
 

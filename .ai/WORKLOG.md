@@ -2573,3 +2573,36 @@ and "fade in fade out when switch pages by bottom nav buttons".
   code changes: the checkout client's displayed total omits the tax term the
   server adds (harmless only while the rate is 0), and `priceCart` /
   `applyDiscountCode` / `computeShipping` have no unit tests at all.
+
+## 2026-07-26 — Region investigation → backlog
+- Found Vercel functions pinned `syd1` while Supabase primary is AWS `us-west-2` (Oregon), contradicting commit `a62848e` / BUILD-REPORT which claim the DB is in Sydney. Measured ~170 ms/query from syd1.
+- Backlogged in `docs/project-state.md`: queue item 7 (move to `pdx1` + fix wrong docs), Later-work bullet (EU read replica only if Europe launches and EU pages are slow).
+- Moved the detail into `docs/features/backend/region-alignment.md`; project-state entries reduced to one-line pointers; indexed in features README.
+
+## 2026-07-26 — Learning docs: show the code at every step
+
+Applied the new `learning-docs-guideline.md` rule ("Shows the code of each
+steps.") across all nine feature-learning docs.
+
+- Every `### Step` inside `## Code Trace` now carries at least one fenced,
+  captioned code block quoted verbatim from the repo. Convention: first line is
+  a comment caption `// path/file.ts:START-END`, interior cuts marked `// …`,
+  blocks kept to ~20 lines.
+- 219 captioned blocks total, all machine-verified against source: each
+  caption's START/END matches the block's first/last quoted line, and every
+  quoted line appears verbatim in the cited range.
+- Fixed pre-existing snippets that were paraphrases rather than quotes — most of
+  doc 06's blocks, plus blocks in 03, 04, 05, 08, 09 (collapsed multi-line
+  calls, stripped indentation, invented comments, one fabricated arrow
+  function, one dropped `console.error` line).
+- Corrected ~80 stale line references in prose links; several files had drifted
+  20–60 lines.
+- Left prose-only, deliberately: doc 04's "Recap" (conceptual re-walk, all code
+  already shown above), doc 05 Step 4 (subject is an HTTP response), doc 06
+  gaps #2/#3 (about code that does not exist).
+
+Known follow-ups, not done:
+- Doc 02 prose says `utm_content`; the code reads `utm_acc` (covered by an
+  existing update banner). Worth a small prose fix.
+- Doc 09's ASCII diagram shows `tests/unit/*.ts`; real glob is
+  `tests/unit/*.test.ts`. Correct string is shown in the Step 1 block.

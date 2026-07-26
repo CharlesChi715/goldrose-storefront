@@ -114,9 +114,12 @@ with `PAYPAL_ENV=live`. Only the owner may switch PayPal to live mode.
 6. Replace third-party/dev imagery, reconcile the two palettes/wordmarks and
    tab bars, and decide whether checkout needs real shipping methods and a
    card provider. See [`ixd/README.md`](ixd/README.md).
-7. Finish launch checklist items, then establish database backups using
+7. Move Vercel functions `syd1` → `pdx1` beside the Oregon database and fix
+   the wrong region claims:
+   [`features/backend/region-alignment.md`](features/backend/region-alignment.md).
+8. Finish launch checklist items, then establish database backups using
    [`features/backend/db-backups.md`](features/backend/db-backups.md).
-8. After acceptance: capture required screenshots, cancel Shopify, revoke the
+9. After acceptance: capture required screenshots, cancel Shopify, revoke the
    Figma token, and begin marketing.
 
 Later work:
@@ -129,6 +132,8 @@ Later work:
   [`supplier-color-charts.md`](supplier-color-charts.md)
 - Influencer campaign and website-only video finale:
   [`ideas.md`](ideas.md)
+- EU read replica if Europe launches:
+  [`features/backend/region-alignment.md`](features/backend/region-alignment.md) §Future.
 
 ## Open product decisions
 

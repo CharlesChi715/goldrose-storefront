@@ -152,6 +152,9 @@ Supabase hosted DB
 ├── migrations (0001–0003) ●●●● DONE — 0003 verified hosted 2026-07-25
 ├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
 └── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
+
+Infrastructure
+└── region-alignment.md ○○○○ BACKLOG — Vercel syd1→pdx1 beside Oregon DB
 ```
 
 Refs (links can't render inside the code blocks, so shorthands above resolve
@@ -164,3 +167,4 @@ here):
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)
 - **order-tracking.md** → [backend/order-tracking.md](backend/order-tracking.md)
 - **promotion-emails.md** → [backend/promotion-emails.md](backend/promotion-emails.md)
+- **region-alignment.md** → [backend/region-alignment.md](backend/region-alignment.md)

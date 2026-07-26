@@ -67,6 +67,7 @@ Key jargon:
 [proxy.ts](../../proxy.ts) is Next.js 16's renamed middleware (the file used to be `middleware.ts`; the exported function is now `proxy()`). It runs at the edge before any page does, and it matches only two path families:
 
 ```ts
+// proxy.ts:90-92
 export const config = {
   matcher: ["/admin/:path*", "/api/admin/:path*"],
 };
@@ -74,16 +75,43 @@ export const config = {
 
 Narrow on purpose. Storefront routes stay statically optimised, and the PayPal webhook and analytics beacon are deliberately *unmatched* — they authenticate with a signature, not a session, so a session check there would only break them.
 
-The part worth staring at, in the local branch ([proxy.ts:51](../../proxy.ts#L51)):
+The part worth staring at is the local branch ([proxy.ts:40-52](../../proxy.ts#L40-L52)) — cookie present → straight through, never verified:
 
 ```ts
-if (!request.cookies.get(SESSION_COOKIE)) { /* redirect to login */ }
-return NextResponse.next();      // cookie present → through. Not verified.
+// proxy.ts:40-52
+  if (!hosted) {
+    // Testing-phase open access: no Supabase and no ADMIN_DEV_PASSWORD →
+    // no login required (see lib/admin/auth.ts isOpenAccess).
+    if (!process.env.ADMIN_DEV_PASSWORD?.trim()) {
+      return NextResponse.next();
+    }
+    if (!request.cookies.get(SESSION_COOKIE)) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = LOGIN_PATH;
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
 ```
 
 **The proxy checks that a cookie exists. It does not check that the cookie is genuine.** The reason is stated at [proxy.ts:10-12](../../proxy.ts#L10-L12): the edge runtime has no filesystem, so it cannot read the signing secret from `.data/admin-secret`. Type `document.cookie = "admin_session=hello"` and you will sail past the proxy — and then get a flat 404 from the layout, which *does* verify.
 
 Same shape in hosted mode: the proxy confirms you are *someone* (`getUser()`), never that you are an *admin*. A logged-in customer passes it.
+
+```ts
+// proxy.ts:72-85
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = LOGIN_PATH;
+    const redirect = NextResponse.redirect(loginUrl);
+    // …
+    return redirect;
+  }
+```
 
 This is worth internalising as a pattern rather than a flaw:
 
@@ -97,15 +125,22 @@ This is worth internalising as a pattern rather than a flaw:
 **Hosted:** `supabase.auth.getUser()` — note `getUser()`, not `getSession()`. `getSession()` reads the cookie and believes it; `getUser()` round-trips to the auth server and validates the signature. Then, crucially:
 
 ```ts
-if (!(await isAllowlisted(user.id))) { return null; }   // logged in ≠ admin
+// lib/admin/auth.ts:197-199
+  if (!(await isAllowlisted(user.id))) {
+    return null; // logged in, but not an admin → treated as no session (404)
+  }
 ```
 
 **Local:** there is no auth server, so the app mints its own token ([:123-128](../../lib/admin/auth.ts#L123-L128)):
 
 ```ts
-const expires = Date.now() + LOCAL_SESSION_DAYS * 24 * 60 * 60 * 1000;
-const payload = `${Buffer.from(email).toString("base64url")}.${expires}`;
-return `${payload}.${sign(secret, payload)}`;
+// lib/admin/auth.ts:123-128
+async function makeLocalToken(email: string): Promise<string> {
+  const secret = await localSecret();
+  const expires = Date.now() + LOCAL_SESSION_DAYS * 24 * 60 * 60 * 1000;
+  const payload = `${Buffer.from(email).toString("base64url")}.${expires}`;
+  return `${payload}.${sign(secret, payload)}`;
+}
 ```
 
 The format is `base64url(email) . expiryMs . HMAC-SHA256(secret, "email.expiry")`. That is a hand-rolled signed cookie — deliberately *not* a JWT. A JWT carries an algorithm field, which is the source of the infamous `alg: none` attack where an attacker declares "this token is unsigned, please trust it." With no header there is no algorithm to lie about. In hosted mode real JWTs are used, because there Supabase is a separate party that has to verify them.
@@ -113,8 +148,13 @@ The format is `base64url(email) . expiryMs . HMAC-SHA256(secret, "email.expiry")
 Verification ([:136-152](../../lib/admin/auth.ts#L136-L152)) checks in the right order — **signature first, expiry second**:
 
 ```ts
-if (!safeEqual(mac, sign(secret, payload))) { return null; }
-if (Number(expires) < Date.now()) { return null; }
+// lib/admin/auth.ts:144-149
+  if (!safeEqual(mac, sign(secret, payload))) {
+    return null;
+  }
+  if (Number(expires) < Date.now()) {
+    return null;
+  }
 ```
 
 Order matters because the expiry lives *inside* the signed payload. Checking expiry first would mean reasoning about a number an attacker might have written.
@@ -122,7 +162,12 @@ Order matters because the expiry lives *inside* the signed payload. Checking exp
 And the comparison is `safeEqual`, not `===` ([:111-115](../../lib/admin/auth.ts#L111-L115)):
 
 ```ts
-return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+// lib/admin/auth.ts:111-115
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
 ```
 
 `===` on strings stops at the first differing character, so a wrong guess that shares a longer prefix takes measurably longer to reject. Over enough requests that timing difference leaks the correct value one character at a time. `timingSafeEqual` always compares every byte. This is a **timing side channel**, and using the constant-time comparison for any secret is a reflex worth having — it costs nothing.
@@ -130,9 +175,12 @@ return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
 ### Step 3 — 404, not 403
 
 ```ts
+// lib/admin/auth.ts:214-220
 export async function requireAdmin(): Promise<AdminSession> {
   const session = await getAdminSession();
-  if (!session) { notFound(); }
+  if (!session) {
+    notFound();
+  }
   return session;
 }
 ```
@@ -147,35 +195,67 @@ The same reasoning drives three other choices:
 - `sendPasswordReset()` returns `void` and the action always reports `"sent"` ([team.ts:124-135](../../lib/admin/team.ts#L124-L135)) — so it cannot be used to probe which addresses have accounts.
 - The one intentional disclosure is `"pending"` (correct password, not yet approved), justified because only the account's real owner can reach that branch.
 
+Both login messages are single strings in the translation table ([lib/admin/i18n.ts:59-61](../../lib/admin/i18n.ts#L59-L61)) — one vague, one deliberately specific:
+
+```ts
+// lib/admin/i18n.ts:59-61
+  "login.error.invalid": "Your email or password is incorrect.",
+  // …
+  "login.error.pending": "Your account exists but hasn't been approved yet — ask the owner.",
+```
+
 ### Step 4 — The allowlist is the actual authorization
 
 [auth.ts:161-164](../../lib/admin/auth.ts#L161-L164):
 
 ```ts
+// lib/admin/auth.ts:161-164
 async function isAllowlisted(userId: string): Promise<boolean> {
   const admins = await getStore().all("admin_users");
   return admins.some((row) => row.user_id === userId);
 }
 ```
 
-`admin_users` is a two-column table ([0001_init.sql:339-342](../../supabase/migrations/0001_init.sql#L339-L342)) whose `user_id` references `auth.users(id) on delete cascade` — delete the auth account and admin access evaporates with it, automatically. Letting the database enforce that relationship beats remembering to clean up in application code.
+`admin_users` is a two-column table ([0001_init.sql:339-342](../../supabase/migrations/0001_init.sql#L339-L342)):
+
+```sql
+-- supabase/migrations/0001_init.sql:339-342
+create table admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  email text not null default ''
+);
+```
+
+Its `user_id` references `auth.users(id) on delete cascade` — delete the auth account and admin access evaporates with it, automatically. Letting the database enforce that relationship beats remembering to clean up in application code.
 
 This separation is the model's backbone. **Signing up creates an account with zero access.** [`signUpForApproval()`](../../lib/admin/team.ts#L151-L184) creates the auth user and writes *no* `admin_users` row; someone already inside must approve it. Notice it deliberately uses the **anon** key, not the service key:
 
 ```ts
-// Anon client on purpose: sign-up is the one public operation.
-const anon = createClient(env.url, env.anonKey, { ... });
+// lib/admin/team.ts:167-170
+  // Anon client on purpose: sign-up is the one public operation.
+  const anon = createClient(env.url, env.anonKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 ```
 
 Using service-role would have worked and would have quietly bypassed Supabase's own rate limits and captcha on sign-up. Reaching for the powerful key by default is how those protections get lost.
 
 Passkeys make the separation unavoidable. WebAuthn runs entirely in the browser, so by the time the server hears about it the session cookie already exists — [`confirmPasskeySignIn()`](../../lib/admin/auth.ts#L280-L296) is a *post-hoc* check, and on failure it calls `signOut()` to revoke what the browser just obtained. The threat is named in the comment: a customer whose passkey also opens the storefront account. Same Supabase project, same user table, same relying-party ID — the WebAuthn layer literally cannot tell an admin's passkey from a customer's. Only the allowlist can.
 
+```ts
+// lib/admin/auth.ts:291-294
+  if (!(await isAllowlisted(user.id))) {
+    await supabase.auth.signOut();
+    return { ok: false, error: "pending" };
+  }
+```
+
 ### Step 5 — Failing closed
 
 The single most instructive line in the file ([auth.ts:54-59](../../lib/admin/auth.ts#L54-L59)):
 
 ```ts
+// lib/admin/auth.ts:54-59
 export function isOpenAccess(): boolean {
   // `!url`, not `!hosted`: a PARTIAL Supabase config (URL set, service key
   // missing/mis-scoped) must fail closed to a locked admin — never fall
@@ -203,8 +283,11 @@ There are three different "is this hosted?" tests in the codebase and they disag
 Everything above is enforced in Node. If an attacker could talk to Postgres directly, none of it would apply. That is what [0001_init.sql:407-439](../../supabase/migrations/0001_init.sql#L407-L439) is for:
 
 ```sql
+-- supabase/migrations/0001_init.sql:412-439
 alter table products enable row level security;
-... 18 tables ...
+alter table product_images enable row level security;
+-- … 15 more `alter table … enable row level security;` lines …
+alter table admin_users enable row level security;
 
 -- No table policies exist except this one: anon may read site content slots.
 create policy site_content_public_read on site_content
@@ -224,30 +307,122 @@ Two details are easy to miss and both are load-bearing:
 1. **Views ignore the RLS of their underlying tables.** A view runs with its *owner's* privileges, so `catalog_products` would happily surface `products` rows despite RLS. The control is the `grant`, which is why the migration revokes everything first and then grants back precisely two reads.
 2. **`catalog_products` is a curated surface, not a table.** It exposes `in_stock` as a boolean rather than the raw count, and omits `cost_cents` entirely ([:366-405](../../supabase/migrations/0001_init.sql#L366-L405)). Even a total compromise of the anon key leaks no margins and no stock levels.
 
+```sql
+-- supabase/migrations/0001_init.sql:392-403
+  coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'id', v.id,
+      -- …
+      'price_cents', v.price_cents,
+      'compare_at_price_cents', v.compare_at_price_cents,
+      'in_stock', (not v.track_quantity) or v.continue_selling_when_oos or v.inventory_on_hand > 0
+    ) order by v.position)
+    from product_variants v where v.product_id = p.id
+  ), '[]'::jsonb) as variants
+```
+
 Note the honest framing: the app's data layer uses the **service-role key**, which bypasses RLS completely. RLS here is not the primary authorization mechanism — it is the wall that still stands if the anon key leaks. That is exactly what defence in depth means: layers that don't depend on each other.
 
 One gap worth knowing about: the `security definer` helper `adjust_inventory()` ([:88-105](../../supabase/migrations/0001_init.sql#L88-L105)) has no `revoke execute … from public`, so it remains callable by anon over PostgREST RPC. It has a pinned `search_path` (the standard hardening), but "deny by default" doesn't yet extend to functions.
 
+```sql
+-- supabase/migrations/0001_init.sql:88-98
+create function adjust_inventory(
+  p_variant_id uuid,
+  p_delta int,
+  -- …
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+```
+
 ### Step 7 — Every action re-checks
 
-The dashboard layout calls `requireAdmin()` once ([layout.tsx:28](../../app/admin/%28dashboard%29/layout.tsx#L28)) — and then roughly thirty-five server actions each call it *again*.
+The dashboard layout calls `requireAdmin()` once ([layout.tsx:28](../../app/admin/%28dashboard%29/layout.tsx#L28)) — and then roughly fifty server actions each call it *again*.
+
+```tsx
+// app/admin/(dashboard)/layout.tsx:23-29
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await requireAdmin();
+  const alerts = await adminAlerts();
+```
+
+Every action repeats the gate on its own first line — here the team actions ([team/actions.ts:16-22](../../app/admin/%28dashboard%29/settings/team/actions.ts#L16-L22)):
+
+```ts
+// app/admin/(dashboard)/settings/team/actions.ts:16-22
+export async function approveMemberAction(userId: string, email: string): Promise<void> {
+  await requireRealAdmin();
+  await approveMember(id.parse(userId), z.string().email().parse(email));
+}
+
+export async function removeMemberAction(userId: string): Promise<void> {
+  const session = await requireRealAdmin();
+```
 
 That is not redundancy. A React server action compiles to its own addressable POST endpoint; it can be invoked directly with `curl`, without ever rendering the layout. **Layout protection protects rendering, not mutation.** Anywhere a framework gives you an implicit entry point, the guard has to sit on the entry point.
 
-There is exactly one deliberate exception, and it documents itself ([app/admin/actions.ts:18-31](../../app/admin/actions.ts#L18-L31)): the language-toggle action skips the check because it only writes the caller's own display-language cookie against a whitelist, and the auth check cost a Supabase round trip per toggle. That is a defensible exception *because it was reasoned about and written down*.
+There is exactly one deliberate exception, and it documents itself ([app/admin/actions.ts:17-31](../../app/admin/actions.ts#L17-L31)): the language-toggle action skips the check because it only writes the caller's own display-language cookie against a whitelist, and the auth check cost a Supabase round trip per toggle. That is a defensible exception *because it was reasoned about and written down*.
+
+```ts
+// app/admin/actions.ts:17-25
+/**
+ * No requireAdmin here on purpose (perf fix 2026-07-22): this only writes
+ * the caller's own display-language cookie — whitelist-validated, zero
+ * security value — and the auth gate cost a Supabase round trip per toggle.
+ */
+export async function setAdminLangAction(lang: string): Promise<void> {
+  if (!isAdminLang(lang)) {
+    return;
+  }
+```
 
 ### Step 8 — Owner: derived, never stored
 
 There is no `role` column anywhere. Owner is computed ([lib/admin/team-owner.ts:26-36](../../lib/admin/team-owner.ts#L26-L36)): the **earliest-created approved account wins**. `auth.users.created_at` is immutable, so the answer cannot drift without a deliberate allowlist edit — and no migration was needed to add the concept.
 
+```ts
+// lib/admin/team-owner.ts:26-36
+export function teamOwnerId(members: OwnerCandidate[]): string | null {
+  const approved = members.filter((member) => member.approved);
+  if (approved.length === 0) {
+    return null;
+  }
+  const dated = approved.filter((member) => member.createdAt !== null);
+  if (dated.length === 0) {
+    return approved[0].userId;
+  }
+  return dated.reduce((a, b) => (a.createdAt! <= b.createdAt! ? a : b)).userId;
+}
+```
+
 The only owner-gated operation is removing a team member ([team/actions.ts:21-34](../../app/admin/%28dashboard%29/settings/team/actions.ts#L21-L34)), and its four checks run in a specific order:
 
 ```ts
-const session = await requireRealAdmin();               // 1 authn
-const parsed = id.parse(userId);                        // 2 input validation
-if (parsed === session.userId) { throw … }              // 3 no self-removal
-if (teamOwnerId(await listTeam()) !== session.userId) { throw … }   // 4 authz
+// app/admin/(dashboard)/settings/team/actions.ts:21-34
+export async function removeMemberAction(userId: string): Promise<void> {
+  const session = await requireRealAdmin();
+  const parsed = id.parse(userId);
+  if (parsed === session.userId) {
+    throw new Error("You cannot remove your own admin access.");
+  }
+  // Owner-only (owner request 2026-07-22): approved members must not be able
+  // to revoke each other — or the owner. Checked server-side; the UI hiding
+  // the button is cosmetic.
+  if (teamOwnerId(await listTeam()) !== session.userId) {
+    throw new Error("Only the store owner can remove a member's access.");
+  }
+  await removeMember(parsed);
+}
 ```
+
+Read top to bottom: 1 authn → 2 input validation → 3 no self-removal → 4 authz.
 
 Three things to take from it:
 
@@ -257,13 +432,57 @@ Three things to take from it:
 
 ### Step 9 — The customer side, and one conservative decision
 
-Storefront sign-in is an emailed one-time code ([ShoppingLogin.tsx:424-459](../../components/login/ShoppingLogin.tsx#L424-L459)) with `shouldCreateUser: true`, so signing in and signing up are one operation.
+Storefront sign-in is an emailed one-time code ([ShoppingLogin.tsx:421-440](../../components/login/ShoppingLogin.tsx#L421-L440)) with `shouldCreateUser: true`, so signing in and signing up are one operation.
+
+```tsx
+// components/login/ShoppingLogin.tsx:430-433
+    const { error: sendError } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { shouldCreateUser: true },
+    });
+```
 
 The interesting rule is in [lib/account/data.ts:9-14](../../lib/account/data.ts#L9-L14) — when is it safe to show someone the orders attached to their email address?
 
 > "linking by email is only allowed for identities whose email the provider actually verified (Google / Apple OAuth). Password accounts are auto-confirmed while the admin's confirm-email stays off, so trusting their email would let anyone claim a stranger's order history by signing up with that address."
 
 That is precisely right, and it is the sort of reasoning that separates a login screen from an access-control system: *an email address in a session is a claim, not a proof, unless someone verified it.*
+
+In code the rule is one constant and one boolean. The allowlist of providers whose email is trusted:
+
+```ts
+// lib/account/data.ts:28
+const EMAIL_VERIFIED_PROVIDERS = new Set(["google", "apple"]);
+```
+
+And the order query, which matches by `customer_id` always but by email *only* when that boolean holds:
+
+```ts
+// lib/account/data.ts:177-186
+  const customer = await linkedCustomer(user);
+  const email = (user.email ?? "").trim().toLowerCase();
+  const canMatchByEmail = Boolean(email) && emailVerifiedByProvider(user);
+
+  const orders = (await getStore().all("orders"))
+    .filter(
+      (order) =>
+        (customer && order.customer_id === customer.id) ||
+        (canMatchByEmail && order.email?.toLowerCase() === email),
+    )
+    // … .sort() and .map() follow
+```
+
+The same check guards the *write* side — an unverified account never claims an existing checkout customer row ([data.ts:99-104](../../lib/account/data.ts#L99-L104)):
+
+```ts
+// lib/account/data.ts:99-104
+  if (!emailVerifiedByProvider(user)) {
+    // Unverified email (password accounts, i.e. the admin testing crew) —
+    // never claim a checkout customer by email, and don't clutter the
+    // admin's Customers list with a new row either.
+    return null;
+  }
+```
 
 Worth flagging, though: the allowlist is `["google", "apple"]`, and today's only live method is emailed OTP, whose provider string is `"email"`. So no current storefront user links to their orders — signed-in customers see an empty order list. Arguably an emailed code *does* prove control of the address, but the allowlist wasn't widened when OTP replaced OAuth. Erring conservative is the right direction to err; it's still a gap to close deliberately rather than by drift.
 

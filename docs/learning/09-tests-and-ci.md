@@ -54,12 +54,14 @@ Key jargon:
 ### Step 1 — The unit layer: no framework at all
 
 ```json
-"test:unit": "node --test tests/unit/*.test.ts"
+// package.json:17
+    "test:unit": "node --test tests/unit/*.test.ts",
 ```
 
 No Jest. No Vitest. No config file, no transpile step, no watch server. Node runs the TypeScript directly — modern Node strips the types and executes the JavaScript underneath. Every test file needs only:
 
 ```ts
+// tests/unit/seed-uuid.test.ts:11-12
 import { test } from "node:test";
 import assert from "node:assert/strict";
 ```
@@ -69,8 +71,13 @@ This is worth pausing on, because the industry default is to reach for a framewo
 The cost is visible in CI, and documented there:
 
 ```yaml
-# Node 24: `npm run test:unit` runs `node --test` directly over .ts
-# files, which needs the unflagged type stripping added in Node 23.6.
+# .github/workflows/ci.yml:29-34
+      # Node 24: `npm run test:unit` runs `node --test` directly over .ts
+      # files, which needs the unflagged type stripping added in Node 23.6.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: "npm"
 ```
 
 That is the right way to record a constraint: at the line that depends on it, not in a wiki nobody opens.
@@ -80,6 +87,7 @@ That is the right way to record a constraint: at the line that depends on it, no
 Several unit tests exercise real database logic. They must not touch the repo's actual `.data/db.json`. The trick ([paypal-webhook.test.ts:16-21](../../tests/unit/paypal-webhook.test.ts#L16-L21)):
 
 ```ts
+// tests/unit/paypal-webhook.test.ts:16-21
 // The local file store roots itself at process.cwd() — isolate it FIRST,
 // before any store import can cache a path.
 process.chdir(mkdtempSync(path.join(tmpdir(), "goldrose-webhook-test-")));
@@ -95,9 +103,44 @@ This is a general lesson about module-level side effects. **Anything a module co
 Two tests worth knowing individually:
 
 - [seed-uuid.test.ts](../../tests/unit/seed-uuid.test.ts) is a regression test for a real incident: demo fixture ids contained non-hex characters that the JSON file adapter happily accepted and Postgres rejected mid-seed. It now regex-checks every id and foreign key in the seed data. This is the **fidelity gap between the two backends** made visible — the file adapter is more permissive than Postgres, so anywhere that matters gets an explicit test. (Same asymmetry as the CHECK constraint in [05](05-verifying-the-hosted-database.md).)
-- [element-names.test.ts](../../tests/unit/element-names.test.ts) is a *convention linter written as a test*. It parses the allowed vocabulary out of `docs/ixd/element-names.md` and checks every `data-el` attribute in the codebase against it. The doc isn't copied into the test — it's *parsed* — so the two cannot drift. It also guards itself:
+
+  ```ts
+  // tests/unit/seed-uuid.test.ts:15-41
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+  // …
+  const UUID_FK_FIELDS = ["customer_id", "order_id", "thread_id", "variant_id"] as const;
+
+  test("every demo row id and uuid foreign key is a well-formed uuid", () => {
+    const tables = buildSeedTables(new Date().toISOString(), { includeDemo: true });
+    for (const table of DEMO_TABLES) {
+      for (const row of tables[table] as Array<Record<string, unknown>>) {
+        assert.match(
+          String(row.id),
+          UUID,
+          `${table} id "${row.id}" is not a valid uuid — Postgres would reject the seed`,
+        );
+        // …
+  ```
+
+- [element-names.test.ts](../../tests/unit/element-names.test.ts) is a *convention linter written as a test*. It parses the allowed vocabulary out of `docs/ixd/element-names.md` and checks every `data-el` attribute in the codebase against it. The doc isn't copied into the test — it's *parsed* — so the two cannot drift:
+
+  ```ts
+  // tests/unit/element-names.test.ts:33-41
+    return [...body.matchAll(/`([A-Z][A-Z0-9-]*)`/g)].map((m) => m[1]);
+  }
+
+  const md = readFileSync(DOC, "utf8");
+  const VOCAB = {
+    PAGE: vocabulary(md, "PAGE"),
+    SECTION: vocabulary(md, "SECTION"),
+    TYPE: vocabulary(md, "TYPE"),
+  };
+  ```
+
+  It also guards itself:
 
 ```ts
+// tests/unit/element-names.test.ts:102-105
 test("the scan actually found element names", () => {
   // Guards against a broken walk silently passing every assertion below.
   assert.ok(NAMES.length > 30, `only found ${NAMES.length} data-el names`);
@@ -111,17 +154,25 @@ That is a sharp idea. A test that scans a codebase passes trivially if the scan 
 [playwright.config.ts](../../playwright.config.ts) is where the hermetic guarantee is enforced. The environment block is the heart of it:
 
 ```ts
-env: {
-  // Real process env beats .env.local, so blanking these guarantees the
-  // suite runs mock checkout even on a machine with PayPal keys.
-  PAYPAL_CLIENT_ID: "", PAYPAL_SECRET: "", NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
-  CHECKOUT_SKIP_PAYMENT: "",
-  // Likewise: never let the suite touch a hosted Supabase project (the
-  // owner's .env.local carries real keys post-activation) — tests always
-  // run against the local file adapter.
-  NEXT_PUBLIC_SUPABASE_URL: "", NEXT_PUBLIC_SUPABASE_ANON_KEY: "", SUPABASE_SERVICE_ROLE_KEY: "",
-  ADMIN_DEV_PASSWORD: "stage2-test-password",
-}
+// playwright.config.ts:51-68
+    env: {
+      // Real process env beats .env.local, so blanking these guarantees the
+      // suite runs mock checkout even on a machine with PayPal keys.
+      PAYPAL_CLIENT_ID: "",
+      PAYPAL_SECRET: "",
+      NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
+      // Same for the testing-phase skip-payment flag (.env.local): blank it so
+      // the suite always exercises the real express/card checkout UI.
+      CHECKOUT_SKIP_PAYMENT: "",
+      // Likewise: never let the suite touch a hosted Supabase project (the
+      // owner's .env.local carries real keys post-activation) — tests always
+      // run against the local file adapter.
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      // Known password for the local-adapter admin login tests.
+      ADMIN_DEV_PASSWORD: "stage2-test-password",
+    },
 ```
 
 Read that as a threat model. The owner's `.env.local` holds **real production keys**. Without those blank lines, running the test suite would mutate the live store and could move real money. The suite doesn't ask the machine to be configured safely — it *forces* safety by blanking, because blanking is the state you can guarantee.
@@ -148,9 +199,21 @@ That is only survivable because two categories of pixel are explicitly excluded,
 - `[data-live-text]` — boxes showing real catalog values, which change when the database does.
 
 ```ts
-await expect(page).toHaveScreenshot("home.png", {
-  fullPage: true, mask: [page.locator("[data-blend]")],
-});
+// tests/e2e/pixels.spec.ts:32-35
+  await expect(page).toHaveScreenshot("home.png", {
+    fullPage: true,
+    mask: [page.locator("[data-blend]")],
+  });
+```
+
+The `/shop` and product-detail baselines mask the other attribute instead ([pixels.spec.ts:45-48](../../tests/e2e/pixels.spec.ts#L45-L48)):
+
+```ts
+// tests/e2e/pixels.spec.ts:45-48
+    await expect(page).toHaveScreenshot(`${name}-masked.png`, {
+      fullPage: true,
+      mask: [page.locator("[data-live-text]")],
+    });
 ```
 
 Two attributes in shipped HTML exist purely as test infrastructure. That's a legitimate trade — it's what lets a byte-strict pixel net coexist with a live database — but it is worth naming: **the masked regions have zero visual coverage.** Anything inside them can regress invisibly. A mask is a documented blind spot, not a fix.
@@ -164,6 +227,7 @@ And the naming: `home-darwin.png`. The `-darwin` suffix is macOS. Font rendering
 The header is the most valuable part of the file:
 
 ```yaml
+# .github/workflows/ci.yml:5-10
 # Deliberately NOT here yet, both for reasons that would make CI red on day one:
 #   * `npm run build` — needs a seeded .data/db.json (that directory is
 #     gitignored), so it wants a `npm run seed -- --reset` step first.
@@ -182,6 +246,7 @@ The judgement behind it is also right, and worth stating as a principle:
 The concurrency block is a small thing that saves real money:
 
 ```yaml
+# .github/workflows/ci.yml:19-21
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -198,6 +263,7 @@ What CI does **not** run: `npm run build`, `npm run format:check` (Prettier is a
 The strongest pattern in the suite: assert on the **UI and the database**, in the same test. From [checkout.spec.ts](../../tests/e2e/checkout.spec.ts) — the test reads the app's database file directly, because with the file adapter, server and test are on one machine:
 
 ```ts
+// tests/e2e/checkout.spec.ts:16
 const DB_FILE = path.join(process.cwd(), ".data", "db.json");
 ```
 
@@ -223,9 +289,15 @@ And the division of labour is written down where you'd look for it. Each unit te
 [scripts/validate-env.mjs](../../scripts/validate-env.mjs) runs before every `next build`:
 
 ```js
+// scripts/validate-env.mjs:65-74
 if (skipPayment && paypalLive) {
-  console.error("[env] CHECKOUT_SKIP_PAYMENT is set while PAYPAL_ENV=live — checkout would");
-  console.error("[env] hand out orders for free on a storefront taking real money.");
+  console.error(
+    "[env] CHECKOUT_SKIP_PAYMENT is set while PAYPAL_ENV=live — checkout would",
+  );
+  console.error(
+    "[env] hand out orders for free on a storefront taking real money.",
+  );
+  console.error("[env] Remove CHECKOUT_SKIP_PAYMENT before going live.");
   process.exit(1);
 }
 ```
@@ -236,11 +308,34 @@ Not a test — a **build-time gate**. The distinction matters: a test tells you 
 
 Written plainly, because a safety net you overestimate is worse than one you understand:
 
-- **CI runs no e2e, no build, no format check.** The reasons are documented; the exposure is real.
+- **CI runs no e2e, no build, no format check.** The reasons are documented; the exposure is real. The gap is visible in the job itself — these are *all* the steps that run:
+
+  ```yaml
+  # .github/workflows/ci.yml:38-48
+        - name: Install dependencies
+          run: npm ci
+
+        - name: Lint
+          run: npm run lint
+
+        - name: Typecheck
+          run: npm run typecheck
+
+        - name: Unit tests
+          run: npm run test:unit
+  ```
+
 - **One browser, one platform.** Chromium only, macOS baselines. No Firefox, no Safari, no real devices.
 - **No accessibility checks** (no axe pass) and **no coverage measurement**.
 - **Nothing between unit and full-stack** — no component tests, no route-handler tests outside e2e.
-- **Hosted-Supabase paths are hand-tested only**: customer email-code sign-in, team sign-up, multi-member teams. All three are documented as such in the files that would otherwise be expected to cover them.
+- **Hosted-Supabase paths are hand-tested only**: customer email-code sign-in, team sign-up, multi-member teams. All three are documented as such in the files that would otherwise be expected to cover them — the spec's own header says which part it cannot reach:
+
+  ```ts
+  // tests/e2e/account.spec.ts:7-8
+   * the admin login shows no passkey button. The real emailed-code flow only
+   * exists against hosted Supabase and is exercised by hand there.
+  ```
+
 - **Real PayPal is never contacted** — all fixtures. Signature verification is only smoke-covered.
 - **Pricing has no unit tests at all** ([08](08-price-math-and-trust.md) Step 7) — `priceCart`, `applyDiscountCode` and `computeShipping` are pure functions with almost no I/O, and are the cheapest high-value tests available right now.
 
