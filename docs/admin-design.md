@@ -237,7 +237,7 @@ proceeds.
 | Database / auth / storage | Supabase | One vendor covers Postgres + Auth + Storage with an owner-usable dashboard; RLS enables the "storefront reads only a safe view" security model (§7.13). Separate DB + NextAuth + S3: more moving parts for a solo owner |
 | Payment provider | PayPal-direct (**working assumption — OQ-1**) | Stripe: best card/wallet UX but a new account + verification and loses the PayPal button many gift buyers prefer. Both providers: best conversion, roughly double the money-code — deferred to launch. Decision recorded when OQ-1 closes |
 | Visitor analytics | First-party `page_views` beacon (§7.12) | GA4 / external tools: blocked by ad-blockers (20–40% undercount), cookie-consent burden for international traffic, and the data lives outside our DB so it can't power the admin's Shopify-style cards or the order Conversion summary. Ad-platform pixels are added when paid ads start (§16) — additive, coexists with the beacon |
-| Dev/prod isolation | One shared Supabase project (region ap-southeast-2, near the owner) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join |
+| Dev/prod isolation | One shared Supabase project (planned ap-southeast-2; actually created in `us-west-2` — see [features/backend/region-alignment.md](features/backend/region-alignment.md)) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join |
 
 ---
 
