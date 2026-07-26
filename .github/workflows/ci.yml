@@ -28,7 +28,7 @@ jobs:
 
       # Node 24: `npm run test:unit` runs `node --test` directly over .ts
       # files, which needs the unflagged type stripping added in Node 23.6.
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: "npm"
