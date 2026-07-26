@@ -8,7 +8,7 @@
  * panel and the SEE HOW WE WORK button. Values verbatim from the Figma data.
  */
 
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 const GOLD = "#D4AF37";

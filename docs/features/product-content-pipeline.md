@@ -91,7 +91,7 @@ None yet — BACKLOG.
 
 ## Related links
 
-- OQ-3 → [SUMMARY.md · Open questions](../../SUMMARY.md)
+- OQ-3 → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
 - Current live-text wiring: `app/products/[slug]/page.tsx`, `app/shop/page.tsx`,
   `lib/admin/products.ts` (`revalidateStorefront`)
 - Existing export (mirror for the import UI): `app/api/admin/products/export/route.ts`

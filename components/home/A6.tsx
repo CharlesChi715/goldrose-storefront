@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { ReviewsRail } from "@/components/home/ReviewsRail";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 /* Recipient filter chips (static, not clickable). "Wife" is the selected

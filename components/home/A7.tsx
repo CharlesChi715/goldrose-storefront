@@ -9,7 +9,7 @@
  */
 
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, goudy, notoSC } from "@/lib/fonts";
 
 /* ---------- Criteria chips (static, non-interactive) ---------- */

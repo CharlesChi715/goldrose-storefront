@@ -19,7 +19,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
 import { formatMoney } from "@/lib/money";
 import { carrierLabel } from "@/lib/shipping/carriers";
-import { BottomNav } from "@/components/veloria";
+import { BottomNav } from "@/components/chrome";
 import { ShoppingLogin } from "@/components/login/ShoppingLogin";
 import { accountOverviewAction } from "./actions";
 import type { AccountOrder, AccountOverview } from "@/lib/account/data.ts";

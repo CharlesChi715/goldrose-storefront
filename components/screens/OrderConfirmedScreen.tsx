@@ -11,7 +11,7 @@
  */
 
 import Link from "next/link";
-import { abs, txt } from "@/components/veloria";
+import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
 /** 2× node renders / glyph exports of this frame's own nodes. */

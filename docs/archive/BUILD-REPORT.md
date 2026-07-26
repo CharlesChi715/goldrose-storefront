@@ -1,6 +1,6 @@
 > **ARCHIVED 2026-07-23.** Historical record of the one-shot admin build.
 > Still live: the **§5 owner activation checklist** below (tracked from
-> `SUMMARY.md` → Next steps).
+> `docs/project-state.md` → Release blockers and active queue).
 
 # GoldRose Admin Build — Report (§0.5)
 

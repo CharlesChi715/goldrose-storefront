@@ -3,7 +3,7 @@
 /**
  * ROLE OF THIS FILE
  * The client half of /checkout (§8, §10), wearing the B-2 · Checkout design:
- * the six pixel-exact modules of components/screens/CheckoutSkin are stacked at
+ * the six pixel-exact modules of components/checkout/CheckoutSkin are stacked at
  * their frame offsets and this file supplies every live value and control. The
  * checkout itself is unchanged — cart summary with quantity controls, ship-to
  * country selector (zone-priced shipping), optional gift message (→ the order's
@@ -28,7 +28,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { abs, ScaleFrame } from "@/components/veloria";
+import { ScaleFrame } from "@/components/chrome";
+import { abs } from "@/lib/figma-layout";
 import {
   CHECKOUT_CANVAS_HEIGHT,
   CheckoutContactDelivery,
@@ -37,7 +38,7 @@ import {
   CheckoutOrderItem,
   CheckoutShippingPayment,
   CheckoutSummaryCta,
-} from "@/components/screens/CheckoutSkin";
+} from "@/components/checkout/CheckoutSkin";
 import { notoSC } from "@/lib/fonts";
 import { formatMoney } from "@/lib/money";
 import { useCart, type CartLine } from "@/lib/cart/store";

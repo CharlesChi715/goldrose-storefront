@@ -6,8 +6,8 @@ parent: backend
 area: backend
 order: 10
 
-delivery: in-progress
-rollout: not-deployed
+delivery: uat
+rollout: test-deployment
 statusChangedAt: 2026-07-25
 
 dependsOn: []

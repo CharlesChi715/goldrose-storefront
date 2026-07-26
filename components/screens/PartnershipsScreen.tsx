@@ -10,7 +10,7 @@
  */
 
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
 /* 756:165…756:176 — 12 colorway dots, 22×22 on a 32px pitch inside the

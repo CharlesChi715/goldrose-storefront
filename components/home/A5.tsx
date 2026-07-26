@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 import { OccasionRail } from "@/components/home/OccasionRail";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
 
 export function A5() {

@@ -17,7 +17,7 @@ import {
   RAIL_AUTOPLAY_MS,
   RAIL_SLIDE_MS,
 } from "@/components/home/Carousel";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
 
 /* Review cards 1–3 (nodes 163:99, 193:150, 193:155) — identical structure, so

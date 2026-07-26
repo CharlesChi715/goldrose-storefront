@@ -14,7 +14,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import NoCalcScale from "@/components/NoCalcScale";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair } from "@/lib/fonts";
 
 /**

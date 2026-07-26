@@ -14,7 +14,7 @@
  */
 
 import { Carousel } from "@/components/home/Carousel";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 
 // 549:97 — the design draws the active dot at 9px and the rest at 7px, at
 // fixed x positions. Only the colour changes as the slide advances; moving or

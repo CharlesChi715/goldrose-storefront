@@ -10,7 +10,7 @@
  */
 
 import type { Metadata } from "next";
-import { ScaleFrame } from "@/components/veloria";
+import { ScaleFrame } from "@/components/chrome";
 import { notoSC } from "@/lib/fonts";
 import { PartnershipsScreen } from "@/components/screens/PartnershipsScreen";
 

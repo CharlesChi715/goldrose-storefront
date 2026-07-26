@@ -11,7 +11,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BottomNav } from "@/components/veloria";
+import { BottomNav } from "@/components/chrome";
 import { inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {

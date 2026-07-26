@@ -15,7 +15,7 @@ import {
   RAIL_AUTOPLAY_MS,
   RAIL_SLIDE_MS,
 } from "@/components/home/Carousel";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 /** One card of the 436:319 recipient rail, at cell coordinates. */

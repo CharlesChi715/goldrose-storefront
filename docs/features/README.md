@@ -10,9 +10,8 @@ everything without opening the files.
 Every future thought moves one way through the docs — never lives in two places:
 
 ```
-docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md "Next steps"  →  .ai/WORKLOG.md
-  (raw inbox,      (options, pros/cons,         (only while queued          (dated entry
-   verbatim)        decision, plan, STATUS)      or in flight)               when done)
+docs/ideas.md  →  docs/features/<name>.md  →  docs/project-state.md  →  .ai/WORKLOG.md
+  (raw inbox,      (decision, plan, STATUS)       (release queue only)       (dated history)
 ```
 
 - An idea graduates: add its feature file, delete its line from ideas.md.
@@ -144,13 +143,13 @@ Order emails (Resend) — console fallback until RESEND_API_KEY set
 └── owner new-order alert ●●●○ UAT
 
 Shipping & tracking
-└── order-tracking.md ●●○○ IN PROGRESS — built; merge + 0003 on hosted pending
+└── order-tracking.md ●●●○ UAT — owner must verify a real carrier link
 
 Marketing
 └── promotion-emails.md ○○○○ BACKLOG — consent + unsubscribe first
 
 Supabase hosted DB
-├── migrations (0001, 0002) ●●●● DONE — 0003 written, apply on hosted pending
+├── migrations (0001–0003) ●●●● DONE — 0003 verified hosted 2026-07-25
 ├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
 └── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
 ```
@@ -160,7 +159,7 @@ here):
 
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
 - **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
-- **OQ-2 / OQ-3** → [SUMMARY.md · Open questions](../../SUMMARY.md)
+- **OQ-2 / OQ-3** → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
 - **db-backups.md** → [backend/db-backups.md](backend/db-backups.md)
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)
 - **order-tracking.md** → [backend/order-tracking.md](backend/order-tracking.md)

@@ -14,7 +14,7 @@
  * the outline (shared <BottomNav> chrome supplies it).
  */
 
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
 /** Figma render assets (public/veloria/screens). */

@@ -20,12 +20,13 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { abs, txt, ScaleFrame } from "@/components/veloria";
+import { ScaleFrame } from "@/components/chrome";
+import { abs, txt } from "@/lib/figma-layout";
 import { FadeLink } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
 import { cormorant, inter } from "@/lib/fonts";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
-import { INK, MUTED, CARD, HAIRLINE, CANVAS, NB, Glyph } from "@/components/login/shared";
+import { INK, MUTED, CARD, HAIRLINE, CANVAS, NB, Glyph } from "@/components/login/tokens";
 
 const A = "/veloria/business";
 

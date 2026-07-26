@@ -12,7 +12,7 @@
  */
 
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
 // Glyph/vector renders (manifest2.json). Figma crops each export to its ink,

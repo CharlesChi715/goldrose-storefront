@@ -8,7 +8,7 @@
  * placeholders until the B-3/B-4 pages exist.
  */
 
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 /* Replaceable placeholder photo shared by the three partnership slots; the

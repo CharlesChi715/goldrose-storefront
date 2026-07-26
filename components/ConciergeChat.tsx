@@ -14,7 +14,7 @@
 
 import { useState } from "react";
 import { inter } from "@/lib/fonts";
-import { abs, txt } from "@/components/veloria";
+import { abs, txt } from "@/lib/figma-layout";
 import NoCalcScale from "@/components/NoCalcScale";
 
 const CHAT_H = 106; // mascot top → bar bottom

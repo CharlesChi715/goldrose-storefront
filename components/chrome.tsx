@@ -7,6 +7,10 @@
  * promo bar, header, and the white bottom tab bar. All coordinates/colors
  * come verbatim from the Figma REST API. The bottom nav is fixed to the
  * viewport (per Charles's request) with Home/Shop tabs wired to routes.
+ *
+ * The `abs`/`txt` style helpers this file used to export are pure CSS math
+ * with no JSX, so they now live in lib/figma-layout.ts. "veloria" was the
+ * Figma file's name, never the brand — hence chrome.tsx.
  */
 
 import Link from "next/link";
@@ -17,41 +21,7 @@ import { WishlistButton } from "@/components/WishlistButton";
 import { inter } from "@/lib/fonts";
 import NoCalcScale from "@/components/NoCalcScale";
 import { MenuButton } from "@/components/MenuButton";
-
-/* ---------- Style helpers ---------- */
-
-// Absolute positioning at integer coordinates, with any fractional part
-// applied via transform. Chrome rounds fractional left/top when painting
-// (Figma doesn't); a translate() keeps true sub-pixel placement.
-export const abs = (
-  left: number,
-  top: number,
-  width?: number,
-  height?: number,
-): React.CSSProperties => {
-  const li = Math.floor(left);
-  const ti = Math.floor(top);
-  const fx = Math.round((left - li) * 1000) / 1000;
-  const fy = Math.round((top - ti) * 1000) / 1000;
-  const s: React.CSSProperties = { position: "absolute", left: li, top: ti };
-  if (fx || fy) s.transform = `translate(${fx}px, ${fy}px)`;
-  if (width !== undefined) s.width = width;
-  if (height !== undefined) s.height = height;
-  return s;
-};
-
-export const txt = (
-  size: number,
-  lineHeight: number,
-  color: string,
-  align?: "center" | "right",
-): React.CSSProperties => ({
-  fontSize: size,
-  lineHeight: `${lineHeight}px`,
-  color,
-  whiteSpace: "nowrap",
-  ...(align ? { textAlign: align } : {}),
-});
+import { abs } from "@/lib/figma-layout";
 
 /* ---------- Inline SVG icons (Figma node renders, format=svg) ---------- */
 

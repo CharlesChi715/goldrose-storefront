@@ -11,8 +11,8 @@ own Shopify-clone admin and native checkout. No Shopify code remains.
 
 **Live:** <https://goldrose-storefront.vercel.app> · **Admin:** `/admin`
 
-> **Start here:** [SUMMARY.md](SUMMARY.md) is the short single source of truth
-> (current state, constraints, next steps).
+> **Start here:** [SUMMARY.md](SUMMARY.md) is the short repository entrypoint
+> (high-level state, structure, and links to details).
 > [docs/admin-design.md](docs/admin-design.md) is the authoritative spec —
 > "§" references everywhere point into it.
 
@@ -68,14 +68,15 @@ Env vars live in the Vercel dashboard; changes need a redeploy.
 ├── public/              # Served assets (bottom-nav/, top-nav/, veloria/, products/)
 ├── assets/              # Raw owner art (not served)
 ├── docs/                # Spec + living docs; docs/archive/ = historical
-└── SUMMARY.md           # Single source of truth — read first
+└── SUMMARY.md           # High-level repository entrypoint — read first
 ```
 
 ## Docs
 
 | Doc | Role |
 |---|---|
-| [SUMMARY.md](SUMMARY.md) | Current state, constraints, next steps |
+| [SUMMARY.md](SUMMARY.md) | High-level state, structure, and documentation index |
+| [docs/project-state.md](docs/project-state.md) | Environment, safety gates, blockers, and open decisions |
 | [docs/admin-design.md](docs/admin-design.md) | The spec (all § references) |
 | [docs/TESTER-GUIDE.md](docs/TESTER-GUIDE.md) | Tester guide, rendered at `/admin/guide` |
 | [docs/Database.md](docs/Database.md) | DB hosting + backup decisions |

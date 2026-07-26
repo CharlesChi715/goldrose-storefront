@@ -10,7 +10,7 @@
  */
 
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, playfairSC, notoSC, goudy } from "@/lib/fonts";
 
 export function A4() {

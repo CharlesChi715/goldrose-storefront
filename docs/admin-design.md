@@ -7,7 +7,7 @@
 | **Users** | Charles' teammates |
 | **Audience** | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below |
 | **Version** | Rev 4.4 · 2026-07-22 — full history in §17 |
-| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/archive/flow-map.md` · `docs/archive/launch-checklist.md` · `docs/seo-geo/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
+| **Related docs** | `SUMMARY.md` (repository entrypoint) · `docs/project-state.md` (current operations/release state) · `docs/archive/flow-map.md` · `docs/archive/launch-checklist.md` · `docs/seo-geo/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
 
 ## Table of contents
 
@@ -48,7 +48,8 @@
 - Never wait for or ask the owner mid-build. Every "owner action" in this
   document becomes an item on the activation checklist (§0.5) instead.
 - Trust hierarchy for conflicting written sources: this document >
-  `SUMMARY.md` > everything else. `docs/archive/*` and the Shopify-era
+  `SUMMARY.md` > `docs/project-state.md` > everything else.
+  `docs/archive/*` and the Shopify-era
   sections of `README.md` are historical — never implement from them.
 
 ### 0.2 Resource fallbacks — mock, don't ask

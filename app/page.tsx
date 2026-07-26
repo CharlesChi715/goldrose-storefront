@@ -12,7 +12,7 @@
  */
 
 import type { Metadata } from "next";
-import { ScaleFrame, PromoBar, HomeHeader } from "@/components/veloria";
+import { ScaleFrame, PromoBar, HomeHeader } from "@/components/chrome";
 import { playfair } from "@/lib/fonts";
 import { A1 } from "@/components/home/A1";
 import { A2 } from "@/components/home/A2";

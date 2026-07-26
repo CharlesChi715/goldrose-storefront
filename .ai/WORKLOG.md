@@ -2534,3 +2534,42 @@ and "fade in fade out when switch pages by bottom nav buttons".
 - `/shop` paging: 1–5 link to `?page=N`, the forward arrow advances and goes inert on page 5, and each page rotates the same eight placeholder cards into different grid slots (page 1 byte-identical + keeps the bare `/shop` URL; pages 2–5 `noindex` since they are the same products reordered).
 - `/account` account-type tabs (Gift Shopping ↔ Business & Partnerships) cross-fade using the existing `FadeLink`, which gained an `ariaLabel` prop since those tab labels are baked into SVG art.
 - Verified in a browser, not just tests: rail track steps exactly one pitch (0 → −267px), zoom `none → 1.06`, page 3 reorders the same card set, fade class applies mid-navigation and clears after, zero page errors. 35 unit + 76 e2e green (3 new specs); home pixel baseline regenerated — module-by-module diff confirms the ONLY changed region is Best Sellers (9.8%), with A-3/A-4/A-5/A-6 at 0.00%.
+## 2026-07-26 — Split the repository summary into an index and on-demand state
+
+- Reduced `SUMMARY.md` from detailed history/backlog to high-level goal, state,
+  depth-1 structure, and documentation routing.
+- Moved environment details, safety gates, current blockers, and open decisions
+  to `docs/project-state.md`; updated cross-references.
+
+## 2026-07-26 — Shareable PDF export for Markdown docs
+
+- Added `scripts/md-to-pdf.mjs` (zero npm deps): a small Markdown renderer
+  builds a print-styled HTML page, then headless Chrome prints it with
+  `--print-to-pdf`. Handles headings, fenced code, lists, blockquotes, inline
+  code/bold/links; A4 with `break-inside: avoid` on code blocks so the status
+  trees never split across pages.
+- Font stack falls back through Menlo → PingFang SC so the `●○` meters, the
+  box-drawing tree characters and `中文` all render (verified page-by-page).
+- Exposed as `npm run docs:pdf -- <file.md> [--out x.pdf] [--title "…"]`.
+- Generated `docs/features/README.pdf` (5 pages) for sharing outside the repo.
+
+## 2026-07-26 — Four more feature-learning docs (06–09)
+
+- Extended `docs/learning/` from 5 to 9 traces, same end-to-end format:
+  - `06-paypal-payment-and-recovery.md` — PayPal create → capture → order →
+    webhook repair. Idempotency (four different mechanisms in the repo), the
+    irreversible-capture line, what the recovery net does and doesn't catch.
+  - `07-who-can-see-what.md` — proxy guard → session (HMAC local / JWT hosted)
+    → `admin_users` allowlist → owner derivation → RLS grants. Authn vs authz,
+    fail-closed config, 404-not-403, constant-time comparison.
+  - `08-price-math-and-trust.md` — integer cents, the discount → shipping → tax
+    order of operations, and the price-free request schema as the anti-tamper
+    design.
+  - `09-tests-and-ci.md` — node:test unit layer, Playwright determinism stack,
+    the new CI workflow and its documented omissions.
+- Added `docs/learning/README.md` (index + suggested reading orders) and a
+  SUMMARY.md routing row; fixed a broken guideline link in doc 01.
+- Two findings surfaced while tracing, both left as written-up gaps rather than
+  code changes: the checkout client's displayed total omits the tax term the
+  server adds (harmless only while the rate is 0), and `priceCart` /
+  `applyDiscountCode` / `computeShipping` have no unit tests at all.

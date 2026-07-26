@@ -14,8 +14,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ConciergeChat } from "@/components/ConciergeChat";
 import {
-  abs,
-  txt,
   CloseIcon,
   DownIcon,
   FilterIcon,
@@ -24,7 +22,8 @@ import {
   PromoBar,
   ScaleFrame,
   ShopHeader,
-} from "@/components/veloria";
+} from "@/components/chrome";
+import { abs, txt } from "@/lib/figma-layout";
 import { inter, notoSC, tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
 import { formatMoney } from "@/lib/money";

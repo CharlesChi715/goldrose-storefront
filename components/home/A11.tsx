@@ -9,7 +9,7 @@
  */
 
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 const INK = "#291A13";

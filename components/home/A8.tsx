@@ -8,7 +8,7 @@
  * personalization ships in a future iteration. Values verbatim from Figma.
  */
 
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 // 465:149/162/175/186 -- the four step rows share one 382x46 geometry.

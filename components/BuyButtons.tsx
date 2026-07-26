@@ -10,7 +10,7 @@
  */
 
 import { useRouter } from "next/navigation";
-import { abs, txt } from "@/components/veloria";
+import { abs, txt } from "@/lib/figma-layout";
 import { addToCart } from "@/lib/cart/store";
 
 export function BuyButtons({

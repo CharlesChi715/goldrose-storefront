@@ -13,7 +13,7 @@
 
 import { Fragment } from "react";
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
 const A = "/veloria/screens";

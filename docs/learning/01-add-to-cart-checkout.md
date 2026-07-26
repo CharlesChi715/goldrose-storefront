@@ -1,6 +1,6 @@
 # Feature Learning 01 — Add to Cart → Checkout → Order
 
-Traced end to end per [learning-docs-guideline.md](../learning-docs-guideline.md).
+Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
 This trace follows the **mock-payment path** (no PayPal keys configured — how local dev runs today). Where the real PayPal path branches off, it is noted.
 
 ## Feature Summary

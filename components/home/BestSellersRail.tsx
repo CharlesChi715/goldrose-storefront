@@ -16,7 +16,7 @@
  * design's smaller inset peek.
  */
 
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import {
   Carousel,
   RAIL_AUTOPLAY_MS,

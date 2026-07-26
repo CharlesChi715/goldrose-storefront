@@ -15,13 +15,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ConciergeChat } from "@/components/ConciergeChat";
-import {
-  abs,
-  txt,
-  PromoBar,
-  ScaleFrame,
-  VHeader,
-} from "@/components/veloria";
+import { PromoBar, ScaleFrame, VHeader } from "@/components/chrome";
+import { abs, txt } from "@/lib/figma-layout";
 import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { BuyButtons } from "@/components/BuyButtons";
 import { getCatalog, getCatalogProduct } from "@/lib/supabase/catalog.ts";

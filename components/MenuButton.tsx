@@ -10,7 +10,7 @@
  */
 
 import { useState } from "react";
-import { MenuDrawer } from "@/components/screens/MenuDrawer";
+import { MenuDrawer } from "@/components/MenuDrawer";
 
 export function MenuButton({
   src = "/veloria/home/549-88.png",

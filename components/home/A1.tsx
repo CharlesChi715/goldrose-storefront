@@ -9,7 +9,7 @@
  */
 
 import Link from "next/link";
-import { abs } from "@/components/veloria";
+import { abs } from "@/lib/figma-layout";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { notoSC, playfair } from "@/lib/fonts";
 
