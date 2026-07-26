@@ -109,12 +109,14 @@ pages come later, if ever.
 
 Out of scope here (own decisions later): guest tracking page (tokenized
 order-status link in the email) and live-status integration (Option C,
-post-ship). Option C lean recorded 2026-07-26 (Charles): **direct UPS Track
-API polling** — OAuth under the boss's UPS account; a Vercel cron every few
-hours over fulfilled-not-yet-delivered orders writes latest status/scan
-events to our DB; the Me page keeps reading only our DB (never calls UPS
-per page view); richer status pill + "Delivered" email. Not an aggregator,
-since shipping is UPS-only; add a USPS poller when USPS shipments are real.
+post-ship). Option C design recorded 2026-07-26 (Charles): **direct UPS
+Track API, fetched on Me-page open with a staleness cache** — page renders
+instantly from our DB; if an undelivered order's tracking is older than
+~30–60 min the server calls UPS (OAuth under the boss's UPS account),
+saves the new status/scan events, and the pill updates. No background cron
+for display; add a small cron only if/when a "Delivered" email automation
+is wanted. Not an aggregator, since shipping is UPS-only; add USPS when
+USPS shipments are real.
 
 ## Blockers and dependencies
 
