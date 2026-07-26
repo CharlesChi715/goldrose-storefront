@@ -108,8 +108,13 @@ pages come later, if ever.
 | 8 | SKU-guard side effects of the 0003 bundle: `saveProduct` rejects taken SKUs; Duplicate clears copied SKUs | ✅ 2026-07-25 |
 
 Out of scope here (own decisions later): guest tracking page (tokenized
-order-status link in the email) and live-status integration (Option C —
-aggregator free tier or UPS Track API, post-ship).
+order-status link in the email) and live-status integration (Option C,
+post-ship). Option C lean recorded 2026-07-26 (Charles): **direct UPS Track
+API polling** — OAuth under the boss's UPS account; a Vercel cron every few
+hours over fulfilled-not-yet-delivered orders writes latest status/scan
+events to our DB; the Me page keeps reading only our DB (never calls UPS
+per page view); richer status pill + "Delivered" email. Not an aggregator,
+since shipping is UPS-only; add a USPS poller when USPS shipments are real.
 
 ## Blockers and dependencies
 
