@@ -154,7 +154,7 @@ Supabase hosted DB
 └── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
 
 Infrastructure
-└── region-alignment.md ○○○○ BACKLOG — Vercel syd1→pdx1 beside Oregon DB
+└── region-alignment.md ●●●● DONE — functions verified in pdx1 2026-07-26; EU-replica option stays future
 ```
 
 Refs (links can't render inside the code blocks, so shorthands above resolve

@@ -6,8 +6,8 @@ parent: backend
 area: backend
 order: 30
 
-delivery: backlog
-rollout: not-deployed
+delivery: verified
+rollout: test-deployment
 statusChangedAt: 2026-07-26
 
 dependsOn: []
@@ -19,6 +19,11 @@ verification:
 ---
 
 # Region alignment — put Vercel compute beside the Oregon database
+
+> **Done 2026-07-26** (commit `fe73e42`): `vercel.json` now pins `pdx1`;
+> both wrong region records are corrected. Verified live —
+> `curl -sI …/api/beacon` returns `x-vercel-id: syd1::pdx1::…` (edge::function
+> region). Only the EU-reads section below remains future work.
 
 ## Context
 

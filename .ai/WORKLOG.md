@@ -2606,3 +2606,8 @@ Known follow-ups, not done:
   existing update banner). Worth a small prose fix.
 - Doc 09's ASCII diagram shows `tests/unit/*.ts`; real glob is
   `tests/unit/*.test.ts`. Correct string is shown in the Step 1 block.
+
+## 2026-07-26 — Delivered: Vercel region moved syd1 → pdx1
+- `fe73e42` pinned `pdx1` in vercel.json (beside the us-west-2 Supabase primary) and corrected the wrong region records in admin-design.md and BUILD-REPORT.md.
+- Verified live: `/api/beacon` returns `x-vercel-id: syd1::pdx1::…`.
+- region-alignment.md → delivery: verified; project-state queue item cleared; features README tree marks DONE.
