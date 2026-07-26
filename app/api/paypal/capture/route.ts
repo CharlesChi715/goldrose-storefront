@@ -14,6 +14,7 @@ import { priceCart } from "@/lib/checkout/pricing";
 import { createOrder } from "@/lib/orders/db";
 import { capturePayPalOrder, getPayPalConfig } from "@/lib/paypal/client";
 import { mapCaptureResponse, type PayPalCaptureResponse } from "@/lib/paypal/mapping";
+import { currentAuthUserId } from "@/lib/supabase/server-auth";
 import { getStore } from "@/lib/supabase/store.ts";
 
 const requestSchema = z.object({ orderID: z.string().min(1).max(64) });
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
       provider_capture_id: mapped.captureId,
       financial_status: "paid",
       email: mapped.email ?? checkout.email,
+      auth_user_id: await currentAuthUserId(),
       phone: mapped.phone,
       shipping_address: mapped.shippingAddress,
       billing_address: mapped.billingAddress,

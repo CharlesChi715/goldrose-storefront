@@ -32,6 +32,8 @@ export type CreateOrderInput = {
   financial_status?: FinancialStatus;
   email?: string | null;
   phone?: string | null;
+  /** Signed-in customer's Supabase auth uid — shows the order in their Me page. */
+  auth_user_id?: string | null;
   shipping_address?: Address | null;
   billing_address?: Address | null;
   /** Buyer's gift message / checkout note → the order's Notes card (§7.4). */
@@ -171,6 +173,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     name,
     source: input.source,
     customer_id: customerId,
+    auth_user_id: input.auth_user_id ?? null,
     payment_provider: input.payment_provider,
     provider_order_id: input.provider_order_id ?? null,
     provider_capture_id: input.provider_capture_id ?? null,

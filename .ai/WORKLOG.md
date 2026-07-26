@@ -2187,3 +2187,25 @@ docs: add first feature learning doc (trial)
 - Tests: 35 unit (7 new), 57 e2e — all green; eslint + tsc clean.
 - Shipped from worktree branch `worktree-order-tracking` (draft PR).
   ⚠️ Apply 0003 on hosted Supabase BEFORE deploying this code.
+
+## 2026-07-26 · Option C design + signed-in checkout linkage (bg session)
+
+- Option C (live tracking) design settled with Charles and recorded in
+  order-tracking.md: trigger = customer clicks "Track" → server polls the
+  UPS Track API (short staleness cache), shows scans on our page; no cron
+  unless a "Delivered" email automation is wanted later. UPS-direct, no
+  aggregator (UPS-only shipping).
+- Deliveries: signed-in checkout stamp — `orders.auth_user_id` (added to
+  0003) set from the Supabase session in /api/checkout + /api/paypal/capture
+  (`currentAuthUserId()` in server-auth.ts, null-safe in file mode);
+  /account matching now includes it, so orders placed while signed in show
+  in Me for any sign-in method (passkeys included) and regardless of the
+  PayPal payer email overriding the typed one (mapped.email ?? checkout.email).
+- Diagnosed for Charles: Me empty ⇒ passkey sign-ins never email-match by
+  design + Google/Apple providers still pending (§5); "sent to j***@gmail"
+  ⇒ sandbox PayPal payer email wins over the typed address.
+- Verified: eslint + tsc clean, 35 unit green; full e2e re-run in flight at
+  session close — commit/push to PR #1 gated on green.
+- ⚠️ Repo state: origin/main force-rewound to 92c455e (docs/IxD line
+  103a000… dropped); PR #1 base diverged — Charles to settle main before
+  merge; dropped commits survive in PR #1 history.

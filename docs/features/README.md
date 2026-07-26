@@ -93,7 +93,7 @@ Customer accounts /account — dormant: owner config pending
 ├── Google OAuth ●●●○ UAT
 ├── Apple OAuth ●●●○ UAT
 ├── passkeys ●●●○ UAT
-└── order matching (verified email) ●●●○ UAT
+└── order matching (verified email + signed-in checkout stamp) ●●●○ UAT
 
 Concierge chat (mascot + bar overlay)
 ├── feedback panel → admin Ideas ●●●○ UAT
