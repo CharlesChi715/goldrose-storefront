@@ -110,13 +110,13 @@ pages come later, if ever.
 Out of scope here (own decisions later): guest tracking page (tokenized
 order-status link in the email) and live-status integration (Option C,
 post-ship). Option C design recorded 2026-07-26 (Charles): **direct UPS
-Track API, fetched on Me-page open with a staleness cache** — page renders
-instantly from our DB; if an undelivered order's tracking is older than
-~30–60 min the server calls UPS (OAuth under the boss's UPS account),
-saves the new status/scan events, and the pill updates. No background cron
-for display; add a small cron only if/when a "Delivered" email automation
-is wanted. Not an aggregator, since shipping is UPS-only; add USPS when
-USPS shipments are real.
+Track API, fetched when the customer clicks "Track"** — the Me page itself
+renders from our DB only; clicking Track calls UPS (OAuth under the boss's
+UPS account), saves the status/scan events, and shows them on our page
+(short staleness cache so repeat clicks don't re-hit UPS). No background
+cron; add one only if/when a "Delivered" email automation is wanted. Not
+an aggregator, since shipping is UPS-only; add USPS when USPS shipments
+are real.
 
 ## Blockers and dependencies
 
