@@ -95,6 +95,7 @@ goldrose-storefront/
 |---|---|
 | Environment, safety gates, blockers, open decisions | [`docs/project-state.md`](docs/project-state.md) |
 | Setup, architecture, commands, deployment | [`README.md`](README.md) |
+| Workflow rules: branching, parallel sessions, CI gates, environments | [`docs/engineering-playbook.md`](docs/engineering-playbook.md) |
 | Feature status and roadmap | [`docs/features/README.md`](docs/features/README.md) |
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
