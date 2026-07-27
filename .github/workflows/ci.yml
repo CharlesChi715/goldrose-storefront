@@ -24,7 +24,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Node 24: `npm run test:unit` runs `node --test` directly over .ts
       # files, which needs the unflagged type stripping added in Node 23.6.
