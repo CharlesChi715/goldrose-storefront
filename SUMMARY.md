@@ -34,10 +34,11 @@ resources only when the task needs them.
 
 ### Product map
 
-- **Public storefront:** homepage, shop, product pages, bag, checkout, order
+- **Public storefront:** homepage, shop (search/sort/filter overlays),
+  product pages (review/color/photo/unboxing overlays), bag, checkout, order
   confirmation, and tracking.
-- **Customer and business:** customer account plus partnership and wholesale
-  enquiry pages.
+- **Customer and business:** customer account (dashboard, orders, gift
+  reminders), customer care, plus partnership and wholesale enquiry pages.
 - **Admin:** products and inventory, orders, customers, discounts, content,
   files, analytics, team, security, and other store operations.
 - **Marketing layer:** SEO/GEO, analytics, and campaign/UTM attribution.
