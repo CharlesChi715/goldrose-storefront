@@ -1,20 +1,19 @@
 # GoldRose repository summary
 
-Start here. This file is only the repo's high-level state and navigation
-index—not implementation history or a detailed backlog. Open linked resources
-only when the task needs them.
+Start here. This file is the repository's high-level startup context and
+navigation index—not implementation history or a detailed backlog. Open linked
+resources only when the task needs them.
 
 ## How to update this file
 
 - Keep this file as concise startup context for any AI agent working on the
   project.
-- Include only what an agent needs to understand the project's purpose, current
+- Include only what an agent needs to understand the project's goal, current
   state, structure, environment, available tooling, and connected services well
   enough to make informed decisions.
-- Treat prose documentation as a single source of truth: each fact, decision,
-  or instruction should have one authoritative location in the repository.
-  Link to that location instead of copying the content elsewhere. This rule
-  applies to documentation, not code.
+- Give each documentation topic one authoritative owner. This file may state
+  the short version needed at startup, but it should link to the owner instead
+  of repeating the full explanation. This rule applies to prose, not code.
 - Summarize each topic at the highest useful level and link to its owning
   document. Keep implementation details, history, long instructions, and full
   task lists out of this file so they do not overwhelm the agent's context.
@@ -24,48 +23,48 @@ only when the task needs them.
 - Sell the GoldRose 24K gold-dipped rose gift line directly to consumers.
 - Help me learn the things you did proactively. I want to learn.
 
-## State — 2026-07-27
+## Project context — 2026-07-27
 
-### Team
+### Business and team
 
-- Most of our teams located in China. I am in Sydney. The influencer we going to find
-  to marketting locates same area with customer.
+- Charles is in Sydney; most teammates are in China.
+- Launch in the United States first, with Europe as a possible later market.
+  Public storefront content is English.
+- Recruit influencers in the same market as the target customers.
 
-### Marketing
+### Product map
 
-- The influencer who going to marketting our product and targetted user in
-  American currently.
-- We planning to sell it in Euorpe in the future but Amarican first.
+- **Public storefront:** homepage, shop, product pages, bag, checkout, order
+  confirmation, and tracking.
+- **Customer and business:** customer account plus partnership and wholesale
+  enquiry pages.
+- **Admin:** products and inventory, orders, customers, discounts, content,
+  files, analytics, team, security, and other store operations.
+- **Marketing layer:** SEO/GEO, analytics, and campaign/UTM attribution.
+- **Main customer journey:** discover → browse → select a product → checkout →
+  confirmation, tracking, or account.
 
-### Project
+### Current phase
 
-- Storefront and admin are deployed for testing:
-  <https://goldrose-storefront.vercel.app>.
-- Supabase, Vercel, PayPal, analytics, and attribution are test-only. There are
-  no real customers or public campaigns.
-- PayPal wallet works in sandbox. PayPal Advanced Cards is selected but not
-  built; the current card form is a mock.
-- Shopify code is removed; cancel the subscription after owner acceptance.
-- All supplied mobile Figma frames are imported, with some placeholders and
-  design conflicts remaining.
+- The storefront and admin are in pre-launch testing. There are no real
+  customers or public campaigns; uncertain public content remains visibly
+  mocked.
 - Next: owner activation/UAT → real shipping and product content → card
-  integration and launch hardening. See
+  integration → launch hardening. Current readiness and blockers:
   [`docs/project-state.md`](docs/project-state.md).
 
-### Working Space
+### Environment and connected tooling
 
-- Apple-silicon iMac (Sydney), macOS, zsh, Homebrew.
-- CLIs: git, node + npm, gh, supabase, vercel, psql, docker (running),
-  python + uv, jq, ripgrep, claude, codex. Deploys still flow via the Vercel↔GitHub
-  integration, not the CLI.
-- Signed in: `gh` (CharlesChi715, SSH); Supabase CLI linked from repo root;
-  `vercel` (vancechi) linked to the goldrose-storefront project.
+- Main workspace: Apple-silicon iMac in Sydney, using macOS, zsh, and Homebrew.
+- Core CLIs are installed: Git/`gh`, Node/npm, Supabase, Vercel, `psql`,
+  Docker, Python 3/`uv`, `jq`, ripgrep, Claude, and Codex.
+- The repository is linked to GitHub, hosted Supabase, and Vercel. Normal
+  production deployment is `main` → GitHub/Vercel integration, not a CLI
+  deployment.
 - Secrets in `.env.local` (gitignored); `.env.example` lists the variables.
-- Apps: Chrome (Claude-in-Chrome), VS Code, Docker Desktop, Xcode.
-- CLI install backlog: cloudflared or ngrok (localhost tunnel for PayPal
-  webhook testing — install when card integration starts). psql to the hosted
-  DB works: password is `SUPABASE_DB_PASSWORD` in `.env.local`, host
-  `aws-1-us-west-2.pooler.supabase.com:5432`, user `postgres.<project-ref>`.
+- Authentication and tool availability can change. Check current verification
+  in [`docs/project-state.md`](docs/project-state.md) and commands in
+  [`README.md`](README.md) before environment-dependent work.
 
 ## Repository structure
 
@@ -99,6 +98,7 @@ goldrose-storefront/
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
 | Database decisions and SKU rules | [`docs/Database.md`](docs/Database.md) |
+| SEO/GEO implementation and supporting research | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |
 | Testing procedure | [`docs/TESTER-GUIDE.md`](docs/TESTER-GUIDE.md) |
 | End-to-end feature traces, written to learn from | [`docs/learning/README.md`](docs/learning/README.md) |
 | Owner ideas, kept verbatim | [`docs/ideas.md`](docs/ideas.md) |

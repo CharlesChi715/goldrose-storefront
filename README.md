@@ -34,6 +34,32 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 ·
 Shopify Polaris (admin UI) · Supabase (Postgres/Auth/Storage) ·
 PayPal Orders v2 · Playwright.
 
+## Tooling and connection checks
+
+The main workspace is an Apple-silicon Mac using macOS, zsh, and Homebrew.
+Project work uses Git/`gh`, Node/npm, Supabase CLI, Vercel CLI, `psql`, Docker,
+Python 3/`uv`, `jq`, ripgrep, Claude, and Codex.
+
+Installed does not mean authenticated or currently usable. Check only the tool
+needed for the task:
+
+```bash
+gh auth status
+vercel whoami
+supabase projects list
+docker info
+```
+
+The Git remote uses SSH. `.vercel/project.json` and `supabase/.temp/` hold the
+local Vercel and Supabase project links and are gitignored. Never copy secrets
+from `.env.local` into documentation, commands, logs, or chat.
+
+For direct hosted PostgreSQL access, the password is stored as
+`SUPABASE_DB_PASSWORD` in `.env.local`. Connect to
+`aws-1-us-west-2.pooler.supabase.com` on port `5432`, database `postgres`, as
+`postgres.<project-ref>`. Prefer read-only queries; make schema changes through
+migrations.
+
 ## Run & test
 
 ```bash
@@ -55,33 +81,12 @@ Money is sandbox/mock only — `PAYPAL_ENV=live` is an owner-only switch.
 Push to `main` → Vercel production deploy (preview URLs for other branches).
 Env vars live in the Vercel dashboard; changes need a redeploy.
 
-## Project structure
+The repository is also linked locally to Vercel for inspection and
+troubleshooting. The normal production path remains the GitHub integration;
+do not create a CLI production deployment unless the task explicitly requires
+one.
 
-```text
-.
-├── app/                 # Routes: storefront, /account, /admin, api/, sitemap/robots/llms.txt
-├── components/          # Storefront + shared UI
-├── lib/                 # admin/, checkout/, supabase/ (2 backends), account/, cart/
-├── supabase/            # SQL migrations
-├── scripts/             # seed.ts
-├── tests/               # e2e (Playwright) + unit
-├── public/              # Served assets (bottom-nav/, top-nav/, veloria/, products/)
-├── assets/              # Raw owner art (not served)
-├── docs/                # Spec + living docs; docs/archive/ = historical
-└── SUMMARY.md           # High-level repository entrypoint — read first
-```
+## Repository map and documentation
 
-## Docs
-
-| Doc | Role |
-|---|---|
-| [SUMMARY.md](SUMMARY.md) | High-level state, structure, and documentation index |
-| [docs/project-state.md](docs/project-state.md) | Environment, safety gates, blockers, and open decisions |
-| [docs/admin-design.md](docs/admin-design.md) | The spec (all § references) |
-| [docs/TESTER-GUIDE.md](docs/TESTER-GUIDE.md) | Tester guide, rendered at `/admin/guide` |
-| [docs/Database.md](docs/Database.md) | DB hosting + backup decisions |
-| [docs/ideas.md](docs/ideas.md) | Owner's ideas, verbatim |
-| [docs/seo-geo/search-discovery-implementation.md](docs/seo-geo/search-discovery-implementation.md) | SEO/GEO implementation source of truth |
-| [docs/seo-geo/seo-intro.md](docs/seo-geo/seo-intro.md) | Concise, verified SEO opportunity map |
-| [docs/seo-geo/geo-intro.md](docs/seo-geo/geo-intro.md) | AI-search/GEO research and platform background |
-| [docs/archive/](docs/archive/) | Historical: build report (§5 activation checklist still live), Shopify-era docs, old flow map |
+[`SUMMARY.md`](SUMMARY.md) owns the repository tree and documentation index.
+Keep setup and command guidance here; add project navigation there.
