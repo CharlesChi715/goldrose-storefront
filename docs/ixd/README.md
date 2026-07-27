@@ -20,6 +20,15 @@ source wins.
   Chinese (translation pending)
 - `assets/` — 52 annotated screenshots (red box = the element for that entry);
   filename = entry ID; JPEG-compressed from the originals
+- [figma-naming-guide.md](figma-naming-guide.md) — the owner's UI naming guide,
+  transcribed **verbatim** from `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`:
+  the PAGE / SECTION / FUNCTION / TYPE vocabulary plus 13 worked examples
+- [element-names.md](element-names.md) — the naming convention we actually
+  apply: grammar, 6 rules, and the vocabulary with our additions and removals.
+  Every visible element carries its name in `data-el`; guarded by
+  `tests/unit/element-names.test.ts`
+- [bottom-nav-buttons.md](bottom-nav-buttons.md), [login-import.md](login-import.md)
+  — per-import notes for the nav art and the 登录界面 frame
 
 ## How to reference an entry
 
@@ -68,3 +77,95 @@ Message from me to ai agents: leave placeholder in unsure things
 6. **Content:** Sources for the copy and images on target pages such as the
    blog, brand story, customer stories, and corporate partnerships remain to
    be determined. -- leave with placeholder.
+
+## Route table (decided by dev 2026-07-25, per owner delegation)
+
+Implemented in the 2026-07-25 homepage/shop import. Wired now (target exists):
+H-04 cart → `/checkout` · H-05 logo → `/` · H-07 hero CTA, H-09/H-12/H-14
+homepage product cards, H-10/H-13 view-all, H-19/H-22 occasion & recipient
+cards, H-27 Browse All Gifts, H-36 Shop All → `/shop` · shop grid cards (N-13)
+→ `/products/[slug]` (live catalog) · bottom nav Home `/`, Shop `/shop`,
+Login `/account`. Everything else — H-01 menu, H-06 search (dropped from the
+final header), H-08/H-16/H-28/H-29/H-30/H-37 personalization, H-15/H-26 MORI,
+H-17/H-31 craft, H-20/H-23/H-35 blog/FAQ, H-24 stories, H-32 workshop,
+H-33 corporate, H-34 story, Wholesale tab — renders pixel-exact but is
+**not clickable** until its target page exists (per the "leave placeholder"
+instruction above).
+
+**Update 2026-07-26 — the three A-4 MORI gift-path cards are now wired.**
+H-15 "FIND A GIFT" → `/shop` (no gift-finder page yet; the catalogue is the
+closest honest destination). H-16 "PERSONALIZE YOUR ROSE" → `#personalize` and
+H-17 "EXPLORE OUR CRAFT" → `#craft` — in-page anchors that scroll to modules
+A-8 ("Personalized Gold Rose Gifts") and A-9 ("Craft, Workshop and Patents")
+further down the same homepage, which are literally that content. All three
+still count as **pending real pages**: a dedicated MORI gift finder,
+personalization flow and craft page supersede these when they exist. The
+remaining H-16/H-17 siblings (H-08/H-28/H-29/H-30/H-37, H-31) and H-26 stay
+inert. No coordinates or styles changed — the cards are pixel-identical.
+
+## `⚠️ Developer note` · mascot artwork needs transparent PNGs
+
+The four AI-generated illustrations on the homepage (the MORI cat and the
+pink ribbon strip) are **opaque bitmaps with a transparency checkerboard
+baked into the pixels**. The Figma file hides that background with a
+`DARKEN` fill blend mode, and the import now reproduces it, so the pages
+match the mock — but DARKEN is a workaround, not a cutout:
+
+- Anything lighter than the backdrop is darkened, so the same art breaks on
+  any dark or coloured section (it can only ever be placed on light cream).
+- A faint grey checkerboard is still visible in the mock and on the page.
+- Browsers composite blend modes on the GPU, so those four boxes are not
+  bit-reproducible and had to be excluded from the pixel-regression net.
+
+**Ask:** please re-export the mascot art as real transparent PNGs (alpha
+channel, no checkerboard) and drop the blend mode. Then the art can sit on
+any background, the checkerboard disappears, and the pixel net can cover it
+again. Same applies to any new mascot art in the screens still in progress.
+
+## B/C screen imports — 2026-07-26 developer findings
+
+All seven remaining frames are now implemented (B-1 bag, B-2 checkout, B-3
+partnerships, B-4 wholesale, C-1 tracking, C-2 confirmation, C-3 menu drawer).
+Things found while transcribing them, for the design team to decide on:
+
+**Two visual languages are now in the codebase.** B-1/B-2 use the palette the
+live homepage and shop already use (`#FFF6EC` / `#3B2F2F` / `#D4AF37`, the
+owner's logo art). C-1/C-2/C-3 use a newer one (`#FFFBF6` / `#09442E` /
+`#D18005`) and set the brand as *text* — "VELORIA" on C-1/C-2, "GoldRose" on
+C-3 — instead of the logo image. Which one is the target? Everything shipped
+verbatim, so the site currently changes character between pages.
+
+**Tab bars disagree.** The live bar is Home / Shop / Wholesale / Login (the
+owner's art). C-1 and C-2 each draw their own glyph bar, and C-2 marks *Help*
+as the active tab on a confirmation screen. B-3/B-4 have no bar at all. Those
+routes therefore opt out of the shared bar to avoid two bars stacking.
+
+**Mockup artifacts / asset bugs** (all left verbatim except where noted):
+- C-3 contains an iPhone status bar ("9:41"). Not implemented — it would put a
+  fake clock on the site.
+- C-2's `✉` and B-1's `Pay` mark export as a `.notdef` square / lose the
+  Apple glyph. Both are served as crops of Figma's frame render instead.
+- B-1's GoldRose wordmark starts 4.5px above its clipping parent, so its top
+  row is cut off in the design itself.
+- B-1 FAQ rows carry a hairline colour with `strokeWeight: 0` (no divider
+  renders); the same component in B-2 has `individualStrokeWeights.bottom: 1`.
+  One of the two is wrong.
+- B-1's gift add-ons look swapped: "Rose Bouquet" shows a gift card, "Personal
+  Card" shows a boxed rose set.
+- B-4's hero image is a "MORI'S RECOMMENDATION" box and its product photo is a
+  blue rose — stock/dev art on a wholesale application.
+- C-2's chip labels (ORDER/SHIP/PIN/CARD/GIFT/HELP) sit at the top of their
+  38px badges rather than centred.
+
+**B-2 checkout has controls with nothing behind them.** The Standard /
+Express / Next-Day picker cannot price per method (shipping is zone-priced
+from the country), and the card / Shop Pay / Apple Pay rows are not live
+providers — PayPal is. Per the owner's decision the picker ships as a cosmetic
+control; card inputs are shown only in mock/dev mode, because a card-number
+field that goes nowhere is a security hazard. To make either real, the design
+needs backend work: per-method shipping rates, and a card provider.
+
+**Placeholder data.** B-1's line items, C-1's whole tracking timeline
+(#VL20250821, the UPS number, the dates) and C-2's product/address rows are
+the mocks' own strings. `/bag` is not yet wired to the live cart, so the cart
+icon still points at `/checkout`, which is the real basket.

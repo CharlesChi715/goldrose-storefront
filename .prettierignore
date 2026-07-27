@@ -1,0 +1,30 @@
+# Prettier owns code style only. Everything below is either generated, binary,
+# or hand-formatted in a way a formatter would damage.
+
+# Generated / vendored
+node_modules/
+.next/
+out/
+build/
+package-lock.json
+*.tsbuildinfo
+next-env.d.ts
+
+# Scratch and local state (all gitignored, listed so `npm run format` is fast)
+temp/
+.data/
+test-results/
+playwright-report/
+.vercel/
+supabase/.temp/
+
+# Assets — binary, and the Figma exports are named by node id
+public/
+assets/
+tests/e2e/__screenshots__/
+docs/ixd/assets/
+
+# Markdown is deliberately out of scope for now: SUMMARY.md and the docs tree
+# carry hand-aligned ASCII trees and tables that a reflow would scramble.
+# Revisit as its own commit once the docs restructure settles.
+*.md

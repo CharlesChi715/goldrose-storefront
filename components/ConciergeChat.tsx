@@ -14,7 +14,7 @@
 
 import { useState } from "react";
 import { inter } from "@/lib/fonts";
-import { abs, txt } from "@/components/veloria";
+import { abs, txt } from "@/lib/figma-layout";
 import NoCalcScale from "@/components/NoCalcScale";
 
 const CHAT_H = 106; // mascot top → bar bottom
@@ -231,13 +231,17 @@ function IdeaForm() {
 export function ConciergeChat({
   navClearance = 59,
   mascotOnTop = true,
+  variant = "green",
 }: {
   /** Height of the fixed bottom nav (+gap) this floats above. */
   navClearance?: number;
   /** Paint order from the Figma frames: shop = mascot over bar, detail = bar over mascot. */
   mascotOnTop?: boolean;
+  /** "green" = original palette; "brown" = the 2026-07-25 redesign palette. */
+  variant?: "green" | "brown";
 }) {
   const [open, setOpen] = useState(false);
+  const brown = variant === "brown";
   const stageH = CHAT_H + navClearance;
 
   const mascot = (
@@ -263,7 +267,7 @@ export function ConciergeChat({
       style={{
         ...abs(16, 60, 398, 46),
         display: "block",
-        background: "#06372E",
+        background: brown ? "#3B2F2F" : "#06372E",
         borderRadius: 18,
         border: "none",
         padding: 0,
@@ -274,17 +278,20 @@ export function ConciergeChat({
     >
       <div
         className={inter.className}
-        style={{ ...abs(16, 8, 258), ...txt(12.5, 15.128, "#FFFFFF"), fontWeight: 500 }}
+        style={{ ...abs(16, 8, 258), ...txt(12.5, 15.128, brown ? "#FFF6EC" : "#FFFFFF"), fontWeight: 500 }}
       >
         Need help choosing the perfect rose?
       </div>
-      <div className={inter.className} style={{ ...abs(16, 17, 258), ...txt(11, 13.312, "#D9E3DE") }}>
+      <div
+        className={inter.className}
+        style={{ ...abs(16, brown ? 25 : 17, 258), ...txt(11, 13.312, brown ? "#FFF6EC" : "#D9E3DE") }}
+      >
         Ask our gifting concierge.
       </div>
-      <div style={{ ...abs(274, 2, 112, 42), background: "#C89236", borderRadius: 99 }}>
+      <div style={{ ...abs(274, 2, 112, 42), background: brown ? "#D4AF37" : "#C89236", borderRadius: 99 }}>
         <div
           className={inter.className}
-          style={{ ...abs(14, 13, 84), ...txt(13, 15.733, "#FFFFFF"), fontWeight: 500 }}
+          style={{ ...abs(14, 13, 84), ...txt(13, 15.733, brown ? "#FFF6EC" : "#FFFFFF"), fontWeight: 500 }}
         >
           {"CHAT NOW  ›"}
         </div>

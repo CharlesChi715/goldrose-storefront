@@ -53,3 +53,27 @@ summary {
   background: #c28a2e;
   color: #231f20;
 }
+
+/* Product photos grow a little under the cursor (owner, 2026-07-26). The photo
+   frames already clip, so the picture zooms inside its own window and the card
+   never changes size or nudges its neighbours.
+   `scale` is used rather than `transform: scale()` on purpose: the Figma import
+   positions sub-pixel coordinates with `transform: translate()`, and the
+   separate `scale` property composes with that instead of overwriting it.
+   Pointer devices only — on a touch screen the :hover would stick after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .gr-photo {
+    transition: scale 320ms ease;
+    will-change: scale;
+  }
+
+  .gr-card-zoom:hover .gr-photo {
+    scale: 1.06;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gr-photo {
+    transition: none;
+  }
+}

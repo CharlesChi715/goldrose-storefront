@@ -71,9 +71,10 @@ test("mock checkout: cart → pay → success → order recorded with note + mov
   await page.getByRole("button", { name: /^Pay \$/ }).click();
 
   await page.waitForURL(/\/checkout\/success\?/);
-  await expect(page.getByText("Thank you for your order.")).toBeVisible();
-  await expect(page.getByText("development test order")).toBeVisible();
-  const orderName = (await page.locator("dd.font-mono").innerText()).trim();
+  // Success page is now the C-2 "Order Confirmed" design.
+  await expect(page.getByRole("heading", { name: "Order Confirmed" })).toBeVisible();
+  await expect(page.getByText(/TEST ORDER · MOCK MODE/)).toBeVisible();
+  const orderName = (await page.locator("[data-order-name]").innerText()).trim();
   expect(orderName).toMatch(/^#1\d{3}$/);
 
   const db = await readDb();
@@ -119,7 +120,7 @@ test("non-US address gets its zone's shipping rate (Rest of world)", async ({ pa
   await page.getByRole("button", { name: "PayPal" }).click();
   await page.waitForURL(/\/checkout\/success\?/);
 
-  const orderName = (await page.locator("dd.font-mono").innerText()).trim();
+  const orderName = (await page.locator("[data-order-name]").innerText()).trim();
   const db = await readDb();
   const order = db.tables.orders.find((row) => row.name === orderName);
   expect(order!.shipping_cents).toBe(1995);

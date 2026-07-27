@@ -10,9 +10,8 @@ everything without opening the files.
 Every future thought moves one way through the docs — never lives in two places:
 
 ```
-docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md "Next steps"  →  .ai/WORKLOG.md
-  (raw inbox,      (options, pros/cons,         (only while queued          (dated entry
-   verbatim)        decision, plan, STATUS)      or in flight)               when done)
+docs/ideas.md  →  docs/features/<name>.md  →  docs/project-state.md  →  .ai/WORKLOG.md
+  (raw inbox,      (decision, plan, STATUS)       (release queue only)       (dated history)
 ```
 
 - An idea graduates: add its feature file, delete its line from ideas.md.
@@ -84,16 +83,22 @@ Native checkout (PayPal Orders v2)
 ├── discount codes ●●●○ UAT
 ├── shipping rates ●●●○ UAT — RoW $19.95 placeholder (OQ-2)
 ├── PayPal create/capture ●●●○ UAT — sandbox until launch
-└── PayPal webhooks ●●●○ UAT
+├── PayPal webhooks ●●●○ UAT
+└── card-payments.md ●○○○ READY — Advanced Cards (OQ-1); owner enables it first
 
 Guest order lookup
 └── /orders ●●●○ UAT
 
 Customer accounts /account — dormant: owner config pending
-├── Google OAuth ●●●○ UAT
-├── Apple OAuth ●●●○ UAT
-├── passkeys ●●●○ UAT
-└── order matching (verified email + signed-in checkout stamp) ●●●○ UAT
+├── email one-time code ●●○○ IN PROGRESS — needs Supabase OTP template + SMTP
+├── Google OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
+├── Apple OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
+├── passkeys ✕ DROPPED — owner 07-25 "no passkey" (storefront only; admin keeps them)
+├── order matching (verified email + signed-in checkout stamp) ●●●○ UAT
+├── nav tab "Login" ⇄ "Me" ●●●○ UAT
+├── login screen 74:53 ●●●○ UAT — imported pixel-exact 07-25
+└── login screen 74:55 (B2B) ●●●○ UAT — imported 07-25; enquiries email the
+    owner, nothing persisted; needs RESEND_API_KEY + a store contact email
 
 Concierge chat (mascot + bar overlay)
 ├── feedback panel → admin Ideas ●●●○ UAT
@@ -139,15 +144,18 @@ Order emails (Resend) — console fallback until RESEND_API_KEY set
 └── owner new-order alert ●●●○ UAT
 
 Shipping & tracking
-└── order-tracking.md ●●○○ IN PROGRESS — built; merge + 0003 on hosted pending
+└── order-tracking.md ●●●○ UAT — owner must verify a real carrier link
 
 Marketing
 └── promotion-emails.md ○○○○ BACKLOG — consent + unsubscribe first
 
 Supabase hosted DB
-├── migrations (0001, 0002) ●●●● DONE — 0003 written, apply on hosted pending
+├── migrations (0001–0003) ●●●● DONE — 0003 verified hosted 2026-07-25
 ├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
 └── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
+
+Infrastructure
+└── region-alignment.md ●●●● DONE — functions verified in pdx1 2026-07-26; EU-replica option stays future
 ```
 
 Refs (links can't render inside the code blocks, so shorthands above resolve
@@ -155,8 +163,10 @@ here):
 
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
 - **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
-- **OQ-2 / OQ-3** → [SUMMARY.md · Open questions](../../SUMMARY.md)
+- **OQ-1 / OQ-2 / OQ-3** → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
+- **card-payments.md** → [card-payments.md](card-payments.md)
 - **db-backups.md** → [backend/db-backups.md](backend/db-backups.md)
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)
 - **order-tracking.md** → [backend/order-tracking.md](backend/order-tracking.md)
 - **promotion-emails.md** → [backend/promotion-emails.md](backend/promotion-emails.md)
+- **region-alignment.md** → [backend/region-alignment.md](backend/region-alignment.md)

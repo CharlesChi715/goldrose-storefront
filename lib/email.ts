@@ -167,3 +167,40 @@ export async function sendShippingConfirmationEmail(
     `Good news — your order has shipped!${tracking}\n\n${orderSummaryText(order, lines)}`,
   );
 }
+
+/**
+ * Email the owner a business/procurement enquiry from the B2B sign-in screen
+ * (frame 74:55). The design's request CTAs have no backend of their own — the
+ * agreed V1 is "static + email the request" — so this is the whole pipeline.
+ * Stored nowhere: if the owner email is unset the enquiry is logged, never
+ * silently dropped.
+ *
+ * @param enquiry - The visitor's email, the chosen need, and which CTA sent it.
+ * @returns True when an email was addressed to the owner, false when no owner
+ *   contact email is configured (the caller still reports success to the
+ *   visitor; the console fallback keeps the enquiry).
+ */
+export async function sendBusinessRequestEmail(enquiry: {
+  email: string;
+  need?: string;
+  kind: "request" | "consultation";
+}): Promise<boolean> {
+  const { storeName, ownerEmail } = await getEmailSettings();
+  const heading =
+    enquiry.kind === "consultation" ? "Consultation booking" : "Purchase request";
+  const text = [
+    `${heading} from the ${storeName} Business & Partnerships page.`,
+    "",
+    `From: ${enquiry.email}`,
+    `Need: ${enquiry.need ?? "(not specified)"}`,
+    "",
+    "Reply directly to this address to follow up.",
+  ].join("\n");
+
+  if (!ownerEmail) {
+    console.warn(`[email] no owner contact email set — business enquiry not delivered:\n${text}`);
+    return false;
+  }
+  await deliver(ownerEmail, `${heading} — ${enquiry.email}`, text);
+  return true;
+}

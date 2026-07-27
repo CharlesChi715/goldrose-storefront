@@ -1,0 +1,48 @@
+# Runs on every push and pull request so each commit gets a visible green or
+# red mark. Next 16 removed lint-on-build, so without this workflow `npm run
+# lint` only ever runs when somebody remembers to type it.
+#
+# Deliberately NOT here yet, both for reasons that would make CI red on day one:
+#   * `npm run build` — needs a seeded .data/db.json (that directory is
+#     gitignored), so it wants a `npm run seed -- --reset` step first.
+#   * `npm run test:e2e` — the pixel baselines in tests/e2e/__screenshots__ are
+#     named `-darwin.png`; on a Linux runner every pixel spec fails. Adding e2e
+#     means a macos-latest runner.
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Node 24: `npm run test:unit` runs `node --test` directly over .ts
+      # files, which needs the unflagged type stripping added in Node 23.6.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      # `npm ci` honours .npmrc, which sets legacy-peer-deps for the Polaris
+      # packages that still declare React 18 against this app's React 19.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:unit

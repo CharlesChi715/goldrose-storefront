@@ -61,11 +61,28 @@ turn it into a real task.
 
 - Add diff popular checkout types across countries in Euo and American.
 
+## From boss - 2026-07-25
+Build payments for US where we going to marketing frist: Visa、 PayPal、Mastercard
 
+## From boss 07-26
+is there any way to get how long time do user stay on a page or stay on a section of certain page? 
 
 
 ## TODO from me:
 payment
-order tracking
+order tracking test
 frontend ixd
 domain
+
+
+- meeting
+
+figma 英语命名 统一
+
+在想backup plan
+
+支付用 PayPal Advanced Cards
+
+email tracking order 
+
+supabase CLI

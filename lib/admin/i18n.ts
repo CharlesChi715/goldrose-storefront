@@ -121,6 +121,9 @@ const en = {
   "security.rename": "Rename",
   "security.renameLabel": "Passkey name",
   "security.remove": "Remove",
+  "security.remove.title": "Remove passkey?",
+  "security.remove.body":
+    "“{name}” will no longer work for signing in. This can't be undone.",
   "security.error": "That didn't work — please try again.",
 
   // Forum (testing phase)
@@ -649,6 +652,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "security.rename": "重命名",
   "security.renameLabel": "通行密钥名称",
   "security.remove": "移除",
+  "security.remove.title": "要移除通行密钥吗？",
+  "security.remove.body": "“{name}”将无法再用于登录。此操作无法撤消。",
   "security.error": "操作失败——请重试。",
 
   // Forum (testing phase)

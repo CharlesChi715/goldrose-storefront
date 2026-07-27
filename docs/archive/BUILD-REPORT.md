@@ -1,6 +1,6 @@
 > **ARCHIVED 2026-07-23.** Historical record of the one-shot admin build.
 > Still live: the **§5 owner activation checklist** below (tracked from
-> `SUMMARY.md` → Next steps).
+> `docs/project-state.md` → Release blockers and active queue).
 
 # GoldRose Admin Build — Report (§0.5)
 
@@ -67,6 +67,7 @@ Do these in order; everything else already works.
 
 1. **Supabase**（约 15 分钟）
    - [ ] Create a project at supabase.com (region `ap-southeast-2`), open **SQL Editor**, paste & run `supabase/migrations/0001_init.sql`.
+     *(Correction 2026-07-26: the project was actually created in `us-west-2` (Oregon); commit `a62848e`'s "database is in Sydney" premise is wrong. See [features/backend/region-alignment.md](../features/backend/region-alignment.md).)*
    - [ ] Project Settings → API: copy the URL + anon key + service-role key into `.env.local` and Vercel (Production **and** Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (mark sensitive).
    - [ ] Seed: `npm run seed` (with the env vars set — it fills products/settings/content, never touches a non-empty db).
    - [ ] Auth → Users → **Add user**: your email + a strong password. Then SQL Editor: `insert into admin_users (user_id, email) select id, email from auth.users where email = 'YOUR-EMAIL';`

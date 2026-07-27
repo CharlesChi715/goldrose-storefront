@@ -2,33 +2,31 @@
 
 /**
  * ROLE OF THIS FILE
- * Client half of /account (owner request 2026-07-23). Sign-in happens here
- * because both flows are browser ceremonies: Google/Apple OAuth redirects
- * out and back through /auth/callback, passkeys run WebAuthn against
- * Supabase's beta API. Once the session cookie exists, the server action
- * returns the account view (orders by verified email). Without Supabase
- * env vars (local file mode / e2e) the page shows a "not available yet"
- * card instead — sign-in needs the hosted backend.
+ * Client half of /account (owner request 2026-07-23). It picks one of two
+ * screens: signed out renders the pixel-exact VELORIA sign-in frame
+ * (ShoppingLogin, 74:53), signed in renders the hand-built account view below
+ * — the design ships no signed-in frame, so that half stays bespoke.
+ *
+ * Sign-in is an emailed one-time code, the only method the 07-25 design
+ * offers; the owner confirmed "no passkey" for the storefront, so the passkey
+ * and OAuth buttons that used to live here are gone. The underlying helpers
+ * (`lib/supabase/browser-auth`, /auth/callback) are untouched and still serve
+ * the admin, so restoring either method is a UI change only.
  */
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { supabaseBrowserAuthClient, useWebAuthnSupported } from "@/lib/supabase/browser-auth";
+import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
 import { formatMoney } from "@/lib/money";
 import { carrierLabel } from "@/lib/shipping/carriers";
+import { BottomNav } from "@/components/chrome";
+import { ShoppingLogin } from "@/components/login/ShoppingLogin";
 import { accountOverviewAction } from "./actions";
 import type { AccountOrder, AccountOverview } from "@/lib/account/data.ts";
 
 const brandName = "GoldRose";
 
 type Phase = "unavailable" | "loading" | "signedOut" | "signedIn";
-
-type PasskeyItem = {
-  id: string;
-  friendly_name?: string;
-  created_at: string;
-  last_used_at?: string;
-};
 
 const FINANCIAL_LABEL: Record<string, string> = {
   pending: "Payment pending",
@@ -67,28 +65,6 @@ function formatDate(iso: string): string {
     : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
-/** Shared warm-gold button used by every sign-in option. */
-function OptionButton({
-  onClick,
-  disabled,
-  children,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[3px] border border-[#d7c28a] bg-[#fffaf2] text-sm font-bold tracking-[0.04em] text-[#211a0e] shadow-sm transition hover:border-[#9a7826] hover:brightness-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {children}
-    </button>
-  );
-}
-
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-xs font-black uppercase tracking-[0.16em] text-[#9a7826]">{children}</p>
@@ -97,10 +73,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export function AccountClient() {
   const supabase = useMemo(() => supabaseBrowserAuthClient(), []);
-  const passkeySupported = useWebAuthnSupported();
   const [phase, setPhase] = useState<Phase>(supabase ? "loading" : "unavailable");
   const [overview, setOverview] = useState<AccountOverview | null>(null);
-  const [passkeys, setPasskeys] = useState<PasskeyItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -112,10 +86,6 @@ export function AccountClient() {
     }
     setOverview(data);
     setPhase("signedIn");
-    if (supabase) {
-      const { data: list } = await supabase.auth.passkey.list();
-      setPasskeys(list ?? []);
-    }
   }
 
   useEffect(() => {
@@ -142,69 +112,24 @@ export function AccountClient() {
       }
       loadAccount();
     });
+    // The sign-in screen verifies the emailed code itself, so the session can
+    // appear without this component doing anything — watch for it.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) {
+        return;
+      }
+      if (event === "SIGNED_IN" && session?.user) {
+        loadAccount();
+      } else if (event === "SIGNED_OUT") {
+        setOverview(null);
+        setPhase("signedOut");
+      }
+    });
     return () => {
       cancelled = true;
+      sub.subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase]);
-
-  function oauthSignIn(provider: "google" | "apple") {
-    if (!supabase) {
-      return;
-    }
-    setBusy(provider);
-    setError(null);
-    supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/account` },
-    });
-  }
-
-  async function passkeySignIn() {
-    if (!supabase) {
-      return;
-    }
-    setBusy("passkey");
-    setError(null);
-    const { data, error: signInError } = await supabase.auth.signInWithPasskey();
-    if (signInError || !data?.session) {
-      setError("Passkey sign-in didn't complete. Try again, or use Google or Apple.");
-      setBusy(null);
-      return;
-    }
-    await loadAccount();
-    setBusy(null);
-  }
-
-  async function addPasskey() {
-    if (!supabase) {
-      return;
-    }
-    setBusy("addPasskey");
-    setError(null);
-    const { error: registerError } = await supabase.auth.registerPasskey();
-    if (registerError) {
-      setError("Couldn't add a passkey on this device.");
-    } else {
-      const { data: list } = await supabase.auth.passkey.list();
-      setPasskeys(list ?? []);
-    }
-    setBusy(null);
-  }
-
-  async function removePasskey(passkeyId: string) {
-    if (!supabase) {
-      return;
-    }
-    setBusy(`remove:${passkeyId}`);
-    const { error: deleteError } = await supabase.auth.passkey.delete({ passkeyId });
-    if (deleteError) {
-      setError("Couldn't remove that passkey.");
-    } else {
-      setPasskeys((current) => current.filter((key) => key.id !== passkeyId));
-    }
-    setBusy(null);
-  }
 
   async function signOut() {
     if (!supabase) {
@@ -213,9 +138,14 @@ export function AccountClient() {
     setBusy("signOut");
     await supabase.auth.signOut();
     setOverview(null);
-    setPasskeys([]);
     setBusy(null);
     setPhase("signedOut");
+  }
+
+  // Signed out (and local mode, which has no auth server) is the design's own
+  // screen; it brings its own bottom nav via ScaleFrame.
+  if (phase === "signedOut" || phase === "unavailable") {
+    return <ShoppingLogin />;
   }
 
   return (
@@ -244,50 +174,8 @@ export function AccountClient() {
           </p>
         ) : null}
 
-        {phase === "unavailable" ? (
-          <div className="mt-7 rounded-md border border-[#d9c48a] bg-[#fbf6ec] p-8 shadow-[0_22px_60px_rgba(33,26,14,0.10)]">
-            <p className="text-sm leading-7 text-[#5c4f38]">
-              Customer sign-in isn&apos;t switched on in this environment yet. You can still
-              browse the shop and check out as a guest.
-            </p>
-          </div>
-        ) : null}
-
         {phase === "loading" ? (
           <p className="mt-7 text-sm text-[#7c6e50]">Checking your session…</p>
-        ) : null}
-
-        {phase === "signedOut" ? (
-          <div className="mt-7 rounded-md border border-[#d9c48a] bg-[#fbf6ec] p-8 shadow-[0_22px_60px_rgba(33,26,14,0.10)]">
-            <SectionLabel>Sign in</SectionLabel>
-            <p className="mt-2 text-sm leading-7 text-[#5c4f38]">
-              Use the account you check out with to see your orders in one place.
-            </p>
-            <div className="mt-5 grid gap-3">
-              <OptionButton onClick={() => oauthSignIn("google")} disabled={busy !== null}>
-                {busy === "google" ? "Opening Google…" : "Continue with Google"}
-              </OptionButton>
-              <OptionButton onClick={() => oauthSignIn("apple")} disabled={busy !== null}>
-                {busy === "apple" ? "Opening Apple…" : "Continue with Apple"}
-              </OptionButton>
-              {passkeySupported ? (
-                <>
-                  <div className="my-1 flex items-center gap-4 text-xs font-bold uppercase tracking-[0.18em] text-[#a99a78]">
-                    <span className="h-px flex-1 bg-[#d7c28a]" />
-                    or
-                    <span className="h-px flex-1 bg-[#d7c28a]" />
-                  </div>
-                  <OptionButton onClick={passkeySignIn} disabled={busy !== null}>
-                    {busy === "passkey" ? "Waiting for your device…" : "Sign in with a passkey"}
-                  </OptionButton>
-                </>
-              ) : null}
-            </div>
-            <p className="mt-4 text-xs leading-5 text-[#7c6e50]">
-              First time here? Continuing with Google or Apple creates your account —
-              you can add a passkey afterwards for one-tap sign-in.
-            </p>
-          </div>
         ) : null}
 
         {phase === "signedIn" && overview ? (
@@ -364,43 +252,10 @@ export function AccountClient() {
               )}
             </div>
 
-            {passkeySupported ? (
-              <div className="rounded-md border border-[#d9c48a] bg-[#fbf6ec] p-8 shadow-[0_22px_60px_rgba(33,26,14,0.10)]">
-                <SectionLabel>Passkeys</SectionLabel>
-                <p className="mt-2 text-sm leading-7 text-[#5c4f38]">
-                  Sign in with Face ID, Touch ID, or your device PIN — no password, nothing to
-                  remember.
-                </p>
-                {passkeys.length > 0 ? (
-                  <ul className="mt-4 divide-y divide-[#e7d9b8]">
-                    {passkeys.map((key) => (
-                      <li key={key.id} className="flex flex-wrap items-baseline justify-between gap-2 py-3">
-                        <div>
-                          <p className="text-sm font-bold">{key.friendly_name || "Passkey"}</p>
-                          <p className="text-xs text-[#7c6e50]">Added {formatDate(key.created_at)}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removePasskey(key.id)}
-                          disabled={busy !== null}
-                          className="text-xs font-bold uppercase tracking-[0.16em] text-[#8a6a22] underline-offset-4 hover:text-[#9a7826] hover:underline disabled:opacity-60"
-                        >
-                          {busy === `remove:${key.id}` ? "Removing…" : "Remove"}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                <div className="mt-5">
-                  <OptionButton onClick={addPasskey} disabled={busy !== null}>
-                    {busy === "addPasskey" ? "Follow your device's prompts…" : "Add a passkey on this device"}
-                  </OptionButton>
-                </div>
-              </div>
-            ) : null}
           </div>
         ) : null}
       </div>
+      <BottomNav active="Account" />
     </main>
   );
 }

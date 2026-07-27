@@ -1,30 +1,30 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * The /shop page — a pixel-exact implementation of "Frame 26" (node 24:644,
- * inner canvas node 24:396, 430×1938) from the VELORIA Figma file. Every
- * coordinate, size, color, and font value comes verbatim from the Figma REST
- * API. Photo assets in /public/veloria are exact 2x node renders. Product
- * cards link to /products/[slug]; the bottom nav (shared) is viewport-fixed.
+ * The /shop page — a pixel-exact implementation of the "shop" frame (node
+ * 24:396, 430×1822, 2026-07-25 redesign palette) from the VELORIA Figma
+ * file. Every coordinate, size, color, and font value comes verbatim from
+ * the Figma REST API. Photo assets in /public/veloria(/home) are exact 2x
+ * node renders. Product cards keep the live-catalog wiring (name, price,
+ * compare-at, link → /products/[slug]); star rows and hearts are static
+ * design art (ratings/wishlist are out of scope this release, IxD README).
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConciergeChat } from "@/components/ConciergeChat";
 import {
-  abs,
-  txt,
   CloseIcon,
   DownIcon,
   FilterIcon,
   ForwardIcon,
-  HeartIcon,
   ListviewIcon,
   PromoBar,
   ScaleFrame,
-  VHeader,
-} from "@/components/veloria";
-import { cormorant, notoSC, tenor } from "@/lib/fonts";
+  ShopHeader,
+} from "@/components/chrome";
+import { abs, txt } from "@/lib/figma-layout";
+import { inter, notoSC, tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
 import { formatMoney } from "@/lib/money";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
@@ -32,27 +32,61 @@ import { getCatalog } from "@/lib/supabase/catalog.ts";
 // DB-backed data (card links, promo slogan) refreshes without a redeploy (§8).
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description: "Shop the GoldRose 24K gold dipped rose collection.",
-  alternates: { canonical: "/shop" },
-};
+/**
+ * Pages 2-5 are the same eight placeholder products in a different order, so
+ * they are kept out of search results until real paging exists; page 1 stays
+ * the canonical /shop listing.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}): Promise<Metadata> {
+  const requested = Number((await searchParams).page);
+  const paged = Number.isInteger(requested) && requested > 1 && requested <= PAGE_COUNT;
+  return {
+    title: paged ? `Shop · page ${requested}` : "Shop",
+    description: "Shop the GoldRose 24K gold dipped rose collection.",
+    alternates: { canonical: "/shop" },
+    ...(paged ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
-const INK = "#1B362B";
-const GREY = "#555555";
+// Redesign palette (2026-07-25 frame edit)
+const INK = "#3B2F2F";
+const INK_SOFT = "#4A403B";
+const MUTED = "#B8A69A";
+const SAND = "#E5D9C9";
 
 /* ---------- Product cards (Figma frame order, left/right per row) ---------- */
 
+// Left cards are 203 wide, right cards 204 (verbatim frame widths); `img` is
+// the 2x render of that card's own Product Visual node, `stars` the row's
+// star-glyph render (185px left / 186px right).
 const CARDS = [
-  { x: 5, y: 414, img: "card-1" },
-  { x: 221, y: 414, img: "card-2" },
-  { x: 5, y: 746, img: "card-3" },
-  { x: 221, y: 746, img: "card-4" },
-  { x: 5, y: 1078, img: "card-5" },
-  { x: 221, y: 1078, img: "card-6" },
-  { x: 5, y: 1410, img: "card-7" },
-  { x: 221, y: 1410, img: "card-8" },
+  { x: 8, y: 408.5, w: 203, img: "58-61", stars: "58-64", starsW: 185 },
+  { x: 219, y: 408.5, w: 204, img: "58-91", stars: "58-94", starsW: 186 },
+  { x: 8, y: 716.5, w: 203, img: "58-103", stars: "58-64", starsW: 185 },
+  { x: 219, y: 716.5, w: 204, img: "58-113", stars: "58-94", starsW: 186 },
+  { x: 8, y: 1024.5, w: 203, img: "58-125", stars: "58-64", starsW: 185 },
+  { x: 219, y: 1024.5, w: 204, img: "58-135", stars: "58-94", starsW: 186 },
+  { x: 8, y: 1332.5, w: 203, img: "58-148", stars: "58-64", starsW: 185 },
+  { x: 219, y: 1332.5, w: 204, img: "58-158", stars: "58-94", starsW: 186 },
 ];
+
+/**
+ * Pagination is placeholder depth: the design draws five pages, and there is
+ * only one page of real products (OQ-3). Every page therefore shows the SAME
+ * eight cards, rotated into different grid slots so the pages are visibly
+ * distinct — page 1 keeps the design's exact order.
+ */
+const PAGE_COUNT = 5;
+const ROTATE_PER_PAGE = 3;
+
+/** Which card's content belongs in grid slot `slot` on `page`. */
+function contentIndex(slot: number, page: number) {
+  return (slot + (page - 1) * ROTATE_PER_PAGE) % CARDS.length;
+}
 
 type CardData = { shortName: string; price: string; compareAt: string | null } | null;
 
@@ -66,65 +100,101 @@ function ProductCard({
   /** Live catalog values for the designated text boxes; null = design text. */
   data: CardData;
 }) {
+  const heartX = card.w === 203 ? 154 : 155; // 收藏 art: 162/374 in frame coords
   return (
     <Link
       href={href}
+      className="gr-card-zoom"
       style={{
-        ...abs(card.x, card.y, 204, 315),
+        ...abs(card.x, card.y, card.w, 297),
         display: "block",
-        background: "#FFFFFF",
-        boxShadow: "inset 0 0 0 1px #FDF2E4",
-        borderRadius: 15,
+        background: "#FFFBF6",
+        boxShadow: `inset 0 0 0 1px ${SAND}`,
+        borderRadius: 14,
+        overflow: "hidden",
       }}
     >
-      <div style={{ ...abs(0, 0.5, 204, 255), background: "#FDF2E4", borderRadius: 15 }} />
       <img
-        src={`/veloria/${card.img}.png`}
+        className="gr-photo"
+        src={`/veloria/home/${card.img}.png`}
         alt="Artisan 24K gold-dipped eternal rose"
-        width={204}
-        height={214}
-        style={{ ...abs(0, 0.5, 204, 214), display: "block" }}
+        width={card.w}
+        height={204}
+        style={{ ...abs(0, 0, card.w, 204), display: "block" }}
       />
-      <span style={abs(168.5, 10.5, 25, 26)}>
-        <HeartIcon />
-      </span>
       <div
-        className={cormorant.className}
+        className={inter.className}
         data-live-text
         style={{
-          ...abs(19.5, 257.5, 165),
-          ...txt(25, 32, "#152C27", "center"),
-          fontWeight: 600,
-          whiteSpace: "nowrap",
+          ...abs(9, 214, card.w - 18),
+          ...txt(16, 16, INK),
+          fontWeight: 500,
           overflow: "hidden",
           textOverflow: "ellipsis",
         }}
       >
-        {data?.shortName ?? "Artisan"}
+        {data?.shortName ?? "Double Rose Gift Set"}
       </div>
+      <img
+        src={`/veloria/home/${card.stars}.svg`}
+        alt="Five star rating"
+        width={card.starsW}
+        height={11}
+        style={{ ...abs(9, 234, card.starsW, 11), display: "block" }}
+      />
+      {/* Price pair. The frame gives each price its own fixed box (48 / 51
+          wide) because the mock text is the short "$219"; real prices carry
+          cents and overflow that, so the two flow in one row that ends short
+          of the heart — same origin as the design, no overlap. */}
       <div
         className={notoSC.className}
         data-live-text
-        style={{ ...abs(42.5, 293.5), ...txt(16, 19.2, "#073A31"), fontWeight: 700 }}
+        style={{
+          ...abs(9, 249, heartX - 13, 43),
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          overflow: "hidden",
+        }}
       >
-        {data?.price ?? "$159.00"}
+        <span style={{ ...txt(20, 24, INK), fontWeight: 700, flexShrink: 0 }}>
+          {data?.price ?? "$219"}
+        </span>
+        {data === null || data.compareAt !== null ? (
+          <span
+            style={{
+              ...txt(14, 16.8, MUTED),
+              textDecoration: "line-through",
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {data?.compareAt ?? "$189.00"}
+          </span>
+        ) : null}
       </div>
-      {data === null || data.compareAt !== null ? (
-        <div
-          className={notoSC.className}
-          data-live-text
-          style={{ ...abs(110.5, 294.5), ...txt(14, 16.8, "#918A83"), textDecoration: "line-through" }}
-        >
-          {data?.compareAt ?? "$189.00"}
-        </div>
-      ) : null}
+      <img
+        src="/veloria/home/58-86.png"
+        alt=""
+        width={40}
+        height={43}
+        style={{ ...abs(heartX, 249, 40, 43), display: "block" }}
+      />
     </Link>
   );
 }
 
 /* ---------- Page ---------- */
 
-export default async function ShopPage() {
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const requested = Number((await searchParams).page);
+  const page =
+    Number.isInteger(requested) && requested >= 1 && requested <= PAGE_COUNT ? requested : 1;
   // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
   let handles: string[] = [];
   let cardData: Array<{ handle: string; shortName: string; price: string; compareAt: string | null }> = [];
@@ -149,11 +219,12 @@ export default async function ShopPage() {
 
   return (
     <>
-      <ScaleFrame height={1938} background="#FFFFFF" fontClass={tenor.className} navGap={1}>
-      {/* Hero carousel render (dots baked in); bleeds 7px past both canvas
-          edges in the design — the canvas clips it, exactly as Figma does. */}
+      <ScaleFrame height={1822} background="#FFF6EC" fontClass={tenor.className}>
+      {/* Hero carousel render (badge, Shop Now pill and dots baked in);
+          bleeds 7px past both canvas edges — the canvas clips it, as Figma
+          does. */}
       <img
-        src="/veloria/shop-hero.png"
+        src="/veloria/home/31-14.png"
         alt="Featured collection"
         width={444}
         height={202}
@@ -161,32 +232,32 @@ export default async function ShopPage() {
         style={{ ...abs(-7, 94, 444, 202), display: "block", maxWidth: "none" }}
       />
 
-      <VHeader backHref="/" right="search" />
-      <PromoBar slogan={promo.text} isDefault={promo.isDefault} />
+      <ShopHeader />
+      <PromoBar slogan={promo.text} isDefault={promo.isDefault} variant="brown" />
 
       {/* Filter bar. The +1.5px on the two tight-line-height Tenor labels is
           the Chrome-vs-Figma baseline correction verified on the homepage. */}
       <div style={{ ...abs(0, 325.359, 127.78), ...txt(14, 14.84, INK, "center"), textTransform: "uppercase" }}>
-        4500 Apparel
+        120 Apparel
       </div>
       <div
-        style={{ ...abs(217, 308, 91.136, 43.105), background: "rgba(196,196,196,0.10)", borderRadius: 33 }}
+        style={{ ...abs(217, 308, 91.136, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: 33 }}
       />
-      <div style={{ ...abs(236, 325.844, 36.33), ...txt(13, 13.78, GREY, "center") }}>New</div>
+      <div style={{ ...abs(236, 325.844, 36.33), ...txt(13, 13.78, INK_SOFT, "center") }}>New</div>
       <span style={abs(275.961, 323, 21, 20)}>
-        <DownIcon />
+        <DownIcon color={INK} />
       </span>
       <div
-        style={{ ...abs(317, 309, 45.099, 43.105), background: "rgba(196,196,196,0.10)", borderRadius: "50%" }}
+        style={{ ...abs(317, 309, 45.099, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: "50%" }}
       />
       <span style={abs(327.022, 318.579, 26, 24)}>
-        <ListviewIcon />
+        <ListviewIcon color={INK} />
       </span>
       <div
-        style={{ ...abs(374.531, 308.254, 45.099, 43.105), background: "rgba(196,196,196,0.10)", borderRadius: "50%" }}
+        style={{ ...abs(374.531, 308.254, 45.099, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: "50%" }}
       />
       <span style={abs(384, 320, 26, 24)}>
-        <FilterIcon />
+        <FilterIcon color="#D4AF37" />
       </span>
 
       {/* Active filter chips — strokes are OUTSIDE-aligned in Figma, so the
@@ -196,62 +267,83 @@ export default async function ShopPage() {
         { x: 119, w: 116, label: "All apparel", labelX: 10, labelW: 74, closeX: 90 },
       ].map((chip) => (
         <div key={chip.label} style={abs(chip.x, 359, chip.w, 32)}>
-          <div style={{ ...abs(-1, -1, chip.w + 2, 34), border: "1px solid #DEDEDE", borderRadius: 31 }} />
+          <div style={{ ...abs(-1, -1, chip.w + 2, 34), border: `1px solid ${SAND}`, borderRadius: 31 }} />
           <div
             style={{ ...abs(chip.labelX, 8, chip.labelW), ...txt(14, 16, INK, "center"), letterSpacing: 0.14 }}
           >
             {chip.label}
           </div>
           <span style={abs(chip.closeX, 8, 16, 16)}>
-            <CloseIcon />
+            <CloseIcon color={INK_SOFT} />
           </span>
         </div>
       ))}
 
-      {/* Product grid — each card routes to its product detail page. */}
-      {CARDS.map((card, i) => (
-        <ProductCard
-          key={i}
-          card={card}
-          href={handles.length ? `/products/${handles[i % handles.length]}` : "/shop"}
-          data={cardData.length ? cardData[i % cardData.length] : null}
-        />
-      ))}
+      {/* Product grid — slot geometry is the design's; which card sits in each
+          slot rotates per page (placeholder paging, see PAGE_COUNT). */}
+      {CARDS.map((slot, i) => {
+        const c = contentIndex(i, page);
+        return (
+          <ProductCard
+            key={i}
+            card={{ ...slot, img: CARDS[c].img }}
+            href={handles.length ? `/products/${handles[c % handles.length]}` : "/shop"}
+            data={cardData.length ? cardData[c % cardData.length] : null}
+          />
+        );
+      })}
 
-      {/* Pagination */}
-      {[
-        { x: 101, label: "1", active: true },
-        { x: 145, label: "2", active: false },
-        { x: 189, label: "3", active: false },
-        { x: 233, label: "4", active: false },
-        { x: 277, label: "5", active: false },
-      ].map((p) => (
-        <div
-          key={p.label}
-          style={{ ...abs(p.x, 1763, 32, 32), background: p.active ? INK : "rgba(136,136,136,0.10)" }}
-        >
-          <div
+      {/* Pagination — page 1 keeps the bare /shop URL so the canonical page
+          has no query string. */}
+      {[110, 154, 198, 242, 286].map((x, i) => {
+        const n = i + 1;
+        const active = n === page;
+        return (
+          <Link
+            key={n}
+            href={n === 1 ? "/shop" : `/shop?page=${n}`}
+            aria-label={`Page ${n}`}
+            aria-current={active ? "page" : undefined}
             style={{
-              position: "absolute",
-              left: 0,
-              top: 4.76,
-              width: "100%",
-              textAlign: "center",
-              ...txt(16, 24, p.active ? "#FCFCFC" : GREY),
+              ...abs(x, 1656.5, 32, 32),
+              display: "block",
+              background: active ? INK : "rgba(184,166,154,0.10)",
             }}
           >
-            {p.label}
-          </div>
-        </div>
-      ))}
-      <span style={abs(318.052, 1767.09, 24, 24)}>
-        <ForwardIcon />
-      </span>
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 4.76,
+                width: "100%",
+                textAlign: "center",
+                ...txt(16, 24, active ? "#FFF6EC" : INK_SOFT),
+              }}
+            >
+              {n}
+            </div>
+          </Link>
+        );
+      })}
+      {/* Next page; inert on the last one, exactly as the design draws it. */}
+      {page < PAGE_COUNT ? (
+        <Link
+          href={`/shop?page=${page + 1}`}
+          aria-label="Next page"
+          style={{ ...abs(327.052, 1660.59, 24, 24), display: "block" }}
+        >
+          <ForwardIcon color={INK} />
+        </Link>
+      ) : (
+        <span style={abs(327.052, 1660.59, 24, 24)}>
+          <ForwardIcon color={INK} />
+        </span>
+      )}
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
           placeholder chat panel on click. */}
-      <ConciergeChat navClearance={60} mascotOnTop />
+      <ConciergeChat navClearance={60} mascotOnTop variant="brown" />
     </>
   );
 }

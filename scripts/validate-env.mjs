@@ -51,3 +51,37 @@ console.log(
     ? "[env] Hosted Supabase configuration is complete."
     : "[env] Supabase is unconfigured; local file mode will be used.",
 );
+
+// Skip-payment is a testing-phase switch: it places orders with no payment at
+// all. That is fine on the pre-launch testing deployment, and catastrophic
+// once real money is switched on — so pairing it with PAYPAL_ENV=live (the
+// owner-only launch switch) is a hard build failure. Everywhere else it is a
+// loud warning, louder still on a Vercel production build.
+const skipPayment = ["1", "true"].includes(
+  (process.env.CHECKOUT_SKIP_PAYMENT ?? "").trim().toLowerCase(),
+);
+const paypalLive = (process.env.PAYPAL_ENV ?? "").trim().toLowerCase() === "live";
+
+if (skipPayment && paypalLive) {
+  console.error(
+    "[env] CHECKOUT_SKIP_PAYMENT is set while PAYPAL_ENV=live — checkout would",
+  );
+  console.error(
+    "[env] hand out orders for free on a storefront taking real money.",
+  );
+  console.error("[env] Remove CHECKOUT_SKIP_PAYMENT before going live.");
+  process.exit(1);
+}
+
+if (skipPayment) {
+  console.warn(
+    "[env] ⚠ CHECKOUT_SKIP_PAYMENT is ON — checkout skips payment entirely and",
+  );
+  console.warn("[env] ⚠ places orders immediately. Testing only.");
+  if (productionVercel) {
+    console.warn(
+      "[env] ⚠ This is a Vercel PRODUCTION build. Fine while pre-launch; it",
+    );
+    console.warn("[env] ⚠ MUST be removed before the storefront takes money.");
+  }
+}

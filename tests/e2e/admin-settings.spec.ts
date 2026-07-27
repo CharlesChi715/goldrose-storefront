@@ -127,7 +127,7 @@ test("notification toggles and policies persist", async ({ page }) => {
 test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({ page }) => {
   // Default → the PNG crop serves.
   await page.goto("/shop");
-  await expect(page.locator('img[src="/veloria/glyph-promo.png"]')).toBeVisible();
+  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toBeVisible();
 
   // Edit in Content → real text renders in the same box.
   await adminLogin(page);
@@ -138,14 +138,14 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({ 
 
   await page.goto("/shop");
   await expect(page.getByText("FREE SHIPPING OVER $75 · GOLDROSE")).toBeVisible();
-  await expect(page.locator('img[src="/veloria/glyph-promo.png"]')).toHaveCount(0);
+  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toHaveCount(0);
 
   // Reset → the PNG returns (pixel-diff stays perfect).
   await page.goto("/admin/content");
   await page.getByRole("button", { name: "Reset to original" }).click();
   await expect(page.getByText("Content saved").first()).toBeVisible();
   await page.goto("/shop");
-  await expect(page.locator('img[src="/veloria/glyph-promo.png"]')).toBeVisible();
+  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toBeVisible();
 });
 
 test("sitemap, llms.txt and Product JSON-LD come from the database", async ({ request }) => {

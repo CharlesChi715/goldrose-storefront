@@ -7,7 +7,7 @@
 | **Users** | Charles' teammates |
 | **Audience** | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below |
 | **Version** | Rev 4.4 · 2026-07-22 — full history in §17 |
-| **Related docs** | `SUMMARY.md` (project source of truth) · `docs/archive/flow-map.md` · `docs/archive/launch-checklist.md` · `docs/seo-geo/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
+| **Related docs** | `SUMMARY.md` (repository entrypoint) · `docs/project-state.md` (current operations/release state) · `docs/archive/flow-map.md` · `docs/archive/launch-checklist.md` · `docs/seo-geo/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** `docs/archive/*`, Shopify-era README sections |
 
 ## Table of contents
 
@@ -48,7 +48,8 @@
 - Never wait for or ask the owner mid-build. Every "owner action" in this
   document becomes an item on the activation checklist (§0.5) instead.
 - Trust hierarchy for conflicting written sources: this document >
-  `SUMMARY.md` > everything else. `docs/archive/*` and the Shopify-era
+  `SUMMARY.md` > `docs/project-state.md` > everything else.
+  `docs/archive/*` and the Shopify-era
   sections of `README.md` are historical — never implement from them.
 
 ### 0.2 Resource fallbacks — mock, don't ask
@@ -236,7 +237,7 @@ proceeds.
 | Database / auth / storage | Supabase | One vendor covers Postgres + Auth + Storage with an owner-usable dashboard; RLS enables the "storefront reads only a safe view" security model (§7.13). Separate DB + NextAuth + S3: more moving parts for a solo owner |
 | Payment provider | PayPal-direct (**working assumption — OQ-1**) | Stripe: best card/wallet UX but a new account + verification and loses the PayPal button many gift buyers prefer. Both providers: best conversion, roughly double the money-code — deferred to launch. Decision recorded when OQ-1 closes |
 | Visitor analytics | First-party `page_views` beacon (§7.12) | GA4 / external tools: blocked by ad-blockers (20–40% undercount), cookie-consent burden for international traffic, and the data lives outside our DB so it can't power the admin's Shopify-style cards or the order Conversion summary. Ad-platform pixels are added when paid ads start (§16) — additive, coexists with the beacon |
-| Dev/prod isolation | One shared Supabase project (region ap-southeast-2, near the owner) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join |
+| Dev/prod isolation | One shared Supabase project (planned ap-southeast-2; actually created in `us-west-2` — see [features/backend/region-alignment.md](features/backend/region-alignment.md)) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join |
 
 ---
 
