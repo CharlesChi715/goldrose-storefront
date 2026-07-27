@@ -174,10 +174,10 @@ export function VHeader({
 }
 
 /**
- * 02 · Header (redesign, "No Menu/Search" variant) — the 2026-07-25 homepage
- * header: menu art, centered logo, wishlist art, cart. Search and the back
- * arrow are gone; menu and wishlist are static placeholders until their
- * target designs leave 美化未完成 (IxD H-01) / wishlist enters scope.
+ * 02 · Header (redesign) — the 2026-07-25 homepage header: menu art,
+ * centered logo, magnifier, cart. The magnifier slot was a static
+ * placeholder until 07-27; it now opens the SEARCH-OPEN overlay like the
+ * shop and detail headers (owner instruction — the art reads as search).
  */
 export function HomeHeader() {
   return (
@@ -187,7 +187,9 @@ export function HomeHeader() {
       <Link href="/" style={{ ...abs(145.5, 47, 136, 40), display: "block" }} aria-label="Home">
         <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
       </Link>
-      <img src="/veloria/home/549-91.png" alt="" width={40} height={43} style={{ ...abs(311.5, 45.5, 40, 43), display: "block" }} />
+      {/* The magnifier art is a live search button here too (owner, 07-27):
+          the homepage is where visitors actually look for it. */}
+      <SearchButton style={abs(311.5, 45.5, 40, 43)} />
       {/* Cart art still goes to /checkout, which IS the live cart. /bag holds
           the B-1 design but shows the mock's own line items — repointing the
           icon there would hide the shopper's real basket. Swap once /bag reads
