@@ -108,4 +108,5 @@ None yet — BACKLOG.
 ## Related links
 
 - Origin + platform decision: [Database.md](../../Database.md) (now points back here)
-- Launch-time Pro upgrade sits with the activation work: [BUILD-REPORT §5](../../archive/BUILD-REPORT.md)
+- Launch-time Pro upgrade sits with the owner activation work:
+  [project-state.md · Release queue](../../project-state.md#release-queue)

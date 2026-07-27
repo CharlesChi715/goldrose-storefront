@@ -42,7 +42,7 @@ Not chosen yet (BACKLOG). Recommendation on the table: two-stage pipeline —
 (1) wire the remaining storefront content areas to the DB, images first;
 (2) Shopify-style bulk import in the admin: one CSV with a fixed column spec +
 an image folder named by SKU/handle. Pending owner confirmation; queued behind
-the ship-critical activation checklist (target 2026-07-30).
+the ship-critical owner activation items (target 2026-07-30).
 
 ## Options considered
 
@@ -79,8 +79,8 @@ the ship-critical activation checklist (target 2026-07-30).
 - SKU rules first (or together): the import upserts by handle+SKU, which
   assumes SKUs are unique and non-blank — rules + planned enforcement in
   [../Database.md § SKU rules](../Database.md).
-- Not blocked, but deliberately queued behind the activation checklist
-  (BUILD-REPORT §5) and ship target 2026-07-30 — this is the delivery vehicle
+- Not blocked, but deliberately queued behind the owner activation items
+  (project-state.md Release queue) and ship target 2026-07-30 — this is the delivery vehicle
   for OQ-3 (real product content), which lands after ship per SUMMARY.
 - Tension to resolve during design: the pixel-diff guard assumes static pixels;
   live-wired regions need excluding or per-SKU baselines.
@@ -91,7 +91,7 @@ None yet — BACKLOG.
 
 ## Related links
 
-- OQ-3 → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
+- OQ-3 → [project-state.md · Product decisions](../project-state.md#product-decisions)
 - Current live-text wiring: `app/products/[slug]/page.tsx`, `app/shop/page.tsx`,
   `lib/admin/products.ts` (`revalidateStorefront`)
 - Existing export (mirror for the import UI): `app/api/admin/products/export/route.ts`

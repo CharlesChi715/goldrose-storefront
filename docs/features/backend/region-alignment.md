@@ -32,8 +32,8 @@ verification:
   (`aws-1-us-west-2.pooler.supabase.com`). The `*.supabase.co` hostname
   resolves to Cloudflare edges, so DNS/ping cannot tell you the region.
 - Commit `a62848e` pinned Vercel functions to `syd1` on the premise that the
-  database was in Sydney. **That premise is wrong**;
-  [`archive/BUILD-REPORT.md`](../../archive/BUILD-REPORT.md) records the same
+  database was in Sydney. **That premise is wrong**; the since-deleted
+  `archive/BUILD-REPORT.md` recorded the same
   wrong region (`ap-southeast-2`). The commit's real win was the
   `getAdminSession` `React cache()` dedupe; the region pin moved compute
   *away* from the data.
@@ -50,9 +50,9 @@ verification:
    (Portland = AWS `us-west-2`, same region as the database; fn→DB drops to
    ~1–5 ms).
 2. Correct the "database is in Sydney / ap-southeast-2" claims where they
-   mislead: [`archive/BUILD-REPORT.md`](../../archive/BUILD-REPORT.md) (and
-   note that commit `a62848e`'s message is wrong — messages can't be edited,
-   so record the correction here and in the BUILD-REPORT).
+   mislead: commit `a62848e`'s message is wrong — messages can't be edited,
+   so the correction is recorded here. (The other stale claim lived in
+   `archive/BUILD-REPORT.md`, since deleted with the archive.)
 
 Trade-off: Sydney/China UAT feels ~180 ms slower per dynamic page (one
 browser→function hop); customers are unaffected and static assets stay on

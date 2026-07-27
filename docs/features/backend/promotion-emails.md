@@ -87,8 +87,8 @@ our email provider; Broadcasts gives hosted unsubscribe handling for free.
 ## Blockers and dependencies
 
 No feature-id dependencies. Practically gated by the owner's Resend
-activation (`RESEND_API_KEY` + domain verification — BUILD-REPORT §5 env-var
-tasks). Campaign *content* (what to send, cadence) is the owner's call and
+activation (`RESEND_API_KEY` + domain verification — owner activation
+env-var tasks). Campaign *content* (what to send, cadence) is the owner's call and
 out of scope here.
 
 ## Verification evidence
@@ -98,7 +98,8 @@ None yet — BACKLOG.
 ## Related links
 
 - Existing email module: `lib/email.ts` (§10.3 notifications)
-- Activation: [BUILD-REPORT §5](../../archive/BUILD-REPORT.md)
+- Activation: owner items in
+  [project-state.md · Release queue](../../project-state.md#release-queue)
 - Sibling ask, same boss note: [order-tracking.md](order-tracking.md)
 - Post-ship marketing context: influencer campaign idea in
   [ideas.md](../../ideas.md)

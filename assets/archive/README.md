@@ -9,7 +9,7 @@ Retired **2026-07-26**. Nothing here is served — Next.js only serves `public/`
 
 | Path here | Came from | Why it was retired |
 | --- | --- | --- |
-| `public/bottom-nav/` (8 files) | `public/bottom-nav/` | Superseded by the 07-25 redesign. The live tab bar renders `/veloria/home/763-*.png`; see the `TABS` table in `components/veloria.tsx`. No code referenced these. |
+| `public/bottom-nav/` (8 files) | `public/bottom-nav/` | Superseded by the 07-25 redesign. The live tab bar renders `/veloria/home/763-*.png`; see the `TABS` table in `components/chrome.tsx`. No code referenced these. |
 | `public/home/` (5 files) | `public/home/` | `banner`, `gift-box`, `rose-gold`, `rose-red`, `rose-white`. Unreferenced; only `logo.png` survived and stays in `public/home/`. |
 | `public/products/` (5 files) | `public/products/` | `occasions`, `process`, `real-rose-comparison`, `romance-dinner`, `valentine-lifestyle`. Unreferenced by code, seed data, or the local file database. The four product photos still in use stayed put. |
 | `public/*.svg` (5 files) | `public/` | `next`, `vercel`, `globe`, `window`, `file` — untouched `create-next-app` scaffolding. |

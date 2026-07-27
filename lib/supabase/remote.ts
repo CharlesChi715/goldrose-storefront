@@ -3,7 +3,7 @@
  * The hosted-Supabase backend: the same TableStore interface as the local
  * file adapter, implemented with @supabase/supabase-js and the SERVICE-ROLE
  * key. Server-side only — app code must reach this through lib/supabase/
- * server.ts (a `server-only` module), never from anything client-shipped.
+ * store.ts, never from anything client-shipped.
  */
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";

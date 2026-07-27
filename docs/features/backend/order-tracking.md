@@ -41,7 +41,7 @@ verification:
   - Signed-in customers see a "Track <number>" link per order on `/account`
     (`app/account/AccountClient.tsx`).
   - Emails go through Resend; until `RESEND_API_KEY` is set they print to the
-    server console (BUILD-REPORT §5 activation item).
+    server console (owner activation item — project-state.md Release queue).
 - What was missing:
   1. **No carrier concept** — admin had to hand-paste a full tracking URL
      every time; a typo silently sent buyers a dead link. → built 2026-07-25.
@@ -118,7 +118,7 @@ aggregator free tier or UPS Track API, post-ship).
   errors while the column doesn't exist. Additive + `if not exists`, safe to
   run via the dashboard SQL editor.
 - The email half only becomes real once the owner sets `RESEND_API_KEY`
-  (BUILD-REPORT §5 — an env-var task, not a feature id).
+  (an owner activation env-var task, not a feature id).
 
 ## Verification evidence
 
@@ -130,6 +130,7 @@ aggregator free tier or UPS Track API, post-ship).
 ## Related links
 
 - Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../../admin-design.md)
-- Activation: [BUILD-REPORT §5](../../archive/BUILD-REPORT.md)
+- Activation: owner items in
+  [project-state.md · Release queue](../../project-state.md#release-queue)
 - SKU rules behind the 0003 bundle: [Database.md](../../Database.md)
 - Sibling ask, same boss note: [promotion-emails.md](promotion-emails.md)

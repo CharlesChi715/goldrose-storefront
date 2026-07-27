@@ -49,6 +49,13 @@ this mode.
 
 - Add migrations as `supabase/migrations/000N_*.sql`, then run
   `supabase db push`. Migrations `0001`–`0003` are applied.
+- ⚠️ **Migration-history drift (found 2026-07-27):** the remote history holds
+  an orphan `0004` row from the removed order-linking path (`125b72f` deleted
+  the file; the empty `orders.auth_user_id` column is still live). Before the
+  next migration: run `supabase migration repair --status reverted 0004`, and
+  have that migration `drop column if exists auth_user_id` on `orders`. Do
+  **not** number a new migration `0004` until the repair has run — `db push`
+  would silently skip it.
 - Do not use the Supabase web editor for migrations.
 - Use `psql` for read-only ad-hoc queries. `supabase db dump` requires Docker;
   verify daemon access first.

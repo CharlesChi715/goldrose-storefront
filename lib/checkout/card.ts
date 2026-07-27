@@ -2,8 +2,9 @@
  * ROLE OF THIS FILE
  * Format-only card validation for the mock (development) checkout: brand
  * detection, the Luhn checksum, and expiry checks. It can say "this LOOKS
- * like a card number", never "this card can pay". In live mode cards are
- * handled entirely by Shopify's hosted checkout and never touch this code.
+ * like a card number", never "this card can pay". In live mode payment runs
+ * through PayPal and never touches this code (a card rail is future work —
+ * docs/features/card-payments.md).
  */
 
 import type { CardInput } from "@/lib/checkout/types";

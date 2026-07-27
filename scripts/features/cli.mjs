@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Feature-registry CLI — docs/Improvement-plan.md §8.
+// Feature-registry CLI — record format and lifecycle: docs/features/README.md.
 // Implemented: new. Planned: list, generate, check, validate.
 
 import { parseArgs } from 'node:util'
@@ -96,6 +96,6 @@ const COMMANDS = { new: cmdNew }
 const [command, ...rest] = process.argv.slice(2)
 if (!command) fail(`usage: cli.mjs <command>\navailable: ${Object.keys(COMMANDS).join(', ')} · planned: ${PLANNED.join(', ')}`)
 if (PLANNED.includes(command))
-  fail(`"${command}" is designed in docs/Improvement-plan.md §8 but not built yet — available: ${Object.keys(COMMANDS).join(', ')}`)
+  fail(`"${command}" is planned but not built yet — available: ${Object.keys(COMMANDS).join(', ')}`)
 if (!COMMANDS[command]) fail(`unknown command "${command}"`)
 COMMANDS[command](rest)

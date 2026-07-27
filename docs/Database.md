@@ -8,10 +8,9 @@ For agents: keep this file concise.
 ---
 
 **DECISION (owner, 2026-07-22): Option 1 — Supabase.** No self-hosted
-Postgres. The code already targets it (hosted Supabase backend + local file
-fallback); what remains is the activation checklist in
-[archive/BUILD-REPORT.md](archive/BUILD-REPORT.md) §5 step 1 (create the Supabase project and
-set the env vars).
+Postgres. Done: the hosted project is live with migrations applied
+(status in [project-state.md](project-state.md)); the local file adapter
+remains as the dev fallback.
 
 ## Backup plan
 
@@ -30,13 +29,11 @@ there.
 - **Bundles = new shelf item.** A gift set (rose + box + card) is pre-packed,
   physically separated stock → own SKU (e.g. `GR-SET-VAL`), own count. Rule:
   one undivided pile = one SKU; physically separated stock = new SKU.
-- ⚠️ **Not yet enforced.** Schema mirrors Shopify's permissive behavior:
-  `product_variants.sku` defaults `''`, no unique constraint (0001), and
-  Duplicate copies SKUs verbatim (`lib/admin/products.ts`). Planned once
-  confirmed: `0003` partial unique index (`where sku <> ''`), the same check in
-  `lib/admin` (the local file adapter has no Postgres index), Duplicate clears
-  copied SKUs, friendly admin validation + an activation gate (active products
-  need non-blank SKUs; drafts may stay blank).
+- **Enforced since `0003` (applied):** partial unique index
+  (`where sku <> ''`), the same check with a friendly error in
+  `lib/admin/products.ts` (the local file adapter has no Postgres index), and
+  Duplicate clears copied SKUs. Still open: an activation gate (active
+  products need non-blank SKUs; drafts may stay blank).
 
 ## SKU naming convention (2026-07-25)
 

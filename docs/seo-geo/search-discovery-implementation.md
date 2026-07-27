@@ -72,9 +72,9 @@ Work is labelled:
 | Analytics | First-party page-view beacon with UTM/referrer | Classify AI referrals and measure the complete conversion funnel |
 | External setup | Not represented in the repository | Production domain, Search Console, Merchant Center, business verification, and feed enrolment |
 
-The relevant security and commerce-integrity defects are tracked in
-[repo-review-2026-07-23.md](../repo-review-2026-07-23.md). This plan depends on
-that review; it does not duplicate the fixes.
+The relevant security and commerce-integrity defects were tracked in the
+2026-07-23 repository review (doc since removed; in git history). This plan
+depends on that review; it does not duplicate the fixes.
 
 ## 4. Target architecture
 

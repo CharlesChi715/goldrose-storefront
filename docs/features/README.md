@@ -17,7 +17,7 @@ docs/ideas.md  →  docs/features/<name>.md  →  docs/project-state.md  →  .a
 - An idea graduates: add its feature file, delete its line from ideas.md.
 - Spec [../admin-design.md](../admin-design.md) is updated only after shipping,
   and only if the product's promised behavior changed.
-- Superseded docs move to [../archive/](../archive/).
+- Superseded docs are deleted; their history stays in git.
 
 ## Status line
 
@@ -162,8 +162,9 @@ Refs (links can't render inside the code blocks, so shorthands above resolve
 here):
 
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
-- **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
-- **OQ-1 / OQ-2 / OQ-3** → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
+- **owner config pending / dormant** → owner activation items in
+  [project-state.md · Release queue](../project-state.md#release-queue)
+- **OQ-1 / OQ-2 / OQ-3** → [project-state.md · Product decisions](../project-state.md#product-decisions)
 - **card-payments.md** → [card-payments.md](card-payments.md)
 - **db-backups.md** → [backend/db-backups.md](backend/db-backups.md)
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)

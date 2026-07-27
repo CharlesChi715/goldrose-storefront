@@ -16,7 +16,7 @@ and were deferred only because they replace working auth, not because the
 design was unfinished.
 
 Each frame is a stack of numbered modules plus the shared bottom nav, which is
-**not** rebuilt — `BottomNav` from `components/veloria.tsx` already matches
+**not** rebuilt — `BottomNav` from `components/chrome.tsx` already matches
 both frames (verified: 0.02% band diff).
 
 ## Pipeline
@@ -29,7 +29,7 @@ both frames (verified: 0.02% band diff).
 4. **Glyphs** — symbol TEXT nodes as `format=svg` (they fall back to different
    fonts in Chrome than in Figma, so live text will not match).
 5. **Build** — absolutely-positioned JSX at verbatim coordinates, using `abs()`
-   and `txt()` from `components/veloria.tsx` and the tokens in
+   and `txt()` from `lib/figma-layout.ts` and the tokens in
    `components/login/shared.tsx`.
 6. **Verify** — screenshot at the design viewport, then a per-module band diff
    against the frame render. Chrome-vs-Figma font antialiasing costs 1.3–4.5%;

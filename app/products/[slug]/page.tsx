@@ -6,9 +6,9 @@
  * Every coordinate, size, color, and font value comes verbatim from the
  * Figma REST API; photo assets in /public/veloria are exact 2x node renders.
  *
- * For now every product renders the same placeholder design (per Charles's
- * instruction); the slug only selects metadata and will later feed real
- * name/price/photos from lib/products.
+ * Every product renders the same pixel design; the slug picks the product,
+ * and live name/price/photos come from the DB catalog (lib/supabase/catalog)
+ * in the designated boxes (§14.2 Stage 9).
  */
 
 import type { Metadata } from "next";

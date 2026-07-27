@@ -27,10 +27,12 @@ resources only when the task needs them.
 
 ### Business and team
 
-- Charles is in Sydney; most teammates are in China.
-- Launch in the United States first, with Europe as a possible later market.
-  Public storefront content is English.
-- Recruit influencers in the same market as the target customers.
+- Two bosses decides everything. (Locate in China)
+- Frontend UI design team design appearance and interaction of web page. (Locate in China)
+- Charles(me) taking responsibility of all IT part and decide how to implement everything in tech,
+  (Locate in Sydney).
+- Influencer which we have not found any yet. (locate same place with our targetted customer, US first)
+- Website Initial targets United States first, with Europe as a possible later market.
 
 ### Product map
 
@@ -79,7 +81,7 @@ goldrose-storefront/
 ├── supabase/            # Hosted database migrations
 ├── scripts/             # Seed, validation, and feature utilities
 ├── tests/               # Playwright end-to-end and unit tests
-├── docs/                # Specs, state, roadmaps, guides, and archive
+├── docs/                # Specs, state, roadmaps, guides
 ├── temp/                # Raw imports and scratch material; not served
 ├── .data/               # Local file-adapter database and uploads
 ├── .ai/                 # Optional work history; never startup context
@@ -94,7 +96,6 @@ goldrose-storefront/
 | Need | Open |
 |---|---|
 | Environment, safety gates, blockers, open decisions | [`docs/project-state.md`](docs/project-state.md) |
-| Setup, architecture, commands, deployment | [`README.md`](README.md) |
 | Workflow rules: branching, parallel sessions, CI gates, environments | [`docs/engineering-playbook.md`](docs/engineering-playbook.md) |
 | Feature status and roadmap | [`docs/features/README.md`](docs/features/README.md) |
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
@@ -104,4 +105,3 @@ goldrose-storefront/
 | Testing procedure | [`docs/TESTER-GUIDE.md`](docs/TESTER-GUIDE.md) |
 | End-to-end feature traces, written to learn from | [`docs/learning/README.md`](docs/learning/README.md) |
 | Owner ideas, kept verbatim | [`docs/ideas.md`](docs/ideas.md) |
-| Historical documents | [`docs/archive/`](docs/archive/) |

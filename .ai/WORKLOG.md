@@ -2764,3 +2764,62 @@ Known follow-ups, not done:
   traced as "the life of one change" through this repo's real
   branch → PR → CI → Vercel preview → squash-merge workflow.
 - Indexed it in `docs/learning/README.md` (table row 10 + reading-order line).
+
+## 2026-07-27 — Professionalization audit (background session)
+
+- Read-only audit of engineering practices: testing, security, observability,
+  structure, type safety, dependencies, database, hygiene, docs.
+- Deliverable: `.ai/reports/2026-07-27-professionalization-audit.md`
+  (ranked P0–P3 gaps + suggested sequence). No code changed.
+- Noted for the record: the auth email-link work pending at session start was
+  committed by the parallel session as `125b72f`.
+
+## 2026-07-27 — docs/archive deletion follow-up
+
+- Charles deleted `docs/archive/` (7 files); cleaned all dangling references
+  in `admin-design.md`, `Database.md`, `features/README.md`, and 4 backend
+  feature docs. Dead links became plain-text notes ("deleted with the
+  archive 2026-07-27; in git history"); launch prerequisites repointed to
+  the `project-state.md` release queue; features policy line now reads
+  "superseded docs are deleted; history stays in git".
+
+## 2026-07-27 — repo-wide staleness sweep (identify + delete stale code/docs/text)
+
+- **Deleted** `docs/Improvement-plan.md` (superseded planning doc — its "not
+  started" claim was false and the simpler live `docs/features/` system
+  replaced its design; in git history). Repointed the two references in
+  `scripts/features/cli.mjs`.
+- **Stale code comments fixed:** `lib/supabase/remote.ts` (non-existent
+  `server.ts` → `store.ts`), `lib/checkout/card.ts` (live cards "handled by
+  Shopify's hosted checkout" → PayPal), `app/products/[slug]/page.tsx`
+  ("will later feed from lib/products" → DB catalog, Stage 9 reality).
+- **`.env.example`:** dead `docs/BUILD-REPORT.md` pointer → project-state.md;
+  hosted Supabase noted as live; documented optional `RESEND_FROM`.
+- **Dead "BUILD-REPORT §5" activation pointers** redirected to
+  `project-state.md → Release queue` in: features/README.md, order-tracking.md
+  (×3), promotion-emails.md (×2), db-backups.md, product-content-pipeline.md
+  (×2), Database.md. Also fixed broken anchors `#open-product-decisions` →
+  `#product-decisions` (×2), the broken `repo-review-2026-07-23.md` link in
+  seo-geo/search-discovery-implementation.md, and renamed-file refs
+  `components/veloria.tsx` → `chrome.tsx` / `lib/figma-layout.ts`
+  (docs/ixd/login-import.md ×2, assets/archive/README.md).
+- **Database.md:** Supabase decision marked done (project live); SKU block
+  updated "Not yet enforced" → "Enforced since 0003" (only the activation gate
+  remains open). **TESTER-GUIDE.md** EN+中文: removed the stale "data may
+  reset until the real database is switched on" warning — hosted DB is live.
+- **⚠️ Migration-history drift found:** `125b72f` deleted
+  `supabase/migrations/0004_orders_auth_user_id.sql` (feature removed) but the
+  remote history still holds an orphan `0004` row and the empty
+  `orders.auth_user_id` column is live (0 rows of data, 0 code refs). Repair
+  was permission-blocked in-session; recorded in project-state.md → Hosted
+  mode: run `supabase migration repair --status reverted 0004`, drop the
+  column in the next migration, and do NOT number a new migration 0004 until
+  the repair has run (`db push` would silently skip it).
+- **temp/ scratch deleted** (gitignored, verified redundant first):
+  `bottom-menu-buttons.zip` + `上部菜单按钮.zip` (extracted art tracked in
+  `assets/{bottom,top}-nav-buttons/`), `temp/inventory/` (3 WeChat JPEGs
+  byte-identical to `assets/supplier-color-charts/`), all `.DS_Store`. Kept
+  `temp/temp.md` (owner-authored note, not captured elsewhere).
+- **Verified:** lint + typecheck clean, 39 unit tests pass, features CLI smoke
+  OK. Remaining BUILD-REPORT/lib-products mentions are deliberate historical
+  annotations (admin-design §0/§17, region-alignment, seed-data rationale).

@@ -49,9 +49,9 @@ real money.
 
 ## Good to know
 
-- Until the real database is switched on, data on the live site (including
-  forum posts) can occasionally reset. Don't be surprised if something
-  disappears — it's expected during testing.
+- The live site now runs on the real database, so your data (orders, forum
+  posts) persists. It is still all test data, and may be cleared once before
+  launch.
 
 ## Marketing links (for the owner)
 
@@ -124,8 +124,8 @@ real money.
 
 ## 注意事项
 
-- 正式数据库启用前，线上数据（包括论坛帖子）可能会不定期重置，属于测试阶段
-  的正常现象。
+- 线上站点已接入正式数据库，数据（订单、论坛帖子）会保留。目前仍全部是测试
+  数据，上线前可能会统一清理一次。
 
 ## 营销链接（店主必读）
 
