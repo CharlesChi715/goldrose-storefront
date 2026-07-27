@@ -2,7 +2,7 @@
  * ROLE OF THIS FILE
  * Customer accounts, local-mode behavior (owner request 2026-07-23). The
  * suite always runs the file adapter with Supabase env blanked, so what's
- * testable here is the graceful degradation: the Login tab reaches /account,
+ * testable here is the graceful degradation: the Me tab reaches /account,
  * the imported sign-in frame renders and says sign-in is off when used, and
  * the admin login shows no passkey button. The real emailed-code flow only
  * exists against hosted Supabase and is exercised by hand there.
@@ -11,10 +11,10 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("customer account (local mode)", () => {
-  test("the Login tab links to /account", async ({ page }) => {
+  test("the Me tab links to /account", async ({ page }) => {
     await page.goto("/");
-    // The redesign nav labels the account tab "Login" (art node 763:119).
-    await page.getByRole("link", { name: "Login", exact: true }).click();
+    // The 07-27 frames rename the account tab back to "Me" (art 921:251).
+    await page.getByRole("link", { name: "Me", exact: true }).click();
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByText("Sign in and continue shopping")).toBeVisible();
   });

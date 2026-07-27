@@ -6,10 +6,10 @@
  * localStorage (lib/cart/store.ts) and wiring it into this layout is a
  * follow-up. The checkout CTA goes to the real /checkout.
  *
- * Canvas height is the design's INNER frame (747:95, 1750px), not the 1844px
- * outer frame: the mock parks its tab bar at y=1692 with dead space beneath,
- * while the real bar is viewport-fixed. At 1750 the fixed bar lands exactly
- * where the design draws it.
+ * Canvas height is 1728 — the 07-27 frame (430×1726 after the polish pass)
+ * parks its own tab bar at y=1669; the real bar is viewport-fixed, so the
+ * canvas is nav-start + 59 and the fixed bar lands exactly where the design
+ * draws its own (same equivalence the 1750 canvas used before the polish).
  */
 
 import type { Metadata } from "next";
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function BagPage() {
   return (
-    <ScaleFrame height={1750} background="#FFF6EC" fontClass={notoSC.className} navActive="Bag">
+    <ScaleFrame height={1728} background="#FFF6EC" fontClass={notoSC.className} navActive="Bag">
       <BagScreen />
     </ScaleFrame>
   );
