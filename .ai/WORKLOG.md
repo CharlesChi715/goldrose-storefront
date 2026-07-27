@@ -2209,3 +2209,15 @@ docs: add first feature learning doc (trial)
 - ⚠️ Repo state: origin/main force-rewound to 92c455e (docs/IxD line
   103a000… dropped); PR #1 base diverged — Charles to settle main before
   merge; dropped commits survive in PR #1 history.
+
+## 2026-07-27 — Fix: orders.auth_user_id never reached the hosted DB (checkout inserts failing)
+
+- Owner's live test failed on both Pay and PayPal: PostgREST "Could not find the
+  'auth_user_id' column of 'orders' in the schema cache".
+- Root cause: a44d725 added the column to migration 0003 — already applied live
+  07-25, and Supabase never re-runs an applied migration, so the DDL never ran.
+- Fix: restored 0003 to its applied state; moved the column + partial index into
+  new 0004_orders_auth_user_id.sql; `supabase db push` applied it (migration list
+  shows 0004 local=remote); psql confirms column uuid + orders_auth_user_idx live.
+- SUMMARY.md refs updated 0003→0004. Lesson: never append statements to an
+  already-applied migration — always create a new file.

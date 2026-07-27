@@ -8,14 +8,6 @@
 -- purpose — provider-neutral; lib/shipping/carriers.ts is the app-side list.
 alter table orders add column if not exists tracking_carrier text;
 
--- Signed-in checkout: the buyer's auth uid stamped on the order it placed,
--- so /account shows it regardless of sign-in method (passkeys included) and
--- of the PayPal payer email. Per-ORDER on purpose — claiming the whole
--- email-keyed customer row would let a stranger surface someone else's
--- history by typing their email at checkout.
-alter table orders add column if not exists auth_user_id uuid references auth.users (id) on delete set null;
-create index if not exists orders_auth_user_idx on orders (auth_user_id) where auth_user_id is not null;
-
 -- SKU rules (docs/Database.md): non-blank SKUs are unique storewide; blank
 -- drafts may coexist. lib/admin/products.ts enforces the same rule for the
 -- local file adapter (which has no Postgres index) and clears SKUs on

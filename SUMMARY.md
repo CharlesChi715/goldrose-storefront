@@ -14,7 +14,7 @@ goldrose-storefront/
 ├── app/                 # Next.js App Router: storefront (/, /shop, /products/[slug], /account), /admin, API routes, sitemap/robots/llms.txt
 ├── components/          # Storefront + shared UI (VHeader, BackButton, WishlistButton, NoCalcScale…)
 ├── lib/                 # Domain logic: admin/, checkout/, supabase/ (2 backends: hosted / .data file adapter), account/, cart/
-├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth, 0003 tracking carrier + hardening)
+├── supabase/            # SQL migrations (0001 full schema, 0002 customer auth, 0003 tracking carrier + hardening, 0004 orders auth uid)
 ├── scripts/             # seed.ts (npm run seed; flags --reset / --demo)
 ├── proxy.ts             # Auth middleware (Next 16 name, §9.2) — guards /admin + /api/admin only
 ├── tests/               # 57 Playwright e2e (production build, port 3001, file adapter) + 35 unit — green
@@ -51,8 +51,8 @@ goldrose-storefront/
 
 - **Charles: finish the activation checklist** ([docs/archive/BUILD-REPORT.md](docs/archive/BUILD-REPORT.md) §5): Vercel env vars + redeploy → Supabase auth config → auth providers (passkeys RP, Google/Apple) → PayPal sandbox → §14.3 walkthrough → screenshots → cancel Shopify → revoke Figma token.
 - Then: real rates (OQ-2), real product content (OQ-3), launch checklist items, and DB backups at/near launch ([docs/features/backend/db-backups.md](docs/features/backend/db-backups.md) — live DB has no backups until then).
-- Boss asks 07-25: [order-tracking](docs/features/backend/order-tracking.md) **BUILT 07-25** (carrier dropdown UPS/USPS + auto link, /account status pill, 0003 bundles the agreed hardening) — merge PR #1, **run 0003 on hosted BEFORE deploy**, then owner UAT · [promotion-emails](docs/features/backend/promotion-emails.md) still BACKLOG (consent + Resend audience).
-- Signed-in checkout **BUILT 07-26** (same PR #1): checkout stamps the session's auth uid on the order (`orders.auth_user_id`, in 0003) → Me shows it for any sign-in method; fixes PayPal payer-email mismatch (sandbox pays as the sandbox buyer's email). Per-order stamp on purpose — never claims the email-keyed customer row.
+- Boss asks 07-25: [order-tracking](docs/features/backend/order-tracking.md) **BUILT 07-25** (carrier dropdown UPS/USPS + auto link, /account status pill, 0003 bundles the agreed hardening; already live 07-25) — merge PR #1, **run 0004 on hosted BEFORE deploy**, then owner UAT · [promotion-emails](docs/features/backend/promotion-emails.md) still BACKLOG (consent + Resend audience).
+- Signed-in checkout **BUILT 07-26** (same PR #1): checkout stamps the session's auth uid on the order (`orders.auth_user_id`, in 0004 — split out of 0003, which was already applied live so late additions to it never ran) → Me shows it for any sign-in method; fixes PayPal payer-email mismatch (sandbox pays as the sandbox buyer's email). Per-order stamp on purpose — never claims the email-keyed customer row.
 - ⚠️ 07-26: origin/main was force-rewound (docs/IxD commits `103a000`… dropped, back to `92c455e`) and PR #1's base diverged — settle which main is canonical before merging; the dropped commits survive inside PR #1's history.
 - Design 07-25: homepage+shop redesign interaction spec (37+15 rows, annotated mobile Figma mocks) imported → [docs/ixd/](docs/ixd/README.md); mechanism-first build possible now, blocked items listed in its 待与设计确认.
 - Post-ship: owner's influencer campaign + website-exclusive video finale ([docs/ideas.md](docs/ideas.md) 07-24) — no influencer links before ship.
