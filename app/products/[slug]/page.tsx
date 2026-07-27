@@ -16,6 +16,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ConciergeChat } from "@/components/ConciergeChat";
 import { PromoBar, ScaleFrame, VHeader } from "@/components/chrome";
+import { PdpOverlays } from "@/components/pdp/PdpOverlays";
 import { abs, txt } from "@/lib/figma-layout";
 import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { BuyButtons } from "@/components/BuyButtons";
@@ -186,7 +187,10 @@ export default async function ProductDetailPage({
       />
       <ScaleFrame height={2501} background="#FCFAF7" fontClass={inter.className}>
       <PromoBar slogan={promo.text} isDefault={promo.isDefault} />
-      <VHeader backHref="/shop" right="heart" wishlistSlug={product.handle} />
+      {/* 07-27 frames replace the wishlist heart with the search icon
+          (SEARCH-OPEN entry point); the heart variant stays in chrome for
+          when wishlist enters scope. */}
+      <VHeader backHref="/shop" right="search" />
 
       {/* 03 · Hero */}
       {/* The hero photo zooms inside its clipped frame on hover (gr-card-zoom
@@ -615,6 +619,9 @@ export default async function ProductDetailPage({
         ))}
       </Section>
 
+      {/* Overlay triggers + drawers (reviews / colors / media / unboxing) —
+          last child so the transparent hit-areas stack above every section. */}
+      <PdpOverlays />
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the

@@ -10,7 +10,10 @@ manually. Mark problems found in the source inline with `⚠️ Developer note`.
 `temp/主页_shop页机制.numbers` (received 2026-07-25); when it updates,
 re-import into this directory. The verbatim Chinese export of the homepage
 sheet is archived at `temp/homepage.zh.md` — on wording disputes, the Chinese
-source wins.
+source wins. A second source, `temp/frontend-function-draft.numbers`
+(received 2026-07-27), covers the order-detail page: verbatim Chinese export
+at `temp/frontend-function-draft.zh.md`, English working copy at
+[order-detail.md](order-detail.md); the same rules apply.
 
 ## Files
 
@@ -18,6 +21,10 @@ source wins.
   translation of the archived Chinese export
 - [shop.md](shop.md) — 15 Shop page entries (N-01…N-15), still verbatim
   Chinese (translation pending)
+- [order-detail.md](order-detail.md) — 3 order-detail entries
+  (ORDER-DETAIL-…), English translation of
+  `temp/frontend-function-draft.zh.md`; IDs follow the Figma naming guide;
+  screenshots pending from the design team
 - `assets/` — 52 annotated screenshots (red box = the element for that entry);
   filename = entry ID; JPEG-compressed from the originals
 - [figma-naming-guide.md](figma-naming-guide.md) — the owner's UI naming guide,
@@ -33,7 +40,9 @@ source wins.
 ## How to reference an entry
 
 Entry IDs are stable. Write `implements H-09` in commits, PRs, and code
-comments; search for `### H-09` within the documentation.
+comments; search for `### H-09` within the documentation. Newer sources use
+full naming-guide IDs (e.g. `implements ORDER-DETAIL-SHARE-TRACKING`);
+reference them the same way.
 
 ## Status legend (target-page design progress)
 
@@ -169,3 +178,78 @@ needs backend work: per-method shipping rates, and a card provider.
 (#VL20250821, the UPS number, the dates) and C-2's product/address rows are
 the mocks' own strings. `/bag` is not yet wired to the live cart, so the cart
 icon still points at `/checkout`, which is the real basket.
+
+## 07-27 screen imports — developer findings
+
+Sixteen new frames landed in the file on 2026-07-27 and are all implemented:
+the two account dashboards (914:112/113), the five 小页面 states (SEARCH-OPEN
+914:114, SHOP-SORT 914:115, SHOP-FILTER 914:116, PDP-REVIEW 914:117,
+PDP-MEDIA 914:118) and the nine MORE-SCREENS frames (PDP-COLOR 1097:112,
+PDP-UNBOXING 1097:113, AUTH-SIGNUP 1097:114, ACCOUNT-ORDERS 1097:115, the
+four CARE tabs 1097:116…119, ACCOUNT-GIFT-REMINDERS 1097:120). B-1 (561:87)
+was re-imported after its polish pass (购买流程 moved to the 已完成 lane).
+
+**Routes vs in-page states (owner instruction 2026-07-27: none of the 小页面
+frames get dedicated routes):**
+
+| Frame | Where it lives |
+|---|---|
+| SEARCH-OPEN | full-screen overlay, opened by the header search button on `/shop` + `/products/[slug]` (`SearchButton`/`SearchOverlay`, MenuDrawer pattern); Enter hands off to `/shop?q=…`, which really filters the catalog |
+| SHOP-SORT dropdown | in-page overlay on `/shop`; sorting is REAL (New = catalog order, the two price rows sort by cents; Recommended aliases the default until merchandising rules exist) |
+| SHOP-FILTER drawer | in-page overlay on `/shop`, cosmetic (catalog has no collection/occasion/recipient/availability fields; "Show 36 Results" is the mock's fixed count) |
+| PDP-REVIEW / PDP-COLOR / PDP-MEDIA / PDP-UNBOXING | overlays on `/products/[slug]`, opened from the rating row / "View All 120 Colors ›" / the hero photo / unboxing "View All ›" |
+| ACCOUNT-INFO-SHOPPING-DASHBOARD | the signed-in `/account` view (real name, initials, latest order number/date/status/total; mock "Jessica" state in local mode and design reviews) |
+| ACCOUNT-INFO-BUSINESS-DASHBOARD | `/account/business/dashboard`, an unlinked visual route (`/bag` precedent) until business auth exists |
+| ACCOUNT-ORDERS-LIST | `/account/orders` — real orders when signed in (number/date/status/total; neutral placeholder photo — the account feed has no line items), the mock's three cards otherwise; tabs filter for real |
+| ACCOUNT-GIFT-REMINDERS | `/account/reminders`, visual placeholder (no reminders backend); toggles/tabs flip visually |
+| AUTH-SIGNUP-SHOPPING | `/account/signup`, unlinked visual placeholder — see the password conflict below |
+| CARE-* | `/care`, one route, four real tabs; `?tab=` deep-links (order confirmation's CONTACT SUPPORT lands on order-issues) |
+
+**Wired beyond the routes:** tab bar renamed back to **Me** (the 07-27 frames
+finally ship both states — outline 921:251, filled 939:174 — so the
+Login/Me session swap is retired); PDP header heart → search art; dashboard
+rows → `/account/orders`, `/account/reminders`, `/care`; C-2's help card →
+`/care?tab=order-issues` (ORDER-DETAIL-CONTACT-SUPPORT, whole card clickable
+per the spec's change proposal). ORDER-DETAIL-SHARE-TRACKING stays static —
+it needs the secure-token share backend. TRACK ORDER buttons reach
+`/orders/track`; carrying `orderId` waits for real tracking data (C-1 is
+still the mock timeline).
+
+**Things found while transcribing, for the design team:**
+
+- The base shop frame (24:396) still says "120 APPAREL / Women × / All
+  apparel ×" — template residue; both overlay frames patch the row to
+  "120 GIFTS / Ruby Red / Gift Sets". The corrected labels are what ships.
+- The account tab has now been Login → Me → Login → Me across four
+  revisions. Me is live (with a real active state); please settle it.
+- The new PDP frames keep nudging fills the live page predates (promo copy,
+  ink shades). Palette reconciliation is already release-queue #6; nothing
+  re-imported for color alone.
+- AUTH-SIGNUP asks for password + confirm-password, but customer auth is
+  decided as the emailed one-time code. The screen ships as an unlinked
+  visual placeholder built from styled divs — a live password box that goes
+  nowhere is the B-2 card-field hazard again. Reconcile the flow before it
+  gets linked.
+- The dashboards ship no sign-out control. A plain "Sign out" text row sits
+  below the member card as a dev addition; style one properly.
+- CARE's Hot-topics tab omits the "Support request status" row the other
+  three tabs have (everything shifts up 52px). Shipped verbatim; flag if
+  unintended.
+- The CARE frames draw a five-tab glyph nav (Home / Shop / **Rose Deals** /
+  Wholesale / Me) — a third bottom-nav language. `/care` draws it verbatim
+  (shared bar opted out, C-1/C-2 precedent); Rose Deals has no route and
+  stays inert.
+- PDP-MEDIA's viewer uses the uncropped product source photo; the repo only
+  has the cropped hero render, so the viewer letterboxes the crops. Please
+  export the source imagery if the viewer should match exactly.
+- Mock artifacts not implemented: SEARCH-OPEN's "9:41" status bar and
+  PDP-MEDIA's iOS home indicator (C-3 precedent).
+- The 12 colors in PDP-COLOR are not product variants; selection is visual
+  and Confirm closes the sheet. Same for unboxing chips/tabs (one media set).
+- B-1 polish notes: gift add-on labels moved to Goudy, the ADD buttons
+  shrank, a dark "safe pay" band appeared in the summary, the FAQ rows'
+  missing hairline is fixed at the source, and Rose Bouquet finally shows a
+  bouquet — but Personal Card still shows a boxed rose set (half of the
+  swap flagged on 07-26 remains).
+- B-2 (checkout) also moved to 已完成 but its skin wraps the live cart, so a
+  pixel drift check needs a focused pass — follow-up, not attempted here.

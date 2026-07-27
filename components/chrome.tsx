@@ -14,13 +14,13 @@
  */
 
 import Link from "next/link";
-import { AccountTabArt } from "@/components/AccountTab";
 import { FadeLink, PageFade } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
 import { WishlistButton } from "@/components/WishlistButton";
 import { inter } from "@/lib/fonts";
 import NoCalcScale from "@/components/NoCalcScale";
 import { MenuButton } from "@/components/MenuButton";
+import { SearchButton } from "@/components/SearchButton";
 import { abs } from "@/lib/figma-layout";
 
 /* ---------- Inline SVG icons (Figma node renders, format=svg) ---------- */
@@ -160,7 +160,9 @@ export function VHeader({
         <img src="/veloria/logo.png" alt="GoldRose" width={136} height={39} style={{ display: "block", width: 136, height: 39 }} />
       </Link>
       {right === "search" ? (
-        <img src="/top-nav/search.png" alt="" style={{ ...abs(324, 50, 32, 26), objectFit: "contain" }} />
+        // 925:159 — the 07-27 detail-page frames replace the wishlist heart
+        // with the search art (355b911e), which opens the SEARCH-OPEN overlay.
+        <SearchButton style={abs(313, 41.5, 40, 43)} />
       ) : (
         <WishlistButton slug={wishlistSlug ?? ""} style={abs(322.5, 50.5, 35, 26)} />
       )}
@@ -210,7 +212,8 @@ export function ShopHeader() {
       <Link href="/" style={{ ...abs(147, 43, 136, 40), display: "block" }} aria-label="Home">
         <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
       </Link>
-      <img src="/veloria/home/549-91.png" alt="" width={40} height={43} style={{ ...abs(313, 41.5, 40, 43), display: "block" }} />
+      {/* Search art opens the SEARCH-OPEN overlay (914:114, 07-27). */}
+      <SearchButton style={abs(313, 41.5, 40, 43)} />
       <Link href="/checkout" style={{ ...abs(383, 41.5, 40, 43), display: "block" }} aria-label="Cart">
         <img src="/veloria/home/549-92.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
       </Link>
@@ -220,9 +223,9 @@ export function ShopHeader() {
 
 /* ---------- 13 · Bottom navigation (fixed overlay) ---------- */
 
-// Tabs are identified by a stable id rather than by their label, because the
-// account tab's label is not fixed: it reads "Login" or "Me" depending on the
-// visitor (see AccountTabArt).
+// Tabs are identified by a stable id rather than by their label — the account
+// tab has been labelled "Login" and "Me" across design revisions (currently
+// "Me", 07-27 frames).
 type TabId = "Home" | "Shop" | "Wholesale" | "Account";
 
 type Tab = {
@@ -233,23 +236,18 @@ type Tab = {
   label: string;
 };
 
-// Redesign nav art (2026-07-25): 2x renders of the frames' own tab images
-// (nodes 763:113…763:129) — outline mascots, label baked in. The design ships
-// active variants only for Home and Shop; the other tabs keep their single
-// state when active. The account tab instead ships two labels — "Login"
-// (763:119) and "Me" (763:129) — swapped in the browser by AccountTabArt.
+// Redesign nav art (2026-07-25): 2x renders of the frames' own tab images —
+// outline mascots, label baked in. The design ships active variants for Home
+// and Shop; Wholesale keeps its single state. The account tab was renamed
+// back to "Me" in the 07-27 frames, which finally ship both of its states:
+// outline (921:251, shop/PDP frames) and filled (939:174, the
+// ACCOUNT-INFO-*-DASHBOARD frames) — the Login/Me session swap is gone.
 const TABS: Tab[] = [
   { id: "Home", href: "/", img: "763-123", activeImg: "763-113", label: "Home" },
   { id: "Shop", href: "/shop", img: "763-115", activeImg: "763-125", label: "Shop" },
   { id: "Wholesale", img: "763-117", label: "Wholesale" },
-  { id: "Account", href: "/account", img: "763-119", label: "Login" },
+  { id: "Account", href: "/account", img: "921-251", activeImg: "939-174", label: "Me" },
 ];
-
-// The "Me" counterpart of the account tab's "Login" art, and the filled
-// "Login" the design uses while the account tab is the current section
-// (763:149, from the sign-in frame 74:53).
-const ACCOUNT_SIGNED_IN_IMG = "763-129";
-const ACCOUNT_ACTIVE_IMG = "763-149";
 
 // Every tab's art sits at the same spot inside its 70×59 hit area.
 const TAB_ART_STYLE: React.CSSProperties = { ...abs(10, 1, 50, 57), display: "block" };
@@ -308,18 +306,7 @@ export function BottomNav({
           {TABS.map((tab, i) => {
             const x = [18, 126, 234, 342][i];
             const style: React.CSSProperties = { ...abs(x, 0, 70, 59), display: "block" };
-            const content =
-              tab.id === "Account" ? (
-                <AccountTabArt
-                  signedOutImg={tab.img}
-                  signedInImg={ACCOUNT_SIGNED_IN_IMG}
-                  activeImg={ACCOUNT_ACTIVE_IMG}
-                  isActive={tab.id === active}
-                  style={TAB_ART_STYLE}
-                />
-              ) : (
-                <TabContent tab={tab} isActive={tab.id === active} />
-              );
+            const content = <TabContent tab={tab} isActive={tab.id === active} />;
             return tab.href ? (
               // FadeLink, not Link: switching tabs cross-fades the canvas.
               <FadeLink key={tab.id} href={tab.href} style={style}>

@@ -13,18 +13,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConciergeChat } from "@/components/ConciergeChat";
-import {
-  CloseIcon,
-  DownIcon,
-  FilterIcon,
-  ForwardIcon,
-  ListviewIcon,
-  PromoBar,
-  ScaleFrame,
-  ShopHeader,
-} from "@/components/chrome";
+import { ForwardIcon, PromoBar, ScaleFrame, ShopHeader } from "@/components/chrome";
+import { ShopInteractive, type CardData, type SlotSpec } from "@/components/shop/ShopInteractive";
 import { abs, txt } from "@/lib/figma-layout";
-import { inter, notoSC, tenor } from "@/lib/fonts";
+import { tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
 import { formatMoney } from "@/lib/money";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
@@ -40,30 +32,33 @@ export const revalidate = 300;
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }): Promise<Metadata> {
-  const requested = Number((await searchParams).page);
+  const params = await searchParams;
+  const requested = Number(params.page);
   const paged = Number.isInteger(requested) && requested > 1 && requested <= PAGE_COUNT;
+  // Search results (?q=, from /search) are user-specific slices of the same
+  // eight cards — keep them out of the index like pages 2-5.
+  const noindex = paged || Boolean(params.q?.trim());
   return {
     title: paged ? `Shop · page ${requested}` : "Shop",
     description: "Shop the GoldRose 24K gold dipped rose collection.",
     alternates: { canonical: "/shop" },
-    ...(paged ? { robots: { index: false, follow: true } } : {}),
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
-// Redesign palette (2026-07-25 frame edit)
+// Redesign palette (2026-07-25 frame edit); the card/chip shades moved into
+// components/shop/ShopInteractive with the grid.
 const INK = "#3B2F2F";
 const INK_SOFT = "#4A403B";
-const MUTED = "#B8A69A";
-const SAND = "#E5D9C9";
 
 /* ---------- Product cards (Figma frame order, left/right per row) ---------- */
 
 // Left cards are 203 wide, right cards 204 (verbatim frame widths); `img` is
 // the 2x render of that card's own Product Visual node, `stars` the row's
 // star-glyph render (185px left / 186px right).
-const CARDS = [
+const CARDS: SlotSpec[] = [
   { x: 8, y: 408.5, w: 203, img: "58-61", stars: "58-64", starsW: 185 },
   { x: 219, y: 408.5, w: 204, img: "58-91", stars: "58-94", starsW: 186 },
   { x: 8, y: 716.5, w: 203, img: "58-103", stars: "58-64", starsW: 185 },
@@ -83,130 +78,37 @@ const CARDS = [
 const PAGE_COUNT = 5;
 const ROTATE_PER_PAGE = 3;
 
-/** Which card's content belongs in grid slot `slot` on `page`. */
-function contentIndex(slot: number, page: number) {
-  return (slot + (page - 1) * ROTATE_PER_PAGE) % CARDS.length;
-}
-
-type CardData = { shortName: string; price: string; compareAt: string | null } | null;
-
-function ProductCard({
-  card,
-  href,
-  data,
-}: {
-  card: (typeof CARDS)[number];
-  href: string;
-  /** Live catalog values for the designated text boxes; null = design text. */
-  data: CardData;
-}) {
-  const heartX = card.w === 203 ? 154 : 155; // 收藏 art: 162/374 in frame coords
-  return (
-    <Link
-      href={href}
-      className="gr-card-zoom"
-      style={{
-        ...abs(card.x, card.y, card.w, 297),
-        display: "block",
-        background: "#FFFBF6",
-        boxShadow: `inset 0 0 0 1px ${SAND}`,
-        borderRadius: 14,
-        overflow: "hidden",
-      }}
-    >
-      <img
-        className="gr-photo"
-        src={`/veloria/home/${card.img}.png`}
-        alt="Artisan 24K gold-dipped eternal rose"
-        width={card.w}
-        height={204}
-        style={{ ...abs(0, 0, card.w, 204), display: "block" }}
-      />
-      <div
-        className={inter.className}
-        data-live-text
-        style={{
-          ...abs(9, 214, card.w - 18),
-          ...txt(16, 16, INK),
-          fontWeight: 500,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {data?.shortName ?? "Double Rose Gift Set"}
-      </div>
-      <img
-        src={`/veloria/home/${card.stars}.svg`}
-        alt="Five star rating"
-        width={card.starsW}
-        height={11}
-        style={{ ...abs(9, 234, card.starsW, 11), display: "block" }}
-      />
-      {/* Price pair. The frame gives each price its own fixed box (48 / 51
-          wide) because the mock text is the short "$219"; real prices carry
-          cents and overflow that, so the two flow in one row that ends short
-          of the heart — same origin as the design, no overlap. */}
-      <div
-        className={notoSC.className}
-        data-live-text
-        style={{
-          ...abs(9, 249, heartX - 13, 43),
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          overflow: "hidden",
-        }}
-      >
-        <span style={{ ...txt(20, 24, INK), fontWeight: 700, flexShrink: 0 }}>
-          {data?.price ?? "$219"}
-        </span>
-        {data === null || data.compareAt !== null ? (
-          <span
-            style={{
-              ...txt(14, 16.8, MUTED),
-              textDecoration: "line-through",
-              minWidth: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {data?.compareAt ?? "$189.00"}
-          </span>
-        ) : null}
-      </div>
-      <img
-        src="/veloria/home/58-86.png"
-        alt=""
-        width={40}
-        height={43}
-        style={{ ...abs(heartX, 249, 40, 43), display: "block" }}
-      />
-    </Link>
-  );
-}
-
 /* ---------- Page ---------- */
 
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
-  const requested = Number((await searchParams).page);
+  const params = await searchParams;
+  const requested = Number(params.page);
   const page =
     Number.isInteger(requested) && requested >= 1 && requested <= PAGE_COUNT ? requested : 1;
+  const query = (params.q ?? "").trim().toLowerCase();
   // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
-  let handles: string[] = [];
-  let cardData: Array<{ handle: string; shortName: string; price: string; compareAt: string | null }> = [];
+  let cardData: CardData[] = [];
   let promo = { text: "", isDefault: true };
   try {
     // Card order = active products by position (§8); cards cycle the catalog.
     const catalog = await getCatalog();
-    handles = catalog.map((product) => product.handle);
-    cardData = catalog.map((product) => ({
+    // /search hands off here as ?q= — a plain title/short-name match. When
+    // nothing matches, the full catalog renders (the design has no empty
+    // state for the grid; noted in docs/ixd/README.md).
+    const matches = query
+      ? catalog.filter((product) =>
+          `${product.title} ${product.short_name ?? ""}`.toLowerCase().includes(query),
+        )
+      : catalog;
+    cardData = (matches.length ? matches : catalog).map((product) => ({
       handle: product.handle,
       shortName: product.short_name || product.title,
       price: formatMoney(product.variants[0]?.price_cents ?? 0),
+      priceCents: product.variants[0]?.price_cents ?? 0,
       compareAt:
         product.variants[0]?.compare_at_price_cents != null
           ? formatMoney(product.variants[0].compare_at_price_cents)
@@ -235,63 +137,10 @@ export default async function ShopPage({
       <ShopHeader />
       <PromoBar slogan={promo.text} isDefault={promo.isDefault} variant="brown" />
 
-      {/* Filter bar. The +1.5px on the two tight-line-height Tenor labels is
-          the Chrome-vs-Figma baseline correction verified on the homepage. */}
-      <div style={{ ...abs(0, 325.359, 127.78), ...txt(14, 14.84, INK, "center"), textTransform: "uppercase" }}>
-        120 Apparel
-      </div>
-      <div
-        style={{ ...abs(217, 308, 91.136, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: 33 }}
-      />
-      <div style={{ ...abs(236, 325.844, 36.33), ...txt(13, 13.78, INK_SOFT, "center") }}>New</div>
-      <span style={abs(275.961, 323, 21, 20)}>
-        <DownIcon color={INK} />
-      </span>
-      <div
-        style={{ ...abs(317, 309, 45.099, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: "50%" }}
-      />
-      <span style={abs(327.022, 318.579, 26, 24)}>
-        <ListviewIcon color={INK} />
-      </span>
-      <div
-        style={{ ...abs(374.531, 308.254, 45.099, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: "50%" }}
-      />
-      <span style={abs(384, 320, 26, 24)}>
-        <FilterIcon color="#D4AF37" />
-      </span>
-
-      {/* Active filter chips — strokes are OUTSIDE-aligned in Figma, so the
-          1px ring is a child div sitting 1px outside the chip box. */}
-      {[
-        { x: 17, w: 95, label: "Women", labelX: 10, labelW: 53, closeX: 69 },
-        { x: 119, w: 116, label: "All apparel", labelX: 10, labelW: 74, closeX: 90 },
-      ].map((chip) => (
-        <div key={chip.label} style={abs(chip.x, 359, chip.w, 32)}>
-          <div style={{ ...abs(-1, -1, chip.w + 2, 34), border: `1px solid ${SAND}`, borderRadius: 31 }} />
-          <div
-            style={{ ...abs(chip.labelX, 8, chip.labelW), ...txt(14, 16, INK, "center"), letterSpacing: 0.14 }}
-          >
-            {chip.label}
-          </div>
-          <span style={abs(chip.closeX, 8, 16, 16)}>
-            <CloseIcon color={INK_SOFT} />
-          </span>
-        </div>
-      ))}
-
-      {/* Product grid — slot geometry is the design's; which card sits in each
-          slot rotates per page (placeholder paging, see PAGE_COUNT). */}
-      {CARDS.map((slot, i) => {
-        const c = contentIndex(i, page);
-        return (
-          <ProductCard
-            key={i}
-            card={{ ...slot, img: CARDS[c].img }}
-            href={handles.length ? `/products/${handles[c % handles.length]}` : "/shop"}
-            data={cardData.length ? cardData[c % cardData.length] : null}
-          />
-        );
-      })}
+      {/* Count / sort / filter row, active chips, grid, and the 07-27 sort
+          dropdown + filter drawer overlays — client component so sorting and
+          the overlays can hold state (components/shop/ShopInteractive). */}
+      <ShopInteractive slots={CARDS} data={cardData} page={page} rotatePerPage={ROTATE_PER_PAGE} />
 
       {/* Pagination — page 1 keeps the bare /shop URL so the canonical page
           has no query string. */}

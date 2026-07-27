@@ -393,7 +393,9 @@ export function OrderConfirmedScreen({
           <Glyph src={`${A}/770-154.svg`} alt="" x={350} y={17} w={20} h={24} />
         </Link>
 
-        {/* 770:155 Share Tracking Link — no share backend yet, static. */}
+        {/* 770:155 Share Tracking Link — static: ORDER-DETAIL-SHARE-TRACKING
+            (docs/ixd/order-detail.md) needs a secure-token share backend
+            (expiring read-only link) that does not exist yet. */}
         <div
           style={{
             ...abs(20, 1122, 390, 74),
@@ -414,7 +416,9 @@ export function OrderConfirmedScreen({
         </div>
         <Glyph src={`${A}/770-161.svg`} alt="" x={368} y={1147} w={20} h={24} />
 
-        {/* 770:162 Help Card — CONTACT SUPPORT has no route yet, static. */}
+        {/* 770:162 Help Card → /care order-issues tab (implements
+            ORDER-DETAIL-CONTACT-SUPPORT, whole card clickable per the spec's
+            change proposal; docs/ixd/order-detail.md). */}
         <div
           style={{
             ...abs(20, 1208, 390, 78),
@@ -433,7 +437,8 @@ export function OrderConfirmedScreen({
         <div className={notoSC.className} style={{ ...abs(86, 1240, 207), ...txt(10, 12, GREY) }}>
           Our concierge is here whenever you need us.
         </div>
-        <Glyph src={`${A}/770-168.svg`} alt="CONTACT SUPPORT →" x={86} y={1256} w={106} h={12} />
+        <Glyph src={`${A}/770-168.svg`} alt="" x={86} y={1256} w={106} h={12} />
+        <Link href="/care?tab=order-issues" aria-label="Contact support" style={{ ...abs(20, 1208, 390, 78), display: "block" }} />
 
         {/* 770:169 Bottom Navigation — this frame draws its own nav card (the
             shared fixed BottomNav is switched off for this route). Home and Shop

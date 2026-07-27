@@ -2668,3 +2668,48 @@ Known follow-ups, not done:
 
 - Added a `SUMMARY.md` rule giving each prose fact, decision, or instruction one
   authoritative location and using links instead of duplicated text.
+## 2026-07-27 — Agent context documentation architecture
+
+- Reorganized `SUMMARY.md` as the high-level product, business, environment,
+  repository, and navigation map.
+- Made `docs/project-state.md` the dated source for deployment, authentication,
+  tooling, safety, readiness, and blockers.
+- Kept commands and connection procedures in `README.md`, removing its
+  duplicate repository tree and documentation index.
+
+## 2026-07-27 — Order-detail IxD spec imported from Numbers draft
+
+- Parsed `temp/frontend-function-draft.numbers` (design team, 3 entries:
+  ORDER-DETAIL-VIEW-STATUS / -SHARE-TRACKING / -CONTACT-SUPPORT).
+- Archived verbatim Chinese export: `temp/frontend-function-draft.zh.md`.
+- Created English working copy: `docs/ixd/order-detail.md` (homepage.md
+  format; IDs kept verbatim — they follow the Figma naming guide).
+- Updated `docs/ixd/README.md`: new source + file listed, ID-reference note.
+- Open: source's screenshot column is a broken placeholder — screenshots
+  requested from the design team; two target pages marked "to be confirmed".
+
+## 2026-07-27 · 07-27 Figma batch: 16 new screens + B-1 re-import (frontend-pages session)
+
+- Imported all 16 frames added to the VELORIA file on 07-27: account
+  dashboards (shopping wired to real /account data + sign-out, business as
+  unlinked visual route), ACCOUNT-ORDERS-LIST (/account/orders, real orders
+  when signed in), gift reminders, signup placeholder, the 4-tab /care page,
+  and — per the owner's instruction that 小页面 frames are not routes — the
+  SEARCH-OPEN overlay (SearchButton/SearchOverlay), shop sort dropdown (real
+  sorting) + filter drawer (cosmetic), and the PDP review/color/media/
+  unboxing drawers as in-page overlays.
+- Chrome: account tab renamed back to "Me" with the frames' new outline +
+  filled art (Login/Me session swap retired); PDP header heart → search.
+- /shop: control row corrected to "120 GIFTS / Ruby Red / Gift Sets" (the
+  base frame still carries apparel template residue; overlay frames patch
+  it); grid moved into a client component; ?q= catalog filtering added for
+  the search overlay hand-off.
+- B-1 /bag re-imported after the polish pass (Goudy add-on labels, safe-pay
+  band, FAQ hairlines fixed, new Rose Bouquet art, canvas 1728). B-2 drift
+  check deferred (live-content page) — flagged in docs/ixd/README.md.
+- C-2 wired per docs/ixd/order-detail.md: CONTACT SUPPORT → /care?tab=
+  order-issues; SHARE-TRACKING stays blocked on the secure-link backend.
+- Verified: pixel band-diffs vs Figma renders for all 16 screens (totals in
+  the 0.8–4.2% font-AA range; media viewer's image-source limitation
+  documented), lint, 39 unit, 76 e2e green; home/shop/PDP pixel baselines
+  regenerated for the Me tab + search icon.
