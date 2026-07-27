@@ -2713,3 +2713,36 @@ Known follow-ups, not done:
   the 0.8–4.2% font-AA range; media viewer's image-source limitation
   documented), lint, 39 unit, 76 e2e green; home/shop/PDP pixel baselines
   regenerated for the Me tab + search icon.
+## 2026-07-26 · Option C design + signed-in checkout linkage (bg session)
+
+- Option C (live tracking) design settled with Charles and recorded in
+  order-tracking.md: trigger = customer clicks "Track" → server polls the
+  UPS Track API (short staleness cache), shows scans on our page; no cron
+  unless a "Delivered" email automation is wanted later. UPS-direct, no
+  aggregator (UPS-only shipping).
+- Deliveries: signed-in checkout stamp — `orders.auth_user_id` (added to
+  0003) set from the Supabase session in /api/checkout + /api/paypal/capture
+  (`currentAuthUserId()` in server-auth.ts, null-safe in file mode);
+  /account matching now includes it, so orders placed while signed in show
+  in Me for any sign-in method (passkeys included) and regardless of the
+  PayPal payer email overriding the typed one (mapped.email ?? checkout.email).
+- Diagnosed for Charles: Me empty ⇒ passkey sign-ins never email-match by
+  design + Google/Apple providers still pending (§5); "sent to j***@gmail"
+  ⇒ sandbox PayPal payer email wins over the typed address.
+- Verified: eslint + tsc clean, 35 unit green; full e2e re-run in flight at
+  session close — commit/push to PR #1 gated on green.
+- ⚠️ Repo state: origin/main force-rewound to 92c455e (docs/IxD line
+  103a000… dropped); PR #1 base diverged — Charles to settle main before
+  merge; dropped commits survive in PR #1 history.
+
+## 2026-07-27 — Fix: orders.auth_user_id never reached the hosted DB (checkout inserts failing)
+
+- Owner's live test failed on both Pay and PayPal: PostgREST "Could not find the
+  'auth_user_id' column of 'orders' in the schema cache".
+- Root cause: a44d725 added the column to migration 0003 — already applied live
+  07-25, and Supabase never re-runs an applied migration, so the DDL never ran.
+- Fix: restored 0003 to its applied state; moved the column + partial index into
+  new 0004_orders_auth_user_id.sql; `supabase db push` applied it (migration list
+  shows 0004 local=remote); psql confirms column uuid + orders_auth_user_idx live.
+- SUMMARY.md refs updated 0003→0004. Lesson: never append statements to an
+  already-applied migration — always create a new file.
