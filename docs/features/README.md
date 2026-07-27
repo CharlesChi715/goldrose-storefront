@@ -83,7 +83,8 @@ Native checkout (PayPal Orders v2)
 ├── discount codes ●●●○ UAT
 ├── shipping rates ●●●○ UAT — RoW $19.95 placeholder (OQ-2)
 ├── PayPal create/capture ●●●○ UAT — sandbox until launch
-└── PayPal webhooks ●●●○ UAT
+├── PayPal webhooks ●●●○ UAT
+└── card-payments.md ●○○○ READY — Advanced Cards (OQ-1); owner enables it first
 
 Guest order lookup
 └── /orders ●●●○ UAT
@@ -162,7 +163,8 @@ here):
 
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
 - **owner config pending / dormant** → [BUILD-REPORT §5 activation checklist](../archive/BUILD-REPORT.md)
-- **OQ-2 / OQ-3** → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
+- **OQ-1 / OQ-2 / OQ-3** → [project-state.md · Open product decisions](../project-state.md#open-product-decisions)
+- **card-payments.md** → [card-payments.md](card-payments.md)
 - **db-backups.md** → [backend/db-backups.md](backend/db-backups.md)
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)
 - **order-tracking.md** → [backend/order-tracking.md](backend/order-tracking.md)

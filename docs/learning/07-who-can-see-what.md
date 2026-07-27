@@ -1,6 +1,6 @@
 # Feature Learning 07 — Who Can Get In, and Who Can See What
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 [04 — How pages read the database](04-how-pages-read-the-database.md) covered the *anon key vs service key* split from the data side. This doc traces the other half: a person arriving at `/admin`, and every gate between them and the store's orders. It is the security model of the whole project in one path.
 
 ## Feature Summary

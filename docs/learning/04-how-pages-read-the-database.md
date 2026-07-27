@@ -1,6 +1,6 @@
 # Feature Learning 04 — How Pages Read the Database
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 This doc covers the **read path** — how data gets *out* of the database and onto a page. The **write path** (how admin edits get *in*) is the companion doc, [03 — Admin product add/edit/delete](03-admin-product-crud.md); read its Step 0 first if the `TableStore` two-backend idea is new, because both docs stand on it.
 
 ## Feature Summary

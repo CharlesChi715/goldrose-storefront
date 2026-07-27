@@ -1,6 +1,6 @@
 # Feature Learning 09 — The Safety Net: Tests, Determinism, and CI
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 The other docs trace features a customer or an operator uses. This one traces the machinery that stops those features breaking silently — from `npm run test:unit` on this Mac to the green tick on a pull request. It is the least glamorous system in the repo and the one that most defines whether the others stay correct.
 
 ## Feature Summary

@@ -1,6 +1,6 @@
 # Feature Learning 02 — Posting-Account Attribution (Commissions)
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 Commit: `17730c3 feat(analytics): per-account attribution for sales commissions`.
 
 > **Update 2026-07-24** — the account tag moved from `utm_content` to our own

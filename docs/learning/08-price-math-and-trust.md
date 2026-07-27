@@ -1,6 +1,6 @@
 # Feature Learning 08 — Price Math, and Who Is Allowed to Do It
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 [01 — Add to cart → checkout](01-add-to-cart-checkout.md) followed the *route* a purchase takes. This doc stops at one station on that route and opens it up: **the arithmetic**. How a price is stored, in what unit, in what order the discount / shipping / tax are applied, where rounding happens, and — the part that actually matters commercially — which computer is permitted to decide what the customer pays.
 
 ## Feature Summary

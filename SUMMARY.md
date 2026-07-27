@@ -12,37 +12,35 @@ only when the task needs them.
 ## Goal
 
 - Sell the GoldRose 24K gold-dipped rose gift line directly to consumers.
-- The current planned area for marketting and selling is only US. Potential
-  area in the future is Europe.
-- All the content in frontend page should be English only.
-- Keep uncertain content visibly mocked until the teammates supplies real content.
+- Help me learn the things you did proactively. I want to learn.
 
-## State — 2026-07-26
+## State — 2026-07-27
 
 ### Team
-- Most of our teams located in China. I am in Sydney. 
-- Build payments for US where we going to marketing frist: Visa、 PayPal、Mastercard.
-- PayPal Orders v2 is built in sandbox mode. Shopify code is removed, but the
-  subscription stays active until the owner walkthrough passes.
-- Hosted Supabase and Vercel are connected. All current data, payments,
-  analytics, and marketing attribution are test-only; there are no real
-  customers or public campaign links.
-- All supplied mobile Figma frames are imported. Some B/C-screen controls and
-  content remain visual placeholders, and design-system conflicts remain open.
-- Immediate path: owner activation/UAT → real shipping and product content →
-  launch hardening. Detailed state and blockers:
-  [`docs/project-state.md`](docs/project-state.md).
+- Most of our teams located in China. I am in Sydney. The influencer we going to find
+  to marketting locates same area with customer.
 
-### Marketting
+### Marketing
 
-- The influencer who going to marketting our product and 
-  targetted user in American currently. We planning to sell it in Euorpe in
-  the future but Amarican first.
+- The influencer who going to marketting our product and targetted user in
+  American currently.
+- We planning to sell it in Euorpe in the future but Amarican first.
 
-### App
+### Project
 
-- The full storefront/admin build is deployed for testing at
+- Storefront and admin are deployed for testing:
   <https://goldrose-storefront.vercel.app>.
+- The US-first storefront is English-only; unknown content stays visibly mocked.
+- Supabase, Vercel, PayPal, analytics, and attribution are test-only. There are
+  no real customers or public campaigns.
+- PayPal wallet works in sandbox. PayPal Advanced Cards is selected but not
+  built; the current card form is a mock.
+- Shopify code is removed; cancel the subscription after owner acceptance.
+- All supplied mobile Figma frames are imported, with some placeholders and
+  design conflicts remaining.
+- Next: owner activation/UAT → real shipping and product content → card
+  integration and launch hardening. See
+  [`docs/project-state.md`](docs/project-state.md).
 
 ## Repository structure
 

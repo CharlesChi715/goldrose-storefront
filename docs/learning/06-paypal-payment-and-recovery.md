@@ -1,6 +1,6 @@
 # Feature Learning 06 — Taking Real Money, and Recovering When It Goes Wrong
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 [01 — Add to cart → checkout](01-add-to-cart-checkout.md) followed the **mock** payment path, and noted where the real one branches off. This doc takes that branch. It is the only path in the repo where an irreversible thing happens to someone else's bank account, so it is also where the most careful engineering lives.
 
 ## Feature Summary

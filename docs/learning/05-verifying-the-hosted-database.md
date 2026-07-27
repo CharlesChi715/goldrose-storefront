@@ -1,6 +1,6 @@
 # Feature Learning 05 — Verifying What's Really in the Hosted Database
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 This doc is not about a screen the customer sees. It traces an **operator** path: you sitting at a terminal, asking the live database "is this rule actually in you?" — and getting a trustworthy answer without a SQL console. It leans on the two-backend `TableStore` idea from [03 — Admin product CRUD](03-admin-product-crud.md) Step 0 and the key-trust split from [04 — How pages read the database](04-how-pages-read-the-database.md).
 
 ## Feature Summary

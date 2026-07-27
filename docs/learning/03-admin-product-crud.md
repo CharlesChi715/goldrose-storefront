@@ -1,6 +1,6 @@
 # Feature Learning 03 — Admin Product Add / Edit / Delete → Database
 
-Traced end to end per [learning-docs-guideline.md](learning-docs-guideline.md).
+Traced end to end per [README.md](README.md).
 This doc covers the **write path** — how a product the owner types into the admin becomes rows in the database. The **read path** (how `/shop` and the admin screens get data *out*) is the companion doc, [04 — How pages read the database](04-how-pages-read-the-database.md).
 
 ## Feature Summary

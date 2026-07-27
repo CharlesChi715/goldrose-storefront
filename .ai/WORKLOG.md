@@ -2611,3 +2611,27 @@ Known follow-ups, not done:
 - `fe73e42` pinned `pdx1` in vercel.json (beside the us-west-2 Supabase primary) and corrected the wrong region records in admin-design.md and BUILD-REPORT.md.
 - Verified live: `/api/beacon` returns `x-vercel-id: syd1::pdx1::…`.
 - region-alignment.md → delivery: verified; project-state queue item cleared; features README tree marks DONE.
+
+## 2026-07-26 — Delivered: OQ-1 closed, card-payment build staged
+- Audited the payment surface: there is **no card rail today**. The "Credit Card"
+  method is a Luhn-checking prop that POSTs a raw PAN to `/api/checkout` in mock
+  mode only; the live path deliberately renders no card fields.
+- Decision (owner sign-off this session): **build on PayPal Advanced Cards**
+  (Expanded Checkout) — PayPal-hosted card iframes on our own checkout page,
+  settling into the existing verified business account. Rejected a second Stripe
+  account as onboarding/KYC overhead, not on technical merit; the
+  provider-neutral order schema keeps Stripe a routes-only swap.
+- Confirmed US/AU/HK are on PayPal's 37-country eligibility list, and that
+  Advanced Checkout needs per-account onboarding (owner action, Stage 0).
+- Staged the build as 8 tasks, Stage 0 (owner onboarding) → Stage 7 (live
+  cutover), with dependencies. No payment code written yet.
+- `docs/project-state.md` OQ-1 records the decision; the full doc sweep
+  (`admin-design.md` §4, SUMMARY.md, stale Shopify comments) is Stage 6.
+
+## 2026-07-26 — Merged learning-docs guideline into README
+- Folded `docs/learning/learning-docs-guideline.md` into `docs/learning/README.md` as a "Guideline for writing these docs" section; deleted the standalone file.
+- Repointed the guideline link in learning docs 01–09 to `README.md`.
+## 2026-07-27 — Concise project documentation
+
+- Condensed `SUMMARY.md` project state and `docs/project-state.md`, preserving
+  deployment boundaries, safety gates, release blockers, and product decisions.

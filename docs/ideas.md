@@ -64,6 +64,9 @@ turn it into a real task.
 ## From boss - 2026-07-25
 Build payments for US where we going to marketing frist: Visa、 PayPal、Mastercard
 
+## From boss 07-26
+is there any way to get how long time do user stay on a page or stay on a section of certain page? 
+
 
 ## TODO from me:
 payment
@@ -72,11 +75,14 @@ frontend ixd
 domain
 
 
-- meeting 25 July
-美化未完成可以做吗
+- meeting
+
 figma 英语命名 统一
 
-首页
-admin passkey
+在想backup plan
+
+支付用 PayPal Advanced Cards
+
 email tracking order 
+
 supabase CLI
