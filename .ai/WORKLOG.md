@@ -2635,3 +2635,36 @@ Known follow-ups, not done:
 
 - Condensed `SUMMARY.md` project state and `docs/project-state.md`, preserving
   deployment boundaries, safety gates, release blockers, and product decisions.
+
+## 2026-07-27 — Device CLI inventory
+- Scanned installed CLIs; filled the empty "CLI installed on this device" bullet in SUMMARY.md.
+- Key finds: no vercel/pnpm/stripe CLI; yarn unlinked; Docker Desktop now runs under charles (daemon live), so supabase db dump/diff unblocked — memory updated.
+## 2026-07-27 — Summary maintenance rule
+
+- Reworded `SUMMARY.md` guidance to define it as concise AI-agent startup
+  context covering project state, setup, tooling, services, and constraints.
+
+## 2026-07-27 — Merged all open Dependabot PRs
+
+- Reviewed and merged PRs #3, #4, #5, #7 (all green CI + Vercel previews):
+  - #3 actions/checkout v5→v7, #4 actions/setup-node v5→v7 (CI workflow only)
+  - #5 routine group: next 16.2.12, react/react-dom 19.2.8, tailwind 4.3.3,
+    @tailwindcss/postcss 4.3.3, @playwright/test 1.62.0, eslint-config-next 16.2.12
+  - #7 @types/node ^20→^26 (dev-only types)
+- #4 needed a local merge + SSH push: gh's OAuth token lacks `workflow` scope,
+  so the API refused to merge a PR touching .github/workflows/ci.yml.
+- Verified after merge: CI on main green (lint/typecheck/unit on the new
+  actions), Vercel production deploy success, local typecheck clean,
+  node_modules synced.
+- Left closed: #6 (eslint 10) and #8 (TypeScript 7) — major upgrades,
+  previously declined.
+- Expanded SUMMARY.md "Working Space" section: device, signed-in services (gh/Supabase), secrets location, desktop apps; version numbers dropped per Charles.
+- Installed Vercel CLI 57 (npm -g); found existing login (vancechi); linked repo to goldrose-storefront project. Link step appended VERCEL_OIDC_TOKEN to .env.local — verified no existing vars lost. SUMMARY.md Working Space updated.
+- Installed psql 18.4 (brew libpq, force-linked) for future ad-hoc SQL against hosted Supabase; DB password still needed from dashboard on first use.
+- Added CLI-install backlog bullet to SUMMARY.md Working Space (tunnel for PayPal webhooks; psql password note).
+- Removed dead NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN from Vercel Production (verified no code references; only archive docs mention Shopify). Env now: 3 Supabase vars only.
+- DB password reset by Charles; stored as SUPABASE_DB_PASSWORD in .env.local. psql verified against hosted DB via aws-1-us-west-2 pooler (aws-0 rejects the tenant). Ad-hoc SQL unblocked; SUMMARY.md + memory updated.
+## 2026-07-27 — Documentation single-source rule
+
+- Added a `SUMMARY.md` rule giving each prose fact, decision, or instruction one
+  authoritative location and using links instead of duplicated text.
