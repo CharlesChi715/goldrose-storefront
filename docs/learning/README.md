@@ -19,6 +19,7 @@ The format is set by the guideline below.
 | 07 | [Who can get in, who can see what](07-who-can-see-what.md) | `/admin` request → proxy → session → allowlist → RLS | Authentication ≠ authorization; fail closed |
 | 08 | [Price math, and who may do it](08-price-math-and-trust.md) | cart → discount → shipping → tax → total | Integer cents; the server always re-prices |
 | 09 | [The safety net: tests and CI](09-tests-and-ci.md) | `npm test` → Playwright → GitHub Actions | Determinism is engineered, not hoped for |
+| 10 | [Working as a team](10-working-as-a-team.md) | idea → task → branch → PR → CI → squash-merge → `main` | Ambiguity, not skill, is what makes teams feel "off" |
 
 ## Reading order
 
@@ -26,6 +27,7 @@ The format is set by the guideline below.
 - **Working on checkout or payments:** 01 → 08 → 06.
 - **Working on the admin, auth, or anything hosted:** 07 → 05 → 03.
 - **Changing anything at all:** 09, so you know what will and won't catch you.
+- **Working with other people:** 10 — it explains the workflow every change here rides on.
 
 Each doc ends with a "Recap" of transferable ideas — those are the parts worth
 remembering after the specific code has changed.

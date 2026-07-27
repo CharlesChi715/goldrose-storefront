@@ -8,10 +8,12 @@
  * 03 Sign In, 04 Member Benefits, 05 GoldRose Membership, 06 Find Existing
  * Order. Module 13 (bottom nav) is the shared BottomNav, already imported.
  *
- * The design's only sign-in method is an emailed one-time code, so this wires
- * Supabase `signInWithOtp` / `verifyOtp`. The frame has no code-entry state —
- * once a code is sent the email field becomes the code field in place, reusing
- * the frame's own input styling, which is the smallest possible deviation.
+ * Sign-in is an emailed link (owner request 2026-07-27): `signInWithOtp`
+ * sends a mail whose link lands on /auth/confirm and signs the visitor in.
+ * The same mail carries a 6-digit code as fallback — useful when the mail is
+ * read on a different device — so after sending, the email field becomes the
+ * code field in place, reusing the frame's own input styling, which is the
+ * smallest possible deviation (the frame has no post-send state).
  *
  * Coordinates and colors come verbatim from the Figma REST API. Glyph icons
  * (✉ □ ♡ ▣ ▢) and the two tab labels are SVG exports of TEXT nodes, because
@@ -136,7 +138,7 @@ function SignInCard({
       }}
     >
       <div style={{ ...abs(16, 19.5, 251, 21), ...txt(17, 20.57, INK), fontWeight: 700 }}>
-        {codeStep ? "Enter your verification code" : "Sign in and continue shopping"}
+        {codeStep ? "Check your email" : "Sign in and continue shopping"}
       </div>
 
       {/* Email / code field (76:68). One box, two roles — the frame has no
@@ -211,7 +213,7 @@ function SignInCard({
               : "SENDING…"
             : codeStep
               ? "VERIFY AND SIGN IN"
-              : "SEND VERIFICATION CODE"}
+              : "EMAIL ME A SIGN-IN LINK"}
         </span>
       </button>
 
@@ -227,8 +229,8 @@ function SignInCard({
         {error
           ? error
           : codeStep
-            ? `We sent a code to ${email}. It expires shortly.`
-            : "We’ll send a one-time verification code to your email."}
+            ? `We emailed a sign-in link to ${email} — tap it, or enter the 6-digit code from that email here.`
+            : "We’ll email you a secure sign-in link. Click it and you’re in — no password needed."}
       </div>
 
       {/* Create account (76:83) — the same emailed-code flow creates the
@@ -433,7 +435,7 @@ export function ShoppingLogin() {
     });
     setBusy(false);
     if (sendError) {
-      setError("We couldn’t send that code. Check the address and try again.");
+      setError("We couldn’t email that address. Check it and try again.");
       return;
     }
     setPhase("code");
@@ -457,6 +459,7 @@ export function ShoppingLogin() {
       return;
     }
     // A valid code sets the session; the account page re-renders signed in.
+    // (The emailed link signs in through /auth/confirm without this step.)
   }
 
   return (

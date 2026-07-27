@@ -94,7 +94,7 @@ Customer accounts /account — dormant: owner config pending
 ├── Google OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
 ├── Apple OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
 ├── passkeys ✕ DROPPED — owner 07-25 "no passkey" (storefront only; admin keeps them)
-├── order matching (verified email + signed-in checkout stamp) ●●●○ UAT
+├── order matching (verified email) ●●●○ UAT
 ├── nav tab "Login" ⇄ "Me" ●●●○ UAT
 ├── login screen 74:53 ●●●○ UAT — imported pixel-exact 07-25
 └── login screen 74:55 (B2B) ●●●○ UAT — imported 07-25; enquiries email the

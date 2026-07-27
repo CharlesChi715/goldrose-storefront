@@ -2713,36 +2713,54 @@ Known follow-ups, not done:
   the 0.8–4.2% font-AA range; media viewer's image-source limitation
   documented), lint, 39 unit, 76 e2e green; home/shop/PDP pixel baselines
   regenerated for the Me tab + search icon.
-## 2026-07-26 · Option C design + signed-in checkout linkage (bg session)
 
-- Option C (live tracking) design settled with Charles and recorded in
-  order-tracking.md: trigger = customer clicks "Track" → server polls the
-  UPS Track API (short staleness cache), shows scans on our page; no cron
-  unless a "Delivered" email automation is wanted later. UPS-direct, no
-  aggregator (UPS-only shipping).
-- Deliveries: signed-in checkout stamp — `orders.auth_user_id` (added to
-  0003) set from the Supabase session in /api/checkout + /api/paypal/capture
-  (`currentAuthUserId()` in server-auth.ts, null-safe in file mode);
-  /account matching now includes it, so orders placed while signed in show
-  in Me for any sign-in method (passkeys included) and regardless of the
-  PayPal payer email overriding the typed one (mapped.email ?? checkout.email).
-- Diagnosed for Charles: Me empty ⇒ passkey sign-ins never email-match by
-  design + Google/Apple providers still pending (§5); "sent to j***@gmail"
-  ⇒ sandbox PayPal payer email wins over the typed address.
-- Verified: eslint + tsc clean, 35 unit green; full e2e re-run in flight at
-  session close — commit/push to PR #1 gated on green.
-- ⚠️ Repo state: origin/main force-rewound to 92c455e (docs/IxD line
-  103a000… dropped); PR #1 base diverged — Charles to settle main before
-  merge; dropped commits survive in PR #1 history.
+## 2026-07-27 — Customer sign-in becomes an emailed link (code fallback)
 
-## 2026-07-27 — Fix: orders.auth_user_id never reached the hosted DB (checkout inserts failing)
+- Owner request: type email → receive link → click → signed in automatically.
+  Diagnosis: the hosted templates only ever sent a link (`{{ .ConfirmationURL }}`)
+  while both login screens asked for a 6-digit code that never arrived, and the
+  link itself dead-ended on the homepage with an unhandled `?code=`.
+- Added `app/auth/confirm/route.ts` (server-side `verifyOtp` on `token_hash`,
+  open-redirect guard, same shape as `/auth/callback`). Reworked copy/flow in
+  `ShoppingLogin` + `BusinessLogin` (link-first, in-place code fallback kept)
+  and the `auth_error` message in `AccountClient`.
+- Verified on dev against hosted Supabase with an admin-minted link (no email
+  sent): click → session cookie + redirect to /account; reused link → friendly
+  error; `next=//evil` → guarded. Typecheck, eslint, 39 unit, 6 account e2e all
+  green. Throwaway test user deleted.
+- Hosted template push was permission-blocked in-session; run
+  `node scripts/apply-auth-email-templates.mjs` to activate. Only the two
+  templates + subjects are PATCHed; `site_url` untouched (passkey RP ID).
+- Rollback values (before): magic-link subject "Your sign-in link", body
+  `<h2>Your sign-in link</h2>…{{ .ConfirmationURL }}…`; confirmation subject
+  "Confirm your email address", body `<h2>Confirm your email address</h2>…
+  {{ .ConfirmationURL }}…`.
+- Known follow-ups: launch-ready SMTP still pending (built-in mailer ≈2
+  emails/hour); order-linking allowlist is still `["google","apple"]` so
+  email-verified customers see no past orders (docs/learning/07 flags it).
 
-- Owner's live test failed on both Pay and PayPal: PostgREST "Could not find the
-  'auth_user_id' column of 'orders' in the schema cache".
-- Root cause: a44d725 added the column to migration 0003 — already applied live
-  07-25, and Supabase never re-runs an applied migration, so the DDL never ran.
-- Fix: restored 0003 to its applied state; moved the column + partial index into
-  new 0004_orders_auth_user_id.sql; `supabase db push` applied it (migration list
-  shows 0004 local=remote); psql confirms column uuid + orders_auth_user_idx live.
-- SUMMARY.md refs updated 0003→0004. Lesson: never append statements to an
-  already-applied migration — always create a new file.
+## 2026-07-27 — Deliveries: order-tracking branch merged to main (PR #9, "test" session)
+
+- Found and committed the stranded 0003→0004 migration-split fix that was
+  sitting uncommitted in the order-tracking worktree since the 07-27 incident.
+- Synced worktree-order-tracking with main twice (41 then 3 commits of drift);
+  docs conflicts resolved keeping main's 07-27 single-source restructure and
+  both sides' WORKLOG histories; all code auto-merged clean.
+- Verified tsc + production build + 39/39 unit green, then squash-merged as
+  PR #9 (e6df3ab) and deleted the branch (remote, local, worktree). Also
+  deleted stale merged branches gold-rose-v0 and worktree-passkey-ui-polish.
+  GitHub now holds main only.
+- Production deploy triggered: order tracking + signed-in checkout stamp are
+  live; deploy-safe because 0004 was already applied to the hosted DB.
+- Walked Charles through the feature-branch workflow end to end: branch →
+  Vercel preview → sync with main → PR → squash-merge → delete; branch naming
+  (type/short-description, never "preview"/"test"); immutable deployments vs
+  branch aliases; CI/CD terminology.
+
+## 2026-07-27 — docs(learning): add 10-working-as-a-team
+
+- Wrote `docs/learning/10-working-as-a-team.md` from the team-collaboration
+  mental-model conversation: friction = ambiguity (truth / ownership / integration),
+  traced as "the life of one change" through this repo's real
+  branch → PR → CI → Vercel preview → squash-merge workflow.
+- Indexed it in `docs/learning/README.md` (table row 10 + reading-order line).

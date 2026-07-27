@@ -102,9 +102,11 @@ indicator, absent in production.
 
 The frames are static mocks; these decisions fill the gaps.
 
-- **No code-entry screen.** 74:53 has "SEND VERIFICATION CODE" but no frame for
-  typing the code. The email field becomes the code field in place, reusing the
-  frame's own input styling.
+- **No post-send screen.** 74:53 has a single send button ("SEND VERIFICATION
+  CODE" in the frame; live label "EMAIL ME A SIGN-IN LINK" since the 07-27
+  owner request) and no frame for what follows. The emailed link signs in by
+  itself via /auth/confirm; for the fallback code in the same mail, the email
+  field becomes the code field in place, reusing the frame's own input styling.
 - **No signed-in frame.** Signed-in `/account` keeps the pre-existing
   hand-built view (orders, sign out).
 - **B2B has no backend.** Per the owner (2026-07-25) V1 is "static + email the
@@ -113,5 +115,5 @@ The frames are static mocks; these decisions fill the gaps.
   contact address. Nothing is persisted.
 - **No selected state for the nine need cards.** Selecting one thickens its
   hairline to `#3B2F2F` — the lightest available signal that the tap registered.
-- **Sign-in is shared.** The procurement card uses the same emailed-code flow;
-  there is no separate procurement account system.
+- **Sign-in is shared.** The procurement card uses the same emailed sign-in
+  link flow; there is no separate procurement account system.

@@ -42,26 +42,3 @@ export async function supabaseServerAuthClient() {
     },
   });
 }
-
-/**
- * The signed-in customer's auth user id for this request, or null when
- * Supabase isn't configured (local file mode), nobody is signed in, or the
- * auth lookup fails — callers (checkout) must never break on auth trouble.
- *
- * @returns The Supabase auth user id, or null.
- */
-export async function currentAuthUserId(): Promise<string | null> {
-  const env = getSupabaseEnv();
-  if (!env.url || !env.anonKey) {
-    return null;
-  }
-  try {
-    const supabase = await supabaseServerAuthClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user?.id ?? null;
-  } catch {
-    return null;
-  }
-}

@@ -181,9 +181,6 @@ export async function getAccountOverview(): Promise<AccountOverview | null> {
   const orders = (await getStore().all("orders"))
     .filter(
       (order) =>
-        // Placed while signed in as this user (works for every sign-in
-        // method — the checkout stamped the session's auth uid on the order).
-        order.auth_user_id === user.id ||
         (customer && order.customer_id === customer.id) ||
         (canMatchByEmail && order.email?.toLowerCase() === email),
     )

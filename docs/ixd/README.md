@@ -226,7 +226,7 @@ still the mock timeline).
   ink shades). Palette reconciliation is already release-queue #6; nothing
   re-imported for color alone.
 - AUTH-SIGNUP asks for password + confirm-password, but customer auth is
-  decided as the emailed one-time code. The screen ships as an unlinked
+  decided as the emailed sign-in link (code fallback). The screen ships as an unlinked
   visual placeholder built from styled divs — a live password box that goes
   nowhere is the B-2 card-field hazard again. Reconcile the flow before it
   gets linked.

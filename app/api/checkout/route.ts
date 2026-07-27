@@ -16,7 +16,6 @@ import { skipPaymentEnabled } from "@/lib/checkout/mode";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createOrder } from "@/lib/orders/db";
 import { getPayPalConfig } from "@/lib/paypal/client";
-import { currentAuthUserId } from "@/lib/supabase/server-auth";
 import { getStore } from "@/lib/supabase/store.ts";
 import type { Address } from "@/lib/supabase/types.ts";
 
@@ -160,7 +159,6 @@ export async function POST(request: Request) {
       payment_provider: "mock",
       financial_status: "paid",
       email: parsed.email ?? null,
-      auth_user_id: await currentAuthUserId(),
       shipping_address: shippingAddress,
       note: parsed.note ?? null,
       visitor_id: parsed.visitorId ?? null,

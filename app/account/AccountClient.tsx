@@ -8,9 +8,10 @@
  * ACCOUNT-INFO-SHOPPING-DASHBOARD (914:112, imported 2026-07-27) fed with
  * the visitor's real name and latest order.
  *
- * Sign-in is an emailed one-time code, the only method the 07-25 design
- * offers; the owner confirmed "no passkey" for the storefront, so the passkey
- * and OAuth buttons that used to live here are gone. The underlying helpers
+ * Sign-in is an emailed link that lands on /auth/confirm (owner request
+ * 2026-07-27), with the mail's 6-digit code as in-place fallback; the owner
+ * confirmed "no passkey" for the storefront, so the passkey and OAuth buttons
+ * that used to live here are gone. The underlying helpers
  * (`lib/supabase/browser-auth`, /auth/callback) are untouched and still serve
  * the admin, so restoring either method is a UI change only.
  */
@@ -98,8 +99,9 @@ export function AccountClient() {
       return;
     }
     let cancelled = false;
-    // Coming back from a failed OAuth round trip (/auth/callback appends
-    // ?auth_error=1) — surface it once and clean the URL.
+    // Coming back from a failed OAuth round trip or an expired/used sign-in
+    // link (/auth/callback and /auth/confirm append ?auth_error=1) — surface
+    // it once and clean the URL.
     const hadAuthError = new URLSearchParams(window.location.search).get("auth_error");
     if (hadAuthError) {
       window.history.replaceState(null, "", "/account");
@@ -109,7 +111,7 @@ export function AccountClient() {
         return;
       }
       if (hadAuthError) {
-        setError("Sign-in didn't complete. Please try again.");
+        setError("Sign-in didn't complete — the link may have expired or already been used. Please request a new one.");
       }
       if (!user) {
         setPhase("signedOut");
@@ -117,8 +119,9 @@ export function AccountClient() {
       }
       loadAccount();
     });
-    // The sign-in screen verifies the emailed code itself, so the session can
-    // appear without this component doing anything — watch for it.
+    // The sign-in screen verifies the emailed fallback code itself, so the
+    // session can appear without this component doing anything — watch for it.
+    // (The emailed link arrives here already signed in via /auth/confirm.)
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) {
         return;

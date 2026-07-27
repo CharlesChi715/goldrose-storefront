@@ -7,12 +7,12 @@
  *
  * The whole form is a VISUAL PLACEHOLDER, deliberately built from styled
  * divs rather than real inputs: the design asks for password fields, but
- * live customer auth is the emailed one-time code (release queue #2) — a
+ * live customer auth is the emailed sign-in link (code fallback) — a
  * password box that goes nowhere is the same hazard as B-2's dead card
  * fields, and a real <input type=password> would also invite password
  * managers to fill it. Until the design and the auth decision are
  * reconciled (flagged in docs/ixd/README.md), only "Sign in ›" is live and
- * goes to /account, where the real code-based flow already works.
+ * goes to /account, where the real link-based flow already works.
  */
 
 import Link from "next/link";

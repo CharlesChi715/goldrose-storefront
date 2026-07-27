@@ -89,8 +89,11 @@ this mode.
 
 1. Complete owner activation and the
    [acceptance walkthrough](admin-design.md#143-final-acceptance).
-2. Configure customer auth as email one-time code: enable email, use
-   `{{ .Token }}`, and configure launch-ready SMTP.
+2. Finish customer sign-in activation (emailed link, owner request
+   2026-07-27): the code and `/auth/confirm` are live; apply the new email
+   templates with `node scripts/apply-auth-email-templates.mjs` (the direct
+   Management API call was permission-blocked in-session), then configure
+   launch-ready SMTP (built-in Supabase email allows only ~2 mails/hour).
 3. Configure PayPal sandbox and begin Advanced Checkout onboarding. Install
    `cloudflared` or `ngrok` when webhook testing starts.
 4. Fix customer order links that currently point to the leftover `/orders`

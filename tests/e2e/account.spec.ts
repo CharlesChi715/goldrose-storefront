@@ -4,8 +4,9 @@
  * suite always runs the file adapter with Supabase env blanked, so what's
  * testable here is the graceful degradation: the Me tab reaches /account,
  * the imported sign-in frame renders and says sign-in is off when used, and
- * the admin login shows no passkey button. The real emailed-code flow only
- * exists against hosted Supabase and is exercised by hand there.
+ * the admin login shows no passkey button. The real emailed sign-in link
+ * (/auth/confirm) only exists against hosted Supabase and is exercised by
+ * hand there.
  */
 
 import { test, expect } from "@playwright/test";
@@ -24,7 +25,7 @@ test.describe("customer account (local mode)", () => {
     // Frame 74:53 modules.
     await expect(page.getByText("Welcome to")).toBeVisible();
     await expect(page.getByLabel("Email address")).toBeVisible();
-    await expect(page.getByRole("button", { name: "SEND VERIFICATION CODE" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "EMAIL ME A SIGN-IN LINK" })).toBeVisible();
     await expect(page.getByText("Benefits after sign-in")).toBeVisible();
     // /orders redirects to the ADMIN list, so the shopper-facing button points
     // at the customer tracking screen (Figma C-1) instead.
@@ -41,7 +42,7 @@ test.describe("customer account (local mode)", () => {
   test("without Supabase, signing in says so instead of failing silently", async ({ page }) => {
     await page.goto("/account");
     await page.getByLabel("Email address").fill("shopper@example.com");
-    await page.getByRole("button", { name: "SEND VERIFICATION CODE" }).click();
+    await page.getByRole("button", { name: "EMAIL ME A SIGN-IN LINK" }).click();
     await expect(page.getByText(/isn’t switched on in this environment/)).toBeVisible();
   });
 

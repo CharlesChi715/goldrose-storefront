@@ -12,8 +12,10 @@
  * B2B has no backend of its own. Per the owner (2026-07-25) the V1 is
  * "static + email the request": picking a need and pressing SUBMIT REQUEST or
  * BOOK CONSULTATION posts to /api/business-request, which emails the owner.
- * Sign-in reuses the storefront's emailed one-time code — there is no
- * separate procurement account system.
+ * Sign-in reuses the storefront's emailed sign-in link (code fallback in the
+ * same mail) — there is no separate procurement account system. The link
+ * lands on /auth/confirm, whose default destination is /account; one tap on
+ * the Business tab returns here signed in.
  *
  * See docs/ixd/login-import.md for how this was produced from the sources.
  */
@@ -358,13 +360,14 @@ export function BusinessLogin() {
       if (verifyError) setError("That code didn’t match. Request a new one if it has expired.");
       return;
     }
+    // Sends the sign-in link mail (6-digit code included as fallback).
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { shouldCreateUser: true },
     });
     setBusy(false);
     if (sendError) {
-      setError("We couldn’t send that code. Check the address and try again.");
+      setError("We couldn’t email that address. Check it and try again.");
       return;
     }
     setPhase("code");
@@ -424,7 +427,7 @@ export function BusinessLogin() {
           style={{ ...abs(16, 20, 274, 36), ...txt(15, 18.15, INK), fontWeight: 700, whiteSpace: "pre-line" }}
         >
           {codeStep
-            ? "Enter your verification code"
+            ? "Check your email"
             : "Have a procurement account?\nSign in for dedicated service"}
         </div>
         <div
@@ -480,7 +483,7 @@ export function BusinessLogin() {
           <span
             style={{ ...txt(12.5, 15.13, CANVAS), fontWeight: 600, display: "block", textAlign: "center" }}
           >
-            {busy ? "SENDING…" : codeStep ? "VERIFY AND SIGN IN" : "SEND VERIFICATION CODE"}
+            {busy ? "SENDING…" : codeStep ? "VERIFY AND SIGN IN" : "EMAIL ME A SIGN-IN LINK"}
           </span>
         </button>
         <div
@@ -491,7 +494,11 @@ export function BusinessLogin() {
             whiteSpace: "normal",
           }}
         >
-          {error ?? notice ?? "We’ll send a one-time verification code to your email."}
+          {error ??
+            notice ??
+            (codeStep
+              ? `We emailed a sign-in link to ${email} — tap it, or enter the 6-digit code from that email here.`
+              : "We’ll email you a secure sign-in link. Click it and you’re in — no password needed.")}
         </div>
         <div style={abs(16, 228, 366, 24)}>
           <span style={{ ...abs(29, 5.5, 135, 13), ...txt(11, 13.31, MUTED), fontWeight: 400 }}>

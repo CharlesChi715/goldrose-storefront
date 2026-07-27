@@ -108,7 +108,6 @@ export type OrderRow = {
   name: string;
   source: OrderSource;
   customer_id: string | null;
-  auth_user_id: string | null;
   payment_provider: string;
   provider_order_id: string | null;
   provider_capture_id: string | null;

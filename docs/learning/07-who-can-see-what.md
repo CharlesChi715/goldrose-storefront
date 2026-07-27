@@ -432,7 +432,7 @@ Three things to take from it:
 
 ### Step 9 — The customer side, and one conservative decision
 
-Storefront sign-in is an emailed one-time code ([ShoppingLogin.tsx:421-440](../../components/login/ShoppingLogin.tsx#L421-L440)) with `shouldCreateUser: true`, so signing in and signing up are one operation.
+Storefront sign-in is an emailed sign-in link, verified server-side by `/auth/confirm`, with the same mail's one-time code as fallback ([ShoppingLogin.tsx](../../components/login/ShoppingLogin.tsx)) and `shouldCreateUser: true`, so signing in and signing up are one operation.
 
 ```tsx
 // components/login/ShoppingLogin.tsx:430-433
