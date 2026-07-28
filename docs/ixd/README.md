@@ -253,3 +253,59 @@ still the mock timeline).
   swap flagged on 07-26 remains).
 - B-2 (checkout) also moved to 已完成 but its skin wraps the live cart, so a
   pixel drift check needs a focused pass — follow-up, not attempted here.
+
+## 07-28 screen imports — developer findings
+
+Ten frames landed on 2026-07-28 in a new `ACCOUNT-PRIVACY-SUPPORT-IPHONE-15-
+PRO-MAX` section (x 12450…17780 — outside both swim-lane banners, treated as
+delivered per the owner's hand-off). Nine are unique and all are implemented;
+the tenth (`ACCOUNT-PERSONAL-INFO-DETAILS-ALT` 1232:114) is a **byte-identical
+duplicate** of ACCOUNT-PERSONAL-INFO-DETAILS (structural diff of every node =
+zero) and was imported once — please delete or differentiate the duplicate.
+
+**Routes (dev-decided, owner-delegation precedent):**
+
+| Frame | Where it lives |
+|---|---|
+| ACCOUNT-PERSONAL-INFO-DETAILS 1230:112 | `/account/personal-info` — visual placeholder ("Olivia Carter" is the mock's data; no profile-update backend, so fields are styled divs and Edit/Save stay inert) |
+| ACCOUNT-PREFERENCES-CONTROLS 1234:111 | `/account/preferences` — the four toggles flip visually; no notification/cookie-consent backend yet |
+| ACCOUNT-PRIVACY-SECURITY 1234:191 | `/account/security`, reached from the dashboard's "Account & Privacy" row (previously inert) |
+| ACCOUNT-PRIVACY-POLICY 1234:271 | `/account/privacy-policy` — collapsed accordion only (the design draws no expanded state); mock copy, not a reviewed legal policy |
+| ACCOUNT-LOGOUT-CONFIRM 1234:351 | `/account/logout` — the dashboard's dev "Sign out" row now lands here; **Log out really ends the Supabase session** and returns home, Cancel goes back. This closes the 07-27 "no sign-out control" flag |
+| ACCOUNT-DELETE-CONFIRM 1234:431 | `/account/delete` — unlinked visual route (`/bag` precedent), see the deletion note below |
+| ACCOUNT-RETURNS-AFTER-SALES 1230:119 | `/account/returns` — the dashboard's "Returns & After-Sales" row re-pointed here (was `/care?tab=after-sales`); tabs flip visually, both cases are mock |
+| CARE-SUPPORT-CHAT 1230:120 | `/care/chat` — wired from /care's "Chat with us" + "Contact support" shortcut and the returns "Contact Support" item; the whole conversation is the mock's |
+| ACCOUNT-KEEPSAKE-SHARE 1230:121 | `/account/keepsake` — unlinked visual route; a real card needs order data plus a share/image-render backend |
+
+**Things found while transcribing, for the design team:**
+
+- **Password + two-step verification conflict (AUTH-SIGNUP redux).** The
+  security screen designs password change and 2FA, but customer auth is
+  decided as the emailed sign-in link (code fallback) — there is no password.
+  The fields ship as styled divs (the live-input hazard rule), the 2FA toggle
+  flips visually, Save is inert. Reconcile the flow before any of it goes
+  live.
+- **Delete Account needs an owner decision.** Account deletion is
+  destructive and touches orders, auth and files; nothing exists behind it,
+  so the screen is a deliberately inert placeholder (type-DELETE field is a
+  styled div, the red button does nothing) on an unlinked route.
+- **A third bottom-nav geometry.** These frames draw the CARE five-tab glyph
+  language at a new 72px band (22px icons, no active pill) — vs CARE's 32px
+  band with a pill highlight, vs the owner-art bar on the main pages. Six
+  settings screens carry it; returns/chat/keepsake draw **no** nav at all.
+  Rose Deals still has no route and stays inert everywhere.
+- **Mock-data oddities, shipped verbatim:** the security screen puts the
+  session in "Tokyo, JP" on a "GoldRose App" (US-first store, no app);
+  returns dates are 2025; the chat's order #GRB-**2026**0821 ships
+  "May 18–23"; the keepsake was "Purchased on: Aug 21, 2026" (the future).
+  Fine as visible mocks, worth fixing at source.
+- **The composer ☺ can't be exported.** Figma renders it as a color emoji
+  and SVG-exports a .notdef box (C-2 ✉ precedent) — served as a crop of the
+  frame render.
+- **First italics in the system.** The keepsake card sets "Classic
+  Collection" and the message line in Playfair Display *italic*; the italic
+  style was added to the font load.
+- Small-text baselines in this batch round ±1px between Figma and Chrome
+  (9–11px Noto Sans SC); eleven single-pixel nudges match the renders, noted
+  inline in the components. Band diffs land at 0.7–1.8% overall (font-AA
+  envelope), verified per-frame against scale-2 renders.
