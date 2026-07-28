@@ -11,11 +11,12 @@
  *
  * Wired: the Help-Center tabs switch for real (?tab= deep-links them, so
  * the order-confirmation "CONTACT SUPPORT" card can land on order issues —
- * implements ORDER-DETAIL-CONTACT-SUPPORT), and the "Track logistics"
- * shortcut goes to /orders/track. Everything else — chat, the other
- * shortcuts, the FAQ rows, "Support request status" — renders pixel-exact
- * but stays inert until its target exists (route-table rule; there is no
- * support backend yet).
+ * implements ORDER-DETAIL-CONTACT-SUPPORT), the "Track logistics"
+ * shortcut goes to /orders/track, and "Chat with us" plus the "Contact
+ * support" shortcut go to /care/chat (the 07-28 chat mock). Everything
+ * else — the other shortcuts, the FAQ rows, "Support request status" —
+ * renders pixel-exact but stays inert until its target exists (route-table
+ * rule; there is no support backend yet).
  *
  * These frames draw their OWN five-tab glyph nav (Home / Shop / Rose Deals /
  * Wholesale / Me, "Me" active) instead of the shared mascot bar — same
@@ -99,7 +100,7 @@ const SHORTCUTS: Array<{ icon: string; ink: [number, number]; label: string; hre
   { icon: "1108-129", ink: [15, 15], label: "Track\nlogistics", href: "/orders/track" },
   { icon: "1108-131", ink: [20, 20], label: "Invoice\nservice" },
   { icon: "1108-133", ink: [16, 19], label: "Account\nsecurity" },
-  { icon: "1108-135", ink: [13, 14], label: "Contact\nsupport" },
+  { icon: "1108-135", ink: [13, 14], label: "Contact\nsupport", href: "/care/chat" },
   { icon: "1108-137", ink: [24, 8], label: "Payment\nissue" },
 ];
 
@@ -126,7 +127,8 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
         Customer Care
       </div>
 
-      {/* hero card — chat is a placeholder until a support channel exists */}
+      {/* hero card — "Chat with us" lands on the CARE-SUPPORT-CHAT mock
+          (07-28); a real support channel is still a tracked follow-up */}
       <div style={{ ...abs(16, 76, 398, 158), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
       <div className={playfair.className} style={{ ...abs(34, 90.7, 255), ...txt(29, 38.66, INK), fontWeight: 600 }}>
         How can we help?
@@ -137,9 +139,9 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
       <Glyph src="1108-116" x={312} y={92} w={76} h={64} ink={[39, 23]} />
       <div style={{ ...abs(34, 182.5, 150), ...txt(12.5, 15, "#1F8533"), fontWeight: 500 }}>●&nbsp;&nbsp;Online now</div>
       <div style={{ ...abs(34, 204, 200), ...txt(10.5, 12.6, INK) }}>Average reply within a few minutes</div>
-      <div style={{ ...abs(234, 180, 164, 38), background: INK, borderRadius: 8 }}>
+      <Link href="/care/chat" style={{ ...abs(234, 180, 164, 38), background: INK, borderRadius: 8, display: "block" }}>
         <span style={{ position: "absolute", left: 6, right: 6, top: 11, ...txt(13, 15.6, CREAM, "center"), fontWeight: 500 }}>Chat with us</span>
-      </div>
+      </Link>
 
       {/* service shortcuts */}
       <div style={{ ...abs(16, 246, 398, 220), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />

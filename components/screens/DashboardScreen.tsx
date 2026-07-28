@@ -18,9 +18,10 @@
  * text row below the member card carries it — flagged to the design team
  * in docs/ixd/README.md.
  *
- * Wired: order tracking, /account/orders, /account/reminders, /care, the
- * account-type toggle, and BUY AGAIN → /shop (nearest honest destination,
- * H-15 precedent). Wishlist / Custom Archive / Addresses / benefits /
+ * Wired: order tracking, /account/orders, /account/reminders, /care,
+ * /account/returns and /account/security (07-28 screens), the account-type
+ * toggle, and BUY AGAIN → /shop (nearest honest destination, H-15
+ * precedent). Wishlist / Custom Archive / Addresses / benefits /
  * business-side tiles render pixel-exact but stay inert until their targets
  * exist (route-table rule).
  */
@@ -114,13 +115,13 @@ function Dashboard({
   variant,
   displayName,
   recentOrder,
-  onSignOut,
+  showSignOut,
 }: {
   variant: "shopping" | "business";
   displayName?: string;
   /** undefined → mock card; null → real visitor with no orders yet. */
   recentOrder?: DashboardRecentOrder | null;
-  onSignOut?: () => void;
+  showSignOut?: boolean;
 }) {
   const shopping = variant === "shopping";
   const backX = shopping ? 10 : 7;
@@ -151,9 +152,9 @@ function Dashboard({
   const rows: Row[] = shopping
     ? [
         { title: "Dates & Gift Reminders", value: "3 upcoming  ›", href: "/account/reminders" },
-        { title: "Returns & After-Sales", value: "Self-service  ›", href: "/care?tab=after-sales" },
+        { title: "Returns & After-Sales", value: "Self-service  ›", href: "/account/returns" },
         { title: "Customer Care", value: "Online now  ›", href: "/care" },
-        { title: "Account & Privacy", value: "Personal settings  ›" },
+        { title: "Account & Privacy", value: "Personal settings  ›", href: "/account/security" },
       ]
     : [
         { title: "Procurement Contacts", value: "Manage contacts  ›" },
@@ -328,15 +329,13 @@ function Dashboard({
       </div>
 
       {/* Sign out — dev addition below the member card; the frame ships no
-          sign-out control and testers need one (docs/ixd/README.md). */}
-      {onSignOut ? (
-        <button
-          type="button"
-          onClick={onSignOut}
-          style={{ ...abs(30, 856, 120, 16), border: 0, padding: 0, background: "transparent", cursor: "pointer", textAlign: "left" }}
-        >
+          sign-out control and testers need one (docs/ixd/README.md). Lands on
+          the designed ACCOUNT-LOGOUT-CONFIRM flow (07-28), which does the
+          actual signing out. */}
+      {showSignOut ? (
+        <Link href="/account/logout" style={{ ...abs(30, 856, 120, 16), display: "block" }}>
           <span style={{ ...txt(11, 14, INK), textDecoration: "underline", display: "block" }}>Sign out</span>
-        </button>
+        </Link>
       ) : null}
     </ScaleFrame>
   );
@@ -346,7 +345,7 @@ function Dashboard({
 export function AccountDashboardScreen(props: {
   displayName?: string;
   recentOrder?: DashboardRecentOrder | null;
-  onSignOut?: () => void;
+  showSignOut?: boolean;
 }) {
   return <Dashboard variant="shopping" {...props} />;
 }

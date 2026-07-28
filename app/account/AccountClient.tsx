@@ -82,7 +82,6 @@ export function AccountClient() {
   const [phase, setPhase] = useState<Phase>(supabase ? "loading" : "unavailable");
   const [overview, setOverview] = useState<AccountOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
 
   async function loadAccount(): Promise<void> {
     const data = await accountOverviewAction();
@@ -139,17 +138,6 @@ export function AccountClient() {
     };
   }, [supabase]);
 
-  async function signOut() {
-    if (!supabase) {
-      return;
-    }
-    setBusy("signOut");
-    await supabase.auth.signOut();
-    setOverview(null);
-    setBusy(null);
-    setPhase("signedOut");
-  }
-
   // Signed out (and local mode, which has no auth server) is the design's own
   // screen; it brings its own bottom nav via ScaleFrame.
   if (phase === "signedOut" || phase === "unavailable") {
@@ -170,7 +158,7 @@ export function AccountClient() {
         <AccountDashboardScreen
           displayName={overview.displayName}
           recentOrder={toRecentOrder(overview.orders)}
-          onSignOut={busy === null ? signOut : undefined}
+          showSignOut
         />
       </>
     );

@@ -39,9 +39,14 @@ export const notoSC = Noto_Sans_SC({
 
 /**
  * Playfair Display 400/500/600 — the redesign display face. 600 arrived with
- * the B/C screens (bag, checkout, business, orders, menu).
+ * the B/C screens (bag, checkout, business, orders, menu); italic with the
+ * 07-28 keepsake card (two italic lines).
  */
-export const playfair = Playfair_Display({ weight: ["400", "500", "600"], subsets: ["latin"] });
+export const playfair = Playfair_Display({
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+});
 
 /** Playfair Display SC 400 — small-caps accent (single A-4 label). */
 export const playfairSC = Playfair_Display_SC({ weight: "400", subsets: ["latin"] });
