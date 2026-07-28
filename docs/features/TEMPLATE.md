@@ -44,7 +44,7 @@ verification:
 
 ## Options considered
 
-<!-- The "why not X" record — the most valuable section six months from now. -->
+<!-- The "why not X" record — the most valuable section six months from now. Dont makeup Option just for completeness.-->
 
 | Option | Pros | Cons | Verdict |
 |---|---|---|---|

@@ -80,7 +80,7 @@ the ship-critical owner activation items (target 2026-07-30).
   assumes SKUs are unique and non-blank — rules + planned enforcement in
   [../Database.md § SKU rules](../Database.md).
 - Not blocked, but deliberately queued behind the owner activation items
-  (project-state.md Release queue) and ship target 2026-07-30 — this is the delivery vehicle
+  (SUMMARY.md Release queue) and ship target 2026-07-30 — this is the delivery vehicle
   for OQ-3 (real product content), which lands after ship per SUMMARY.
 - Tension to resolve during design: the pixel-diff guard assumes static pixels;
   live-wired regions need excluding or per-SKU baselines.
@@ -91,7 +91,7 @@ None yet — BACKLOG.
 
 ## Related links
 
-- OQ-3 → [project-state.md · Product decisions](../project-state.md#product-decisions)
+- OQ-3 → [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions)
 - Current live-text wiring: `app/products/[slug]/page.tsx`, `app/shop/page.tsx`,
   `lib/admin/products.ts` (`revalidateStorefront`)
 - Existing export (mirror for the import UI): `app/api/admin/products/export/route.ts`

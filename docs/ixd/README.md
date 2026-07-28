@@ -17,6 +17,10 @@ at `temp/frontend-function-draft.zh.md`, English working copy at
 
 ## Files
 
+- [delivery-protocol.md](delivery-protocol.md) — **how work is handed over**:
+  the three hand-overs (design team → dev → bosses), the per-frame delivery
+  checklist (交付清单), what we do on receipt, and what to do when something is
+  missing. Start here if you are asking "how does this get delivered?"
 - [homepage.md](homepage.md) — 37 homepage entries (H-01…H-37), English
   translation of the archived Chinese export
 - [shop.md](shop.md) — 15 Shop page entries (N-01…N-15), still verbatim
@@ -57,6 +61,17 @@ reference them the same way.
 Message from me to ai agents: leave placeholder in unsure things
 
 ## Items to confirm with the design team
+
+> **Open questions now live in one place:**
+> [`docs/TODO/design-team-questions.md`](../TODO/design-team-questions.md).
+> The findings below stay here as the record of what was discovered during
+> each import; anything still unanswered has been carried over into that doc
+> with a `DQ-nn` id. Add new questions there, not here.
+
+> **Unresolved navigation targets** — every element whose destination page is
+> unknown, unbuilt, or "to be confirmed" is collected as 13 grouped questions in
+> [`docs/TODO/2026-07-28-design-team-navigation-questions.md`](../TODO/2026-07-28-design-team-navigation-questions.md).
+> The list below is the older, narrower set of source-quality questions.
 
 1. **Routes:** H-06, H-08, H-17, H-28, H-29, H-32, and H-37 are marked
    “suggested route, pending developer confirmation.” Finalize them after

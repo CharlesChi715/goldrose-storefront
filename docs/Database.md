@@ -9,7 +9,7 @@ For agents: keep this file concise.
 
 **DECISION (owner, 2026-07-22): Option 1 — Supabase.** No self-hosted
 Postgres. Done: the hosted project is live with migrations applied
-(status in [project-state.md](project-state.md)); the local file adapter
+(status in [SUMMARY.md](../SUMMARY.md)); the local file adapter
 remains as the dev fallback.
 
 ## Backup plan

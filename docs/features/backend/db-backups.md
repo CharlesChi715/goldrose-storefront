@@ -109,4 +109,4 @@ None yet — BACKLOG.
 
 - Origin + platform decision: [Database.md](../../Database.md) (now points back here)
 - Launch-time Pro upgrade sits with the owner activation work:
-  [project-state.md · Release queue](../../project-state.md#release-queue)
+  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)

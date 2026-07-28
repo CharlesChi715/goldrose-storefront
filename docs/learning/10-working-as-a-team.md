@@ -64,7 +64,7 @@ Intern teams keep truth in memory and in chat scrollback, and it evaporates. Thi
 
 > Give each documentation topic one authoritative owner.
 
-So: `SUMMARY.md` is where any newcomer starts, [`docs/project-state.md`](../project-state.md) owns current blockers and open decisions, [`docs/ideas.md`](../ideas.md) holds the owner's ideas verbatim, and `main` is always the real, working code. Nobody has to ask "which version is current?" — the answer is structural, not social. **If it isn't written in the home, it didn't happen.**
+So: `SUMMARY.md` is where any newcomer starts — and since 2026-07-28 it also owns current blockers and open decisions, [`docs/ideas.md`](../ideas.md) holds the owner's ideas verbatim, and `main` is always the real, working code. Nobody has to ask "which version is current?" — the answer is structural, not social. **If it isn't written in the home, it didn't happen.**
 
 ### Step 2 — Work is small, written, and owned
 

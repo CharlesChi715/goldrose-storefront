@@ -99,7 +99,7 @@ None yet — BACKLOG.
 
 - Existing email module: `lib/email.ts` (§10.3 notifications)
 - Activation: owner items in
-  [project-state.md · Release queue](../../project-state.md#release-queue)
+  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
 - Sibling ask, same boss note: [order-tracking.md](order-tracking.md)
 - Post-ship marketing context: influencer campaign idea in
   [ideas.md](../../ideas.md)

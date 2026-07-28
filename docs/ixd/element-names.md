@@ -29,6 +29,21 @@ additions, minus our removals. The test parses them from this file.
 
 ---
 
+## Figma hierachy
+
+Frame is a web page.
+
+  File  «VELORIA — iPhone 15 Pro Max 商品详情页»
+  └── CANVAS  «VELORIA · Product Detail»        ← the one Page tab; the infinite surface
+      ├── SECTION «business»                    ← grouping box on the canvas
+      │   ├── FRAME B-3 · Business Partnerships ← one web page
+      │   └── FRAME B-4 · Wholesale Application ← one web page 
+      ├── SECTION «已完成» ... «shop二级» ...   
+      ├── FRAME 914:113 ACCOUNT-INFO-BUSINESS-DASHBOARD   ← loose, in no section
+      └── VECTOR «Arrow 4» , ELLIPSE «Ellipse 36»         ← stray junk
+      
+
+
 ## Grammar
 
 ```

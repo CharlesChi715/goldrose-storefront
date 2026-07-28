@@ -1,6 +1,6 @@
 # Figma UI Naming Guide — GoldRose (owner's source)
 
-Verbatim transcription of `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`, so the
+Verbatim transcription of `temp/Figma_UI_Naming_Guide_GoldRose.xlsx` from design team, so the
 vocabulary is version-controlled, greppable and diffable instead of living in a
 binary blob in a scratch folder.
 

@@ -41,7 +41,7 @@ verification:
   - Signed-in customers see a "Track <number>" link per order on `/account`
     (`app/account/AccountClient.tsx`).
   - Emails go through Resend; until `RESEND_API_KEY` is set they print to the
-    server console (owner activation item — project-state.md Release queue).
+    server console (owner activation item — SUMMARY.md Release queue).
 - What was missing:
   1. **No carrier concept** — admin had to hand-paste a full tracking URL
      every time; a typo silently sent buyers a dead link. → built 2026-07-25.
@@ -131,6 +131,6 @@ aggregator free tier or UPS Track API, post-ship).
 
 - Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../../admin-design.md)
 - Activation: owner items in
-  [project-state.md · Release queue](../../project-state.md#release-queue)
+  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
 - SKU rules behind the 0003 bundle: [Database.md](../../Database.md)
 - Sibling ask, same boss note: [promotion-emails.md](promotion-emails.md)

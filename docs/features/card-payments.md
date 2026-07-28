@@ -125,7 +125,7 @@ None yet — nothing built. The PayPal *wallet* took a real card-funded payment 
 
 ## Related links
 
-- Decision register: [project-state.md · Open product decisions](../project-state.md#open-product-decisions) (OQ-1)
+- Decision register: [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions) (OQ-1)
 - Spec: [admin-design.md](../admin-design.md) §4 (OQ-1 row), §7.4 (order payment columns), §14.3 (owner walkthrough)
 - PayPal: [Advanced Checkout overview](https://developer.paypal.com/studio/checkout/advanced) ·
   [eligibility, countries and card brands](https://developer.paypal.com/expanded/eligibility)

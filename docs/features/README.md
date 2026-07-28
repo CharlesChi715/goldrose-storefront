@@ -10,7 +10,7 @@ everything without opening the files.
 Every future thought moves one way through the docs — never lives in two places:
 
 ```
-docs/ideas.md  →  docs/features/<name>.md  →  docs/project-state.md  →  .ai/WORKLOG.md
+docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md  →  .ai/WORKLOG.md
   (raw inbox,      (decision, plan, STATUS)       (release queue only)       (dated history)
 ```
 
@@ -128,7 +128,8 @@ Admin suite (EN/中文) — §14.3 owner walkthrough pending
 └── Analytics
     ├── first-party beacon ●●●○ UAT
     ├── channel/UTM/country reports ●●●○ UAT
-    └── posting-account-attribution.md ●●●○ UAT — utm_acc tag
+    ├── posting-account-attribution.md ●●●○ UAT — utm_acc tag
+    └── engagement-tracking.md ○○○○ BACKLOG — page/section dwell time
 
 Product content — 120 SKUs (OQ-3)
 └── product-content-pipeline.md ○○○○ BACKLOG — live-wire pages + CSV/image import
@@ -163,8 +164,8 @@ here):
 
 - **§14.3** → [admin-design.md · 14.3 Final acceptance](../admin-design.md#143-final-acceptance)
 - **owner config pending / dormant** → owner activation items in
-  [project-state.md · Release queue](../project-state.md#release-queue)
-- **OQ-1 / OQ-2 / OQ-3** → [project-state.md · Product decisions](../project-state.md#product-decisions)
+  [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)
+- **OQ-1 / OQ-2 / OQ-3** → [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions)
 - **card-payments.md** → [card-payments.md](card-payments.md)
 - **db-backups.md** → [backend/db-backups.md](backend/db-backups.md)
 - **search-discovery-implementation.md** → [seo-geo/search-discovery-implementation.md](../seo-geo/search-discovery-implementation.md)

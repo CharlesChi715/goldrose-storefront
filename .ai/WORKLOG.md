@@ -2823,3 +2823,179 @@ Known follow-ups, not done:
 - **Verified:** lint + typecheck clean, 39 unit tests pass, features CLI smoke
   OK. Remaining BUILD-REPORT/lib-products mentions are deliberate historical
   annotations (admin-design §0/§17, region-alignment, seed-data rationale).
+
+## 2026-07-28 — docs/TODO convention
+
+- Created `docs/TODO/README.md`: per-task owner-decision hand-off format
+  (what shipped / self-made decisions D-n / mocks M-n / questions Q-n with
+  options + recommendation / dated resolution log; Sydney timestamps;
+  delete file when 🟢). Linked from SUMMARY.md find-details table.
+
+## 2026-07-28 — project-state.md merged into SUMMARY.md (owner decision)
+
+- Charles chose one entrypoint file over the two-file split. All content of
+  docs/project-state.md (environment, tooling verification, runtime/safety,
+  release gates, release queue, OQ product decisions) compressed into
+  SUMMARY.md under anchors #release-gates / #release-queue /
+  #product-decisions; the file was deleted.
+- Repointed all 12 inbound reference sites (engineering-playbook,
+  admin-design ×3, Database.md, learning/10, features/README ×3,
+  card-payments, product-content-pipeline ×2, promotion-emails, db-backups,
+  order-tracking ×2, TODO/README). Verified by grep: zero "project-state"
+  references remain.
+
+## 2026-07-28 — ACCOUNT-PRIVACY-SUPPORT screens imported (bg session)
+
+- New Figma section 1230:111 (10 frames, delivered 07-28) imported pixel-exact:
+  personal info, preferences, security, privacy policy, logout, delete,
+  returns, support chat, keepsake card → 9 new routes (8× /account/*, /care/chat).
+  ALT frame skipped: byte-identical duplicate of 1230:112.
+- Wired: dashboard "Account & Privacy" → /account/security, "Returns &
+  After-Sales" → /account/returns, Sign out → /account/logout (real Supabase
+  sign-out on confirm); /care "Chat with us" + "Contact support" → /care/chat.
+- Verified: per-frame band diff vs scale-2 renders 0.7–1.8% (font-AA envelope)
+  after eleven ±1px baseline nudges; 39 unit + 85 e2e green (9 new smoke tests).
+- Findings for design team recorded in docs/ixd/README.md (password/2FA vs
+  email-link auth conflict, delete-account decision needed, third nav
+  geometry, ALT duplicate, mock-data oddities).
+
+## 2026-07-28 — Repository AI collaboration protocol added
+
+- Added root `AGENTS.md` as the canonical Version 1 guided-collaboration and
+  teaching protocol.
+- Added `CLAUDE.md` importing `AGENTS.md` so Claude uses the same source of
+  truth without duplicated instructions.
+- Updated the concise repository structure in `SUMMARY.md` and verified the
+  import, Markdown structure, and diff formatting.
+
+## 2026-07-28 — Interactive Codex working-mode selector added
+
+- Replaced the rejection-only `UserPromptSubmit` hook with a macOS two-option
+  selector for Guided Mode and Execution Mode.
+- Preserved `Guided:` and `Execution:` prefixes as non-GUI fallbacks.
+- Verified Python syntax, both prefix paths, hook JSON output, and a live
+  arrow-key/Return selection through the macOS dialog.
+- Added `.codex/` to the concise repository structure in `SUMMARY.md`.
+
+## 2026-07-28 — Consolidated navigation questions for the design team
+
+- Created `docs/ixd/open-navigation-questions.md`: every Figma element whose
+  destination page is unknown, unbuilt, or "to be confirmed", swept from
+  `docs/ixd/homepage.md`, `shop.md`, `order-detail.md`, `login-import.md` and
+  `bottom-nav-buttons.md`.
+- Grouped 27 entries into 13 questions **by destination page** rather than by
+  screen, because the gaps repeat (7 elements point at one unbuilt
+  personalization flow, 4 at one unbuilt brand-story page).
+- Each question carries the entry IDs, the source's exact status wording, what
+  development already built as a stopgap, and an inline `Answer:` slot.
+- Indexed it from `docs/ixd/README.md`. Verified every cross-link target exists.
+- Follow-up same day, at Charles's direction: moved the list out of `docs/ixd/`
+  into `docs/TODO/2026-07-28-design-team-navigation-questions.md` and rewrote it
+  to the TODO template — Status header, self-made decisions (D1–D3), mocks
+  (M1–M5), and 13 numbered questions each carrying options plus a
+  recommendation with a reason, per the folder's "never a bare open question"
+  rule. `docs/ixd/README.md` now points at it instead of holding it.
+
+## 2026-07-28 — Single doc for front-end design-team questions
+
+Created `docs/TODO/design-team-questions.md`: the standing, never-deleted
+place where every open question for the design team is collected — which page
+a Figma frame belongs to, where an inert button is meant to navigate, states
+the frames never drew, and design conflicts. 33 questions (DQ-01…DQ-33),
+grouped as navigation (13), missing states (7), conflicts (8), assets (5),
+plus 6 items marked as our own dev follow-ups rather than design questions.
+
+Each entry records what we shipped as a placeholder and carries a
+recommendation, per the `docs/TODO/README.md` rule.
+
+Every "where it is now" line was verified in code at `ded0d46` rather than
+copied from the import notes, which turned out to be stale: H-01, H-06, H-15,
+H-16, H-17, H-20 and H-23 are wired now, while H-33's corporate CTAs are still
+inert even though `/business/partnerships` and `/business/wholesale` exist.
+
+Pointers added so there is one source: `docs/ixd/README.md` (open questions
+now live in the TODO doc), `docs/TODO/README.md` (standing-doc exception to
+the dated-filename rule), and `SUMMARY.md` (find-details-on-demand row).
+
+Most urgent: DQ-14 — B-2's pay button has no disabled state, which blocks the
+requested "no payment until contact + delivery are filled" work.
+
+## 2026-07-28 — Delivery protocol: how work is handed over
+
+Created `docs/ixd/delivery-protocol.md`, the standing record of how work and
+outcomes move between people on this project. Written after Charles asked what
+the professional move is for a design team to deliver frames when the function
+of each button and image is unknown.
+
+Structure: the chain (bosses → design team → dev → bosses) as three hand-overs
+each with a return leg; the principle that every element must answer three
+questions (what is it called / does it do anything / what happens); a bilingual
+12-item per-frame delivery checklist (交付清单); what we do on receipt; the
+placeholder-plus-`DQ-nn` rule; and an artifact map.
+
+Every checklist item is justified by an incident already recorded in
+`docs/ixd/README.md` rather than invented — the 13 groups of inert buttons,
+B-2's missing disabled state, the `$189`/`$219` price, the mascot art's baked-in
+checkerboard, the third-party gift-box photo, the "120 APPAREL" template
+residue, the two palettes and three bottom navs, and the account tab renamed
+four times.
+
+Status split: §2 (the checklist the design team would run) is **Proposed** —
+it cannot be imposed unilaterally. §3–§5 (our own receipt, return and
+acceptance procedure) are **Adopted**, since they describe what we already do.
+
+Diagnosis worth keeping: the handoff is currently dev-pull — frames arrive and
+the dev side reverse-engineers intent, which is what the 33 open `DQ-nn`
+questions cost. The apparatus for design-push mostly exists already (mechanism
+tables, naming guide, `data-el` enforcement, annotated screenshots); the gap is
+that it is produced downstream instead of at delivery. Highest-leverage single
+ask: name the Figma layers with the element IDs, so the "one string, five
+places" chain stops being half-live.
+
+Pointers: `docs/ixd/README.md` (files list), `SUMMARY.md`
+(find-details-on-demand row), and `docs/engineering-playbook.md` — its "Design
+intake" stub now links here instead of duplicating the checklist.
+
+Open: the design team's Figma plan tier is unknown, so whether Dev Mode
+("Ready for Dev", annotations, Code Connect) can carry §2 is unconfirmed.
+
+### Amendment — §9 added to the delivery protocol
+
+`docs/ixd/delivery-protocol.md` gained §9, the design team's 12-column
+mechanism table (机制表) rendered twice: §9.1 the original Chinese verbatim,
+§9.2 a bilingual copy where every cell reads `English (中文)`. Sample rows are
+N-01 and N-02; the full set stays in `shop.md`.
+
+Separately drafted and NOT merged: a v1-vs-v2 schema critique proposing 7 new
+columns (element name, frame node id, states drawn, content final/placeholder,
+asset origin, revision, dev fill-back) plus fixed value sets. Charles undid it
+in favour of the plain bilingual render. Kept for later if the schema
+conversation reopens; the headline is that v1 records behaviour but has no
+column for identity, verifiability or completeness — a row cannot say what an
+element is called, whether its target frame exists, or whether its content is
+real.
+
+## 2026-07-28 — Engagement tracking design (page + section dwell)
+
+Turned the owner's raw idea ("Analytics about behavior of the viewer in this
+website", `docs/ideas.md`) into a feature record:
+`docs/features/backend/engagement-tracking.md`, scaffolded with
+`npm run features:new`, `delivery: backlog`, leaf added to the status tree in
+`docs/features/README.md`. Design only — no code.
+
+Two decisions carry the design:
+
+1. **Client aggregates, one flush per visit.** Section-level events would have
+   multiplied `page_views` rows 10–40×, and `analyticsSummary` reads that table
+   whole-table into JS on every admin render — so a raw event log would tax the
+   dashboard forever. Instead the browser keeps the clock and sends one summary
+   at visit end, which `UPDATE`s the existing row. Row count unchanged.
+2. **Section identity reuses `data-el="…-SECTION"`.** No new attribute —
+   `element-names.md` rule 5 warns specifically against a second parallel
+   marker. Consequence: section timing is blocked on tagging A-4…A-11, whose
+   SECTION vocabulary is still PROPOSED pending the owner. Plan is staged so
+   page-level dwell (stage 1) ships without that dependency.
+
+Flagged: remote holds an orphan `0004` migration row — repair before pushing,
+number this `0005`. Dwell + scroll is behavioural measurement, so it lands on
+the consent-wording debt already logged at `docs/admin-design.md:1004`.

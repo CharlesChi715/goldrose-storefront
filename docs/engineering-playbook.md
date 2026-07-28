@@ -59,16 +59,15 @@ session nearly sweeping the other's uncommitted files into a commit). Rules:
   points at staging by default; the live project is touched only by the
   deployed site and by sessions explicitly told to work on live data.
 - Existing money/live-mode gates stay as written in
-  [`project-state.md`](project-state.md).
+  [`SUMMARY.md` · Release gates](../SUMMARY.md#release-gates).
 
 ## Design intake — Proposed (needs the design team)
 
-Per-batch checklist before frames are declared 已完成: interaction states
-included (empty, signed-out, error), sign-out/back affordances present, real
-copy (no template residue like "120 APPAREL"), mock artifacts removed
-(status bars, home indicators), one visual language per surface, layer names
-per the naming guide. Triage the accumulated conflicts in
-[`ixd/README.md`](ixd/README.md) with the boss and design team; settle the
+Owned by [`ixd/delivery-protocol.md`](ixd/delivery-protocol.md): the three
+hand-overs, the 12-item per-frame delivery checklist frames must pass before
+they are declared 已完成, and the placeholder-plus-`DQ-nn` rule for anything
+missing. Still to do: triage the accumulated conflicts in
+[`ixd/README.md`](ixd/README.md) with the boss and design team, and settle the
 bottom-nav and palette questions once.
 
 ## Verification tooling — Planned
