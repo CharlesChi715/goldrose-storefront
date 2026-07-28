@@ -54,7 +54,8 @@ resources only when the task needs them.
 - Built: storefront, admin, accounts, catalog, checkout/order flow,
   analytics, and the SEO/GEO baseline. PayPal Orders v2 wallet checkout
   works in sandbox. Supplied Figma screens are imported through the
-  2026-07-27 batch (routes, placeholders, and design conflicts:
+  2026-07-28 batch — account privacy/support screens included (routes,
+  placeholders, and design conflicts:
   [`docs/ixd/README.md`](docs/ixd/README.md)).
 - `/bag` items, tracking timeline, shipping choices, and card fields are
   visual placeholders; the real cart enters through `/checkout`.

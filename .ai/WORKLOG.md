@@ -2999,3 +2999,64 @@ Two decisions carry the design:
 Flagged: remote holds an orphan `0004` migration row — repair before pushing,
 number this `0005`. Dwell + scroll is behavioural measurement, so it lands on
 the consent-wording debt already logged at `docs/admin-design.md:1004`.
+
+## 2026-07-28 — Merged the account/privacy/support screens into main (Deliveries)
+
+Squash-merged PR #10 (`feat/account-privacy-support-screens`) into `main` and
+deleted the branch on both GitHub and locally, so the remote is back to a
+single branch. Merge commit `26bb048`; 99 files, +1841/−40.
+
+The branch was 2 commits ahead of `main` and 0 behind, so there was nothing to
+rebase and no conflict was possible. It brings 10 new routes (personal-info,
+security, preferences, privacy-policy, returns, keepsake, delete, logout,
+care/chat) with their screen components, the shared `account-chrome.tsx`, ~80
+Figma SVG/PNG assets, `tests/e2e/account-screens.spec.ts`, and the
+`docs/ixd` README section plus the bilingual `feedback-2026-07-28.md`.
+
+Worth recording: the PR's green CI predated `dd2dcf2` (the docs consolidation)
+landing on `main`, so the tested tree was not the merged tree. Re-ran the CI
+triple locally on merged `main` — lint, typecheck, `test:unit` (39/39) — and
+GitHub's own push run on `26bb048` is green too. `dd2dcf2` is docs-only, so
+the gap was never risky, but "CI was green on the PR" is not the same claim as
+"CI is green on what we merged" whenever main moves in between.
+
+Left alone: one lint warning shipped with the branch — unused `GOLD` constant
+at `components/screens/PrivacyPolicyScreen.tsx:20`. Warning, not an error; CI
+stays green. Worth a one-line cleanup next time that file is touched.
+
+### Amendment — two optional sections added to the feature template
+
+`docs/features/TEMPLATE.md` gained `## Contract` (after Options considered) and
+`## Open questions` (after Blockers). Both optional; the CLI copies the template,
+so only records created from 2026-07-28 carry them.
+
+`Contract` holds the technical commitments acceptance criteria are written
+against — data shape, column names, invariants — with an admission rule that
+keeps it from bloating: if you can't write an acceptance criterion against it, it
+doesn't belong. Deliberately NOT called "tech details": a generic bucket has no
+update trigger and would drift against `docs/admin-design.md`, which already owns
+the post-ship spec.
+
+`Open questions` holds choices still *ours* to make, as distinct from Blockers
+(someone else's to clear). Numbered OQ-n to match SUMMARY.md. Each OQ must exit —
+into `Decision`, or into SUMMARY.md Product decisions — which is what stops the
+section accumulating forever.
+
+`docs/features/README.md` "File format" updated: it listed a stale order that
+began with a body "Status line" the template forbids. Verified by scaffolding a
+throwaway record and deleting it.
+
+Follow-up the same day: `## Tech details` added as a third optional section
+(after `Plan`), on Charles's call. The earlier objection — that a technical
+bucket rots — is answered by an admission test on whose fact it is: platform
+facts ("background tabs throttle setInterval", "IntersectionObserver reports
+geometry, not occlusion") stay true regardless of our code and are expensive to
+rediscover; facts about our own code are excluded and stay with
+`docs/admin-design.md`. Placed after `Plan` rather than beside `Contract` so the
+two technical sections are separated by purpose — commitments with the decision
+material, terrain notes with the build material.
+
+Correction, same day: `## Contract` was removed again on Charles's call — the
+template ships **two** optional sections, `Tech details` and `Open questions`,
+not three. Data shape and invariants now live in `Tech details`; the checkbox
+proving them stays in `Acceptance criteria`.
