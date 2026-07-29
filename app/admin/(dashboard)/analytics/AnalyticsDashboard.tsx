@@ -63,6 +63,18 @@ function StatCard({
   );
 }
 
+/**
+ * Milliseconds as a short human duration — "8s", "2m 14s".
+ * Dwell numbers are read at a glance; raw ms would make the card unreadable.
+ */
+function formatDuration(ms: number): string {
+  const totalSeconds = Math.round(ms / 1000);
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return seconds === 0 ? `${minutes}m` : `${minutes}m ${seconds}s`;
+}
+
 function ListCard({
   title,
   rows,
@@ -277,6 +289,41 @@ export function AnalyticsDashboard({
               </Text>
             </BlockStack>
           </Card>
+        </InlineGrid>
+
+        {/* Engagement (engagement-tracking.md): how long visits lasted and
+            which named sections held attention. */}
+        <InlineGrid columns={{ xs: 1, md: 3 }} gap="400">
+          <ListCard
+            title={`${t("analytics.card.timeOnPage")} — ${formatDuration(
+              summary.engagement.medianActiveMs.current,
+            )} ${t("analytics.engagement.median")}`}
+            empty={t("analytics.engagement.empty")}
+            rows={summary.engagement.byPath.map((row) => ({
+              label: `${row.path} (${row.visits})`,
+              value: `${formatDuration(row.medianActiveMs)} · ${row.medianScrollPct}% ${t(
+                "analytics.engagement.scroll",
+              )}`,
+            }))}
+          />
+          <ListCard
+            title={t("analytics.card.sectionAttention")}
+            empty={t("analytics.engagement.emptySections")}
+            rows={summary.engagement.sections.map((row) => ({
+              label: row.section,
+              value: `${formatDuration(row.medianMs)} · ${row.reachRatePercent}% ${t(
+                "analytics.engagement.reach",
+              )}`,
+            }))}
+          />
+          <ListCard
+            title={t("analytics.card.dropOff")}
+            empty={t("analytics.engagement.emptySections")}
+            rows={summary.engagement.dropOff.map((row) => ({
+              label: row.section,
+              value: `${row.visits} ${t("analytics.engagement.visits")} · ${row.sharePercent}%`,
+            }))}
+          />
         </InlineGrid>
 
         <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">

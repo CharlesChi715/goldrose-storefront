@@ -240,6 +240,16 @@ export type PageViewRow = {
   // read: "utm: a Record from string to string, or null"
   country: string | null;
   created_at: string;
+  /** Active milliseconds on the page — null until the closing beacon lands
+   * (engagement-tracking.md). Null means unknown, never a zero-second visit. */
+  active_ms?: number | null;
+  /** Deepest scroll reached, 0-100. */
+  scroll_pct?: number | null;
+  /** Active ms per `data-el` section name; sums to <= active_ms. */
+  sections?: Record<string, number> | null;
+  // read: "sections: optional — a Record from string to number, or null"
+  /** Last section to hold the clock — where the visit stopped. */
+  last_section?: string | null;
 };
 
 export type SiteContentRow = {

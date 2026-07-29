@@ -82,6 +82,13 @@ function netSales(orders: OrderRow[]): number {
 
 export { channelOf, sourceOf } from "./channels.ts";
 
+import {
+  engagementReport,
+  type DropOffEntry,
+  type PathEngagement,
+  type SectionEngagement,
+} from "./engagement-report.ts";
+
 export type MetricPair = { current: number; previous: number };
 
 export type AnalyticsSummary = {
@@ -111,6 +118,15 @@ export type AnalyticsSummary = {
     total: number;
     byChannel: Array<{ channel: string; visitors: number }>;
     byCountry: Array<{ country: string; visitors: number }>;
+  };
+  /** How long visits actually lasted and which sections held attention
+   *  (engagement-tracking.md). Empty until closing beacons start landing. */
+  engagement: {
+    medianActiveMs: MetricPair;
+    measuredVisits: number;
+    byPath: PathEngagement[];
+    sections: SectionEngagement[];
+    dropOff: DropOffEntry[];
   };
 };
 
@@ -301,6 +317,10 @@ export async function analyticsSummary(
   }
   const visitorsRightNow = liveSessionByVisitor.size;
 
+  // Engagement reads the same page_views already in memory — no extra query.
+  const currentEngagement = engagementReport(views.filter((view) => within(view.created_at, current)));
+  const previousEngagement = engagementReport(views.filter((view) => within(view.created_at, previous)));
+
   const currentAov =
     currentOrders.length > 0 ? Math.round(netSales(currentOrders) / currentOrders.length) : 0;
   const previousAov =
@@ -364,6 +384,16 @@ export async function analyticsSummary(
       byCountry: [...liveByCountry.entries()]
         .map(([country, visitors]) => ({ country, visitors }))
         .sort((a, b) => b.visitors - a.visitors),
+    },
+    engagement: {
+      medianActiveMs: {
+        current: currentEngagement.medianActiveMs,
+        previous: previousEngagement.medianActiveMs,
+      },
+      measuredVisits: currentEngagement.measuredVisits,
+      byPath: currentEngagement.byPath,
+      sections: currentEngagement.sections,
+      dropOff: currentEngagement.dropOff,
     },
   };
 }
