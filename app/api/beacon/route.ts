@@ -17,6 +17,12 @@ const requestSchema = z.object({
   path: z.string().trim().min(1).max(500),
   referrer: z.string().trim().max(1000).nullable().optional(),
   utm: z.record(z.string(), z.string().max(200)).nullable().optional(),
+  // The client mints the row id so it can address this exact view later with
+  // its engagement summary (engagement-tracking.md). A v4 UUID is unguessable,
+  // and the engagement route additionally matches visitor_id, so a stranger
+  // cannot write onto someone else's view. Optional: older cached bundles that
+  // do not send one still record arrivals, they just never report dwell.
+  viewId: z.string().uuid().optional(),
 });
 
 export async function POST(request: Request) {
@@ -35,7 +41,7 @@ export async function POST(request: Request) {
   try {
     await getStore().insert("page_views", [
       {
-        id: randomUUID(),
+        id: parsed.viewId ?? randomUUID(),
         visitor_id: parsed.visitorId,
         session_id: parsed.sessionId,
         path: parsed.path,

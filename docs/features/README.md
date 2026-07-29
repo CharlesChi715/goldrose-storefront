@@ -129,7 +129,7 @@ Admin suite (EN/中文) — §14.3 owner walkthrough pending
     ├── first-party beacon ●●●○ UAT
     ├── channel/UTM/country reports ●●●○ UAT
     ├── posting-account-attribution.md ●●●○ UAT — utm_acc tag
-    └── engagement-tracking.md ○○○○ BACKLOG — page/section dwell time
+    └── engagement-tracking.md ●●○○ IN PROGRESS — page/section dwell time
 
 Product content — 120 SKUs (OQ-3)
 └── product-content-pipeline.md ○○○○ BACKLOG — live-wire pages + CSV/image import

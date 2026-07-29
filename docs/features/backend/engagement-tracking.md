@@ -6,15 +6,22 @@ parent: admin-analytics
 area: backend
 order: 40
 
-delivery: backlog
-rollout: not-deployed
+delivery: in-progress
+rollout: local-only
+priority: p2
+owner: charles
+target: v1-launch
+qualifier: "hosted schema live; app code not yet deployed"
 statusChangedAt: 2026-07-28
 
 dependsOn: []
 blockedBy: []
 
 verification:
-  automated: []
+  automated:
+    - tests/unit/engagement.test.ts
+    - tests/unit/engagement-report.test.ts
+    - tests/e2e/engagement-beacon.spec.ts
   human: null
 ---
 
@@ -63,9 +70,9 @@ Precision here is the whole feature — vague rules produce numbers nobody trust
 - **Idle cut at 30 s.** No scroll, pointer, or key event for 30 s pauses the
   clock; the next interaction resumes it. Stops "left the tab open at lunch"
   from reading as engagement.
-- **One section owns the clock at a time** — the section covering the largest
-  share of the viewport. This makes per-section times **sum to ≤ page active
-  time**, which is the invariant that makes the report defensible.
+- **One section owns the clock at a time**, so per-section times **sum to ≤ page
+  active time** — the invariant that makes the report defensible. *Which* section
+  owns it is undecided: see [OQ-1](#oq-1--which-section-owns-the-clock).
 - **Flush on `visibilitychange → hidden`**, plus on client-side route change,
   with `pagehide` as backstop. Uses `navigator.sendBeacon` (not the `keepalive`
   fetch the arrival beacon uses) — at unload, `fetch` is unreliable on mobile
@@ -83,6 +90,12 @@ Three columns added to `page_views`, written by one `UPDATE`:
 | `active_ms` | `integer` | `41200` |
 | `scroll_pct` | `smallint` | `78` |
 | `sections` | `jsonb` | `{"HOME-HERO-SECTION": 8200, "HOME-STORY-SECTION": 19500}` |
+| `last_section` | `text` | `"HOME-STORY-SECTION"` |
+
+`last_section` was added during implementation. The drop-off report needs the
+final section reached, and that **cannot** be read off the end of `sections`:
+Postgres `jsonb` does not preserve key order, so the "last" key of that blob is
+meaningless once stored. It is sent explicitly instead.
 
 Addressing the row requires the client to know its id, so `POST /api/beacon`
 starts accepting a client-generated `viewId` and uses it as the primary key
@@ -111,8 +124,10 @@ consent-wording review that gates launch rather than opening that question now.
 
 ## Acceptance criteria
 
-- [ ] `page_views` gains `active_ms`, `scroll_pct`, `sections`; `0001`–`0003`
+- [x] `page_views` gains `active_ms`, `scroll_pct`, `sections`; `0001`–`0003`
       plus repaired `0004` state verified before `0005` is pushed.
+      *(2026-07-28: orphan `0004` repaired to `reverted`, `0005` pushed; local
+      and remote both at `0005`, all 734 existing rows preserved as null.)*
 - [ ] A visit that stays 40 s on `/` records `active_ms` within ±2 s of 40 000.
 - [ ] A backgrounded tab for 60 s adds **zero** active time.
 - [ ] Per-section times never exceed the page's `active_ms` (the invariant).
@@ -146,9 +161,98 @@ before that sign-off means renaming across ~8 files later.
 No feature-record id exists for element naming, so `dependsOn` stays empty and
 the dependency is recorded here in prose.
 
+## Open questions
+
+### OQ-1 — which section owns the clock
+
+When three bands are partly on screen at once, which one is the visitor
+"viewing"? This is a judgement call, not an API limit — IntersectionObserver
+reports all three, and we choose the rule.
+
+| Rule | Consequence |
+|---|---|
+| Any pixel visible counts | Every band on screen runs its clock, so section times overlap and sum to far more than the page total. The numbers stop meaning anything. |
+| Element ≥50% visible | Breaks for tall bands — a section taller than the screen can never be 50% visible, so the longest bands always read zero. |
+| Biggest share of the viewport wins | Exactly one section holds the clock at a time, and the sum stays ≤ page active time. Cost: during a fast scroll the winner flips every few frames, so it needs a minimum-dwell floor (~1 s) to avoid crediting meaningless slivers. |
+
+**DECIDED 2026-07-28 (owner): biggest share of the viewport, with a 1 s minimum
+dwell.** Charles then raised the objection that fixes the formula:
+
+> if we choose Biggest share of the viewport wins, what if the section is too
+> small it doesnt shares most of the screen even in the middle of screen?
+
+Correct, and fatal to the naive version. A 120 px band between two tall bands
+can never own the most viewport pixels, even dead-centre, so short sections
+would read zero forever. So coverage is measured against **the most a section
+could possibly show**, not against the whole screen:
+
+```
+coverage = visible px ÷ min(section height, viewport height)
+```
+
+Short sections are judged against their own height, tall ones against the
+screen, and either can reach 1.0 — size no longer decides the winner. A mild
+centre bias breaks the remaining tie so a sliver at the very edge cannot beat
+the band filling the middle. Exactly one winner still holds the clock, so the
+sum invariant survives. Implemented as `sectionScore()` in `lib/engagement.ts`
+and pinned by the first test in `tests/unit/engagement.test.ts`.
+
+Original recommendation, kept for the record: **biggest share, with a 1 s
+minimum dwell.** Time below the
+floor stays deliberately unattributed, which makes the gap between page time and
+summed section time its own signal ("skim time"). Needs the owner's read before
+stage 2 is built, because it decides what every section number means.
+
+Charles: if we choose Biggest share of the viewport wins, what if the section is too small it doesnt     
+  shares most of the screen even in the middle of screen? 
+
 ## Verification evidence
 
-Not started — this document is a design awaiting approval.
+**Automated — 2026-07-28, all green.**
+
+- `tests/unit/engagement.test.ts` (15 tests): hidden tabs bank zero; idle past
+  the 30 s cut is dropped and interaction restarts the clock; a section below
+  the 1 s floor earns nothing; the sum invariant holds across visibility
+  changes; a short centred section outscores a tall partial one.
+- `tests/unit/engagement-report.test.ts` (7 tests): unmeasured visits are
+  excluded rather than counted as zero-second visits; medians, reach rate and
+  drop-off shares.
+- `tests/e2e/engagement-beacon.spec.ts` (2 tests): a real Chromium visit to `/`
+  banks time, records tagged sections, and on tab-hide flushes a summary that
+  lands on **the same `page_views` row** the arrival created; the admin cards
+  render.
+- Whole suite re-run after the change: **87/87 e2e pass**, 60/60 unit pass,
+  `tsc --noEmit` clean, `next build` succeeds. Pixel baselines unchanged.
+
+**Manual — local file adapter, production build:**
+
+- Arrival + engagement round trip updates one row in place (no second row).
+- A payload whose section times exceed the page total has its `sections`
+  dropped and its page time kept — the invariant is enforced server-side too.
+- A caller holding the `viewId` but the wrong `visitorId` cannot write.
+- `/admin/analytics?range=30d` renders "Time on page — 52s median", "Section
+  attention" (`HOME-FEATURED-SECTION` 21s · 67% reached) and "Where visits
+  stop", from seeded data.
+
+**Hosted — 2026-07-28, migration `0005` applied.** Orphan `0004` repaired to
+`reverted` first; local and remote now both read `0005`. Verified directly
+against the hosted database with one throwaway row, since deleted (row count
+returned to its prior 734):
+
+- The adapter's two-key match (`id` + `visitor_id`) updates exactly 1 row.
+- The same update with a wrong `visitor_id` touches **0** rows — cross-visitor
+  writes are impossible even for a caller holding the view id.
+- `scroll_pct = 150` is rejected by `page_views_scroll_pct_check`.
+
+This mattered because both beacon routes swallow their errors by design: a
+hosted failure would otherwise have been completely silent.
+
+**Not yet verified:** the deployed app. The code is still an uncommitted
+working tree, so nothing on Vercel records engagement yet and the owner
+acceptance criterion is untouched. Section coverage is limited to the three
+bands tagged today
+(`HOME-HERO-SECTION`, `HOME-FEATURED-SECTION`, `HOME-PROMISE-SECTION`) — the
+mechanism is complete and generic, coverage grows as tagging lands.
 
 ## Related links
 

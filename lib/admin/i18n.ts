@@ -467,6 +467,18 @@ const en = {
   "analytics.funnel.checkout": "Reached checkout",
   "analytics.funnel.purchased": "Purchased",
   "analytics.empty": "No data for this period",
+  "analytics.card.timeOnPage": "Time on page",
+  "analytics.card.sectionAttention": "Section attention",
+  "analytics.card.dropOff": "Where visits stop",
+  "analytics.engagement.median": "Median time on page",
+  "analytics.engagement.measured": "measured visits",
+  "analytics.engagement.scroll": "scrolled",
+  "analytics.engagement.reach": "reached",
+  "analytics.engagement.visits": "visits",
+  "analytics.engagement.empty":
+    "No engagement measured yet — visits report their time when the visitor leaves the page",
+  "analytics.engagement.emptySections":
+    "No section times yet — only sections tagged with data-el are measured",
 
   // ⌘K search (§9.1)
   "search.group.orders": "Orders",
@@ -981,6 +993,16 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.funnel.checkout": "进入结账",
   "analytics.funnel.purchased": "已购买",
   "analytics.empty": "此时段暂无数据",
+  "analytics.card.timeOnPage": "页面停留时长",
+  "analytics.card.sectionAttention": "区域关注度",
+  "analytics.card.dropOff": "访问止步位置",
+  "analytics.engagement.median": "停留时长中位数",
+  "analytics.engagement.measured": "个已测量访问",
+  "analytics.engagement.scroll": "滚动至",
+  "analytics.engagement.reach": "到达",
+  "analytics.engagement.visits": "次访问",
+  "analytics.engagement.empty": "暂无停留数据——访客离开页面时才会回报时长",
+  "analytics.engagement.emptySections": "暂无区域时长——仅统计带 data-el 标记的区域",
 
   "search.group.orders": "订单",
   "search.group.products": "产品",

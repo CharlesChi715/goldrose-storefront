@@ -693,6 +693,14 @@ function buildDemoRows(now: string): Pick<
     referrer: string | null,
     utm: Record<string, string> | null,
     country: string,
+    // Engagement (engagement-tracking.md). Omitted on the two "right now"
+    // rows below, so the demo store also shows what an in-flight visit looks
+    // like: null active_ms means the closing beacon has not landed yet.
+    engagement?: {
+      activeMs: number;
+      scrollPct: number;
+      sections?: Record<string, number>;
+    },
   ): DbTables["page_views"] => ({
     id: demoId(tail),
     visitor_id: visitorId,
@@ -702,6 +710,12 @@ function buildDemoRows(now: string): Pick<
     utm,
     country,
     created_at: createdAt,
+    active_ms: engagement?.activeMs ?? null,
+    scroll_pct: engagement?.scrollPct ?? null,
+    sections: engagement?.sections ?? null,
+    last_section: engagement?.sections
+      ? Object.keys(engagement.sections)[Object.keys(engagement.sections).length - 1]
+      : null,
   });
 
   return {
@@ -857,13 +871,23 @@ function buildDemoRows(now: string): Pick<
       },
     ],
     page_views: [
-      view("p01", "demo-visitor-emily", "demo-session-e1", "/", ago(24 * 6 + 1), "https://www.google.com/", null, "US"),
-      view("p02", "demo-visitor-emily", "demo-session-e1", "/shop", ago(24 * 6 + 0.9), "https://www.google.com/", null, "US"),
-      view("p03", "demo-visitor-emily", "demo-session-e1", "/products/signature-24k-gold-rose", ago(24 * 6 + 0.8), null, null, "US"),
-      view("p04", "demo-visitor-emily", "demo-session-e1", "/checkout", ago(24 * 6 + 0.5), null, null, "US"),
-      view("p05", "demo-visitor-james", "demo-session-j1", "/shop", ago(24 * 3 + 1), null, { utm_source: "instagram", utm_campaign: "gifts", utm_acc: "rose_daily" }, "GB"),
-      view("p06", "demo-visitor-james", "demo-session-j1", "/products/premium-gold-rose-gift-bundle", ago(24 * 3 + 0.8), null, { utm_source: "instagram", utm_campaign: "gifts", utm_acc: "rose_daily" }, "GB"),
-      view("p07", "demo-visitor-james", "demo-session-j1", "/checkout", ago(24 * 3 + 0.4), null, null, "GB"),
+      // Section names are the ones actually tagged in components/home today
+      // (docs/ixd/element-names.md); untagged bands are simply not measured.
+      view("p01", "demo-visitor-emily", "demo-session-e1", "/", ago(24 * 6 + 1), "https://www.google.com/", null, "US",
+        { activeMs: 64_000, scrollPct: 82, sections: { "HOME-HERO-SECTION": 21_000, "HOME-FEATURED-SECTION": 26_000, "HOME-PROMISE-SECTION": 9_000 } }),
+      view("p02", "demo-visitor-emily", "demo-session-e1", "/shop", ago(24 * 6 + 0.9), "https://www.google.com/", null, "US",
+        { activeMs: 41_000, scrollPct: 55 }),
+      view("p03", "demo-visitor-emily", "demo-session-e1", "/products/signature-24k-gold-rose", ago(24 * 6 + 0.8), null, null, "US",
+        { activeMs: 96_000, scrollPct: 91 }),
+      view("p04", "demo-visitor-emily", "demo-session-e1", "/checkout", ago(24 * 6 + 0.5), null, null, "US",
+        { activeMs: 148_000, scrollPct: 100 }),
+      view("p05", "demo-visitor-james", "demo-session-j1", "/shop", ago(24 * 3 + 1), null, { utm_source: "instagram", utm_campaign: "gifts", utm_acc: "rose_daily" }, "GB",
+        { activeMs: 18_000, scrollPct: 34 }),
+      view("p06", "demo-visitor-james", "demo-session-j1", "/products/premium-gold-rose-gift-bundle", ago(24 * 3 + 0.8), null, { utm_source: "instagram", utm_campaign: "gifts", utm_acc: "rose_daily" }, "GB",
+        { activeMs: 73_000, scrollPct: 78 }),
+      view("p07", "demo-visitor-james", "demo-session-j1", "/checkout", ago(24 * 3 + 0.4), null, null, "GB",
+        { activeMs: 52_000, scrollPct: 88 }),
+      // A visit still in progress: engagement lands only when it ends.
       view("p08", "demo-visitor-window", "demo-session-w1", "/", ago(5), null, null, "AU"),
       view("p09", "demo-visitor-window", "demo-session-w1", "/shop", ago(4.9), null, null, "AU"),
     ],

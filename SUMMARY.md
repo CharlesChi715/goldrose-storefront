@@ -57,6 +57,9 @@ resources only when the task needs them.
   2026-07-28 batch — account privacy/support screens included (routes,
   placeholders, and design conflicts:
   [`docs/ixd/README.md`](docs/ixd/README.md)).
+- Page/section dwell tracking is built and its hosted schema is live, but the
+  code is **not deployed yet** — no real traffic has recorded engagement
+  ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
 - `/bag` items, tracking timeline, shipping choices, and card fields are
   visual placeholders; the real cart enters through `/checkout`.
 - The [owner walkthrough](docs/admin-design.md#143-final-acceptance) is
@@ -90,9 +93,10 @@ resources only when the task needs them.
   restores local data. Admin is open unless `ADMIN_DEV_PASSWORD` is set;
   customer sign-in is unavailable.
 - **Hosted mode:** add migrations as `supabase/migrations/000N_*.sql`, apply
-  with `supabase db push` — never the web SQL editor. Migrations
-  `0001`–`0003` are applied. Use `psql` for read-only ad-hoc queries;
-  `supabase db dump` requires Docker.
+  with `supabase db push` — never the web SQL editor. Migrations `0001`–`0003`
+  and `0005` are applied; `0004` is permanently skipped (its orphan history row
+  was repaired 2026-07-28 — intentional, not a gap to fill). Use `psql` for
+  read-only ad-hoc queries; `supabase db dump` requires Docker.
 
 ### Release gates
 
