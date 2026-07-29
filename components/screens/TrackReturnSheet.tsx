@@ -20,7 +20,7 @@
  * (findings note).
  */
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import NoCalcScale from "@/components/NoCalcScale";
@@ -32,6 +32,11 @@ const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
 
 /** 1542:749…788 · uniform 27px rows from y508; dividers at row bottom. */
+// SSR-safe mounted detection for the portal (the PdpOverlays pattern).
+const subscribeToNothing = () => () => {};
+const onTheClient = () => true;
+const onTheServer = () => false;
+
 const REASONS = [
   "1.  Item arrived damaged",
   "2.  Item has a quality issue",
@@ -46,9 +51,8 @@ const REASONS = [
 ];
 
 export function TrackReturnSheet() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeToNothing, onTheClient, onTheServer);
   const [selected, setSelected] = useState<number | null>(null);
-  useEffect(() => setMounted(true), []);
   if (!mounted) {
     return null;
   }
