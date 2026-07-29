@@ -26,7 +26,7 @@
  *   ships (designer slip flagged in docs/ixd/README.md).
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CloseIcon, DownIcon, FilterIcon, ListviewIcon } from "@/components/chrome";
 import { abs, txt } from "@/lib/figma-layout";
@@ -50,7 +50,15 @@ export type CardData = {
   price: string;
   priceCents: number;
   compareAt: string | null;
+  /** The product's own catalog photo; null falls back to the slot's frame art. */
+  image: string | null;
 };
+
+/** Grid cross-fade on sort change — same 150ms ease as PageFade's tab fade. */
+const FADE_MS = 150;
+
+const wantsMotion = () =>
+  !globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 type SortKey = "recommended" | "new" | "high" | "low";
 
@@ -150,13 +158,16 @@ function ProductCard({
         overflow: "hidden",
       }}
     >
+      {/* The product's own photo, so sorting moves the picture with the name
+          and price; products without one keep the slot's frame art. Real
+          catalog photos are not the frame's 203×204, so they cover-crop. */}
       <img
         className="gr-photo"
-        src={`/veloria/home/${img}.png`}
-        alt="Artisan 24K gold-dipped eternal rose"
+        src={data?.image ?? `/veloria/home/${img}.png`}
+        alt={data ? data.shortName : "Artisan 24K gold-dipped eternal rose"}
         width={slot.w}
         height={204}
-        style={{ ...abs(0, 0, slot.w, 204), display: "block" }}
+        style={{ ...abs(0, 0, slot.w, 204), display: "block", objectFit: "cover" }}
       />
       <div
         className={inter.className}
@@ -234,6 +245,33 @@ export function ShopInteractive({
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterSelection, setFilterSelection] = useState<number[]>(defaultFilterSelection);
+  const [fading, setFading] = useState(false);
+  const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // A pending fade must not fire into an unmounted tree.
+  useEffect(() => () => {
+    if (fadeTimer.current) clearTimeout(fadeTimer.current);
+  }, []);
+
+  /**
+   * Fade the grid out, swap the order while it is invisible, fade it back in.
+   * The cards keep their DOM nodes across the swap, so they are already
+   * painted at opacity 0 and the fade-in needs no rAF dance (unlike PageFade,
+   * whose incoming canvas is a fresh element). Reduced motion swaps outright.
+   */
+  const chooseSort = (next: SortKey) => {
+    setSortOpen(false);
+    if (next === sort) return;
+    if (!wantsMotion()) {
+      setSort(next);
+      return;
+    }
+    setFading(true);
+    fadeTimer.current = setTimeout(() => {
+      setSort(next);
+      setFading(false);
+    }, FADE_MS);
+  };
 
   // Sorting reorders the DATA that cycles through the fixed design slots;
   // "new" is the catalog's own order — the state the frame draws.
@@ -343,20 +381,24 @@ export function ShopInteractive({
       ))}
 
       {/* Product grid — slot geometry is the design's; which card sits in
-          each slot rotates per page and follows the chosen sort. */}
-      {slots.map((slot, i) => {
-        const c = contentIndex(i, page, slots.length, rotatePerPage);
-        const cardData = sorted.length ? sorted[c % sorted.length] : null;
-        return (
-          <ProductCard
-            key={i}
-            slot={slot}
-            img={slots[c].img}
-            href={cardData ? `/products/${cardData.handle}` : "/shop"}
-            data={cardData}
-          />
-        );
-      })}
+          each slot rotates per page and follows the chosen sort. The wrapper
+          is unpositioned on purpose: the cards stay absolutely placed against
+          the same canvas, and it exists only to fade them as one unit. */}
+      <div style={{ opacity: fading ? 0 : 1, transition: `opacity ${FADE_MS}ms ease` }}>
+        {slots.map((slot, i) => {
+          const c = contentIndex(i, page, slots.length, rotatePerPage);
+          const cardData = sorted.length ? sorted[c % sorted.length] : null;
+          return (
+            <ProductCard
+              key={i}
+              slot={slot}
+              img={slots[c].img}
+              href={cardData ? `/products/${cardData.handle}` : "/shop"}
+              data={cardData}
+            />
+          );
+        })}
+      </div>
 
       {/* Click-away backdrop for either overlay. */}
       {overlayOpen ? (
@@ -392,10 +434,7 @@ export function ShopInteractive({
                 type="button"
                 role="menuitemradio"
                 aria-checked={selected}
-                onClick={() => {
-                  setSort(row.key);
-                  setSortOpen(false);
-                }}
+                onClick={() => chooseSort(row.key)}
                 style={{
                   ...abs(0, [16, 57, 100, 143][i] - 6, 206, 32),
                   background: "transparent",

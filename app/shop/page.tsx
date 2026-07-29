@@ -16,6 +16,7 @@ import { ConciergeChat } from "@/components/ConciergeChat";
 import { ForwardIcon, PromoBar, ScaleFrame, ShopHeader } from "@/components/chrome";
 import { ShopInteractive, type CardData, type SlotSpec } from "@/components/shop/ShopInteractive";
 import { abs, txt } from "@/lib/figma-layout";
+import { fileUrl } from "@/lib/files-url";
 import { tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
 import { formatMoney } from "@/lib/money";
@@ -113,6 +114,9 @@ export default async function ShopPage({
         product.variants[0]?.compare_at_price_cents != null
           ? formatMoney(product.variants[0].compare_at_price_cents)
           : null,
+      // Resolved server-side (local path or Supabase storage URL) so the card
+      // photo travels with the product when the grid is sorted.
+      image: product.images[0] ? fileUrl(product.images[0].path) : null,
     }));
     promo = await getPromoSlogan();
   } catch {
