@@ -79,10 +79,14 @@ function ListCard({
   title,
   rows,
   empty,
+  caption,
 }: {
   title: string;
   rows: Array<{ label: string; value: string }>;
   empty: string;
+  /** One line under the title explaining what the row numbers mean. Engagement
+   *  rows read like "42s · 73%", which is unreadable without a key. */
+  caption?: string;
 }) {
   return (
     <Card>
@@ -90,6 +94,11 @@ function ListCard({
         <Text as="h3" variant="headingSm">
           {title}
         </Text>
+        {caption ? (
+          <Text as="p" variant="bodySm" tone="subdued">
+            {caption}
+          </Text>
+        ) : null}
         {rows.length === 0 ? (
           <Text as="p" tone="subdued">
             {empty}
@@ -295,33 +304,34 @@ export function AnalyticsDashboard({
             which named sections held attention. */}
         <InlineGrid columns={{ xs: 1, md: 3 }} gap="400">
           <ListCard
-            title={`${t("analytics.card.timeOnPage")} — ${formatDuration(
+            title={t("analytics.card.timeOnPage")}
+            caption={`${t("analytics.engagement.median")}: ${formatDuration(
               summary.engagement.medianActiveMs.current,
-            )} ${t("analytics.engagement.median")}`}
+            )} · ${summary.engagement.measuredVisits} ${t(
+              "analytics.engagement.measured",
+            )}. ${t("analytics.engagement.captionTime")}`}
             empty={t("analytics.engagement.empty")}
             rows={summary.engagement.byPath.map((row) => ({
               label: `${row.path} (${row.visits})`,
-              value: `${formatDuration(row.medianActiveMs)} · ${row.medianScrollPct}% ${t(
-                "analytics.engagement.scroll",
-              )}`,
+              value: `${formatDuration(row.medianActiveMs)} · ${row.medianScrollPct}%`,
             }))}
           />
           <ListCard
             title={t("analytics.card.sectionAttention")}
+            caption={t("analytics.engagement.captionSections")}
             empty={t("analytics.engagement.emptySections")}
             rows={summary.engagement.sections.map((row) => ({
               label: row.section,
-              value: `${formatDuration(row.medianMs)} · ${row.reachRatePercent}% ${t(
-                "analytics.engagement.reach",
-              )}`,
+              value: `${formatDuration(row.medianMs)} · ${row.reachRatePercent}%`,
             }))}
           />
           <ListCard
             title={t("analytics.card.dropOff")}
+            caption={t("analytics.engagement.captionDropOff")}
             empty={t("analytics.engagement.emptySections")}
             rows={summary.engagement.dropOff.map((row) => ({
               label: row.section,
-              value: `${row.visits} ${t("analytics.engagement.visits")} · ${row.sharePercent}%`,
+              value: `${row.visits} · ${row.sharePercent}%`,
             }))}
           />
         </InlineGrid>
