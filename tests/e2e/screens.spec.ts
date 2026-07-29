@@ -70,10 +70,11 @@ test("the shop pagination walks pages and reorders the placeholder cards", async
   page,
 }) => {
   await page.goto("/shop");
-  const firstOnPageOne = await page
-    .locator(".gr-card-zoom .gr-photo")
-    .first()
-    .getAttribute("src");
+  const photos = () =>
+    page.$$eval(".gr-card-zoom .gr-photo", (els) =>
+      els.map((el) => el.getAttribute("src")),
+    );
+  const pageOne = await photos();
 
   await page.getByRole("link", { name: "Page 3" }).click();
   await expect(page).toHaveURL(/\/shop\?page=3$/);
@@ -81,12 +82,11 @@ test("the shop pagination walks pages and reorders the placeholder cards", async
     "aria-current",
     "page",
   );
-  // Same eight placeholder products, rotated into different slots (OQ-3).
-  const firstOnPageThree = await page
-    .locator(".gr-card-zoom .gr-photo")
-    .first()
-    .getAttribute("src");
-  expect(firstOnPageThree).not.toBe(firstOnPageOne);
+  // The same products rotated into different slots (OQ-3). Compared as a whole
+  // sequence, not by the first card: card photos now follow the product rather
+  // than the slot, and with only three real products several pages happen to
+  // open on the same one — the grids still differ further down.
+  expect(await photos()).not.toEqual(pageOne);
 
   // The next-page arrow is inert on the last page, as the design draws it.
   await page.goto("/shop?page=5");
