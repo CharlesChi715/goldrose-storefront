@@ -4,8 +4,8 @@
  * The two signed-in account dashboards from the 07-27 frames, one skeleton,
  * two variants:
  *
- *   ACCOUNT-INFO-SHOPPING-DASHBOARD 914:112 → /account (signed in)
- *   ACCOUNT-INFO-BUSINESS-DASHBOARD 914:113 → /account/business/dashboard
+ *   "mepage" 1523:2536 (07-29) → /account (signed in)
+ *   ACCOUNT-INFO-BUSINESS-DASHBOARD 1523:885 (07-29) → /account/business/dashboard
  *
  * Geometry, colors, fonts and copy verbatim from the Figma REST data. With
  * no props the shopping variant renders the mock's own state ("Jessica",
@@ -14,16 +14,18 @@
  * visitor: display name, avatar initials, and the latest order's number /
  * date / delivery status / total (the account data has no line items, so a
  * real order shows the neutral placeholder image, per the owner's
- * explicit-unknown rule). The design ships no sign-out control; a plain
- * text row below the member card carries it — flagged to the design team
- * in docs/ixd/README.md.
+ * explicit-unknown rule). The 07-28 dev "Sign out" row is retired: the
+ * designed path is now Account & Privacy → the hub's Session card →
+ * /account/logout.
  *
  * Wired: order tracking, /account/orders, /account/reminders, /care,
- * /account/returns and /account/security (07-28 screens), the account-type
+ * /account/returns and /account/privacy (the 07-29 hub), the account-type
  * toggle, and BUY AGAIN → /shop (nearest honest destination, H-15
  * precedent). Wishlist / Custom Archive / Addresses / benefits /
  * business-side tiles render pixel-exact but stay inert until their targets
- * exist (route-table rule).
+ * exist (route-table rule). Header wordmark: the shopping frame's image
+ * reads "ELDREVE" (placeholder brand, DQ) — the owner's GoldRose art stays,
+ * centred in the frame's wordmark box.
  */
 
 import Link from "next/link";
@@ -115,17 +117,17 @@ function Dashboard({
   variant,
   displayName,
   recentOrder,
-  showSignOut,
 }: {
   variant: "shopping" | "business";
   displayName?: string;
   /** undefined → mock card; null → real visitor with no orders yet. */
   recentOrder?: DashboardRecentOrder | null;
-  showSignOut?: boolean;
 }) {
   const shopping = variant === "shopping";
-  const backX = shopping ? 10 : 7;
-  const logoX = shopping ? 146 : 143;
+  const backX = shopping ? 5.5 : 7;
+  const logoX = shopping ? 136.5 : 143;
+  // 07-29: the shopping frame's member card moved down 6px; business kept 756.
+  const memberY = shopping ? 762 : 756;
   const name = displayName ?? (shopping ? "Jessica" : "David");
   const initials = name
     .split(/\s+/)
@@ -154,7 +156,7 @@ function Dashboard({
         { title: "Dates & Gift Reminders", value: "3 upcoming  ›", href: "/account/reminders" },
         { title: "Returns & After-Sales", value: "Self-service  ›", href: "/account/returns" },
         { title: "Customer Care", value: "Online now  ›", href: "/care" },
-        { title: "Account & Privacy", value: "Personal settings  ›", href: "/account/security" },
+        { title: "Account & Privacy", value: "Personal settings  ›", href: "/account/privacy" },
       ]
     : [
         { title: "Procurement Contacts", value: "Manage contacts  ›" },
@@ -164,7 +166,8 @@ function Dashboard({
       ];
 
   return (
-    <ScaleFrame height={873} background={CREAM} fontClass={notoSC.className} navActive="Account">
+    // Canvas 932 = the frames' nav band top (873) + 59.
+    <ScaleFrame height={932} background={CREAM} fontClass={notoSC.className} navActive="Account">
       {/* 939:155/162 header — back art + logo, no promo bar on this screen */}
       <BackButton fallback="/" src="/veloria/home/56-71.png" style={abs(backX, 19.5, 40, 43)} />
       <Link href="/" style={{ ...abs(logoX, 21, 136, 40), display: "block" }} aria-label="Home">
@@ -315,42 +318,31 @@ function Dashboard({
       })}
 
       {/* member / security card */}
-      <div style={{ ...abs(16, 756, 398, 94), background: shopping ? PINK : "#EBF5EC", borderRadius: 14 }} />
-      <div className={playfair.className} style={{ ...abs(34, 770, 240), ...txt(shopping ? 18 : 15, shopping ? 22 : 18, INK), fontWeight: 600 }}>
+      <div style={{ ...abs(16, memberY, 398, 94), background: shopping ? PINK : "#EBF5EC", borderRadius: 14 }} />
+      <div className={playfair.className} style={{ ...abs(34, memberY + 24, 240), ...txt(shopping ? 18 : 15, shopping ? 22 : 18, INK), fontWeight: 600 }}>
         {shopping ? "GoldRose Gift Member" : "Enterprise Account Protected"}
       </div>
-      <div style={{ ...abs(34, shopping ? 798 : 804, 250), ...txt(shopping ? 12 : 10, shopping ? 16 : 14, INK) }}>
+      <div style={{ ...abs(34, shopping ? 814 : 804, 250), ...txt(shopping ? 12 : 10, shopping ? 16 : 14, INK) }}>
         {shopping ? "1,280 points · 2 available rewards" : "Sensitive details are secured for your team."}
       </div>
-      <div style={{ ...abs(290, 781, 108, 42), background: INK, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 10 }}>
+      <div style={{ ...abs(290, memberY + 25, 108, 42), background: INK, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 10 }}>
         <span style={{ position: "absolute", left: 8, top: 13, width: 92, ...txt(12, 16, CREAM, "center"), fontWeight: 500 }}>
           {shopping ? "VIEW BENEFITS" : "SECURITY"}
         </span>
       </div>
-
-      {/* Sign out — dev addition below the member card; the frame ships no
-          sign-out control and testers need one (docs/ixd/README.md). Lands on
-          the designed ACCOUNT-LOGOUT-CONFIRM flow (07-28), which does the
-          actual signing out. */}
-      {showSignOut ? (
-        <Link href="/account/logout" style={{ ...abs(30, 856, 120, 16), display: "block" }}>
-          <span style={{ ...txt(11, 14, INK), textDecoration: "underline", display: "block" }}>Sign out</span>
-        </Link>
-      ) : null}
     </ScaleFrame>
   );
 }
 
-/** 914:112 — the shopping dashboard (real data via props, mock without). */
+/** 1523:2536 — the shopping dashboard (real data via props, mock without). */
 export function AccountDashboardScreen(props: {
   displayName?: string;
   recentOrder?: DashboardRecentOrder | null;
-  showSignOut?: boolean;
 }) {
   return <Dashboard variant="shopping" {...props} />;
 }
 
-/** 914:113 — the business dashboard (mock; business auth has no backend). */
+/** 1523:885 — the business dashboard (mock; business auth has no backend). */
 export function BusinessDashboardScreen() {
   return <Dashboard variant="business" />;
 }

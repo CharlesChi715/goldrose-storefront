@@ -1,12 +1,13 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * The SEARCH-OPEN overlay (914:114, 07-27, 已完成 lane) — a full-screen
- * in-page state, NOT a route, per the owner's 07-27 instruction that none of
- * the 小页面 frames get dedicated routes. The header search button
- * (SearchButton, same pattern as MenuButton/MenuDrawer) opens it wherever
- * the visitor is. Geometry, colors, fonts and copy verbatim from the Figma
- * REST data; ornamental glyphs are Figma's own SVG exports (see
+ * The search overlay (07-29 frame 1523:3266 " Homepage-serch" [sic]) — a
+ * full-screen in-page state, NOT a route, per the owner's 07-27 instruction
+ * that none of the 小页面 frames get dedicated routes. The header search
+ * button (SearchButton, same pattern as MenuButton/MenuDrawer) opens it
+ * wherever the visitor is. Geometry, colors, fonts and copy verbatim from the
+ * Figma REST data; ornamental glyphs are Figma's own SVG exports (see
  * components/screens/glyphs).
  *
  * What is real:
@@ -18,10 +19,13 @@
  *
  * Deliberate deviations (docs/ixd/README.md):
  * - The mock draws a TYPED state ("gold rose gift" in the field, so the
- *   clear button shows); the field starts empty, and the clear button
- *   appears once there is text.
- * - The mock's iPhone status bar ("9:41", 920:111) is not implemented —
- *   C-3 precedent.
+ *   input's × shows); the field starts empty, and the × appears once there
+ *   is text. The 07-29 sheet names that node SEARCH-HEADER-INPUT-CLOSE-BTN,
+ *   but it stays the clear-input affordance — closing lives on the back
+ *   chevron and Escape (flagged to design).
+ * - The frame is 948 tall against the 932 viewport; its content ends at
+ *   y≈663 and the header hugs y=0, so the extra 16px is empty bottom slack,
+ *   not top bleed. The overlay keeps the 932 mapping.
  */
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -42,13 +46,15 @@ const STORAGE_KEY = "goldrose.recent-searches";
 const MAX_STORED = 8;
 const MAX_SHOWN = 4; // the frame draws four rows
 
-// 920:123…132 — trending chips (chip 1's ✦ label ships as design pixels).
+// 1523:3274 … 1523:3283 — trending chips. The 07-29 batch exported no text
+// SVG for chip 1's "✦  24K Gold Rose"; the 07-27 export (920-124.svg) is the
+// same string, face and #D4AF37 fill, so it still ships as the design pixels.
 const TRENDING: Array<{ x: number; y: number; w: number; label: string; svg?: { id: string; ink: [number, number]; textX: number; textW: number } }> = [
-  { x: 20, y: 278, w: 148, label: "24K Gold Rose", svg: { id: "920-124", ink: [93, 12], textX: 28, textW: 132 } },
-  { x: 180, y: 278, w: 142, label: "Anniversary Gift" },
-  { x: 20, y: 330, w: 132, label: "Rose Gift Set" },
-  { x: 164, y: 330, w: 104, label: "For Mom" },
-  { x: 280, y: 330, w: 130, label: "Ready to Ship" },
+  { x: 20, y: 231, w: 148, label: "24K Gold Rose", svg: { id: "920-124", ink: [93, 12], textX: 28, textW: 132 } },
+  { x: 180, y: 231, w: 142, label: "Anniversary Gift" },
+  { x: 20, y: 283, w: 132, label: "Rose Gift Set" },
+  { x: 164, y: 283, w: 104, label: "For Mom" },
+  { x: 280, y: 283, w: 130, label: "Ready to Ship" },
 ];
 
 // The history lives in localStorage, read as an external store (server
@@ -151,27 +157,29 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
       `}</style>
       <div className="figv-searchwrap">
       <div className="figv-searchstage">
-      {/* 920:112 header — ‹ back (920:113 ink 7×14 in its 36-wide box), title, Close */}
-      <button type="button" aria-label="Back" onClick={onClose} style={{ ...abs(18, 46, 36, 36), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}>
-        <Glyph src="920-113" x={14.5} y={11} w={7} h={14} ink={[7, 14]} />
+      {/* 1523:3307 SHOP-HEADER — the 07-29 header block (its frame sits at
+          x-11 in the sheet; the children below are at their own absolute
+          boxes). It replaces the 07-27 "Search" title and "Close" text
+          button: closing now lives on the back chevron (and Escape). */}
+      {/* 1523:3308 back chevron — an image-fill rectangle, retina PNG at the
+          sheet's 40×43 box; tapping it closes the overlay. */}
+      <button type="button" aria-label="Back" onClick={onClose} style={{ ...abs(10.5, 9.5, 40, 43), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}>
+        <img src="/veloria/screens/1523-3308.png" alt="" style={{ display: "block", width: 40, height: 43 }} />
       </button>
-      <div className={playfair.className} style={{ ...abs(66, 47, 200), ...txt(30, 36, INK), fontWeight: 600 }}>
-        Search
-      </div>
-      <button
-        type="button"
-        onClick={onClose}
-        className={playfair.className}
-        style={{ ...abs(338, 53, 74, 18), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
-      >
-        <span style={{ ...txt(14, 18, GOLD, "right"), display: "block" }}>Close</span>
-      </button>
+      {/* 1523:3309 brand wordmark image — the design's "ELDREVE" placeholder
+          brand, shipped pixel-exact (flagged to design; the dialog keeps its
+          "Search" aria-label). */}
+      {/* 1523:3309 is an "ELDREVE" wordmark image (placeholder brand, DQ) —
+          the owner's GoldRose art stays, centred in the image's box. */}
+      <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ ...abs(158.5, 11, 136, 40), display: "block" }} />
 
-      {/* 920:116 input capsule */}
-      <div style={{ ...abs(20, 112, 390, 58), background: FIELD_BG, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 28 }} />
-      <Glyph src="920-117" x={36} y={123} w={34} h={30} ink={[14, 15]} />
+      {/* 1523:3267 input capsule */}
+      <div style={{ ...abs(20, 65, 390, 58), background: FIELD_BG, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 28 }} />
+      {/* 1523:3268 ⌕ — 26px/30 line box; the sheet's collapsed 10px text-box
+          heights don't position the ink, the line box does (07-27 treatment). */}
+      <Glyph src="1523-3268" x={36} y={76} w={34} h={30} ink={[14, 15]} />
       <form
-        style={abs(80, 127, 250, 30)}
+        style={abs(80, 80, 250, 30)}
         onSubmit={(event) => {
           event.preventDefault();
           submit(value);
@@ -195,6 +203,8 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
           }}
         />
       </form>
+      {/* 1523:3270 — named SEARCH-HEADER-INPUT-CLOSE-BTN in the sheet, kept
+          as the clear-input affordance (see the deviations note above). */}
       {value ? (
         <button
           type="button"
@@ -203,17 +213,18 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
             setValue("");
             inputRef.current?.focus();
           }}
-          style={{ ...abs(354, 121, 40, 40), background: "#F7F2ED", borderRadius: 20, border: 0, padding: 0, cursor: "pointer" }}
+          style={{ ...abs(354, 74, 40, 40), background: "#F7F2ED", borderRadius: 20, border: 0, padding: 0, cursor: "pointer" }}
         >
           <span style={{ position: "absolute", left: 0, right: 0, top: 7, ...txt(22, 24, INK, "center") }}>×</span>
         </button>
       ) : null}
-      <div style={{ ...abs(28, 184, 374), ...txt(11, 15, INK, "center") }}>
+      {/* 1523:3272 hint */}
+      <div style={{ ...abs(28, 137, 374), ...txt(11, 15, INK, "center") }}>
         Search products, occasions, or recipients&nbsp;&nbsp;·&nbsp;&nbsp;Press enter to search
       </div>
 
-      {/* 920:122 trending */}
-      <div className={playfair.className} style={{ ...abs(20, 228, 390), ...txt(25, 30, INK), fontWeight: 600 }}>
+      {/* 1523:3273 trending */}
+      <div className={playfair.className} style={{ ...abs(20, 181, 390), ...txt(25, 30, INK), fontWeight: 600 }}>
         Trending Searches
       </div>
       {TRENDING.map((chip) => (
@@ -244,27 +255,30 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
         </button>
       ))}
 
-      <div style={{ ...abs(20, 398, 390, 1), background: SAND }} />
+      {/* 1523:3284 separator */}
+      <div style={{ ...abs(20, 351, 390, 1), background: SAND }} />
 
-      {/* 920:134 recent searches (real history) */}
-      <div className={playfair.className} style={{ ...abs(20, 430, 260), ...txt(25, 30, INK), fontWeight: 600 }}>
+      {/* 1523:3285 recent searches (real history) */}
+      <div className={playfair.className} style={{ ...abs(20, 383, 260), ...txt(25, 30, INK), fontWeight: 600 }}>
         Recent Searches
       </div>
+      {/* 1523:3286 Clear all */}
       {recents.length ? (
         <button
           type="button"
           onClick={() => writeRecents([])}
           className={playfair.className}
-          style={{ ...abs(326, 436, 84, 18), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
+          style={{ ...abs(326, 389, 84, 18), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
         >
           <span style={{ ...txt(14, 18, GOLD, "right"), display: "block" }}>Clear all</span>
         </button>
       ) : null}
+      {/* 1523:3287 … 1523:3306 — the four mock rows' geometry, on a 58px pitch */}
       {recents.slice(0, MAX_SHOWN).map((term, i) => {
-        const y = 486 + i * 58;
+        const y = 439 + i * 58;
         return (
           <div key={term} style={abs(20, y, 390, 50)}>
-            <Glyph src="920-137" x={0} y={12} w={30} h={22} ink={[13, 13]} />
+            <Glyph src="1523-3288" x={0} y={12} w={30} h={22} ink={[13, 13]} />
             <button
               type="button"
               onClick={() => submit(term)}
@@ -285,12 +299,8 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
           </div>
         );
       })}
-
-      {/* 920:156 footer */}
-      <Glyph src="920-156" x={140} y={886} w={24} h={18} ink={[15, 15]} />
-      <div className={playfair.className} style={{ ...abs(170, 889, 240), ...txt(12, 17, INK), fontWeight: 500 }}>
-        Your search history is private and secure.
-      </div>
+      {/* The 07-27 footer ("Your search history is private and secure.") is
+          not in the 07-29 frame — removed. */}
       </div>
       </div>
       <NoCalcScale base={430} stage=".figv-searchstage" origin="top center" wrap=".figv-searchwrap" height={932} />

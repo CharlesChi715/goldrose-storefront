@@ -109,9 +109,12 @@ test("the homepage gift-path cards reach the shop and the on-page sections", asy
 }) => {
   await page.goto("/");
   await expect(page.locator("#personalize")).toHaveCount(1);
+  // #craft stays as an anchor target, but the EXPLORE OUR CRAFT card now
+  // reaches the real /craft page (07-29 import); the story CTA reaches /story.
   await expect(page.locator("#craft")).toHaveCount(1);
   await expect(page.locator('a[href="#personalize"]')).toHaveCount(1);
-  await expect(page.locator('a[href="#craft"]')).toHaveCount(1);
+  await expect(page.locator('a[href="/craft"]')).toHaveCount(1);
+  await expect(page.locator('a[href="/story"]')).toHaveCount(1);
   await expect(
     page.getByRole("link", { name: /Valentine/i }).first(),
   ).toBeVisible();

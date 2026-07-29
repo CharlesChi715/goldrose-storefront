@@ -45,13 +45,13 @@ export function BuyButtons({
         }}
         style={{
           ...abs(16, 18, 178, 54),
-          background: "#FFFFFF",
+          background: "#FFFBF6",
           borderRadius: 14,
-          boxShadow: "inset 0 0 0 1.5px #17483F",
+          boxShadow: "inset 0 0 0 1.5px #3B2F2F",
           cursor: variantId ? "pointer" : "default",
         }}
       >
-        <div style={{ ...abs(38, 18, 102), ...txt(15, 18.153, "#173A33"), fontWeight: 500 }}>
+        <div style={{ ...abs(38, 18, 102), ...txt(15, 18.153, "#3B2F2F"), fontWeight: 500 }}>
           ADD TO CART
         </div>
       </div>
@@ -67,9 +67,9 @@ export function BuyButtons({
         }}
         style={{
           ...abs(204, 18, 178, 54),
-          background: "#073A31",
+          background: "#3B2F2F",
           borderRadius: 14,
-          boxShadow: "inset 0 0 0 1.5px #17483F",
+          boxShadow: "inset 0 0 0 1.5px #3B2F2F",
           cursor: variantId ? "pointer" : "default",
         }}
       >
@@ -77,7 +77,7 @@ export function BuyButtons({
           data-live-text
           style={{
             ...abs(27, 19, 124),
-            ...txt(13, 15.733, "#FFFFFF"),
+            ...txt(13, 15.733, "#FFF6EC"),
             fontWeight: 500,
             whiteSpace: "nowrap",
             overflow: "hidden",

@@ -1,9 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * /account/signup — pixel-exact implementation of AUTH-SIGNUP-SHOPPING
- * (1097:114, 07-27). Geometry, colors, fonts and copy verbatim from the
- * Figma REST data; input icons are Figma's own SVG exports.
+ * /account/signup — pixel-exact implementation of "loginpage-Create a
+ * shopping account" (1523:3315, 07-29 restyle). Geometry, colors, fonts and
+ * copy verbatim from the Figma REST data; input icons are Figma's own SVG
+ * exports (the ✉ is a crop of the frame render — it SVG-exports as a
+ * .notdef box, C-2 precedent).
+ *
+ * ⚠️ Brand substitution: the frame's header wordmark is an image reading
+ * "ELDREVE" — the placeholder brand this delivery stamps on several screens
+ * (DQ raised). The live page keeps GoldRose in Playfair at the image's box,
+ * the C-2 precedent.
  *
  * The whole form is a VISUAL PLACEHOLDER, deliberately built from styled
  * divs rather than real inputs: the design asks for password fields, but
@@ -24,25 +31,35 @@ import { notoSC, playfair } from "@/lib/fonts";
 
 const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
-const GOLD = "#D4AF37";
 const CREAM = "#FFF6EC";
 const SHEET = "#FFFEFB";
 const HINT = "#75665E";
 
-// 1105:118…134 — the five fields: box y, icon export, ink size, hint text.
-const FIELDS: Array<{ y: number; icon: string; ink: [number, number]; hint: string; sendCode?: boolean }> = [
-  { y: 398, icon: "1105-119", ink: [14, 17], hint: "Full name" },
-  { y: 472, icon: "1105-122", ink: [22, 22], hint: "Enter your email address" },
-  { y: 546, icon: "1105-125", ink: [22, 22], hint: "Verification code", sendCode: true },
-  { y: 620, icon: "1105-130", ink: [21, 21], hint: "Create password" },
-  { y: 694, icon: "1105-130", ink: [21, 21], hint: "Confirm password" },
+// 1561:115/114/112/113/111 — the five fields, frame order (the 07-29 frame
+// moves Verification code below the passwords): box y, icon export (ink =
+// SVG natural size; crop = the ✉ render-crop's measured box), hint text.
+const FIELDS: Array<{
+  y: number;
+  icon: string;
+  ink?: [number, number];
+  crop?: [number, number, number, number];
+  hint: string;
+  sendCode?: boolean;
+}> = [
+  { y: 400, icon: "1523-3322", ink: [14, 17], hint: "Full name" },
+  { y: 474, icon: "1523-3325", crop: [50.5, 496.5, 21.5, 14.5], hint: "Enter your email address" },
+  { y: 548, icon: "1523-3333", ink: [21, 21], hint: "Create password" },
+  { y: 622, icon: "1523-3336", ink: [21, 21], hint: "Confirm password" },
+  { y: 696, icon: "1523-3328", ink: [22, 22], hint: "Verification code", sendCode: true },
 ];
 
 export function SignupScreen() {
   return (
     <ScaleFrame height={932} background={CREAM} fontClass={notoSC.className} nav={false}>
-      <BackButton fallback="/account" src="/veloria/screens/1107-111.svg" style={abs(32, 50, 8, 16)} />
-      <div className={playfair.className} style={{ ...abs(118, 35.7, 194, 58), ...txt(35, 46.65, GOLD, "center"), fontWeight: 500 }}>
+      {/* Brand Navigation (1523:3343) — ‹ back; GoldRose substituted for the
+          frame's "ELDREVE" wordmark image at its box (see the file header) */}
+      <BackButton fallback="/account" src="/veloria/screens/1523-3344.png" style={abs(0, 18, 40, 42)} />
+      <div className={playfair.className} style={{ ...abs(153, 13.5, 140, 51), ...txt(24, 51, INK, "center"), fontWeight: 600 }}>
         GoldRose
       </div>
 
@@ -53,7 +70,7 @@ export function SignupScreen() {
         {"Save favorites, track orders,\nand enjoy effortless gifting."}
       </div>
       <img
-        src="/veloria/screens/1105-115.png"
+        src="/veloria/screens/1523-3318.png"
         alt="Sapphire blue gold-dipped rose"
         width={178}
         height={250}
@@ -62,17 +79,23 @@ export function SignupScreen() {
 
       {/* form card — all fields are visual placeholders (see file header) */}
       <div style={{ ...abs(16, 326, 398, 576), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 16 }} />
-      <div style={{ ...abs(34, 352, 350), ...txt(21, 25.2, INK), fontWeight: 700 }}>Create your shopping account</div>
+      <div style={{ ...abs(32, 352.4, 350), ...txt(21, 25.2, INK), fontWeight: 700 }}>Create your shopping account</div>
 
       {FIELDS.map((field) => (
         <div key={field.hint}>
           <div style={{ ...abs(32, field.y, 366, 60), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 10 }} />
-          <Glyph src={field.icon} x={44} y={field.y + 8} w={34} h={44} ink={field.ink} />
-          <div style={{ ...abs(82, field.y + 22, 195), ...txt(14, 16.8, HINT) }}>{field.hint}</div>
+          {field.crop ? (
+            <img src={`/veloria/screens/${field.icon}.png`} alt="" style={{ ...abs(...field.crop), display: "block" }} />
+          ) : field.ink ? (
+            <Glyph src={field.icon} x={44} y={field.y + 8} w={34} h={44} ink={field.ink} />
+          ) : null}
+          <div style={{ ...abs(field.sendCode ? 89 : 82, field.y + 21.6, field.sendCode ? 195 : 290), ...txt(14, 16.8, HINT) }}>
+            {field.hint}
+          </div>
           {field.sendCode ? (
             <>
-              <div style={{ ...abs(300, field.y + 10, 1, 40), background: SAND }} />
-              <div style={{ ...abs(306, field.y + 22, 84), ...txt(13, 15.6, INK, "center"), fontWeight: 500 }}>Send code</div>
+              <div style={{ ...abs(295, field.y + 10, 1, 40), background: SAND }} />
+              <div style={{ ...abs(307, field.y + 22.2, 84), ...txt(13, 15.6, INK, "center"), fontWeight: 500 }}>Send code</div>
             </>
           ) : null}
         </div>
@@ -83,13 +106,13 @@ export function SignupScreen() {
 
       {/* CREATE — inert placeholder (no password signup on the live flow) */}
       <div style={{ ...abs(32, 810, 366, 48), background: INK, borderRadius: 10 }} aria-disabled="true">
-        <span style={{ position: "absolute", left: 10, right: 10, top: 16, ...txt(13, 15.6, CREAM, "center"), fontWeight: 500 }}>
+        <span style={{ position: "absolute", left: 10, right: 10, top: 16.2, ...txt(13, 15.6, CREAM, "center"), fontWeight: 500 }}>
           CREATE SHOPPING ACCOUNT
         </span>
       </div>
 
       <Link href="/account" style={{ ...abs(56, 862, 318, 28), display: "block" }}>
-        <span style={{ position: "absolute", left: 0, right: 0, top: 6, ...txt(12.5, 15, INK, "center") }}>
+        <span style={{ position: "absolute", left: 0, right: 0, top: 6.5, ...txt(12.5, 15, INK, "center") }}>
           Already have an account?&nbsp;&nbsp;Sign in&nbsp;&nbsp;›
         </span>
       </Link>

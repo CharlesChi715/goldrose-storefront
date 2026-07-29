@@ -195,7 +195,7 @@ export function HomeHeader() {
           icon there would hide the shopper's real basket. Swap once /bag reads
           lib/cart/store.ts. */}
       <Link href="/checkout" style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }} aria-label="Cart">
-        <img src="/veloria/home/549-92.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+        <img src="/veloria/screens/1523-1682.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
       </Link>
     </>
   );
@@ -217,7 +217,7 @@ export function ShopHeader() {
       {/* Search art opens the SEARCH-OPEN overlay (914:114, 07-27). */}
       <SearchButton style={abs(313, 41.5, 40, 43)} />
       <Link href="/checkout" style={{ ...abs(383, 41.5, 40, 43), display: "block" }} aria-label="Cart">
-        <img src="/veloria/home/549-92.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+        <img src="/veloria/screens/1523-1682.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
       </Link>
     </>
   );

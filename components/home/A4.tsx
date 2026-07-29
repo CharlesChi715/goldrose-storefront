@@ -302,7 +302,7 @@ export function A4() {
             H-17 → #craft: same reasoning as H-16 — module A-9 on this page is
             the craft/workshop content, so we scroll there. */}
         <Link
-          href="#craft"
+          href="/craft"
           style={{
             ...abs(21, 366, 335, 64),
             display: "block",

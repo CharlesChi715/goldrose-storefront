@@ -16,6 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/shop`, changeFrequency: "weekly", priority: 0.9 },
     // Business + tracking screens (Figma B-3/B-4/C-1) — static content pages.
+    { url: `${base}/story`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/craft`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/business/partnerships`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/business/wholesale`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/orders/track`, changeFrequency: "monthly", priority: 0.3 },

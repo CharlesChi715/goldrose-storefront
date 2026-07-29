@@ -44,8 +44,23 @@ never disagree.
 
 ## File format
 
-Status line → Context → Decision → Options considered (pros/cons table) →
-Plan (work items) → Related links (learning/, TESTER-GUIDE, spec §).
+[`TEMPLATE.md`](TEMPLATE.md) is the authority; scaffold with
+`npm run features:new`. Body order:
+
+Context → Decision → Options considered (pros/cons table) → Acceptance criteria
+→ Plan → *Tech details* → Blockers and dependencies → *Open questions* →
+Verification evidence → Related links.
+
+Two **optional** sections, added 2026-07-28 (records created before then do not
+carry them):
+
+| Section | Holds | Sits there because |
+|---|---|---|
+| *Tech details* | platform constraints and traps found while planning | reference for whoever executes the Plan above it |
+| *Open questions* | OQ-1, OQ-2… choices still **ours** to make | next to Blockers, which are someone **else's** to clear |
+
+Data shape and invariants (column names, "X must never exceed Y") go in
+*Tech details*; the checkbox that proves them goes in *Acceptance criteria*.
 
 ## Status tree (= roadmap)
 

@@ -158,7 +158,6 @@ export function AccountClient() {
         <AccountDashboardScreen
           displayName={overview.displayName}
           recentOrder={toRecentOrder(overview.orders)}
-          showSignOut
         />
       </>
     );

@@ -1,28 +1,21 @@
 "use client";
 /**
  * ROLE OF THIS FILE
- * /care — pixel-exact implementation of the four Customer Care frames
- * (CARE-HOT-TOPICS 1097:117, CARE-ORDER-ISSUES 1097:116, CARE-PROMOTIONS
- * 1097:119, CARE-AFTER-SALES 1097:118, 07-27). The four frames are one page
- * in four tab states: the active Help-Center tab, its 8 FAQ rows, and — on
- * every tab except Hot topics — a "Support request status" row that pushes
- * the Help Center down 52px. Geometry, colors, fonts and copy verbatim from
- * the Figma REST data; ornamental glyphs are Figma's own SVG exports.
+ * /care — pixel-exact implementation of the four "mepage-customer care"
+ * frames (care01 1523:3611 hot-topics, care02 1523:3540 order-issues,
+ * care03 1523:3753 promotions, care04 1523:3682 after-sales; 07-29
+ * delivery). One page, four Help-Center tab states: the active tab label,
+ * the gold indicator, and that tab's 8 FAQ rows. ?tab= still deep-links a
+ * tab (?tab=order-issues from the order flow keeps working — implements
+ * ORDER-DETAIL-CONTACT-SUPPORT).
  *
- * Wired: the Help-Center tabs switch for real (?tab= deep-links them, so
- * the order-confirmation "CONTACT SUPPORT" card can land on order issues —
- * implements ORDER-DETAIL-CONTACT-SUPPORT), the "Track logistics"
- * shortcut goes to /orders/track, and "Chat with us" plus the "Contact
- * support" shortcut go to /care/chat (the 07-28 chat mock). Everything
- * else — the other shortcuts, the FAQ rows, "Support request status" —
- * renders pixel-exact but stays inert until its target exists (route-table
- * rule; there is no support backend yet).
- *
- * These frames draw their OWN five-tab glyph nav (Home / Shop / Rose Deals /
- * Wholesale / Me, "Me" active) instead of the shared mascot bar — same
- * situation as C-1/C-2, so the screen opts out of the shared bar and draws
- * the band verbatim; the conflict stays flagged in docs/ixd/README.md.
- * "Rose Deals" has no route and stays inert.
+ * Gone from the 07-27 import, per the 07-29 frames: the five-tab glyph nav
+ * band (no nav at all now), and the "Support request status" row with its
+ * 52px shift. New: the concierge mascot art in the hero, the 返回 back art,
+ * and wired shortcuts — "Request after-sales" → /account/returns and
+ * "Account security" → /account/security join "Track logistics" →
+ * /orders/track and "Contact support" / "Chat with us" → /care/chat. The
+ * remaining shortcuts and the FAQ rows stay inert (route-table rule).
  */
 
 import { useState } from "react";
@@ -42,13 +35,20 @@ const DIM = "#7A737A";
 
 export type CareTab = "hot-topics" | "order-issues" | "promotions" | "after-sales";
 
+/** 1523:3638…3642 — labels at fixed x; the gold indicator is 52×3 and its
+ * [x, y] comes from each frame (care04 sits 1px lower — verbatim). */
 const TABS: Array<{ key: CareTab; label: string; x: number; w: number; indicator: [number, number] }> = [
-  { key: "hot-topics", label: "Hot topics", x: 22, w: 100, indicator: [44, 52] },
-  { key: "order-issues", label: "Order issues", x: 122, w: 100, indicator: [140, 62] },
-  { key: "promotions", label: "Promotions", x: 222, w: 100, indicator: [244, 72] },
-  { key: "after-sales", label: "After-sales", x: 322, w: 88, indicator: [350, 58] },
+  { key: "hot-topics", label: "Hot topics", x: 22, w: 100, indicator: [44, 557] },
+  { key: "order-issues", label: "Order issues", x: 122, w: 100, indicator: [140, 557] },
+  { key: "promotions", label: "Promotions", x: 222, w: 100, indicator: [236, 557] },
+  { key: "after-sales", label: "After-sales", x: 322, w: 88, indicator: [331, 558] },
 ];
 
+/**
+ * Per-tab FAQ rows. The pinned 07-29 snapshot briefly showed one identical
+ * list on all four frames; the live frames restored the per-tab lists the
+ * same day (verified against fresh renders), so they stay per-tab.
+ */
 const FAQS: Record<CareTab, string[]> = {
   "hot-topics": [
     "The item I received is damaged",
@@ -95,35 +95,23 @@ const FAQS: Record<CareTab, string[]> = {
 // 1108:123…138 — the eight service shortcuts (icons: Figma SVG exports).
 const SHORTCUTS: Array<{ icon: string; ink: [number, number]; label: string; href?: string }> = [
   { icon: "1108-123", ink: [20, 20], label: "Shipping\nreminder" },
-  { icon: "1108-125", ink: [24, 24], label: "Request\nafter-sales" },
+  { icon: "1108-125", ink: [24, 24], label: "Request\nafter-sales", href: "/account/returns" },
   { icon: "1108-127", ink: [18, 18], label: "Change\naddress" },
   { icon: "1108-129", ink: [15, 15], label: "Track\nlogistics", href: "/orders/track" },
   { icon: "1108-131", ink: [20, 20], label: "Invoice\nservice" },
-  { icon: "1108-133", ink: [16, 19], label: "Account\nsecurity" },
+  { icon: "1108-133", ink: [16, 19], label: "Account\nsecurity", href: "/account/security" },
   { icon: "1108-135", ink: [13, 14], label: "Contact\nsupport", href: "/care/chat" },
   { icon: "1108-137", ink: [24, 8], label: "Payment\nissue" },
 ];
 
-// 1108:184…195 — the frames' own five-tab glyph nav band.
-const NAV = [
-  { icon: "1108-185", ink: [9, 10] as [number, number], label: "Home", href: "/" },
-  { icon: "1108-187", ink: [13, 13] as [number, number], label: "Shop", href: "/shop" },
-  { icon: "1108-189", ink: [14, 14] as [number, number], label: "Rose Deals" },
-  { icon: "1108-191", ink: [12, 12] as [number, number], label: "Wholesale", href: "/business/wholesale" },
-  { icon: "1108-194", ink: [13, 13] as [number, number], label: "Me", href: "/account", active: true },
-];
 
 export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab }) {
   const [tab, setTab] = useState<CareTab>(initialTab);
-  const hot = tab === "hot-topics";
-  // Hot topics has no "Support request status" row; everything below the
-  // shortcuts sits 52px higher there (frame diff).
-  const shift = hot ? -52 : 0;
 
   return (
     <ScaleFrame height={932} background={CREAM} fontClass={notoSC.className} nav={false}>
-      <BackButton fallback="/account" src="/veloria/screens/1107-111.svg" style={abs(30, 43, 8, 16)} />
-      <div className={playfair.className} style={{ ...abs(100, 27, 230, 48), ...txt(29, 38.66, INK, "center"), fontWeight: 600, paddingTop: 5 }}>
+      <BackButton fallback="/account" src="/veloria/screens/1523-3679.png" style={abs(0, 16, 45, 48)} />
+      <div className={playfair.className} style={{ ...abs(101, 20.7, 230), ...txt(29, 38.66, INK, "center"), fontWeight: 600 }}>
         Customer Care
       </div>
 
@@ -136,7 +124,7 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
       <div style={{ ...abs(34, 136.4, 260, 52), ...txt(13, 15.6, INK), whiteSpace: "pre-line" }}>
         {"We’re here for you.\nOur support team is ready to assist."}
       </div>
-      <Glyph src="1108-116" x={312} y={92} w={76} h={64} ink={[39, 23]} />
+      <img src="/veloria/screens/1523-3681.png" alt="" width={104} height={104} style={{ ...abs(288, 86, 104, 104), display: "block" }} />
       <div style={{ ...abs(34, 182.5, 150), ...txt(12.5, 15, "#1F8533"), fontWeight: 500 }}>●&nbsp;&nbsp;Online now</div>
       <div style={{ ...abs(34, 204, 200), ...txt(10.5, 12.6, INK) }}>Average reply within a few minutes</div>
       <Link href="/care/chat" style={{ ...abs(234, 180, 164, 38), background: INK, borderRadius: 8, display: "block" }}>
@@ -170,20 +158,8 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
         );
       })}
 
-      {/* support request status — absent on Hot topics, as the frames draw it */}
-      {hot ? null : (
-        <>
-          <div style={{ ...abs(16, 478, 398, 44), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 12 }} />
-          <Glyph src="1108-140" x={28} y={482} w={38} h={36} ink={[17, 17]} />
-          <div className={playfair.className} style={{ ...abs(68, 491, 280), ...txt(14, 18.66, INK), fontWeight: 500 }}>
-            Support request status
-          </div>
-          <div style={{ ...abs(370, 485, 26, 30), ...txt(25, 30, INK, "center") }}>›</div>
-        </>
-      )}
-
       {/* help center */}
-      <div className={playfair.className} style={{ ...abs(20, 535 + shift, 200), ...txt(21, 27.99, INK), fontWeight: 600 }}>
+      <div className={playfair.className} style={{ ...abs(20, 483, 200), ...txt(21, 27.99, INK), fontWeight: 600 }}>
         Help Center
       </div>
       {TABS.map((t) => {
@@ -195,60 +171,38 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
             aria-pressed={active}
             onClick={() => setTab(t.key)}
             className={playfair.className}
-            style={{ ...abs(t.x, 567 + shift, t.w, 32), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
+            style={{ ...abs(t.x, 529, t.w, 26), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
           >
-            <span style={{ position: "absolute", left: 0, right: 0, top: 7, ...txt(13, 17.33, active ? INK : DIM, "center"), fontWeight: active ? 600 : 500 }}>
+            <span style={{ position: "absolute", left: 0, right: 0, top: 5, ...txt(13, 17.33, active ? INK : DIM, "center"), fontWeight: active ? 600 : 500 }}>
               {t.label}
             </span>
           </button>
         );
       })}
       {(() => {
-        const [ix, iw] = TABS.find((t) => t.key === tab)!.indicator;
-        return <div style={{ ...abs(ix, 598 + shift, iw, 3), background: GOLD, borderRadius: 2 }} />;
+        const [ix, iy] = TABS.find((t) => t.key === tab)!.indicator;
+        return <div style={{ ...abs(ix, iy, 52, 3), background: GOLD, borderRadius: 2 }} />;
       })()}
 
-      <div style={{ ...abs(16, 606 + shift, 398, 220), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+      <div style={{ ...abs(16, 577, 398, 242), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
       {FAQS[tab].map((question, i) => {
-        const y = 610 + shift + i * 27;
+        const y = 594 + i * 27;
         return (
           <div key={question}>
-            <div style={{ ...abs(27, y, 24, 26), ...txt(12, 26, GOLD, "center"), fontWeight: 500 }}>?</div>
-            <div style={{ ...abs(58, y + 6, 310), ...txt(10.5, 12.6, INK), overflow: "hidden", textOverflow: "ellipsis" }}>{question}</div>
-            <div style={{ ...abs(378, y + 1, 24, 26), ...txt(19, 22.8, INK, "center") }}>›</div>
-            {i < 7 ? <div style={{ ...abs(28, y + 26, 370, 1), background: SAND }} /> : null}
+            <div style={{ ...abs(31, y, 24, 26), ...txt(12, 26, GOLD, "center"), fontWeight: 500 }}>?</div>
+            <div style={{ ...abs(62, y + 6.7, 310), ...txt(10.5, 12.6, INK), overflow: "hidden", textOverflow: "ellipsis" }}>{question}</div>
+            <div style={{ ...abs(382, y, 24, 26), ...txt(19, 26, INK, "center") }}>›</div>
+            {i < 7 ? <div style={{ ...abs(32, y + 26, 370, 1), background: SAND }} /> : null}
           </div>
         );
       })}
 
       {/* trust card */}
-      <div style={{ ...abs(16, 838 + shift, 398, 54), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
-      <Glyph src="1108-182" x={26} y={844 + shift} w={34} h={36} ink={[17, 17]} />
-      <div style={{ ...abs(64, 850.4 + shift, 300, 42), ...txt(10.5, 12.6, INK), whiteSpace: "pre-line" }}>
+      <div style={{ ...abs(16, 840, 398, 54), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+      <Glyph src="1108-182" x={26} y={847} w={34} h={36} ink={[17, 17]} />
+      <div style={{ ...abs(64, 852.4, 300, 42), ...txt(10.5, 12.6, INK), whiteSpace: "pre-line" }}>
         {"We appreciate your trust in GoldRose.\nYour satisfaction means everything to us."}
       </div>
-
-      {/* the frames' own glyph nav band (shared mascot bar opted out) */}
-      <div style={{ ...abs(0, 900, 430, 32), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}` }} />
-      {NAV.map((item, i) => {
-        const x = [4, 90, 176, 262, 348][i];
-        const body = (
-          <>
-            {item.active ? <span style={{ ...abs(0, 0, 78, 32), background: "#FAEDE0", borderRadius: 16, display: "block" }} /> : null}
-            <Glyph src={item.icon} x={16} y={-1} w={46} h={18} ink={item.ink} />
-            <span style={{ position: "absolute", left: 0, top: 17.3, width: 78, ...txt(9.5, 11.4, INK, "center"), display: "block" }}>{item.label}</span>
-          </>
-        );
-        return item.href ? (
-          <Link key={item.label} href={item.href} style={{ ...abs(x, 900, 78, 32), display: "block" }}>
-            {body}
-          </Link>
-        ) : (
-          <div key={item.label} style={abs(x, 900, 78, 32)}>
-            {body}
-          </div>
-        );
-      })}
     </ScaleFrame>
   );
 }

@@ -1,626 +1,149 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * C-1 · Order Tracking — pixel-exact import of Figma frame 765:112 (430×1780):
- * inline VELORIA header, route map, tracking-details card, six-step delivery
- * timeline, latest-update and help panels, and the design's own bottom nav.
- * Every order number / date / carrier is the mock's placeholder text — there
- * is no lookup backend — so only the back chevron (→ /account) and the nav
- * Shop tab (→ /shop) are live; every other CTA is a static div.
- * NOTE: this frame uses a newer palette (#FFFBF6 / #09442E / #D18005) than the
- * rest of the storefront and its own header, built verbatim as designed.
+ * Order tracking — pixel-exact implementation of "shoppage-Product
+ * Details-Checkout-Order Details_track order" (1541:254, 07-29 delivery;
+ * byte-identical twin "mepage-my orders-track order" 1523:775). The
+ * redesigned C-1: 430×1519, the vector route map replaces the old artwork,
+ * and the frame's own glyph tab bar is gone. The whole timeline is still
+ * the design's placeholder order (#VL20250821, the UPS number, the dates) —
+ * there is no tracking backend.
+ *
+ * The return flow ("…track order_return" 1542:628 / loose twin 1523:1266)
+ * is a dim-overlay + bottom-sheet state OVER this page — implemented as
+ * /orders/track?return=1 (TrackReturnSheet). No element on the track frame
+ * triggers it and the file carries no prototype links, so the state ships
+ * unlinked (DQ raised for the trigger).
+ *
+ * ⚠️ Brand substitution: the frame's header wordmark image reads "ELDREVE"
+ * (placeholder brand, DQ) — the live page keeps GoldRose in the flow's
+ * Playfair treatment at the image's box.
  */
 
 import Link from "next/link";
-import { abs } from "@/lib/figma-layout";
+import { BackButton } from "@/components/BackButton";
+import { TrackReturnSheet } from "@/components/screens/TrackReturnSheet";
+import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-// Glyph/vector renders (manifest2.json). Figma crops each export to its ink,
-// so every one is placed at its own render-bounds origin at natural size.
-const ART = "/veloria/screens/";
+const A = "/veloria/screens";
 
-// 768:113 / 768:122 / 768:131 / 768:140 / 768:149 / 768:158 — the six timeline
-// rows are a perfect 94px pitch inside the card, so they differ only in copy
-// and marker state. Row-local offsets: marker (3,0), rail (14,24),
-// title (40,1), meta (40,20), body (40,35).
+const GREEN = "#09442E"; // flow brand: headline, done markers, values
+const INK = "#29211F";
+const GOLD = "#D18005"; // current marker, section glyphs
+const GREY = "#6B6E75"; // small-caps labels, timestamps
+const CANVAS = "#FFFBF6";
+const CARD = "#FFFFFF";
+const SAND = "#E0D6C9"; // card hairlines
+const PENDING = "#C7C9C9"; // pending marker + rail
+const UPDATE_BG = "#FAF5ED"; // latest-update panel
+
+/** Ink-cropped SVG export of a symbol TEXT node, at the node box. */
+function Glyph({ src, x, y, w, h }: { src: string; x: number; y: number; w: number; h: number }) {
+  return (
+    <img
+      src={src}
+      alt=""
+      width={w}
+      height={h}
+      style={{ ...abs(x, y, w, h), display: "block", objectFit: "none", objectPosition: "left center" }}
+    />
+  );
+}
+
+/**
+ * 1541:298–350 · the six timeline entries ride a uniform 94px pitch from
+ * y752. done = green ✓ marker + green rail; current = gold • marker + grey
+ * rail; pending = grey empty marker, no rail (last row).
+ */
 const TIMELINE = [
-  {
-    state: "done",
-    title: "Order Confirmed",
-    titleW: 105,
-    meta: "May 15 · 9:41 AM",
-    metaW: 83,
-    body: "We received your order.",
-  },
-  {
-    state: "done",
-    title: "Preparing Your Gift",
-    titleW: 118,
-    meta: "May 15 · 2:10 PM",
-    metaW: 83,
-    body: "Your rose entered our studio.",
-  },
-  {
-    state: "done",
-    title: "Quality Check & Packaging",
-    titleW: 165,
-    meta: "May 16 · 8:30 AM",
-    metaW: 83,
-    body: "Inspection complete and carefully packed.",
-  },
-  {
-    state: "done",
-    title: "Shipped",
-    titleW: 52,
-    meta: "May 16 · 8:46 AM",
-    metaW: 83,
-    body: "Your parcel was handed to UPS.",
-  },
-  {
-    state: "current",
-    title: "In Transit",
-    titleW: 58,
-    meta: "Estimated May 18–23",
-    metaW: 98,
-    body: "Traveling to the next UPS facility.",
-  },
-  {
-    state: "pending",
-    title: "Delivered",
-    titleW: 60,
-    meta: "Estimated May 18–23",
-    metaW: 98,
-    body: "The gift will be delivered to the recipient.",
-  },
+  { title: "Order Confirmed", time: "May 15 · 9:41 AM", copy: "We received your order.", state: "done" },
+  { title: "Preparing Your Gift", time: "May 15 · 2:10 PM", copy: "Your rose entered our studio.", state: "done" },
+  { title: "Quality Check & Packaging", time: "May 16 · 8:30 AM", copy: "Inspection complete and carefully packed.", state: "done" },
+  { title: "Shipped", time: "May 16 · 8:46 AM", copy: "Your parcel was handed to UPS.", state: "done" },
+  { title: "In Transit", time: "Estimated May 18–23", copy: "Traveling to the next UPS facility.", state: "current" },
+  { title: "Delivered", time: "Estimated May 18–23", copy: "The gift will be delivered to the recipient.", state: "pending" },
 ] as const;
 
-const MARKER_FILL = { done: "#09442E", current: "#D18005", pending: "#C7C9C9" };
-
-// 768:177 / 768:180 / 768:183 / 768:186 — nav tabs at the design's fractional
-// x pitch (90×58 each). icon/label offsets are relative to each tab.
-const NAV = [
-  {
-    label: "Home",
-    x: 0,
-    href: null,
-    color: "#29211F",
-    icon: { src: `${ART}768-178.svg`, x: 38.5, y: 16.2, w: 13, h: 15 },
-    text: { x: 32, w: 26 },
-  },
-  {
-    label: "Shop",
-    x: 102.667,
-    href: "/shop",
-    color: "#29211F",
-    icon: { src: `${ART}768-181.svg`, x: 36.2, y: 14.3, w: 18, h: 18 },
-    text: { x: 33.5, w: 23 },
-  },
-  {
-    label: "Personalize",
-    x: 205.333,
-    href: null,
-    color: "#29211F",
-    icon: { src: `${ART}768-184.svg`, x: 35.32, y: 13.62, w: 20, h: 19 },
-    text: { x: 20, w: 50 },
-  },
-  {
-    label: "Help",
-    x: 308,
-    href: null,
-    color: "#D18005",
-    icon: { src: `${ART}768-187.svg`, x: 36, y: 13.9, w: 18, h: 18 },
-    text: { x: 34.5, w: 21 },
-  },
+/** 1541:277/283/289 · the tracking-details rows (glyph boxes vary per row). */
+const DETAILS = [
+  { glyph: "1541-278", gx: 32, gy: 502, gw: 22, label: "ORDER NUMBER", lx: 64, ly: 489, value: "#VL20250821", vy: 502 },
+  { glyph: "1541-284", gx: 32, gy: 569, gw: 17, label: "TRACKING NUMBER", lx: 59, ly: 556, value: "1Z84W3E60390566070", vy: 569 },
+  { glyph: "1541-290", gx: 32, gy: 636, gw: 22, label: "CARRIER", lx: 64, ly: 623, value: "UPS", vy: 636 },
 ] as const;
 
-export function TrackOrderScreen() {
+export function TrackOrderScreen({ returnOpen = false }: { returnOpen?: boolean }) {
   return (
     <>
-      {/* 765:115 and the four section bands (765:116–765:119) are transparent
-          groupings over the #FFFBF6 stage, so children sit at frame coords. */}
-
-      {/* 766:114 · VELORIA Header (this frame's own header, not site chrome) */}
-      <div style={{ ...abs(16, 8, 398, 48), overflow: "hidden" }}>
-        {/* 766:115 back chevron — the glyph's ink is 6×13 inside its 10×36 box */}
-        <Link href="/account" aria-label="Back to my account" style={{ ...abs(0, 6, 10, 36), display: "block" }}>
-          <img
-            src={`${ART}766-115.svg`}
-            alt=""
-            width={6}
-            height={13}
-            style={{ ...abs(1.56, 15.12, 6, 13), display: "block" }}
-          />
-        </Link>
-
-        {/* 766:116 wordmark — 250px box centred on 205.5, not on the frame */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(64.5, 5, 250),
-            fontSize: 27,
-            lineHeight: "35.99px",
-            fontWeight: 600,
-            color: "#09442E",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          VELORIA
-        </div>
-
-        {/* 766:117 bag glyph with its item count (static) */}
-        <img
-          src={`${ART}766-117.svg`}
-          alt="Bag, 1 item"
-          width={25}
-          height={19}
-          style={{ ...abs(370.2, 14.48, 25, 19), display: "block" }}
-        />
+      {/* ---------- 01 · Header + Route Map ---------- */}
+      <BackButton fallback="/account" src={`${A}/1541-258.png`} style={abs(16, 8, 40, 42)} />
+      {/* Wordmark box (134,1.6 152×54.8) — GoldRose for the frame's
+          "ELDREVE" placeholder image, in the flow's Playfair treatment. */}
+      <div className={playfair.className} style={{ ...abs(134, 1.6, 152, 54.8), ...txt(26, 54.8, GREEN, "center"), fontWeight: 600 }}>
+        GoldRose
       </div>
-
-      {/* 766:118 page title */}
-      <div
-        className={playfair.className}
-        style={{
-          ...abs(16, 64, 398),
-          fontSize: 29,
-          lineHeight: "38.66px",
-          fontWeight: 600,
-          color: "#09442E",
-          textAlign: "center",
-          whiteSpace: "nowrap",
-        }}
-      >
+      <h1 className={playfair.className} style={{ ...abs(16, 58, 398), ...txt(29, 38.7, GREEN, "center"), fontWeight: 600, margin: 0 }}>
         Track Your Order
-      </div>
+      </h1>
+      <div style={{ ...abs(16, 108, 398), ...txt(13, 15.6, INK, "center"), fontWeight: 500 }}>Your gift is on the way</div>
+      {/* 1541:262 · Editable Route Map — the whole vector panel (path, state
+          labels, origin/destination markers) served as one scale-2 render. */}
+      <img src={`${A}/1541-262.png`} alt="" width={398} height={324} style={{ ...abs(16, 140, 398, 324), borderRadius: 12, display: "block" }} />
 
-      {/* 766:119 subtitle */}
-      <div
-        className={notoSC.className}
-        style={{
-          ...abs(16, 114, 398),
-          fontSize: 13,
-          lineHeight: "15.6px",
-          fontWeight: 500,
-          color: "#29211F",
-          textAlign: "center",
-          whiteSpace: "nowrap",
-        }}
-      >
-        Your gift is on the way
-      </div>
-
-      {/* 766:120 route map (766:121 'Route Path Vector' shares this exact box,
-          so it is flattened away). The four VECTOR nodes are design art served
-          as their Figma renders; a CENTER stroke makes each export
-          strokeWeight wider than its node, hence the −½w offsets. */}
-      <div
-        style={{
-          ...abs(16, 146, 398, 324),
-          background: "#E5F5F7",
-          boxShadow: "inset 0 0 0 1px #D6E0E0",
-          borderRadius: 14,
-          overflow: "hidden",
-        }}
-      >
-        <img
-          src={`${ART}766-122.svg`}
-          alt=""
-          width={399}
-          height={219}
-          // 766:122 — 399px wide inside a 398px box: Tailwind preflight would
-          // squash it to 100%, and the map's own clip does the trimming.
-          style={{ ...abs(-0.5, 11.5, 399, 219), display: "block", maxWidth: "none" }}
-        />
-        <img
-          src={`${ART}766-123.svg`}
-          alt=""
-          width={294}
-          height={137}
-          style={{ ...abs(63.5, 96.5, 294, 137), display: "block" }}
-        />
-        <img
-          src={`${ART}766-124.svg`}
-          alt=""
-          width={21}
-          height={21}
-          style={{ ...abs(54.5, 221.5, 21, 21), display: "block" }}
-        />
-        <img
-          src={`${ART}766-125.svg`}
-          alt=""
-          width={21}
-          height={21}
-          style={{ ...abs(345.5, 87.5, 21, 21), display: "block" }}
-        />
-
-        {/* 766:126 / 766:127 / 766:128 state labels */}
-        {[
-          { t: "CALIFORNIA", x: 28, y: 258, w: 47 },
-          { t: "ILLINOIS", x: 172, y: 210, w: 34 },
-          { t: "NEW YORK", x: 306, y: 58, w: 41 },
-        ].map((l) => (
-          <div
-            key={l.t}
-            className={notoSC.className}
-            style={{
-              ...abs(l.x, l.y, l.w),
-              fontSize: 8,
-              lineHeight: "9.6px",
-              fontWeight: 500,
-              color: "#737A85",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {l.t}
-          </div>
-        ))}
-
-        {/* 766:130 origin marker + 766:129 glyph */}
-        <div style={{ ...abs(39, 188, 52, 52), background: "#D18005", borderRadius: 26, overflow: "hidden" }}>
-          <img
-            src={`${ART}766-129.svg`}
-            alt=""
-            width={26}
-            height={11}
-            style={{ ...abs(14.12, 20.124, 26, 11), display: "block" }}
-          />
+      {/* ---------- 02 · Tracking Details ---------- */}
+      <div style={{ ...abs(16, 474, 398, 220), background: CARD, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+      {DETAILS.map((row, i) => (
+        <div key={row.label}>
+          <Glyph src={`${A}/${row.glyph}.svg`} x={row.gx} y={row.gy} w={row.gw} h={26} />
+          <div style={{ ...abs(row.lx, row.ly, 300), ...txt(9, 10.8, GREY), fontWeight: 500 }}>{row.label}</div>
+          <div style={{ ...abs(row.lx, row.vy, 300), ...txt(13, 15.6, INK), fontWeight: 500 }}>{row.value}</div>
+          {i < 2 ? <div style={{ ...abs(32, i === 0 ? 548 : 615, 366, 1), background: SAND }} /> : null}
         </div>
+      ))}
+      {/* VIEW ON UPS stays inert — no real tracking number to hand over. */}
+      <div style={{ ...abs(300, 643, 78), ...txt(10, 12, GOLD), fontWeight: 500 }}>{"VIEW ON UPS  →"}</div>
 
-        {/* 766:132 destination marker + 766:131 glyph */}
-        <div style={{ ...abs(330, 50, 52, 52), background: "#09442E", borderRadius: 26, overflow: "hidden" }}>
-          <img
-            src={`${ART}766-131.svg`}
-            alt=""
-            width={23}
-            height={23}
-            style={{ ...abs(14.56, 13.94, 23, 23), display: "block" }}
-          />
-        </div>
-      </div>
-
-      {/* 766:133 tracking details card. The three rows (766:134 / 766:140 /
-          766:146) and their inner copy frames are transparent groupings,
-          flattened into card coordinates. All values are the mock's data. */}
-      <div
-        style={{
-          ...abs(16, 530, 398, 220),
-          background: "#FFFFFF",
-          boxShadow: "inset 0 0 0 1px #E0D6C9, 0 4px 14px rgba(41,33,31,0.08)",
-          borderRadius: 14,
-          overflow: "hidden",
-        }}
-      >
-        {/* 766:135 / 766:141 / 766:147 row glyphs (each at its own ink box) */}
-        <img
-          src={`${ART}766-135.svg`}
-          alt=""
-          width={18}
-          height={18}
-          style={{ ...abs(18.2, 32.84, 18, 18), display: "block" }}
-        />
-        <img
-          src={`${ART}766-141.svg`}
-          alt=""
-          width={17}
-          height={16}
-          style={{ ...abs(16.242, 101.204, 17, 16), display: "block" }}
-        />
-        <img
-          src={`${ART}766-147.svg`}
-          alt=""
-          width={21}
-          height={9}
-          style={{ ...abs(16.88, 171.526, 21, 9), display: "block" }}
-        />
-
-        {/* 766:137/138, 766:143/144, 766:149/150 — label + value pairs. The
-            middle row starts at x=43, not 48, exactly as the design does. */}
-        {[
-          { label: "ORDER NUMBER", labelW: 71, value: "#VL20250821", x: 48, y: 15, valueW: 300 },
-          { label: "TRACKING NUMBER", labelW: 85, value: "1Z84W3E60390566070", x: 43, y: 82, valueW: 300 },
-          { label: "CARRIER", labelW: 38, value: "UPS", x: 48, y: 149, valueW: 226 },
-        ].map((row) => (
-          <div key={row.label}>
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(row.x, row.y, row.labelW),
-                fontSize: 9,
-                lineHeight: "10.8px",
-                fontWeight: 500,
-                color: "#6B6E75",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {row.label}
-            </div>
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(row.x, row.y + 13, row.valueW),
-                fontSize: 13,
-                lineHeight: "15.6px",
-                fontWeight: 500,
-                color: "#29211F",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {row.value}
-            </div>
-          </div>
-        ))}
-
-        {/* 766:139 / 766:145 hairline separators */}
-        <div style={{ ...abs(16, 74, 366, 1), background: "#E0D6C9" }} />
-        <div style={{ ...abs(16, 141, 366, 1), background: "#E0D6C9" }} />
-
-        {/* 766:151 'VIEW ON UPS →' — static, no carrier deep link yet */}
-        <img
-          src={`${ART}766-151.svg`}
-          alt="View on UPS"
-          width={78}
-          height={8}
-          style={{ ...abs(283.98, 171.5, 78, 8), display: "block" }}
-        />
-      </div>
-
-      {/* 768:111 delivery-timeline card */}
-      <div
-        style={{
-          ...abs(16, 772, 398, 666),
-          background: "#FFFFFF",
-          boxShadow: "inset 0 0 0 1px #E0D6C9",
-          borderRadius: 14,
-          overflow: "hidden",
-        }}
-      >
-        {/* 768:112 */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(16, 16, 169),
-            fontSize: 21,
-            lineHeight: "27.99px",
-            fontWeight: 500,
-            color: "#09442E",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Delivery Timeline
-        </div>
-
-        {TIMELINE.map((step, i) => (
-          <div key={step.title} style={{ ...abs(16, 46 + 94 * i, 366, 92), overflow: "hidden" }}>
-            {/* Rail marker (768:115 …) */}
-            <div
-              style={{
-                ...abs(3, 0, 24, 24),
-                background: MARKER_FILL[step.state],
-                borderRadius: 12,
-                overflow: "hidden",
-              }}
-            />
-            {step.state === "done" ? (
-              <img
-                src={`${ART}768-116.svg`}
-                alt=""
-                width={8}
-                height={9}
-                style={{ ...abs(10.033, 5.519, 8, 9), display: "block" }}
-              />
-            ) : null}
+      {/* ---------- 03 · Delivery Timeline ---------- */}
+      <div style={{ ...abs(16, 706, 398, 588), background: CARD, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+      <div className={playfair.className} style={{ ...abs(32, 722, 169), ...txt(21, 28, GREEN), fontWeight: 500 }}>Delivery Timeline</div>
+      {TIMELINE.map((step, i) => {
+        const y = 752 + i * 94;
+        const markerBg = step.state === "done" ? GREEN : step.state === "current" ? GOLD : PENDING;
+        return (
+          <div key={step.title}>
+            <div style={{ ...abs(35, y, 24, 24), background: markerBg, borderRadius: 12 }} />
+            {step.state === "done" ? <Glyph src={`${A}/1541-301.svg`} x={42} y={y + 3} w={8} h={13} /> : null}
             {step.state === "current" ? (
-              <img
-                src={`${ART}768-152.svg`}
-                alt=""
-                width={3}
-                height={3}
-                style={{ ...abs(14.224, 8.544, 3, 3), display: "block" }}
-              />
+              <div style={{ ...abs(42, y + 3, 11), ...txt(11, 13.2, "#FFFFFF"), fontWeight: 500 }}>•</div>
             ) : null}
-            {/* The last row's marker holds an empty TEXT node (768:161, width
-                0), so it renders no glyph — and it has no rail below it. */}
-            {step.state === "pending" ? null : (
-              <div
-                style={{
-                  ...abs(14, 24, 2, 68),
-                  background: step.state === "current" ? "#C7C9C9" : "#09442E",
-                }}
-              />
-            )}
-
-            {/* 768:119/120/121 … timeline copy */}
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(40, 1, step.titleW),
-                fontSize: 13,
-                lineHeight: "15.6px",
-                fontWeight: 500,
-                color: step.state === "pending" ? "#29211F" : "#09442E",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {step.title}
-            </div>
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(40, 20, step.metaW),
-                fontSize: 10,
-                lineHeight: "12px",
-                fontWeight: 400,
-                color: "#6B6E75",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {step.meta}
-            </div>
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(40, 35, 326),
-                fontSize: 10,
-                lineHeight: "12px",
-                fontWeight: 400,
-                color: "#29211F",
-              }}
-            >
-              {step.body}
-            </div>
+            {i < TIMELINE.length - 1 ? (
+              <div style={{ ...abs(46, y + 24, 2, 68), background: step.state === "done" ? GREEN : PENDING }} />
+            ) : null}
+            <div style={{ ...abs(72, y + 1, 326), ...txt(13, 15.6, step.state === "pending" ? INK : GREEN), fontWeight: 500 }}>{step.title}</div>
+            <div style={{ ...abs(72, y + 20, 326), ...txt(10, 12, GREY) }}>{step.time}</div>
+            <div style={{ ...abs(72, y + 35, 326), ...txt(10, 12, INK) }}>{step.copy}</div>
           </div>
-        ))}
+        );
+      })}
+
+      {/* ---------- 04 · Latest Update + Help ---------- */}
+      <div style={{ ...abs(16, 1314, 398, 102), background: UPDATE_BG, borderRadius: 12 }} />
+      <div style={{ ...abs(30, 1326, 113), ...txt(9, 10.8, GREEN), fontWeight: 500 }}>LATEST SHIPPING UPDATE</div>
+      <div className={playfair.className} style={{ ...abs(30, 1341, 125), ...txt(17, 22.7, INK), fontWeight: 500 }}>May 16 · 8:46 AM</div>
+      <div style={{ ...abs(30, 1368, 370), ...txt(10, 12, INK), whiteSpace: "normal" }}>
+        Your parcel left the UPS facility in Chicago and is traveling to the next stop.
       </div>
 
-      {/* 768:166 latest shipping update */}
-      <div
-        style={{
-          ...abs(16, 1462, 398, 102),
-          background: "#FAF5ED",
-          boxShadow: "inset 0 0 0 1px #E0D6C9",
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(14, 12, 113),
-            fontSize: 9,
-            lineHeight: "10.8px",
-            fontWeight: 500,
-            color: "#09442E",
-            whiteSpace: "nowrap",
-          }}
-        >
-          LATEST SHIPPING UPDATE
-        </div>
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(14, 27, 125),
-            fontSize: 17,
-            lineHeight: "22.66px",
-            fontWeight: 500,
-            color: "#29211F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          May 16 · 8:46 AM
-        </div>
-        {/* 768:169 — wraps inside its 370px box, as the design does */}
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(14, 54, 370),
-            fontSize: 10,
-            lineHeight: "12px",
-            fontWeight: 400,
-            color: "#29211F",
-          }}
-        >
-          Your parcel left the UPS facility in Chicago and is traveling to the next stop.
-        </div>
-      </div>
+      {/* implements ORDER-DETAIL-CONTACT-SUPPORT — whole card lands in chat. */}
+      <div style={{ ...abs(16, 1426, 398, 78), background: CARD, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 12 }} />
+      <Glyph src={`${A}/1541-357.svg`} x={30} y={1449.5} w={26} h={31} />
+      <div className={playfair.className} style={{ ...abs(68, 1439, 300), ...txt(17, 22.7, INK), fontWeight: 500 }}>Need help?</div>
+      <div style={{ ...abs(68, 1464, 300), ...txt(10, 12, INK) }}>Our customer care team is always here.</div>
+      <div style={{ ...abs(68, 1478, 300), ...txt(9, 10.8, GREEN), fontWeight: 500 }}>{"CONTACT SUPPORT  →"}</div>
+      <Link href="/care/chat" aria-label="Contact support" style={{ ...abs(16, 1426, 398, 78), display: "block" }} />
 
-      {/* 768:170 need help (768:172 'Help Copy' flattened) */}
-      <div
-        style={{
-          ...abs(16, 1574, 398, 78),
-          background: "#FFFFFF",
-          boxShadow: "inset 0 0 0 1px #E0D6C9",
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        <img
-          src={`${ART}768-171.svg`}
-          alt=""
-          width={24}
-          height={24}
-          style={{ ...abs(15.3, 27.92, 24, 24), display: "block" }}
-        />
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(52, 13, 85),
-            fontSize: 17,
-            lineHeight: "22.66px",
-            fontWeight: 500,
-            color: "#29211F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Need help?
-        </div>
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(52, 38, 182),
-            fontSize: 10,
-            lineHeight: "12px",
-            fontWeight: 400,
-            color: "#29211F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Our customer care team is always here.
-        </div>
-        {/* 768:175 'CONTACT SUPPORT →' — static per the design brief */}
-        <img
-          src={`${ART}768-175.svg`}
-          alt="Contact support"
-          width={97}
-          height={7}
-          style={{ ...abs(52.504, 54.25, 97, 7), display: "block" }}
-        />
-      </div>
-
-      {/* 768:176 the frame's own bottom navigation (the route opts out of the
-          shared site tab bar). Only Shop has a destination today. */}
-      <div style={{ ...abs(16, 1662, 398, 88), overflow: "hidden" }}>
-        {NAV.map((tab) => {
-          const { href } = tab;
-          const inner = (
-            <>
-              <img
-                src={tab.icon.src}
-                alt=""
-                width={tab.icon.w}
-                height={tab.icon.h}
-                style={{ ...abs(tab.icon.x, tab.icon.y, tab.icon.w, tab.icon.h), display: "block" }}
-              />
-              <div
-                className={notoSC.className}
-                style={{
-                  ...abs(tab.text.x, 36.5, tab.text.w),
-                  fontSize: 9,
-                  lineHeight: "10.8px",
-                  fontWeight: 500,
-                  color: tab.color,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {tab.label}
-              </div>
-            </>
-          );
-          return href ? (
-            <Link
-              key={tab.label}
-              href={href}
-              style={{ ...abs(tab.x, 15, 90, 58), display: "block", overflow: "hidden" }}
-            >
-              {inner}
-            </Link>
-          ) : (
-            <div key={tab.label} style={{ ...abs(tab.x, 15, 90, 58), overflow: "hidden" }}>
-              {inner}
-            </div>
-          );
-        })}
-      </div>
+      {returnOpen ? <TrackReturnSheet /> : null}
+      <span className={notoSC.className} style={{ display: "none" }} />
     </>
   );
 }

@@ -1,14 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * B-4 · Wholesale Application — Figma frame 561:90 (430×1954): application
- * hero, three "Shape Your Partnership" direction cards, and the eight-field
- * wholesale enquiry form. Coordinates/colours are verbatim from the Figma REST
- * data. The eight text fields are real inputs, but there is no backend: the
- * SUBMIT CTA is a non-clickable placeholder and the channel/volume chips are
- * static (their selected states are the design's). The frame's own bottom nav
- * (758:149) is dropped — the route wraps this fragment in ScaleFrame + the
- * shared fixed BottomNav.
+ * B-4 · Wholesale Application — Figma frame 1523:672 (07-29 restyle,
+ * 430×1954): application hero, three "Shape Your Partnership" direction
+ * cards, the eight-field wholesale enquiry form and — new in the 07-29
+ * frames — the mascot bottom-nav band drawn in-frame. Coordinates/colours are
+ * verbatim from the Figma REST data. The eight text fields are real inputs,
+ * but there is no backend: the SUBMIT CTA is a non-clickable placeholder and
+ * the channel/volume chips are static (their selected states are the
+ * design's). Fragment only — the route supplies ScaleFrame (nav={false}).
  */
 
 import Link from "next/link";
@@ -18,7 +18,7 @@ import { notoSC, playfair } from "@/lib/fonts";
 const A = "/veloria/screens";
 
 /** HTML collapses the design's double spaces; nbsp + space keeps them. */
-const NB = " ";
+const NB = " ";
 
 // Shared field-box chrome: white card, 1px inside hairline, r=10.
 const FIELD_BOX: React.CSSProperties = {
@@ -37,7 +37,7 @@ const FIELD_LABEL: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-// Shared inset-input chrome (757:135 etc.): cream well, r=7, clipped.
+// Shared inset-input chrome (1523:705 etc.): cream well, r=7, clipped.
 const INPUT_WELL: React.CSSProperties = {
   background: "#FFF6EC",
   borderRadius: 7,
@@ -58,13 +58,13 @@ const INPUT_TEXT: React.CSSProperties = {
   color: "#3B2F2F",
 };
 
-// 757:114 / 757:119 / 757:124 — direction cards. Geometry is identical bar the
-// side the 154×106 photo sits on; `top` is relative to the 02 section band.
+// 1523:683 / 1523:688 / 1523:693 — direction cards. Geometry is identical bar
+// the side the 154×106 photo sits on; `top` is relative to the 02 section band.
 const CARDS = [
   {
     top: 48,
     bg: "rgba(247, 218, 225, 0.62)", // #F7DAE1 at 62%
-    img: "757-115",
+    img: "1523-684",
     alt: "Blue preserved rose with gold-trimmed petals",
     imgX: 8,
     textX: 174,
@@ -74,7 +74,7 @@ const CARDS = [
   {
     top: 180,
     bg: "#FFF6EC",
-    img: "757-120",
+    img: "1523-692",
     alt: "Single 24K gold-dipped rose against bokeh lights",
     imgX: 236,
     textX: 8,
@@ -84,7 +84,7 @@ const CARDS = [
   {
     top: 312,
     bg: "rgba(247, 218, 225, 0.62)",
-    img: "757-125",
+    img: "1523-694",
     alt: "Boxed red preserved rose with its authenticity certificate",
     imgX: 8,
     textX: 174,
@@ -93,12 +93,15 @@ const CARDS = [
   },
 ] as const;
 
-// 757:131 / 757:137 / 757:143 / 757:149 — Part A field rows (398×64). `top` is
-// relative to the 03 section band; glyph boxes keep each TEXT node's own size.
+// 1523:701 / 1523:707 / 1523:713 / 1523:719 — Part A field rows (398×64).
+// `top` is relative to the 03 section band; glyph boxes keep each TEXT node's
+// own size. 1523:709's ✉ is an emoji fallback whose SVG export is a solid
+// box, so it ships as a frame-render PNG crop of the node box instead
+// (raster: scale-to-fit, not the SVGs' ink-crop objectFit "none").
 const ROWS = [
   {
     top: 84,
-    glyph: { src: "757-133", alt: "○", y: 21, w: 18, h: 22 },
+    glyph: { src: "1523-703.svg", alt: "○", y: 21, w: 18, h: 22, raster: false },
     label: { x: 36, text: `01${NB} Contact Name` },
     input: {
       placeholder: "Your full name",
@@ -110,7 +113,7 @@ const ROWS = [
   },
   {
     top: 158,
-    glyph: { src: "757-139", alt: "✉", y: 23, w: 18, h: 18 },
+    glyph: { src: "1523-709.png", alt: "✉", y: 23, w: 18, h: 18, raster: true },
     label: { x: 36, text: `02${NB} Work Email` },
     input: {
       placeholder: "name@company.com",
@@ -122,7 +125,7 @@ const ROWS = [
   },
   {
     top: 232,
-    glyph: { src: "757-145", alt: "⌕", y: 21, w: 12, h: 22 },
+    glyph: { src: "1523-715.svg", alt: "⌕", y: 21, w: 12, h: 22, raster: false },
     label: { x: 30, text: `03${NB} Phone / WhatsApp` },
     input: {
       placeholder: "Country code + number",
@@ -134,7 +137,7 @@ const ROWS = [
   },
   {
     top: 306,
-    glyph: { src: "757-151", alt: "▥", y: 21, w: 18, h: 22 },
+    glyph: { src: "1523-721.svg", alt: "▥", y: 21, w: 18, h: 22, raster: false },
     label: { x: 36, text: `04${NB} Company / Store` },
     input: {
       placeholder: "Optional business name",
@@ -149,7 +152,7 @@ const ROWS = [
 /** A selection chip: box x/w relative to the field row, text tx/tw to the chip. */
 type Chip = { x: number; w: number; dark: boolean; label: string; tx: number; tw: number };
 
-// 758:110–758:119 — sales-channel chips. `dark` is the design's own selected
+// 1523:729–1523:738 — sales-channel chips. `dark` is the design's own selected
 // state, kept static (nothing here is interactive).
 const CHANNEL_CHIPS: Chip[] = [
   { x: 10, w: 70, dark: true, label: "Gift Shop", tx: 17, tw: 36 },
@@ -159,7 +162,7 @@ const CHANNEL_CHIPS: Chip[] = [
   { x: 320, w: 68, dark: false, label: "Distributor", tx: 13, tw: 42 },
 ];
 
-// 758:123–758:132 — first-order-volume chips.
+// 1523:742–1523:751 — first-order-volume chips.
 const VOLUME_CHIPS: Chip[] = [
   { x: 10, w: 60, dark: false, label: "10–49", tx: 18.5, tw: 23 },
   { x: 75, w: 64, dark: true, label: "50–199", tx: 18, tw: 28 },
@@ -167,6 +170,20 @@ const VOLUME_CHIPS: Chip[] = [
   { x: 219, w: 58, dark: false, label: "500+", tx: 19.5, tw: 19 },
   { x: 282, w: 68, dark: false, label: "Not sure", tx: 17.5, tw: 33 },
 ];
+
+// Both CTA arrows (I1523:762;1523:389 / I1523:763;1523:392) export
+// byte-identical; one file serves both.
+const ARROW = `${A}/I1523-762_1523-389.svg`;
+
+// 1523:766…1523:773 — nav tabs: mascot art (labels baked in, Wholesale ships
+// its active state) on the shared 70-wide hit grid. Wholesale has no page of
+// its own, so — like the shared BottomNav — its tab stays inert.
+const NAV_TABS = [
+  { x: 18, src: "1523-767", label: "Home", href: "/" },
+  { x: 126, src: "1523-769", label: "Shop", href: "/shop" },
+  { x: 234, src: "1523-771", label: "Wholesale", href: null },
+  { x: 342, src: "1523-773", label: "Me", href: "/account" },
+] as const;
 
 /** One static selection chip (r=16), positioned inside its field row. */
 function ChipRow({ chips }: { chips: Chip[] }) {
@@ -209,24 +226,34 @@ export function WholesaleScreen() {
           be set inline, so one scoped rule carries it. */}
       <style>{`.b4-field::placeholder { color: #94857A; opacity: 1; }`}</style>
 
-      {/* ---- 756:148 · 01 / Application Hero ---- */}
+      {/* ---- 1523:674 · 01 / Application Hero ---- */}
       <div style={{ ...abs(0, 0, 430, 444), background: "#FFF6EC", overflow: "hidden" }}>
-        {/* 757:107 brand header — one Figma render carrying ‹ and ❀ GOLDROSE */}
-        <img
-          src={`${A}/756-153.svg`}
-          alt="GoldRose"
-          width={398}
-          height={44}
-          style={{ ...abs(16, 14, 398, 44), display: "block" }}
-        />
-        {/* 757:108 ‹ — the back arrow's own box, overlaid on that render */}
-        <Link href="/" aria-label="Back to home" style={{ ...abs(16, 18, 10, 36), display: "block" }} />
+        {/* 1523:675 Brand Navigation — clips, and the wordmark (1523:677) sits
+            4.5px above the band's top edge, cropped by design. */}
+        <div style={{ ...abs(16, 14, 398, 42), overflow: "hidden" }}>
+          <img
+            src={`${A}/1523-676.png`}
+            alt=""
+            width={40}
+            height={42}
+            style={{ ...abs(0, 0, 40, 42), display: "block", objectFit: "cover" }}
+          />
+          <img
+            src={`${A}/1523-677.png`}
+            alt="GoldRose"
+            width={140}
+            height={51}
+            style={{ ...abs(131, -4.5, 140, 51), display: "block", objectFit: "cover" }}
+          />
+        </div>
+        {/* 1523:676 back button — transparent hit area over its art */}
+        <Link href="/" aria-label="Back to home" style={{ ...abs(16, 14, 40, 42), display: "block" }} />
 
-        {/* 757:110 title */}
+        {/* 1523:678 title */}
         <div
           className={playfair.className}
           style={{
-            ...abs(16, 68, 398),
+            ...abs(16, 66, 398),
             fontSize: 30,
             lineHeight: "34px",
             fontWeight: 600,
@@ -237,11 +264,11 @@ export function WholesaleScreen() {
           {"Wholesale Partnership\nApplication"}
         </div>
 
-        {/* 757:111 intro copy — wraps inside its 398px box */}
+        {/* 1523:679 intro copy — wraps inside its 398px box */}
         <div
           className={notoSC.className}
           style={{
-            ...abs(16, 154, 398),
+            ...abs(16, 152, 398),
             fontSize: 12,
             lineHeight: "18px",
             fontWeight: 400,
@@ -252,25 +279,25 @@ export function WholesaleScreen() {
           proposal.
         </div>
 
-        {/* 757:112 hero image */}
+        {/* 1523:680 hero image */}
         <img
-          src={`${A}/757-112.png`}
-          alt="Blush velvet keepsake box beside a 24K gold-dipped rose"
+          src={`${A}/1523-680.png`}
+          alt="Pink velvet GoldRose gift box beside a gold-dipped rose"
           width={398}
           height={230}
-          style={{ ...abs(16, 206, 398, 230), display: "block", objectFit: "cover", borderRadius: 16 }}
+          style={{ ...abs(16, 204, 398, 230), display: "block", objectFit: "cover", borderRadius: 16 }}
         />
       </div>
 
-      {/* ---- 756:149 · 02 / Business Direction Cards ---- */}
+      {/* ---- 1523:681 · 02 / Business Direction Cards ---- */}
       <div style={{ ...abs(0, 444, 430, 440), background: "#FFFFFF", overflow: "hidden" }}>
-        {/* 757:113 section heading */}
+        {/* 1523:682 section heading */}
         <div
           className={playfair.className}
           style={{
             ...abs(16, 14, 398),
             fontSize: 23,
-            lineHeight: "30.66px",
+            lineHeight: "30.7px",
             fontWeight: 500,
             color: "#09442E",
             whiteSpace: "nowrap",
@@ -307,7 +334,7 @@ export function WholesaleScreen() {
               style={{
                 ...abs(c.textX, 33, 216),
                 fontSize: 18,
-                lineHeight: "23.99px",
+                lineHeight: "24px",
                 fontWeight: 500,
                 color: "#09442E",
                 whiteSpace: "nowrap",
@@ -331,15 +358,15 @@ export function WholesaleScreen() {
         ))}
       </div>
 
-      {/* ---- 756:150 · 03 / Application Form Part A ---- */}
+      {/* ---- 1523:698 · 03 / Application Form Part A ---- */}
       <div style={{ ...abs(0, 884, 430, 380), background: "#FFF6EC", overflow: "hidden" }}>
-        {/* 757:129 heading */}
+        {/* 1523:699 heading */}
         <div
           className={playfair.className}
           style={{
             ...abs(16, 16, 398),
             fontSize: 24,
-            lineHeight: "31.99px",
+            lineHeight: "32px",
             fontWeight: 500,
             color: "#09442E",
             whiteSpace: "nowrap",
@@ -347,7 +374,7 @@ export function WholesaleScreen() {
         >
           Your Business Details
         </div>
-        {/* 757:130 sub-copy */}
+        {/* 1523:700 sub-copy */}
         <div
           className={notoSC.className}
           style={{
@@ -364,24 +391,25 @@ export function WholesaleScreen() {
 
         {ROWS.map((r) => (
           <div key={r.input.name} style={{ ...abs(16, r.top, 398, 64), ...FIELD_BOX }}>
-            {/* 757:132 etc. label glyph — Figma crops glyph exports to the ink,
-                so it is placed unstretched at the TEXT node's own box. */}
+            {/* 1523:703 etc. label glyph — Figma crops glyph exports to the
+                ink, so SVGs sit unstretched at the TEXT node's own box; the ✉
+                render crop is the node box itself and scales to fit. */}
             <img
-              src={`${A}/${r.glyph.src}.svg`}
+              src={`${A}/${r.glyph.src}`}
               alt={r.glyph.alt}
               width={r.glyph.w}
               height={r.glyph.h}
               style={{
                 ...abs(10, r.glyph.y, r.glyph.w, r.glyph.h),
                 display: "block",
-                objectFit: "none",
+                objectFit: r.glyph.raster ? "cover" : "none",
                 objectPosition: "left center",
               }}
             />
             <div className={notoSC.className} style={{ ...abs(r.label.x, 20, 112), ...FIELD_LABEL }}>
               {r.label.text}
             </div>
-            {/* 757:135 etc. input well */}
+            {/* 1523:705 etc. input well */}
             <div style={{ ...abs(162, 11, 226, 42), ...INPUT_WELL }}>
               <input
                 className={`${notoSC.className} b4-field`}
@@ -397,9 +425,9 @@ export function WholesaleScreen() {
         ))}
       </div>
 
-      {/* ---- 756:151 · 04 / Application Form Part B ---- */}
+      {/* ---- 1523:725 · 04 / Application Form Part B ---- */}
       <div style={{ ...abs(0, 1264, 430, 430), background: "#FFFFFF", overflow: "hidden" }}>
-        {/* 758:107 Field 05 / Sales Channels */}
+        {/* 1523:726 Field 05 / Sales Channels */}
         <div style={{ ...abs(16, 12, 398, 94), ...FIELD_BOX }}>
           <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
             {`05${NB} Sales Channels${NB} ·${NB} Select all that apply`}
@@ -407,7 +435,7 @@ export function WholesaleScreen() {
           <ChipRow chips={CHANNEL_CHIPS} />
         </div>
 
-        {/* 758:120 Field 06 / First Order Volume */}
+        {/* 1523:739 Field 06 / First Order Volume */}
         <div style={{ ...abs(16, 116, 398, 94), ...FIELD_BOX }}>
           <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
             {`06${NB} Estimated First Order Volume`}
@@ -415,7 +443,7 @@ export function WholesaleScreen() {
           <ChipRow chips={VOLUME_CHIPS} />
         </div>
 
-        {/* 758:133 Field 07 / Target Regions */}
+        {/* 1523:752 Field 07 / Target Regions */}
         <div style={{ ...abs(16, 220, 398, 70), ...FIELD_BOX }}>
           <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
             {`07${NB} Target Sales Regions`}
@@ -432,7 +460,7 @@ export function WholesaleScreen() {
           </div>
         </div>
 
-        {/* 758:137 Field 08 / Additional Notes */}
+        {/* 1523:756 Field 08 / Additional Notes */}
         <div style={{ ...abs(16, 300, 398, 112), ...FIELD_BOX }}>
           <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
             {`08${NB} Additional Notes`}
@@ -453,23 +481,26 @@ export function WholesaleScreen() {
         </div>
       </div>
 
-      {/* ---- 756:152 · 05 / Submit + Bottom Navigation ---- */}
-      <div style={{ ...abs(0, 1694, 430, 260), background: "#FFF6EC", overflow: "hidden" }}>
-        {/* 758:141 consent line — served as the frame's own render (♢ glyph) */}
-        <img
-          src={`${A}/758-141.svg`}
-          alt="♢ By submitting, you agree that the GoldRose business team may contact you about this inquiry."
-          width={398}
-          height={24}
+      {/* ---- 1523:760 · 05 / Submit + Bottom Navigation ---- */}
+      <div style={{ ...abs(0, 1694, 430, 202), background: "#FFF6EC", overflow: "hidden" }}>
+        {/* 1523:761 consent line — a real TEXT node in the 07-29 frame (the old
+            baked SVG is gone); wraps to two centred lines in its 398×24 box.
+            The ♢ keeps the design's double space after it. */}
+        <div
+          className={notoSC.className}
           style={{
             ...abs(16, 14, 398, 24),
-            display: "block",
-            objectFit: "none",
-            objectPosition: "center center",
+            fontSize: 9,
+            lineHeight: "10.8px",
+            fontWeight: 400,
+            color: "#3B2F2F",
+            textAlign: "center",
           }}
-        />
+        >
+          {`♢${NB} By submitting, you agree that the GoldRose business team may contact you about this inquiry.`}
+        </div>
 
-        {/* 758:142 CTA · Submit Wholesale Application — non-submitting
+        {/* 1523:762 CTA · Submit Wholesale Application — non-submitting
             placeholder: there is no wholesale backend yet. */}
         <div style={{ ...abs(16, 46, 398, 50), background: "#3B2F2F", borderRadius: 10 }}>
           <div
@@ -487,7 +518,7 @@ export function WholesaleScreen() {
             SUBMIT WHOLESALE APPLICATION
           </div>
           <img
-            src={`${A}/I753-116_145-55.svg`}
+            src={ARROW}
             alt="→"
             width={15}
             height={18}
@@ -500,7 +531,7 @@ export function WholesaleScreen() {
           />
         </div>
 
-        {/* 758:145 CTA · Return to Partnership Details */}
+        {/* 1523:763 CTA · Return to Partnership Details */}
         <Link
           href="/business/partnerships"
           style={{
@@ -526,7 +557,7 @@ export function WholesaleScreen() {
             RETURN TO PARTNERSHIP DETAILS
           </div>
           <img
-            src={`${A}/I753-116_145-55.svg`}
+            src={ARROW}
             alt="→"
             width={15}
             height={18}
@@ -539,7 +570,7 @@ export function WholesaleScreen() {
           />
         </Link>
 
-        {/* 758:148 response-time note */}
+        {/* 1523:764 response-time note */}
         <div
           className={notoSC.className}
           style={{
@@ -554,9 +585,44 @@ export function WholesaleScreen() {
         >
           GoldRose business specialists typically respond within 1–2 business days.
         </div>
+      </div>
 
-        {/* 758:149 the frame's own bottom nav (⌂ / ♧ / ▣ / ○) is intentionally
-            not rebuilt: the route supplies the shared fixed BottomNav. */}
+      {/* ---- 1523:765 · 13 · Bottom Navigation ---- */}
+      {/* The 07-29 frame draws the nav band inside the business page (the
+          route keeps the shared fixed BottomNav switched off). Tab art is the
+          frames' own mascot images, Wholesale in its baked active state. The
+          band's sheet box runs 1px past the 1954 outer frame — clipped, as in
+          the design. */}
+      <div
+        style={{
+          ...abs(0, 1896, 430, 59),
+          background: "#FFFFFF",
+          borderRadius: "15px 15px 0 0",
+          boxShadow: "inset 0 0 0 1px #EEE6DD",
+          overflow: "hidden",
+        }}
+      >
+        {NAV_TABS.map((tab) => {
+          const art = (
+            <img
+              src={`${A}/${tab.src}.png`}
+              alt={tab.label}
+              width={50}
+              height={57}
+              style={{ ...abs(10, 1, 50, 57), display: "block" }}
+            />
+          );
+          const style: React.CSSProperties = { ...abs(tab.x, 0, 70, 59), display: "block" };
+          return tab.href ? (
+            <Link key={tab.label} href={tab.href} style={style}>
+              {art}
+            </Link>
+          ) : (
+            <div key={tab.label} style={style}>
+              {art}
+            </div>
+          );
+        })}
       </div>
     </>
   );

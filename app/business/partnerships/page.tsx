@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Corporate partnerships (`/business/partnerships`) — a pixel-exact import of
- * the "B-3 · Business Partnerships" frame (node 561:89, 430×1922) from the
+ * the "B-3 · Business Partnerships" frame (1523:567, 430×1907, 07-29) from the
  * VELORIA Figma file: hero, colourways, partner grid, advantages, the
  * four-step process and two CTAs (the frame carries no enquiry form). Copy is
  * the design's own placeholder text. "Apply for wholesale" links to
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function PartnershipsPage() {
   return (
-    <ScaleFrame height={1922} background="#FFF6EC" fontClass={notoSC.className} nav={false}>
+    <ScaleFrame height={1907} background="#FFF6EC" fontClass={notoSC.className} nav={false}>
       <PartnershipsScreen />
     </ScaleFrame>
   );

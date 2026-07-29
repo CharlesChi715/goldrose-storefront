@@ -31,13 +31,22 @@ at `temp/frontend-function-draft.zh.md`, English working copy at
   screenshots pending from the design team
 - `assets/` — 52 annotated screenshots (red box = the element for that entry);
   filename = entry ID; JPEG-compressed from the originals
-- [figma-naming-guide.md](figma-naming-guide.md) — the owner's UI naming guide,
-  transcribed **verbatim** from `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`:
-  the PAGE / SECTION / FUNCTION / TYPE vocabulary plus 13 worked examples
-- [element-names.md](element-names.md) — the naming convention we actually
-  apply: grammar, 6 rules, and the vocabulary with our additions and removals.
-  Every visible element carries its name in `data-el`; guarded by
-  `tests/unit/element-names.test.ts`
+**Naming — one system, three files.** Read them in this order:
+
+- [element-names.md](element-names.md) — **the convention itself, and the
+  master copy.** Grammar, 7 rules, vocabulary, enforcement levels, governance
+  and changelog. Every visible element carries its name in `data-el`; guarded
+  by `tests/unit/element-names.test.ts`, which parses the vocabulary straight
+  out of the document so the two cannot drift
+- [frame-names.md](frame-names.md) — the **page-level chapter**: a frame name
+  is its route, uppercased, with `/` between path levels and `·` for states and
+  overlays. Also carries the live 40-frame rename worklist, keyed on Figma node
+  id, with a `Do now? / Hold / Blocked` column
+- [figma-naming-guide.md](figma-naming-guide.md) — a **frozen archive** of the
+  guide received from the design team on 2026-07-25, transcribed verbatim from
+  `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`. ⚠️ Corrected 2026-07-29: this is
+  a record, **not** the source of truth. The markdown is the master; the
+  spreadsheet is now an export produced for the design team
 - [bottom-nav-buttons.md](bottom-nav-buttons.md), [login-import.md](login-import.md)
   — per-import notes for the nav art and the 登录界面 frame
 
@@ -324,3 +333,80 @@ zero) and was imported once — please delete or differentiate the duplicate.
   (9–11px Noto Sans SC); eleven single-pixel nudges match the renders, noted
   inline in the components. Band diffs land at 0.7–1.8% overall (font-AA
   envelope), verified per-frame against scale-2 renders.
+
+## 07-29 screen imports — developer findings
+
+The design team reorganized the whole file into a click-depth sitemap
+(首页/shop/me 一级–五级 sections, plus `business`, a fixed-nav section and
+`STORY-CRAFT-REDESIGN-IMAGE-LED`) and re-delivered every screen under new
+node ids. The batch is a **file-wide visual unification** — the answer to
+delivery-checklist item 9 and DQ-21: pink accent cards/pills/chips became
+ink `#3B2F2F`, gold primary buttons became ink with cream text, cards went
+white (or translucent white) with the sand inside-stroke, and the 07-28
+five-tab glyph nav band was removed from every account/me screen. The C-flow
+(order confirmation + tracking) keeps its green palette but was condensed
+and lost its own tab bar. All ~40 frames were re-imported or drift-checked;
+band diffs sit in the AA envelope on every screen (worst bands are live-data
+or fixed-overlay screenshot artifacts, noted below).
+
+**New pages this batch:**
+
+| Frame | Where it lives |
+|---|---|
+| mepage-Account & Privacy 1523:3878 | `/account/privacy` — the settings hub; the dashboard's "Account & Privacy" row lands here (was `/account/security`); Delete row stays inert (owner decision pending) |
+| Order Details 1541:362 (≡ my-orders view-details 1523:3347) | the redesigned C-2 serves `/checkout/success` AND the new `/account/orders/details` (orders list "VIEW DETAILS" target, static mock — the `/orders/track` precedent) |
+| track order 1541:254 (≡ 1523:775) | the redesigned C-1 at `/orders/track` (430×1519; vector route map served as one render) |
+| track order_return 1542:628 (≡ loose 1523:1266) | `/orders/track?return=1` — dim + bottom-sheet return-reason modal (absorbs the never-imported RETURNS-REASON-SELECT-OVERLAY 1339:112). **No element triggers it in the design** — unlinked state, DQ-36 |
+| MESTORY 1573:106 | `/story` — wired from the menu drawer's OUR STORY row and A-11's READ OUR STORY CTA (live for the first time) |
+| MECRAFT 1573:107 | `/craft` — wired from the menu OUR CRAFT row and A-4's EXPLORE OUR CRAFT card (was the `#craft` anchor). Imported from the live frame after it stabilized — it grew 509→657→1184→1368 px during the batch |
+
+**Wiring changes:** order-details/track "CONTACT SUPPORT" cards → `/care/chat`
+(the sitemap hangs the chat frame off every support touchpoint — five
+byte-identical chat frames; supersedes `/care?tab=order-issues`); orders-list
+VIEW DETAILS buttons → `/account/orders/details`; menu drawer grew
+PERSONALIZE (→ `/#personalize`), FOR BUSINESS (→ `/business/partnerships`),
+BLOG (inert — no blog), OUR CRAFT, OUR STORY rows; care shortcuts wired
+where honest targets exist (after-sales → `/account/returns`, security →
+`/account/security`); the dashboard's dev "Sign out" row retired — the
+designed path is the hub's Session card → `/account/logout`.
+
+**Things found while transcribing, for the design team:**
+
+- **The header wordmark image reads "ELDREVE" on ~12 frames** (settings,
+  orders, returns, signup, search, keepsake — which also carries an ELDREVE
+  "E" monogram saved from WeChat). The same delivery's hero eyebrow still
+  says GOLDROSE and the business frames kept real GoldRose art. Everything
+  shipped with the owner's GoldRose treatment substituted at the image's box
+  (deviating from the 07-26 "VELORIA verbatim" precedent — a masthead is not
+  a mock string). DQ-34; DQ-22 now has a third brand string.
+- **Layer names now carry element IDs** (`ACCOUNT-FIRST-NAME-INPUT`…) —
+  checklist item 2 executed at last. Frame names did NOT adopt the
+  frame-names.md rule (a sixth naming convention instead); no prototype
+  links anywhere (item 3 still unmet).
+- **The file was edited while we imported.** CRAFT grew during the batch;
+  STORY's placeholder plates became real photos the same day (re-imported);
+  the care frames briefly showed one identical FAQ list on all four tabs
+  before the per-tab lists returned (kept per-tab); the unboxing tile crops
+  moved between snapshots (the app carries the newest exports). A batch
+  note per the delivery protocol would have prevented three re-passes.
+- **Sibling inconsistencies, shipped as drawn unless noted:** STORY draws
+  the owner-art nav, CRAFT draws a five-tab glyph-text nav with "Me" active
+  (both get the shared owner-art bar — DQ-35); the shopping dashboard's
+  member card moved +6px, the business one didn't; header back-arrows are
+  pasted "返回" raster screenshots at per-frame jitter positions (no vector
+  back icon exists in the delivery); the return modal's footer band is 382
+  wide on a 430 sheet; care04's indicator sits 1px lower; per-frame brand
+  bands drift 1–4px.
+- **Design regressions kept out:** the shop base frame again says
+  "120 Apparel" (the corrected GIFTS/Ruby Red/Gift Sets row still exists in
+  the overlay frames and stays live); the shop/PDP headers drew a wishlist
+  heart where the live search button sits (search is real functionality,
+  wishlist was declared out of scope — search stays, DQ-37); back arrows on
+  tab-root pages (bag ships one wired to history-back).
+- **Screenshot-artifact notes for future drift passes:** fullPage shots
+  capture the fixed nav/concierge at the first viewport, the sort/filter/
+  overlay diffs are dominated by live-catalog data vs the mocks' repeated
+  cards, and scale-1 frame renders pad asymmetrically (home: 36px left,
+  **20px top**).
+- B-2 checkout's deferred drift check closed: only the buy-button palette
+  moved (green → ink, swapped); the skin's geometry is unchanged.
