@@ -23,14 +23,27 @@ import { join } from "node:path";
 const ROOT = join(import.meta.dirname, "..", "..");
 const DOC = join(ROOT, "docs", "ixd", "element-names.md");
 
-/** Pulls the backticked ALL-CAPS tokens out of one `### <dimension>` section. */
+/** Pulls the vocabulary tokens out of one `### <dimension>` section's tables. */
 function vocabulary(md: string, heading: string): string[] {
   const start = md.indexOf(`### ${heading}`);
   assert.notEqual(start, -1, `docs/ixd/element-names.md has no "### ${heading}" section`);
   const after = md.slice(start + 4);
   const end = after.search(/\n(?:### |## |---)/);
   const body = end === -1 ? after : after.slice(0, end);
-  return [...body.matchAll(/`([A-Z][A-Z0-9-]*)`/g)].map((m) => m[1]);
+  // A word counts only when it is a table cell's ENTIRE content — the 编号
+  // column. Scraping every backticked ALL-CAPS string in the section let prose
+  // leak into the vocabulary: `BUY` (a FUNCTION, discussed under PAGE), bare
+  // `CTA` (from the note saying it must NOT be a SECTION), and the worked
+  // example `PDP-PRODUCT-PRICE` (quoted inside a TYPE table cell's remark).
+  const words: string[] = [];
+  for (const line of body.split("\n")) {
+    if (!line.trimStart().startsWith("|")) continue;
+    for (const cell of line.split("|")) {
+      const m = cell.trim().match(/^`([A-Z][A-Z0-9-]*)`$/);
+      if (m) words.push(m[1]);
+    }
+  }
+  return words;
 }
 
 const md = readFileSync(DOC, "utf8");

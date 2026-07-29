@@ -3060,3 +3060,258 @@ Correction, same day: `## Contract` was removed again on Charles's call — the
 template ships **two** optional sections, `Tech details` and `Open questions`,
 not three. Data shape and invariants now live in `Tech details`; the checkbox
 proving them stays in `Acceptance criteria`.
+
+## 2026-07-28 — Engagement tracking implemented (stages 1–3)
+
+Owner chose "biggest share of the viewport wins" for OQ-1 and asked for the
+implementation. All three staged reports are built; the mechanism is generic,
+so section coverage grows automatically as `data-el` tagging lands.
+
+Files: `supabase/migrations/0005_page_engagement.sql` (new, NOT pushed),
+`lib/engagement.ts` (new — the measurement rules as pure functions),
+`lib/admin/engagement-report.ts` (new), `components/Beacon.tsx`,
+`app/api/beacon/route.ts`, `app/api/beacon/engagement/route.ts` (new),
+`lib/supabase/types.ts`, `lib/supabase/seed-data.ts`, `lib/admin/analytics.ts`,
+`lib/admin/i18n.ts` (EN + 中文), `AnalyticsDashboard.tsx`, plus three test
+files.
+
+Charles's objection reshaped the core formula. Naive "most viewport pixels
+wins" makes a short band between two tall bands score zero forever, even
+dead-centre. Coverage is now measured against the most a section *could* show —
+`visible ÷ min(section height, viewport height)` — so short and tall sections
+can both reach 1.0, plus a centre bias to break ties. One winner still holds the
+clock, so per-section time still sums to <= page time.
+
+`last_section` was added as a 4th column beyond the doc's data shape: drop-off
+needs the final section, and jsonb does not preserve key order, so it cannot be
+read off the end of `sections`.
+
+Verified: 60/60 unit, 87/87 e2e (pixel baselines unchanged), typecheck and
+build clean. Round trip confirmed against the local file adapter: engagement
+updates the arrival's own row, the sum invariant is enforced server-side, and a
+wrong visitorId cannot write.
+
+⚠️ Incident, self-reported: while verifying, a dev server was already running on
+port 3000 in HOSTED mode, so two probe rows (`verify-visitor-1`, `probe-visitor`)
+landed in the hosted `page_views` table. Awaiting Charles's decision on removing
+them. Re-verification was redone in isolation on port 3101 in local mode.
+
+Open: migration 0005 needs `supabase migration repair` for the orphan 0004 row
+before it can be pushed — both require the owner's approval.
+
+### Amendment — hosted migration applied, stray rows removed
+
+Charles approved both follow-ups. `supabase migration repair --status reverted
+0004` cleared the orphan history row, then `supabase db push` applied `0005`;
+local and remote now both read `0001 0002 0003 0005` (0004 permanently skipped
+by design). All 734 existing page_views rows preserved with null engagement.
+
+The two accidental probe rows were deleted by exact id — 736 → 734, none left.
+
+Hosted path then verified with one throwaway row, since deleted (count back to
+734): the adapter's two-key match updates exactly 1 row, the same update with a
+wrong visitor_id touches 0 rows, and scroll_pct = 150 is rejected by the check
+constraint. Worth doing because both beacon routes swallow errors by design, so
+a hosted failure would have been silent.
+
+Still outstanding: orders.auth_user_id remains a live, empty, unreferenced
+column for a future migration to drop.
+
+## 2026-07-28 — Frame naming rule: Figma frame name = its route
+
+Created `docs/ixd/frame-names.md` from Charles's requirement that Figma frame
+names and URL routes stay consistent. Rule: frame name is the route uppercased
+with `/`→`-`, dynamic segments dropped (`/products/[slug]` → `PRODUCTS`), `/` →
+`HOME`, and `·` introducing anything that is not part of a route — a page state
+or an overlay (`SHOP · FILTER`, `ACCOUNT · SIGNED-OUT`). `·` was chosen because
+the design file already uses it as house style and it cannot appear in a URL.
+
+Frame names were read live from Figma `3CXNpmuuyNyCW70qOci0oM`; every cited
+route was checked against `app/**/page.tsx`. The doc carries the full
+current→proposed rename list: 23 pages, 4 `/care` tab states, 9 overlays.
+
+Found while writing it:
+
+- Frame 765:114 is named with a **leading space** — `" Homepage · Menu Open · …"`
+  (confirmed via API `repr()`). Invisible in the layer panel, breaks exact-match
+  tooling.
+- Two frames have no clear route: 765:113 was `C-2 · Order Confirmed` and is now
+  `订单详情`, and 1230:121 `付款完弹窗`. Either could be `/checkout/success`.
+- Routes with no frame: `/checkout/cancel`, `/orders`, `/placeholder`, plus the
+  base states of `/care` and `/account/returns`.
+- The file uses five naming conventions at once (`shop`, `orders`, `详情页`,
+  `B-3 · … · iPhone 15 Pro Max`, `ACCOUNT-INFO-BUSINESS-DASHBOARD`). The newest
+  1230/1234-series frames are already UPPERCASE-hyphen, so the team has started
+  converging on the target style unprompted.
+
+Consequence needing the owner's sign-off: this **replaces Sheet 1 (PAGE) of the
+owner's naming guide**. `PDP`→`PRODUCTS`, `AUTH`→`ACCOUNT · SIGNED-OUT`,
+`ORDER`→`ORDERS`, and `CART`/`WISHLIST`/`SETTINGS` disappear for having no
+route. One fewer list to sync, but `PDP` is used across existing specs, commits
+and code comments — keep old ids as legacy aliases.
+
+Also established this session (from live Figma inspection, for future sessions):
+the file has **one Page tab** («VELORIA · Product Detail»); screens are
+top-level FRAMEs grouped by Figma SECTION nodes plus x-position, and those
+sections **overlap**, so section membership cannot be trusted as structure.
+Naming inside a frame should treat only UPPERCASE layer names as structural
+levels, so junk wrappers (`Frame 28`, `Group 30`) are skipped when composing
+`SHOP-HEADER-MENU-BTN` from the ancestor path.
+# 2026-07-28
+
+- Reformatted both tables in `docs/ixd/frame-names.md` as raw-source-aligned
+  Markdown tables without changing their meaning.
+
+### Amendment — hosted analytics reset (2026-07-29)
+
+Charles asked whether the hosted database could be reset. Inspection first: all
+13 orders are `provider=mock` with no capture id, so there is NO real money in
+the database (the genuine 07-15 PayPal payment went through the since-removed
+Shopify permalink and was never stored here). The real risk was elsewhere —
+7 `auth.users` accounts, 2 passkey credentials, and the 6-row `admin_users`
+allowlist that IS admin access.
+
+Scope chosen: analytics only.
+
+Backups do not exist yet (release queue item 7), so a verified dump was taken
+first, to /Users/charles/Developer/goldrose-backups (OUTSIDE the repo — dumps
+contain customer emails and addresses and must never be committed):
+`goldrose-2026-07-29-schema.sql` + `-data.sql`. Verified by parsing, not
+assumed: 798 page_views, 7 auth.users, 2 auth.webauthn_credentials, 6
+admin_users, 13 orders, 3 products, 7 settings.
+
+Then deleted all 798 `page_views` rows (HTTP 204, count 0). Every other table
+verified unchanged afterwards; accounts and passkeys intact.
+
+Consequence: admin analytics now reads empty until real traffic arrives — the 9
+seeded demo views went too. `npm run seed -- --reset` only rebuilds the LOCAL
+file adapter, not hosted.
+
+## 2026-07-29 — naming convention: governance pass + frame rename table
+
+**Frame naming (`docs/ixd/frame-names.md`)**
+- Fixed a real defect in the proposed rule: `/`→`-` made frame names
+  un-reversible (`ACCOUNT-PERSONAL-INFO` could be `/account/personal/info` or
+  `/account/personal-info`). Path separator is now `/`; `-` is a word break;
+  `·` marks a state or overlay. Three marks, three jobs.
+- Added the full 40-frame rename table keyed on Figma node id, grouped as
+  Pages / States / Overlays / Blocked, with a `Do now?` column — 21 ✅ rename
+  now, 16 ⏳ held on route decisions, 3 ⛔ blocked. §3 lists the five decisions
+  and how many frames each unblocks, so nothing gets renamed twice.
+- Documented the `·` codepoint (U+00B7) and its look-alikes (U+2022, U+30FB —
+  the latter inserted by Chinese IMEs), and the Figma component-nesting cost of
+  using `/`.
+- Flagged two source conflicts rather than resolving them silently: node
+  `1230:121` is `付款完弹窗` here but `ACCOUNT-KEEPSAKE-SHARE` in README; and
+  `ACCOUNT-RETURNS-AFTER-SALES` (`1230:119`) is in the 07-28 import notes but
+  absent from the 07-28 live Figma read.
+
+**Element naming (`docs/ixd/element-names.md`) — v1.0**
+- **Source of truth inverted.** The doc claimed the design team's `.xlsx` was
+  the master; a binary blob in a scratch folder cannot be diffed or reviewed.
+  Markdown is now the master, the spreadsheet an export. Recorded in
+  `figma-naming-guide.md` too.
+- **Rule 7 added — a shipped name is frozen.** `Beacon.tsx` reads
+  `[data-el$="-SECTION"]` as an analytics dimension, so renaming a section
+  after deploy silently splits its time series. Engagement tracking is built
+  but not deployed, so names are still free to change — noted as time-sensitive.
+- **Enforcement split into fail/warn levels.** Hard-fail where the set is
+  closed (format, uniqueness, PAGE, SECTION); warn where it is open (TYPE,
+  FUNCTION), so a new control never blocks a build.
+- **Decided, not yet implemented:** derive the PAGE vocabulary from
+  `app/**/page.tsx` instead of a hand-written table; downgrade unknown
+  TYPE/FUNCTION to warnings. Both recorded in a decided-vs-implemented table
+  rather than described as done.
+- **`data-el` corrected to analytics-only.** The e2e suite selects by role and
+  text (183 `getByRole`, 0 `getByTestId`); only the engagement spec asserts on
+  `data-el`.
+- **Reference-ID uniqueness rule added**, with the live `OQ-1` collision
+  (`SUMMARY.md` / `admin-design.md` / `card-payments.md`) flagged as unfixed.
+- Added version, technical owner, **review-by date with "silence adopts"**, and
+  a changelog. Both naming docs had sat in "Proposed" indefinitely.
+
+**Verification:** `npm run test:unit` — 60/60 pass, including the vocabulary
+parser that reads `element-names.md` (the three `### PAGE/SECTION/TYPE`
+sections were left structurally untouched for exactly this reason). Link
+targets and dot codepoints checked; the only look-alike dots in the repo are
+the two deliberate examples in the look-alike table.
+
+**Not done / next:** apply the two decided test changes; fix the `OQ-1`
+collision; route architecture and terminology (sitting 2) still await the
+owner's decisions.
+
+## 2026-07-29 — Front-end Definition of Done + naming-guard fix
+
+- Researched the Claude Code skills ecosystem (verified via GitHub API); top
+  recommendations recorded in session "skills". Key external finding:
+  Shopify/polaris-react (admin UI library) archived upstream 2026-01-06.
+- Drafted `docs/ixd/frontend-definition-of-done.md` (status: Proposed) — three
+  gates (Machine / Convention / Evidence) plus a teaching clause; intended to
+  become `.claude/skills/frontend-screen/SKILL.md` after sign-off.
+- Fixed the leaky vocabulary parser in `tests/unit/element-names.test.ts`:
+  words now count only when a table cell's entire content is the backticked
+  token. Removes false vocabulary `BUY` (PAGE), `CTA` (SECTION),
+  `PDP-PRODUCT-PRICE` (TYPE). All 60 unit tests pass.
+- Deferred by decision: FUNCTION enforcement (→ warn level), PAGE derived from
+  route tree (both recorded in element-names.md Enforcement), data-el backfill
+  (screen-by-screen, deadline = before engagement beacon meets real traffic).
+
+### Delivery — 2026-07-29, engagement tracking pushed for review
+
+Committed as `519cda2` on branch `feat/engagement-tracking` and pushed (17
+files, +1296). Contains ONLY the engagement work: the beacon clock, the
+engagement ingest route, migration 0005, the report layer, three admin cards
+(EN/中文), three test files, the feature record, and the SUMMARY state line.
+
+Deliberately excluded from the commit, because the working tree held two
+unrelated streams: the whole `docs/ixd/*` naming stream, `TEMPLATE.md`,
+`ideas.md`, `tests/unit/element-names.test.ts`, and this WORKLOG (its entries
+are interleaved between both streams). `docs/features/README.md` was mixed, so
+only the engagement status-leaf line was staged — via a HEAD copy patched and
+staged as a blob — leaving the "File format / Tech details" rewrite untouched
+in the working tree.
+
+Not merged to main. Next: Vercel branch preview → owner acceptance (read one
+homepage band ~30s, leave the page, confirm it tops Section attention) → PR.
+
+## 2026-07-29 — Tooling install: top-5 MCP servers, plugins, skills
+
+- `.mcp.json` (new, project scope): supabase (HTTP, read_only=true, pinned
+  project_ref), next-devtools (npx), playwright (npx).
+- Plugins (user scope): context7@claude-plugins-official (connected),
+  supply-chain-risk-auditor@trailofbits (marketplace added via SSH clone).
+- Skills copied into `.claude/skills/`: supabase (v0.1.2),
+  supabase-postgres-best-practices (v1.1.1) — via `npx skills add`.
+- Pending user actions: approve the 3 project MCP servers in an interactive
+  session; OAuth Supabase via /mcp; next-devtools needs `npm run dev` running.
+- Skipped by prior decision: obra/superpowers (conflicts with AGENTS.md).
+- Mirrored both Supabase skills to `.agents/skills/` via `npx skills add
+  --agent codex`; verified with `codex exec` that Codex lists them.
+- Completed the Codex mirror: supply-chain-risk-auditor copied to
+  `.agents/skills/`; supabase (HTTP, read-only, OAuth completed), context7,
+  next-devtools, playwright added via `codex mcp add` (global config).
+
+## 2026-07-29 — the 07-29 redesign import: full-file restyle + 6 new pages
+
+- Imported the design team's reorganized VELORIA file (sitemap sections, all
+  new node ids): a file-wide visual unification — pink accents → ink, gold
+  buttons → ink/cream, white cards, account nav band removed — re-imported
+  or drift-checked across ~40 frames / ~30 routes.
+- New: `/account/privacy` (settings hub), `/account/orders/details`
+  (VIEW DETAILS target), redesigned C-1 `/orders/track` (+ unlinked
+  `?return=1` return-reason sheet), redesigned C-2 confirmation, `/story`,
+  `/craft` (menu + homepage cards now live). Chat wired at every support
+  touchpoint (→ /care/chat). Homepage: new hero photo, mascot-style header
+  icon set; shop: new ad banner; PDP: ink buy buttons; care: mascot +
+  restyle, per-tab lists kept.
+- Brand: the delivery stamps an "ELDREVE" wordmark on ~12 frames —
+  substituted the owner's GoldRose treatment everywhere (DQ-34, boss-level
+  flag), deviating deliberately from the 07-26 VELORIA-verbatim precedent.
+- Process: file was edited mid-import (CRAFT grew 509→1368, STORY gained
+  real photos, care lists flip-flopped, unboxing crops moved) — re-passed
+  each; DQ-40 asks for batch notes. Docs: ixd README 07-29 findings
+  section, DQ-34…40. Verified: per-frame band diffs in the AA envelope,
+  typecheck, 60/60 unit, e2e + pixel baselines regenerated (see below).
+- Executed via 10 parallel screen subagents on disjoint components + a
+  central foundation/verify pass (build sheets generated from the REST data
+  per frame; assets pre-fetched in batched calls).

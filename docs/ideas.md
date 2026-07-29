@@ -69,6 +69,9 @@ is there any way to get how long time do user stay on a page or stay on a sectio
 
 
 ## TODO from me:
+frontend naming convention
+CI/CD
+
 payment
 order tracking test
 frontend ixd

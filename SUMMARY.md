@@ -54,9 +54,12 @@ resources only when the task needs them.
 - Built: storefront, admin, accounts, catalog, checkout/order flow,
   analytics, and the SEO/GEO baseline. PayPal Orders v2 wallet checkout
   works in sandbox. Supplied Figma screens are imported through the
-  2026-07-28 batch — account privacy/support screens included (routes,
-  placeholders, and design conflicts:
-  [`docs/ixd/README.md`](docs/ixd/README.md)).
+  2026-07-29 redesign batch — a file-wide restyle plus `/account/privacy`,
+  `/account/orders/details`, `/orders/track` (redesigned, with an unlinked
+  return sheet), `/story` and `/craft` (routes, placeholders, and design
+  conflicts: [`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ The delivery
+  stamped an "ELDREVE" placeholder wordmark on many frames — GoldRose was
+  substituted everywhere; DQ-34 asks the design team to confirm.
 - Page/section dwell tracking is built, its hosted schema is live (`0005`), and
   the code sits on branch `feat/engagement-tracking` awaiting preview review —
   **not merged to `main`**, so production records no engagement yet
@@ -86,6 +89,15 @@ resources only when the task needs them.
   one when PayPal webhook testing begins.
 - `FIGMA_TOKEN` has `file_content:read`; revoke it after design-import work.
 - Tool auth can change; re-verify before environment-dependent work.
+- Agent tooling (installed 2026-07-29): `.mcp.json` declares supabase
+  (read-only, pinned project), next-devtools, and playwright MCP servers —
+  all three still need one-time interactive approval, and Supabase needs
+  `/mcp` OAuth. context7 and Trail of Bits supply-chain-risk-auditor plugins
+  are live (user scope); official Supabase skills sit in `.claude/skills/`
+  (Claude Code) and `.agents/skills/` (Codex — verified it loads them).
+  Codex mirror complete: supply-chain-risk-auditor skill in
+  `.agents/skills/`, and all four MCP servers in `~/.codex/config.toml`
+  (global) — Supabase OAuth already done on the Codex side.
 
 ## Runtime and safety
 
@@ -166,6 +178,7 @@ goldrose-storefront/
 ├── temp/                # Raw imports and scratch material; not served
 ├── .data/               # Local file-adapter database and uploads
 ├── .ai/                 # Optional work history; never startup context
+├── .mcp.json            # Project MCP servers (supabase read-only, next-devtools, playwright)
 ├── proxy.ts             # Admin route/API authentication guard
 ├── package.json         # Dependencies and runnable commands
 ├── README.md            # Setup, stack, run, test, and deploy guide
@@ -180,6 +193,7 @@ goldrose-storefront/
 | Feature status and roadmap | [`docs/features/README.md`](docs/features/README.md) |
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
+| Front-end Definition of Done (Proposed, awaiting sign-off) | [`docs/ixd/frontend-definition-of-done.md`](docs/ixd/frontend-definition-of-done.md) |
 | How work is handed over: design team → dev → bosses, delivery checklist | [`docs/ixd/delivery-protocol.md`](docs/ixd/delivery-protocol.md) |
 | Database decisions and SKU rules | [`docs/Database.md`](docs/Database.md) |
 | SEO/GEO implementation and supporting research | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |
