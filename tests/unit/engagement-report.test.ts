@@ -9,7 +9,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { engagementReport, median } from "../../lib/admin/engagement-report.ts";
+import { engagementReport, mean } from "../../lib/admin/engagement-report.ts";
 import type { PageViewRow } from "../../lib/supabase/types.ts";
 
 function view(patch: Partial<PageViewRow>): PageViewRow {
@@ -26,10 +26,10 @@ function view(patch: Partial<PageViewRow>): PageViewRow {
   };
 }
 
-test("median handles odd, even and empty lists", () => {
-  assert.equal(median([5, 1, 3]), 3);
-  assert.equal(median([1, 2, 3, 4]), 3);   // (2+3)/2 rounded
-  assert.equal(median([]), 0);
+test("mean handles normal and empty lists, and rounds", () => {
+  assert.equal(mean([5, 1, 3]), 3);
+  assert.equal(mean([1, 2, 3, 4]), 3);     // 2.5 -> rounded to 3
+  assert.equal(mean([]), 0);
 });
 
 test("visits with no closing beacon are excluded, not counted as zero", () => {
@@ -41,9 +41,9 @@ test("visits with no closing beacon are excluded, not counted as zero", () => {
   ]);
 
   assert.equal(report.measuredVisits, 2);
-  // Median of [10000, 20000] is 15000. Counting the two unmeasured rows as
-  // zero would have produced 5000 instead.
-  assert.equal(report.medianActiveMs, 15_000);
+  // Average of [10000, 20000] is 15000. Counting the two unmeasured rows as
+  // zero would have produced 7500 instead.
+  assert.equal(report.averageActiveMs, 15_000);
 });
 
 test("time on page is grouped per path", () => {
@@ -56,9 +56,9 @@ test("time on page is grouped per path", () => {
   const home = report.byPath.find((row) => row.path === "/");
   const shop = report.byPath.find((row) => row.path === "/shop");
   assert.equal(home?.visits, 2);
-  assert.equal(home?.medianActiveMs, 20_000);
-  assert.equal(home?.medianScrollPct, 60);
-  assert.equal(shop?.medianActiveMs, 60_000);
+  assert.equal(home?.averageActiveMs, 20_000);
+  assert.equal(home?.averageScrollPct, 60);
+  assert.equal(shop?.averageActiveMs, 60_000);
 });
 
 test("section reach rate is a share of that page's measured visits", () => {
@@ -72,12 +72,12 @@ test("section reach rate is a share of that page's measured visits", () => {
   const hero = report.sections.find((row) => row.section === "HOME-HERO-SECTION");
   const story = report.sections.find((row) => row.section === "HOME-STORY-SECTION");
   assert.equal(hero?.visits, 2);
-  assert.equal(hero?.medianMs, 15_000);
+  assert.equal(hero?.averageMs, 15_000);
   assert.equal(hero?.reachRatePercent, 50);   // 2 of 4 measured visits to "/"
   assert.equal(story?.reachRatePercent, 25);
 });
 
-test("sections are ranked by median attention, not by raw visit count", () => {
+test("sections are ranked by average attention, not by raw visit count", () => {
   const report = engagementReport([
     view({ path: "/", active_ms: 60_000, sections: { "HOME-HERO-SECTION": 2_000 } }),
     view({ path: "/", active_ms: 60_000, sections: { "HOME-HERO-SECTION": 2_000 } }),
@@ -104,7 +104,7 @@ test("an empty period reports zeroes rather than throwing", () => {
   const report = engagementReport([]);
   assert.deepEqual(report, {
     measuredVisits: 0,
-    medianActiveMs: 0,
+    averageActiveMs: 0,
     byPath: [],
     sections: [],
     dropOff: [],
