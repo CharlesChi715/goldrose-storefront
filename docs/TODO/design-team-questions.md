@@ -165,7 +165,7 @@ The core question for every group is the same, so it is written once:
 | **The gap** | The shared bottom bar's **Wholesale** tab has no destination (`components/chrome.tsx:250` — no `href`), even though `/business/wholesale` now exists. Separately, the `/care` frames draw a **five**-tab bar including **"Rose Deals"**, which has no page at all. |
 | **Ask** | (a) Should the Wholesale tab open the B-4 wholesale page? (b) What is "Rose Deals" and does it have a frame? |
 | **Recommendation** | (a) Yes — we can wire this immediately once confirmed. (b) Rose Deals looks like a promotions page that was never designed; if it is not planned, it should come out of the CARE bar. See also DQ-21 (the three different bottom bars). |
-| **Answer** | _(pending)_ |
+| **Answer** | **(a) Answered 2026-07-29 (Charles): yes — the tab opens `/business/wholesale` (the B-4 application form), not the partnerships overview. Wired and verified; see F-02.** (b) _(still pending)_ |
 
 ---
 
@@ -437,7 +437,7 @@ development work with an obvious answer.
 | # | Item | Action |
 |---|---|---|
 | F-01 | H-33's two corporate CTAs are inert although `/business/partnerships` and `/business/wholesale` both exist now | Wire "EXPLORE BUSINESS PARTNERSHIPS" → partnerships, "REQUEST PARTNER PRICING" → wholesale (`components/home/A10.tsx:345`) |
-| F-02 | Bottom-nav Wholesale tab has no `href` although the page exists | Wire once DQ-13(a) is confirmed |
+| ~~F-02~~ | ~~Bottom-nav Wholesale tab has no `href` although the page exists~~ | **Done 2026-07-29** — DQ-13(a) answered; tab → `/business/wholesale` in both the shared `BottomNav` (`components/chrome.tsx`) and the business pages' own band (`PartnershipsScreen`). It stays inert on `WholesaleScreen` alone, which *is* that page. |
 | F-03 | The PDP header still draws menu art as a bare image, so the drawer does not open there | Replace with the same `MenuButton` the homepage and shop use (`components/chrome.tsx:157`) |
 | F-04 | `/checkout/cancel` is unreachable — nothing redirects to it | Point PayPal's cancel return at it, or delete the route |
 | F-05 | `/orders` only redirects to the admin, but customer-facing order links may reach it | Already release-queue item #4 |

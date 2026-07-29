@@ -32,7 +32,6 @@ const GREEN = "#09442E"; // flow brand: headline, done markers, values
 const INK = "#29211F";
 const GOLD = "#D18005"; // current marker, section glyphs
 const GREY = "#6B6E75"; // small-caps labels, timestamps
-const CANVAS = "#FFFBF6";
 const CARD = "#FFFFFF";
 const SAND = "#E0D6C9"; // card hairlines
 const PENDING = "#C7C9C9"; // pending marker + rail

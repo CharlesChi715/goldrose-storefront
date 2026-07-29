@@ -67,12 +67,13 @@ const STEPS = [
 const ARROW = "/veloria/screens/I1523-661_1523-389.svg";
 
 /* 1523:664…1523:671 — nav tabs: mascot art (labels baked in, Wholesale ships
-   its active state) on the shared 70-wide hit grid. Wholesale has no page of
-   its own, so — like the shared BottomNav — its tab stays inert. */
+   its active state) on the shared 70-wide hit grid. Wholesale is drawn active
+   because this page sits in that section, and it links on to the B-4
+   application form (DQ-13(a), answered 2026-07-29). */
 const NAV_TABS = [
   { x: 18, src: "1523-665", label: "Home", href: "/" },
   { x: 126, src: "1523-667", label: "Shop", href: "/shop" },
-  { x: 234, src: "1523-669", label: "Wholesale", href: null },
+  { x: 234, src: "1523-669", label: "Wholesale", href: "/business/wholesale" },
   { x: 342, src: "1523-671", label: "Me", href: "/account" },
 ] as const;
 
@@ -650,14 +651,11 @@ export function PartnershipsScreen() {
             />
           );
           const style: React.CSSProperties = { ...abs(tab.x, 0, 70, 59), display: "block" };
-          return tab.href ? (
+          // Every tab on this screen links out, so there is no inert fallback.
+          return (
             <Link key={tab.label} href={tab.href} style={style}>
               {art}
             </Link>
-          ) : (
-            <div key={tab.label} style={style}>
-              {art}
-            </div>
           );
         })}
       </div>

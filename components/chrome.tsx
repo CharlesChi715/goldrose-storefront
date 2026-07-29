@@ -244,12 +244,21 @@ type Tab = {
 // back to "Me" in the 07-27 frames, which finally ship both of its states:
 // outline (921:251, shop/PDP frames) and filled (939:174, the
 // ACCOUNT-INFO-*-DASHBOARD frames) — the Login/Me session swap is gone.
+// Wholesale points at the B-4 application form (DQ-13(a), answered 2026-07-29);
+// it had stayed inert while that page did not yet exist. Its active art is the
+// one tab state the 07-25 home set never rendered — B-4 ships it (1523:771), so
+// that id carries a set prefix.
 const TABS: Tab[] = [
   { id: "Home", href: "/", img: "763-123", activeImg: "763-113", label: "Home" },
   { id: "Shop", href: "/shop", img: "763-115", activeImg: "763-125", label: "Shop" },
-  { id: "Wholesale", img: "763-117", label: "Wholesale" },
+  { id: "Wholesale", href: "/business/wholesale", img: "763-117", activeImg: "screens/1523-771", label: "Wholesale" },
   { id: "Account", href: "/account", img: "921-251", activeImg: "939-174", label: "Me" },
 ];
+
+// Bare ids resolve against the 07-25 home render set; an id containing "/" is a
+// path into a sibling set under /veloria.
+const tabArtSrc = (id: string) =>
+  id.includes("/") ? `/veloria/${id}.png` : `/veloria/home/${id}.png`;
 
 // Every tab's art sits at the same spot inside its 70×59 hit area.
 const TAB_ART_STYLE: React.CSSProperties = { ...abs(10, 1, 50, 57), display: "block" };
@@ -257,7 +266,7 @@ const TAB_ART_STYLE: React.CSSProperties = { ...abs(10, 1, 50, 57), display: "bl
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
   return (
     <img
-      src={`/veloria/home/${isActive && tab.activeImg ? tab.activeImg : tab.img}.png`}
+      src={tabArtSrc(isActive && tab.activeImg ? tab.activeImg : tab.img)}
       alt={tab.label}
       width={50}
       height={57}
@@ -351,10 +360,12 @@ export function ScaleFrame({
   navGap?: number;
   navActive?: TabId | (string & {});
   /**
-   * Opt out of the shared tab bar. B-3/B-4 (business) show no tab bar at all;
-   * C-1/C-2 (tracking, confirmation) draw their OWN glyph nav band inside the
-   * frame, so the screen component renders it and the shared bar would double
-   * up. Both cases flagged to the design team in docs/ixd.
+   * Opt out of the shared tab bar. B-3 (partnerships) and C-1/C-2 (tracking,
+   * confirmation) draw their OWN nav band inside the frame, so the screen
+   * component renders it and the shared bar would double up. Flagged to the
+   * design team in docs/ixd. B-4 (wholesale) used to be in that list; as of
+   * 2026-07-29 it renders the shared fixed bar like every other main page,
+   * because an in-frame band scrolls away instead of staying reachable.
    */
   nav?: boolean;
   children: React.ReactNode;

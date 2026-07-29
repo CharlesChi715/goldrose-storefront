@@ -3330,3 +3330,66 @@ homepage band ~30s, leave the page, confirm it tops Section attention) → PR.
 - One real gap, not fixed (awaiting owner call): sort lives in React state
   only, so a hard reload / shared link resets the pill to "New". Putting it
   in the URL (`?sort=`) would make it shareable and SSR-correct.
+
+## 2026-07-29 — Bottom-nav "Wholesale" tab wired to /business/wholesale
+
+**Problem.** The Wholesale tab was inert in both bottom-nav implementations —
+it rendered as a plain `<div>`, not a link, so tapping it did nothing. The
+code comments justified this with "Wholesale has no page of its own", which
+had gone stale: `/business/wholesale` exists and renders fine. Tracked as
+DQ-13(a) / F-02 in `docs/TODO/design-team-questions.md`.
+
+**Decision.** Charles answered DQ-13(a): the tab opens `/business/wholesale`
+(the B-4 application form), not the `/business/partnerships` overview.
+
+**Changed.**
+- `components/chrome.tsx` — shared `BottomNav` (~30 pages): added
+  `href: "/business/wholesale"`; refreshed the stale comment.
+- `components/screens/PartnershipsScreen.tsx` — own nav band: `href: null` →
+  `/business/wholesale`. With all four tabs linking, the inert-tab ternary
+  became unreachable (`tsc`: "Property 'label' does not exist on type
+  'never'") and was removed.
+- `components/screens/WholesaleScreen.tsx` — comment only. Its tab stays
+  inert: this screen *is* the destination.
+- `docs/TODO/design-team-questions.md`, `docs/ixd/README.md` — recorded the
+  answer; DQ-13(b) ("Rose Deals") remains open.
+
+**Verified.** `tsc --noEmit` clean; `eslint` clean on all three files; drove
+both navs in a real browser (Playwright) — `/` → `/business/wholesale` and
+`/business/partnerships` → `/business/wholesale`; zero console errors; the
+tab is correctly a non-link image on the wholesale page itself.
+
+**Note.** The dark "N" badge overlapping "Your Business Details" in dev
+screenshots is the Next.js dev-tools button, not a layout defect.
+
+## 2026-07-29 — /business/wholesale switched to the shared fixed bottom nav
+
+**Problem.** B-4 drew its tab bar *inside* the 1954-tall page canvas, so the
+bar scrolled away with the content and was only reachable once you scrolled to
+the very bottom — unlike every other main page, where the bar is pinned to the
+viewport.
+
+**Changed.**
+- `app/business/wholesale/page.tsx` — `nav={false}` → `navActive="Wholesale"`.
+  Frame height stays 1954: the deleted band's 58px is left empty so the fixed
+  bar floats over background, not over the response-time note (content ends at
+  y=1896, last text ends ~y=1859).
+- `components/screens/WholesaleScreen.tsx` — removed the in-frame band and
+  `NAV_TABS`.
+- `components/chrome.tsx` — B-4 is the only frame that ever rendered the
+  Wholesale tab's *active* state (1523:771); the 07-25 home set has only the
+  outline. Added it as the shared tab's `activeImg`, which meant tab ids can
+  now carry a set prefix — new `tabArtSrc()` resolves a bare id against
+  `/veloria/home` and a slash-bearing id against `/veloria`. Refreshed the
+  stale `nav` JSDoc that still claimed B-3/B-4 show no tab bar.
+- `docs/ixd/README.md` — recorded both the wiring and this change.
+
+**Verified.** `tsc --noEmit` and `eslint` clean; in a real browser the bar is
+pinned on first paint, the Wholesale tab renders its filled active art, the
+response-time note is fully clear of the bar when scrolled to the end, only one
+nav exists on the page, and zero console errors. Spot-checked `/shop` — its own
+active art still resolves, so the path refactor did not regress other pages.
+All three nav images return 200.
+
+**Left deliberately.** B-3 `/business/partnerships` still draws its own
+in-frame band and still scrolls away — this change was scoped to wholesale.

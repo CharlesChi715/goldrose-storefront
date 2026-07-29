@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
  * /care — pixel-exact implementation of the four "mepage-customer care"

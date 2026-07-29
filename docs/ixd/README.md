@@ -125,6 +125,30 @@ H-33 corporate, H-34 story, Wholesale tab — renders pixel-exact but is
 **not clickable** until its target page exists (per the "leave placeholder"
 instruction above).
 
+**Update 2026-07-29 — the bottom-nav Wholesale tab is now wired.** Its target
+page exists, so the "until its target page exists" condition above is spent:
+the tab opens `/business/wholesale` (DQ-13(a), answered by Charles). This
+covers both bottom-nav implementations — the shared `BottomNav`
+(`components/chrome.tsx`) and the band the business pages draw for themselves
+(`PartnershipsScreen`).
+
+**Update 2026-07-29 — B-4 now uses the shared fixed bar.** The B-4 frame drew
+its tab bar *inside* the 1954-tall page, so it scrolled away with the canvas
+and was only reachable at the very bottom. `/business/wholesale` now renders
+the shared fixed `BottomNav` (`navActive="Wholesale"`) like every other main
+page; the in-frame band was deleted from `WholesaleScreen`. The frame height
+is unchanged — the band's old 58px is left empty so the fixed bar floats over
+background rather than over the response-time note.
+
+One asset note: B-4 is the only frame that ever rendered the Wholesale tab's
+**active** state (1523:771); the 07-25 home set has just the outline. That art
+is now the shared tab's `activeImg`, so tab ids may carry a set prefix
+(`screens/1523-771`) — see `tabArtSrc` in `components/chrome.tsx`.
+
+⚠️ **B-3 (`/business/partnerships`) still draws its own in-frame band** and so
+still scrolls away. Left as-is deliberately (this change was scoped to
+wholesale); worth aligning — see DQ-21 on the disagreeing tab bars.
+
 **Update 2026-07-26 — the three A-4 MORI gift-path cards are now wired.**
 H-15 "FIND A GIFT" → `/shop` (no gift-finder page yet; the catalogue is the
 closest honest destination). H-16 "PERSONALIZE YOUR ROSE" → `#personalize` and

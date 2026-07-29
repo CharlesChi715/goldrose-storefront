@@ -175,15 +175,9 @@ const VOLUME_CHIPS: Chip[] = [
 // byte-identical; one file serves both.
 const ARROW = `${A}/I1523-762_1523-389.svg`;
 
-// 1523:766…1523:773 — nav tabs: mascot art (labels baked in, Wholesale ships
-// its active state) on the shared 70-wide hit grid. Wholesale has no page of
-// its own, so — like the shared BottomNav — its tab stays inert.
-const NAV_TABS = [
-  { x: 18, src: "1523-767", label: "Home", href: "/" },
-  { x: 126, src: "1523-769", label: "Shop", href: "/shop" },
-  { x: 234, src: "1523-771", label: "Wholesale", href: null },
-  { x: 342, src: "1523-773", label: "Me", href: "/account" },
-] as const;
+// 1523:766…1523:773 — this screen's own nav tabs are retired; the route renders
+// the shared fixed BottomNav (2026-07-29). B-4's Wholesale active art (1523:771)
+// lives on as the shared tab's activeImg — see TABS in components/chrome.tsx.
 
 /** One static selection chip (r=16), positioned inside its field row. */
 function ChipRow({ chips }: { chips: Chip[] }) {
@@ -588,42 +582,11 @@ export function WholesaleScreen() {
       </div>
 
       {/* ---- 1523:765 · 13 · Bottom Navigation ---- */}
-      {/* The 07-29 frame draws the nav band inside the business page (the
-          route keeps the shared fixed BottomNav switched off). Tab art is the
-          frames' own mascot images, Wholesale in its baked active state. The
-          band's sheet box runs 1px past the 1954 outer frame — clipped, as in
-          the design. */}
-      <div
-        style={{
-          ...abs(0, 1896, 430, 59),
-          background: "#FFFFFF",
-          borderRadius: "15px 15px 0 0",
-          boxShadow: "inset 0 0 0 1px #EEE6DD",
-          overflow: "hidden",
-        }}
-      >
-        {NAV_TABS.map((tab) => {
-          const art = (
-            <img
-              src={`${A}/${tab.src}.png`}
-              alt={tab.label}
-              width={50}
-              height={57}
-              style={{ ...abs(10, 1, 50, 57), display: "block" }}
-            />
-          );
-          const style: React.CSSProperties = { ...abs(tab.x, 0, 70, 59), display: "block" };
-          return tab.href ? (
-            <Link key={tab.label} href={tab.href} style={style}>
-              {art}
-            </Link>
-          ) : (
-            <div key={tab.label} style={style}>
-              {art}
-            </div>
-          );
-        })}
-      </div>
+      {/* The 07-29 frame drew this band inside the page, so it scrolled away
+          with the canvas. The route now renders the shared fixed BottomNav
+          instead (2026-07-29), matching every other main page. The frame's
+          1954 height is unchanged: the band's old 58px is left empty so the
+          fixed bar floats over background, not over the response-time note. */}
     </>
   );
 }
