@@ -115,7 +115,13 @@ test("the admin analytics page shows the engagement cards", async ({ page }) => 
   await page.setViewportSize(ADMIN_VIEWPORT);
   await adminLogin(page);
   await page.goto("/admin/analytics?range=30d");
-  await expect(page.getByText("Time on page", { exact: false })).toBeVisible();
-  await expect(page.getByText("Section attention", { exact: false })).toBeVisible();
-  await expect(page.getByText("Where visits stop", { exact: false })).toBeVisible();
+  // Match the card headings, not loose text: each card also carries a caption
+  // explaining its numbers, and "Median time on page" contains the title.
+  await expect(page.getByRole("heading", { name: "Time on page" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Section attention" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Where visits stop" })).toBeVisible();
+
+  // The captions are the point of this card set — numbers like "42s · 73%" are
+  // unreadable without them.
+  await expect(page.getByText("visits measured", { exact: false })).toBeVisible();
 });
