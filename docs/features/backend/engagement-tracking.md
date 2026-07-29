@@ -109,8 +109,8 @@ number this migration `0005` — do not reuse `0004`.
 
 Three cards on `/admin/analytics`, EN + 中文 like every other admin string:
 
-1. **Time on page** — median active seconds per path, compared to previous period.
-2. **Section attention** (per page) — bar list of median seconds per section,
+1. **Time on page** — average active seconds per path, compared to previous period.
+2. **Section attention** (per page) — bar list of average seconds per section,
    with the % of visits that ever reached it.
 3. **Drop-off** — the last section reached, ranked; tells us where readers stop.
 
@@ -215,7 +215,7 @@ Charles: if we choose Biggest share of the viewport wins, what if the section is
   the 1 s floor earns nothing; the sum invariant holds across visibility
   changes; a short centred section outscores a tall partial one.
 - `tests/unit/engagement-report.test.ts` (7 tests): unmeasured visits are
-  excluded rather than counted as zero-second visits; medians, reach rate and
+  excluded rather than counted as zero-second visits; averages, reach rate and
   drop-off shares.
 - `tests/e2e/engagement-beacon.spec.ts` (2 tests): a real Chromium visit to `/`
   banks time, records tagged sections, and on tab-hide flushes a summary that
@@ -230,7 +230,7 @@ Charles: if we choose Biggest share of the viewport wins, what if the section is
 - A payload whose section times exceed the page total has its `sections`
   dropped and its page time kept — the invariant is enforced server-side too.
 - A caller holding the `viewId` but the wrong `visitorId` cannot write.
-- `/admin/analytics?range=30d` renders "Time on page — 52s median", "Section
+- `/admin/analytics?range=30d` renders "Time on page" with its average, "Section
   attention" (`HOME-FEATURED-SECTION` 21s · 67% reached) and "Where visits
   stop", from seeded data.
 

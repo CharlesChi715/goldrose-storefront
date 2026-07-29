@@ -305,15 +305,15 @@ export function AnalyticsDashboard({
         <InlineGrid columns={{ xs: 1, md: 3 }} gap="400">
           <ListCard
             title={t("analytics.card.timeOnPage")}
-            caption={`${t("analytics.engagement.median")}: ${formatDuration(
-              summary.engagement.medianActiveMs.current,
+            caption={`${t("analytics.engagement.average")}: ${formatDuration(
+              summary.engagement.averageActiveMs.current,
             )} · ${summary.engagement.measuredVisits} ${t(
               "analytics.engagement.measured",
             )}. ${t("analytics.engagement.captionTime")}`}
             empty={t("analytics.engagement.empty")}
             rows={summary.engagement.byPath.map((row) => ({
               label: `${row.path} (${row.visits})`,
-              value: `${formatDuration(row.medianActiveMs)} · ${row.medianScrollPct}%`,
+              value: `${formatDuration(row.averageActiveMs)} · ${row.averageScrollPct}%`,
             }))}
           />
           <ListCard
@@ -322,7 +322,7 @@ export function AnalyticsDashboard({
             empty={t("analytics.engagement.emptySections")}
             rows={summary.engagement.sections.map((row) => ({
               label: row.section,
-              value: `${formatDuration(row.medianMs)} · ${row.reachRatePercent}%`,
+              value: `${formatDuration(row.averageMs)} · ${row.reachRatePercent}%`,
             }))}
           />
           <ListCard

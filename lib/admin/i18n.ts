@@ -470,7 +470,7 @@ const en = {
   "analytics.card.timeOnPage": "Time on page",
   "analytics.card.sectionAttention": "Section attention",
   "analytics.card.dropOff": "Where visits stop",
-  "analytics.engagement.median": "Median time on page",
+  "analytics.engagement.average": "Average time on page",
   "analytics.engagement.measured": "measured visits",
   "analytics.engagement.scroll": "scrolled",
   "analytics.engagement.reach": "reached",
@@ -480,9 +480,9 @@ const en = {
   "analytics.engagement.emptySections":
     "No section times yet — only sections tagged with data-el are measured",
   "analytics.engagement.captionTime":
-    "Per page: (n) = visits measured, then median time and how far down the page they scrolled. Time counts only while the tab is open and the visitor is active.",
+    "Per page: (n) = visits measured, then average time and how far down the page they scrolled. Time counts only while the tab is open and the visitor is active.",
   "analytics.engagement.captionSections":
-    "Median time spent inside each section, then the share of that page's visits that ever reached it. One section is counted at a time, so these never add up to more than the page's time.",
+    "Average time spent inside each section, then the share of that page's visits that ever reached it. One section is counted at a time, so these never add up to more than the page's time.",
   "analytics.engagement.captionDropOff":
     "The last section a visit reached before leaving, then its share of all measured visits. Where readers stop.",
 
@@ -1002,7 +1002,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.card.timeOnPage": "页面停留时长",
   "analytics.card.sectionAttention": "区域关注度",
   "analytics.card.dropOff": "访问止步位置",
-  "analytics.engagement.median": "停留时长中位数",
+  "analytics.engagement.average": "平均停留时长",
   "analytics.engagement.measured": "个已测量访问",
   "analytics.engagement.scroll": "滚动至",
   "analytics.engagement.reach": "到达",
@@ -1010,9 +1010,9 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.engagement.empty": "暂无停留数据——访客离开页面时才会回报时长",
   "analytics.engagement.emptySections": "暂无区域时长——仅统计带 data-el 标记的区域",
   "analytics.engagement.captionTime":
-    "按页面：(n) = 已测量的访问次数，其后为停留时长中位数与页面滚动深度。仅在标签页打开且访客活跃时计时。",
+    "按页面：(n) = 已测量的访问次数，其后为平均停留时长与页面滚动深度。仅在标签页打开且访客活跃时计时。",
   "analytics.engagement.captionSections":
-    "每个区域的停留时长中位数，其后为该页访问中到达此区域的比例。同一时刻只统计一个区域，因此各区域之和不会超过整页时长。",
+    "每个区域的平均停留时长，其后为该页访问中到达此区域的比例。同一时刻只统计一个区域，因此各区域之和不会超过整页时长。",
   "analytics.engagement.captionDropOff":
     "访问离开前最后到达的区域，其后为占全部已测量访问的比例，即读者止步之处。",
 

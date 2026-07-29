@@ -122,7 +122,7 @@ export type AnalyticsSummary = {
   /** How long visits actually lasted and which sections held attention
    *  (engagement-tracking.md). Empty until closing beacons start landing. */
   engagement: {
-    medianActiveMs: MetricPair;
+    averageActiveMs: MetricPair;
     measuredVisits: number;
     byPath: PathEngagement[];
     sections: SectionEngagement[];
@@ -386,9 +386,9 @@ export async function analyticsSummary(
         .sort((a, b) => b.visitors - a.visitors),
     },
     engagement: {
-      medianActiveMs: {
-        current: currentEngagement.medianActiveMs,
-        previous: previousEngagement.medianActiveMs,
+      averageActiveMs: {
+        current: currentEngagement.averageActiveMs,
+        previous: previousEngagement.averageActiveMs,
       },
       measuredVisits: currentEngagement.measuredVisits,
       byPath: currentEngagement.byPath,

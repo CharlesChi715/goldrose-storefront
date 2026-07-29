@@ -6,8 +6,10 @@
  * to a date range, so `lib/admin/analytics.ts` stays the orchestrator and this
  * stays unit-testable.
  *
- * Medians, not means: one visitor who leaves a tab open behind a lunch break
- * drags an average badly, and dwell distributions are long-tailed by nature.
+ * Averages, on the owner's call 2026-07-29 — the plainer reading of "how long
+ * do people stay". Note the tradeoff this accepts: dwell is long-tailed, so a
+ * few absorbed readers lift the average above what a typical visit looks like.
+ * The 30s idle cut in lib/engagement.ts is what stops that running away.
  */
 
 import type { PageViewRow } from "../supabase/types.ts";
@@ -20,15 +22,15 @@ const TOP_DROP_OFF = 8;
 export type PathEngagement = {
   path: string;
   visits: number;
-  medianActiveMs: number;
-  medianScrollPct: number;
+  averageActiveMs: number;
+  averageScrollPct: number;
 };
 
 export type SectionEngagement = {
   section: string;
   /** Measured visits that spent any time in this section. */
   visits: number;
-  medianMs: number;
+  averageMs: number;
   /** Share of that page's measured visits which reached this section at all. */
   reachRatePercent: number;
 };
@@ -42,25 +44,22 @@ export type DropOffEntry = {
 export type EngagementReport = {
   /** Visits that reported engagement — the denominator for everything here. */
   measuredVisits: number;
-  medianActiveMs: number;
+  averageActiveMs: number;
   byPath: PathEngagement[];
   sections: SectionEngagement[];
   dropOff: DropOffEntry[];
 };
 
 /**
- * Middle value of a numeric list; the mean of the middle two when even.
+ * Arithmetic mean of a numeric list, rounded.
  *
  * @param values Numbers to summarise; order does not matter.
- * @returns The median, or 0 for an empty list.
+ * @returns The average, or 0 for an empty list.
  */
-export function median(values: number[]): number {
+export function mean(values: number[]): number {
   if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? Math.round((sorted[mid - 1] + sorted[mid]) / 2)
-    : sorted[mid];
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return Math.round(total / values.length);
 }
 
 /**
@@ -116,8 +115,8 @@ export function engagementReport(views: PageViewRow[]): EngagementReport {
     .map(([path, samples]) => ({
       path,
       visits: samples.length,
-      medianActiveMs: median(samples),
-      medianScrollPct: median(scrollByPath.get(path) ?? []),
+      averageActiveMs: mean(samples),
+      averageScrollPct: mean(scrollByPath.get(path) ?? []),
     }))
     .sort((a, b) => b.visits - a.visits)
     .slice(0, TOP_PATHS);
@@ -129,12 +128,12 @@ export function engagementReport(views: PageViewRow[]): EngagementReport {
       return {
         section,
         visits: samples.length,
-        medianMs: median(samples),
+        averageMs: mean(samples),
         reachRatePercent:
           pageVisits > 0 ? Math.round((samples.length / pageVisits) * 100) : 0,
       };
     })
-    .sort((a, b) => b.medianMs - a.medianMs)
+    .sort((a, b) => b.averageMs - a.averageMs)
     .slice(0, TOP_SECTIONS);
 
   const dropOffTotal = [...dropOffCounts.values()].reduce((a, b) => a + b, 0);
@@ -149,7 +148,7 @@ export function engagementReport(views: PageViewRow[]): EngagementReport {
 
   return {
     measuredVisits: measured.length,
-    medianActiveMs: median(measured.map((view) => view.active_ms ?? 0)),
+    averageActiveMs: mean(measured.map((view) => view.active_ms ?? 0)),
     byPath,
     sections,
     dropOff,
