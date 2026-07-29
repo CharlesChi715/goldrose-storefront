@@ -5,9 +5,9 @@
 | **What this is**    | The single place where every open question for the design team is collected, so Charles can ask them in one batch. |
 | **Standing doc**    | Not a per-task hand-off — it is never deleted, only emptied as answers land. |
 | **Opened**          | 2026-07-28                                                            |
-| **Last updated**    | 2026-07-28 (Claude Code background job)                               |
+| **Last updated**    | 2026-07-29 (Claude Code background job — the 07-29 redesign import)   |
 | **Verified against**| `main` @ `ded0d46` — every "where it is now" line below was read in the code, not assumed. |
-| **Status**          | 🔴 33 open · 🟡 0 answered, not applied · 🟢 0 applied                 |
+| **Status**          | 🔴 40 open · 🟡 0 answered, not applied · 🟢 0 applied                 |
 
 ## How to use this doc
 
@@ -320,6 +320,72 @@ something the design team never drew.**
 | **Answer** | _(pending)_ |
 
 ---
+
+### 🔴 DQ-34 — The masthead reads "ELDREVE" on ~12 of the 07-29 frames
+
+| | |
+|---|---|
+| **The conflict** | The 07-29 delivery stamps an **ELDREVE** wordmark image (one shared asset, plus an "E" monogram on the keepsake card that is literally a WeChat-saved file) into the headers of the settings, orders, returns, signup, search and keepsake frames — while the same delivery's homepage hero eyebrow still says **GOLDROSE**, the business frames carry real GoldRose art, and C-1/C-2 previously said VELORIA (DQ-22). That is a third brand string on customer-facing screens. |
+| **What we shipped** | The owner's GoldRose wordmark/art substituted at every ELDREVE box (`GoldRoseWordmark` in account-chrome). Nothing on the live site says ELDREVE. |
+| **Ask** | Is ELDREVE template residue, or is a brand rename being explored? If it is residue, please replace the shared image with the GoldRose wordmark so future imports stop carrying it. |
+| **Recommendation** | Treat as residue; also worth telling the bosses a rename would touch every asset, domain and listing, so it should not arrive via a Figma image swap. |
+| **Answer** | _(pending)_ |
+
+### 🔴 DQ-35 — STORY and CRAFT draw two different bottom navs
+
+| | |
+|---|---|
+| **The conflict** | MESTORY 1573:106 draws the owner-art 4-tab bar; its sibling MECRAFT 1573:107 draws the retired five-tab glyph-text bar with **Me active** (it is not a Me page). |
+| **What we shipped** | The shared owner-art bar on both `/story` and `/craft`. |
+| **Ask** | Confirm the owner-art bar is the target for both pages. |
+| **Answer** | _(pending)_ |
+
+### 🔴 DQ-36 — Nothing opens the return-reason sheet
+
+| | |
+|---|---|
+| **The question** | "…track order_return" (1542:628) is the track page under a dim overlay with a return-reason bottom sheet — but no element on the track frame (1541:254) triggers it, and the file has no prototype links. |
+| **What we shipped** | The sheet lives at `/orders/track?return=1`, fully built (visual radios, inert Confirm — no returns backend) but unlinked. |
+| **Ask** | Which element starts a return — a button on the track page, a row on Returns & After-Sales, or the order-details page? |
+| **Recommendation** | A "Start a return" action on `/account/returns`, which is where a customer already looks for it. |
+| **Answer** | _(pending)_ |
+
+### 🔴 DQ-37 — The 07-29 headers drop the search button for a wishlist heart
+
+| | |
+|---|---|
+| **The conflict** | The shop/PDP/home headers now draw 菜单 + 返回 + wordmark + **收藏 (heart)** + cart. The live header's third slot is the **search button**, which really works (overlay → `/shop?q=`), and the team's own 07-27 answer declared wishlist out of scope. The A-1 header render also shows a magnifier at that slot, so the file disagrees with itself. Separately, 返回 back arrows now appear on tab-root pages (shop, bag). |
+| **What we shipped** | The new mascot-style icon art, with search kept in the third slot; bag's back arrow ships wired to history-back. |
+| **Ask** | Confirm search stays (and whether the heart was intentional), and whether tab-root pages should really carry a back arrow. |
+| **Answer** | _(pending)_ |
+
+### 🔴 DQ-38 — A password-less Security screen sits outside the delivered lane
+
+| | |
+|---|---|
+| **The question** | Loose frame 1526:111 duplicates the Security screen minus the password-change fields — exactly the fix for the password/email-link conflict we flagged 07-28 — but it sits outside the 已完成 lane, so we treated it as a draft. |
+| **What we shipped** | `/account/security` still follows the in-lane frame 1523:1078 (password fields as inert styled divs). |
+| **Ask** | Is 1526:111 the intended replacement? If yes we swap it in next pass. |
+| **Recommendation** | Yes — it resolves the conflict; move it into the lane and we will import it. |
+| **Answer** | _(pending)_ |
+
+### 🔴 DQ-39 — Duplicates and scratch frames to clean up in the file
+
+| | |
+|---|---|
+| **The question** | The 07-29 file carries: 1523:1470 ≡ 1542:1551 (byte-identical chat frames — five chat copies total across the flows), 1542:628 ≡ 1523:1266 (return, 932 vs 908 crop), 1541:362 ≡ 1523:3347 and 1541:254 ≡ 1523:775 (checkout-flow vs me-flow twins), and the 07-28 ALT personal-info duplicate is still standing. |
+| **What we shipped** | Each design imported once; twins serve both routes. |
+| **Ask** | Are the flow-twins intentional sitemap notation (fine — say so), and can the scratch copies (1523:1266, 1526:111 if superseded, the 07-28 ALT) be deleted? |
+| **Answer** | _(pending)_ |
+
+### 🔴 DQ-40 — The file was edited while we imported (batch note, please)
+
+| | |
+|---|---|
+| **The question** | During the 07-29 import: CRAFT grew 509→1368px, STORY's placeholder plates became real photos, the care FAQ lists flip-flopped, and the unboxing tile crops moved — all mid-batch. Each cost a re-pass. |
+| **What we shipped** | The newest state of each frame (CRAFT imported after it stabilized). |
+| **Ask** | Per the delivery protocol §2: a two-line batch note (date · frames · what changed · what is knowingly unfinished) with each delivery, and no edits to delivered frames until we confirm import. |
+| **Answer** | _(pending)_ |
 
 ## 4. Assets and exports we need from the design team
 
