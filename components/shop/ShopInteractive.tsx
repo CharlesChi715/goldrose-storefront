@@ -273,11 +273,19 @@ export function ShopInteractive({
     }, FADE_MS);
   };
 
-  // Sorting reorders the DATA that cycles through the fixed design slots;
-  // "new" is the catalog's own order — the state the frame draws.
-  const sorted = [...data];
-  if (sort === "high") sorted.sort((a, b) => b.priceCents - a.priceCents);
-  if (sort === "low") sorted.sort((a, b) => a.priceCents - b.priceCents);
+  // Fill the grid FIRST, then sort what it holds. The catalog is shorter than
+  // the eight design slots (OQ-3), so it cycles to fill them — and sorting the
+  // catalog before that cycling made the visible prices restart every time the
+  // loop came round ($79, $64, $49, $79 …). Ordering the filled grid instead
+  // keeps the sequence strictly monotonic; equal prices stay in fill order
+  // because Array#sort is stable. `art` rides along so a product without its
+  // own photo keeps the frame art it was filled with.
+  const filled = slots.map((_, i) => {
+    const c = contentIndex(i, page, slots.length, rotatePerPage);
+    return { art: slots[c].img, card: data.length ? data[c % data.length] : null };
+  });
+  if (sort === "high") filled.sort((a, b) => (b.card?.priceCents ?? 0) - (a.card?.priceCents ?? 0));
+  if (sort === "low") filled.sort((a, b) => (a.card?.priceCents ?? 0) - (b.card?.priceCents ?? 0));
 
   const overlayOpen = sortOpen || filterOpen;
 
@@ -386,15 +394,14 @@ export function ShopInteractive({
           the same canvas, and it exists only to fade them as one unit. */}
       <div style={{ opacity: fading ? 0 : 1, transition: `opacity ${FADE_MS}ms ease` }}>
         {slots.map((slot, i) => {
-          const c = contentIndex(i, page, slots.length, rotatePerPage);
-          const cardData = sorted.length ? sorted[c % sorted.length] : null;
+          const { art, card } = filled[i];
           return (
             <ProductCard
               key={i}
               slot={slot}
-              img={slots[c].img}
-              href={cardData ? `/products/${cardData.handle}` : "/shop"}
-              data={cardData}
+              img={art}
+              href={card ? `/products/${card.handle}` : "/shop"}
+              data={card}
             />
           );
         })}
