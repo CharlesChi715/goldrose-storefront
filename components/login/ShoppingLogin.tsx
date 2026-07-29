@@ -3,10 +3,16 @@
 /**
  * ROLE OF THIS FILE
  * The signed-out storefront sign-in screen, imported pixel-exact from the
- * VELORIA frame 74:53 ("My · Shopping Account", 430×1232, 已完成). Six design
- * modules stack on a 430-wide canvas: 01 Welcome Hero, 02 Account Type Tabs,
- * 03 Sign In, 04 Member Benefits, 05 GoldRose Membership, 06 Find Existing
- * Order. Module 13 (bottom nav) is the shared BottomNav, already imported.
+ * VELORIA frame 1523:2470 ("loginpage", 430×1232, 2026-07-29 delivery). Six
+ * design modules stack on a 430-wide canvas: 01 Welcome Hero, 02 Account Type
+ * Tabs, 03 Sign In, 04 Member Benefits, 05 GoldRose Membership, 06 Find
+ * Existing Order. Module 13 (bottom nav) is the shared BottomNav — this
+ * main-flow frame keeps the nav band the account-settings frames dropped.
+ *
+ * 07-29 restyle: the outer cards of modules 03/04/06 went WHITE on their sand
+ * hairlines, and the inactive account-type tab went white too; inner tiles,
+ * fields and the VIEW MY ORDER button stay CARD. The frame's glyph re-exports
+ * came back byte-equivalent to the 76-* files, so those assets stay.
  *
  * Sign-in is an emailed link (owner request 2026-07-27): `signInWithOtp`
  * sends a mail whose link lands on /auth/confirm and signs the visitor in.
@@ -29,14 +35,14 @@ import { FadeLink } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
 import { cormorant, inter } from "@/lib/fonts";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
-import { INK, MUTED, CARD, HAIRLINE, CANVAS, Glyph } from "@/components/login/tokens";
+import { INK, MUTED, CARD, HAIRLINE, CANVAS, WHITE, Glyph } from "@/components/login/tokens";
 
 const A = "/veloria/login";
 
 /** Non-breaking spaces: HTML collapses the design's double/triple spaces. */
 const NB = " ";
 
-/* ---------- 01 · Welcome Hero (76:53, 430×310) ---------- */
+/* ---------- 01 · Welcome Hero (1523:2472, 430×310) ---------- */
 
 function WelcomeHero() {
   return (
@@ -58,7 +64,10 @@ function WelcomeHero() {
         {"Sign in to save every meaningful gift,\ntrack orders and continue personalizing anytime."}
       </div>
       <BackButton fallback="/" src="/veloria/home/56-71.png" style={abs(15, 20, 40, 43)} />
-      <Link href="/" style={{ ...abs(157, 22, 136, 40), display: "block" }} aria-label="GoldRose home">
+      {/* The frame's wordmark node (1523:2477, 144,22 152×40) ships an
+          "ELDREVE" placeholder — a mock artifact; the business frame keeps
+          GoldRose. The real wordmark stays, centred in the new box. */}
+      <Link href="/" style={{ ...abs(152, 22, 136, 40), display: "block" }} aria-label="GoldRose home">
         <img
           src="/veloria/home/549-90.png"
           alt="GoldRose"
@@ -69,7 +78,7 @@ function WelcomeHero() {
   );
 }
 
-/* ---------- 02 · Account Type Tabs (76:59, 398×54 @ 16,324) ---------- */
+/* ---------- 02 · Account Type Tabs (1523:2478, 398×54 @ 16,324) ---------- */
 
 function AccountTypeTabs() {
   return (
@@ -86,7 +95,7 @@ function AccountTypeTabs() {
           treatment the bottom-nav tabs get (owner, 2026-07-26). */}
       <FadeLink
         href="/account/business"
-        style={{ ...abs(202, 0, 196, 54), background: CARD, borderRadius: 12, display: "block" }}
+        style={{ ...abs(202, 0, 196, 54), background: WHITE, borderRadius: 12, display: "block" }}
         ariaLabel="Business & Partnerships"
       >
         <Glyph src={`${A}/76-63.svg`} left={14} top={22} width={168} height={13} />
@@ -95,7 +104,7 @@ function AccountTypeTabs() {
   );
 }
 
-/* ---------- 03 · Sign In (76:64, 398×254 @ 16,392) ---------- */
+/* ---------- 03 · Sign In (1523:2483, 398×254 @ 16,392) ---------- */
 
 function SignInCard({
   email,
@@ -132,7 +141,7 @@ function SignInCard({
       }}
       style={{
         ...abs(16, 392, 398, 254),
-        background: CARD,
+        background: WHITE,
         borderRadius: 14,
         boxShadow: `inset 0 0 0 1px ${HAIRLINE}`,
       }}
@@ -141,8 +150,8 @@ function SignInCard({
         {codeStep ? "Check your email" : "Sign in and continue shopping"}
       </div>
 
-      {/* Email / code field (76:68). One box, two roles — the frame has no
-          separate code-entry state. */}
+      {/* Email / code field (1523:2486). One box, two roles — the frame has
+          no separate code-entry state. */}
       <div
         style={{
           ...abs(16, 56, 366, 52),
@@ -152,7 +161,8 @@ function SignInCard({
         }}
       >
         {/* The ✉ is a PNG, not an SVG: Figma renders it from a fallback font
-            and its SVG export degrades to a solid filled box. */}
+            and its SVG export degrades to a solid filled box — the 07-29
+            re-export (1523-2487.svg) degrades the same way. */}
         <img
           src={`${A}/76-69.png`}
           alt=""
@@ -186,7 +196,9 @@ function SignInCard({
         />
       </div>
 
-      {/* Primary button (76:71). */}
+      {/* Primary button (1523:2489). The frame still labels it "SEND
+          VERIFICATION CODE"; the live label matches the emailed-link flow
+          (owner request 2026-07-27) and stays. */}
       <button
         type="submit"
         disabled={disabled}
@@ -217,7 +229,7 @@ function SignInCard({
         </span>
       </button>
 
-      {/* Hint line (76:73) — doubles as the error/status slot. */}
+      {/* Hint line (1523:2491) — doubles as the error/status slot. */}
       <div
         style={{
           ...abs(16, 186, 366, 12),
@@ -233,7 +245,7 @@ function SignInCard({
             : "We’ll email you a secure sign-in link. Click it and you’re in — no password needed."}
       </div>
 
-      {/* Create account (76:83) — the same emailed-code flow creates the
+      {/* Create account (1523:2492) — the same emailed-code flow creates the
           account, so this just focuses the field. */}
       <div style={abs(16, 212, 366, 24)}>
         <span style={{ ...abs(68.5, 5.5, 56, 13), ...txt(11, 13.31, MUTED), fontWeight: 400 }}>
@@ -260,7 +272,7 @@ function SignInCard({
   );
 }
 
-/* ---------- 04 · Member Benefits (76:86, 398×184 @ 16,660) ---------- */
+/* ---------- 04 · Member Benefits (1523:2495, 398×184 @ 16,660) ---------- */
 
 // gx/gy/gw/gh are measured ink boxes (see Glyph), not the design's node boxes.
 const BENEFITS = [
@@ -272,7 +284,7 @@ const BENEFITS = [
 
 function MemberBenefits() {
   return (
-    <div style={{ ...abs(16, 660, 398, 184), background: CARD, borderRadius: 14 }}>
+    <div style={{ ...abs(16, 660, 398, 184), background: WHITE, borderRadius: 14 }}>
       <div style={{ ...abs(14, 16, 156, 18), ...txt(15, 18.15, INK), fontWeight: 700 }}>
         Benefits after sign-in
       </div>
@@ -306,7 +318,7 @@ function MemberBenefits() {
   );
 }
 
-/* ---------- 05 · GoldRose Membership (76:105, 398×205 @ 16,858) ---------- */
+/* ---------- 05 · GoldRose Membership (1523:2514, 398×205 @ 16,858) ---------- */
 
 function Membership({ onCreate }: { onCreate: () => void }) {
   return (
@@ -354,11 +366,11 @@ function Membership({ onCreate }: { onCreate: () => void }) {
   );
 }
 
-/* ---------- 06 · Find Existing Order (76:111, 398×82 @ 16,1077) ---------- */
+/* ---------- 06 · Find Existing Order (1523:2520, 398×82 @ 16,1077) ---------- */
 
 function FindExistingOrder() {
   return (
-    <div style={{ ...abs(16, 1077, 398, 82), background: CARD, borderRadius: 14 }}>
+    <div style={{ ...abs(16, 1077, 398, 82), background: WHITE, borderRadius: 14 }}>
       <Glyph src={`${A}/76-112.svg`} left={19} top={31} width={20} height={20} />
       <div style={{ ...abs(53, 20, 192, 16), ...txt(13, 15.73, INK), fontWeight: 600 }}>
         Already purchased?

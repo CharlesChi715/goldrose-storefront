@@ -45,9 +45,9 @@ export default async function CheckoutSuccessPage({
   const hasTotal = Number.isFinite(totalCents) && totalCents > 0;
 
   return (
-    // The C-2 frame is 430×1386 and has no shared tab bar of its own (it draws
-    // a nav card inside the canvas), so this route opts out of BottomNav.
-    <ScaleFrame height={1386} background="#FFFBF6" fontClass={notoSC.className} nav={false}>
+    // The redesigned C-2 frame (1541:362, 07-29) is 430×1188 and dropped its
+    // glyph tab bar entirely, so this route opts out of BottomNav.
+    <ScaleFrame height={1188} background="#FFFBF6" fontClass={notoSC.className} nav={false}>
       <OrderConfirmedScreen
         orderName={params.order ?? ""}
         total={hasTotal ? formatMoney(totalCents) : null}

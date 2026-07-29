@@ -94,13 +94,16 @@ export function A11() {
             >
               {"A flower may fade.\nThe story does not have to."}
             </div>
-            {/* 506:96 CTA · Read Our Story — placeholder, not clickable */}
-            <div
+            {/* 506:96 CTA · Read Our Story — live since 07-29: /story exists */}
+            <Link
+              href="/story"
+              aria-label="Read our story"
               style={{
                 ...abs(25, 216, 138, 28),
                 background: CTA_GRADIENT,
                 borderRadius: 6,
                 overflow: "hidden",
+                display: "block",
               }}
             >
               <div
@@ -124,7 +127,7 @@ export function A11() {
                 height={7}
                 style={{ ...abs(117.02, 11.005, 13, 7), display: "block" }}
               />
-            </div>
+            </Link>
             {/* 506:99 story divider (hairline sits just above the node's y) */}
             <img
               src="/veloria/home/506-99.svg"

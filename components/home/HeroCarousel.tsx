@@ -7,10 +7,10 @@
  * art — one photo and four inert ellipses.
  *
  * ⚠️ PLACEHOLDER: the design ships one hero photo against four dots, so slides
- * 2–4 repeat the first card, which is what makes the auto-play visible. Slide
- * 1 keeps the design's exact bleed framing (the crop overhangs 343px above the
- * window), so the home pixel baseline is unaffected while the track rests at
- * its first slide.
+ * 2–4 repeat the first card, which is what makes the auto-play visible. The
+ * 07-29 delivery replaced the slide-1 art with a flat 430×317 photo
+ * (1523:1675 — the candle-lit "Real Rose" box scene), so the old 343px
+ * overhang crop is gone.
  */
 
 import { Carousel } from "@/components/home/Carousel";
@@ -43,11 +43,11 @@ export function HeroCarousel() {
       name="HOME-HERO"
       renderSlide={() => (
         <img
-          src="/veloria/home/153-64.png"
+          src="/veloria/screens/1523-1675.png"
           alt="Gold-dipped rose in a gift box"
           width={430}
-          height={1003}
-          style={{ ...abs(0, -343, 430, 1003), display: "block" }}
+          height={317}
+          style={{ ...abs(0, 0, 430, 317), display: "block" }}
         />
       )}
     />

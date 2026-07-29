@@ -1,19 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * B-3 "Business Partnerships" — pixel-exact import of VELORIA frame 561:89
- * (content frame 756:140): brand hero, 120+ colorway swatches, the partner
- * grid, four "Why GoldRose" advantage cards and the 4-step process with two
- * CTAs. Only "APPLY FOR WHOLESALE" (756:240) and the header back chevron are
- * wired; "CONTACT BUSINESS TEAM" (756:243) is a non-clickable placeholder.
- * Fragment only — the route supplies ScaleFrame and the bottom nav.
+ * B-3 "Business Partnerships" — pixel-exact import of VELORIA frame 1523:567
+ * (07-29 restyle, 430×1907): brand hero, 120+ colorway swatches, the partner
+ * grid, four "Why GoldRose" advantage cards, the 4-step process with two CTAs
+ * and — new in the 07-29 frames — the mascot bottom-nav band drawn in-frame.
+ * Only "APPLY FOR WHOLESALE" (1523:661), the header back button and the nav
+ * tabs are wired; "CONTACT BUSINESS TEAM" (1523:662) is a non-clickable
+ * placeholder. Fragment only — the route supplies ScaleFrame (nav={false}).
  */
 
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-/* 756:165…756:176 — 12 colorway dots, 22×22 on a 32px pitch inside the
+/* 1523:583…1523:594 — 12 colorway dots, 22×22 on a 32px pitch inside the
    398×52 swatch frame (all share the 1px inset gold ring). */
 const SWATCHES = [
   "#AD0808",
@@ -30,7 +31,7 @@ const SWATCHES = [
   "#EB4D57",
 ];
 
-/* 756:181…756:198 — the six partner tiles, three per 398×88 row. `glyph`
+/* 1523:600…1523:618 — the six partner tiles, three per 398×88 row. `glyph`
    boxes are the TEXT nodes' own boxes, relative to the 126×88 tile. */
 type Partner = {
   x: number;
@@ -42,18 +43,18 @@ type Partner = {
 
 const PARTNER_ROWS: readonly Partner[][] = [
   [
-    { x: 0, src: "756-182", alt: "⌂", glyph: { x: 54, w: 18, h: 29 }, label: "Boutiques" },
-    { x: 136, src: "756-185", alt: "▣", glyph: { x: 51, w: 24, h: 29 }, label: "E-commerce" },
-    { x: 272, src: "756-188", alt: "✦", glyph: { x: 52.5, w: 21, h: 29 }, label: "Creators" },
+    { x: 0, src: "1523-601", alt: "⌂", glyph: { x: 54, w: 18, h: 29 }, label: "Boutiques" },
+    { x: 136, src: "1523-604", alt: "▣", glyph: { x: 51, w: 24, h: 29 }, label: "E-commerce" },
+    { x: 272, src: "1523-607", alt: "✦", glyph: { x: 52.5, w: 21, h: 29 }, label: "Creators" },
   ],
   [
-    { x: 0, src: "756-192", alt: "❀", glyph: { x: 51, w: 24, h: 29 }, label: "Florists" },
-    { x: 136, src: "756-195", alt: "♔", glyph: { x: 51, w: 24, h: 29 }, label: "Corporate Gifts" },
-    { x: 272, src: "756-198", alt: "⌘", glyph: { x: 51, w: 24, h: 29 }, label: "Distributors" },
+    { x: 0, src: "1523-611", alt: "❀", glyph: { x: 51, w: 24, h: 29 }, label: "Florists" },
+    { x: 136, src: "1523-614", alt: "♔", glyph: { x: 51, w: 24, h: 29 }, label: "Corporate Gifts" },
+    { x: 272, src: "1523-617", alt: "⌘", glyph: { x: 51, w: 24, h: 29 }, label: "Distributors" },
   ],
 ];
 
-/* 756:224…756:239 — process steps, 93×112 tiles on a 101px pitch. */
+/* 1523:645…1523:660 — process steps, 93×112 tiles on a 101px pitch. */
 const STEPS = [
   { x: 0, n: "01", title: "Share Needs", body: "Tell us your market and goals." },
   { x: 101, n: "02", title: "Align", body: "Select products, colors and pricing." },
@@ -61,13 +62,24 @@ const STEPS = [
   { x: 303, n: "04", title: "Launch", body: "Quote, production and shipment." },
 ];
 
-/* Both CTA arrows (I756:240;145:55 / I756:243;145:58) share one glyph render. */
-const ARROW = "/veloria/screens/I753-116_145-55.svg";
+/* Both CTA arrows (I1523:661;1523:389 / I1523:662;1523:392) export
+   byte-identical; one file serves both. */
+const ARROW = "/veloria/screens/I1523-661_1523-389.svg";
+
+/* 1523:664…1523:671 — nav tabs: mascot art (labels baked in, Wholesale ships
+   its active state) on the shared 70-wide hit grid. Wholesale has no page of
+   its own, so — like the shared BottomNav — its tab stays inert. */
+const NAV_TABS = [
+  { x: 18, src: "1523-665", label: "Home", href: "/" },
+  { x: 126, src: "1523-667", label: "Shop", href: "/shop" },
+  { x: 234, src: "1523-669", label: "Wholesale", href: null },
+  { x: 342, src: "1523-671", label: "Me", href: "/account" },
+] as const;
 
 /**
- * 756:201 / 756:206 / 756:211 / 756:216 — one advantage card: a 154×100 photo
- * on one side and a 216×100 copy frame on the other. Card 4 sets its own
- * title/body metrics (smaller title, 42px title box, taller body leading).
+ * 1523:621 / 626 / 631 / 636 — one advantage card: a 154×100 photo on one
+ * side and a 216×100 copy frame on the other. Card 4 sets its own title/body
+ * metrics (smaller title, 42px title box, taller body leading).
  */
 function Advantage({
   top,
@@ -77,7 +89,7 @@ function Advantage({
   title,
   titleTop = 23,
   titleSize = 17,
-  titleLine = "22.66px",
+  titleLine = "22.7px",
   titleHeight,
   body,
   bodyTop = 53,
@@ -120,7 +132,7 @@ function Advantage({
       }}
     >
       {imgSide === "left" ? photo : null}
-      {/* copy frame (756:203 / 208 / 213 / 218) — clips its two lines */}
+      {/* copy frame (1523:623 / 627 / 633 / 637) — clips its two lines */}
       <div style={{ ...abs(copyX, 8, 216, 100), overflow: "hidden" }}>
         <div
           className={playfair.className}
@@ -155,32 +167,38 @@ function Advantage({
 export function PartnershipsScreen() {
   return (
     <>
-      {/* 756:140 content frame — 1848 of the 1922px canvas; the 74px tail is
-          the outer frame's own cream, left for the bottom nav. */}
-      <div style={{ ...abs(0, 0, 430, 1848), background: "#FFF6EC" }} />
-
-      {/* ---------- 756:141 · 01 / Brand Hero ---------- */}
+      {/* ---------- 1523:569 · 01 / Brand Hero ---------- */}
       <div style={{ ...abs(0, 0, 430, 460), background: "#FFF6EC", overflow: "hidden" }}>
-        {/* 756:153 header (back chevron + wordmark) served as one Figma render */}
-        <img
-          src="/veloria/screens/756-153.svg"
-          alt="❀ GOLDROSE"
-          width={398}
-          height={44}
-          style={{ ...abs(16, 14, 398, 44), display: "block" }}
-        />
-        {/* 756:154 back chevron — transparent hit area over the render */}
+        {/* 1523:570 Brand Navigation — clips, and the wordmark (1523:572) sits
+            4.5px above the band's top edge, cropped by design. */}
+        <div style={{ ...abs(16, 14, 398, 42), overflow: "hidden" }}>
+          <img
+            src="/veloria/screens/1523-571.png"
+            alt=""
+            width={40}
+            height={42}
+            style={{ ...abs(0, 0, 40, 42), display: "block", objectFit: "cover" }}
+          />
+          <img
+            src="/veloria/screens/1523-572.png"
+            alt="GoldRose"
+            width={140}
+            height={51}
+            style={{ ...abs(131, -4.5, 140, 51), display: "block", objectFit: "cover" }}
+          />
+        </div>
+        {/* 1523:571 back button — transparent hit area over its art */}
         <Link
           href="/"
           aria-label="Back to home"
-          style={{ ...abs(16, 18, 10, 36), display: "block" }}
+          style={{ ...abs(16, 14, 40, 42), display: "block" }}
         />
 
-        {/* 756:156 hero title */}
+        {/* 1523:573 hero title */}
         <div
           className={playfair.className}
           style={{
-            ...abs(16, 68, 398),
+            ...abs(16, 66, 398),
             fontSize: 30,
             lineHeight: "34px",
             fontWeight: 600,
@@ -191,11 +209,11 @@ export function PartnershipsScreen() {
           {"Gifts Your Customers\nWill Always Remember"}
         </div>
 
-        {/* 756:157 hero body — wraps inside its 398px box */}
+        {/* 1523:574 hero body — wraps inside its 398px box */}
         <div
           className={notoSC.className}
           style={{
-            ...abs(16, 154, 398),
+            ...abs(16, 152, 398),
             fontSize: 12,
             lineHeight: "18px",
             fontWeight: 400,
@@ -206,24 +224,24 @@ export function PartnershipsScreen() {
           distribution partners.
         </div>
 
-        {/* 756:158 hero photo — the Figma render bakes in the r=16 corners and
+        {/* 1523:575 hero photo — the Figma render bakes in the r=16 corners and
             the 0/6/16 drop shadow, so its box bleeds 16px each side and starts
-            10px above the node (y 210 → 200); section 01 clips the last 10px. */}
+            10px above the node (y 208 → 198); section 01 clips the tail. */}
         <img
-          src="/veloria/screens/756-158.png"
+          src="/veloria/screens/1523-575.png"
           alt="Pink velvet GoldRose gift box beside a gold-dipped rose"
           width={430}
           height={270}
-          style={{ ...abs(0, 200, 430, 270), display: "block" }}
+          style={{ ...abs(0, 198, 430, 270), display: "block" }}
         />
       </div>
 
-      {/* ---------- 756:142 · 02 / Colorways ---------- */}
-      <div style={{ ...abs(0, 460, 430, 188), background: "#FFFFFF", overflow: "hidden" }}>
-        {/* 756:159 heading row */}
+      {/* ---------- 1523:576 · 02 / Colorways ---------- */}
+      <div style={{ ...abs(0, 460, 430, 188), background: "#FFF6EC", overflow: "hidden" }}>
+        {/* 1523:577 heading row */}
         <div style={{ ...abs(16, 14, 398, 30), overflow: "hidden" }}>
           <img
-            src="/veloria/screens/756-160.svg"
+            src="/veloria/screens/1523-578.svg"
             alt=""
             width={11}
             height={14}
@@ -239,7 +257,7 @@ export function PartnershipsScreen() {
             style={{
               ...abs(83.5, 0, 231),
               fontSize: 21,
-              lineHeight: "27.99px",
+              lineHeight: "28px",
               fontWeight: 500,
               color: "#09442E",
               whiteSpace: "nowrap",
@@ -248,7 +266,7 @@ export function PartnershipsScreen() {
             120+ Curated Colorways
           </div>
           <img
-            src="/veloria/screens/756-160.svg"
+            src="/veloria/screens/1523-580.svg"
             alt=""
             width={11}
             height={14}
@@ -261,7 +279,7 @@ export function PartnershipsScreen() {
           />
         </div>
 
-        {/* 756:163 colour list */}
+        {/* 1523:581 colour list */}
         <div
           className={notoSC.className}
           style={{
@@ -277,7 +295,7 @@ export function PartnershipsScreen() {
           Ruby · Blush · Violet · Sapphire · Ivory · Gold · Emerald and more
         </div>
 
-        {/* 756:164 swatch row */}
+        {/* 1523:582 swatch row */}
         <div style={{ ...abs(16, 84, 398, 52), overflow: "hidden" }}>
           {SWATCHES.map((color, i) => (
             <div
@@ -292,7 +310,7 @@ export function PartnershipsScreen() {
           ))}
         </div>
 
-        {/* 756:177 caption */}
+        {/* 1523:595 caption */}
         <div
           className={notoSC.className}
           style={{
@@ -309,15 +327,15 @@ export function PartnershipsScreen() {
         </div>
       </div>
 
-      {/* ---------- 756:143 · 03 / Partner Grid ---------- */}
+      {/* ---------- 1523:596 · 03 / Partner Grid ---------- */}
       <div style={{ ...abs(0, 648, 430, 300), background: "#FFF6EC", overflow: "hidden" }}>
-        {/* 756:178 heading */}
+        {/* 1523:597 heading */}
         <div
           className={playfair.className}
           style={{
             ...abs(16, 16, 398),
             fontSize: 23,
-            lineHeight: "30.66px",
+            lineHeight: "30.7px",
             fontWeight: 500,
             color: "#09442E",
             textAlign: "center",
@@ -326,7 +344,7 @@ export function PartnershipsScreen() {
         >
           Who We Partner With
         </div>
-        {/* 756:179 subheading */}
+        {/* 1523:598 subheading */}
         <div
           className={notoSC.className}
           style={{
@@ -342,7 +360,7 @@ export function PartnershipsScreen() {
           Flexible programs for retail, gifting and distribution.
         </div>
 
-        {/* 756:180 / 756:190 partner rows (tiles are placeholders, not clickable) */}
+        {/* 1523:599 / 1523:609 partner rows (tiles are placeholders, not clickable) */}
         {PARTNER_ROWS.map((row, r) => (
           <div key={r} style={{ ...abs(16, 84 + r * 100, 398, 88), overflow: "hidden" }}>
             {row.map((p) => (
@@ -388,15 +406,15 @@ export function PartnershipsScreen() {
         ))}
       </div>
 
-      {/* ---------- 756:144 · 04 / Why GoldRose ---------- */}
-      <div style={{ ...abs(0, 948, 430, 560), background: "#FFFFFF", overflow: "hidden" }}>
-        {/* 756:200 heading */}
+      {/* ---------- 1523:619 · 04 / Why GoldRose ---------- */}
+      <div style={{ ...abs(0, 948, 430, 560), background: "#FFF6EC", overflow: "hidden" }}>
+        {/* 1523:620 heading */}
         <div
           className={playfair.className}
           style={{
             ...abs(16, 14, 398),
             fontSize: 24,
-            lineHeight: "31.99px",
+            lineHeight: "32px",
             fontWeight: 500,
             color: "#09442E",
             whiteSpace: "nowrap",
@@ -408,15 +426,15 @@ export function PartnershipsScreen() {
         <Advantage
           top={48}
           background="rgba(247, 218, 225, 0.66)"
-          img={{ src: "756-202", alt: "Gold-dipped rose against a bokeh backdrop" }}
+          img={{ src: "1523-622", alt: "Gold-dipped rose against a bokeh backdrop" }}
           imgSide="left"
           title="120+ Curated Colors"
           body="Built for campaigns, seasons and distinct markets."
         />
         <Advantage
           top={174}
-          background="#FFF6EC"
-          img={{ src: "756-207", alt: "Preserved rose finished by hand in gold" }}
+          background="#FFFFFF"
+          img={{ src: "1523-630", alt: "Blue preserved rose with gold-trimmed petals" }}
           imgSide="right"
           title="Authentic Rose Craft"
           body="Real preserved roses finished by hand in precious metal."
@@ -424,15 +442,15 @@ export function PartnershipsScreen() {
         <Advantage
           top={300}
           background="rgba(247, 218, 225, 0.66)"
-          img={{ src: "756-212", alt: "Pink velvet GoldRose gift box with a gold rose" }}
+          img={{ src: "1523-632", alt: "Pink velvet GoldRose gift box with a gold rose" }}
           imgSide="left"
           title="Premium Presentation"
           body="Gift-ready packaging designed for high-value retail."
         />
         <Advantage
           top={426}
-          background="#FFF6EC"
-          img={{ src: "756-217", alt: "GoldRose keepsake presentation" }}
+          background="#FFFFFF"
+          img={{ src: "1523-640", alt: "Boxed red preserved rose with its authenticity certificate" }}
           imgSide="right"
           title={"Patent & Copyright Protection"}
           titleTop={6}
@@ -446,15 +464,15 @@ export function PartnershipsScreen() {
         />
       </div>
 
-      {/* ---------- 756:145 · 05 / Partnership Process + CTA ---------- */}
+      {/* ---------- 1523:641 · 05 / Partnership Process + CTA ---------- */}
       <div style={{ ...abs(0, 1508, 430, 340), background: "#FFF6EC", overflow: "hidden" }}>
-        {/* 756:221 heading */}
+        {/* 1523:642 heading */}
         <div
           className={playfair.className}
           style={{
             ...abs(16, 16, 398),
             fontSize: 24,
-            lineHeight: "31.99px",
+            lineHeight: "32px",
             fontWeight: 500,
             color: "#09442E",
             textAlign: "center",
@@ -463,7 +481,7 @@ export function PartnershipsScreen() {
         >
           How Partnership Works
         </div>
-        {/* 756:222 subheading */}
+        {/* 1523:643 subheading */}
         <div
           className={notoSC.className}
           style={{
@@ -479,7 +497,7 @@ export function PartnershipsScreen() {
           A clear path from brief to delivery.
         </div>
 
-        {/* 756:223 step row */}
+        {/* 1523:644 step row */}
         <div style={{ ...abs(16, 88, 398, 112), overflow: "hidden" }}>
           {STEPS.map((s) => (
             <div
@@ -497,7 +515,7 @@ export function PartnershipsScreen() {
                 style={{
                   ...abs(6, 8, 81),
                   fontSize: 22,
-                  lineHeight: "29.33px",
+                  lineHeight: "29.3px",
                   fontWeight: 500,
                   color: "#B86B1F",
                   textAlign: "center",
@@ -537,7 +555,7 @@ export function PartnershipsScreen() {
           ))}
         </div>
 
-        {/* 756:240 CTA · Apply for Wholesale */}
+        {/* 1523:661 CTA · Apply for Wholesale */}
         <Link
           href="/business/wholesale"
           style={{ ...abs(16, 212, 398, 48), display: "block", background: "#3B2F2F", borderRadius: 10 }}
@@ -570,7 +588,7 @@ export function PartnershipsScreen() {
           />
         </Link>
 
-        {/* 756:243 CTA · Contact Business Team (placeholder, not clickable) */}
+        {/* 1523:662 CTA · Contact Business Team (placeholder, not clickable) */}
         <div
           style={{
             ...abs(16, 272, 398, 44),
@@ -606,6 +624,42 @@ export function PartnershipsScreen() {
             }}
           />
         </div>
+      </div>
+
+      {/* ---------- 1523:663 · 13 · Bottom Navigation ---------- */}
+      {/* The 07-29 frame draws the nav band inside the business page (the
+          route keeps the shared fixed BottomNav switched off). Tab art is the
+          frames' own mascot images, Wholesale in its baked active state. */}
+      <div
+        style={{
+          ...abs(0, 1848, 430, 59),
+          background: "#FFFFFF",
+          borderRadius: "15px 15px 0 0",
+          boxShadow: "inset 0 0 0 1px #EEE6DD",
+          overflow: "hidden",
+        }}
+      >
+        {NAV_TABS.map((tab) => {
+          const art = (
+            <img
+              src={`/veloria/screens/${tab.src}.png`}
+              alt={tab.label}
+              width={50}
+              height={57}
+              style={{ ...abs(10, 1, 50, 57), display: "block" }}
+            />
+          );
+          const style: React.CSSProperties = { ...abs(tab.x, 0, 70, 59), display: "block" };
+          return tab.href ? (
+            <Link key={tab.label} href={tab.href} style={style}>
+              {art}
+            </Link>
+          ) : (
+            <div key={tab.label} style={style}>
+              {art}
+            </div>
+          );
+        })}
       </div>
     </>
   );

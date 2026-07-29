@@ -122,11 +122,11 @@ export default async function ShopPage({
   return (
     <>
       <ScaleFrame height={1822} background="#FFF6EC" fontClass={tenor.className}>
-      {/* Hero carousel render (badge, Shop Now pill and dots baked in);
-          bleeds 7px past both canvas edges — the canvas clips it, as Figma
-          does. */}
+      {/* Hero carousel render, 07-29 art (1523:1626 — badge, Shop Now pill
+          and dots baked into the frame render); bleeds 7px past both canvas
+          edges — the canvas clips it, as Figma does. */}
       <img
-        src="/veloria/home/31-14.png"
+        src="/veloria/screens/1523-1626.png"
         alt="Featured collection"
         width={444}
         height={202}

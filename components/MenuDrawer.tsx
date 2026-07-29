@@ -2,28 +2,23 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * C-3 · Menu drawer overlay — nodes 765:130 (Menu Scrim) and 765:131 (Left
- * Navigation Drawer) of Figma frame 765:114 "Homepage · Menu Open". The
- * homepage under the scrim (765:126) is context in the design only and is not
- * rebuilt here. HOME / SHOP / FOR BUSINESS are wired; PERSONALIZE, BLOG,
- * OUR CRAFT and OUR STORY are pixel-exact placeholders (no routes yet).
- * Coordinates, colours and fonts are verbatim from the Figma REST data.
+ * C-3 · Menu drawer overlay — nodes 1523:3224 (Menu Scrim) and 1523:3225
+ * (Left Navigation Drawer) of the 07-29 Figma frame 1523:3197
+ * " Homepage-Menu_drawer". The homepage under the scrim (1523:3199) is
+ * context in the design only and is not rebuilt here; its "9:41" status bar
+ * stays unimplemented — C-3 precedent. HOME / SHOP / PERSONALIZE /
+ * FOR BUSINESS / OUR CRAFT / OUR STORY are wired; BLOG is a pixel-exact
+ * placeholder (no blog exists yet). Coordinates, colours and fonts are
+ * verbatim from the Figma REST data.
  */
 
 import { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import NoCalcScale from "@/components/NoCalcScale";
+import { Glyph } from "@/components/screens/glyphs";
 import { abs } from "@/lib/figma-layout";
 import { playfair } from "@/lib/fonts";
-
-/**
- * One VECTOR node of a row's icon, boxed relative to that row's 30×30 icon
- * frame. Figma's SVG export canvas is the node box grown by the 1.8px centred
- * stroke, so each image is drawn at (x-0.9, y-0.9) sized (w+1.8)×(h+1.8) —
- * that is the export's own bounds, not a nudge.
- */
-type Icon = { src: string; x: number; y: number; w: number; h: number };
 
 type Row = {
   /** Figma node id of the row frame, for traceability. */
@@ -34,64 +29,23 @@ type Row = {
   href?: string;
   /** HOME is the design's current row: darker fill, amber label. */
   current?: boolean;
-  icons: Icon[];
+  /** The row's icon — the 07-29 icons ship as whole 30×30 frame exports. */
+  icon: string;
 };
 
-// 771:140 … 771:175 — the seven menu rows. Each row places its icon frame at
-// (38, y+26) and its label at (86, y+29.5) in frame coordinates.
+// 1523:3236 … 1523:3262 — the seven menu rows on an 87px pitch (82 tall + a
+// 5px gap; the 07-27 between-row separators are gone from this frame). Each
+// row places its 30×30 icon frame at (38, y+26) and its label at (86, y+29.5)
+// in frame coordinates.
 const ROWS: Row[] = [
-  {
-    id: "771:140",
-    label: "HOME",
-    y: 161,
-    href: "/",
-    current: true,
-    icons: [{ src: "771-142", x: 3.75, y: 4.688, w: 22.5, h: 21.5625 }],
-  },
-  {
-    id: "771:145",
-    label: "SHOP",
-    y: 244,
-    href: "/shop",
-    icons: [{ src: "771-147", x: 5.625, y: 3.75, w: 18.75, h: 22.5 }],
-  },
-  {
-    id: "771:150",
-    label: "PERSONALIZE",
-    y: 327,
-    icons: [{ src: "771-152", x: 5.625, y: 3.75, w: 20.625, h: 22.5 }],
-  },
-  {
-    id: "771:155",
-    label: "FOR BUSINESS",
-    y: 410,
-    href: "/business/partnerships",
-    icons: [
-      { src: "771-157", x: 4.6875, y: 9.375, w: 20.625, h: 15.9375 },
-      { src: "771-158", x: 4.6875, y: 6.562, w: 20.625, h: 11.25 },
-    ],
-  },
-  {
-    id: "771:161",
-    label: "BLOG",
-    y: 493,
-    icons: [
-      { src: "771-163", x: 6.5625, y: 3.75, w: 16.875, h: 22.5 },
-      { src: "771-164", x: 10.3125, y: 9.375, w: 9.375, h: 9.375 },
-    ],
-  },
-  {
-    id: "771:167",
-    label: "OUR CRAFT",
-    y: 576,
-    icons: [{ src: "771-169", x: 6.5625, y: 9.375, w: 16.875, h: 16.875 }],
-  },
-  {
-    id: "771:172",
-    label: "OUR STORY",
-    y: 659,
-    icons: [{ src: "771-174", x: 4.6875, y: 5.911, w: 20.625, h: 19.4016 }],
-  },
+  { id: "1523:3236", label: "HOME", y: 196, href: "/", current: true, icon: "1523-3237" },
+  { id: "1523:3240", label: "SHOP", y: 283, href: "/shop", icon: "1523-3241" },
+  // /#personalize — the homepage anchor on the A-4 personalize card (H-16 precedent)
+  { id: "1523:3244", label: "PERSONALIZE", y: 370, href: "/#personalize", icon: "1523-3245" },
+  { id: "1523:3248", label: "FOR BUSINESS", y: 457, href: "/business/partnerships", icon: "1523-3249" },
+  { id: "1523:3253", label: "BLOG", y: 544, icon: "1523-3254" },
+  { id: "1523:3258", label: "OUR CRAFT", y: 631, href: "/craft", icon: "1523-3259" },
+  { id: "1523:3262", label: "OUR STORY", y: 718, href: "/story", icon: "1523-3263" },
 ];
 
 const RESET: React.CSSProperties = {
@@ -147,7 +101,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         }
       `}</style>
 
-      {/* 765:130 Menu Scrim — #0A0605 at 0.44 fill alpha under a 0.34 node
+      {/* 1523:3224 Menu Scrim — #0A0605 at 0.44 fill alpha under a 0.34 node
           opacity (both composed). Figma sizes it to the 430×932 frame; here it
           fills the viewport so the dim never stops short of the screen edge. */}
       <button
@@ -158,7 +112,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
       />
 
       <div className="figv-menustage">
-        {/* 765:131 Left Navigation Drawer — flush to the stage's left edge */}
+        {/* 1523:3225 Left Navigation Drawer — flush to the stage's left edge */}
         <div
           role="dialog"
           aria-modal="true"
@@ -170,7 +124,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             overflow: "hidden",
           }}
         >
-          {/* 771:132 Drawer Inner Border — decoration only (it neither clips
+          {/* 1523:3226 Drawer Inner Border — decoration only (it neither clips
               nor changes the fill), so the header and rows below stay on the
               outline's frame coordinates instead of nesting inside it. */}
           <div
@@ -182,29 +136,25 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             }}
           />
 
-          {/* 771:134 Close / 771:135 × — Figma's own glyph render, drawn at
-              natural size inside the TEXT node's 31×37 box (LEFT/TOP align). */}
-          <button type="button" aria-label="Close menu" onClick={onClose} style={{ ...RESET, ...abs(258, 27, 31, 37) }}>
-            <img
-              src="/veloria/screens/771-135.svg"
-              alt="×"
-              style={{
-                display: "block",
-                width: 31,
-                height: 37,
-                objectFit: "none",
-                objectPosition: "left center",
-              }}
-            />
+          {/* 1523:3227 … 1523:3231 — five hairlines ruled across the drawer's
+              top, the 07-29 frame's ornament. */}
+          {[27, 33, 39, 45, 51].map((y) => (
+            <div key={y} style={{ ...abs(25, y, 240, 1), background: "#D18005", opacity: 0.48 }} />
+          ))}
+
+          {/* 1523:3233 Close / 1523:3234 × — Figma's ink-cropped glyph export
+              (20×20), centred on the TEXT node's 31×37 box. */}
+          <button type="button" aria-label="Close menu" onClick={onClose} style={{ ...RESET, ...abs(258, 57, 31, 37) }}>
+            <Glyph src="1523-3234" x={0} y={0} w={31} h={37} ink={[20, 20]} />
           </button>
 
-          {/* 771:139 drawer title */}
+          {/* 1523:3235 drawer title */}
           <div
             className={playfair.className}
             style={{
-              ...abs(25, 62, 264),
+              ...abs(25, 92, 264),
               fontSize: 48,
-              lineHeight: "63.98px",
+              lineHeight: "64px",
               fontWeight: 500,
               color: "#D18005",
               textAlign: "center",
@@ -223,17 +173,12 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             };
             const inner = (
               <>
-                {/* icon frame (30×30, clips) */}
-                <div style={{ ...abs(13, 26, 30, 30), overflow: "hidden" }}>
-                  {row.icons.map((ic) => (
-                    <img
-                      key={ic.src}
-                      src={`/veloria/screens/${ic.src}.svg`}
-                      alt=""
-                      style={{ ...abs(ic.x - 0.9, ic.y - 0.9, ic.w + 1.8, ic.h + 1.8), display: "block" }}
-                    />
-                  ))}
-                </div>
+                {/* icon frame export — placed exactly at its 30×30 sheet box */}
+                <img
+                  src={`/veloria/screens/${row.icon}.svg`}
+                  alt=""
+                  style={{ ...abs(13, 26, 30, 30), display: "block" }}
+                />
                 <div
                   className={playfair.className}
                   style={{
@@ -259,16 +204,6 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
             );
           })}
-
-          {/* 771:144 / 149 / 154 / 160 / 166 / 171 separators — one per row
-              except the last, each in the 1px gap below its row. They are 240
-              wide, i.e. 24px short of the 264-wide rows (per the design). */}
-          {ROWS.slice(0, -1).map((row) => (
-            <div
-              key={`sep-${row.id}`}
-              style={{ ...abs(25, row.y + 82, 240, 1), background: "#D18005", opacity: 0.48 }}
-            />
-          ))}
         </div>
       </div>
 

@@ -2,9 +2,10 @@
 /**
  * ROLE OF THIS FILE
  * Tokens and helpers shared by the two imported VELORIA account frames —
- * 74:53 (Gift Shopping sign-in) and 74:55 (Business & Partnerships). Both are
- * 430-wide canvases built from the same palette and the same glyph pipeline,
- * so the values live here rather than being restated per frame.
+ * 1523:2470 ("loginpage" sign-in) and 1523:2947 (Business & Partnerships),
+ * the 2026-07-29 delivery. Both are 430-wide canvases built from the same
+ * palette and the same glyph pipeline, so the values live here rather than
+ * being restated per frame.
  *
  * See docs/ixd/login-import.md for how these frames were produced from the
  * Figma sources, including the two export traps this pipeline works around.
@@ -16,6 +17,9 @@ export const MUTED = "#B8A69A";
 export const CARD = "#FFFBF6";
 export const HAIRLINE = "#E5D9C9";
 export const CANVAS = "#FFF6EC";
+/** 07-29: the sign-in frame's outer cards and, on both frames, the inactive
+    account-type tab went pure white; CARD stays the inner tile/field fill. */
+export const WHITE = "#FFFFFF";
 
 /** HTML collapses the design's double/triple spaces; these keep them. */
 export const NB = " ";

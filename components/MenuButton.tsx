@@ -13,7 +13,7 @@ import { useState } from "react";
 import { MenuDrawer } from "@/components/MenuDrawer";
 
 export function MenuButton({
-  src = "/veloria/home/549-88.png",
+  src = "/veloria/screens/1523-1678.png",
   style,
 }: {
   src?: string;

@@ -3,11 +3,17 @@
 /**
  * ROLE OF THIS FILE
  * The Business & Partnerships screen, imported pixel-exact from VELORIA frame
- * 74:55 ("Business · Procurement", 430×1614, 已完成). Seven design modules
- * stack on a 430-wide canvas: 01 Procurement Hero, 02 Account Type Tabs,
- * 03 Procurement Sign In, 04 Procurement Services, 05 Purchasing Needs,
- * 06 Three-Step Process, 07 MORI Business Help. Module 13 (bottom nav) is the
- * shared BottomNav, with the account tab active exactly as in 74:53.
+ * 1523:2947 ("Business · Procurement", 430×1614, 2026-07-29 delivery). Seven
+ * design modules stack on a 430-wide canvas: 01 Procurement Hero, 02 Account
+ * Type Tabs, 03 Procurement Sign In, 04 Procurement Services, 05 Purchasing
+ * Needs, 06 Three-Step Process, 07 MORI Business Help. Module 13 (bottom nav)
+ * is the shared BottomNav, with the account tab active exactly as in
+ * 1523:2470.
+ *
+ * 07-29 restyle: only the inactive account-type tab went WHITE here — unlike
+ * the sign-in frame, every card on this frame stays CARD (#FFFBF6), and the
+ * re-exported glyphs/photos came back equivalent to the 77-* files, so those
+ * assets stay.
  *
  * B2B has no backend of its own. Per the owner (2026-07-25) the V1 is
  * "static + email the request": picking a need and pressing SUBMIT REQUEST or
@@ -28,11 +34,11 @@ import { FadeLink } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
 import { cormorant, inter } from "@/lib/fonts";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
-import { INK, MUTED, CARD, HAIRLINE, CANVAS, NB, Glyph } from "@/components/login/tokens";
+import { INK, MUTED, CARD, HAIRLINE, CANVAS, WHITE, NB, Glyph } from "@/components/login/tokens";
 
 const A = "/veloria/business";
 
-/* ---------- 01 · Procurement Hero (77:53, 430×310) ---------- */
+/* ---------- 01 · Procurement Hero (1523:2949, 430×310) ---------- */
 
 function ProcurementHero() {
   return (
@@ -65,7 +71,7 @@ function ProcurementHero() {
   );
 }
 
-/* ---------- 02 · Account Type Tabs (77:59, 398×54 @ 16,324) ---------- */
+/* ---------- 02 · Account Type Tabs (1523:2955, 398×54 @ 16,324) ---------- */
 
 function AccountTypeTabs() {
   return (
@@ -74,7 +80,7 @@ function AccountTypeTabs() {
           same treatment the bottom-nav tabs get (owner, 2026-07-26). */}
       <FadeLink
         href="/account"
-        style={{ ...abs(0, 0, 196, 54), background: CARD, borderRadius: 10, display: "block" }}
+        style={{ ...abs(0, 0, 196, 54), background: WHITE, borderRadius: 10, display: "block" }}
         ariaLabel="Gift Shopping"
       >
         <Glyph src={`${A}/77-61.svg`} left={48} top={22} width={100} height={13} />
@@ -91,7 +97,7 @@ function AccountTypeTabs() {
   );
 }
 
-/* ---------- 04 · Procurement Services (77:86, 398×184 @ 16,676) ---------- */
+/* ---------- 04 · Procurement Services (1523:2972, 398×184 @ 16,676) ---------- */
 
 // gx/gy/gw/gh are measured ink boxes (see Glyph), not the design's node boxes.
 const SERVICES = [
@@ -127,7 +133,7 @@ function ProcurementServices() {
   );
 }
 
-/* ---------- 05 · Purchasing Needs (77:105, 398×290 @ 16,874) ---------- */
+/* ---------- 05 · Purchasing Needs (1523:2991, 398×290 @ 16,874) ---------- */
 
 const NEEDS = [
   { x: 14, y: 46, glyph: "77-109", gx: 63, gy: 65, gw: 15, gh: 15, label: "Corporate Gifts", tx: 19, ty: 88.5 },
@@ -200,7 +206,7 @@ function PurchasingNeeds({
   );
 }
 
-/* ---------- 06 · Three-Step Process (77:137, 398×204 @ 16,1178) ---------- */
+/* ---------- 06 · Three-Step Process (1523:3023, 398×204 @ 16,1178) ---------- */
 
 const STEPS = [
   { x: 14, n: "1", ny: 64, title: "Submit needs", ty: 83, desc: "Basic details and quantity", dy: 100, dh: 10 },
@@ -276,7 +282,7 @@ function ThreeStepProcess({
   );
 }
 
-/* ---------- 07 · MORI Business Help (77:157, 398×152 @ 16,1396) ---------- */
+/* ---------- 07 · MORI Business Help (1523:3043, 398×152 @ 16,1396) ---------- */
 
 function MoriBusinessHelp({ onAsk }: { onAsk: () => void }) {
   return (
@@ -410,7 +416,7 @@ export function BusinessLogin() {
       <ProcurementHero />
       <AccountTypeTabs />
 
-      {/* 03 · Procurement Sign In (77:64, 398×270 @ 16,392) */}
+      {/* 03 · Procurement Sign In (1523:2960, 398×270 @ 16,392) */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -438,7 +444,8 @@ export function BusinessLogin() {
             boxShadow: `inset 0 0 0 1px ${HAIRLINE}`,
           }}
         >
-          {/* Same ✉ node as 74:53, same size — reuse rather than re-export. */}
+          {/* Same ✉ node as the sign-in frame, same size — reuse the PNG; the
+              07-29 SVG re-export (1523-2964.svg) degrades to a solid box. */}
           <img
             src="/veloria/login/76-69.png"
             alt=""
