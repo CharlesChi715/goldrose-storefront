@@ -3393,3 +3393,33 @@ All three nav images return 200.
 
 **Left deliberately.** B-3 `/business/partnerships` still draws its own
 in-frame band and still scrolls away — this change was scoped to wholesale.
+
+## 2026-07-29 — Deliveries: /shop sort fade, product-following photos, strict price order
+
+- Shipped as PR #16 (squash-merged to `main` as `7f3d393`), two commits.
+- Grid cross-fades on sort: 150ms out, order swaps while invisible, 150ms in —
+  the same timing `PageFade` uses for tabs. Only the grid fades, so the
+  dropdown and header never blink; `prefers-reduced-motion` swaps outright
+  (measured 0.43 opacity mid-transition; reduced motion sampled 1,1,1,1,1).
+- Card photos now follow the product. They came from the grid slot while name
+  and price came from the sorted catalog, so sorting moved the text and left
+  the picture behind. Cards use the product's own catalog photo via
+  `fileUrl()`, falling back to frame art; they cover-crop, as the real photos
+  are not the frame's 203×204.
+- Price order is now strict. Sorting the catalog and then cycling it into
+  eight slots restarted the sequence ($79.99, $64.99, $49.99, $79.99 …).
+  The grid is filled first and sorted second; verified strict on all five
+  pages in both directions (10/10).
+- Verified: typecheck, lint, 60 unit, 87 e2e, 3 pixel baselines. The pixel
+  diff confirmed changes confined to the eight photo rectangles with no
+  layout shift; `/shop` baseline regenerated, home and product-detail
+  untouched. One e2e assertion updated (first-card photo → whole sequence),
+  since photos now follow products.
+- Worked in a throwaway git worktree: a parallel session held the shared
+  directory on `main`, so its HEAD was never switched and none of its
+  in-progress files were committed.
+- Known, not fixed: real photos are supplier composites unfit for launch
+  (OQ-3); repeated products now sit adjacent under a price sort, and all five
+  pages show the same cards while sorted (three products, eight slots); the
+  PDP hero is still frame art, so a card's photo differs from the page it
+  opens; sort is client state, so a reload resets it to "New".

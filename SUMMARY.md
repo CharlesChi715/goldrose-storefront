@@ -157,6 +157,9 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
   Stage 0 is owner onboarding.
 - **OQ-2 — open:** rest-of-world shipping at `$19.95` is a placeholder.
 - **OQ-3 — open:** seed product details and some imagery are placeholders.
+  `/shop` cards now show the real catalog photos, which are supplier
+  composites with English text baked in — replace before launch. Only three
+  products fill the eight-card grid, so cards repeat.
 - Use `temp/PlaceholderPicture.png` for explicitly unknown images.
 
 ## Repository structure
