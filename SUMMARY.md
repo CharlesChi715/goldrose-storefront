@@ -57,8 +57,9 @@ resources only when the task needs them.
   2026-07-28 batch — account privacy/support screens included (routes,
   placeholders, and design conflicts:
   [`docs/ixd/README.md`](docs/ixd/README.md)).
-- Page/section dwell tracking is built and its hosted schema is live, but the
-  code is **not deployed yet** — no real traffic has recorded engagement
+- Page/section dwell tracking is built, its hosted schema is live (`0005`), and
+  the code sits on branch `feat/engagement-tracking` awaiting preview review —
+  **not merged to `main`**, so production records no engagement yet
   ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
 - `/bag` items, tracking timeline, shipping choices, and card fields are
   visual placeholders; the real cart enters through `/checkout`.
