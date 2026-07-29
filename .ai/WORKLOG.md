@@ -3315,3 +3315,18 @@ homepage band ~30s, leave the page, confirm it tops Section attention) → PR.
 - Executed via 10 parallel screen subagents on disjoint components + a
   central foundation/verify pass (build sheets generated from the REST data
   per frame; assets pre-fetched in batched calls).
+
+## 2026-07-29 — /shop price sort: verified already implemented (no code change)
+
+- Request: implement Price High→Low and Low→High sort on `/shop`.
+- Finding: already built and working — landed in `a1164e8` (07-27 Figma
+  overlay batch), `components/shop/ShopInteractive.tsx:240-242`, sorting the
+  live catalog by `priceCents` inside the design's fixed grid slots.
+- Verified in the running dev app (Playwright, local seed = 3 active
+  products at $49.99/$64.99/$79.99): default "New" renders 49.99→64.99→79.99;
+  "Price: High to Low" renders 79.99→64.99→49.99; "Price: Low to High"
+  renders 49.99→64.99→79.99; the sort pill label updates each time; the
+  choice survives soft navigation to page 2.
+- One real gap, not fixed (awaiting owner call): sort lives in React state
+  only, so a hard reload / shared link resets the pill to "New". Putting it
+  in the URL (`?sort=`) would make it shareable and SSR-correct.
