@@ -52,6 +52,8 @@ temp/
 # playwright
 /test-results/
 /playwright-report/
+# scratch logs/snapshots written by the Playwright MCP server (agent tooling)
+/.playwright-mcp/
 
 # supabase CLI per-machine link state (project ref, pooler url) — migrations stay tracked
 supabase/.temp/
