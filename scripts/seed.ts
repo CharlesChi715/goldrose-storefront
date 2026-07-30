@@ -29,7 +29,10 @@ import type { TableName, TableStore } from "../lib/supabase/types.ts";
 /** Minimal .env.local loader (Node scripts don't get Next's env handling). */
 async function loadEnvLocal(): Promise<void> {
   try {
-    const raw = await fs.readFile(path.join(process.cwd(), ".env.local"), "utf8");
+    const raw = await fs.readFile(
+      path.join(process.cwd(), ".env.local"),
+      "utf8",
+    );
     for (const line of raw.split("\n")) {
       const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
       if (match && process.env[match[1]] === undefined) {
@@ -53,12 +56,17 @@ async function printSummary(store: TableStore): Promise<void> {
   for (const product of products.sort((a, b) => a.position - b.position)) {
     const own = variants.filter((variant) => variant.product_id === product.id);
     const price = own[0] ? `$${(own[0].price_cents / 100).toFixed(2)}` : "—";
-    const stock = own.reduce((sum, variant) => sum + variant.inventory_on_hand, 0);
+    const stock = own.reduce(
+      (sum, variant) => sum + variant.inventory_on_hand,
+      0,
+    );
     console.log(
       `  • ${product.title} [${product.status}] — ${own.length} variants @ ${price}, ${stock} on hand`,
     );
     for (const variant of own.sort((a, b) => a.position - b.position)) {
-      console.log(`      - ${variant.option_values.join(" / ")} (${variant.sku})`);
+      console.log(
+        `      - ${variant.option_values.join(" / ")} (${variant.sku})`,
+      );
     }
   }
   console.log(`  Settings keys: ${settings.map((row) => row.key).join(", ")}`);
@@ -107,7 +115,9 @@ async function seedHosted(demo: boolean): Promise<void> {
   }
 
   // Without --demo the real store seeds clean (demo data is testing-phase only).
-  const tables = buildSeedTables(new Date().toISOString(), { includeDemo: demo });
+  const tables = buildSeedTables(new Date().toISOString(), {
+    includeDemo: demo,
+  });
 
   if (existingProducts.length === 0) {
     // FK-safe insert order; admin_users deliberately skipped for hosted (see header).
@@ -128,7 +138,9 @@ async function seedHosted(demo: boolean): Promise<void> {
       if (rows.length === 0) return;
       const existing = await store.all(table);
       if (existing.length > 0) {
-        console.log(`  • ${table}: ${existing.length} rows already present — skipped`);
+        console.log(
+          `  • ${table}: ${existing.length} rows already present — skipped`,
+        );
         return;
       }
       await store.insert(table, rows);

@@ -19,7 +19,12 @@ export const metadata: Metadata = {
 
 export default function WholesalePage() {
   return (
-    <ScaleFrame height={1954} background="#FFF6EC" fontClass={notoSC.className} navActive="Wholesale">
+    <ScaleFrame
+      height={1954}
+      background="#FFF6EC"
+      fontClass={notoSC.className}
+      navActive="Wholesale"
+    >
       <WholesaleScreen />
     </ScaleFrame>
   );

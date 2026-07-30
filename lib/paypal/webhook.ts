@@ -29,11 +29,7 @@ export type PayPalWebhookEvent = {
 };
 
 export type WebhookOutcome =
-  | "confirmed"
-  | "repaired"
-  | "refund_synced"
-  | "duplicate"
-  | "ignored";
+  "confirmed" | "repaired" | "refund_synced" | "duplicate" | "ignored";
 
 /**
  * Parse a PayPal decimal amount string into cents, e.g. "49.99" → 4999.
@@ -80,21 +76,30 @@ async function addEvent(orderId: string, message: string): Promise<void> {
  *
  * @param event - The verified webhook event payload.
  */
-async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<WebhookOutcome> {
-  const providerOrderId = event.resource?.supplementary_data?.related_ids?.order_id;
+async function handleCaptureCompleted(
+  event: PayPalWebhookEvent,
+): Promise<WebhookOutcome> {
+  const providerOrderId =
+    event.resource?.supplementary_data?.related_ids?.order_id;
   if (!providerOrderId) {
     return "ignored";
   }
   const store = getStore();
   const orders = await store.all("orders");
-  const existing = orders.find((order) => order.provider_order_id === providerOrderId);
+  const existing = orders.find(
+    (order) => order.provider_order_id === providerOrderId,
+  );
 
   if (existing) {
     if (existing.financial_status === "pending") {
       await store.update(
         "orders",
         { id: existing.id },
-        { financial_status: "paid", provider_capture_id: event.resource?.id ?? existing.provider_capture_id },
+        {
+          financial_status: "paid",
+          provider_capture_id:
+            event.resource?.id ?? existing.provider_capture_id,
+        },
       );
       await addEvent(existing.id, "Payment confirmed by PayPal webhook");
       return "confirmed";
@@ -132,7 +137,10 @@ async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<Webhoo
     checkout_id: checkout.id,
     raw: event,
   });
-  await addEvent(order.id, "Order repaired from PayPal webhook (capture completed)");
+  await addEvent(
+    order.id,
+    "Order repaired from PayPal webhook (capture completed)",
+  );
   return "repaired";
 }
 
@@ -145,8 +153,11 @@ async function handleCaptureCompleted(event: PayPalWebhookEvent): Promise<Webhoo
  *
  * @param event - The verified webhook event payload.
  */
-async function handleCaptureRefunded(event: PayPalWebhookEvent): Promise<WebhookOutcome> {
-  const providerOrderId = event.resource?.supplementary_data?.related_ids?.order_id;
+async function handleCaptureRefunded(
+  event: PayPalWebhookEvent,
+): Promise<WebhookOutcome> {
+  const providerOrderId =
+    event.resource?.supplementary_data?.related_ids?.order_id;
   if (!providerOrderId) {
     return "ignored";
   }
@@ -161,7 +172,11 @@ async function handleCaptureRefunded(event: PayPalWebhookEvent): Promise<Webhook
   const refundId = event.resource?.id ?? "unknown";
   const marker = `PayPal refund ${refundId}`;
   const events = await store.all("order_events");
-  if (events.some((entry) => entry.order_id === order.id && entry.message.includes(marker))) {
+  if (
+    events.some(
+      (entry) => entry.order_id === order.id && entry.message.includes(marker),
+    )
+  ) {
     return "duplicate";
   }
 
@@ -181,7 +196,8 @@ async function handleCaptureRefunded(event: PayPalWebhookEvent): Promise<Webhook
     { id: order.id },
     {
       refunded_cents: refunded,
-      financial_status: refunded >= order.total_cents ? "refunded" : "partially_refunded",
+      financial_status:
+        refunded >= order.total_cents ? "refunded" : "partially_refunded",
     },
   );
   await addEvent(
@@ -201,7 +217,9 @@ async function handleCaptureRefunded(event: PayPalWebhookEvent): Promise<Webhook
  * @returns What happened: "confirmed", "repaired", "refund_synced",
  *   "duplicate", or "ignored".
  */
-export async function handlePayPalEvent(event: PayPalWebhookEvent): Promise<WebhookOutcome> {
+export async function handlePayPalEvent(
+  event: PayPalWebhookEvent,
+): Promise<WebhookOutcome> {
   switch (event.event_type) {
     case "PAYMENT.CAPTURE.COMPLETED":
       return handleCaptureCompleted(event);

@@ -84,7 +84,11 @@ export async function saveContentText(
   const now = new Date().toISOString();
   const existing = rows.find((entry) => entry.key === key);
   if (existing) {
-    await store.update("site_content", { key }, { value: { text }, updated_at: now });
+    await store.update(
+      "site_content",
+      { key },
+      { value: { text }, updated_at: now },
+    );
     return;
   }
   await store.insert("site_content", [
@@ -125,7 +129,10 @@ export async function resetContent(key: string): Promise<void> {
  *
  * @returns The slogan text and whether it still equals the default.
  */
-export async function getPromoSlogan(): Promise<{ text: string; isDefault: boolean }> {
+export async function getPromoSlogan(): Promise<{
+  text: string;
+  isDefault: boolean;
+}> {
   try {
     const slot = await getContentSlot("promo.slogan");
     if (!slot) {

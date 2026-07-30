@@ -34,15 +34,46 @@ const CREAM = "#FFF6EC";
 const SHEET = "#FFFEFB";
 const DIM = "#7A737A";
 
-export type CareTab = "hot-topics" | "order-issues" | "promotions" | "after-sales";
+export type CareTab =
+  "hot-topics" | "order-issues" | "promotions" | "after-sales";
 
 /** 1523:3638…3642 — labels at fixed x; the gold indicator is 52×3 and its
  * [x, y] comes from each frame (care04 sits 1px lower — verbatim). */
-const TABS: Array<{ key: CareTab; label: string; x: number; w: number; indicator: [number, number] }> = [
-  { key: "hot-topics", label: "Hot topics", x: 22, w: 100, indicator: [44, 557] },
-  { key: "order-issues", label: "Order issues", x: 122, w: 100, indicator: [140, 557] },
-  { key: "promotions", label: "Promotions", x: 222, w: 100, indicator: [236, 557] },
-  { key: "after-sales", label: "After-sales", x: 322, w: 88, indicator: [331, 558] },
+const TABS: Array<{
+  key: CareTab;
+  label: string;
+  x: number;
+  w: number;
+  indicator: [number, number];
+}> = [
+  {
+    key: "hot-topics",
+    label: "Hot topics",
+    x: 22,
+    w: 100,
+    indicator: [44, 557],
+  },
+  {
+    key: "order-issues",
+    label: "Order issues",
+    x: 122,
+    w: 100,
+    indicator: [140, 557],
+  },
+  {
+    key: "promotions",
+    label: "Promotions",
+    x: 222,
+    w: 100,
+    indicator: [236, 557],
+  },
+  {
+    key: "after-sales",
+    label: "After-sales",
+    x: 322,
+    w: 88,
+    indicator: [331, 558],
+  },
 ];
 
 /**
@@ -94,47 +125,160 @@ const FAQS: Record<CareTab, string[]> = {
 };
 
 // 1108:123…138 — the eight service shortcuts (icons: Figma SVG exports).
-const SHORTCUTS: Array<{ icon: string; ink: [number, number]; label: string; href?: string }> = [
+const SHORTCUTS: Array<{
+  icon: string;
+  ink: [number, number];
+  label: string;
+  href?: string;
+}> = [
   { icon: "1108-123", ink: [20, 20], label: "Shipping\nreminder" },
-  { icon: "1108-125", ink: [24, 24], label: "Request\nafter-sales", href: "/account/returns" },
+  {
+    icon: "1108-125",
+    ink: [24, 24],
+    label: "Request\nafter-sales",
+    href: "/account/returns",
+  },
   { icon: "1108-127", ink: [18, 18], label: "Change\naddress" },
-  { icon: "1108-129", ink: [15, 15], label: "Track\nlogistics", href: "/orders/track" },
+  {
+    icon: "1108-129",
+    ink: [15, 15],
+    label: "Track\nlogistics",
+    href: "/orders/track",
+  },
   { icon: "1108-131", ink: [20, 20], label: "Invoice\nservice" },
-  { icon: "1108-133", ink: [16, 19], label: "Account\nsecurity", href: "/account/security" },
-  { icon: "1108-135", ink: [13, 14], label: "Contact\nsupport", href: "/care/chat" },
+  {
+    icon: "1108-133",
+    ink: [16, 19],
+    label: "Account\nsecurity",
+    href: "/account/security",
+  },
+  {
+    icon: "1108-135",
+    ink: [13, 14],
+    label: "Contact\nsupport",
+    href: "/care/chat",
+  },
   { icon: "1108-137", ink: [24, 8], label: "Payment\nissue" },
 ];
 
-
-export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab }) {
+export function CareScreen({
+  initialTab = "hot-topics",
+}: {
+  initialTab?: CareTab;
+}) {
   const [tab, setTab] = useState<CareTab>(initialTab);
 
   return (
-    <ScaleFrame height={932} background={CREAM} fontClass={notoSC.className} nav={false}>
-      <BackButton fallback="/account" src="/veloria/screens/1523-3679.png" style={abs(0, 16, 45, 48)} />
-      <div className={playfair.className} style={{ ...abs(101, 20.7, 230), ...txt(29, 38.66, INK, "center"), fontWeight: 600 }}>
+    <ScaleFrame
+      height={932}
+      background={CREAM}
+      fontClass={notoSC.className}
+      nav={false}
+    >
+      <BackButton
+        fallback="/account"
+        src="/veloria/screens/1523-3679.png"
+        style={abs(0, 16, 45, 48)}
+      />
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(101, 20.7, 230),
+          ...txt(29, 38.66, INK, "center"),
+          fontWeight: 600,
+        }}
+      >
         Customer Care
       </div>
 
       {/* hero card — "Chat with us" lands on the CARE-SUPPORT-CHAT mock
           (07-28); a real support channel is still a tracked follow-up */}
-      <div style={{ ...abs(16, 76, 398, 158), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
-      <div className={playfair.className} style={{ ...abs(34, 90.7, 255), ...txt(29, 38.66, INK), fontWeight: 600 }}>
+      <div
+        style={{
+          ...abs(16, 76, 398, 158),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 14,
+        }}
+      />
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(34, 90.7, 255),
+          ...txt(29, 38.66, INK),
+          fontWeight: 600,
+        }}
+      >
         How can we help?
       </div>
-      <div style={{ ...abs(34, 136.4, 260, 52), ...txt(13, 15.6, INK), whiteSpace: "pre-line" }}>
+      <div
+        style={{
+          ...abs(34, 136.4, 260, 52),
+          ...txt(13, 15.6, INK),
+          whiteSpace: "pre-line",
+        }}
+      >
         {"We’re here for you.\nOur support team is ready to assist."}
       </div>
-      <img src="/veloria/screens/1523-3681.png" alt="" width={104} height={104} style={{ ...abs(288, 86, 104, 104), display: "block" }} />
-      <div style={{ ...abs(34, 182.5, 150), ...txt(12.5, 15, "#1F8533"), fontWeight: 500 }}>●&nbsp;&nbsp;Online now</div>
-      <div style={{ ...abs(34, 204, 200), ...txt(10.5, 12.6, INK) }}>Average reply within a few minutes</div>
-      <Link href="/care/chat" style={{ ...abs(234, 180, 164, 38), background: INK, borderRadius: 8, display: "block" }}>
-        <span style={{ position: "absolute", left: 6, right: 6, top: 11, ...txt(13, 15.6, CREAM, "center"), fontWeight: 500 }}>Chat with us</span>
+      <img
+        src="/veloria/screens/1523-3681.png"
+        alt=""
+        width={104}
+        height={104}
+        style={{ ...abs(288, 86, 104, 104), display: "block" }}
+      />
+      <div
+        style={{
+          ...abs(34, 182.5, 150),
+          ...txt(12.5, 15, "#1F8533"),
+          fontWeight: 500,
+        }}
+      >
+        ●&nbsp;&nbsp;Online now
+      </div>
+      <div style={{ ...abs(34, 204, 200), ...txt(10.5, 12.6, INK) }}>
+        Average reply within a few minutes
+      </div>
+      <Link
+        href="/care/chat"
+        style={{
+          ...abs(234, 180, 164, 38),
+          background: INK,
+          borderRadius: 8,
+          display: "block",
+        }}
+      >
+        <span
+          style={{
+            position: "absolute",
+            left: 6,
+            right: 6,
+            top: 11,
+            ...txt(13, 15.6, CREAM, "center"),
+            fontWeight: 500,
+          }}
+        >
+          Chat with us
+        </span>
       </Link>
 
       {/* service shortcuts */}
-      <div style={{ ...abs(16, 246, 398, 220), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
-      <div className={playfair.className} style={{ ...abs(30, 256, 210), ...txt(20, 26.66, INK), fontWeight: 500 }}>
+      <div
+        style={{
+          ...abs(16, 246, 398, 220),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 14,
+        }}
+      />
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(30, 256, 210),
+          ...txt(20, 26.66, INK),
+          fontWeight: 500,
+        }}
+      >
         Service shortcuts
       </div>
       {SHORTCUTS.map((cut, i) => {
@@ -143,13 +287,27 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
         const body = (
           <>
             <Glyph src={cut.icon} x={0} y={0} w={88} h={34} ink={cut.ink} />
-            <span style={{ position: "absolute", left: 0, top: 37.2, width: 88, ...txt(11.5, 13.8, INK, "center"), whiteSpace: "pre-line", display: "block" }}>
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 37.2,
+                width: 88,
+                ...txt(11.5, 13.8, INK, "center"),
+                whiteSpace: "pre-line",
+                display: "block",
+              }}
+            >
               {cut.label}
             </span>
           </>
         );
         return cut.href ? (
-          <Link key={cut.label} href={cut.href} style={{ ...abs(x, y, 88, 72), display: "block" }}>
+          <Link
+            key={cut.label}
+            href={cut.href}
+            style={{ ...abs(x, y, 88, 72), display: "block" }}
+          >
             {body}
           </Link>
         ) : (
@@ -160,7 +318,14 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
       })}
 
       {/* help center */}
-      <div className={playfair.className} style={{ ...abs(20, 483, 200), ...txt(21, 27.99, INK), fontWeight: 600 }}>
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(20, 483, 200),
+          ...txt(21, 27.99, INK),
+          fontWeight: 600,
+        }}
+      >
         Help Center
       </div>
       {TABS.map((t) => {
@@ -172,9 +337,24 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
             aria-pressed={active}
             onClick={() => setTab(t.key)}
             className={playfair.className}
-            style={{ ...abs(t.x, 529, t.w, 26), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
+            style={{
+              ...abs(t.x, 529, t.w, 26),
+              border: 0,
+              padding: 0,
+              background: "transparent",
+              cursor: "pointer",
+            }}
           >
-            <span style={{ position: "absolute", left: 0, right: 0, top: 5, ...txt(13, 17.33, active ? INK : DIM, "center"), fontWeight: active ? 600 : 500 }}>
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 5,
+                ...txt(13, 17.33, active ? INK : DIM, "center"),
+                fontWeight: active ? 600 : 500,
+              }}
+            >
               {t.label}
             </span>
           </button>
@@ -182,27 +362,76 @@ export function CareScreen({ initialTab = "hot-topics" }: { initialTab?: CareTab
       })}
       {(() => {
         const [ix, iy] = TABS.find((t) => t.key === tab)!.indicator;
-        return <div style={{ ...abs(ix, iy, 52, 3), background: GOLD, borderRadius: 2 }} />;
+        return (
+          <div
+            style={{ ...abs(ix, iy, 52, 3), background: GOLD, borderRadius: 2 }}
+          />
+        );
       })()}
 
-      <div style={{ ...abs(16, 577, 398, 242), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+      <div
+        style={{
+          ...abs(16, 577, 398, 242),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 14,
+        }}
+      />
       {FAQS[tab].map((question, i) => {
         const y = 594 + i * 27;
         return (
           <div key={question}>
-            <div style={{ ...abs(31, y, 24, 26), ...txt(12, 26, GOLD, "center"), fontWeight: 500 }}>?</div>
-            <div style={{ ...abs(62, y + 6.7, 310), ...txt(10.5, 12.6, INK), overflow: "hidden", textOverflow: "ellipsis" }}>{question}</div>
-            <div style={{ ...abs(382, y, 24, 26), ...txt(19, 26, INK, "center") }}>›</div>
-            {i < 7 ? <div style={{ ...abs(32, y + 26, 370, 1), background: SAND }} /> : null}
+            <div
+              style={{
+                ...abs(31, y, 24, 26),
+                ...txt(12, 26, GOLD, "center"),
+                fontWeight: 500,
+              }}
+            >
+              ?
+            </div>
+            <div
+              style={{
+                ...abs(62, y + 6.7, 310),
+                ...txt(10.5, 12.6, INK),
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {question}
+            </div>
+            <div
+              style={{ ...abs(382, y, 24, 26), ...txt(19, 26, INK, "center") }}
+            >
+              ›
+            </div>
+            {i < 7 ? (
+              <div style={{ ...abs(32, y + 26, 370, 1), background: SAND }} />
+            ) : null}
           </div>
         );
       })}
 
       {/* trust card */}
-      <div style={{ ...abs(16, 840, 398, 54), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+      <div
+        style={{
+          ...abs(16, 840, 398, 54),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 14,
+        }}
+      />
       <Glyph src="1108-182" x={26} y={847} w={34} h={36} ink={[17, 17]} />
-      <div style={{ ...abs(64, 852.4, 300, 42), ...txt(10.5, 12.6, INK), whiteSpace: "pre-line" }}>
-        {"We appreciate your trust in GoldRose.\nYour satisfaction means everything to us."}
+      <div
+        style={{
+          ...abs(64, 852.4, 300, 42),
+          ...txt(10.5, 12.6, INK),
+          whiteSpace: "pre-line",
+        }}
+      >
+        {
+          "We appreciate your trust in GoldRose.\nYour satisfaction means everything to us."
+        }
       </div>
     </ScaleFrame>
   );

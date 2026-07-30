@@ -5,7 +5,14 @@
  * Client half of the abandoned-checkouts list (§9.4) — read-only.
  */
 
-import { Banner, BlockStack, Card, IndexTable, Page, Text } from "@shopify/polaris";
+import {
+  Banner,
+  BlockStack,
+  Card,
+  IndexTable,
+  Page,
+  Text,
+} from "@shopify/polaris";
 import { formatMoney } from "@/lib/money";
 import { useAdminT } from "../../../PolarisShell";
 import { formatDateTime } from "@/lib/dates";
@@ -23,7 +30,10 @@ export function AbandonedList({ items }: { items: AbandonedItem[] }) {
   const t = useAdminT();
 
   return (
-    <Page title={t("nav.orders.abandoned")} backAction={{ url: "/admin/orders" }}>
+    <Page
+      title={t("nav.orders.abandoned")}
+      backAction={{ url: "/admin/orders" }}
+    >
       <BlockStack gap="300">
         <Banner tone="info">{t("abandoned.recoveryNote")}</Banner>
         <Card padding="0">

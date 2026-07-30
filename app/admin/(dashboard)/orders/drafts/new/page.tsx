@@ -19,7 +19,9 @@ export default async function NewDraftPage() {
       return {
         variantId: variant.id,
         label: `${product?.title ?? variant.product_id}${
-          variant.option_values.length ? ` — ${variant.option_values.join(" / ")}` : ""
+          variant.option_values.length
+            ? ` — ${variant.option_values.join(" / ")}`
+            : ""
         } ($${(variant.price_cents / 100).toFixed(2)})`,
       };
     })

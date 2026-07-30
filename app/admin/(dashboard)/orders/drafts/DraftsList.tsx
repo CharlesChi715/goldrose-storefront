@@ -30,11 +30,17 @@ export function DraftsList({ items }: { items: DraftListItem[] }) {
     <Page
       title={t("nav.orders.drafts")}
       backAction={{ url: "/admin/orders" }}
-      primaryAction={{ content: t("drafts.create"), url: "/admin/orders/drafts/new" }}
+      primaryAction={{
+        content: t("drafts.create"),
+        url: "/admin/orders/drafts/new",
+      }}
     >
       <Card padding="0">
         <IndexTable
-          resourceName={{ singular: t("orders.column.order"), plural: t("nav.orders.drafts") }}
+          resourceName={{
+            singular: t("orders.column.order"),
+            plural: t("nav.orders.drafts"),
+          }}
           itemCount={items.length}
           selectable={false}
           emptyState={
@@ -65,9 +71,7 @@ export function DraftsList({ items }: { items: DraftListItem[] }) {
                   {item.name}
                 </Text>
               </IndexTable.Cell>
-              <IndexTable.Cell>
-                {formatDate(item.placedAt)}
-              </IndexTable.Cell>
+              <IndexTable.Cell>{formatDate(item.placedAt)}</IndexTable.Cell>
               <IndexTable.Cell>{item.customerLabel}</IndexTable.Cell>
               <IndexTable.Cell>
                 <Text as="span" alignment="end" numeric>
@@ -77,13 +81,19 @@ export function DraftsList({ items }: { items: DraftListItem[] }) {
               <IndexTable.Cell>
                 <Badge
                   tone={item.financialStatus === "paid" ? undefined : "warning"}
-                  progress={item.financialStatus === "paid" ? "complete" : "partiallyComplete"}
+                  progress={
+                    item.financialStatus === "paid"
+                      ? "complete"
+                      : "partiallyComplete"
+                  }
                 >
                   {t(`orders.status.${item.financialStatus}` as never)}
                 </Badge>
               </IndexTable.Cell>
               <IndexTable.Cell>
-                {interpolate(t("orders.items.count"), { count: item.itemCount })}
+                {interpolate(t("orders.items.count"), {
+                  count: item.itemCount,
+                })}
               </IndexTable.Cell>
             </IndexTable.Row>
           ))}

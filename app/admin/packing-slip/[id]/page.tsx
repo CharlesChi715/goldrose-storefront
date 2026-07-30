@@ -33,7 +33,13 @@ export default async function PackingSlipPage({
         color: "#111",
       }}
     >
-      <header style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 24,
+        }}
+      >
         <div>
           <h1 style={{ margin: 0, fontSize: 22 }}>GoldRose</h1>
           <p style={{ margin: "4px 0 0", color: "#555" }}>Packing slip</p>
@@ -47,14 +53,18 @@ export default async function PackingSlipPage({
       </header>
 
       <section style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 14, textTransform: "uppercase", color: "#555" }}>Ship to</h2>
+        <h2 style={{ fontSize: 14, textTransform: "uppercase", color: "#555" }}>
+          Ship to
+        </h2>
         {address ? (
           <p style={{ margin: 0, lineHeight: 1.5 }}>
             {[
               address.name,
               address.address1,
               address.address2,
-              [address.city, address.state, address.postal_code].filter(Boolean).join(", "),
+              [address.city, address.state, address.postal_code]
+                .filter(Boolean)
+                .join(", "),
               address.country,
             ]
               .filter(Boolean)
@@ -73,10 +83,22 @@ export default async function PackingSlipPage({
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={{ textAlign: "left", borderBottom: "1px solid #ccc", padding: "6px 0" }}>
+            <th
+              style={{
+                textAlign: "left",
+                borderBottom: "1px solid #ccc",
+                padding: "6px 0",
+              }}
+            >
               Item
             </th>
-            <th style={{ textAlign: "right", borderBottom: "1px solid #ccc", padding: "6px 0" }}>
+            <th
+              style={{
+                textAlign: "right",
+                borderBottom: "1px solid #ccc",
+                padding: "6px 0",
+              }}
+            >
               Quantity
             </th>
           </tr>
@@ -107,7 +129,11 @@ export default async function PackingSlipPage({
 
       {order.note ? (
         <section style={{ marginTop: 24 }}>
-          <h2 style={{ fontSize: 14, textTransform: "uppercase", color: "#555" }}>Gift message</h2>
+          <h2
+            style={{ fontSize: 14, textTransform: "uppercase", color: "#555" }}
+          >
+            Gift message
+          </h2>
           <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{order.note}</p>
         </section>
       ) : null}

@@ -23,7 +23,10 @@ export default async function EditDiscountPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [discount, products] = await Promise.all([getDiscount(id), listProducts()]);
+  const [discount, products] = await Promise.all([
+    getDiscount(id),
+    listProducts(),
+  ]);
   if (!discount) {
     notFound();
   }
@@ -47,7 +50,8 @@ export default async function EditDiscountPage({
       discount.min_purchase_cents !== null
         ? (discount.min_purchase_cents / 100).toFixed(2)
         : "",
-    usageLimit: discount.usage_limit !== null ? String(discount.usage_limit) : "",
+    usageLimit:
+      discount.usage_limit !== null ? String(discount.usage_limit) : "",
     oncePerCustomer: discount.once_per_customer,
     startsAt: toLocalDatetime(discount.starts_at),
     endsAt: toLocalDatetime(discount.ends_at),
@@ -56,7 +60,10 @@ export default async function EditDiscountPage({
   return (
     <DiscountForm
       initial={initial}
-      products={products.map((row) => ({ id: row.product.id, title: row.product.title }))}
+      products={products.map((row) => ({
+        id: row.product.id,
+        title: row.product.title,
+      }))}
     />
   );
 }

@@ -19,10 +19,17 @@ const { getStore } = await import("../../lib/supabase/store.ts");
 
 const SIGNATURE_VARIANT = "0a2b1a10-4b7e-4d7a-9d24-000000000101";
 
-function checkoutRow(id: string, createdAt: string, status: "open" | "completed") {
+function checkoutRow(
+  id: string,
+  createdAt: string,
+  status: "open" | "completed",
+) {
   return {
     id,
-    cart: { lines: [{ variant_id: SIGNATURE_VARIANT, quantity: 2 }], country: "US" },
+    cart: {
+      lines: [{ variant_id: SIGNATURE_VARIANT, quantity: 2 }],
+      country: "US",
+    },
     email: `${id}@example.com`,
     discount_code: null,
     subtotal_cents: 9998,
@@ -37,9 +44,21 @@ function checkoutRow(id: string, createdAt: string, status: "open" | "completed"
 before(async () => {
   const now = Date.now();
   await getStore().insert("checkouts", [
-    checkoutRow("old-open", new Date(now - 2 * 60 * 60 * 1000).toISOString(), "open"),
-    checkoutRow("fresh-open", new Date(now - 10 * 60 * 1000).toISOString(), "open"),
-    checkoutRow("old-completed", new Date(now - 3 * 60 * 60 * 1000).toISOString(), "completed"),
+    checkoutRow(
+      "old-open",
+      new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+      "open",
+    ),
+    checkoutRow(
+      "fresh-open",
+      new Date(now - 10 * 60 * 1000).toISOString(),
+      "open",
+    ),
+    checkoutRow(
+      "old-completed",
+      new Date(now - 3 * 60 * 60 * 1000).toISOString(),
+      "completed",
+    ),
   ]);
 });
 

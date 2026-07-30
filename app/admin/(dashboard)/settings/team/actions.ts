@@ -8,12 +8,20 @@
  */
 
 import { z } from "zod";
-import { approveMember, listTeam, removeMember, requireRealAdmin } from "@/lib/admin/team";
+import {
+  approveMember,
+  listTeam,
+  removeMember,
+  requireRealAdmin,
+} from "@/lib/admin/team";
 import { teamOwnerId } from "@/lib/admin/team-owner";
 
 const id = z.string().uuid();
 
-export async function approveMemberAction(userId: string, email: string): Promise<void> {
+export async function approveMemberAction(
+  userId: string,
+  email: string,
+): Promise<void> {
   await requireRealAdmin();
   await approveMember(id.parse(userId), z.string().email().parse(email));
 }

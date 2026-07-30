@@ -21,22 +21,32 @@ async function deleteFromForm(page: Page) {
   await page.waitForURL(/\/admin\/products$/);
 }
 
-test("products list shows seeded products with inventory summaries", async ({ page }) => {
+test("products list shows seeded products with inventory summaries", async ({
+  page,
+}) => {
   await adminLogin(page);
   await page.goto("/admin/products");
-  await expect(page.getByText("GoldRose Signature 24K Gold Rose")).toBeVisible();
+  await expect(
+    page.getByText("GoldRose Signature 24K Gold Rose"),
+  ).toBeVisible();
   await expect(page.getByText("GoldRose Boxed Keepsake Rose")).toBeVisible();
   await expect(page.getByText("GoldRose Premium Gift Bundle")).toBeVisible();
-  await expect(page.getByText(/\d+ in stock for 3 variants/).first()).toBeVisible();
+  await expect(
+    page.getByText(/\d+ in stock for 3 variants/).first(),
+  ).toBeVisible();
 });
 
-test("create → edit → duplicate → archive → delete, card for card", async ({ page }) => {
+test("create → edit → duplicate → archive → delete, card for card", async ({
+  page,
+}) => {
   await adminLogin(page);
 
   // Create (draft by default, single default variant).
   await page.goto("/admin/products/new");
   await page.getByRole("textbox", { name: /^Title\*?$/ }).fill(TEST_TITLE);
-  await page.getByLabel("Description", { exact: true }).fill("A product created by the e2e suite.");
+  await page
+    .getByLabel("Description", { exact: true })
+    .fill("A product created by the e2e suite.");
   await page.getByLabel("Price", { exact: true }).fill("12.50");
   await page.getByLabel("Quantity", { exact: true }).fill("5");
   await page.getByLabel("SKU (Stock Keeping Unit)").fill("E2E-001");
@@ -68,7 +78,10 @@ test("create → edit → duplicate → archive → delete, card for card", asyn
   await deleteFromForm(page); // clean the copy up
 
   // Archive the original…
-  const originalRow = page.getByRole("row").filter({ hasText: TEST_TITLE }).first();
+  const originalRow = page
+    .getByRole("row")
+    .filter({ hasText: TEST_TITLE })
+    .first();
   await originalRow.getByText(TEST_TITLE).last().click();
   await page.waitForURL(/\/admin\/products\/[a-z0-9-]+$/);
   await page.getByRole("button", { name: "Archive", exact: true }).click();
@@ -81,13 +94,17 @@ test("create → edit → duplicate → archive → delete, card for card", asyn
   ).toHaveCount(0);
 });
 
-test("inventory screen: four columns, reasoned adjustment, history", async ({ page }) => {
+test("inventory screen: four columns, reasoned adjustment, history", async ({
+  page,
+}) => {
   await adminLogin(page);
   await page.goto("/admin/products/inventory");
 
   // Four Shopify columns present.
   for (const column of ["Unavailable", "Committed", "Available", "On hand"]) {
-    await expect(page.getByRole("columnheader", { name: column, exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: column, exact: true }),
+    ).toBeVisible();
   }
 
   // Read the current on-hand of the first seeded variant (SKU GR-SIG-001-1).

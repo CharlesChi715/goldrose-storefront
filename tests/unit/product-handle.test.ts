@@ -16,21 +16,34 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { productHandle } from "../../lib/admin/product-handle.ts";
 
-const DOC = join(import.meta.dirname, "..", "..", "docs", "ixd", "naming", "product-handles.md");
+const DOC = join(
+  import.meta.dirname,
+  "..",
+  "..",
+  "docs",
+  "ixd",
+  "naming",
+  "product-handles.md",
+);
 
 /** Pulls `title` → expected-handle pairs out of the doc's fixture table. */
 function fixtures(): Array<{ title: string; expected: string }> {
   const md = readFileSync(DOC, "utf8");
   const rows: Array<{ title: string; expected: string }> = [];
   // Fixture rows look like: | 1 | `Some Title` | `some-title` |
-  for (const match of md.matchAll(/^\|\s*\d+\s*\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|/gm)) {
+  for (const match of md.matchAll(
+    /^\|\s*\d+\s*\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|/gm,
+  )) {
     rows.push({ title: match[1], expected: match[2] });
   }
   return rows;
 }
 
 test("the doc's fixture table is present and non-trivial", () => {
-  assert.ok(fixtures().length >= 8, "expected at least 8 fixture rows in product-handles.md");
+  assert.ok(
+    fixtures().length >= 8,
+    "expected at least 8 fixture rows in product-handles.md",
+  );
 });
 
 test("productHandle reproduces every fixture row exactly", () => {
@@ -41,7 +54,11 @@ test("productHandle reproduces every fixture row exactly", () => {
 
 test("underivable titles throw instead of inventing a handle", () => {
   for (const bad of ["", "   ", "🌹", "副本", "'’"]) {
-    assert.throws(() => productHandle(bad), /set one manually/, `title: ${JSON.stringify(bad)}`);
+    assert.throws(
+      () => productHandle(bad),
+      /set one manually/,
+      `title: ${JSON.stringify(bad)}`,
+    );
   }
 });
 

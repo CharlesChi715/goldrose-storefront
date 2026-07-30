@@ -17,7 +17,13 @@ import { playfair, notoSC } from "@/lib/fonts";
 export function A5() {
   return (
     // 138:61 — module frame; clips the over-wide chip + card rails.
-    <div style={{ ...abs(0, 3204, 430, 558), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, 3204, 430, 558),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       {/* 424:150 · header ornament (rose + lines) */}
       <img
         src="/veloria/home/424-150.svg"
@@ -297,7 +303,12 @@ export function A5() {
           alt="SHOP VALENTINE'S GIFTS →"
           width={186}
           height={16}
-          style={{ ...abs(12, 336, 186, 16), display: "block", objectFit: "none", objectPosition: "center center" }}
+          style={{
+            ...abs(12, 336, 186, 16),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "center center",
+          }}
         />
       </Link>
 
@@ -305,13 +316,55 @@ export function A5() {
 
       {/* 429:149 · carousel dots */}
       <div style={{ ...abs(145, 424, 135, 10), overflow: "hidden" }}>
-        <div style={{ ...abs(0, 0.5, 9, 9), background: "#B27A38", borderRadius: 9999 }} />
-        <div style={{ ...abs(22, 1, 8, 8), background: "#E5D1B2", borderRadius: 9999 }} />
-        <div style={{ ...abs(43, 1, 8, 8), background: "#E5D1B2", borderRadius: 9999 }} />
-        <div style={{ ...abs(64, 1, 8, 8), background: "#E5D1B2", borderRadius: 9999 }} />
-        <div style={{ ...abs(85, 1, 8, 8), background: "#E5D1B2", borderRadius: 9999 }} />
-        <div style={{ ...abs(106, 1, 8, 8), background: "#E5D1B2", borderRadius: 9999 }} />
-        <div style={{ ...abs(127, 1, 8, 8), background: "#E5D1B2", borderRadius: 9999 }} />
+        <div
+          style={{
+            ...abs(0, 0.5, 9, 9),
+            background: "#B27A38",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(22, 1, 8, 8),
+            background: "#E5D1B2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(43, 1, 8, 8),
+            background: "#E5D1B2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(64, 1, 8, 8),
+            background: "#E5D1B2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(85, 1, 8, 8),
+            background: "#E5D1B2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(106, 1, 8, 8),
+            background: "#E5D1B2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(127, 1, 8, 8),
+            background: "#E5D1B2",
+            borderRadius: 9999,
+          }}
+        />
       </div>
 
       {/* 436:345 · Just Because · Recipient note card */}
@@ -368,7 +421,12 @@ export function A5() {
           alt="›"
           width={12}
           height={43}
-          style={{ ...abs(370, 6, 12, 43), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(370, 6, 12, 43),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
       </Link>
     </div>

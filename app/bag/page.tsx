@@ -26,7 +26,12 @@ export const metadata: Metadata = {
 
 export default function BagPage() {
   return (
-    <ScaleFrame height={1728} background="#FFF6EC" fontClass={notoSC.className} navActive="Bag">
+    <ScaleFrame
+      height={1728}
+      background="#FFF6EC"
+      fontClass={notoSC.className}
+      navActive="Bag"
+    >
       <BagScreen />
     </ScaleFrame>
   );

@@ -18,7 +18,11 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const lang = await getAdminLang();
   return <PolarisShell lang={lang}>{children}</PolarisShell>;
 }

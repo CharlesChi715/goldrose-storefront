@@ -57,14 +57,27 @@ export function sCard(
  * delivery's own hero eyebrow still says GOLDROSE). The live pages keep the
  * owner's GoldRose art, centred in whatever box the frame gave the image.
  */
-export function GoldRoseWordmark({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
+export function GoldRoseWordmark({
+  x,
+  y,
+  w,
+  h,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}) {
   return (
     <img
       src="/veloria/home/549-90.png"
       alt="GoldRose"
       width={136}
       height={40}
-      style={{ ...abs(x + (w - 136) / 2, y + (h - 40) / 2, 136, 40), display: "block" }}
+      style={{
+        ...abs(x + (w - 136) / 2, y + (h - 40) / 2, 136, 40),
+        display: "block",
+      }}
     />
   );
 }
@@ -77,8 +90,19 @@ export function GoldRoseWordmark({ x, y, w, h }: { x: number; y: number; w: numb
 export function SettingsHeader({ title }: { title: string }) {
   return (
     <>
-      <BackButton fallback="/account" src="/veloria/screens/1523-955.svg" style={abs(36, 53, 24, 24)} />
-      <div className={playfair.className} style={{ ...abs(83, 65, 278), ...txt(25, 28, INK, "center"), fontWeight: 500 }}>
+      <BackButton
+        fallback="/account"
+        src="/veloria/screens/1523-955.svg"
+        style={abs(36, 53, 24, 24)}
+      />
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(83, 65, 278),
+          ...txt(25, 28, INK, "center"),
+          fontWeight: 500,
+        }}
+      >
         {title}
       </div>
     </>
@@ -103,14 +127,33 @@ export function AccountNavBand() {
         const x = [4, 90, 176, 262, 348][i];
         const body = (
           <>
-            <img src={`/veloria/screens/${item.icon}.svg`} alt="" width={22} height={22} style={{ ...abs(28, 4, 22, 22), display: "block" }} />
-            <span style={{ position: "absolute", left: 0, top: 32, width: 78, ...txt(10, 16, item.active ? GOLD : INK, "center"), display: "block" }}>
+            <img
+              src={`/veloria/screens/${item.icon}.svg`}
+              alt=""
+              width={22}
+              height={22}
+              style={{ ...abs(28, 4, 22, 22), display: "block" }}
+            />
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 32,
+                width: 78,
+                ...txt(10, 16, item.active ? GOLD : INK, "center"),
+                display: "block",
+              }}
+            >
               {item.label}
             </span>
           </>
         );
         return item.href ? (
-          <Link key={item.label} href={item.href} style={{ ...abs(x, 866, 78, 60), display: "block" }}>
+          <Link
+            key={item.label}
+            href={item.href}
+            style={{ ...abs(x, 866, 78, 60), display: "block" }}
+          >
             {body}
           </Link>
         ) : (
@@ -150,7 +193,14 @@ export function SettingsToggle({
       aria-checked={on}
       aria-label={label}
       onClick={onFlip}
-      style={{ ...abs(x, y, w, 24), background: on ? GOLD : INK, borderRadius: 12, border: 0, padding: 0, cursor: "pointer" }}
+      style={{
+        ...abs(x, y, w, 24),
+        background: on ? GOLD : INK,
+        borderRadius: 12,
+        border: 0,
+        padding: 0,
+        cursor: "pointer",
+      }}
     >
       <span
         style={{

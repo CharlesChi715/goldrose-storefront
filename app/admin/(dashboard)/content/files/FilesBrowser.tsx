@@ -111,7 +111,12 @@ export function FilesBrowser({ items }: { items: FileItem[] }) {
                   }}
                 />
                 <BlockStack gap="050">
-                  <Text as="span" variant="bodySm" fontWeight="semibold" truncate>
+                  <Text
+                    as="span"
+                    variant="bodySm"
+                    fontWeight="semibold"
+                    truncate
+                  >
                     {item.name}
                   </Text>
                   <Text as="span" tone="subdued" variant="bodySm">
@@ -154,14 +159,21 @@ export function FilesBrowser({ items }: { items: FileItem[] }) {
               router.refresh();
             }),
         }}
-        secondaryActions={[{ content: t("common.cancel"), onAction: () => setConfirmDelete(null) }]}
+        secondaryActions={[
+          {
+            content: t("common.cancel"),
+            onAction: () => setConfirmDelete(null),
+          },
+        ]}
       >
         <Modal.Section>
           <Text as="p">{t("files.delete.body")}</Text>
         </Modal.Section>
       </Modal>
 
-      {toast ? <Toast content={toast} onDismiss={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast content={toast} onDismiss={() => setToast(null)} />
+      ) : null}
     </Page>
   );
 }

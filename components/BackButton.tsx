@@ -60,7 +60,16 @@ export function BackButton({
         ...style,
       }}
     >
-      <img src={src} alt="" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
+      <img
+        src={src}
+        alt=""
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+        }}
+      />
     </button>
   );
 }

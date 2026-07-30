@@ -54,27 +54,87 @@ const TAGS = [
 // 1523:3104 / 3111 / 3118 / 3125 — gift add-on cards. Identical 95×167
 // geometry; only x, art and copy differ.
 const GIFTS = [
-  { x: 16, src: "1523-3105", alt: "Red and gold dipped roses on an acrylic stand", name: "Acrylic Stand", price: "+$20" },
-  { x: 117, src: "1523-3112", alt: "Gold dipped rose in a luxury gift box", name: "Luxury Gift Box", price: "+$25" },
-  { x: 218, src: "1523-3119", alt: "Blush preserved rose bouquet", name: "Rose Bouquet", price: "+$25" },
-  { x: 319, src: "1523-3126", alt: "Red rose gift set with certificate", name: "Personal Card", price: "+$5" },
+  {
+    x: 16,
+    src: "1523-3105",
+    alt: "Red and gold dipped roses on an acrylic stand",
+    name: "Acrylic Stand",
+    price: "+$20",
+  },
+  {
+    x: 117,
+    src: "1523-3112",
+    alt: "Gold dipped rose in a luxury gift box",
+    name: "Luxury Gift Box",
+    price: "+$25",
+  },
+  {
+    x: 218,
+    src: "1523-3119",
+    alt: "Blush preserved rose bouquet",
+    name: "Rose Bouquet",
+    price: "+$25",
+  },
+  {
+    x: 319,
+    src: "1523-3126",
+    alt: "Red rose gift set with certificate",
+    name: "Personal Card",
+    price: "+$5",
+  },
 ];
 
 // 1523:3137 … 3140 — two-line glyph-led story rows, card-relative y. No
 // 07-29 exports for these nodes either; the 07-27 renders match the sheet
 // (same strings, 212×24 boxes, #3B2F2F).
 const STORY = [
-  { y: 43, src: "750-149", alt: "✦ Symbolism — Love that endures beyond the moment" },
-  { y: 74, src: "750-150", alt: "◇ Rose finish — Deep sapphire preserved rose" },
+  {
+    y: 43,
+    src: "750-149",
+    alt: "✦ Symbolism — Love that endures beyond the moment",
+  },
+  {
+    y: 74,
+    src: "750-150",
+    alt: "◇ Rose finish — Deep sapphire preserved rose",
+  },
   { y: 105, src: "750-151", alt: "⌁ Stem — Alloy core with 24K gold finish" },
-  { y: 136, src: "750-152", alt: "♧ Presentation — Luxury box, care card and soft pouch" },
+  {
+    y: 136,
+    src: "750-152",
+    alt: "♧ Presentation — Luxury box, care card and soft pouch",
+  },
 ];
 
 // 1523:3149 / 3152 / 3155 — order-summary rows, card-relative.
 const SUMMARY = [
-  { y: 43, label: "Merchandise", labelW: 72, valueX: 337, valueW: 45, value: "$159.00", valueColor: "#3B2F2F" },
-  { y: 73, label: "Gift services", labelW: 68, valueX: 351, valueW: 31, value: "$0.00", valueColor: "#3B2F2F" },
-  { y: 103, label: "Shipping", labelW: 51, valueX: 292, valueW: 90, value: "Complimentary", valueColor: "#09442E" },
+  {
+    y: 43,
+    label: "Merchandise",
+    labelW: 72,
+    valueX: 337,
+    valueW: 45,
+    value: "$159.00",
+    valueColor: "#3B2F2F",
+  },
+  {
+    y: 73,
+    label: "Gift services",
+    labelW: 68,
+    valueX: 351,
+    valueW: 31,
+    value: "$0.00",
+    valueColor: "#3B2F2F",
+  },
+  {
+    y: 103,
+    label: "Shipping",
+    labelW: 51,
+    valueX: 292,
+    valueW: 90,
+    value: "Complimentary",
+    valueColor: "#09442E",
+  },
 ];
 
 // 1523:3180 / 3181 / 3182 — FAQ rows, now component instances carrying a
@@ -102,7 +162,11 @@ export function BagScreen() {
           wired as the flow's BackButton; / is the fallback when the bag is
           the first page of the visit. */}
       <div style={{ ...abs(16, 20, 398, 42), overflow: "hidden" }}>
-        <BackButton fallback="/" src={`${A}/1523-3063.png`} style={abs(0, 0, 40, 42)} />
+        <BackButton
+          fallback="/"
+          src={`${A}/1523-3063.png`}
+          style={abs(0, 0, 40, 42)}
+        />
         {/* 1523:3064 wordmark box (nav-rel 122,−6.4 152×54.8): GoldRose for
             the frame's "ELDREVE" placeholder image — see the file header. */}
         <div
@@ -152,7 +216,12 @@ export function BagScreen() {
             alt={b.alt}
             width={b.w}
             height={12}
-            style={{ ...abs(b.x, 15, b.w, 12), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(b.x, 15, b.w, 12),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
         ))}
       </div>
@@ -174,7 +243,12 @@ export function BagScreen() {
           alt="●  COMPLIMENTARY SHIPPING UNLOCKED"
           width={223}
           height={13}
-          style={{ ...abs(12, 10, 223, 13), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(12, 10, 223, 13),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
         <div
           className={notoSC.className}
@@ -190,7 +264,13 @@ export function BagScreen() {
           {"Order by 4:00 PM for same-day dispatch  ·  $0 remaining"}
         </div>
         {/* 1523:3073 shipping meter — already full width (nothing left to earn) */}
-        <div style={{ ...abs(12, 59, 374, 4), background: "#09442E", borderRadius: 2 }} />
+        <div
+          style={{
+            ...abs(12, 59, 374, 4),
+            background: "#09442E",
+            borderRadius: 2,
+          }}
+        />
       </div>
 
       {/* ---------- 02 · Product Card (1523:3074) ---------- */}
@@ -206,13 +286,21 @@ export function BagScreen() {
         }}
       >
         {/* 1523:3076 thumbnail → /shop until per-line product links are wired */}
-        <Link href="/shop" style={{ ...abs(14, 14, 148, 244), display: "block" }}>
+        <Link
+          href="/shop"
+          style={{ ...abs(14, 14, 148, 244), display: "block" }}
+        >
           <img
             src={`${A}/1523-3076.png`}
             alt="Artisan Blue Rose — gold-trimmed blue preserved rose"
             width={148}
             height={244}
-            style={{ display: "block", width: 148, height: 244, borderRadius: 10 }}
+            style={{
+              display: "block",
+              width: 148,
+              height: 244,
+              borderRadius: 10,
+            }}
           />
         </Link>
 
@@ -240,7 +328,12 @@ export function BagScreen() {
           alt="Color  ·  Deep sapphire  ●"
           width={152}
           height={14}
-          style={{ ...abs(176, 55, 152, 14), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(176, 55, 152, 14),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
 
         {/* 1523:3081 presentation line */}
@@ -329,7 +422,12 @@ export function BagScreen() {
             alt="−"
             width={11}
             height={22}
-            style={{ ...abs(33, 7, 11, 22), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(33, 7, 11, 22),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
           <div
             className={notoSC.className}
@@ -381,19 +479,40 @@ export function BagScreen() {
       {/* 1523:3099 heading with its two em-dash rules */}
       <div
         className={notoSC.className}
-        style={{ ...abs(129, 535.5, 15), fontSize: 16, lineHeight: "19.2px", fontWeight: 400, color: "#C88217", whiteSpace: "nowrap" }}
+        style={{
+          ...abs(129, 535.5, 15),
+          fontSize: 16,
+          lineHeight: "19.2px",
+          fontWeight: 400,
+          color: "#C88217",
+          whiteSpace: "nowrap",
+        }}
       >
         —
       </div>
       <div
         className={playfair.className}
-        style={{ ...abs(152, 530.5, 126), fontSize: 22, lineHeight: "29.33px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+        style={{
+          ...abs(152, 530.5, 126),
+          fontSize: 22,
+          lineHeight: "29.33px",
+          fontWeight: 500,
+          color: "#3B2F2F",
+          whiteSpace: "nowrap",
+        }}
       >
         Gift Services
       </div>
       <div
         className={notoSC.className}
-        style={{ ...abs(286, 535.5, 15), fontSize: 16, lineHeight: "19.2px", fontWeight: 400, color: "#C88217", whiteSpace: "nowrap" }}
+        style={{
+          ...abs(286, 535.5, 15),
+          fontSize: 16,
+          lineHeight: "19.2px",
+          fontWeight: 400,
+          color: "#C88217",
+          whiteSpace: "nowrap",
+        }}
       >
         —
       </div>
@@ -450,7 +569,14 @@ export function BagScreen() {
           >
             {g.price}
           </div>
-          <div style={{ ...abs(12, 136, 73, 25), background: "#3B2F2F", borderRadius: 7, overflow: "hidden" }}>
+          <div
+            style={{
+              ...abs(12, 136, 73, 25),
+              background: "#3B2F2F",
+              borderRadius: 7,
+              overflow: "hidden",
+            }}
+          >
             <div
               className={notoSC.className}
               style={{
@@ -475,7 +601,14 @@ export function BagScreen() {
       {/* ---------- 04 · Product Story (1523:3132) ---------- */}
 
       {/* 1523:3133 Rose Craftsmanship panel — hairline ring only, no fill */}
-      <div style={{ ...abs(16, 748, 398, 218), borderRadius: 14, boxShadow: HAIRLINE_RING, overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(16, 748, 398, 218),
+          borderRadius: 14,
+          boxShadow: HAIRLINE_RING,
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:3134 — the 07-29 frame reuses the product thumbnail's photo
             here (same image hash as 1523:3076; the old close-up is gone) */}
         <img
@@ -483,11 +616,22 @@ export function BagScreen() {
           alt="The Artisan Blue Rose"
           width={148}
           height={194}
-          style={{ ...abs(12, 12, 148, 194), display: "block", borderRadius: 10 }}
+          style={{
+            ...abs(12, 12, 148, 194),
+            display: "block",
+            borderRadius: 10,
+          }}
         />
         <div
           className={playfair.className}
-          style={{ ...abs(174, 12, 212), fontSize: 17, lineHeight: "22.66px", fontWeight: 500, color: "#09442E", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(174, 12, 212),
+            fontSize: 17,
+            lineHeight: "22.66px",
+            fontWeight: 500,
+            color: "#09442E",
+            whiteSpace: "nowrap",
+          }}
         >
           A Rose Made to Last
         </div>
@@ -498,7 +642,12 @@ export function BagScreen() {
             alt={s.alt}
             width={212}
             height={24}
-            style={{ ...abs(174, s.y, 212, 24), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(174, s.y, 212, 24),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
         ))}
       </div>
@@ -521,13 +670,27 @@ export function BagScreen() {
       >
         <div
           className={playfair.className}
-          style={{ ...abs(12, 10, 65), fontSize: 16, lineHeight: "21.33px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(12, 10, 65),
+            fontSize: 16,
+            lineHeight: "21.33px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Gift Note
         </div>
         {/* 1523:3144 note field — a real input; its ADD affordance is a static
             placeholder (nothing to submit to yet) */}
-        <div style={{ ...abs(12, 37, 374, 34), borderRadius: 7, boxShadow: HAIRLINE_RING, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(12, 37, 374, 34),
+            borderRadius: 7,
+            boxShadow: HAIRLINE_RING,
+            overflow: "hidden",
+          }}
+        >
           <input
             type="text"
             name="giftNote"
@@ -560,7 +723,12 @@ export function BagScreen() {
             alt="ADD  →"
             width={32}
             height={11}
-            style={{ ...abs(334, 11.5, 32, 11), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(334, 11.5, 32, 11),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
         </div>
       </div>
@@ -577,7 +745,14 @@ export function BagScreen() {
       >
         <div
           className={playfair.className}
-          style={{ ...abs(16, 12, 140), fontSize: 19, lineHeight: "25.33px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(16, 12, 140),
+            fontSize: 19,
+            lineHeight: "25.33px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Order Summary
         </div>
@@ -619,13 +794,27 @@ export function BagScreen() {
         {/* 1523:3159 total row */}
         <div
           className={playfair.className}
-          style={{ ...abs(16, 144.5, 40), fontSize: 17, lineHeight: "22.66px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(16, 144.5, 40),
+            fontSize: 17,
+            lineHeight: "22.66px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Total
         </div>
         <div
           className={playfair.className}
-          style={{ ...abs(305, 140.5, 77), fontSize: 23, lineHeight: "30.66px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(305, 140.5, 77),
+            fontSize: 23,
+            lineHeight: "30.66px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           $159.00
         </div>
@@ -633,7 +822,14 @@ export function BagScreen() {
         {/* 1523:3162 savings note */}
         <div
           className={notoSC.className}
-          style={{ ...abs(16, 178, 122), fontSize: 11, lineHeight: "13.2px", fontWeight: 500, color: "#C88217", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(16, 178, 122),
+            fontSize: 11,
+            lineHeight: "13.2px",
+            fontWeight: 500,
+            color: "#C88217",
+            whiteSpace: "nowrap",
+          }}
         >
           You saved $39.00 today
         </div>
@@ -641,7 +837,14 @@ export function BagScreen() {
         {/* 1523:3163 "safe pay" bar — a dark band between the savings note
             and the payment marks (static art). The source layer is literally
             named "Ask Auri" — a copy-paste artifact, not this card's button. */}
-        <div style={{ ...abs(16, 197, 366, 34), background: "#3B2F2F", borderRadius: 8, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(16, 197, 366, 34),
+            background: "#3B2F2F",
+            borderRadius: 8,
+            overflow: "hidden",
+          }}
+        >
           <div
             className={notoSC.className}
             style={{
@@ -665,7 +868,14 @@ export function BagScreen() {
             the design; the two glyph marks come from Figma's own renders */}
         <div
           className={notoSC.className}
-          style={{ ...abs(87, 237, 24), fontSize: 11, lineHeight: "13.2px", fontWeight: 500, color: "#1A4DB2", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(87, 237, 24),
+            fontSize: 11,
+            lineHeight: "13.2px",
+            fontWeight: 500,
+            color: "#1A4DB2",
+            whiteSpace: "nowrap",
+          }}
         >
           VISA
         </div>
@@ -674,11 +884,23 @@ export function BagScreen() {
           alt="●●"
           width={24}
           height={14}
-          style={{ ...abs(129, 237, 24, 14), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(129, 237, 24, 14),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
         <div
           className={notoSC.className}
-          style={{ ...abs(171, 237, 36), fontSize: 11, lineHeight: "13.2px", fontWeight: 500, color: "#0D4D99", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(171, 237, 36),
+            fontSize: 11,
+            lineHeight: "13.2px",
+            fontWeight: 500,
+            color: "#0D4D99",
+            whiteSpace: "nowrap",
+          }}
         >
           PayPal
         </div>
@@ -695,7 +917,14 @@ export function BagScreen() {
         />
         <div
           className={notoSC.className}
-          style={{ ...abs(276, 237, 35), fontSize: 10, lineHeight: "12px", fontWeight: 500, color: "#1A1A1A", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(276, 237, 35),
+            fontSize: 10,
+            lineHeight: "12px",
+            fontWeight: 500,
+            color: "#1A1A1A",
+            whiteSpace: "nowrap",
+          }}
         >
           Klarna.
         </div>
@@ -713,31 +942,71 @@ export function BagScreen() {
           overflow: "hidden",
         }}
       >
-        <div style={{ ...abs(12, 13, 44, 44), background: "#F7DAE1", borderRadius: 22, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(12, 13, 44, 44),
+            background: "#F7DAE1",
+            borderRadius: 22,
+            overflow: "hidden",
+          }}
+        >
           <img
             src={`${A}/1523-3174.svg`}
             alt="✦"
             width={21}
             height={31}
-            style={{ ...abs(11.5, 6.5, 21, 31), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(11.5, 6.5, 21, 31),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
         </div>
         <div
           className={playfair.className}
-          style={{ ...abs(66, 13, 140), fontSize: 15, lineHeight: "19.99px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(66, 13, 140),
+            fontSize: 15,
+            lineHeight: "19.99px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Need help choosing?
         </div>
         <div
           className={notoSC.className}
-          style={{ ...abs(66, 35, 226), fontSize: 9, lineHeight: "10.8px", fontWeight: 400, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(66, 35, 226),
+            fontSize: 9,
+            lineHeight: "10.8px",
+            fontWeight: 400,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Auri, your VELORIA concierge, is here 24/7.
         </div>
-        <div style={{ ...abs(302, 18, 86, 34), background: "#3B2F2F", borderRadius: 8, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(302, 18, 86, 34),
+            background: "#3B2F2F",
+            borderRadius: 8,
+            overflow: "hidden",
+          }}
+        >
           <div
             className={notoSC.className}
-            style={{ ...abs(23, 11.5, 40), fontSize: 9, lineHeight: "10.8px", fontWeight: 500, color: "#FFFFFF", whiteSpace: "nowrap" }}
+            style={{
+              ...abs(23, 11.5, 40),
+              fontSize: 9,
+              lineHeight: "10.8px",
+              fontWeight: 500,
+              color: "#FFFFFF",
+              whiteSpace: "nowrap",
+            }}
           >
             ASK AURI
           </div>
@@ -766,24 +1035,52 @@ export function BagScreen() {
             alt="＋"
             width={18}
             height={22}
-            style={{ ...abs(380, f.y + 11, 18, 22), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(380, f.y + 11, 18, 22),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
           {/* bottom hairline (the instance's t0r0b1l0 stroke) */}
-          <div style={{ ...abs(16, f.y + 43, 398, 1), background: "#E5D9C9" }} />
+          <div
+            style={{ ...abs(16, f.y + 43, 398, 1), background: "#E5D9C9" }}
+          />
         </Fragment>
       ))}
 
       {/* 1523:3183 sticky checkout bar */}
-      <div style={{ ...abs(16, 1588, 398, 68), background: "#FFF6EC", borderRadius: 12, overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(16, 1588, 398, 68),
+          background: "#FFF6EC",
+          borderRadius: 12,
+          overflow: "hidden",
+        }}
+      >
         <div
           className={playfair.className}
-          style={{ ...abs(10, 11, 74), fontSize: 22, lineHeight: "29.33px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(10, 11, 74),
+            fontSize: 22,
+            lineHeight: "29.33px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           $159.00
         </div>
         <div
           className={notoSC.className}
-          style={{ ...abs(10, 41, 68), fontSize: 9, lineHeight: "10.8px", fontWeight: 500, color: "#C88217", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(10, 41, 68),
+            fontSize: 9,
+            lineHeight: "10.8px",
+            fontWeight: 500,
+            color: "#C88217",
+            whiteSpace: "nowrap",
+          }}
         >
           You save $39.00
         </div>
@@ -791,7 +1088,12 @@ export function BagScreen() {
         {/* 1523:3187 primary CTA → /checkout */}
         <Link
           href="/checkout"
-          style={{ ...abs(142, 10, 250, 48), display: "block", background: "#3B2F2F", borderRadius: 10 }}
+          style={{
+            ...abs(142, 10, 250, 48),
+            display: "block",
+            background: "#3B2F2F",
+            borderRadius: 10,
+          }}
         >
           <div
             className={notoSC.className}
@@ -813,7 +1115,12 @@ export function BagScreen() {
             alt="→"
             width={15}
             height={18}
-            style={{ ...abs(188, 15, 15, 18), display: "block", objectFit: "none", objectPosition: "left center" }}
+            style={{
+              ...abs(188, 15, 15, 18),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "left center",
+            }}
           />
         </Link>
       </div>

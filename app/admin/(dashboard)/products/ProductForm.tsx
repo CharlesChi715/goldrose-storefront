@@ -126,7 +126,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const [tagsText, setTagsText] = useState(initial.tags.join(", "));
   const [handle, setHandle] = useState(initial.handle);
   const [chargeTax, setChargeTax] = useState(initial.chargeTax);
-  const [requiresShipping, setRequiresShipping] = useState(initial.requiresShipping);
+  const [requiresShipping, setRequiresShipping] = useState(
+    initial.requiresShipping,
+  );
   const [origin, setOrigin] = useState(initial.origin);
   const [hs, setHs] = useState(initial.hs);
   const [seoTitle, setSeoTitle] = useState(initial.seoTitle);
@@ -150,14 +152,18 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   }, [initial]);
 
   const [optionNames, setOptionNames] = useState<string[]>(initial.optionNames);
-  const [optionValues, setOptionValues] = useState<string[]>(initialValuesByOption);
-  const [variantEdits, setVariantEdits] = useState<Map<string, FormVariant>>(() => {
-    const map = new Map<string, FormVariant>();
-    for (const variant of initial.variants) {
-      map.set(variant.option_values.join(" / "), variant);
-    }
-    return map;
-  });
+  const [optionValues, setOptionValues] = useState<string[]>(
+    initialValuesByOption,
+  );
+  const [variantEdits, setVariantEdits] = useState<Map<string, FormVariant>>(
+    () => {
+      const map = new Map<string, FormVariant>();
+      for (const variant of initial.variants) {
+        map.set(variant.option_values.join(" / "), variant);
+      }
+      return map;
+    },
+  );
   // The "default variant" carries pricing/inventory/shipping card values when
   // no options exist (Shopify's optionless-product model, §7.2).
   const defaultVariant = initial.variants[0] ?? emptyVariant();
@@ -180,7 +186,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
     }
     let result: string[][] = [[]];
     for (const list of lists) {
-      result = result.flatMap((combo) => list.map((value) => [...combo, value]));
+      result = result.flatMap((combo) =>
+        list.map((value) => [...combo, value]),
+      );
     }
     return result;
   }, [hasOptions, optionValues]);
@@ -210,7 +218,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const costCents = toCents(base.cost);
   const profit = costCents !== null ? priceCents - costCents : null;
   const margin =
-    profit !== null && priceCents > 0 ? Math.round((profit / priceCents) * 100) : null;
+    profit !== null && priceCents > 0
+      ? Math.round((profit / priceCents) * 100)
+      : null;
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) {
@@ -224,7 +234,11 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
     if (result.ok) {
       setImages((current) => [
         ...current,
-        ...result.images.map((image) => ({ path: image.path, url: image.url, alt: "" })),
+        ...result.images.map((image) => ({
+          path: image.path,
+          url: image.url,
+          alt: "",
+        })),
       ]);
     } else {
       setError(result.error ?? "Upload failed");
@@ -308,14 +322,18 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
           content: t("form.duplicate"),
           onAction: () =>
             startSaving(async () => {
-              const result = await duplicateProductAction(initial.id!, t("form.copyPrefix"));
+              const result = await duplicateProductAction(
+                initial.id!,
+                t("form.copyPrefix"),
+              );
               if (result.ok) {
                 router.push(`/admin/products/${result.id}`);
               }
             }),
         },
         {
-          content: status === "archived" ? t("form.unarchive") : t("form.archive"),
+          content:
+            status === "archived" ? t("form.unarchive") : t("form.archive"),
           onAction: () =>
             startSaving(async () => {
               const next = status === "archived" ? "draft" : "archived";
@@ -337,12 +355,24 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
       backAction={{ url: "/admin/products" }}
       titleMetadata={
         isNew ? undefined : (
-          <Badge tone={status === "active" ? "success" : status === "draft" ? "info" : undefined}>
+          <Badge
+            tone={
+              status === "active"
+                ? "success"
+                : status === "draft"
+                  ? "info"
+                  : undefined
+            }
+          >
             {t(`products.status.${status as "active" | "draft" | "archived"}`)}
           </Badge>
         )
       }
-      primaryAction={{ content: t("form.save"), onAction: save, loading: saving }}
+      primaryAction={{
+        content: t("form.save"),
+        onAction: save,
+        loading: saving,
+      }}
       secondaryActions={secondaryActions}
     >
       <Layout>
@@ -383,7 +413,10 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   <Text as="h2" variant="headingSm">
                     {t("form.media.title")}
                   </Text>
-                  <Button onClick={() => fileInputRef.current?.click()} variant="plain">
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="plain"
+                  >
                     {t("form.media.add")}
                   </Button>
                 </InlineStack>
@@ -419,7 +452,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                           onChange={(alt) =>
                             setImages((current) =>
                               current.map((entry, entryIndex) =>
-                                entryIndex === index ? { ...entry, alt } : entry,
+                                entryIndex === index
+                                  ? { ...entry, alt }
+                                  : entry,
                               ),
                             )
                           }
@@ -449,7 +484,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                             accessibilityLabel={t("form.media.remove")}
                             onClick={() =>
                               setImages((current) =>
-                                current.filter((_, entryIndex) => entryIndex !== index),
+                                current.filter(
+                                  (_, entryIndex) => entryIndex !== index,
+                                ),
                               )
                             }
                           />
@@ -472,7 +509,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     label={t("form.price")}
                     prefix="$"
                     value={base.price}
-                    onChange={(price) => setBase((current) => ({ ...current, price }))}
+                    onChange={(price) =>
+                      setBase((current) => ({ ...current, price }))
+                    }
                     autoComplete="off"
                     inputMode="decimal"
                   />
@@ -480,7 +519,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     label={t("form.compareAt")}
                     prefix="$"
                     value={base.compareAt}
-                    onChange={(compareAt) => setBase((current) => ({ ...current, compareAt }))}
+                    onChange={(compareAt) =>
+                      setBase((current) => ({ ...current, compareAt }))
+                    }
                     autoComplete="off"
                     inputMode="decimal"
                   />
@@ -496,7 +537,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     label={t("form.cost")}
                     prefix="$"
                     value={base.cost}
-                    onChange={(cost) => setBase((current) => ({ ...current, cost }))}
+                    onChange={(cost) =>
+                      setBase((current) => ({ ...current, cost }))
+                    }
                     autoComplete="off"
                     inputMode="decimal"
                     helpText={t("form.costHelp")}
@@ -529,27 +572,35 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   <TextField
                     label={t("form.sku")}
                     value={base.sku}
-                    onChange={(sku) => setBase((current) => ({ ...current, sku }))}
+                    onChange={(sku) =>
+                      setBase((current) => ({ ...current, sku }))
+                    }
                     autoComplete="off"
                   />
                   <TextField
                     label={t("form.barcode")}
                     value={base.barcode}
-                    onChange={(barcode) => setBase((current) => ({ ...current, barcode }))}
+                    onChange={(barcode) =>
+                      setBase((current) => ({ ...current, barcode }))
+                    }
                     autoComplete="off"
                   />
                 </InlineGrid>
                 <Checkbox
                   label={t("form.trackQty")}
                   checked={base.trackQty}
-                  onChange={(trackQty) => setBase((current) => ({ ...current, trackQty }))}
+                  onChange={(trackQty) =>
+                    setBase((current) => ({ ...current, trackQty }))
+                  }
                 />
                 {!hasOptions && base.trackQty ? (
                   <TextField
                     label={t("form.quantity")}
                     type="number"
                     value={base.quantity}
-                    onChange={(quantity) => setBase((current) => ({ ...current, quantity }))}
+                    onChange={(quantity) =>
+                      setBase((current) => ({ ...current, quantity }))
+                    }
                     autoComplete="off"
                   />
                 ) : null}
@@ -591,7 +642,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                       <TextField
                         label={t("form.origin")}
                         value={origin}
-                        onChange={(value) => setOrigin(value.toUpperCase().slice(0, 2))}
+                        onChange={(value) =>
+                          setOrigin(value.toUpperCase().slice(0, 2))
+                        }
                         autoComplete="off"
                         placeholder="CN"
                       />
@@ -662,10 +715,14 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                         variant="plain"
                         onClick={() => {
                           setOptionNames((current) =>
-                            current.filter((_, entryIndex) => entryIndex !== index),
+                            current.filter(
+                              (_, entryIndex) => entryIndex !== index,
+                            ),
                           );
                           setOptionValues((current) =>
-                            current.filter((_, entryIndex) => entryIndex !== index),
+                            current.filter(
+                              (_, entryIndex) => entryIndex !== index,
+                            ),
                           );
                         }}
                       >
@@ -703,7 +760,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                             labelHidden
                             type="number"
                             value={variant.quantity}
-                            onChange={(quantity) => editCombo(combo, { quantity })}
+                            onChange={(quantity) =>
+                              editCombo(combo, { quantity })
+                            }
                             autoComplete="off"
                           />
                           <TextField
@@ -729,11 +788,18 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   {t("form.seo.title")}
                 </Text>
                 {/* Google-result preview */}
-                <Box background="bg-surface-secondary" padding="300" borderRadius="200">
+                <Box
+                  background="bg-surface-secondary"
+                  padding="300"
+                  borderRadius="200"
+                >
                   <BlockStack gap="050">
                     <Text as="p" variant="bodyLg">
                       <span style={{ color: "#1a0dab" }}>
-                        {(seoTitle || title || t("form.title.label")).slice(0, 70)}
+                        {(seoTitle || title || t("form.title.label")).slice(
+                          0,
+                          70,
+                        )}
                       </span>
                     </Text>
                     <Text as="p" variant="bodySm">
@@ -767,7 +833,12 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   label={t("form.seo.handle")}
                   value={handle}
                   onChange={(value) =>
-                    setHandle(value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-"))
+                    setHandle(
+                      value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]+/g, "-")
+                        .replace(/-+/g, "-"),
+                    )
                   }
                   autoComplete="off"
                   helpText={t("form.seo.handleWarning")}
@@ -841,14 +912,21 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
               router.push("/admin/products");
             }),
         }}
-        secondaryActions={[{ content: t("common.cancel"), onAction: () => setConfirmDelete(false) }]}
+        secondaryActions={[
+          {
+            content: t("common.cancel"),
+            onAction: () => setConfirmDelete(false),
+          },
+        ]}
       >
         <Modal.Section>
           <Text as="p">{t("products.delete.body")}</Text>
         </Modal.Section>
       </Modal>
 
-      {toast ? <Toast content={toast} onDismiss={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast content={toast} onDismiss={() => setToast(null)} />
+      ) : null}
     </Page>
   );
 }

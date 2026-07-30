@@ -17,16 +17,22 @@
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
-const ref = readFileSync(new URL("../supabase/.temp/project-ref", import.meta.url), "utf8").trim();
+const ref = readFileSync(
+  new URL("../supabase/.temp/project-ref", import.meta.url),
+  "utf8",
+).trim();
 
 const token =
   process.env.SUPABASE_ACCESS_TOKEN?.trim() ||
-  execSync('security find-generic-password -s "Supabase CLI" -w', { encoding: "utf8" }).trim();
+  execSync('security find-generic-password -s "Supabase CLI" -w', {
+    encoding: "utf8",
+  }).trim();
 
 // The emailed link lands on /auth/confirm, which verifies the token_hash
 // server-side and redirects signed in. {{ .Token }} is the fallback code the
 // sign-in screens accept in place.
-const confirmLink = '{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account';
+const confirmLink =
+  "{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account";
 const codeFallback =
   "<p>Reading this on a different device? Enter this code on the sign-in page instead: <strong>{{ .Token }}</strong></p>\n" +
   "<p>If you didn’t request this email, you can safely ignore it.</p>";
@@ -49,11 +55,17 @@ const patch = {
     codeFallback,
 };
 
-const response = await fetch(`https://api.supabase.com/v1/projects/${ref}/config/auth`, {
-  method: "PATCH",
-  headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-  body: JSON.stringify(patch),
-});
+const response = await fetch(
+  `https://api.supabase.com/v1/projects/${ref}/config/auth`,
+  {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(patch),
+  },
+);
 if (!response.ok) {
   throw new Error(`PATCH failed: ${response.status} ${await response.text()}`);
 }

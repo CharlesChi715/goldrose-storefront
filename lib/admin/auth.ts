@@ -86,7 +86,9 @@ async function localSecret(): Promise<string> {
   // survive serverless instance churn (no shared disk there).
   const password = process.env.ADMIN_DEV_PASSWORD?.trim();
   if (password) {
-    return createHmac("sha256", "goldrose-admin-session-v1").update(password).digest("hex");
+    return createHmac("sha256", "goldrose-admin-session-v1")
+      .update(password)
+      .digest("hex");
   }
   try {
     return (await fs.readFile(SECRET_FILE, "utf8")).trim();
@@ -220,8 +222,7 @@ export async function requireAdmin(): Promise<AdminSession> {
 }
 
 export type SignInResult =
-  | { ok: true }
-  | { ok: false; error: "invalid" | "pending" };
+  { ok: true } | { ok: false; error: "invalid" | "pending" };
 
 /**
  * Email + password sign-in for both modes. Errors stay deliberately vague.
@@ -257,7 +258,10 @@ export async function signInWithPassword(
   }
 
   const supabase = await supabaseAuthClient();
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
   if (error || !data.user) {
     return { ok: false, error: "invalid" };
   }
@@ -303,7 +307,9 @@ export async function confirmPasskeySignIn(): Promise<SignInResult> {
  * @param nickname - New nickname to store in user_metadata.
  * @returns True when the update succeeded.
  */
-export async function updateAccountNickname(nickname: string): Promise<boolean> {
+export async function updateAccountNickname(
+  nickname: string,
+): Promise<boolean> {
   if (!getSupabaseEnv().hosted) {
     return false;
   }

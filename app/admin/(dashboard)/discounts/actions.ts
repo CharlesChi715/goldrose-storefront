@@ -27,19 +27,28 @@ const saveSchema = z.object({
   endsAt: z.string().min(1).nullable(),
 });
 
-export type SaveDiscountResult = { ok: true; id: string } | { ok: false; error: string };
+export type SaveDiscountResult =
+  { ok: true; id: string } | { ok: false; error: string };
 
-export async function saveDiscountAction(payload: unknown): Promise<SaveDiscountResult> {
+export async function saveDiscountAction(
+  payload: unknown,
+): Promise<SaveDiscountResult> {
   await requireAdmin();
   const parsed = saveSchema.safeParse(payload);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
   }
   try {
     const id = await saveDiscount(parsed.data);
     return { ok: true, id };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Save failed" };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Save failed",
+    };
   }
 }
 

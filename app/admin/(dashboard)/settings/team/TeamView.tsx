@@ -62,7 +62,9 @@ export function TeamView({
                 <BlockStack gap="050">
                   <InlineStack gap="200" blockAlign="center">
                     <Text as="span" fontWeight="semibold">
-                      {member.nickname ? `${member.nickname} · ${member.email}` : member.email}
+                      {member.nickname
+                        ? `${member.nickname} · ${member.email}`
+                        : member.email}
                     </Text>
                     {member.approved ? (
                       <Badge tone="success">{t("team.approved")}</Badge>
@@ -72,7 +74,9 @@ export function TeamView({
                     {member.userId === ownerUserId ? (
                       <Badge tone="info">{t("team.owner")}</Badge>
                     ) : null}
-                    {member.userId === selfUserId ? <Badge>{t("team.you")}</Badge> : null}
+                    {member.userId === selfUserId ? (
+                      <Badge>{t("team.you")}</Badge>
+                    ) : null}
                   </InlineStack>
                   {member.createdAt ? (
                     <Text as="span" tone="subdued" variant="bodySm">

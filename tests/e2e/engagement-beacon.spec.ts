@@ -20,15 +20,24 @@ import { ADMIN_VIEWPORT, adminLogin } from "./helpers";
  * Playwright exposes no readable body for those. Storage is the better
  * assertion anyway — it proves the write landed, not merely that it was sent.
  */
-async function storedView(viewId: string): Promise<Record<string, unknown> | undefined> {
-  const raw = await fs.readFile(path.join(process.cwd(), ".data", "db.json"), "utf8");
-  const db = JSON.parse(raw) as { tables: { page_views: Array<Record<string, unknown>> } };
+async function storedView(
+  viewId: string,
+): Promise<Record<string, unknown> | undefined> {
+  const raw = await fs.readFile(
+    path.join(process.cwd(), ".data", "db.json"),
+    "utf8",
+  );
+  const db = JSON.parse(raw) as {
+    tables: { page_views: Array<Record<string, unknown>> };
+  };
   return db.tables.page_views.find((row) => row.id === viewId);
 }
 
 type ArrivalPayload = { viewId?: string; path: string };
 
-test("a real visit reports its time, its sections, and where it stopped", async ({ page }) => {
+test("a real visit reports its time, its sections, and where it stopped", async ({
+  page,
+}) => {
   const arrivals: ArrivalPayload[] = [];
 
   page.on("request", (request) => {
@@ -64,7 +73,10 @@ test("a real visit reports its time, its sections, and where it stopped", async 
 
   const arrival = arrivals.find((entry) => entry.path === "/");
   expect(arrival, "the arrival beacon should have fired for /").toBeTruthy();
-  expect(arrival?.viewId, "arrival must mint a viewId for the summary to address").toBeTruthy();
+  expect(
+    arrival?.viewId,
+    "arrival must mint a viewId for the summary to address",
+  ).toBeTruthy();
 
   /* ---------- the closing summary, as actually stored ---------- */
 
@@ -111,17 +123,27 @@ test("a real visit reports its time, its sections, and where it stopped", async 
   expect(names).toContain(row.last_section);
 });
 
-test("the admin analytics page shows the engagement cards", async ({ page }) => {
+test("the admin analytics page shows the engagement cards", async ({
+  page,
+}) => {
   await page.setViewportSize(ADMIN_VIEWPORT);
   await adminLogin(page);
   await page.goto("/admin/analytics?range=30d");
   // Match the card headings, not loose text: each card also carries a caption
   // explaining its numbers, and "Median time on page" contains the title.
-  await expect(page.getByRole("heading", { name: "Time on page" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Section attention" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Where visits stop" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Time on page" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Section attention" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Where visits stop" }),
+  ).toBeVisible();
 
   // The captions are the point of this card set — numbers like "42s · 73%" are
   // unreadable without them.
-  await expect(page.getByText("visits measured", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("visits measured", { exact: false }),
+  ).toBeVisible();
 });

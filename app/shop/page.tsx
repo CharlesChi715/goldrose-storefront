@@ -13,8 +13,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConciergeChat } from "@/components/ConciergeChat";
-import { ForwardIcon, PromoBar, ScaleFrame, ShopHeader } from "@/components/chrome";
-import { ShopInteractive, type CardData, type SlotSpec } from "@/components/shop/ShopInteractive";
+import {
+  ForwardIcon,
+  PromoBar,
+  ScaleFrame,
+  ShopHeader,
+} from "@/components/chrome";
+import {
+  ShopInteractive,
+  type CardData,
+  type SlotSpec,
+} from "@/components/shop/ShopInteractive";
 import { abs, txt } from "@/lib/figma-layout";
 import { fileUrl } from "@/lib/files-url";
 import { tenor } from "@/lib/fonts";
@@ -37,7 +46,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const params = await searchParams;
   const requested = Number(params.page);
-  const paged = Number.isInteger(requested) && requested > 1 && requested <= PAGE_COUNT;
+  const paged =
+    Number.isInteger(requested) && requested > 1 && requested <= PAGE_COUNT;
   // Search results (?q=, from /search) are user-specific slices of the same
   // eight cards — keep them out of the index like pages 2-5.
   const noindex = paged || Boolean(params.q?.trim());
@@ -89,7 +99,9 @@ export default async function ShopPage({
   const params = await searchParams;
   const requested = Number(params.page);
   const page =
-    Number.isInteger(requested) && requested >= 1 && requested <= PAGE_COUNT ? requested : 1;
+    Number.isInteger(requested) && requested >= 1 && requested <= PAGE_COUNT
+      ? requested
+      : 1;
   const query = (params.q ?? "").trim().toLowerCase();
   // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
   let cardData: CardData[] = [];
@@ -102,7 +114,9 @@ export default async function ShopPage({
     // state for the grid; noted in docs/ixd/README.md).
     const matches = query
       ? catalog.filter((product) =>
-          `${product.title} ${product.short_name ?? ""}`.toLowerCase().includes(query),
+          `${product.title} ${product.short_name ?? ""}`
+            .toLowerCase()
+            .includes(query),
         )
       : catalog;
     cardData = (matches.length ? matches : catalog).map((product) => ({
@@ -125,73 +139,90 @@ export default async function ShopPage({
 
   return (
     <>
-      <ScaleFrame height={1822} background="#FFF6EC" fontClass={tenor.className}>
-      {/* Hero carousel render, 07-29 art (1523:1626 — badge, Shop Now pill
+      <ScaleFrame
+        height={1822}
+        background="#FFF6EC"
+        fontClass={tenor.className}
+      >
+        {/* Hero carousel render, 07-29 art (1523:1626 — badge, Shop Now pill
           and dots baked into the frame render); bleeds 7px past both canvas
           edges — the canvas clips it, as Figma does. */}
-      <img
-        src="/veloria/screens/1523-1626.png"
-        alt="Featured collection"
-        width={444}
-        height={202}
-        fetchPriority="high"
-        style={{ ...abs(-7, 94, 444, 202), display: "block", maxWidth: "none" }}
-      />
+        <img
+          src="/veloria/screens/1523-1626.png"
+          alt="Featured collection"
+          width={444}
+          height={202}
+          fetchPriority="high"
+          style={{
+            ...abs(-7, 94, 444, 202),
+            display: "block",
+            maxWidth: "none",
+          }}
+        />
 
-      <ShopHeader />
-      <PromoBar slogan={promo.text} isDefault={promo.isDefault} variant="brown" />
+        <ShopHeader />
+        <PromoBar
+          slogan={promo.text}
+          isDefault={promo.isDefault}
+          variant="brown"
+        />
 
-      {/* Count / sort / filter row, active chips, grid, and the 07-27 sort
+        {/* Count / sort / filter row, active chips, grid, and the 07-27 sort
           dropdown + filter drawer overlays — client component so sorting and
           the overlays can hold state (components/shop/ShopInteractive). */}
-      <ShopInteractive slots={CARDS} data={cardData} page={page} rotatePerPage={ROTATE_PER_PAGE} />
+        <ShopInteractive
+          slots={CARDS}
+          data={cardData}
+          page={page}
+          rotatePerPage={ROTATE_PER_PAGE}
+        />
 
-      {/* Pagination — page 1 keeps the bare /shop URL so the canonical page
+        {/* Pagination — page 1 keeps the bare /shop URL so the canonical page
           has no query string. */}
-      {[110, 154, 198, 242, 286].map((x, i) => {
-        const n = i + 1;
-        const active = n === page;
-        return (
-          <Link
-            key={n}
-            href={n === 1 ? "/shop" : `/shop?page=${n}`}
-            aria-label={`Page ${n}`}
-            aria-current={active ? "page" : undefined}
-            style={{
-              ...abs(x, 1656.5, 32, 32),
-              display: "block",
-              background: active ? INK : "rgba(184,166,154,0.10)",
-            }}
-          >
-            <div
+        {[110, 154, 198, 242, 286].map((x, i) => {
+          const n = i + 1;
+          const active = n === page;
+          return (
+            <Link
+              key={n}
+              href={n === 1 ? "/shop" : `/shop?page=${n}`}
+              aria-label={`Page ${n}`}
+              aria-current={active ? "page" : undefined}
               style={{
-                position: "absolute",
-                left: 0,
-                top: 4.76,
-                width: "100%",
-                textAlign: "center",
-                ...txt(16, 24, active ? "#FFF6EC" : INK_SOFT),
+                ...abs(x, 1656.5, 32, 32),
+                display: "block",
+                background: active ? INK : "rgba(184,166,154,0.10)",
               }}
             >
-              {n}
-            </div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 4.76,
+                  width: "100%",
+                  textAlign: "center",
+                  ...txt(16, 24, active ? "#FFF6EC" : INK_SOFT),
+                }}
+              >
+                {n}
+              </div>
+            </Link>
+          );
+        })}
+        {/* Next page; inert on the last one, exactly as the design draws it. */}
+        {page < PAGE_COUNT ? (
+          <Link
+            href={`/shop?page=${page + 1}`}
+            aria-label="Next page"
+            style={{ ...abs(327.052, 1660.59, 24, 24), display: "block" }}
+          >
+            <ForwardIcon color={INK} />
           </Link>
-        );
-      })}
-      {/* Next page; inert on the last one, exactly as the design draws it. */}
-      {page < PAGE_COUNT ? (
-        <Link
-          href={`/shop?page=${page + 1}`}
-          aria-label="Next page"
-          style={{ ...abs(327.052, 1660.59, 24, 24), display: "block" }}
-        >
-          <ForwardIcon color={INK} />
-        </Link>
-      ) : (
-        <span style={abs(327.052, 1660.59, 24, 24)}>
-          <ForwardIcon color={INK} />
-        </span>
-      )}
+        ) : (
+          <span style={abs(327.052, 1660.59, 24, 24)}>
+            <ForwardIcon color={INK} />
+          </span>
+        )}
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the

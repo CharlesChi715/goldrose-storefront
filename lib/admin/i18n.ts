@@ -43,8 +43,10 @@ const en = {
   "topbar.account.logout": "Log out",
 
   // Payment-mode banner (adapt — where Shopify shows trial banners)
-  "banner.mock": "Test mode — checkout is simulated locally and no payment provider is connected.",
-  "banner.sandbox": "PayPal sandbox mode — payments use sandbox money, nothing real is charged.",
+  "banner.mock":
+    "Test mode — checkout is simulated locally and no payment provider is connected.",
+  "banner.sandbox":
+    "PayPal sandbox mode — payments use sandbox money, nothing real is charged.",
   "banner.live": "Live payments are ON — real money moves at checkout.",
 
   // Login
@@ -58,7 +60,8 @@ const en = {
   "login.submit": "Log in",
   "login.error.invalid": "Your email or password is incorrect.",
   "login.error.nickname": "Please enter a nickname.",
-  "login.error.pending": "Your account exists but hasn't been approved yet — ask the owner.",
+  "login.error.pending":
+    "Your account exists but hasn't been approved yet — ask the owner.",
   "login.signup.open": "Need an account? Request access",
   "login.signup.title": "Request access",
   "login.signup.passwordHelp": "At least 8 characters.",
@@ -66,9 +69,12 @@ const en = {
   "login.signup.done":
     "Request sent — you can log in as soon as the owner approves your account.",
   "login.signup.error.exists": "An account with this email already exists.",
-  "login.signup.error.invalid": "Please enter a valid email and a password of 8+ characters.",
-  "login.signup.error.nickname": "Please choose a nickname — it's your name on the forum.",
-  "login.signup.nicknameHelp": "Required — this is how teammates will see you on the forum.",
+  "login.signup.error.invalid":
+    "Please enter a valid email and a password of 8+ characters.",
+  "login.signup.error.nickname":
+    "Please choose a nickname — it's your name on the forum.",
+  "login.signup.nicknameHelp":
+    "Required — this is how teammates will see you on the forum.",
   "login.forgot.open": "Forgot password?",
   "login.forgot.title": "Reset your password",
   "login.forgot.submit": "Send reset link",
@@ -144,13 +150,16 @@ const en = {
   "forum.deleteThread": "Delete discussion",
   "forum.error.empty": "Please fill in both a title and a message.",
   "forum.error.emptyReply": "Please write a message first.",
-  "forum.error.files": "Attachments: up to 5 files, 5 MB each, images or common documents.",
+  "forum.error.files":
+    "Attachments: up to 5 files, 5 MB each, images or common documents.",
   "forum.attach": "Attach files",
-  "forum.attach.hint": "You can also paste images straight into the message box.",
+  "forum.attach.hint":
+    "You can also paste images straight into the message box.",
   "forum.attach.remove": "Remove",
 
   // Guide
-  "guide.missing": "The guide file (docs/TESTER-GUIDE.md) is missing from this deployment.",
+  "guide.missing":
+    "The guide file (docs/TESTER-GUIDE.md) is missing from this deployment.",
   "login.devHint":
     "Local development login — no Supabase configured. Use any email with the dev password (ADMIN_DEV_PASSWORD).",
 
@@ -309,7 +318,8 @@ const en = {
   "order.fulfill.carrier.other": "Other (paste a tracking URL)",
   "order.fulfill.tracking": "Tracking number",
   "order.fulfill.trackingUrl": "Tracking URL (optional)",
-  "order.fulfill.trackingUrl.help": "Leave blank to build the link from the carrier and tracking number.",
+  "order.fulfill.trackingUrl.help":
+    "Leave blank to build the link from the carrier and tracking number.",
   "order.fulfill.submit": "Fulfill items",
   "order.fulfilled.trackingLabel": "Tracking",
   "order.payment.title": "Payment",
@@ -364,7 +374,8 @@ const en = {
   "customers.column.orders": "Orders",
   "customers.column.spent": "Amount spent",
   "customers.export": "Export",
-  "customers.empty": "No customers yet — they're created automatically from paid orders",
+  "customers.empty":
+    "No customers yet — they're created automatically from paid orders",
   "customers.search.placeholder": "Filter customers",
   "customer.lastOrder.title": "Last order placed",
   "customer.orders.title": "Orders",
@@ -460,7 +471,8 @@ const en = {
   "analytics.channel.direct": "Direct",
   "analytics.unknown": "Unknown",
   "analytics.live.autoRefresh": "Updates every 30 seconds",
-  "analytics.emptyCampaign": "No tagged visits yet — add utm_campaign to your links",
+  "analytics.emptyCampaign":
+    "No tagged visits yet — add utm_campaign to your links",
   "analytics.emptyAccount":
     "No account-tagged visits yet — add utm_acc=account-name to each account's links",
   "analytics.funnel.sessions": "Sessions",
@@ -505,28 +517,38 @@ const en = {
   "settings.payments.mode.live": "PayPal LIVE connected",
   "settings.payments.clientId": "Client ID",
   "settings.payments.webhook.ok": "Webhook configured",
-  "settings.payments.webhook.missing": "Webhook not configured (PAYPAL_WEBHOOK_ID)",
+  "settings.payments.webhook.missing":
+    "Webhook not configured (PAYPAL_WEBHOOK_ID)",
   "settings.checkout.title": "Checkout",
-  "settings.checkout.mockNote": "With no PayPal keys set, checkout runs in mock mode — full click-through, no money moves.",
-  "settings.checkout.discountToggle": "Show the discount code field at checkout",
+  "settings.checkout.mockNote":
+    "With no PayPal keys set, checkout runs in mock mode — full click-through, no money moves.",
+  "settings.checkout.discountToggle":
+    "Show the discount code field at checkout",
   "settings.shipping.title": "Shipping and delivery",
   "settings.shipping.zone.name": "Zone name",
-  "settings.shipping.zone.countries": "Countries (ISO codes, * = everywhere else)",
+  "settings.shipping.zone.countries":
+    "Countries (ISO codes, * = everywhere else)",
   "settings.shipping.zone.rate": "Rate ($)",
   "settings.shipping.zone.freeOver": "Free shipping over ($, empty = never)",
   "settings.shipping.zone.add": "Add zone",
   "settings.shipping.zone.remove": "Remove zone",
-  "settings.shipping.placeholderNote": "Placeholder rate — confirm real rates before launch (OQ-2).",
+  "settings.shipping.placeholderNote":
+    "Placeholder rate — confirm real rates before launch (OQ-2).",
   "settings.markets.title": "Markets",
-  "settings.markets.note": "GoldRose sells and ships to the countries covered by the shipping zones below. All markets are priced in USD in V1 — the buyer's bank converts.",
+  "settings.markets.note":
+    "GoldRose sells and ships to the countries covered by the shipping zones below. All markets are priced in USD in V1 — the buyer's bank converts.",
   "settings.taxes.title": "Taxes and duties",
   "settings.taxes.rate": "Tax rate (%)",
-  "settings.taxes.note": "0 while testing. Import duties are the buyer's responsibility — stated at checkout.",
+  "settings.taxes.note":
+    "0 while testing. Import duties are the buyer's responsibility — stated at checkout.",
   "settings.notifications.title": "Notifications",
-  "settings.notifications.orderConfirmation": "Order confirmation (to the buyer)",
-  "settings.notifications.shippingConfirmation": "Shipping confirmation (to the buyer)",
+  "settings.notifications.orderConfirmation":
+    "Order confirmation (to the buyer)",
+  "settings.notifications.shippingConfirmation":
+    "Shipping confirmation (to the buyer)",
   "settings.notifications.newOrderAlert": "New-order alert (to you)",
-  "settings.notifications.note": "Sent via Resend when RESEND_API_KEY is set; logged to the server console otherwise.",
+  "settings.notifications.note":
+    "Sent via Resend when RESEND_API_KEY is set; logged to the server console otherwise.",
   "settings.users.title": "Users and permissions",
   "settings.users.owner": "Owner",
   "settings.users.note": "Adding staff later is one row in admin_users.",
@@ -538,17 +560,21 @@ const en = {
   "settings.search.homeTitle": "Homepage title",
   "settings.search.homeDescription": "Homepage meta description",
   "settings.search.socialImage": "Social share image path",
-  "settings.search.aiToggle": "Allow AI assistants to read the store (GPTBot, ClaudeBot, …)",
-  "settings.search.aiHelp": "Also regenerates /llms.txt and the robots.txt policy.",
+  "settings.search.aiToggle":
+    "Allow AI assistants to read the store (GPTBot, ClaudeBot, …)",
+  "settings.search.aiHelp":
+    "Also regenerates /llms.txt and the robots.txt policy.",
   "settings.languages.title": "Languages",
-  "settings.languages.note": "The admin is bilingual (EN / 中文) — switch it from the account menu in the top bar. The storefront sells internationally in English; storefront translations are V2.",
+  "settings.languages.note":
+    "The admin is bilingual (EN / 中文) — switch it from the account menu in the top bar. The storefront sells internationally in English; storefront translations are V2.",
   "settings.lowStock": "Low-stock alert threshold",
 
   // Content (§9.8)
   "content.slots.title": "Slots",
   "content.reset": "Reset to original",
   "content.saved": "Content saved",
-  "content.slot.help.promo": "✦ symbols may look slightly different from the original design once edited",
+  "content.slot.help.promo":
+    "✦ symbols may look slightly different from the original design once edited",
 
   // Content → Ideas (visitor feedback)
   "ideas.column.message": "Idea",
@@ -556,7 +582,8 @@ const en = {
   "ideas.column.page": "Page",
   "ideas.column.date": "Date",
   "ideas.delete": "Delete",
-  "ideas.empty": "No ideas yet — visitors share them from the storefront chat bubble",
+  "ideas.empty":
+    "No ideas yet — visitors share them from the storefront chat bubble",
 
   // Content → Files (§9.8)
   "files.upload": "Upload files",
@@ -564,7 +591,8 @@ const en = {
   "files.copied": "Copied",
   "files.delete": "Delete",
   "files.delete.title": "Delete file?",
-  "files.delete.body": "The file will be removed from storage. This can't be undone.",
+  "files.delete.body":
+    "The file will be removed from storage. This can't be undone.",
   "files.empty": "No files yet",
 } as const;
 
@@ -625,7 +653,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "login.forgot.open": "忘记密码？",
   "login.forgot.title": "重置密码",
   "login.forgot.submit": "发送重置链接",
-  "login.forgot.done": "如果该账号存在，重置邮件已在路上。测试阶段邮件可能较慢——也可以请店主直接重置密码。",
+  "login.forgot.done":
+    "如果该账号存在，重置邮件已在路上。测试阶段邮件可能较慢——也可以请店主直接重置密码。",
   "login.passkey": "使用通行密钥登录",
   "login.passkey.error": "通行密钥登录未完成——请重试或改用密码登录。",
 
@@ -638,7 +667,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "reset.done": "密码已更新——现在可以用它登录了。",
   "reset.error.short": "密码至少 8 个字符。",
   "reset.error.mismatch": "两次输入的密码不一致。",
-  "reset.error.expired": "重置链接无效或已过期。请在登录页重新申请（请使用同一浏览器打开）。",
+  "reset.error.expired":
+    "重置链接无效或已过期。请在登录页重新申请（请使用同一浏览器打开）。",
   "reset.backToLogin": "返回登录",
 
   // Settings → Team
@@ -659,7 +689,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "security.subtitle": "使用通行密钥更快登录。",
   "security.intro":
     "通行密钥让你用 Face ID、Touch ID 或设备 PIN 登录，无需输入密码。请在每台常用设备上各添加一个。",
-  "security.hostedOnly": "通行密钥需要托管的 Supabase 后端——本地开发模式不可用。",
+  "security.hostedOnly":
+    "通行密钥需要托管的 Supabase 后端——本地开发模式不可用。",
   "security.unsupported": "此浏览器不支持通行密钥。",
   "security.add": "在此设备上添加通行密钥",
   "security.addBusy": "请按设备提示操作……",
@@ -775,7 +806,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.seo.pageTitle": "页面标题",
   "form.seo.metaDescription": "元描述",
   "form.seo.handle": "URL 句柄",
-  "form.seo.handleWarning": "上线后请勿更改句柄 — 链接和 Google 搜索结果会指向它。",
+  "form.seo.handleWarning":
+    "上线后请勿更改句柄 — 链接和 Google 搜索结果会指向它。",
   "form.status.title": "状态",
   "form.organization.title": "产品分类",
   "form.productType": "类型",
@@ -994,7 +1026,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.unknown": "未知",
   "analytics.live.autoRefresh": "每 30 秒自动刷新",
   "analytics.emptyCampaign": "暂无带标签的访问——请在链接中加上 utm_campaign",
-  "analytics.emptyAccount": "暂无带账号标签的访问——请在每个账号的链接中加上 utm_acc=账号名",
+  "analytics.emptyAccount":
+    "暂无带账号标签的访问——请在每个账号的链接中加上 utm_acc=账号名",
   "analytics.funnel.sessions": "会话",
   "analytics.funnel.checkout": "进入结账",
   "analytics.funnel.purchased": "已购买",
@@ -1008,7 +1041,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "analytics.engagement.reach": "到达",
   "analytics.engagement.visits": "次访问",
   "analytics.engagement.empty": "暂无停留数据——访客离开页面时才会回报时长",
-  "analytics.engagement.emptySections": "暂无区域时长——仅统计带 data-el 标记的区域",
+  "analytics.engagement.emptySections":
+    "暂无区域时长——仅统计带 data-el 标记的区域",
   "analytics.engagement.captionTime":
     "按页面：(n) = 已测量的访问次数，其后为平均停留时长与页面滚动深度。仅在标签页打开且访客活跃时计时。",
   "analytics.engagement.captionSections":
@@ -1035,7 +1069,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "settings.payments.webhook.ok": "Webhook 已配置",
   "settings.payments.webhook.missing": "Webhook 未配置（PAYPAL_WEBHOOK_ID）",
   "settings.checkout.title": "结账",
-  "settings.checkout.mockNote": "未设置 PayPal 密钥时，结账为模拟模式 — 全流程可点击，不会转移任何资金。",
+  "settings.checkout.mockNote":
+    "未设置 PayPal 密钥时，结账为模拟模式 — 全流程可点击，不会转移任何资金。",
   "settings.checkout.discountToggle": "在结账页显示折扣码输入框",
   "settings.shipping.title": "发货和配送",
   "settings.shipping.zone.name": "区域名称",
@@ -1044,9 +1079,11 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "settings.shipping.zone.freeOver": "满额免运费（$，留空 = 不免）",
   "settings.shipping.zone.add": "添加区域",
   "settings.shipping.zone.remove": "移除区域",
-  "settings.shipping.placeholderNote": "占位运费 — 上线前请确认真实运费（OQ-2）。",
+  "settings.shipping.placeholderNote":
+    "占位运费 — 上线前请确认真实运费（OQ-2）。",
   "settings.markets.title": "市场",
-  "settings.markets.note": "GoldRose 销售并配送至下方运费区域覆盖的国家/地区。V1 所有市场均以美元定价 — 由买家银行进行货币转换。",
+  "settings.markets.note":
+    "GoldRose 销售并配送至下方运费区域覆盖的国家/地区。V1 所有市场均以美元定价 — 由买家银行进行货币转换。",
   "settings.taxes.title": "税费和关税",
   "settings.taxes.rate": "税率（%）",
   "settings.taxes.note": "测试期间为 0。进口关税由买家承担 — 结账时已注明。",
@@ -1054,7 +1091,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "settings.notifications.orderConfirmation": "订单确认（发给买家）",
   "settings.notifications.shippingConfirmation": "发货确认（发给买家）",
   "settings.notifications.newOrderAlert": "新订单提醒（发给您）",
-  "settings.notifications.note": "设置 RESEND_API_KEY 后通过 Resend 发送；否则记录到服务器控制台。",
+  "settings.notifications.note":
+    "设置 RESEND_API_KEY 后通过 Resend 发送；否则记录到服务器控制台。",
   "settings.users.title": "用户和权限",
   "settings.users.owner": "店主",
   "settings.users.note": "以后添加员工只需在 admin_users 中加一行。",
@@ -1069,7 +1107,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "settings.search.aiToggle": "允许 AI 助手读取商店（GPTBot、ClaudeBot 等）",
   "settings.search.aiHelp": "同时会重新生成 /llms.txt 和 robots.txt 策略。",
   "settings.languages.title": "语言",
-  "settings.languages.note": "后台支持双语（EN / 中文）— 在顶栏账户菜单中切换。店面面向国际市场使用英文；店面翻译为 V2。",
+  "settings.languages.note":
+    "后台支持双语（EN / 中文）— 在顶栏账户菜单中切换。店面面向国际市场使用英文；店面翻译为 V2。",
   "settings.lowStock": "低库存提醒阈值",
 
   "content.slots.title": "内容槽位",

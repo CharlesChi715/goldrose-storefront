@@ -26,7 +26,10 @@ export async function uploadFilesAction(formData: FormData): Promise<{
     await Promise.all(files.map((file) => uploadFile(file)));
     return { ok: true };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Upload failed" };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Upload failed",
+    };
   }
 }
 

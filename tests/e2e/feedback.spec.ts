@@ -15,7 +15,9 @@ const IDEA = `Add rose engraving please! (e2e ${Date.now()})`;
 
 test("a visitor shares an idea from the concierge panel", async ({ page }) => {
   await page.goto("/shop", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Ask our gifting concierge." }).click();
+  await page
+    .getByRole("button", { name: "Ask our gifting concierge." })
+    .click();
 
   const panel = page.getByRole("dialog", { name: "Gifting concierge chat" });
   await expect(panel).toBeVisible();
@@ -25,13 +27,17 @@ test("a visitor shares an idea from the concierge panel", async ({ page }) => {
   await expect(panel.getByText("Thank you!")).toBeVisible();
 });
 
-test("the idea appears in Content → Ideas and can be deleted", async ({ page }) => {
+test("the idea appears in Content → Ideas and can be deleted", async ({
+  page,
+}) => {
   await page.setViewportSize(ADMIN_VIEWPORT);
   await adminLogin(page);
   await page.goto("/admin/content/ideas");
 
   await expect(page.getByText(IDEA)).toBeVisible();
-  await expect(page.getByText(/idea-fan@example\.com · \/shop/).first()).toBeVisible();
+  await expect(
+    page.getByText(/idea-fan@example\.com · \/shop/).first(),
+  ).toBeVisible();
 
   // Clean up: delete our test idea. Polaris 13 Cards render no "Card" class
   // (ShadowBevel + Box), so scope by position instead: the list is

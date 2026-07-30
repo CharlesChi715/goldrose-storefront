@@ -13,13 +13,19 @@ import { StoryScreen } from "@/components/screens/StoryScreen";
 
 export const metadata: Metadata = {
   title: "Our story — GoldRose",
-  description: "Why GoldRose preserves real roses in 24K gold: meaning, sincerity, memory.",
+  description:
+    "Why GoldRose preserves real roses in 24K gold: meaning, sincerity, memory.",
   alternates: { canonical: "/story" },
 };
 
 export default function StoryPage() {
   return (
-    <ScaleFrame height={1260} background="#FFF6EC" fontClass={notoSC.className} navActive="none">
+    <ScaleFrame
+      height={1260}
+      background="#FFF6EC"
+      fontClass={notoSC.className}
+      navActive="none"
+    >
       <StoryScreen />
     </ScaleFrame>
   );

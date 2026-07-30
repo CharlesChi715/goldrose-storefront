@@ -19,7 +19,13 @@ import NoCalcScale from "@/components/NoCalcScale";
 
 const CHAT_H = 106; // mascot top → bar bottom
 
-function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void }) {
+function ChatPanel({
+  bottom,
+  onClose,
+}: {
+  bottom: number;
+  onClose: () => void;
+}) {
   return (
     <div
       role="dialog"
@@ -32,7 +38,8 @@ function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void })
         width: 398,
         background: "#FFFFFF",
         borderRadius: 18,
-        boxShadow: "0 12px 40px rgba(6,55,46,0.28), 0 2px 8px rgba(6,55,46,0.12)",
+        boxShadow:
+          "0 12px 40px rgba(6,55,46,0.28), 0 2px 8px rgba(6,55,46,0.12)",
         overflow: "hidden",
         pointerEvents: "auto",
       }}
@@ -43,12 +50,22 @@ function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void })
           alt=""
           width={34}
           height={34}
-          style={{ position: "absolute", left: 12, top: 7, width: 34, height: 34 }}
+          style={{
+            position: "absolute",
+            left: 12,
+            top: 7,
+            width: 34,
+            height: 34,
+          }}
         />
-        <div style={{ ...abs(56, 9), ...txt(13, 16, "#FFFFFF"), fontWeight: 600 }}>
+        <div
+          style={{ ...abs(56, 9), ...txt(13, 16, "#FFFFFF"), fontWeight: 600 }}
+        >
           Gifting Concierge
         </div>
-        <div style={{ ...abs(56, 26), ...txt(10, 12, "#D9E3DE") }}>GoldRose · usually replies fast</div>
+        <div style={{ ...abs(56, 26), ...txt(10, 12, "#D9E3DE") }}>
+          GoldRose · usually replies fast
+        </div>
         <button
           type="button"
           aria-label="Close chat"
@@ -85,7 +102,9 @@ function ChatPanel({ bottom, onClose }: { bottom: number; onClose: () => void })
 function IdeaForm() {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle",
+  );
   const [error, setError] = useState("");
 
   async function submit() {
@@ -128,8 +147,8 @@ function IdeaForm() {
           }}
         >
           <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
-            <strong>Thank you!</strong> Your idea is on its way to us — it truly helps us
-            shape GoldRose. 🌹
+            <strong>Thank you!</strong> Your idea is on its way to us — it truly
+            helps us shape GoldRose. 🌹
           </div>
         </div>
       </div>
@@ -147,7 +166,8 @@ function IdeaForm() {
         }}
       >
         <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
-          Hi! Live chat is <strong>coming soon</strong> — meanwhile, we&apos;d love your
+          Hi! Live chat is <strong>coming soon</strong> — meanwhile, we&apos;d
+          love your
           <strong> ideas and feedback</strong>. What would make GoldRose better?
         </div>
       </div>
@@ -217,11 +237,23 @@ function IdeaForm() {
         </button>
       </div>
       {state === "error" ? (
-        <div style={{ ...txt(11, 15, "#B3473F"), whiteSpace: "normal", marginTop: 8 }}>
+        <div
+          style={{
+            ...txt(11, 15, "#B3473F"),
+            whiteSpace: "normal",
+            marginTop: 8,
+          }}
+        >
           {error}
         </div>
       ) : null}
-      <div style={{ ...txt(11, 15, "#7C7369"), whiteSpace: "normal", marginTop: 10 }}>
+      <div
+        style={{
+          ...txt(11, 15, "#7C7369"),
+          whiteSpace: "normal",
+          marginTop: 10,
+        }}
+      >
         Every rose ships with our gift guarantee.
       </div>
     </div>
@@ -246,13 +278,27 @@ export function ConciergeChat({
 
   const mascot = (
     // Clipped 3px on the left, exactly as the canvas clipped it in the design.
-    <div key="mascot" style={{ ...abs(0, 0, 95, 98), overflow: "hidden", pointerEvents: "none" }}>
+    <div
+      key="mascot"
+      style={{
+        ...abs(0, 0, 95, 98),
+        overflow: "hidden",
+        pointerEvents: "none",
+      }}
+    >
       <img
         src="/veloria/concierge-mascot.png"
         alt=""
         width={98}
         height={98}
-        style={{ position: "absolute", left: -3, top: 0, width: 98, height: 98, maxWidth: "none" }}
+        style={{
+          position: "absolute",
+          left: -3,
+          top: 0,
+          width: 98,
+          height: 98,
+          maxWidth: "none",
+        }}
       />
     </div>
   );
@@ -278,20 +324,37 @@ export function ConciergeChat({
     >
       <div
         className={inter.className}
-        style={{ ...abs(16, 8, 258), ...txt(12.5, 15.128, brown ? "#FFF6EC" : "#FFFFFF"), fontWeight: 500 }}
+        style={{
+          ...abs(16, 8, 258),
+          ...txt(12.5, 15.128, brown ? "#FFF6EC" : "#FFFFFF"),
+          fontWeight: 500,
+        }}
       >
         Need help choosing the perfect rose?
       </div>
       <div
         className={inter.className}
-        style={{ ...abs(16, brown ? 25 : 17, 258), ...txt(11, 13.312, brown ? "#FFF6EC" : "#D9E3DE") }}
+        style={{
+          ...abs(16, brown ? 25 : 17, 258),
+          ...txt(11, 13.312, brown ? "#FFF6EC" : "#D9E3DE"),
+        }}
       >
         Ask our gifting concierge.
       </div>
-      <div style={{ ...abs(274, 2, 112, 42), background: brown ? "#D4AF37" : "#C89236", borderRadius: 99 }}>
+      <div
+        style={{
+          ...abs(274, 2, 112, 42),
+          background: brown ? "#D4AF37" : "#C89236",
+          borderRadius: 99,
+        }}
+      >
         <div
           className={inter.className}
-          style={{ ...abs(14, 13, 84), ...txt(13, 15.733, brown ? "#FFF6EC" : "#FFFFFF"), fontWeight: 500 }}
+          style={{
+            ...abs(14, 13, 84),
+            ...txt(13, 15.733, brown ? "#FFF6EC" : "#FFFFFF"),
+            fontWeight: 500,
+          }}
         >
           {"CHAT NOW  ›"}
         </div>
@@ -310,7 +373,9 @@ export function ConciergeChat({
         }
       `}</style>
       <div className="figv-chatstage" style={{ height: stageH }}>
-        {open && <ChatPanel bottom={stageH - 52} onClose={() => setOpen(false)} />}
+        {open && (
+          <ChatPanel bottom={stageH - 52} onClose={() => setOpen(false)} />
+        )}
         {mascotOnTop ? [bar, mascot] : [mascot, bar]}
       </div>
       {/* No-calc fallback: scale the chat stage via zoom/transform. */}

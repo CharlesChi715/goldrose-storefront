@@ -43,7 +43,10 @@ export function Glyph({
       alt=""
       width={iw}
       height={ih}
-      style={{ ...abs(x + (w - iw) / 2, y + (h - ih) / 2, iw, ih), display: "block" }}
+      style={{
+        ...abs(x + (w - iw) / 2, y + (h - ih) / 2, iw, ih),
+        display: "block",
+      }}
     />
   );
 }

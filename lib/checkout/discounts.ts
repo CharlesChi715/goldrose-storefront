@@ -50,7 +50,10 @@ export function discountStatus(
   if (discount.ends_at && new Date(discount.ends_at) < now) {
     return "expired";
   }
-  if (discount.usage_limit !== null && discount.used_count >= discount.usage_limit) {
+  if (
+    discount.usage_limit !== null &&
+    discount.used_count >= discount.usage_limit
+  ) {
     return "expired";
   }
   return "active";
@@ -96,8 +99,14 @@ export async function applyDiscountCode(input: {
   if (discount.ends_at && new Date(discount.ends_at) < now) {
     throw new DiscountError("expired", "This code has expired.");
   }
-  if (discount.usage_limit !== null && discount.used_count >= discount.usage_limit) {
-    throw new DiscountError("usage_limit", "This code has been fully redeemed.");
+  if (
+    discount.usage_limit !== null &&
+    discount.used_count >= discount.usage_limit
+  ) {
+    throw new DiscountError(
+      "usage_limit",
+      "This code has been fully redeemed.",
+    );
   }
   if (
     discount.min_purchase_cents !== null &&
@@ -133,14 +142,20 @@ export async function applyDiscountCode(input: {
   let discountCents = 0;
   let freeShipping = false;
   if (discount.type === "percentage") {
-    discountCents = Math.round((eligible * Math.min(100, Math.max(0, discount.value))) / 100);
+    discountCents = Math.round(
+      (eligible * Math.min(100, Math.max(0, discount.value))) / 100,
+    );
   } else if (discount.type === "fixed_amount") {
     discountCents = Math.min(discount.value, eligible);
   } else {
     freeShipping = true;
   }
 
-  return { discount, discount_cents: discountCents, free_shipping: freeShipping };
+  return {
+    discount,
+    discount_cents: discountCents,
+    free_shipping: freeShipping,
+  };
 }
 
 /**
@@ -153,7 +168,9 @@ export async function applyDiscountCode(input: {
 export async function incrementDiscountUsage(code: string): Promise<void> {
   const store = getStore();
   const discounts = await store.all("discounts");
-  const discount = discounts.find((row) => row.code.toLowerCase() === code.toLowerCase());
+  const discount = discounts.find(
+    (row) => row.code.toLowerCase() === code.toLowerCase(),
+  );
   if (discount) {
     await store.update(
       "discounts",

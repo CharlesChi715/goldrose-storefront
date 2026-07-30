@@ -41,7 +41,11 @@ export function A1() {
     // 138:57 module frame — children below are positioned relative to it.
     <div
       data-el="HOME-HERO-SECTION"
-      style={{ ...abs(0, 32, 430, 811), background: "#FFF6EC", overflow: "hidden" }}
+      style={{
+        ...abs(0, 32, 430, 811),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
     >
       {/* 153:65 eyebrow — space runs kept via nbsp so HTML doesn't collapse them */}
       <div
@@ -108,15 +112,20 @@ export function A1() {
           textAlign: "center",
         }}
       >
-        Discover real preserved rose gifts for anniversaries, birthdays, weddings and
-        meaningful moments.
+        Discover real preserved rose gifts for anniversaries, birthdays,
+        weddings and meaningful moments.
       </div>
 
       {/* 155:53 CTA · Shop Gold-Dipped Roses */}
       <Link
         data-el="HOME-HERO-SHOP-BTN"
         href="/shop"
-        style={{ ...abs(32, 598, 366, 44), display: "block", background: "#3B2F2F", borderRadius: 10 }}
+        style={{
+          ...abs(32, 598, 366, 44),
+          display: "block",
+          background: "#3B2F2F",
+          borderRadius: 10,
+        }}
       >
         <div
           data-el="HOME-HERO-SHOP-TEXT"
@@ -133,7 +142,13 @@ export function A1() {
         >
           SHOP GOLD-DIPPED ROSES
         </div>
-        <img src={ARROW} alt="→" width={15} height={18} style={{ ...abs(272, 13, 15, 18), display: "block" }} />
+        <img
+          src={ARROW}
+          alt="→"
+          width={15}
+          height={18}
+          style={{ ...abs(272, 13, 15, 18), display: "block" }}
+        />
       </Link>
 
       {/* 155:56 CTA · Create Personalized Rose Gift (placeholder, not clickable) */}
@@ -161,7 +176,13 @@ export function A1() {
         >
           CREATE A PERSONALIZED ROSE GIFT
         </div>
-        <img src={ARROW} alt="→" width={15} height={18} style={{ ...abs(302.5, 13, 15, 18), display: "block" }} />
+        <img
+          src={ARROW}
+          alt="→"
+          width={15}
+          height={18}
+          style={{ ...abs(302.5, 13, 15, 18), display: "block" }}
+        />
       </div>
 
       {/* 155:59 / 155:62 / 155:65 benefit tiles (placeholders, not clickable) */}

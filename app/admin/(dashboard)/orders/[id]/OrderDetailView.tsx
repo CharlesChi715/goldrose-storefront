@@ -34,7 +34,12 @@ import {
 import { formatMoney } from "@/lib/money";
 import { CARRIERS, carrierLabel } from "@/lib/shipping/carriers";
 import { interpolate } from "@/lib/admin/i18n";
-import type { Address, OrderEventRow, OrderLineRow, OrderRow } from "@/lib/supabase/types.ts";
+import type {
+  Address,
+  OrderEventRow,
+  OrderLineRow,
+  OrderRow,
+} from "@/lib/supabase/types.ts";
 import type { ConversionSummary } from "@/lib/admin/orders";
 import { useAdminT } from "../../../PolarisShell";
 import {
@@ -56,7 +61,13 @@ type CustomerSummary = {
   ordersCount: number;
 } | null;
 
-function AddressBlock({ address, none }: { address: Address | null; none: string }) {
+function AddressBlock({
+  address,
+  none,
+}: {
+  address: Address | null;
+  none: string;
+}) {
   if (!address) {
     return (
       <Text as="p" tone="subdued">
@@ -70,7 +81,9 @@ function AddressBlock({ address, none }: { address: Address | null; none: string
         address.name,
         address.address1,
         address.address2,
-        [address.city, address.state, address.postal_code].filter(Boolean).join(", "),
+        [address.city, address.state, address.postal_code]
+          .filter(Boolean)
+          .join(", "),
         address.country,
       ]
         .filter(Boolean)
@@ -112,7 +125,9 @@ export function OrderDetailView({
 
   const [refundOpen, setRefundOpen] = useState(false);
   const remainingCents = order.total_cents - order.refunded_cents;
-  const [refundAmount, setRefundAmount] = useState((remainingCents / 100).toFixed(2));
+  const [refundAmount, setRefundAmount] = useState(
+    (remainingCents / 100).toFixed(2),
+  );
   const [refundRestock, setRefundRestock] = useState(false);
 
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -127,10 +142,14 @@ export function OrderDetailView({
   const cancelled = Boolean(order.cancelled_at);
   const canFulfill = !cancelled && order.fulfillment_status === "unfulfilled";
   const canRefund =
-    (order.financial_status === "paid" || order.financial_status === "partially_refunded") &&
+    (order.financial_status === "paid" ||
+      order.financial_status === "partially_refunded") &&
     remainingCents > 0;
 
-  function run(action: () => Promise<{ ok: boolean; error?: string } | void>, done?: string) {
+  function run(
+    action: () => Promise<{ ok: boolean; error?: string } | void>,
+    done?: string,
+  ) {
     startTransition(async () => {
       setError(null);
       const result = await action();
@@ -151,7 +170,13 @@ export function OrderDetailView({
       onAction: () => window.open(`/admin/packing-slip/${order.id}`, "_blank"),
     },
     ...(canFulfill && !cancelled
-      ? [{ content: t("order.cancel"), destructive: true, onAction: () => setCancelOpen(true) }]
+      ? [
+          {
+            content: t("order.cancel"),
+            destructive: true,
+            onAction: () => setCancelOpen(true),
+          },
+        ]
       : []),
     {
       content: order.archived_at ? t("order.unarchive") : t("order.archive"),
@@ -161,7 +186,8 @@ export function OrderDetailView({
   ];
 
   // Shopify's draft flow (§9.4): "Mark as paid" converts the draft.
-  const isPendingDraft = order.source === "draft" && order.financial_status === "pending";
+  const isPendingDraft =
+    order.source === "draft" && order.financial_status === "pending";
 
   return (
     <Page
@@ -181,17 +207,29 @@ export function OrderDetailView({
         <InlineStack gap="200">
           <Badge
             tone={order.financial_status === "paid" ? undefined : "warning"}
-            progress={order.financial_status === "paid" ? "complete" : "partiallyComplete"}
+            progress={
+              order.financial_status === "paid"
+                ? "complete"
+                : "partiallyComplete"
+            }
           >
             {t(`orders.status.${order.financial_status}`)}
           </Badge>
           <Badge
-            tone={order.fulfillment_status === "fulfilled" ? undefined : "attention"}
-            progress={order.fulfillment_status === "fulfilled" ? "complete" : "incomplete"}
+            tone={
+              order.fulfillment_status === "fulfilled" ? undefined : "attention"
+            }
+            progress={
+              order.fulfillment_status === "fulfilled"
+                ? "complete"
+                : "incomplete"
+            }
           >
             {t(`orders.status.${order.fulfillment_status}`)}
           </Badge>
-          {cancelled ? <Badge tone="critical">{t("orders.status.cancelled")}</Badge> : null}
+          {cancelled ? (
+            <Badge tone="critical">{t("orders.status.cancelled")}</Badge>
+          ) : null}
           <Badge tone={order.source === "mock" ? "info" : undefined}>
             {t(`orders.source.${order.source}`)}
           </Badge>
@@ -219,16 +257,25 @@ export function OrderDetailView({
                       {t("order.lineItems.title")}
                     </Text>
                     <Badge
-                      tone={order.fulfillment_status === "fulfilled" ? undefined : "attention"}
+                      tone={
+                        order.fulfillment_status === "fulfilled"
+                          ? undefined
+                          : "attention"
+                      }
                       progress={
-                        order.fulfillment_status === "fulfilled" ? "complete" : "incomplete"
+                        order.fulfillment_status === "fulfilled"
+                          ? "complete"
+                          : "incomplete"
                       }
                     >
                       {t(`orders.status.${order.fulfillment_status}`)}
                     </Badge>
                   </InlineStack>
                   {canFulfill ? (
-                    <Button variant="primary" onClick={() => setFulfillOpen(true)}>
+                    <Button
+                      variant="primary"
+                      onClick={() => setFulfillOpen(true)}
+                    >
                       {t("order.fulfill")}
                     </Button>
                   ) : null}
@@ -236,7 +283,11 @@ export function OrderDetailView({
                 <Divider />
                 <BlockStack gap="200">
                   {lines.map((line) => (
-                    <InlineStack key={line.id} align="space-between" blockAlign="start">
+                    <InlineStack
+                      key={line.id}
+                      align="space-between"
+                      blockAlign="start"
+                    >
                       <BlockStack gap="050">
                         <Text as="span" fontWeight="semibold">
                           {line.name}
@@ -246,13 +297,14 @@ export function OrderDetailView({
                         </Text>
                       </BlockStack>
                       <Text as="span" numeric>
-                        {formatMoney(line.unit_amount_cents)} × {line.quantity} ={" "}
-                        {formatMoney(line.line_total_cents)}
+                        {formatMoney(line.unit_amount_cents)} × {line.quantity}{" "}
+                        = {formatMoney(line.line_total_cents)}
                       </Text>
                     </InlineStack>
                   ))}
                 </BlockStack>
-                {order.fulfillment_status === "fulfilled" && order.tracking_number ? (
+                {order.fulfillment_status === "fulfilled" &&
+                order.tracking_number ? (
                   <>
                     <Divider />
                     <Text as="p">
@@ -348,8 +400,8 @@ export function OrderDetailView({
                 </BlockStack>
                 {order.provider_capture_id ? (
                   <Text as="p" tone="subdued" variant="bodySm">
-                    {t("order.payment.captureId")}: {order.provider_capture_id} (
-                    {order.payment_provider})
+                    {t("order.payment.captureId")}: {order.provider_capture_id}{" "}
+                    ({order.payment_provider})
                   </Text>
                 ) : null}
                 {sellerProtection ? (
@@ -394,11 +446,17 @@ export function OrderDetailView({
                 <Divider />
                 <BlockStack gap="300">
                   {events.map((event) => (
-                    <InlineStack key={event.id} align="space-between" blockAlign="start">
+                    <InlineStack
+                      key={event.id}
+                      align="space-between"
+                      blockAlign="start"
+                    >
                       <BlockStack gap="050">
                         <Text
                           as="span"
-                          fontWeight={event.kind === "comment" ? "regular" : "medium"}
+                          fontWeight={
+                            event.kind === "comment" ? "regular" : "medium"
+                          }
                         >
                           {event.message}
                         </Text>
@@ -407,7 +465,9 @@ export function OrderDetailView({
                           {event.created_by ? ` · ${event.created_by}` : ""}
                         </Text>
                       </BlockStack>
-                      {event.kind === "comment" ? <Badge>{t("order.timeline.title")}</Badge> : null}
+                      {event.kind === "comment" ? (
+                        <Badge>{t("order.timeline.title")}</Badge>
+                      ) : null}
                     </InlineStack>
                   ))}
                 </BlockStack>
@@ -436,7 +496,9 @@ export function OrderDetailView({
                 {note !== order.note ? (
                   <Button
                     size="slim"
-                    onClick={() => run(() => saveOrderNoteAction(order.id, note))}
+                    onClick={() =>
+                      run(() => saveOrderNoteAction(order.id, note))
+                    }
                   >
                     {t("common.save")}
                   </Button>
@@ -483,7 +545,10 @@ export function OrderDetailView({
                 <Text as="h2" variant="headingSm">
                   {t("order.shippingAddress.title")}
                 </Text>
-                <AddressBlock address={order.shipping_address} none={t("order.address.none")} />
+                <AddressBlock
+                  address={order.shipping_address}
+                  none={t("order.address.none")}
+                />
               </BlockStack>
             </Card>
 
@@ -492,7 +557,10 @@ export function OrderDetailView({
                 <Text as="h2" variant="headingSm">
                   {t("order.billingAddress.title")}
                 </Text>
-                <AddressBlock address={order.billing_address} none={t("order.address.none")} />
+                <AddressBlock
+                  address={order.billing_address}
+                  none={t("order.address.none")}
+                />
               </BlockStack>
             </Card>
 
@@ -576,7 +644,8 @@ export function OrderDetailView({
             run(async () => {
               const result = await fulfillOrderAction({
                 id: order.id,
-                carrier: carrier === "other" ? null : (carrier as "ups" | "usps"),
+                carrier:
+                  carrier === "other" ? null : (carrier as "ups" | "usps"),
                 trackingNumber: tracking,
                 trackingUrl,
               });
@@ -586,7 +655,12 @@ export function OrderDetailView({
               return result;
             }),
         }}
-        secondaryActions={[{ content: t("common.cancel"), onAction: () => setFulfillOpen(false) }]}
+        secondaryActions={[
+          {
+            content: t("common.cancel"),
+            onAction: () => setFulfillOpen(false),
+          },
+        ]}
       >
         <Modal.Section>
           <BlockStack gap="300">
@@ -612,7 +686,11 @@ export function OrderDetailView({
               label={t("order.fulfill.trackingUrl")}
               value={trackingUrl}
               onChange={setTrackingUrl}
-              helpText={carrier === "other" ? undefined : t("order.fulfill.trackingUrl.help")}
+              helpText={
+                carrier === "other"
+                  ? undefined
+                  : t("order.fulfill.trackingUrl.help")
+              }
               autoComplete="off"
             />
           </BlockStack>
@@ -642,7 +720,9 @@ export function OrderDetailView({
               return result;
             }),
         }}
-        secondaryActions={[{ content: t("common.cancel"), onAction: () => setRefundOpen(false) }]}
+        secondaryActions={[
+          { content: t("common.cancel"), onAction: () => setRefundOpen(false) },
+        ]}
       >
         <Modal.Section>
           <BlockStack gap="300">
@@ -687,7 +767,12 @@ export function OrderDetailView({
               return result;
             }),
         }}
-        secondaryActions={[{ content: t("order.cancel.keep"), onAction: () => setCancelOpen(false) }]}
+        secondaryActions={[
+          {
+            content: t("order.cancel.keep"),
+            onAction: () => setCancelOpen(false),
+          },
+        ]}
       >
         <Modal.Section>
           <BlockStack gap="300">
@@ -711,7 +796,9 @@ export function OrderDetailView({
         </Modal.Section>
       </Modal>
 
-      {toast ? <Toast content={toast} onDismiss={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast content={toast} onDismiss={() => setToast(null)} />
+      ) : null}
     </Page>
   );
 }

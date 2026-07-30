@@ -28,7 +28,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { CloseIcon, DownIcon, FilterIcon, ListviewIcon } from "@/components/chrome";
+import {
+  CloseIcon,
+  DownIcon,
+  FilterIcon,
+  ListviewIcon,
+} from "@/components/chrome";
 import { abs, txt } from "@/lib/figma-layout";
 import { inter, notoSC, playfair } from "@/lib/fonts";
 
@@ -41,7 +46,14 @@ const CREAM = "#FFF6EC";
 const CARD_BG = "#FFFBF6";
 
 /** One grid slot's fixed geometry plus the design art it shows. */
-export type SlotSpec = { x: number; y: number; w: number; img: string; stars: string; starsW: number };
+export type SlotSpec = {
+  x: number;
+  y: number;
+  w: number;
+  img: string;
+  stars: string;
+  starsW: number;
+};
 
 /** Live catalog values for one card's designated text boxes. */
 export type CardData = {
@@ -71,7 +83,11 @@ const SORT_ROWS: Array<{ key: SortKey; label: string }> = [
 ];
 
 // 923:252 filter drawer groups — labels and the frame's default selection.
-const FILTER_GROUPS: Array<{ title: string; y: number; options: Array<{ label: string; x: number; w: number; selected?: boolean }> }> = [
+const FILTER_GROUPS: Array<{
+  title: string;
+  y: number;
+  options: Array<{ label: string; x: number; w: number; selected?: boolean }>;
+}> = [
   {
     title: "Collections",
     y: 368,
@@ -123,13 +139,20 @@ const FILTER_GROUPS: Array<{ title: string; y: number; options: Array<{ label: s
 ];
 
 const defaultFilterSelection = () =>
-  FILTER_GROUPS.map((group) => group.options.findIndex((option) => option.selected));
+  FILTER_GROUPS.map((group) =>
+    group.options.findIndex((option) => option.selected),
+  );
 
 /**
  * Which card's content belongs in grid slot `slot` on `page` — same rotation
  * the server page used before this component existed (placeholder paging).
  */
-function contentIndex(slot: number, page: number, cardCount: number, rotatePerPage: number) {
+function contentIndex(
+  slot: number,
+  page: number,
+  cardCount: number,
+  rotatePerPage: number,
+) {
   return (slot + (page - 1) * rotatePerPage) % cardCount;
 }
 
@@ -167,7 +190,11 @@ function ProductCard({
         alt={data ? data.shortName : "Artisan 24K gold-dipped eternal rose"}
         width={slot.w}
         height={204}
-        style={{ ...abs(0, 0, slot.w, 204), display: "block", objectFit: "cover" }}
+        style={{
+          ...abs(0, 0, slot.w, 204),
+          display: "block",
+          objectFit: "cover",
+        }}
       />
       <div
         className={inter.className}
@@ -244,14 +271,19 @@ export function ShopInteractive({
   const [sort, setSort] = useState<SortKey>("new");
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterSelection, setFilterSelection] = useState<number[]>(defaultFilterSelection);
+  const [filterSelection, setFilterSelection] = useState<number[]>(
+    defaultFilterSelection,
+  );
   const [fading, setFading] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // A pending fade must not fire into an unmounted tree.
-  useEffect(() => () => {
-    if (fadeTimer.current) clearTimeout(fadeTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (fadeTimer.current) clearTimeout(fadeTimer.current);
+    },
+    [],
+  );
 
   /**
    * Fade the grid out, swap the order while it is invisible, fade it back in.
@@ -282,10 +314,19 @@ export function ShopInteractive({
   // own photo keeps the frame art it was filled with.
   const filled = slots.map((_, i) => {
     const c = contentIndex(i, page, slots.length, rotatePerPage);
-    return { art: slots[c].img, card: data.length ? data[c % data.length] : null };
+    return {
+      art: slots[c].img,
+      card: data.length ? data[c % data.length] : null,
+    };
   });
-  if (sort === "high") filled.sort((a, b) => (b.card?.priceCents ?? 0) - (a.card?.priceCents ?? 0));
-  if (sort === "low") filled.sort((a, b) => (a.card?.priceCents ?? 0) - (b.card?.priceCents ?? 0));
+  if (sort === "high")
+    filled.sort(
+      (a, b) => (b.card?.priceCents ?? 0) - (a.card?.priceCents ?? 0),
+    );
+  if (sort === "low")
+    filled.sort(
+      (a, b) => (a.card?.priceCents ?? 0) - (b.card?.priceCents ?? 0),
+    );
 
   const overlayOpen = sortOpen || filterOpen;
 
@@ -294,7 +335,10 @@ export function ShopInteractive({
       {/* 927:153 SHOP-PRODUCT-COUNT-CARD — the overlay frames patch the base
           frame's "120 Apparel" with the gift-shop count. */}
       <div style={{ ...abs(0, 307, 185, 45), background: CREAM }} />
-      <div className={playfair.className} style={{ ...abs(18, 321, 150), ...txt(13, 18, INK), fontWeight: 500 }}>
+      <div
+        className={playfair.className}
+        style={{ ...abs(18, 321, 150), ...txt(13, 18, INK), fontWeight: 500 }}
+      >
         120 GIFTS
       </div>
 
@@ -319,7 +363,14 @@ export function ShopInteractive({
         {sort === "new" ? (
           // Exact frame box for the default label (Tenor inherited from the
           // page's font class, +1.5px baseline correction like the old row).
-          <span style={{ ...abs(19, 17.844, 36.33), ...txt(13, 13.78, INK_SOFT, "center") }}>New</span>
+          <span
+            style={{
+              ...abs(19, 17.844, 36.33),
+              ...txt(13, 13.78, INK_SOFT, "center"),
+            }}
+          >
+            New
+          </span>
         ) : (
           <span
             style={{
@@ -340,7 +391,11 @@ export function ShopInteractive({
         </span>
       </button>
       <div
-        style={{ ...abs(317, 309, 45.099, 43.105), background: "rgba(229,217,201,0.10)", borderRadius: "50%" }}
+        style={{
+          ...abs(317, 309, 45.099, 43.105),
+          background: "rgba(229,217,201,0.10)",
+          borderRadius: "50%",
+        }}
       />
       <span style={abs(327.022, 318.579, 26, 24)}>
         <ListviewIcon color={INK} />
@@ -372,13 +427,37 @@ export function ShopInteractive({
       {/* Active filter chips (929:169/172) — static art, like the apparel
           pair before them; the drawer is the interactive surface. */}
       {[
-        { x: 17, w: 109, label: "Ruby Red", labelX: 10, labelW: 67, closeX: 83 },
-        { x: 134, w: 103, label: "Gift Sets", labelX: 10, labelW: 61, closeX: 77 },
+        {
+          x: 17,
+          w: 109,
+          label: "Ruby Red",
+          labelX: 10,
+          labelW: 67,
+          closeX: 83,
+        },
+        {
+          x: 134,
+          w: 103,
+          label: "Gift Sets",
+          labelX: 10,
+          labelW: 61,
+          closeX: 77,
+        },
       ].map((chip) => (
         <div key={chip.label} style={abs(chip.x, 359, chip.w, 32)}>
-          <div style={{ ...abs(-1, -1, chip.w + 2, 34), border: `1px solid ${SAND}`, borderRadius: 31 }} />
           <div
-            style={{ ...abs(chip.labelX, 8, chip.labelW), ...txt(14, 16, INK, "center"), letterSpacing: 0.14 }}
+            style={{
+              ...abs(-1, -1, chip.w + 2, 34),
+              border: `1px solid ${SAND}`,
+              borderRadius: 31,
+            }}
+          />
+          <div
+            style={{
+              ...abs(chip.labelX, 8, chip.labelW),
+              ...txt(14, 16, INK, "center"),
+              letterSpacing: 0.14,
+            }}
           >
             {chip.label}
           </div>
@@ -392,7 +471,12 @@ export function ShopInteractive({
           each slot rotates per page and follows the chosen sort. The wrapper
           is unpositioned on purpose: the cards stay absolutely placed against
           the same canvas, and it exists only to fade them as one unit. */}
-      <div style={{ opacity: fading ? 0 : 1, transition: `opacity ${FADE_MS}ms ease` }}>
+      <div
+        style={{
+          opacity: fading ? 0 : 1,
+          transition: `opacity ${FADE_MS}ms ease`,
+        }}
+      >
         {slots.map((slot, i) => {
           const { art, card } = filled[i];
           return (
@@ -416,7 +500,13 @@ export function ShopInteractive({
             setSortOpen(false);
             setFilterOpen(false);
           }}
-          style={{ ...abs(0, 0, 430, 1822), background: "transparent", border: 0, padding: 0, cursor: "default" }}
+          style={{
+            ...abs(0, 0, 430, 1822),
+            background: "transparent",
+            border: 0,
+            padding: 0,
+            cursor: "default",
+          }}
         />
       ) : null}
 
@@ -451,7 +541,15 @@ export function ShopInteractive({
                   textAlign: "left",
                 }}
               >
-                <span style={{ position: "absolute", left: 18, top: 6, ...txt(15, 20, selected ? GOLD : INK), fontWeight: 500 }}>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 18,
+                    top: 6,
+                    ...txt(15, 20, selected ? GOLD : INK),
+                    fontWeight: 500,
+                  }}
+                >
                   {row.label}
                 </span>
                 {selected ? (
@@ -460,14 +558,22 @@ export function ShopInteractive({
                     alt=""
                     width={13}
                     height={13}
-                    style={{ position: "absolute", right: 14, top: 9.5, display: "block" }}
+                    style={{
+                      position: "absolute",
+                      right: 14,
+                      top: 9.5,
+                      display: "block",
+                    }}
                   />
                 ) : null}
               </button>
             );
           })}
           {[412, 455, 498].map((y) => (
-            <div key={y} style={{ ...abs(18, y - 365, 170, 1), background: SAND }} />
+            <div
+              key={y}
+              style={{ ...abs(18, y - 365, 170, 1), background: SAND }}
+            />
           ))}
         </div>
       ) : null}
@@ -488,7 +594,13 @@ export function ShopInteractive({
         >
           {FILTER_GROUPS.map((group, gi) => (
             <div key={group.title}>
-              <div style={{ ...abs(16, group.y - 356, 180), ...txt(15, 19, INK), fontWeight: 500 }}>
+              <div
+                style={{
+                  ...abs(16, group.y - 356, 180),
+                  ...txt(15, 19, INK),
+                  fontWeight: 500,
+                }}
+              >
                 {group.title}
               </div>
               {group.options.map((option, oi) => {
@@ -500,7 +612,9 @@ export function ShopInteractive({
                     aria-pressed={selected}
                     onClick={() =>
                       setFilterSelection((current) =>
-                        current.map((sel, idx) => (idx === gi ? (sel === oi ? -1 : oi) : sel)),
+                        current.map((sel, idx) =>
+                          idx === gi ? (sel === oi ? -1 : oi) : sel,
+                        ),
                       )
                     }
                     style={{
@@ -513,7 +627,16 @@ export function ShopInteractive({
                       cursor: "pointer",
                     }}
                   >
-                    <span style={{ position: "absolute", left: 6, right: 6, top: 8, ...txt(11, 16, selected ? CREAM : INK, "center"), fontWeight: 500 }}>
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: 6,
+                        right: 6,
+                        top: 8,
+                        ...txt(11, 16, selected ? CREAM : INK, "center"),
+                        fontWeight: 500,
+                      }}
+                    >
                       {option.label}
                       {selected ? "  ✓" : ""}
                     </span>
@@ -526,7 +649,14 @@ export function ShopInteractive({
           <button
             type="button"
             onClick={() => setFilterSelection(defaultFilterSelection())}
-            style={{ ...abs(18, 398, 88, 21), background: "transparent", border: 0, padding: 0, cursor: "pointer", textAlign: "left" }}
+            style={{
+              ...abs(18, 398, 88, 21),
+              background: "transparent",
+              border: 0,
+              padding: 0,
+              cursor: "pointer",
+              textAlign: "left",
+            }}
           >
             <span style={{ ...txt(17, 21, INK), fontWeight: 500 }}>Reset</span>
           </button>
@@ -544,7 +674,16 @@ export function ShopInteractive({
               cursor: "pointer",
             }}
           >
-            <span style={{ position: "absolute", left: 10, right: 10, top: 15, ...txt(17, 22, CREAM, "center"), fontWeight: 500 }}>
+            <span
+              style={{
+                position: "absolute",
+                left: 10,
+                right: 10,
+                top: 15,
+                ...txt(17, 22, CREAM, "center"),
+                fontWeight: 500,
+              }}
+            >
               Show 36 Results
             </span>
           </button>

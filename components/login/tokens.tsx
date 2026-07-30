@@ -54,7 +54,14 @@ export function Glyph({
     <img
       src={src}
       alt=""
-      style={{ position: "absolute", left, top, width, height, display: "block" }}
+      style={{
+        position: "absolute",
+        left,
+        top,
+        width,
+        height,
+        display: "block",
+      }}
     />
   );
 }

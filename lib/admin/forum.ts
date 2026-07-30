@@ -21,12 +21,16 @@ const NICKNAME_DAYS = 90;
  * @param raw - Any user-supplied value; null/undefined become "".
  */
 export function cleanNickname(raw: unknown): string {
-  return String(raw ?? "").trim().slice(0, NICKNAME_MAX);
+  return String(raw ?? "")
+    .trim()
+    .slice(0, NICKNAME_MAX);
 }
 
 /** The visitor's forum nickname, or null if they haven't picked one. */
 export async function getForumNickname(): Promise<string | null> {
-  const value = cleanNickname((await cookies()).get(FORUM_NICKNAME_COOKIE)?.value);
+  const value = cleanNickname(
+    (await cookies()).get(FORUM_NICKNAME_COOKIE)?.value,
+  );
   return value || null;
 }
 

@@ -11,7 +11,10 @@
 
 import { useState } from "react";
 import { Banner, BlockStack, Button } from "@shopify/polaris";
-import { supabaseBrowserAuthClient, useWebAuthnSupported } from "@/lib/supabase/browser-auth";
+import {
+  supabaseBrowserAuthClient,
+  useWebAuthnSupported,
+} from "@/lib/supabase/browser-auth";
 import { useAdminT } from "../PolarisShell";
 import { confirmPasskeyLoginAction } from "./actions";
 
@@ -33,7 +36,8 @@ export function PasskeyLoginButton() {
     }
     setPending(true);
     setError(null);
-    const { data, error: signInError } = await supabase.auth.signInWithPasskey();
+    const { data, error: signInError } =
+      await supabase.auth.signInWithPasskey();
     if (signInError || !data?.session) {
       setError("failed");
       setPending(false);
@@ -52,7 +56,9 @@ export function PasskeyLoginButton() {
     <BlockStack gap="200">
       {error ? (
         <Banner tone={error === "pending" ? "warning" : "critical"}>
-          {error === "pending" ? t("login.error.pending") : t("login.passkey.error")}
+          {error === "pending"
+            ? t("login.error.pending")
+            : t("login.passkey.error")}
         </Banner>
       ) : null}
       <Button fullWidth loading={pending} onClick={signIn}>

@@ -40,7 +40,10 @@ export type DateRange = { start: Date; end: Date };
  * @param now - Range end; defaults to the current time (injectable for tests).
  * @returns The `current` range and the same-length `previous` range before it.
  */
-export function rangesFor(key: RangeKey, now = new Date()): {
+export function rangesFor(
+  key: RangeKey,
+  now = new Date(),
+): {
   current: DateRange;
   previous: DateRange;
 } {
@@ -77,7 +80,10 @@ function salesOrders(orders: OrderRow[], range: DateRange): OrderRow[] {
 
 /** Sum of order totals minus refunds, in cents. */
 function netSales(orders: OrderRow[]): number {
-  return orders.reduce((sum, order) => sum + order.total_cents - order.refunded_cents, 0);
+  return orders.reduce(
+    (sum, order) => sum + order.total_cents - order.refunded_cents,
+    0,
+  );
 }
 
 export { channelOf, sourceOf } from "./channels.ts";
@@ -104,10 +110,18 @@ export type AnalyticsSummary = {
     ratePercent: MetricPair;
   };
   topProducts: Array<{ name: string; quantity: number; salesCents: number }>;
-  salesByCountry: Array<{ country: string; orders: number; salesCents: number }>;
+  salesByCountry: Array<{
+    country: string;
+    orders: number;
+    salesCents: number;
+  }>;
   salesByDiscount: Array<{ code: string; orders: number; salesCents: number }>;
   salesBySource: Array<{ source: string; orders: number; salesCents: number }>;
-  salesByAccount: Array<{ account: string; orders: number; salesCents: number }>;
+  salesByAccount: Array<{
+    account: string;
+    orders: number;
+    salesCents: number;
+  }>;
   salesOverTime: Array<{ date: string; salesCents: number }>;
   visitorsRightNow: number;
   trafficByChannel: Array<{ channel: string; sessions: number }>;
@@ -158,19 +172,26 @@ export async function analyticsSummary(
     const byCustomer = new Map<string, number>();
     for (const order of rangeOrders) {
       if (order.customer_id) {
-        byCustomer.set(order.customer_id, (byCustomer.get(order.customer_id) ?? 0) + 1);
+        byCustomer.set(
+          order.customer_id,
+          (byCustomer.get(order.customer_id) ?? 0) + 1,
+        );
       }
     }
     if (byCustomer.size === 0) {
       return 0;
     }
-    const returning = [...byCustomer.values()].filter((count) => count > 1).length;
+    const returning = [...byCustomer.values()].filter(
+      (count) => count > 1,
+    ).length;
     return Math.round((returning / byCustomer.size) * 100);
   }
 
   function sessionsIn(range: DateRange): Set<string> {
     return new Set(
-      views.filter((view) => within(view.created_at, range)).map((view) => view.session_id),
+      views
+        .filter((view) => within(view.created_at, range))
+        .map((view) => view.session_id),
     );
   }
   const currentSessions = sessionsIn(current);
@@ -178,12 +199,18 @@ export async function analyticsSummary(
 
   const checkoutSessions = new Set(
     views
-      .filter((view) => within(view.created_at, current) && view.path.startsWith("/checkout"))
+      .filter(
+        (view) =>
+          within(view.created_at, current) && view.path.startsWith("/checkout"),
+      )
       .map((view) => view.session_id),
   );
   const purchased = currentOrders.filter((order) => order.visitor_id).length;
 
-  function conversionRate(rangeOrders: OrderRow[], sessions: Set<string>): number {
+  function conversionRate(
+    rangeOrders: OrderRow[],
+    sessions: Set<string>,
+  ): number {
     if (sessions.size === 0) {
       return 0;
     }
@@ -227,7 +254,9 @@ export async function analyticsSummary(
   // view of a session is the one that still carries the referrer / UTM tags.
   const firstViewByVisitor = new Map<string, PageViewRow>();
   const firstViewBySession = new Map<string, PageViewRow>();
-  for (const view of [...views].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
+  for (const view of [...views].sort((a, b) =>
+    a.created_at.localeCompare(b.created_at),
+  )) {
     if (!firstViewByVisitor.has(view.visitor_id)) {
       firstViewByVisitor.set(view.visitor_id, view);
     }
@@ -239,9 +268,14 @@ export async function analyticsSummary(
   // Sales by posting account (owner request 2026-07-23): trace each order back
   // to the specific account that brought the buyer (utm_acc on the
   // visitor's first view) so per-salesperson commission can be worked out.
-  const byAccountSales = new Map<string, { orders: number; salesCents: number }>();
+  const byAccountSales = new Map<
+    string,
+    { orders: number; salesCents: number }
+  >();
   for (const order of currentOrders) {
-    const firstView = order.visitor_id ? firstViewByVisitor.get(order.visitor_id) : undefined;
+    const firstView = order.visitor_id
+      ? firstViewByVisitor.get(order.visitor_id)
+      : undefined;
     const source = order.visitor_id ? channelOf(firstView) : "Unattributed";
     const entry = bySource.get(source) ?? { orders: 0, salesCents: 0 };
     entry.orders += 1;
@@ -249,7 +283,10 @@ export async function analyticsSummary(
     bySource.set(source, entry);
     const account = accountOf(firstView);
     if (account) {
-      const accountEntry = byAccountSales.get(account) ?? { orders: 0, salesCents: 0 };
+      const accountEntry = byAccountSales.get(account) ?? {
+        orders: 0,
+        salesCents: 0,
+      };
       accountEntry.orders += 1;
       accountEntry.salesCents += order.total_cents - order.refunded_cents;
       byAccountSales.set(account, accountEntry);
@@ -289,7 +326,10 @@ export async function analyticsSummary(
   }
   for (const order of currentOrders) {
     const bucket = order.placed_at.slice(0, 10);
-    buckets.set(bucket, (buckets.get(bucket) ?? 0) + order.total_cents - order.refunded_cents);
+    buckets.set(
+      bucket,
+      (buckets.get(bucket) ?? 0) + order.total_cents - order.refunded_cents,
+    );
   }
 
   // Live view (owner request 2026-07-22): who is on the site right now,
@@ -318,25 +358,40 @@ export async function analyticsSummary(
   const visitorsRightNow = liveSessionByVisitor.size;
 
   // Engagement reads the same page_views already in memory — no extra query.
-  const currentEngagement = engagementReport(views.filter((view) => within(view.created_at, current)));
-  const previousEngagement = engagementReport(views.filter((view) => within(view.created_at, previous)));
+  const currentEngagement = engagementReport(
+    views.filter((view) => within(view.created_at, current)),
+  );
+  const previousEngagement = engagementReport(
+    views.filter((view) => within(view.created_at, previous)),
+  );
 
   const currentAov =
-    currentOrders.length > 0 ? Math.round(netSales(currentOrders) / currentOrders.length) : 0;
+    currentOrders.length > 0
+      ? Math.round(netSales(currentOrders) / currentOrders.length)
+      : 0;
   const previousAov =
     previousOrders.length > 0
       ? Math.round(netSales(previousOrders) / previousOrders.length)
       : 0;
 
   return {
-    totalSalesCents: { current: netSales(currentOrders), previous: netSales(previousOrders) },
-    ordersCount: { current: currentOrders.length, previous: previousOrders.length },
+    totalSalesCents: {
+      current: netSales(currentOrders),
+      previous: netSales(previousOrders),
+    },
+    ordersCount: {
+      current: currentOrders.length,
+      previous: previousOrders.length,
+    },
     aovCents: { current: currentAov, previous: previousAov },
     returningRatePercent: {
       current: returningRate(currentOrders),
       previous: returningRate(previousOrders),
     },
-    sessions: { current: currentSessions.size, previous: previousSessions.size },
+    sessions: {
+      current: currentSessions.size,
+      previous: previousSessions.size,
+    },
     conversion: {
       sessions: currentSessions.size,
       reachedCheckout: checkoutSessions.size,
@@ -362,7 +417,10 @@ export async function analyticsSummary(
     salesByAccount: [...byAccountSales.entries()]
       .map(([account, entry]) => ({ account, ...entry }))
       .sort((a, b) => b.salesCents - a.salesCents),
-    salesOverTime: [...buckets.entries()].map(([date, salesCents]) => ({ date, salesCents })),
+    salesOverTime: [...buckets.entries()].map(([date, salesCents]) => ({
+      date,
+      salesCents,
+    })),
     visitorsRightNow,
     trafficByChannel: [...byChannel.entries()]
       .map(([channel, sessions]) => ({ channel, sessions }))
@@ -422,8 +480,11 @@ export async function homeFeed(now = new Date()): Promise<HomeFeed> {
     cachedAll("settings"),
   ]);
   const threshold =
-    (settings.find((row) => row.key === "low_stock_threshold")?.value as number) ?? 10;
-  const titleById = new Map(products.map((product) => [product.id, product.title]));
+    (settings.find((row) => row.key === "low_stock_threshold")
+      ?.value as number) ?? 10;
+  const titleById = new Map(
+    products.map((product) => [product.id, product.title]),
+  );
   const dayAgo = now.getTime() - 24 * 60 * 60 * 1000;
   const hourAgo = now.getTime() - 60 * 60 * 1000;
 
@@ -435,7 +496,10 @@ export async function homeFeed(now = new Date()): Promise<HomeFeed> {
         order.financial_status !== "pending",
     ).length,
     lowStock: variants
-      .filter((variant) => variant.track_quantity && variant.inventory_on_hand <= threshold)
+      .filter(
+        (variant) =>
+          variant.track_quantity && variant.inventory_on_hand <= threshold,
+      )
       .sort((a, b) => a.inventory_on_hand - b.inventory_on_hand)
       .slice(0, 5)
       .map((variant) => ({
@@ -500,7 +564,9 @@ export async function searchAdmin(query: string): Promise<SearchResults> {
   );
   const productHits = products
     .filter(
-      (product) => product.title.toLowerCase().includes(needle) || skuMatch.has(product.id),
+      (product) =>
+        product.title.toLowerCase().includes(needle) ||
+        skuMatch.has(product.id),
     )
     .slice(0, 5)
     .map((product) => ({
@@ -513,12 +579,15 @@ export async function searchAdmin(query: string): Promise<SearchResults> {
     .filter(
       (customer) =>
         customer.email.toLowerCase().includes(needle) ||
-        `${customer.first_name} ${customer.last_name}`.toLowerCase().includes(needle),
+        `${customer.first_name} ${customer.last_name}`
+          .toLowerCase()
+          .includes(needle),
     )
     .slice(0, 5)
     .map((customer) => ({
       id: customer.id,
-      label: `${customer.first_name} ${customer.last_name}`.trim() || customer.email,
+      label:
+        `${customer.first_name} ${customer.last_name}`.trim() || customer.email,
       sublabel: customer.email,
     }));
 

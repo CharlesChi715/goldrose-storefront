@@ -27,7 +27,13 @@ export function A11() {
   return (
     <>
       {/* 138:67 module frame */}
-      <div style={{ ...abs(0, 7900, 430, 714), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 7900, 430, 714),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 505:101 A11 · Reference Rebuild — solid #FFF6EC + radial glow */}
         <div
           style={{
@@ -223,7 +229,11 @@ export function A11() {
                 width={430}
                 height={722}
                 // Bleed crop: 430×722 photo offset -462px; keep verbatim.
-                style={{ ...abs(0, -462, 430, 722), display: "block", maxWidth: "none" }}
+                style={{
+                  ...abs(0, -462, 430, 722),
+                  display: "block",
+                  maxWidth: "none",
+                }}
               />
             </div>
             <div
@@ -265,26 +275,38 @@ export function A11() {
               height={22}
               style={{ ...abs(360, 70, 22, 22), display: "block" }}
             />
-            {["A real rose.", "A personal story.", "A gift made to last."].map((v, i) => (
-              <div
-                key={v}
-                className={goudy.className}
-                style={{
-                  ...abs([200, 267, 334][i], 96, 74),
-                  fontSize: 7.6,
-                  lineHeight: "16px",
-                  color: INK,
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {v}
-              </div>
-            ))}
+            {["A real rose.", "A personal story.", "A gift made to last."].map(
+              (v, i) => (
+                <div
+                  key={v}
+                  className={goudy.className}
+                  style={{
+                    ...abs([200, 267, 334][i], 96, 74),
+                    fontSize: 7.6,
+                    lineHeight: "16px",
+                    color: INK,
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {v}
+                </div>
+              ),
+            )}
             {/* 509:101/102 value dividers — 0.7px CSS hairlines (the exported
                 SVG has a zero-width canvas, unusable) */}
-            <div style={{ ...abs(266.65, 72, 0.7, 43), background: "rgba(194,143,97,0.55)" }} />
-            <div style={{ ...abs(333.65, 72, 0.7, 43), background: "rgba(194,143,97,0.55)" }} />
+            <div
+              style={{
+                ...abs(266.65, 72, 0.7, 43),
+                background: "rgba(194,143,97,0.55)",
+              }}
+            />
+            <div
+              style={{
+                ...abs(333.65, 72, 0.7, 43),
+                background: "rgba(194,143,97,0.55)",
+              }}
+            />
             {/* 509:103 CTA · Shop All GoldRose Gifts → /shop */}
             <Link
               href="/shop"

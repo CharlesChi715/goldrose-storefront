@@ -13,7 +13,10 @@
 
 import { NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/paypal/client";
-import { handlePayPalEvent, type PayPalWebhookEvent } from "@/lib/paypal/webhook";
+import {
+  handlePayPalEvent,
+  type PayPalWebhookEvent,
+} from "@/lib/paypal/webhook";
 
 export const runtime = "nodejs";
 
@@ -22,7 +25,10 @@ export async function POST(request: Request) {
 
   let verified = false;
   try {
-    verified = await verifyWebhookSignature({ headers: request.headers, rawBody });
+    verified = await verifyWebhookSignature({
+      headers: request.headers,
+      rawBody,
+    });
   } catch {
     verified = false;
   }

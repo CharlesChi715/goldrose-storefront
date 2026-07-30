@@ -47,26 +47,67 @@ const FIELDS: Array<{
   sendCode?: boolean;
 }> = [
   { y: 400, icon: "1523-3322", ink: [14, 17], hint: "Full name" },
-  { y: 474, icon: "1523-3325", crop: [50.5, 496.5, 21.5, 14.5], hint: "Enter your email address" },
+  {
+    y: 474,
+    icon: "1523-3325",
+    crop: [50.5, 496.5, 21.5, 14.5],
+    hint: "Enter your email address",
+  },
   { y: 548, icon: "1523-3333", ink: [21, 21], hint: "Create password" },
   { y: 622, icon: "1523-3336", ink: [21, 21], hint: "Confirm password" },
-  { y: 696, icon: "1523-3328", ink: [22, 22], hint: "Verification code", sendCode: true },
+  {
+    y: 696,
+    icon: "1523-3328",
+    ink: [22, 22],
+    hint: "Verification code",
+    sendCode: true,
+  },
 ];
 
 export function SignupScreen() {
   return (
-    <ScaleFrame height={932} background={CREAM} fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={932}
+      background={CREAM}
+      fontClass={notoSC.className}
+      nav={false}
+    >
       {/* Brand Navigation (1523:3343) — ‹ back; GoldRose substituted for the
           frame's "ELDREVE" wordmark image at its box (see the file header) */}
-      <BackButton fallback="/account" src="/veloria/screens/1523-3344.png" style={abs(0, 18, 40, 42)} />
-      <div className={playfair.className} style={{ ...abs(153, 13.5, 140, 51), ...txt(24, 51, INK, "center"), fontWeight: 600 }}>
+      <BackButton
+        fallback="/account"
+        src="/veloria/screens/1523-3344.png"
+        style={abs(0, 18, 40, 42)}
+      />
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(153, 13.5, 140, 51),
+          ...txt(24, 51, INK, "center"),
+          fontWeight: 600,
+        }}
+      >
         GoldRose
       </div>
 
-      <div className={playfair.className} style={{ ...abs(28, 98, 195, 150), ...txt(36, 48, INK), fontWeight: 600, whiteSpace: "pre-line" }}>
+      <div
+        className={playfair.className}
+        style={{
+          ...abs(28, 98, 195, 150),
+          ...txt(36, 48, INK),
+          fontWeight: 600,
+          whiteSpace: "pre-line",
+        }}
+      >
         {"Create a\nshopping\naccount"}
       </div>
-      <div style={{ ...abs(28, 256.2, 225, 70), ...txt(14, 16.8, INK), whiteSpace: "pre-line" }}>
+      <div
+        style={{
+          ...abs(28, 256.2, 225, 70),
+          ...txt(14, 16.8, INK),
+          whiteSpace: "pre-line",
+        }}
+      >
         {"Save favorites, track orders,\nand enjoy effortless gifting."}
       </div>
       <img
@@ -78,41 +119,125 @@ export function SignupScreen() {
       />
 
       {/* form card — all fields are visual placeholders (see file header) */}
-      <div style={{ ...abs(16, 326, 398, 576), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 16 }} />
-      <div style={{ ...abs(32, 352.4, 350), ...txt(21, 25.2, INK), fontWeight: 700 }}>Create your shopping account</div>
+      <div
+        style={{
+          ...abs(16, 326, 398, 576),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 16,
+        }}
+      />
+      <div
+        style={{
+          ...abs(32, 352.4, 350),
+          ...txt(21, 25.2, INK),
+          fontWeight: 700,
+        }}
+      >
+        Create your shopping account
+      </div>
 
       {FIELDS.map((field) => (
         <div key={field.hint}>
-          <div style={{ ...abs(32, field.y, 366, 60), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 10 }} />
+          <div
+            style={{
+              ...abs(32, field.y, 366, 60),
+              background: SHEET,
+              boxShadow: `inset 0 0 0 1px ${SAND}`,
+              borderRadius: 10,
+            }}
+          />
           {field.crop ? (
-            <img src={`/veloria/screens/${field.icon}.png`} alt="" style={{ ...abs(...field.crop), display: "block" }} />
+            <img
+              src={`/veloria/screens/${field.icon}.png`}
+              alt=""
+              style={{ ...abs(...field.crop), display: "block" }}
+            />
           ) : field.ink ? (
-            <Glyph src={field.icon} x={44} y={field.y + 8} w={34} h={44} ink={field.ink} />
+            <Glyph
+              src={field.icon}
+              x={44}
+              y={field.y + 8}
+              w={34}
+              h={44}
+              ink={field.ink}
+            />
           ) : null}
-          <div style={{ ...abs(field.sendCode ? 89 : 82, field.y + 21.6, field.sendCode ? 195 : 290), ...txt(14, 16.8, HINT) }}>
+          <div
+            style={{
+              ...abs(
+                field.sendCode ? 89 : 82,
+                field.y + 21.6,
+                field.sendCode ? 195 : 290,
+              ),
+              ...txt(14, 16.8, HINT),
+            }}
+          >
             {field.hint}
           </div>
           {field.sendCode ? (
             <>
-              <div style={{ ...abs(295, field.y + 10, 1, 40), background: SAND }} />
-              <div style={{ ...abs(307, field.y + 22.2, 84), ...txt(13, 15.6, INK, "center"), fontWeight: 500 }}>Send code</div>
+              <div
+                style={{ ...abs(295, field.y + 10, 1, 40), background: SAND }}
+              />
+              <div
+                style={{
+                  ...abs(307, field.y + 22.2, 84),
+                  ...txt(13, 15.6, INK, "center"),
+                  fontWeight: 500,
+                }}
+              >
+                Send code
+              </div>
             </>
           ) : null}
         </div>
       ))}
 
-      <div style={{ ...abs(32, 772, 18, 18), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 2 }} />
-      <div style={{ ...abs(58, 773.8, 315), ...txt(12, 14.4, INK) }}>I agree to the Terms &amp; Privacy Policy</div>
+      <div
+        style={{
+          ...abs(32, 772, 18, 18),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 2,
+        }}
+      />
+      <div style={{ ...abs(58, 773.8, 315), ...txt(12, 14.4, INK) }}>
+        I agree to the Terms &amp; Privacy Policy
+      </div>
 
       {/* CREATE — inert placeholder (no password signup on the live flow) */}
-      <div style={{ ...abs(32, 810, 366, 48), background: INK, borderRadius: 10 }} aria-disabled="true">
-        <span style={{ position: "absolute", left: 10, right: 10, top: 16.2, ...txt(13, 15.6, CREAM, "center"), fontWeight: 500 }}>
+      <div
+        style={{ ...abs(32, 810, 366, 48), background: INK, borderRadius: 10 }}
+        aria-disabled="true"
+      >
+        <span
+          style={{
+            position: "absolute",
+            left: 10,
+            right: 10,
+            top: 16.2,
+            ...txt(13, 15.6, CREAM, "center"),
+            fontWeight: 500,
+          }}
+        >
           CREATE SHOPPING ACCOUNT
         </span>
       </div>
 
-      <Link href="/account" style={{ ...abs(56, 862, 318, 28), display: "block" }}>
-        <span style={{ position: "absolute", left: 0, right: 0, top: 6.5, ...txt(12.5, 15, INK, "center") }}>
+      <Link
+        href="/account"
+        style={{ ...abs(56, 862, 318, 28), display: "block" }}
+      >
+        <span
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 6.5,
+            ...txt(12.5, 15, INK, "center"),
+          }}
+        >
           Already have an account?&nbsp;&nbsp;Sign in&nbsp;&nbsp;›
         </span>
       </Link>

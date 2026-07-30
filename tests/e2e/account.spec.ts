@@ -25,42 +25,57 @@ test.describe("customer account (local mode)", () => {
     // Frame 74:53 modules.
     await expect(page.getByText("Welcome to")).toBeVisible();
     await expect(page.getByLabel("Email address")).toBeVisible();
-    await expect(page.getByRole("button", { name: "EMAIL ME A SIGN-IN LINK" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "EMAIL ME A SIGN-IN LINK" }),
+    ).toBeVisible();
     await expect(page.getByText("Benefits after sign-in")).toBeVisible();
     // /orders redirects to the ADMIN list, so the shopper-facing button points
     // at the customer tracking screen (Figma C-1) instead.
-    await expect(page.getByRole("link", { name: /VIEW MY ORDER/ })).toHaveAttribute(
-      "href",
-      "/orders/track",
-    );
+    await expect(
+      page.getByRole("link", { name: /VIEW MY ORDER/ }),
+    ).toHaveAttribute("href", "/orders/track");
     // The owner dropped passkeys from the storefront; the design has no
     // Google/Apple buttons either.
     await expect(page.getByRole("button", { name: /passkey/i })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /Continue with/ })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /Continue with/ }),
+    ).toHaveCount(0);
   });
 
-  test("without Supabase, signing in says so instead of failing silently", async ({ page }) => {
+  test("without Supabase, signing in says so instead of failing silently", async ({
+    page,
+  }) => {
     await page.goto("/account");
     await page.getByLabel("Email address").fill("shopper@example.com");
     await page.getByRole("button", { name: "EMAIL ME A SIGN-IN LINK" }).click();
-    await expect(page.getByText(/isn’t switched on in this environment/)).toBeVisible();
+    await expect(
+      page.getByText(/isn’t switched on in this environment/),
+    ).toBeVisible();
   });
 
-  test("the account-type tabs switch between the two imported frames", async ({ page }) => {
+  test("the account-type tabs switch between the two imported frames", async ({
+    page,
+  }) => {
     await page.goto("/account");
     await page.getByLabel("Business & Partnerships").click();
     await expect(page).toHaveURL(/\/account\/business$/);
     // Frame 74:55 modules.
     await expect(page.getByText("Better purchasing")).toBeVisible();
-    await expect(page.getByText("Procurement & partnership services")).toBeVisible();
-    await expect(page.getByRole("button", { name: /SUBMIT REQUEST/ })).toBeVisible();
+    await expect(
+      page.getByText("Procurement & partnership services"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /SUBMIT REQUEST/ }),
+    ).toBeVisible();
     // ...and back.
     await page.getByLabel("Gift Shopping").click();
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByText("Sign in and continue shopping")).toBeVisible();
   });
 
-  test("a business enquiry needs an email and then reports success", async ({ page }) => {
+  test("a business enquiry needs an email and then reports success", async ({
+    page,
+  }) => {
     await page.goto("/account/business");
     await page.getByRole("button", { name: /SUBMIT REQUEST/ }).click();
     await expect(page.getByText("Add your business email above")).toBeVisible();
@@ -71,7 +86,9 @@ test.describe("customer account (local mode)", () => {
     await expect(page.getByText("your request is with our team")).toBeVisible();
   });
 
-  test("admin login hides the passkey option in local mode", async ({ page }) => {
+  test("admin login hides the passkey option in local mode", async ({
+    page,
+  }) => {
     await page.goto("/admin/login");
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(

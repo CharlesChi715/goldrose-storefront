@@ -69,7 +69,11 @@ export function DraftForm({ variants }: { variants: DraftVariantOption[] }) {
     <Page
       title={t("drafts.create")}
       backAction={{ url: "/admin/orders/drafts" }}
-      primaryAction={{ content: t("drafts.form.save"), onAction: save, loading: saving }}
+      primaryAction={{
+        content: t("drafts.form.save"),
+        onAction: save,
+        loading: saving,
+      }}
     >
       <BlockStack gap="400">
         {error ? <Banner tone="critical">{error}</Banner> : null}
@@ -109,7 +113,9 @@ export function DraftForm({ variants }: { variants: DraftVariantOption[] }) {
                       variant="plain"
                       onClick={() =>
                         setLines((current) =>
-                          current.filter((_, entryIndex) => entryIndex !== index),
+                          current.filter(
+                            (_, entryIndex) => entryIndex !== index,
+                          ),
                         )
                       }
                     >

@@ -104,12 +104,16 @@ export function engagementReport(views: PageViewRow[]): EngagementReport {
     }
 
     if (view.last_section) {
-      dropOffCounts.set(view.last_section, (dropOffCounts.get(view.last_section) ?? 0) + 1);
+      dropOffCounts.set(
+        view.last_section,
+        (dropOffCounts.get(view.last_section) ?? 0) + 1,
+      );
     }
   }
 
   const visitsPerPath = new Map<string, number>();
-  for (const [path, samples] of activeByPath) visitsPerPath.set(path, samples.length);
+  for (const [path, samples] of activeByPath)
+    visitsPerPath.set(path, samples.length);
 
   const byPath: PathEngagement[] = [...activeByPath.entries()]
     .map(([path, samples]) => ({
@@ -141,7 +145,8 @@ export function engagementReport(views: PageViewRow[]): EngagementReport {
     .map(([section, visits]) => ({
       section,
       visits,
-      sharePercent: dropOffTotal > 0 ? Math.round((visits / dropOffTotal) * 100) : 0,
+      sharePercent:
+        dropOffTotal > 0 ? Math.round((visits / dropOffTotal) * 100) : 0,
     }))
     .sort((a, b) => b.visits - a.visits)
     .slice(0, TOP_DROP_OFF);

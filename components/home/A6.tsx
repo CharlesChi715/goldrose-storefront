@@ -16,13 +16,69 @@ import { playfair, notoSC, goudy } from "@/lib/fonts";
 /* Recipient filter chips (static, not clickable). "Wife" is the selected
    state: orange stroke + orange label; the rest share the neutral pair. */
 const CHIPS = [
-  { x: 12, w: 46, stroke: "#C76E29", labelX: 25.5, labelW: 19, label: "Wife", color: "#BD5C1A" },
-  { x: 63, w: 58, stroke: "#E5D6C2", labelX: 72, labelW: 40, label: "Girlfriend", color: "#3B2E2E" },
-  { x: 126, w: 42, stroke: "#E5D6C2", labelX: 136, labelW: 22, label: "Mom", color: "#3B2E2E" },
-  { x: 173, w: 52, stroke: "#E5D6C2", labelX: 183.5, labelW: 31, label: "Friends", color: "#3B2E2E" },
-  { x: 230, w: 54, stroke: "#E5D6C2", labelX: 240, labelW: 34, label: "Couples", color: "#3B2E2E" },
-  { x: 289, w: 48, stroke: "#E5D6C2", labelX: 298.5, labelW: 29, label: "Clients", color: "#3B2E2E" },
-  { x: 342, w: 62, stroke: "#E5D6C2", labelX: 350, labelW: 46, label: "Employees", color: "#3B2E2E" },
+  {
+    x: 12,
+    w: 46,
+    stroke: "#C76E29",
+    labelX: 25.5,
+    labelW: 19,
+    label: "Wife",
+    color: "#BD5C1A",
+  },
+  {
+    x: 63,
+    w: 58,
+    stroke: "#E5D6C2",
+    labelX: 72,
+    labelW: 40,
+    label: "Girlfriend",
+    color: "#3B2E2E",
+  },
+  {
+    x: 126,
+    w: 42,
+    stroke: "#E5D6C2",
+    labelX: 136,
+    labelW: 22,
+    label: "Mom",
+    color: "#3B2E2E",
+  },
+  {
+    x: 173,
+    w: 52,
+    stroke: "#E5D6C2",
+    labelX: 183.5,
+    labelW: 31,
+    label: "Friends",
+    color: "#3B2E2E",
+  },
+  {
+    x: 230,
+    w: 54,
+    stroke: "#E5D6C2",
+    labelX: 240,
+    labelW: 34,
+    label: "Couples",
+    color: "#3B2E2E",
+  },
+  {
+    x: 289,
+    w: 48,
+    stroke: "#E5D6C2",
+    labelX: 298.5,
+    labelW: 29,
+    label: "Clients",
+    color: "#3B2E2E",
+  },
+  {
+    x: 342,
+    w: 62,
+    stroke: "#E5D6C2",
+    labelX: 350,
+    labelW: 46,
+    label: "Employees",
+    color: "#3B2E2E",
+  },
 ] as const;
 
 export function A6() {
@@ -117,14 +173,26 @@ export function A6() {
           overflow: "hidden",
         }}
       >
-        <div style={{ ...abs(0, 0, 176, 156), background: "#F3C6D1", borderRadius: 10, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(0, 0, 176, 156),
+            background: "#F3C6D1",
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+        >
           {/* Bleed crop: the shared photo extends far outside the 176×156 window */}
           <img
             src="/veloria/home/163-86.png"
             alt="Gold-dipped rose gift"
             width={546.1}
             height={911.9}
-            style={{ ...abs(-25.4, -210.82, 546.1, 911.9), display: "block", objectFit: "cover", maxWidth: "none" }}
+            style={{
+              ...abs(-25.4, -210.82, 546.1, 911.9),
+              display: "block",
+              objectFit: "cover",
+              maxWidth: "none",
+            }}
           />
         </div>
         <div
@@ -166,7 +234,12 @@ export function A6() {
           alt="SHOP WIFE GIFTS →"
           width={152}
           height={13}
-          style={{ ...abs(12, 235.82, 152, 13), display: "block", objectFit: "none", objectPosition: "center center" }}
+          style={{
+            ...abs(12, 235.82, 152, 13),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "center center",
+          }}
         />
       </Link>
 
@@ -182,13 +255,25 @@ export function A6() {
           overflow: "hidden",
         }}
       >
-        <div style={{ ...abs(0, 0, 176, 156), background: "#F3C6D1", borderRadius: 10, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(0, 0, 176, 156),
+            background: "#F3C6D1",
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+        >
           <img
             src="/veloria/home/163-86.png"
             alt="Gold-dipped rose gift"
             width={546.1}
             height={911.9}
-            style={{ ...abs(-241.3, -210.82, 546.1, 911.9), display: "block", objectFit: "cover", maxWidth: "none" }}
+            style={{
+              ...abs(-241.3, -210.82, 546.1, 911.9),
+              display: "block",
+              objectFit: "cover",
+              maxWidth: "none",
+            }}
           />
         </div>
         <div
@@ -230,7 +315,12 @@ export function A6() {
           alt="SHOP WIFE GIFTS →"
           width={152}
           height={13}
-          style={{ ...abs(12, 236.82, 152, 13), display: "block", objectFit: "none", objectPosition: "center center" }}
+          style={{
+            ...abs(12, 236.82, 152, 13),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "center center",
+          }}
         />
       </Link>
 
@@ -247,13 +337,25 @@ export function A6() {
           overflow: "hidden",
         }}
       >
-        <div style={{ ...abs(0, 0, 176, 156), background: "#F3C6D1", borderRadius: 10, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(0, 0, 176, 156),
+            background: "#F3C6D1",
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+        >
           <img
             src="/veloria/home/163-86.png"
             alt="Gold-dipped rose gift"
             width={546.1}
             height={911.9}
-            style={{ ...abs(-457.2, -210.82, 546.1, 911.9), display: "block", objectFit: "cover", maxWidth: "none" }}
+            style={{
+              ...abs(-457.2, -210.82, 546.1, 911.9),
+              display: "block",
+              objectFit: "cover",
+              maxWidth: "none",
+            }}
           />
         </div>
         <div
@@ -296,17 +398,52 @@ export function A6() {
           alt="SHOP WIFE GIFTS →"
           width={152}
           height={13}
-          style={{ ...abs(12, 261, 152, 13), display: "block", objectFit: "none", objectPosition: "center center" }}
+          style={{
+            ...abs(12, 261, 152, 13),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "center center",
+          }}
         />
       </Link>
 
       {/* Recipient carousel dots · five (440:149) */}
       <div style={{ ...abs(176, 4176, 80, 8), overflow: "hidden" }}>
-        <div style={{ ...abs(0, 0, 8, 8), background: "#C46E29", borderRadius: 9999 }} />
-        <div style={{ ...abs(19, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
-        <div style={{ ...abs(37, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
-        <div style={{ ...abs(55, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
-        <div style={{ ...abs(73, 0.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
+        <div
+          style={{
+            ...abs(0, 0, 8, 8),
+            background: "#C46E29",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(19, 0.5, 7, 7),
+            background: "#E0CCB2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(37, 0.5, 7, 7),
+            background: "#E0CCB2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(55, 0.5, 7, 7),
+            background: "#E0CCB2",
+            borderRadius: 9999,
+          }}
+        />
+        <div
+          style={{
+            ...abs(73, 0.5, 7, 7),
+            background: "#E0CCB2",
+            borderRadius: 9999,
+          }}
+        />
       </div>
 
       {/* Just Because · recipient category card (192:150) */}
@@ -331,13 +468,27 @@ export function A6() {
         />
         <div
           className={playfair.className}
-          style={{ ...abs(71, 16, 250), fontSize: 15, lineHeight: "18px", fontWeight: 500, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(71, 16, 250),
+            fontSize: 15,
+            lineHeight: "18px",
+            fontWeight: 500,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Just Because
         </div>
         <div
           className={notoSC.className}
-          style={{ ...abs(71, 36, 280), fontSize: 9, lineHeight: "14px", fontWeight: 400, color: "#3B2F2F", whiteSpace: "nowrap" }}
+          style={{
+            ...abs(71, 36, 280),
+            fontSize: 9,
+            lineHeight: "14px",
+            fontWeight: 400,
+            color: "#3B2F2F",
+            whiteSpace: "nowrap",
+          }}
         >
           Because meaningful moments don’t need a reason.
         </div>
@@ -346,7 +497,12 @@ export function A6() {
           alt="›"
           width={12}
           height={43}
-          style={{ ...abs(370, 6, 12, 43), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(370, 6, 12, 43),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
       </Link>
 
@@ -390,14 +546,25 @@ export function A6() {
 
       {/* 442:165 · the design's fourth review dot — there is no fourth review,
           so it stays static art rather than pointing at a missing slide. */}
-      <div style={{ ...abs(239, 4522.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
+      <div
+        style={{
+          ...abs(239, 4522.5, 7, 7),
+          background: "#E0CCB2",
+          borderRadius: 9999,
+        }}
+      />
 
       {/* Button · Read Customer Stories (163:111) — live since 07-30; target
           from the Figma prototype link on 1523:1992 (ON_CLICK → 1573:106 /story) */}
       <Link
         href="/story"
         aria-label="Read customer stories"
-        style={{ ...abs(92, 4553, 246, 33), background: "#2E1C12", borderRadius: 7, display: "block" }}
+        style={{
+          ...abs(92, 4553, 246, 33),
+          background: "#2E1C12",
+          borderRadius: 7,
+          display: "block",
+        }}
       >
         <div
           className={goudy.className}
@@ -417,7 +584,12 @@ export function A6() {
           alt="→"
           width={11}
           height={13}
-          style={{ ...abs(208, 10, 11, 13), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(208, 10, 11, 13),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
       </Link>
     </>

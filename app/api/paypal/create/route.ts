@@ -31,7 +31,10 @@ const requestSchema = z.object({
 
 export async function POST(request: Request) {
   if (!getPayPalConfig().configured) {
-    return NextResponse.json({ error: "PayPal is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { error: "PayPal is not configured." },
+      { status: 503 },
+    );
   }
 
   let parsed: z.infer<typeof requestSchema>;
@@ -73,7 +76,9 @@ export async function POST(request: Request) {
       },
     ]);
 
-    const paypalOrder = await createPayPalOrder(priced, { idempotencyKey: checkoutId });
+    const paypalOrder = await createPayPalOrder(priced, {
+      idempotencyKey: checkoutId,
+    });
     await getStore().update(
       "checkouts",
       { id: checkoutId },
@@ -84,7 +89,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[paypal/create]", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not start PayPal checkout." },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not start PayPal checkout.",
+      },
       { status: 400 },
     );
   }

@@ -21,7 +21,7 @@ import {
 const VISITOR_KEY = "goldrose-visitor-id";
 const SESSION_KEY = "goldrose-session-id";
 const SESSION_SEEN_KEY = "goldrose-session-seen";
-const SESSION_GAP_MS = 30 * 60 * 1000;  // Google Analytics defaults to a 30-minute inactivity timeout
+const SESSION_GAP_MS = 30 * 60 * 1000; // Google Analytics defaults to a 30-minute inactivity timeout
 
 /** How often the biggest-share contest is re-run. Cheap: it measures only the
  *  handful of sections the IntersectionObserver says are on screen. */
@@ -52,7 +52,9 @@ export function getVisitorId(): string | null {
 function getSessionId(): string | null {
   try {
     const now = Date.now();
-    const lastSeen = Number(window.sessionStorage.getItem(SESSION_SEEN_KEY) ?? 0);
+    const lastSeen = Number(
+      window.sessionStorage.getItem(SESSION_SEEN_KEY) ?? 0,
+    );
     let id = window.sessionStorage.getItem(SESSION_KEY);
     if (!id || now - lastSeen > SESSION_GAP_MS) {
       id = randomId();
@@ -75,7 +77,11 @@ export function Beacon() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!pathname || pathname.startsWith("/admin") || pathname.startsWith("/api")) {
+    if (
+      !pathname ||
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/api")
+    ) {
       return;
     }
     const visitorId = getVisitorId();
@@ -83,7 +89,7 @@ export function Beacon() {
     if (!visitorId || !sessionId) {
       return;
     }
-    
+
     // For this URL:
     // https://goldrose.com/shop?utm_source=instagram&utm_medium=social
     // window.location.search is:
@@ -92,7 +98,14 @@ export function Beacon() {
     const utm: Record<string, string> = {};
     // utm_acc is our own tag (posting account, for commissions) — not one of
     // the five standard UTM params, so ad tools will never overwrite it.
-    for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_acc"]) {
+    for (const key of [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "utm_acc",
+    ]) {
       const value = params.get(key);
       if (value) {
         utm[key] = value.slice(0, 120);
@@ -153,7 +166,7 @@ export function Beacon() {
     const readScrollPct = (): number => {
       const doc = document.documentElement;
       const scrollable = doc.scrollHeight - window.innerHeight;
-      if (scrollable <= 0) return 100;  // page fits the screen: fully seen
+      if (scrollable <= 0) return 100; // page fits the screen: fully seen
       return ((window.scrollY || 0) / scrollable) * 100;
     };
 
@@ -187,14 +200,17 @@ export function Beacon() {
       try {
         // sendBeacon, not fetch: during unload the browser is free to cancel
         // in-flight fetches, but is obliged to deliver a queued beacon.
-        navigator.sendBeacon("/api/beacon/engagement", new Blob([payload], { type: "application/json" }));
+        navigator.sendBeacon(
+          "/api/beacon/engagement",
+          new Blob([payload], { type: "application/json" }),
+        );
       } catch {
         // Analytics must never break browsing.
       }
     }
 
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("pagehide", flush);       // unload backstop
+    window.addEventListener("pagehide", flush); // unload backstop
     for (const event of ["scroll", "pointerdown", "pointermove", "keydown"]) {
       window.addEventListener(event, markActivity, { passive: true });
     }

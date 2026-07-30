@@ -35,7 +35,8 @@ export function unreadInThread(
   mark: string | undefined,
   self: string,
 ): number {
-  return posts.filter((post) => post.by !== self && (!mark || post.at > mark)).length;
+  return posts.filter((post) => post.by !== self && (!mark || post.at > mark))
+    .length;
 }
 
 /**
@@ -51,7 +52,8 @@ export function totalUnread(
   self: string,
 ): number {
   return activity.reduce(
-    (sum, thread) => sum + unreadInThread(thread.posts, marks[thread.threadId], self),
+    (sum, thread) =>
+      sum + unreadInThread(thread.posts, marks[thread.threadId], self),
     0,
   );
 }

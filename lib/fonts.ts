@@ -20,10 +20,16 @@ import {
 export const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
 
 /** Inter 400–700 — the general UI/body face. */
-export const inter = Inter({ weight: ["400", "500", "600", "700"], subsets: ["latin"] });
+export const inter = Inter({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+});
 
 /** Cormorant Garamond 600 — the serif accent face. */
-export const cormorant = Cormorant_Garamond({ weight: "600", subsets: ["latin"] });
+export const cormorant = Cormorant_Garamond({
+  weight: "600",
+  subsets: ["latin"],
+});
 
 /**
  * Used for prices, star glyphs, and the geometric icon glyphs (⌂ ◆ ✦ …) the
@@ -49,7 +55,10 @@ export const playfair = Playfair_Display({
 });
 
 /** Playfair Display SC 400 — small-caps accent (single A-4 label). */
-export const playfairSC = Playfair_Display_SC({ weight: "400", subsets: ["latin"] });
+export const playfairSC = Playfair_Display_SC({
+  weight: "400",
+  subsets: ["latin"],
+});
 
 /**
  * Sorts Mill Goudy 400 — Figma names it "OFL Sorts Mill Goudy TT" at weight

@@ -72,7 +72,10 @@ export async function POST(request: Request) {
   try {
     parsed = requestSchema.parse(await request.json());
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Invalid request." },
+      { status: 400 },
+    );
   }
 
   // The no-payment method is unreachable unless the flag explicitly enables it.
@@ -111,7 +114,11 @@ export async function POST(request: Request) {
       }
       if (Object.keys(fieldErrors).length > 0) {
         return NextResponse.json(
-          { ok: false, error: "Please fix the highlighted fields.", fieldErrors },
+          {
+            ok: false,
+            error: "Please fix the highlighted fields.",
+            fieldErrors,
+          },
           { status: 400 },
         );
       }
@@ -186,7 +193,10 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Unable to process checkout.",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unable to process checkout.",
       },
       { status: 400 },
     );

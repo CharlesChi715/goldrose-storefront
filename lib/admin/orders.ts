@@ -11,7 +11,11 @@ import { randomUUID } from "crypto";
 import { accountOf } from "./channels.ts";
 import { sendShippingConfirmationEmail } from "@/lib/email";
 import { getPayPalConfig, refundPayPalCapture } from "@/lib/paypal/client";
-import { buildTrackingUrl, carrierLabel, type CarrierId } from "@/lib/shipping/carriers";
+import {
+  buildTrackingUrl,
+  carrierLabel,
+  type CarrierId,
+} from "@/lib/shipping/carriers";
 import { getStore } from "@/lib/supabase/store.ts";
 import type {
   CustomerRow,
@@ -46,7 +50,10 @@ export type OrderDetail = {
 };
 
 /** Display name for an order's customer: customer name ▸ order email ▸ shipping name ▸ "—". */
-function customerLabel(order: OrderRow, customer: CustomerRow | undefined): string {
+function customerLabel(
+  order: OrderRow,
+  customer: CustomerRow | undefined,
+): string {
   if (customer && (customer.first_name || customer.last_name)) {
     return `${customer.first_name} ${customer.last_name}`.trim();
   }
@@ -108,13 +115,15 @@ function sourceLabel(view: PageViewRow | undefined): string {
  *
  * @param visitorId - The order's visitor id; null (or no recorded views) returns null.
  */
-async function conversionFor(visitorId: string | null): Promise<ConversionSummary | null> {
+async function conversionFor(
+  visitorId: string | null,
+): Promise<ConversionSummary | null> {
   if (!visitorId) {
     return null;
   }
-  const views = (await getStore().where("page_views", { visitor_id: visitorId })).sort(
-    (a, b) => a.created_at.localeCompare(b.created_at),
-  );
+  const views = (
+    await getStore().where("page_views", { visitor_id: visitorId })
+  ).sort((a, b) => a.created_at.localeCompare(b.created_at));
   if (views.length === 0) {
     return null;
   }
@@ -147,10 +156,15 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
   if (!order) {
     return null;
   }
-  const customer = customers.find((row) => row.id === order.customer_id) ?? null;
-  const raw = order.raw as
-    | { purchase_units?: Array<{ payments?: { captures?: Array<{ seller_protection?: { status?: string } }> } }> }
-    | null;
+  const customer =
+    customers.find((row) => row.id === order.customer_id) ?? null;
+  const raw = order.raw as {
+    purchase_units?: Array<{
+      payments?: {
+        captures?: Array<{ seller_protection?: { status?: string } }>;
+      };
+    }>;
+  } | null;
   return {
     order,
     lines: lines.filter((line) => line.order_id === id),
@@ -160,17 +174,23 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
     customer: customer
       ? {
           ...customer,
-          ordersCount: orders.filter((row) => row.customer_id === customer.id).length,
+          ordersCount: orders.filter((row) => row.customer_id === customer.id)
+            .length,
         }
       : null,
     conversion: await conversionFor(order.visitor_id),
     sellerProtection:
-      raw?.purchase_units?.[0]?.payments?.captures?.[0]?.seller_protection?.status ?? null,
+      raw?.purchase_units?.[0]?.payments?.captures?.[0]?.seller_protection
+        ?.status ?? null,
   };
 }
 
 /** Appends a "system" event to the order's timeline. */
-async function addSystemEvent(orderId: string, message: string, actor: string | null) {
+async function addSystemEvent(
+  orderId: string,
+  message: string,
+  actor: string | null,
+) {
   await getStore().insert("order_events", [
     {
       id: randomUUID(),
@@ -216,7 +236,9 @@ export async function fulfillOrder(input: {
   }
   const now = new Date().toISOString();
   const trackingUrl =
-    input.trackingUrl || buildTrackingUrl(input.carrier, input.trackingNumber) || "";
+    input.trackingUrl ||
+    buildTrackingUrl(input.carrier, input.trackingNumber) ||
+    "";
   await store.update(
     "orders",
     { id: input.id },
@@ -237,7 +259,9 @@ export async function fulfillOrder(input: {
     input.actor,
   );
   const updated = await mustGetOrder(input.id);
-  const lines = (await store.all("order_lines")).filter((line) => line.order_id === input.id);
+  const lines = (await store.all("order_lines")).filter(
+    (line) => line.order_id === input.id,
+  );
   await sendShippingConfirmationEmail(updated, lines);
 }
 
@@ -277,17 +301,28 @@ export async function refundOrder(input: {
   const order = await mustGetOrder(input.id);
   const remaining = order.total_cents - order.refunded_cents;
   if (input.amountCents <= 0 || input.amountCents > remaining) {
-    throw new Error("Refund amount must be between $0.01 and the remaining total.");
+    throw new Error(
+      "Refund amount must be between $0.01 and the remaining total.",
+    );
   }
-  if (order.financial_status === "pending" || order.financial_status === "refunded") {
+  if (
+    order.financial_status === "pending" ||
+    order.financial_status === "refunded"
+  ) {
     throw new Error("Order can't be refunded");
   }
 
   if (order.payment_provider === "paypal" && order.provider_capture_id) {
     if (!getPayPalConfig().configured) {
-      throw new Error("PayPal is not configured — cannot refund a real payment.");
+      throw new Error(
+        "PayPal is not configured — cannot refund a real payment.",
+      );
     }
-    await refundPayPalCapture(order.provider_capture_id, input.amountCents, order.currency);
+    await refundPayPalCapture(
+      order.provider_capture_id,
+      input.amountCents,
+      order.currency,
+    );
   }
 
   const refunded = order.refunded_cents + input.amountCents;
@@ -296,7 +331,8 @@ export async function refundOrder(input: {
     { id: input.id },
     {
       refunded_cents: refunded,
-      financial_status: refunded >= order.total_cents ? "refunded" : "partially_refunded",
+      financial_status:
+        refunded >= order.total_cents ? "refunded" : "partially_refunded",
     },
   );
   if (input.restock) {
@@ -330,13 +366,23 @@ export async function cancelOrder(input: {
   }
   const now = new Date().toISOString();
 
-  if (input.refund && order.total_cents > order.refunded_cents && order.financial_status !== "pending") {
+  if (
+    input.refund &&
+    order.total_cents > order.refunded_cents &&
+    order.financial_status !== "pending"
+  ) {
     const remaining = order.total_cents - order.refunded_cents;
     if (order.payment_provider === "paypal" && order.provider_capture_id) {
       if (!getPayPalConfig().configured) {
-        throw new Error("PayPal is not configured — cannot refund a real payment.");
+        throw new Error(
+          "PayPal is not configured — cannot refund a real payment.",
+        );
       }
-      await refundPayPalCapture(order.provider_capture_id, remaining, order.currency);
+      await refundPayPalCapture(
+        order.provider_capture_id,
+        remaining,
+        order.currency,
+      );
     }
     await store.update(
       "orders",
@@ -365,11 +411,18 @@ export async function cancelOrder(input: {
  * @param ids - Order ids to update.
  * @param archived - True to archive, false to unarchive.
  */
-export async function setOrdersArchived(ids: string[], archived: boolean): Promise<void> {
+export async function setOrdersArchived(
+  ids: string[],
+  archived: boolean,
+): Promise<void> {
   const store = getStore();
   const now = new Date().toISOString();
   for (const id of ids) {
-    await store.update("orders", { id }, { archived_at: archived ? now : null });
+    await store.update(
+      "orders",
+      { id },
+      { archived_at: archived ? now : null },
+    );
   }
 }
 
@@ -380,7 +433,11 @@ export async function setOrdersArchived(ids: string[], archived: boolean): Promi
  * @param message - Comment text.
  * @param actor - Admin name shown on the event.
  */
-export async function addOrderComment(id: string, message: string, actor: string): Promise<void> {
+export async function addOrderComment(
+  id: string,
+  message: string,
+  actor: string,
+): Promise<void> {
   await getStore().insert("order_events", [
     {
       id: randomUUID(),
@@ -462,7 +519,13 @@ export async function listCustomers(): Promise<CustomerListRow[]> {
 export type CustomerDetail = {
   customer: CustomerRow;
   orders: OrderRow[];
-  events: Array<{ id: string; kind: string; message: string; created_by: string | null; created_at: string }>;
+  events: Array<{
+    id: string;
+    kind: string;
+    message: string;
+    created_by: string | null;
+    created_at: string;
+  }>;
   totalSpentCents: number;
 };
 
@@ -472,7 +535,9 @@ export type CustomerDetail = {
  *
  * @param id - Customer id; unknown ids return null.
  */
-export async function getCustomerDetail(id: string): Promise<CustomerDetail | null> {
+export async function getCustomerDetail(
+  id: string,
+): Promise<CustomerDetail | null> {
   const store = getStore();
   const [customers, orders, events] = await Promise.all([
     store.all("customers"),
@@ -529,7 +594,10 @@ export async function addCustomerComment(
  * @param id - Customer id.
  * @param note - New note text.
  */
-export async function saveCustomerNote(id: string, note: string): Promise<void> {
+export async function saveCustomerNote(
+  id: string,
+  note: string,
+): Promise<void> {
   await getStore().update("customers", { id }, { note });
 }
 
@@ -539,6 +607,9 @@ export async function saveCustomerNote(id: string, note: string): Promise<void> 
  * @param id - Customer id.
  * @param tags - Full new tag list.
  */
-export async function saveCustomerTags(id: string, tags: string[]): Promise<void> {
+export async function saveCustomerTags(
+  id: string,
+  tags: string[],
+): Promise<void> {
   await getStore().update("customers", { id }, { tags });
 }

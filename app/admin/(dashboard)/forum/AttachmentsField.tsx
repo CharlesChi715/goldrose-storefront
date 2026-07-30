@@ -66,7 +66,9 @@ export function AttachmentsField({
         multiple
         accept={ACCEPT}
         style={{ display: "none" }}
-        onChange={(event) => attachments.onPick(Array.from(event.target.files ?? []))}
+        onChange={(event) =>
+          attachments.onPick(Array.from(event.target.files ?? []))
+        }
       />
       <InlineStack gap="200" blockAlign="center">
         <Button onClick={() => inputRef.current?.click()}>
@@ -79,11 +81,19 @@ export function AttachmentsField({
       {attachments.files.length > 0 ? (
         <BlockStack gap="050">
           {attachments.files.map((file, index) => (
-            <InlineStack key={`${file.name}-${index}`} gap="200" blockAlign="center">
+            <InlineStack
+              key={`${file.name}-${index}`}
+              gap="200"
+              blockAlign="center"
+            >
               <Text as="span" variant="bodySm">
                 📎 {file.name}
               </Text>
-              <Button size="micro" variant="plain" onClick={() => attachments.removeAt(index)}>
+              <Button
+                size="micro"
+                variant="plain"
+                onClick={() => attachments.removeAt(index)}
+              >
                 {t("forum.attach.remove")}
               </Button>
             </InlineStack>

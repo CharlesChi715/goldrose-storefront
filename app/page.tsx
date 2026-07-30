@@ -96,7 +96,9 @@ export default async function HomePage() {
           name: product.title,
           sku: product.variants[0]?.sku,
           description: product.description,
-          image: product.images[0] ? fileUrl(product.images[0].path) : undefined,
+          image: product.images[0]
+            ? fileUrl(product.images[0].path)
+            : undefined,
           url: `${base}/products/${product.handle}`,
         },
         price: ((product.variants[0]?.price_cents ?? 0) / 100).toFixed(2),
@@ -109,12 +111,21 @@ export default async function HomePage() {
   ];
 
   return (
-    <ScaleFrame height={8673} background="#FFF6EC" fontClass={playfair.className} navActive="Home">
+    <ScaleFrame
+      height={8673}
+      background="#FFF6EC"
+      fontClass={playfair.className}
+      navActive="Home"
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <PromoBar slogan={promo.text} isDefault={promo.isDefault} variant="brown" />
+      <PromoBar
+        slogan={promo.text}
+        isDefault={promo.isDefault}
+        variant="brown"
+      />
       <A1 />
       <A2 />
       <A3 />

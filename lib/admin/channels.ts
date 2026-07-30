@@ -40,7 +40,10 @@ export function sourceOf(view: PageViewRow | undefined): string {
 const CHANNEL_PATTERNS: Array<{ pattern: RegExp; channel: string }> = [
   { pattern: /youtu\.?be|(^|\b)yt(\b|$)/, channel: "YouTube" },
   { pattern: /google|adwords|gclid/, channel: "Google" },
-  { pattern: /facebook|fbclid|fb\.com|(^|\b)fb(\b|$)|meta\.com/, channel: "Facebook" },
+  {
+    pattern: /facebook|fbclid|fb\.com|(^|\b)fb(\b|$)|meta\.com/,
+    channel: "Facebook",
+  },
   { pattern: /instagram|(^|\b)ig(\b|$)/, channel: "Instagram" },
   { pattern: /tiktok/, channel: "TikTok" },
   { pattern: /pinterest|pin\.it/, channel: "Pinterest" },

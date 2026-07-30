@@ -28,7 +28,7 @@ function view(patch: Partial<PageViewRow>): PageViewRow {
 
 test("mean handles normal and empty lists, and rounds", () => {
   assert.equal(mean([5, 1, 3]), 3);
-  assert.equal(mean([1, 2, 3, 4]), 3);     // 2.5 -> rounded to 3
+  assert.equal(mean([1, 2, 3, 4]), 3); // 2.5 -> rounded to 3
   assert.equal(mean([]), 0);
 });
 
@@ -36,8 +36,8 @@ test("visits with no closing beacon are excluded, not counted as zero", () => {
   const report = engagementReport([
     view({ active_ms: 10_000, scroll_pct: 50 }),
     view({ active_ms: 20_000, scroll_pct: 60 }),
-    view({ active_ms: null }),              // still in flight
-    view({}),                               // never reported
+    view({ active_ms: null }), // still in flight
+    view({}), // never reported
   ]);
 
   assert.equal(report.measuredVisits, 2);
@@ -63,25 +63,53 @@ test("time on page is grouped per path", () => {
 
 test("section reach rate is a share of that page's measured visits", () => {
   const report = engagementReport([
-    view({ path: "/", active_ms: 40_000, sections: { "HOME-HERO-SECTION": 20_000 } }),
-    view({ path: "/", active_ms: 40_000, sections: { "HOME-HERO-SECTION": 10_000 } }),
-    view({ path: "/", active_ms: 40_000, sections: { "HOME-STORY-SECTION": 30_000 } }),
-    view({ path: "/", active_ms: 40_000 }),   // measured, reached no tagged section
+    view({
+      path: "/",
+      active_ms: 40_000,
+      sections: { "HOME-HERO-SECTION": 20_000 },
+    }),
+    view({
+      path: "/",
+      active_ms: 40_000,
+      sections: { "HOME-HERO-SECTION": 10_000 },
+    }),
+    view({
+      path: "/",
+      active_ms: 40_000,
+      sections: { "HOME-STORY-SECTION": 30_000 },
+    }),
+    view({ path: "/", active_ms: 40_000 }), // measured, reached no tagged section
   ]);
 
-  const hero = report.sections.find((row) => row.section === "HOME-HERO-SECTION");
-  const story = report.sections.find((row) => row.section === "HOME-STORY-SECTION");
+  const hero = report.sections.find(
+    (row) => row.section === "HOME-HERO-SECTION",
+  );
+  const story = report.sections.find(
+    (row) => row.section === "HOME-STORY-SECTION",
+  );
   assert.equal(hero?.visits, 2);
   assert.equal(hero?.averageMs, 15_000);
-  assert.equal(hero?.reachRatePercent, 50);   // 2 of 4 measured visits to "/"
+  assert.equal(hero?.reachRatePercent, 50); // 2 of 4 measured visits to "/"
   assert.equal(story?.reachRatePercent, 25);
 });
 
 test("sections are ranked by average attention, not by raw visit count", () => {
   const report = engagementReport([
-    view({ path: "/", active_ms: 60_000, sections: { "HOME-HERO-SECTION": 2_000 } }),
-    view({ path: "/", active_ms: 60_000, sections: { "HOME-HERO-SECTION": 2_000 } }),
-    view({ path: "/", active_ms: 60_000, sections: { "HOME-STORY-SECTION": 45_000 } }),
+    view({
+      path: "/",
+      active_ms: 60_000,
+      sections: { "HOME-HERO-SECTION": 2_000 },
+    }),
+    view({
+      path: "/",
+      active_ms: 60_000,
+      sections: { "HOME-HERO-SECTION": 2_000 },
+    }),
+    view({
+      path: "/",
+      active_ms: 60_000,
+      sections: { "HOME-STORY-SECTION": 45_000 },
+    }),
   ]);
   // The story band is seen by fewer people but holds them far longer.
   assert.equal(report.sections[0].section, "HOME-STORY-SECTION");

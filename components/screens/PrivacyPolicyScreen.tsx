@@ -19,7 +19,9 @@ import {
   INK,
   SAND,
   sCard,
-  SettingsHeader, GoldRoseWordmark } from "@/components/screens/account-chrome";
+  SettingsHeader,
+  GoldRoseWordmark,
+} from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC } from "@/lib/fonts";
@@ -91,33 +93,74 @@ const ROWS: Array<{
 
 export function PrivacyPolicyScreen() {
   return (
-    <ScaleFrame height={932} background={CREAM} fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={932}
+      background={CREAM}
+      fontClass={notoSC.className}
+      nav={false}
+    >
       {/* 1523:1187 Brand Navigation — the frame's own wordmark art */}
       <GoldRoseWordmark x={145} y={0} w={140} h={51} />
       <SettingsHeader title="Privacy Policy" />
 
       {/* hero card (1523:1138) */}
       <div style={sCard(20, 129, 398, 151)} />
-      <div style={{ ...abs(44, 181, 235), ...txt(14, 20, INK), whiteSpace: "pre-line" }}>
+      <div
+        style={{
+          ...abs(44, 181, 235),
+          ...txt(14, 20, INK),
+          whiteSpace: "pre-line",
+        }}
+      >
         {"Learn how we collect, use, and\nprotect your information."}
       </div>
-      <img src="/veloria/screens/1523-1140.svg" alt="" width={78} height={78} style={{ ...abs(319, 166, 78, 78), display: "block" }} />
+      <img
+        src="/veloria/screens/1523-1140.svg"
+        alt=""
+        width={78}
+        height={78}
+        style={{ ...abs(319, 166, 78, 78), display: "block" }}
+      />
 
       {/* accordion card (1523:1144) — collapsed states only, as designed */}
       <div style={sCard(20, 301, 398, 600)} />
       {ROWS.map((row) => (
         <div key={row.title}>
-          {row.divider !== undefined ? <div style={{ ...abs(38, row.divider, 362, 1), background: SAND }} /> : null}
+          {row.divider !== undefined ? (
+            <div
+              style={{ ...abs(38, row.divider, 362, 1), background: SAND }}
+            />
+          ) : null}
           <img
             src={`/veloria/screens/${row.icon.src}.svg`}
             alt=""
             width={Math.round(row.icon.w)}
             height={Math.round(row.icon.h)}
-            style={{ ...abs(row.icon.x, row.icon.y, row.icon.w, row.icon.h), display: "block" }}
+            style={{
+              ...abs(row.icon.x, row.icon.y, row.icon.w, row.icon.h),
+              display: "block",
+            }}
           />
-          <div style={{ ...abs(82, row.titleY, 255), ...txt(14, 20, INK) }}>{row.title}</div>
-          <div style={{ ...abs(82, row.descY, 285), ...txt(9, 16, INK), whiteSpace: "pre-line" }}>{row.body}</div>
-          <Glyph src={row.chev.src} x={row.chev.x} y={row.chev.y} w={24} h={20} ink={[8, 7]} />
+          <div style={{ ...abs(82, row.titleY, 255), ...txt(14, 20, INK) }}>
+            {row.title}
+          </div>
+          <div
+            style={{
+              ...abs(82, row.descY, 285),
+              ...txt(9, 16, INK),
+              whiteSpace: "pre-line",
+            }}
+          >
+            {row.body}
+          </div>
+          <Glyph
+            src={row.chev.src}
+            x={row.chev.x}
+            y={row.chev.y}
+            w={24}
+            h={20}
+            ink={[8, 7]}
+          />
         </div>
       ))}
     </ScaleFrame>

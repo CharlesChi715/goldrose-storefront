@@ -7,7 +7,10 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { teamOwnerId, type OwnerCandidate } from "../../lib/admin/team-owner.ts";
+import {
+  teamOwnerId,
+  type OwnerCandidate,
+} from "../../lib/admin/team-owner.ts";
 
 const member = (
   userId: string,
@@ -33,12 +36,18 @@ test("pending accounts never count — even with an earlier creation time", () =
 });
 
 test("no approved members → no owner", () => {
-  assert.equal(teamOwnerId([member("pending", false, "2026-07-22T08:00:00Z")]), null);
+  assert.equal(
+    teamOwnerId([member("pending", false, "2026-07-22T08:00:00Z")]),
+    null,
+  );
   assert.equal(teamOwnerId([]), null);
 });
 
 test("local adapter (no creation times): first allowlist row wins", () => {
-  const members = [member("local-owner", true, null), member("other", true, null)];
+  const members = [
+    member("local-owner", true, null),
+    member("other", true, null),
+  ];
   assert.equal(teamOwnerId(members), "local-owner");
 });
 

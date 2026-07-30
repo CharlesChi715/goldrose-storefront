@@ -9,7 +9,12 @@
  * pixel baselines (which run after this file) stay byte-identical.
  */
 
-import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
+import {
+  test,
+  expect,
+  type APIRequestContext,
+  type Page,
+} from "@playwright/test";
 import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
 
 test.use({ viewport: ADMIN_VIEWPORT });
@@ -94,7 +99,9 @@ test("notification toggles and policies persist", async ({ page }) => {
   await openSettings(page);
 
   await page.getByLabel("Order confirmation (to the buyer)").uncheck();
-  await page.getByLabel("Refund policy").fill("30-day returns, full refund on damage.");
+  await page
+    .getByLabel("Refund policy")
+    .fill("30-day returns, full refund on damage.");
   await page
     .getByRole("heading", { name: "Notifications" })
     .locator("..")
@@ -109,7 +116,9 @@ test("notification toggles and policies persist", async ({ page }) => {
   await expect(page.getByText("Settings saved").first()).toBeVisible();
 
   await page.reload();
-  await expect(page.getByLabel("Order confirmation (to the buyer)")).not.toBeChecked();
+  await expect(
+    page.getByLabel("Order confirmation (to the buyer)"),
+  ).not.toBeChecked();
   await expect(page.getByLabel("Refund policy")).toHaveValue(
     "30-day returns, full refund on damage.",
   );
@@ -124,31 +133,45 @@ test("notification toggles and policies persist", async ({ page }) => {
   await expect(page.getByText("Settings saved").first()).toBeVisible();
 });
 
-test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({ page }) => {
+test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
+  page,
+}) => {
   // Default → the PNG crop serves.
   await page.goto("/shop");
-  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toBeVisible();
+  await expect(
+    page.locator('img[src="/veloria/home/549-95.svg"]'),
+  ).toBeVisible();
 
   // Edit in Content → real text renders in the same box.
   await adminLogin(page);
   await page.goto("/admin/content");
-  await page.getByLabel("Top banner slogan").fill("FREE SHIPPING OVER $75 · GOLDROSE");
+  await page
+    .getByLabel("Top banner slogan")
+    .fill("FREE SHIPPING OVER $75 · GOLDROSE");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Content saved").first()).toBeVisible();
 
   await page.goto("/shop");
-  await expect(page.getByText("FREE SHIPPING OVER $75 · GOLDROSE")).toBeVisible();
-  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toHaveCount(0);
+  await expect(
+    page.getByText("FREE SHIPPING OVER $75 · GOLDROSE"),
+  ).toBeVisible();
+  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toHaveCount(
+    0,
+  );
 
   // Reset → the PNG returns (pixel-diff stays perfect).
   await page.goto("/admin/content");
   await page.getByRole("button", { name: "Reset to original" }).click();
   await expect(page.getByText("Content saved").first()).toBeVisible();
   await page.goto("/shop");
-  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toBeVisible();
+  await expect(
+    page.locator('img[src="/veloria/home/549-95.svg"]'),
+  ).toBeVisible();
 });
 
-test("sitemap, llms.txt and Product JSON-LD come from the database", async ({ request }) => {
+test("sitemap, llms.txt and Product JSON-LD come from the database", async ({
+  request,
+}) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap).toContain("/shop");
   expect(sitemap).toContain("/products/signature-24k-gold-rose");
@@ -208,7 +231,9 @@ test("homepage search listing is editable in Settings, then reverts", async ({
   request,
 }) => {
   await openSettings(page);
-  await page.getByLabel("Homepage title").fill("GoldRose — Eternal 24K Gold Roses");
+  await page
+    .getByLabel("Homepage title")
+    .fill("GoldRose — Eternal 24K Gold Roses");
   await page
     .getByRole("heading", { name: "Search engine & AI" })
     .locator("..")
@@ -219,7 +244,9 @@ test("homepage search listing is editable in Settings, then reverts", async ({
   const home = await (await request.get("/")).text();
   expect(home).toContain("<title>GoldRose — Eternal 24K Gold Roses</title>");
 
-  await page.getByLabel("Homepage title").fill("GoldRose — 24K Gold Dipped Roses");
+  await page
+    .getByLabel("Homepage title")
+    .fill("GoldRose — 24K Gold Dipped Roses");
   await page
     .getByRole("heading", { name: "Search engine & AI" })
     .locator("..")

@@ -38,7 +38,11 @@ export function SearchButton({
           ...style,
         }}
       >
-        <img src={src} alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+        <img
+          src={src}
+          alt=""
+          style={{ display: "block", width: "100%", height: "100%" }}
+        />
       </button>
       <SearchOverlay open={open} onClose={() => setOpen(false)} />
     </>

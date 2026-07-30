@@ -67,12 +67,60 @@ const CRAFT_PHOTOS = [
 // Six workshop gallery crops (482:128…482:139), coords relative to the lower
 // frame (0,6579); each shows an offset window into the same 430×913 source.
 const WORKSHOP_CROPS = [
-  { x: 12, y: 84, w: 150, h: 105, imgX: -11, imgY: -449, alt: "Careful preparation in the GoldRose workshop" },
-  { x: 166, y: 84, w: 120, h: 105, imgX: -164, imgY: -449, alt: "Hand-finishing roses with precision" },
-  { x: 290, y: 84, w: 130, h: 105, imgX: -289, imgY: -449, alt: "Thoughtful packaging of gold roses" },
-  { x: 12, y: 196, w: 110, h: 106, imgX: -11, imgY: -565, alt: "Quality inspection of finished roses" },
-  { x: 126, y: 196, w: 129, h: 106, imgX: -125, imgY: -565, alt: "Finished gold roses ready for delivery" },
-  { x: 259, y: 196, w: 161, h: 106, imgX: -263, imgY: -565, alt: "Bulk orders prepared in the workshop" },
+  {
+    x: 12,
+    y: 84,
+    w: 150,
+    h: 105,
+    imgX: -11,
+    imgY: -449,
+    alt: "Careful preparation in the GoldRose workshop",
+  },
+  {
+    x: 166,
+    y: 84,
+    w: 120,
+    h: 105,
+    imgX: -164,
+    imgY: -449,
+    alt: "Hand-finishing roses with precision",
+  },
+  {
+    x: 290,
+    y: 84,
+    w: 130,
+    h: 105,
+    imgX: -289,
+    imgY: -449,
+    alt: "Thoughtful packaging of gold roses",
+  },
+  {
+    x: 12,
+    y: 196,
+    w: 110,
+    h: 106,
+    imgX: -11,
+    imgY: -565,
+    alt: "Quality inspection of finished roses",
+  },
+  {
+    x: 126,
+    y: 196,
+    w: 129,
+    h: 106,
+    imgX: -125,
+    imgY: -565,
+    alt: "Finished gold roses ready for delivery",
+  },
+  {
+    x: 259,
+    y: 196,
+    w: 161,
+    h: 106,
+    imgX: -263,
+    imgY: -565,
+    alt: "Bulk orders prepared in the workshop",
+  },
 ];
 
 // Certificate columns (483:125…483:144), x relative to the 303×119 strip.
@@ -85,16 +133,39 @@ const CERTIFICATES = [
 
 // Certification benefits row (484:115…484:135), x relative to the 406×44 strip.
 const BENEFITS = [
-  { x: 0, icon: "/veloria/home/484-116.svg", label: "Patented Preservation\nTechnology" },
-  { x: 102, icon: "/veloria/home/484-121.svg", label: "International Patent\nProtection" },
-  { x: 204, icon: "/veloria/home/484-127.svg", label: "Certified Quality\nManagement" },
-  { x: 306, icon: "/veloria/home/484-132.svg", label: "Trusted Worldwide\nProtection" },
+  {
+    x: 0,
+    icon: "/veloria/home/484-116.svg",
+    label: "Patented Preservation\nTechnology",
+  },
+  {
+    x: 102,
+    icon: "/veloria/home/484-121.svg",
+    label: "International Patent\nProtection",
+  },
+  {
+    x: 204,
+    icon: "/veloria/home/484-127.svg",
+    label: "Certified Quality\nManagement",
+  },
+  {
+    x: 306,
+    icon: "/veloria/home/484-132.svg",
+    label: "Trusted Worldwide\nProtection",
+  },
 ];
 
 export function A9() {
   return (
     // id="craft" — scroll target for the A-4 "EXPLORE OUR CRAFT" card (H-17).
-    <div id="craft" style={{ ...abs(0, 6141, 430, 1011), background: "#3B2F2F", overflow: "hidden" }}>
+    <div
+      id="craft"
+      style={{
+        ...abs(0, 6141, 430, 1011),
+        background: "#3B2F2F",
+        overflow: "hidden",
+      }}
+    >
       {/* 165:137 · eyebrow */}
       <div
         className={notoSC.className}
@@ -131,21 +202,40 @@ export function A9() {
       {/* 165:139 · intro */}
       <div
         className={goudy.className}
-        style={{ ...abs(50, 118, 330), fontSize: 11, lineHeight: "17px", color: CREAM, textAlign: "center" }}
+        style={{
+          ...abs(50, 118, 330),
+          fontSize: 11,
+          lineHeight: "17px",
+          color: CREAM,
+          textAlign: "center",
+        }}
       >
-        Each rose is hand-selected, naturally preserved, and finished in pure 24k gold with meticulous care.
+        Each rose is hand-selected, naturally preserved, and finished in pure
+        24k gold with meticulous care.
       </div>
 
       {/* 165:140/145/150 · craft photo crops 1–3: 90×96 windows into the full
           430×912.397 source photo (offset left by the card's own x). */}
       {CRAFT_STEPS.slice(0, 3).map((s, i) => (
-        <div key={s.num} style={{ ...abs(s.x, 170, 90, 96), background: "#F3C6D1", borderRadius: 10, overflow: "hidden" }}>
+        <div
+          key={s.num}
+          style={{
+            ...abs(s.x, 170, 90, 96),
+            background: "#F3C6D1",
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+        >
           <img
             src={CRAFT_PHOTOS[i]}
             alt={s.alt}
             width={430}
             height={912}
-            style={{ ...abs(-s.x, -170, 430, 912.397), maxWidth: "none", display: "block" }}
+            style={{
+              ...abs(-s.x, -170, 430, 912.397),
+              maxWidth: "none",
+              display: "block",
+            }}
           />
         </div>
       ))}
@@ -189,7 +279,13 @@ export function A9() {
             color: CREAM,
             fontWeight: 500,
             textAlign: "center",
-            ...(s.centerTitle ? { display: "flex", alignItems: "center", justifyContent: "center" } : {}),
+            ...(s.centerTitle
+              ? {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }
+              : {}),
           }}
         >
           {s.title}
@@ -227,9 +323,21 @@ export function A9() {
       />
 
       {/* 482:117 · corrected lower block — workshop gallery + certifications */}
-      <div style={{ ...abs(0, 438, 430, 573), background: "#3B2F2F", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 438, 430, 573),
+          background: "#3B2F2F",
+          overflow: "hidden",
+        }}
+      >
         {/* 482:118 · rose divider */}
-        <img src="/veloria/home/482-118.svg" alt="" width={104} height={14} style={{ ...abs(163, 7, 104, 14), display: "block" }} />
+        <img
+          src="/veloria/home/482-118.svg"
+          alt=""
+          width={104}
+          height={14}
+          style={{ ...abs(163, 7, 104, 14), display: "block" }}
+        />
 
         {/* 482:122 · workshop title */}
         <div
@@ -250,7 +358,13 @@ export function A9() {
         {/* 482:123 · workshop copy */}
         <div
           className={goudy.className}
-          style={{ ...abs(50, 54, 330), fontSize: 9, lineHeight: "10px", color: CREAM, textAlign: "center" }}
+          style={{
+            ...abs(50, 54, 330),
+            fontSize: 9,
+            lineHeight: "10px",
+            color: CREAM,
+            textAlign: "center",
+          }}
         >
           See where real roses are prepared, finished,
           <br />
@@ -259,13 +373,25 @@ export function A9() {
 
         {/* 482:124 · six workshop gallery crops */}
         {WORKSHOP_CROPS.map((c) => (
-          <div key={`${c.x}-${c.y}`} style={{ ...abs(c.x, c.y, c.w, c.h), borderRadius: 6, overflow: "hidden" }}>
+          <div
+            key={`${c.x}-${c.y}`}
+            style={{
+              ...abs(c.x, c.y, c.w, c.h),
+              borderRadius: 6,
+              overflow: "hidden",
+            }}
+          >
             <img
               src="/veloria/home/482-129.png"
               alt={c.alt}
               width={430}
               height={913}
-              style={{ ...abs(c.imgX, c.imgY, 430, 913), maxWidth: "none", objectFit: "cover", display: "block" }}
+              style={{
+                ...abs(c.imgX, c.imgY, 430, 913),
+                maxWidth: "none",
+                objectFit: "cover",
+                display: "block",
+              }}
             />
             {/* stroke overlaid above the photo: an inset shadow on the frame
                 itself would paint underneath the child image */}
@@ -292,32 +418,67 @@ export function A9() {
         >
           {/* 483:115 · certification intro */}
           <div style={{ ...abs(8, 7, 99, 118), overflow: "hidden" }}>
-            <img src="/veloria/home/483-116.svg" alt="" width={24} height={24} style={{ ...abs(4, 1, 24, 24), display: "block" }} />
+            <img
+              src="/veloria/home/483-116.svg"
+              alt=""
+              width={24}
+              height={24}
+              style={{ ...abs(4, 1, 24, 24), display: "block" }}
+            />
             <div
               className={playfair.className}
-              style={{ ...abs(2, 42, 97), fontSize: 8.5, lineHeight: "11px", color: CHAMPAGNE, fontWeight: 500, whiteSpace: "nowrap" }}
+              style={{
+                ...abs(2, 42, 97),
+                fontSize: 8.5,
+                lineHeight: "11px",
+                color: CHAMPAGNE,
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+              }}
             >
               Patents & Certificates
             </div>
             <div
               className={goudy.className}
-              style={{ ...abs(2, 60, 96), fontSize: 6.2, lineHeight: "8px", color: "rgba(255, 246, 236, 0.9)", whiteSpace: "pre-line" }}
+              style={{
+                ...abs(2, 60, 96),
+                fontSize: 6.2,
+                lineHeight: "8px",
+                color: "rgba(255, 246, 236, 0.9)",
+                whiteSpace: "pre-line",
+              }}
             >
-              {"Our craftsmanship and preservation\ntechniques are protected by\ninternational patents and certified\nfor quality and authenticity."}
+              {
+                "Our craftsmanship and preservation\ntechniques are protected by\ninternational patents and certified\nfor quality and authenticity."
+              }
             </div>
           </div>
 
           {/* 483:122 · four certificates */}
           <div style={{ ...abs(111, 7, 303, 119), overflow: "hidden" }}>
             {CERTIFICATES.map((c) => (
-              <div key={c.title} style={{ ...abs(c.x, 0, 69, 119), overflow: "hidden" }}>
-                <div style={{ ...abs(2.5, 0, 64, 88), borderRadius: 2, overflow: "hidden" }}>
+              <div
+                key={c.title}
+                style={{ ...abs(c.x, 0, 69, 119), overflow: "hidden" }}
+              >
+                <div
+                  style={{
+                    ...abs(2.5, 0, 64, 88),
+                    borderRadius: 2,
+                    overflow: "hidden",
+                  }}
+                >
                   <img
                     src="/veloria/home/482-129.png"
                     alt={`${c.title} certificate`}
                     width={430}
                     height={913}
-                    style={{ ...abs(c.imgX, -684, 430, 913), maxWidth: "none", objectFit: "cover", display: "block" }}
+                    style={{
+                      ...abs(c.imgX, -684, 430, 913),
+                      maxWidth: "none",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
                   />
                   <div
                     style={{
@@ -363,14 +524,29 @@ export function A9() {
 
           {/* 483:123 · footer divider — zero-height line, 1px CENTER stroke,
               so the rendered strip sits 0.5px above the node's y */}
-          <img src="/veloria/home/483-123.svg" alt="" width={406} height={1} style={{ ...abs(8, 128.5, 406, 1), display: "block" }} />
+          <img
+            src="/veloria/home/483-123.svg"
+            alt=""
+            width={406}
+            height={1}
+            style={{ ...abs(8, 128.5, 406, 1), display: "block" }}
+          />
 
           {/* 483:124 · certification benefits */}
           <div style={{ ...abs(8, 133, 406, 44), overflow: "hidden" }}>
             {BENEFITS.map((b) => (
-              <div key={b.label} style={{ ...abs(b.x, 0, 96, 44), overflow: "hidden" }}>
+              <div
+                key={b.label}
+                style={{ ...abs(b.x, 0, 96, 44), overflow: "hidden" }}
+              >
                 {/* 484:116/121/127/132 · per-benefit icons */}
-                <img src={b.icon} alt="" width={22} height={22} style={{ ...abs(0, 7, 22, 22), display: "block" }} />
+                <img
+                  src={b.icon}
+                  alt=""
+                  width={22}
+                  height={22}
+                  style={{ ...abs(0, 7, 22, 22), display: "block" }}
+                />
                 <div
                   className={notoSC.className}
                   style={{

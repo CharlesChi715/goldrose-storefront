@@ -72,7 +72,9 @@ export async function listProducts(): Promise<ProductListRow[]> {
   return products
     .sort((a, b) => a.position - b.position || a.title.localeCompare(b.title))
     .map((product) => {
-      const own = variants.filter((variant) => variant.product_id === product.id);
+      const own = variants.filter(
+        (variant) => variant.product_id === product.id,
+      );
       const thumb = images
         .filter((image) => image.product_id === product.id)
         .sort((a, b) => a.position - b.position)[0];
@@ -80,7 +82,10 @@ export async function listProducts(): Promise<ProductListRow[]> {
         product,
         thumbnailPath: thumb?.path ?? null,
         variantCount: own.length,
-        totalOnHand: own.reduce((sum, variant) => sum + variant.inventory_on_hand, 0),
+        totalOnHand: own.reduce(
+          (sum, variant) => sum + variant.inventory_on_hand,
+          0,
+        ),
         tracked: own.some((variant) => variant.track_quantity),
       };
     });
@@ -91,7 +96,9 @@ export async function listProducts(): Promise<ProductListRow[]> {
  *
  * @param id - Product id; unknown ids return null.
  */
-export async function getProductDetail(id: string): Promise<ProductDetail | null> {
+export async function getProductDetail(
+  id: string,
+): Promise<ProductDetail | null> {
   const store = getStore();
   const [products, variants, images] = await Promise.all([
     store.all("products"),
@@ -130,7 +137,8 @@ function assertHandleAvailable(
 ): void {
   const clash = products.some(
     (product) =>
-      (product.handle === handle || product.id === handle) && product.id !== ignoreId,
+      (product.handle === handle || product.id === handle) &&
+      product.id !== ignoreId,
   );
   if (clash) {
     throw new Error(
@@ -193,7 +201,9 @@ export async function saveProduct(
   const now = new Date().toISOString();
   const isCreate = input.id === null;
   const products = await store.all("products");
-  const existing = isCreate ? null : (products.find((row) => row.id === input.id) ?? null);
+  const existing = isCreate
+    ? null
+    : (products.find((row) => row.id === input.id) ?? null);
   if (!isCreate && !existing) {
     throw new Error(`Unknown product: ${input.id}`);
   }
@@ -202,8 +212,14 @@ export async function saveProduct(
   // title at creation, manual handles must pass the same validation, and a
   // non-draft product's handle is frozen until product_redirects exists (§5).
   const manualHandle = input.handle?.trim() || null;
-  if (manualHandle && (manualHandle.length > HANDLE_MAX_LENGTH || !HANDLE_PATTERN.test(manualHandle))) {
-    throw new Error(`Handle "${manualHandle}" is invalid — lowercase words separated by single hyphens.`);
+  if (
+    manualHandle &&
+    (manualHandle.length > HANDLE_MAX_LENGTH ||
+      !HANDLE_PATTERN.test(manualHandle))
+  ) {
+    throw new Error(
+      `Handle "${manualHandle}" is invalid — lowercase words separated by single hyphens.`,
+    );
   }
   const handle = existing
     ? (manualHandle ?? existing.handle)
@@ -225,20 +241,28 @@ export async function saveProduct(
   // SKU rules (docs/Database.md): non-blank SKUs are unique storewide. The
   // 0003 partial index enforces this on Postgres; this check covers the
   // local file adapter and turns the violation into a readable error.
-  const incomingSkus = input.variants.map((variant) => variant.sku).filter((sku) => sku !== "");
-  const duplicateSku = incomingSkus.find((sku, index) => incomingSkus.indexOf(sku) !== index);
+  const incomingSkus = input.variants
+    .map((variant) => variant.sku)
+    .filter((sku) => sku !== "");
+  const duplicateSku = incomingSkus.find(
+    (sku, index) => incomingSkus.indexOf(sku) !== index,
+  );
   if (duplicateSku) {
     throw new Error(`SKU "${duplicateSku}" is used twice on this product.`);
   }
   if (incomingSkus.length > 0) {
     const taken = (await store.all("product_variants")).find(
-      (variant) => variant.product_id !== id && incomingSkus.includes(variant.sku),
+      (variant) =>
+        variant.product_id !== id && incomingSkus.includes(variant.sku),
     );
     if (taken) {
       throw new Error(`SKU "${taken.sku}" is already used by another product.`);
     }
   }
-  const maxPosition = products.reduce((max, row) => Math.max(max, row.position), 0);
+  const maxPosition = products.reduce(
+    (max, row) => Math.max(max, row.position),
+    0,
+  );
 
   const row: ProductRow = {
     id,
@@ -360,7 +384,10 @@ export async function saveProduct(
  * @param copySuffix - Localized "Copy of" text put before the new title.
  * @returns The new product's id.
  */
-export async function duplicateProduct(id: string, copySuffix: string): Promise<string> {
+export async function duplicateProduct(
+  id: string,
+  copySuffix: string,
+): Promise<string> {
   const detail = await getProductDetail(id);
   if (!detail) {
     throw new Error(`Unknown product: ${id}`);
@@ -375,7 +402,10 @@ export async function duplicateProduct(id: string, copySuffix: string): Promise<
   // title (or the original's) and duplicate again.
   const newId = productHandle(title);
   assertHandleAvailable(products, newId);
-  const maxPosition = products.reduce((max, row) => Math.max(max, row.position), 0);
+  const maxPosition = products.reduce(
+    (max, row) => Math.max(max, row.position),
+    0,
+  );
 
   await store.insert("products", [
     {
@@ -403,7 +433,11 @@ export async function duplicateProduct(id: string, copySuffix: string): Promise<
   if (detail.images.length > 0) {
     await store.insert(
       "product_images",
-      detail.images.map((image) => ({ ...image, id: randomUUID(), product_id: newId })),
+      detail.images.map((image) => ({
+        ...image,
+        id: randomUUID(),
+        product_id: newId,
+      })),
     );
   }
   return newId;
@@ -415,7 +449,10 @@ export async function duplicateProduct(id: string, copySuffix: string): Promise<
  * @param ids - Product ids to update.
  * @param status - New status for all of them.
  */
-export async function setProductStatus(ids: string[], status: ProductStatus): Promise<void> {
+export async function setProductStatus(
+  ids: string[],
+  status: ProductStatus,
+): Promise<void> {
   const store = getStore();
   const now = new Date().toISOString();
   for (const id of ids) {
@@ -487,7 +524,9 @@ export async function listVariantInventory(): Promise<VariantInventoryRow[]> {
     }
   }
 
-  const titleById = new Map(products.map((product) => [product.id, product.title]));
+  const titleById = new Map(
+    products.map((product) => [product.id, product.title]),
+  );
   return variants
     .map((variant) => {
       const committed = committedByVariant.get(variant.id) ?? 0;
@@ -502,7 +541,8 @@ export async function listVariantInventory(): Promise<VariantInventoryRow[]> {
     })
     .sort(
       (a, b) =>
-        a.productTitle.localeCompare(b.productTitle) || a.variant.position - b.variant.position,
+        a.productTitle.localeCompare(b.productTitle) ||
+        a.variant.position - b.variant.position,
     );
 }
 
@@ -534,7 +574,9 @@ export async function adjustVariantInventory(input: {
  *
  * @param variantId - Variant to look up.
  */
-export async function variantMovements(variantId: string): Promise<InventoryMovementRow[]> {
+export async function variantMovements(
+  variantId: string,
+): Promise<InventoryMovementRow[]> {
   const movements = await getStore().all("inventory_movements");
   return movements
     .filter((movement) => movement.variant_id === variantId)

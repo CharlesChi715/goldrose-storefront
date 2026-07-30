@@ -152,10 +152,19 @@ export function addToCart(variantId: string, quantity = 1) {
     return existing
       ? lines.map((line) =>
           line.variantId === variantId
-            ? { ...line, quantity: Math.min(MAX_QUANTITY, line.quantity + quantity) }
+            ? {
+                ...line,
+                quantity: Math.min(MAX_QUANTITY, line.quantity + quantity),
+              }
             : line,
         )
-      : [...lines, { variantId, quantity: Math.min(MAX_QUANTITY, Math.max(1, quantity)) }];
+      : [
+          ...lines,
+          {
+            variantId,
+            quantity: Math.min(MAX_QUANTITY, Math.max(1, quantity)),
+          },
+        ];
   });
 }
 
@@ -171,7 +180,10 @@ function changeLineQuantity(variantId: string, amount: number) {
     lines
       .map((line) =>
         line.variantId === variantId
-          ? { ...line, quantity: Math.min(MAX_QUANTITY, line.quantity + amount) }
+          ? {
+              ...line,
+              quantity: Math.min(MAX_QUANTITY, line.quantity + amount),
+            }
           : line,
       )
       .filter((line) => line.quantity > 0),
@@ -198,14 +210,20 @@ function clearCart() {
  */
 export function useCart(catalog: CatalogProduct[]) {
   const lines = useSyncExternalStore(subscribe, readLines, () => EMPTY);
-  const hydrated = useSyncExternalStore(subscribeHydration, () => true, () => false);
+  const hydrated = useSyncExternalStore(
+    subscribeHydration,
+    () => true,
+    () => false,
+  );
 
   const lineViews = useMemo<CartLineView[]>(
     () =>
       lines
         .map((line) => {
           for (const product of catalog) {
-            const variant = product.variants.find((entry) => entry.id === line.variantId);
+            const variant = product.variants.find(
+              (entry) => entry.id === line.variantId,
+            );
             if (variant) {
               return {
                 ...line,

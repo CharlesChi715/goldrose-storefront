@@ -11,10 +11,16 @@ import { CareScreen, type CareTab } from "@/components/screens/CareScreen";
 
 export const metadata: Metadata = {
   title: "Customer care — GoldRose",
-  description: "GoldRose customer care: order help, promotions, returns and after-sales.",
+  description:
+    "GoldRose customer care: order help, promotions, returns and after-sales.",
 };
 
-const TAB_KEYS: CareTab[] = ["hot-topics", "order-issues", "promotions", "after-sales"];
+const TAB_KEYS: CareTab[] = [
+  "hot-topics",
+  "order-issues",
+  "promotions",
+  "after-sales",
+];
 
 export default async function CarePage({
   searchParams,
@@ -22,6 +28,8 @@ export default async function CarePage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const requested = (await searchParams).tab;
-  const tab = TAB_KEYS.includes(requested as CareTab) ? (requested as CareTab) : "hot-topics";
+  const tab = TAB_KEYS.includes(requested as CareTab)
+    ? (requested as CareTab)
+    : "hot-topics";
   return <CareScreen initialTab={tab} />;
 }

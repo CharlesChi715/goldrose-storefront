@@ -38,14 +38,45 @@ type Row = {
 // row places its 30×30 icon frame at (38, y+26) and its label at (86, y+29.5)
 // in frame coordinates.
 const ROWS: Row[] = [
-  { id: "1523:3236", label: "HOME", y: 196, href: "/", current: true, icon: "1523-3237" },
+  {
+    id: "1523:3236",
+    label: "HOME",
+    y: 196,
+    href: "/",
+    current: true,
+    icon: "1523-3237",
+  },
   { id: "1523:3240", label: "SHOP", y: 283, href: "/shop", icon: "1523-3241" },
   // /#personalize — the homepage anchor on the A-4 personalize card (H-16 precedent)
-  { id: "1523:3244", label: "PERSONALIZE", y: 370, href: "/#personalize", icon: "1523-3245" },
-  { id: "1523:3248", label: "FOR BUSINESS", y: 457, href: "/business/partnerships", icon: "1523-3249" },
+  {
+    id: "1523:3244",
+    label: "PERSONALIZE",
+    y: 370,
+    href: "/#personalize",
+    icon: "1523-3245",
+  },
+  {
+    id: "1523:3248",
+    label: "FOR BUSINESS",
+    y: 457,
+    href: "/business/partnerships",
+    icon: "1523-3249",
+  },
   { id: "1523:3253", label: "BLOG", y: 544, icon: "1523-3254" },
-  { id: "1523:3258", label: "OUR CRAFT", y: 631, href: "/craft", icon: "1523-3259" },
-  { id: "1523:3262", label: "OUR STORY", y: 718, href: "/story", icon: "1523-3263" },
+  {
+    id: "1523:3258",
+    label: "OUR CRAFT",
+    y: 631,
+    href: "/craft",
+    icon: "1523-3259",
+  },
+  {
+    id: "1523:3262",
+    label: "OUR STORY",
+    y: 718,
+    href: "/story",
+    icon: "1523-3263",
+  },
 ];
 
 const RESET: React.CSSProperties = {
@@ -64,14 +95,24 @@ const subscribeToNothing = () => () => {};
 const onTheClient = () => true;
 const onTheServer = () => false;
 
-export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MenuDrawer({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   // The trigger lives inside ScaleFrame's `.figv-stage`, which is transformed.
   // A transform makes that stage the containing block AND the stacking context
   // for fixed descendants, so an in-place drawer would be scaled twice and
   // would lose the z-order fight to the tab bar (z-index 10 outside the stage
   // beats anything inside it). Portal to <body> so `fixed` means the viewport
   // and z-index 40 actually wins — same reason BottomNav sits outside the stage.
-  const mounted = useSyncExternalStore(subscribeToNothing, onTheClient, onTheServer);
+  const mounted = useSyncExternalStore(
+    subscribeToNothing,
+    onTheClient,
+    onTheServer,
+  );
 
   // Escape closes, and the page behind must not scroll while the drawer is open.
   useEffect(() => {
@@ -108,7 +149,13 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         type="button"
         aria-label="Close menu"
         onClick={onClose}
-        style={{ ...RESET, position: "absolute", inset: 0, background: "rgba(10,6,5,0.44)", opacity: 0.34 }}
+        style={{
+          ...RESET,
+          position: "absolute",
+          inset: 0,
+          background: "rgba(10,6,5,0.44)",
+          opacity: 0.34,
+        }}
       />
 
       <div className="figv-menustage">
@@ -139,12 +186,24 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           {/* 1523:3227 … 1523:3231 — five hairlines ruled across the drawer's
               top, the 07-29 frame's ornament. */}
           {[27, 33, 39, 45, 51].map((y) => (
-            <div key={y} style={{ ...abs(25, y, 240, 1), background: "#D18005", opacity: 0.48 }} />
+            <div
+              key={y}
+              style={{
+                ...abs(25, y, 240, 1),
+                background: "#D18005",
+                opacity: 0.48,
+              }}
+            />
           ))}
 
           {/* 1523:3233 Close / 1523:3234 × — Figma's ink-cropped glyph export
               (20×20), centred on the TEXT node's 31×37 box. */}
-          <button type="button" aria-label="Close menu" onClick={onClose} style={{ ...RESET, ...abs(258, 57, 31, 37) }}>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={onClose}
+            style={{ ...RESET, ...abs(258, 57, 31, 37) }}
+          >
             <Glyph src="1523-3234" x={0} y={0} w={31} h={37} ink={[20, 20]} />
           </button>
 
@@ -195,7 +254,12 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </>
             );
             return row.href ? (
-              <Link key={row.id} href={row.href} onClick={onClose} style={{ ...box, display: "block" }}>
+              <Link
+                key={row.id}
+                href={row.href}
+                onClick={onClose}
+                style={{ ...box, display: "block" }}
+              >
                 {inner}
               </Link>
             ) : (

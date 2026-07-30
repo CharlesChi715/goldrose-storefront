@@ -36,13 +36,17 @@ export default async function CheckoutPage() {
 
   const headerStore = await headers();
   const geo = (headerStore.get("x-vercel-ip-country") ?? "").toUpperCase();
-  const defaultCountry = countries.some((country) => country.code === geo) ? geo : "US";
+  const defaultCountry = countries.some((country) => country.code === geo)
+    ? geo
+    : "US";
 
   // Testing-phase switch: skip payment entirely, so the PayPal buttons must
   // not mount even when the keys exist (§10.4, lib/checkout/mode.ts).
   const skipPayment = skipPaymentEnabled();
   const paypalClientId =
-    !skipPayment && process.env.PAYPAL_CLIENT_ID && process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    !skipPayment &&
+    process.env.PAYPAL_CLIENT_ID &&
+    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
       ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
       : null;
 

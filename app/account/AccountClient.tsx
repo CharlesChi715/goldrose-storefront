@@ -36,9 +36,15 @@ type Phase = "unavailable" | "loading" | "signedOut" | "signedIn";
  * UPS" when the carrier is known) → still preparing. Live carrier scans stay
  * behind the "Track" link-out for now.
  */
-function deliveryStatus(order: AccountOrder): { label: string; className: string } {
+function deliveryStatus(order: AccountOrder): {
+  label: string;
+  className: string;
+} {
   if (order.cancelled) {
-    return { label: "Cancelled", className: "border-[#cbbfa6] bg-[#f1eadb] text-[#7c6e50]" };
+    return {
+      label: "Cancelled",
+      className: "border-[#cbbfa6] bg-[#f1eadb] text-[#7c6e50]",
+    };
   }
   if (order.fulfillment_status === "fulfilled") {
     const carrier = carrierLabel(order.tracking_carrier);
@@ -57,7 +63,11 @@ function formatDate(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime())
     ? ""
-    : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
 }
 
 /**
@@ -79,7 +89,9 @@ function toRecentOrder(orders: AccountOrder[]): DashboardRecentOrder | null {
 
 export function AccountClient() {
   const supabase = useMemo(() => supabaseBrowserAuthClient(), []);
-  const [phase, setPhase] = useState<Phase>(supabase ? "loading" : "unavailable");
+  const [phase, setPhase] = useState<Phase>(
+    supabase ? "loading" : "unavailable",
+  );
   const [overview, setOverview] = useState<AccountOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,7 +113,9 @@ export function AccountClient() {
     // Coming back from a failed OAuth round trip or an expired/used sign-in
     // link (/auth/callback and /auth/confirm append ?auth_error=1) — surface
     // it once and clean the URL.
-    const hadAuthError = new URLSearchParams(window.location.search).get("auth_error");
+    const hadAuthError = new URLSearchParams(window.location.search).get(
+      "auth_error",
+    );
     if (hadAuthError) {
       window.history.replaceState(null, "", "/account");
     }
@@ -110,7 +124,9 @@ export function AccountClient() {
         return;
       }
       if (hadAuthError) {
-        setError("Sign-in didn't complete — the link may have expired or already been used. Please request a new one.");
+        setError(
+          "Sign-in didn't complete — the link may have expired or already been used. Please request a new one.",
+        );
       }
       if (!user) {
         setPhase("signedOut");
@@ -150,7 +166,20 @@ export function AccountClient() {
         {error ? (
           <p
             role="alert"
-            style={{ position: "fixed", left: 8, right: 8, top: 8, zIndex: 50, margin: 0, borderRadius: 6, border: "1px solid #c65a4a", background: "#fdf1ef", padding: "10px 14px", fontSize: 13, color: "#8a2f22" }}
+            style={{
+              position: "fixed",
+              left: 8,
+              right: 8,
+              top: 8,
+              zIndex: 50,
+              margin: 0,
+              borderRadius: 6,
+              border: "1px solid #c65a4a",
+              background: "#fdf1ef",
+              padding: "10px 14px",
+              fontSize: 13,
+              color: "#8a2f22",
+            }}
           >
             {error}
           </p>

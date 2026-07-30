@@ -35,20 +35,29 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024;
  * Pull attachments out of the form and store them. Throws "files" (caught
  * by the caller into the form error) on limit/type violations.
  */
-async function storeAttachments(formData: FormData): Promise<ForumAttachment[]> {
+async function storeAttachments(
+  formData: FormData,
+): Promise<ForumAttachment[]> {
   const files = formData
     .getAll("files")
     .filter((entry): entry is File => entry instanceof File && entry.size > 0);
   if (files.length === 0) {
     return [];
   }
-  if (files.length > MAX_FILES || files.some((file) => file.size > MAX_FILE_BYTES)) {
+  if (
+    files.length > MAX_FILES ||
+    files.some((file) => file.size > MAX_FILE_BYTES)
+  ) {
     throw new Error("files");
   }
   const attachments: ForumAttachment[] = [];
   for (const file of files) {
     const stored = await uploadAttachment(file); // throws on bad type
-    attachments.push({ path: stored.path, name: file.name, type: file.type || "application/octet-stream" });
+    attachments.push({
+      path: stored.path,
+      name: file.name,
+      type: file.type || "application/octet-stream",
+    });
   }
   return attachments;
 }
@@ -140,7 +149,10 @@ export async function replyAction(
  * only, which is all the open testing phase promises. Editing another
  * nickname's post is silently refused.
  */
-export async function updatePostAction(postId: string, body: string): Promise<void> {
+export async function updatePostAction(
+  postId: string,
+  body: string,
+): Promise<void> {
   await requireAdmin();
   const nickname = await author();
   const parsedId = id.parse(postId);

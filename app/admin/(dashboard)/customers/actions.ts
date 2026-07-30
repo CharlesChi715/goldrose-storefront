@@ -16,7 +16,10 @@ import {
 
 const id = z.string().min(1).max(64);
 
-export async function addCustomerCommentAction(customerId: string, message: string): Promise<void> {
+export async function addCustomerCommentAction(
+  customerId: string,
+  message: string,
+): Promise<void> {
   const session = await requireAdmin();
   await addCustomerComment(
     id.parse(customerId),
@@ -25,12 +28,21 @@ export async function addCustomerCommentAction(customerId: string, message: stri
   );
 }
 
-export async function saveCustomerNoteAction(customerId: string, note: string): Promise<void> {
+export async function saveCustomerNoteAction(
+  customerId: string,
+  note: string,
+): Promise<void> {
   await requireAdmin();
-  await saveCustomerNote(id.parse(customerId), z.string().max(2000).parse(note));
+  await saveCustomerNote(
+    id.parse(customerId),
+    z.string().max(2000).parse(note),
+  );
 }
 
-export async function saveCustomerTagsAction(customerId: string, tags: string[]): Promise<void> {
+export async function saveCustomerTagsAction(
+  customerId: string,
+  tags: string[],
+): Promise<void> {
   await requireAdmin();
   await saveCustomerTags(
     id.parse(customerId),

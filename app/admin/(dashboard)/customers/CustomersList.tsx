@@ -32,14 +32,17 @@ export function CustomersList({ items }: { items: CustomerListItem[] }) {
     }
     return items.filter(
       (item) =>
-        item.name.toLowerCase().includes(needle) || item.email.toLowerCase().includes(needle),
+        item.name.toLowerCase().includes(needle) ||
+        item.email.toLowerCase().includes(needle),
     );
   }, [items, query]);
 
   return (
     <Page
       title={t("nav.customers")}
-      secondaryActions={[{ content: t("customers.export"), url: "/api/admin/customers/export" }]}
+      secondaryActions={[
+        { content: t("customers.export"), url: "/api/admin/customers/export" },
+      ]}
     >
       <Card padding="0">
         <div style={{ padding: "12px 12px 8px" }}>
@@ -55,7 +58,10 @@ export function CustomersList({ items }: { items: CustomerListItem[] }) {
           />
         </div>
         <IndexTable
-          resourceName={{ singular: t("customers.column.name"), plural: t("nav.customers") }}
+          resourceName={{
+            singular: t("customers.column.name"),
+            plural: t("nav.customers"),
+          }}
           itemCount={filtered.length}
           selectable={false}
           emptyState={

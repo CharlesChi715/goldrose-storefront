@@ -40,7 +40,10 @@ export default async function ForumPage() {
         replyCount: Math.max(0, threadPosts.length - 1),
         lastPostAt,
         // Post stamps for the unread badge (counted client-side per device).
-        posts: threadPosts.map((post) => ({ at: post.created_at, by: post.nickname })),
+        posts: threadPosts.map((post) => ({
+          at: post.created_at,
+          by: post.nickname,
+        })),
       };
     })
     .sort((a, b) => b.lastPostAt.localeCompare(a.lastPostAt));

@@ -28,10 +28,17 @@ const DEMO_TABLES = [
   "forum_posts",
 ] as const;
 
-const UUID_FK_FIELDS = ["customer_id", "order_id", "thread_id", "variant_id"] as const;
+const UUID_FK_FIELDS = [
+  "customer_id",
+  "order_id",
+  "thread_id",
+  "variant_id",
+] as const;
 
 test("every demo row id and uuid foreign key is a well-formed uuid", () => {
-  const tables = buildSeedTables(new Date().toISOString(), { includeDemo: true });
+  const tables = buildSeedTables(new Date().toISOString(), {
+    includeDemo: true,
+  });
   for (const table of DEMO_TABLES) {
     for (const row of tables[table] as Array<Record<string, unknown>>) {
       assert.match(
@@ -42,7 +49,11 @@ test("every demo row id and uuid foreign key is a well-formed uuid", () => {
       for (const field of UUID_FK_FIELDS) {
         const value = row[field];
         if (typeof value === "string") {
-          assert.match(value, UUID, `${table}.${field} "${value}" is not a valid uuid`);
+          assert.match(
+            value,
+            UUID,
+            `${table}.${field} "${value}" is not a valid uuid`,
+          );
         }
       }
     }

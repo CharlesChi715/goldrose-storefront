@@ -22,7 +22,10 @@ import {
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 function failed(error: unknown): ActionResult {
-  return { ok: false, error: error instanceof Error ? error.message : "Action failed" };
+  return {
+    ok: false,
+    error: error instanceof Error ? error.message : "Action failed",
+  };
 }
 
 const id = z.string().min(1).max(64);
@@ -57,7 +60,12 @@ export async function refundOrderAction(payload: {
   try {
     await refundOrder({
       id: id.parse(payload.id),
-      amountCents: z.number().int().min(1).max(100_000_000).parse(payload.amountCents),
+      amountCents: z
+        .number()
+        .int()
+        .min(1)
+        .max(100_000_000)
+        .parse(payload.amountCents),
       restock: z.boolean().parse(payload.restock),
       actor: session.email,
     });
@@ -88,23 +96,35 @@ export async function cancelOrderAction(payload: {
   }
 }
 
-export async function archiveOrdersAction(ids: string[], archived: boolean): Promise<void> {
+export async function archiveOrdersAction(
+  ids: string[],
+  archived: boolean,
+): Promise<void> {
   await requireAdmin();
   await setOrdersArchived(z.array(id).min(1).max(200).parse(ids), archived);
 }
 
-export async function addOrderCommentAction(orderId: string, message: string): Promise<void> {
+export async function addOrderCommentAction(
+  orderId: string,
+  message: string,
+): Promise<void> {
   const session = await requireAdmin();
   const text = z.string().trim().min(1).max(2000).parse(message);
   await addOrderComment(id.parse(orderId), text, session.email);
 }
 
-export async function saveOrderNoteAction(orderId: string, note: string): Promise<void> {
+export async function saveOrderNoteAction(
+  orderId: string,
+  note: string,
+): Promise<void> {
   await requireAdmin();
   await saveOrderNote(id.parse(orderId), z.string().max(2000).parse(note));
 }
 
-export async function saveOrderTagsAction(orderId: string, tags: string[]): Promise<void> {
+export async function saveOrderTagsAction(
+  orderId: string,
+  tags: string[],
+): Promise<void> {
   await requireAdmin();
   await saveOrderTags(
     id.parse(orderId),

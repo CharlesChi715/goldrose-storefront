@@ -8,7 +8,9 @@
 import { test, expect } from "@playwright/test";
 
 const canvasOpacity = (page: import("@playwright/test").Page) =>
-  page.locator(".figv-wrap").evaluate((el) => Number(getComputedStyle(el).opacity));
+  page
+    .locator(".figv-wrap")
+    .evaluate((el) => Number(getComputedStyle(el).opacity));
 
 /**
  * The fade lives in a click handler, so it only exists once React has taken

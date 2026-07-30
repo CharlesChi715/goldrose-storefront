@@ -26,7 +26,15 @@ type ChipSpec = {
 
 const CHIPS: ChipSpec[] = [
   // Step one · WHO IS THIS GIFT FOR?
-  { x: 224, y: 222, w: 82, label: "Wife", labelX: 29.5, labelW: 23, selected: true },
+  {
+    x: 224,
+    y: 222,
+    w: 82,
+    label: "Wife",
+    labelX: 29.5,
+    labelW: 23,
+    selected: true,
+  },
   { x: 314, y: 222, w: 82, label: "Girlfriend", labelX: 16.5, labelW: 49 },
   { x: 224, y: 256, w: 82, label: "Mother", labelX: 22.5, labelW: 37 },
   { x: 314, y: 256, w: 82, label: "Friend", labelX: 24.5, labelW: 33 },
@@ -87,7 +95,13 @@ const buttonLabel: React.CSSProperties = {
 
 export function A7() {
   return (
-    <div style={{ ...abs(0, 4606, 430, 730), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, 4606, 430, 730),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       {/* MORI Finder Hero (163:114) */}
       <div style={{ ...abs(0, 0, 430, 522), background: "#FFF6EC" }} />
       <img
@@ -126,7 +140,9 @@ export function A7() {
           textAlign: "center",
         }}
       >
-        {"Tell MORI who the gift is for and what you're celebrating, and we'll help you find the best match."}
+        {
+          "Tell MORI who the gift is for and what you're celebrating, and we'll help you find the best match."
+        }
       </div>
       {/* Illustration bleeds 10px past the left edge; the module frame clips it.
           Figma fill blendMode DARKEN keys out the art's opaque near-white
@@ -146,10 +162,16 @@ export function A7() {
       />
 
       {/* Steps + criteria chips (static; a hidden step-three label in the design is omitted) */}
-      <div className={notoSC.className} style={{ ...abs(224, 198, 188), ...stepLabel }}>
+      <div
+        className={notoSC.className}
+        style={{ ...abs(224, 198, 188), ...stepLabel }}
+      >
         WHO IS THIS GIFT FOR?
       </div>
-      <div className={notoSC.className} style={{ ...abs(224, 332, 188), ...stepLabel }}>
+      <div
+        className={notoSC.className}
+        style={{ ...abs(224, 332, 188), ...stepLabel }}
+      >
         WHAT ARE YOU CELEBRATING?
       </div>
       {CHIPS.map((c) => (
@@ -157,11 +179,24 @@ export function A7() {
       ))}
 
       {/* Button · Reveal My Gift Match (163:147) — placeholder, not clickable */}
-      <div style={{ ...abs(24, 506, 382, 44), background: "#3B2F2F", borderRadius: 10 }}>
-        <div className={goudy.className} style={{ ...abs(116, 11.5, 123), ...buttonLabel, color: "#FFF6EC" }}>
+      <div
+        style={{
+          ...abs(24, 506, 382, 44),
+          background: "#3B2F2F",
+          borderRadius: 10,
+        }}
+      >
+        <div
+          className={goudy.className}
+          style={{ ...abs(116, 11.5, 123), ...buttonLabel, color: "#FFF6EC" }}
+        >
           {"See MORI's Picks"}
         </div>
-        <img src="/veloria/home/465-156.svg" alt="→" style={{ ...abs(251, 13, 15, 18), display: "block" }} />
+        <img
+          src="/veloria/home/465-156.svg"
+          alt="→"
+          style={{ ...abs(251, 13, 15, 18), display: "block" }}
+        />
       </div>
 
       {/* Button · Browse All Gifts (163:150) */}
@@ -175,10 +210,17 @@ export function A7() {
           borderRadius: 10,
         }}
       >
-        <div className={goudy.className} style={{ ...abs(119.5, 11.5, 116), ...buttonLabel, color: "#3B2F2F" }}>
+        <div
+          className={goudy.className}
+          style={{ ...abs(119.5, 11.5, 116), ...buttonLabel, color: "#3B2F2F" }}
+        >
           Browse All Gifts
         </div>
-        <img src="/veloria/home/465-156.svg" alt="→" style={{ ...abs(247.5, 13, 15, 18), display: "block" }} />
+        <img
+          src="/veloria/home/465-156.svg"
+          alt="→"
+          style={{ ...abs(247.5, 13, 15, 18), display: "block" }}
+        />
       </Link>
 
       {/* MORI Recommendation Card (452:149) */}
@@ -187,7 +229,8 @@ export function A7() {
           ...abs(24, 610, 382, 108),
           background: "#FFF9F1",
           borderRadius: 16,
-          boxShadow: "inset 0 0 0 1px rgba(231, 210, 188, 0.9), 0 4px 12px rgba(59, 47, 47, 0.08)",
+          boxShadow:
+            "inset 0 0 0 1px rgba(231, 210, 188, 0.9), 0 4px 12px rgba(59, 47, 47, 0.08)",
           overflow: "hidden",
         }}
       >
@@ -196,7 +239,11 @@ export function A7() {
           alt="Recommended gold-dipped rose gift"
           width={146}
           height={108}
-          style={{ ...abs(0, 0, 146, 108), objectFit: "cover", display: "block" }}
+          style={{
+            ...abs(0, 0, 146, 108),
+            objectFit: "cover",
+            display: "block",
+          }}
         />
         <div style={{ ...abs(158, 0, 214, 108), overflow: "hidden" }}>
           <div
@@ -214,10 +261,15 @@ export function A7() {
           </div>
           <div
             className={goudy.className}
-            style={{ ...abs(0, 38.54, 214), fontSize: 10, lineHeight: "13px", color: "#3B2F2F" }}
+            style={{
+              ...abs(0, 38.54, 214),
+              fontSize: 10,
+              lineHeight: "13px",
+              color: "#3B2F2F",
+            }}
           >
-            MORI combines the timeless beauty of real roses with your story to recommend gifts that
-            speak from the heart.
+            MORI combines the timeless beauty of real roses with your story to
+            recommend gifts that speak from the heart.
           </div>
           <img
             src="/veloria/home/452-154.svg"

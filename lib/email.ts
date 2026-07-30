@@ -30,12 +30,10 @@ async function getEmailSettings(): Promise<{
   ownerEmail: string;
 }> {
   const settings = await getStore().all("settings");
-  const notifications = settings.find((row) => row.key === "notifications")?.value as
-    | Partial<NotificationToggles>
-    | undefined;
+  const notifications = settings.find((row) => row.key === "notifications")
+    ?.value as Partial<NotificationToggles> | undefined;
   const store = settings.find((row) => row.key === "store")?.value as
-    | { name?: string; contact_email?: string }
-    | undefined;
+    { name?: string; contact_email?: string } | undefined;
   return {
     toggles: {
       order_confirmation: notifications?.order_confirmation ?? true,
@@ -60,10 +58,16 @@ function money(cents: number): string {
  * @param subject - Email subject line.
  * @param text - Plain-text body.
  */
-async function deliver(to: string, subject: string, text: string): Promise<void> {
+async function deliver(
+  to: string,
+  subject: string,
+  text: string,
+): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
-    console.log(`[email:console-mode] To: ${to}\nSubject: ${subject}\n${text}\n`);
+    console.log(
+      `[email:console-mode] To: ${to}\nSubject: ${subject}\n${text}\n`,
+    );
     return;
   }
   try {
@@ -81,7 +85,9 @@ async function deliver(to: string, subject: string, text: string): Promise<void>
       }),
     });
     if (!response.ok) {
-      console.error(`[email] Resend ${response.status}: ${await response.text()}`);
+      console.error(
+        `[email] Resend ${response.status}: ${await response.text()}`,
+      );
     }
   } catch (error) {
     // Email failures never break an order.
@@ -187,7 +193,9 @@ export async function sendBusinessRequestEmail(enquiry: {
 }): Promise<boolean> {
   const { storeName, ownerEmail } = await getEmailSettings();
   const heading =
-    enquiry.kind === "consultation" ? "Consultation booking" : "Purchase request";
+    enquiry.kind === "consultation"
+      ? "Consultation booking"
+      : "Purchase request";
   const text = [
     `${heading} from the ${storeName} Business & Partnerships page.`,
     "",
@@ -198,7 +206,9 @@ export async function sendBusinessRequestEmail(enquiry: {
   ].join("\n");
 
   if (!ownerEmail) {
-    console.warn(`[email] no owner contact email set — business enquiry not delivered:\n${text}`);
+    console.warn(
+      `[email] no owner contact email set — business enquiry not delivered:\n${text}`,
+    );
     return false;
   }
   await deliver(ownerEmail, `${heading} — ${enquiry.email}`, text);

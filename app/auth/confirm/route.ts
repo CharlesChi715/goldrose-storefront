@@ -28,7 +28,10 @@ export async function GET(request: Request) {
 
   if (tokenHash && type && getSupabaseEnv().hosted) {
     const supabase = await supabaseServerAuthClient();
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash: tokenHash,
+    });
     if (!error) {
       // Behind Vercel's proxy the request origin is the internal host —
       // x-forwarded-host is the address the visitor actually sees.

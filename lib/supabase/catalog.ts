@@ -92,7 +92,9 @@ export const getCatalog = cache(async (): Promise<CatalogProduct[]> => {
  * @param handle - The product's URL handle, e.g. "signature-24k-gold-rose".
  * @returns The matching catalog product, or null if none is active.
  */
-export async function getCatalogProduct(handle: string): Promise<CatalogProduct | null> {
+export async function getCatalogProduct(
+  handle: string,
+): Promise<CatalogProduct | null> {
   const catalog = await getCatalog();
   return catalog.find((product) => product.handle === handle) ?? null;
 }

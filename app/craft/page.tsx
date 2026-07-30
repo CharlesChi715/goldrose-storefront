@@ -14,13 +14,19 @@ import { CraftScreen } from "@/components/screens/CraftScreen";
 
 export const metadata: Metadata = {
   title: "Our craft — GoldRose",
-  description: "How GoldRose preserves real roses in 24K gold: selected, preserved, hand-finished.",
+  description:
+    "How GoldRose preserves real roses in 24K gold: selected, preserved, hand-finished.",
   alternates: { canonical: "/craft" },
 };
 
 export default function CraftPage() {
   return (
-    <ScaleFrame height={1347} background="#FFF6EC" fontClass={notoSC.className} navActive="none">
+    <ScaleFrame
+      height={1347}
+      background="#FFF6EC"
+      fontClass={notoSC.className}
+      navActive="none"
+    >
       <CraftScreen />
     </ScaleFrame>
   );

@@ -71,7 +71,9 @@ export function HomeDashboard({
   const todoItems: Array<{ message: string; url: string }> = [];
   if (feed.unfulfilledCount > 0) {
     todoItems.push({
-      message: interpolate(t("home.todo.unfulfilled"), { count: feed.unfulfilledCount }),
+      message: interpolate(t("home.todo.unfulfilled"), {
+        count: feed.unfulfilledCount,
+      }),
       url: "/admin/orders",
     });
   }
@@ -86,7 +88,9 @@ export function HomeDashboard({
   }
   if (feed.abandonedLastDay > 0) {
     todoItems.push({
-      message: interpolate(t("home.todo.abandoned"), { count: feed.abandonedLastDay }),
+      message: interpolate(t("home.todo.abandoned"), {
+        count: feed.abandonedLastDay,
+      }),
       url: "/admin/orders/abandoned",
     });
   }

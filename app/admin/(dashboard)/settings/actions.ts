@@ -23,7 +23,10 @@ const zonesSchema = z
     z.object({
       id: z.string().min(1).max(64),
       name: z.string().trim().min(1).max(120),
-      countries: z.array(z.string().trim().min(1).max(2).or(z.literal("*"))).min(1).max(250),
+      countries: z
+        .array(z.string().trim().min(1).max(2).or(z.literal("*")))
+        .min(1)
+        .max(250),
       rate_cents: z.number().int().min(0).max(100_000_000),
       free_over_cents: z.number().int().min(0).max(100_000_000).nullable(),
       placeholder: z.boolean().optional(),
@@ -68,7 +71,9 @@ export async function saveTaxAction(payload: unknown): Promise<void> {
   await saveSetting("tax", taxSchema.parse(payload));
 }
 
-export async function saveCheckoutSettingsAction(payload: unknown): Promise<void> {
+export async function saveCheckoutSettingsAction(
+  payload: unknown,
+): Promise<void> {
   await requireAdmin();
   await saveSetting("checkout", checkoutSchema.parse(payload));
 }
@@ -80,7 +85,10 @@ export async function saveNotificationsAction(payload: unknown): Promise<void> {
 
 export async function saveLowStockAction(threshold: number): Promise<void> {
   await requireAdmin();
-  await saveSetting("low_stock_threshold", z.number().int().min(0).max(100000).parse(threshold));
+  await saveSetting(
+    "low_stock_threshold",
+    z.number().int().min(0).max(100000).parse(threshold),
+  );
 }
 
 export async function saveSearchEngineAction(payload: unknown): Promise<void> {
@@ -95,9 +103,14 @@ const POLICY_LABELS: Record<string, string> = {
   "policy.terms": "Terms of service",
 };
 
-export async function savePolicyAction(key: string, text: string): Promise<void> {
+export async function savePolicyAction(
+  key: string,
+  text: string,
+): Promise<void> {
   await requireAdmin();
-  const parsedKey = z.enum(["policy.refund", "policy.privacy", "policy.terms"]).parse(key);
+  const parsedKey = z
+    .enum(["policy.refund", "policy.privacy", "policy.terms"])
+    .parse(key);
   await saveContentText(parsedKey, z.string().max(50_000).parse(text), {
     label: POLICY_LABELS[parsedKey],
     help: "",

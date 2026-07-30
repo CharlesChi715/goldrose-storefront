@@ -22,7 +22,9 @@ test("team page lists the owner as approved", async ({ page }) => {
   await expect(main.getByText("Owner", { exact: true })).toBeVisible();
 });
 
-test("request-access sign-up is not offered in local mode", async ({ page }) => {
+test("request-access sign-up is not offered in local mode", async ({
+  page,
+}) => {
   await page.goto("/admin/login");
   await expect(page.getByText("Request access")).toHaveCount(0);
 });

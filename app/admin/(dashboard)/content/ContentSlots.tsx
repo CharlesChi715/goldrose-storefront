@@ -82,7 +82,9 @@ export function ContentSlots({ slots }: { slots: ContentSlot[] }) {
                   variant="primary"
                   loading={pending}
                   disabled={(drafts[slot.key] ?? "") === slot.text}
-                  onClick={() => run(() => saveSlotAction(slot.key, drafts[slot.key] ?? ""))}
+                  onClick={() =>
+                    run(() => saveSlotAction(slot.key, drafts[slot.key] ?? ""))
+                  }
                 >
                   {t("common.save")}
                 </Button>
@@ -91,7 +93,9 @@ export function ContentSlots({ slots }: { slots: ContentSlot[] }) {
           </Card>
         ))}
       </BlockStack>
-      {toast ? <Toast content={toast} onDismiss={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast content={toast} onDismiss={() => setToast(null)} />
+      ) : null}
     </Page>
   );
 }

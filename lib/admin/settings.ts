@@ -22,13 +22,25 @@ export async function getSettingsMap(): Promise<SettingsShape> {
   // Seed defaults paper over any missing key (e.g. dbs seeded pre-Stage-8).
   return {
     store: { ...SEED_SETTINGS.store, ...(map.store as object | undefined) },
-    shipping_zones: (map.shipping_zones as ShippingZone[] | undefined) ?? SEED_SETTINGS.shipping_zones,
+    shipping_zones:
+      (map.shipping_zones as ShippingZone[] | undefined) ??
+      SEED_SETTINGS.shipping_zones,
     tax: { ...SEED_SETTINGS.tax, ...(map.tax as object | undefined) },
-    checkout: { ...SEED_SETTINGS.checkout, ...(map.checkout as object | undefined) },
+    checkout: {
+      ...SEED_SETTINGS.checkout,
+      ...(map.checkout as object | undefined),
+    },
     low_stock_threshold:
-      (map.low_stock_threshold as number | undefined) ?? SEED_SETTINGS.low_stock_threshold,
-    notifications: { ...SEED_SETTINGS.notifications, ...(map.notifications as object | undefined) },
-    search_engine: { ...SEED_SETTINGS.search_engine, ...(map.search_engine as object | undefined) },
+      (map.low_stock_threshold as number | undefined) ??
+      SEED_SETTINGS.low_stock_threshold,
+    notifications: {
+      ...SEED_SETTINGS.notifications,
+      ...(map.notifications as object | undefined),
+    },
+    search_engine: {
+      ...SEED_SETTINGS.search_engine,
+      ...(map.search_engine as object | undefined),
+    },
   };
 }
 

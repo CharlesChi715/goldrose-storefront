@@ -63,7 +63,10 @@ class RemoteStore implements TableStore {
     }
   }
 
-  async where<T extends TableName>(table: T, match: Match<T>): Promise<DbTables[T][]> {
+  async where<T extends TableName>(
+    table: T,
+    match: Match<T>,
+  ): Promise<DbTables[T][]> {
     const pageSize = 1000;
     const rows: DbTables[T][] = [];
     for (let from = 0; ; from += pageSize) {
@@ -84,7 +87,10 @@ class RemoteStore implements TableStore {
     }
   }
 
-  async insert<T extends TableName>(table: T, rows: DbTables[T][]): Promise<void> {
+  async insert<T extends TableName>(
+    table: T,
+    rows: DbTables[T][],
+  ): Promise<void> {
     const { error } = await this.client.from(table).insert(rows);
     if (error) {
       throw new Error(`supabase insert ${table}: ${error.message}`);
@@ -107,7 +113,10 @@ class RemoteStore implements TableStore {
     return data?.length ?? 0;
   }
 
-  async remove<T extends TableName>(table: T, match: Match<T>): Promise<number> {
+  async remove<T extends TableName>(
+    table: T,
+    match: Match<T>,
+  ): Promise<number> {
     const { data, error } = await this.client
       .from(table)
       .delete()

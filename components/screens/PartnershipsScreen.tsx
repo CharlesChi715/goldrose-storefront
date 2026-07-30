@@ -43,22 +43,73 @@ type Partner = {
 
 const PARTNER_ROWS: readonly Partner[][] = [
   [
-    { x: 0, src: "1523-601", alt: "⌂", glyph: { x: 54, w: 18, h: 29 }, label: "Boutiques" },
-    { x: 136, src: "1523-604", alt: "▣", glyph: { x: 51, w: 24, h: 29 }, label: "E-commerce" },
-    { x: 272, src: "1523-607", alt: "✦", glyph: { x: 52.5, w: 21, h: 29 }, label: "Creators" },
+    {
+      x: 0,
+      src: "1523-601",
+      alt: "⌂",
+      glyph: { x: 54, w: 18, h: 29 },
+      label: "Boutiques",
+    },
+    {
+      x: 136,
+      src: "1523-604",
+      alt: "▣",
+      glyph: { x: 51, w: 24, h: 29 },
+      label: "E-commerce",
+    },
+    {
+      x: 272,
+      src: "1523-607",
+      alt: "✦",
+      glyph: { x: 52.5, w: 21, h: 29 },
+      label: "Creators",
+    },
   ],
   [
-    { x: 0, src: "1523-611", alt: "❀", glyph: { x: 51, w: 24, h: 29 }, label: "Florists" },
-    { x: 136, src: "1523-614", alt: "♔", glyph: { x: 51, w: 24, h: 29 }, label: "Corporate Gifts" },
-    { x: 272, src: "1523-617", alt: "⌘", glyph: { x: 51, w: 24, h: 29 }, label: "Distributors" },
+    {
+      x: 0,
+      src: "1523-611",
+      alt: "❀",
+      glyph: { x: 51, w: 24, h: 29 },
+      label: "Florists",
+    },
+    {
+      x: 136,
+      src: "1523-614",
+      alt: "♔",
+      glyph: { x: 51, w: 24, h: 29 },
+      label: "Corporate Gifts",
+    },
+    {
+      x: 272,
+      src: "1523-617",
+      alt: "⌘",
+      glyph: { x: 51, w: 24, h: 29 },
+      label: "Distributors",
+    },
   ],
 ];
 
 /* 1523:645…1523:660 — process steps, 93×112 tiles on a 101px pitch. */
 const STEPS = [
-  { x: 0, n: "01", title: "Share Needs", body: "Tell us your market and goals." },
-  { x: 101, n: "02", title: "Align", body: "Select products, colors and pricing." },
-  { x: 202, n: "03", title: "Confirm", body: "Approve quantities and delivery." },
+  {
+    x: 0,
+    n: "01",
+    title: "Share Needs",
+    body: "Tell us your market and goals.",
+  },
+  {
+    x: 101,
+    n: "02",
+    title: "Align",
+    body: "Select products, colors and pricing.",
+  },
+  {
+    x: 202,
+    n: "03",
+    title: "Confirm",
+    body: "Approve quantities and delivery.",
+  },
   { x: 303, n: "04", title: "Launch", body: "Quote, production and shipment." },
 ];
 
@@ -119,7 +170,12 @@ function Advantage({
       alt={img.alt}
       width={154}
       height={100}
-      style={{ ...abs(imgX, 8, 154, 100), display: "block", objectFit: "cover", borderRadius: 10 }}
+      style={{
+        ...abs(imgX, 8, 154, 100),
+        display: "block",
+        objectFit: "cover",
+        borderRadius: 10,
+      }}
     />
   );
   return (
@@ -169,7 +225,13 @@ export function PartnershipsScreen() {
   return (
     <>
       {/* ---------- 1523:569 · 01 / Brand Hero ---------- */}
-      <div style={{ ...abs(0, 0, 430, 460), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 0, 430, 460),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:570 Brand Navigation — clips, and the wordmark (1523:572) sits
             4.5px above the band's top edge, cropped by design. */}
         <div style={{ ...abs(16, 14, 398, 42), overflow: "hidden" }}>
@@ -178,14 +240,22 @@ export function PartnershipsScreen() {
             alt=""
             width={40}
             height={42}
-            style={{ ...abs(0, 0, 40, 42), display: "block", objectFit: "cover" }}
+            style={{
+              ...abs(0, 0, 40, 42),
+              display: "block",
+              objectFit: "cover",
+            }}
           />
           <img
             src="/veloria/screens/1523-572.png"
             alt="GoldRose"
             width={140}
             height={51}
-            style={{ ...abs(131, -4.5, 140, 51), display: "block", objectFit: "cover" }}
+            style={{
+              ...abs(131, -4.5, 140, 51),
+              display: "block",
+              objectFit: "cover",
+            }}
           />
         </div>
         {/* 1523:571 back button — transparent hit area over its art */}
@@ -221,8 +291,8 @@ export function PartnershipsScreen() {
             color: "#3B2F2F",
           }}
         >
-          Memorable gifting for boutiques, florists, luxury retail, e-commerce and regional
-          distribution partners.
+          Memorable gifting for boutiques, florists, luxury retail, e-commerce
+          and regional distribution partners.
         </div>
 
         {/* 1523:575 hero photo — the Figma render bakes in the r=16 corners and
@@ -238,7 +308,13 @@ export function PartnershipsScreen() {
       </div>
 
       {/* ---------- 1523:576 · 02 / Colorways ---------- */}
-      <div style={{ ...abs(0, 460, 430, 188), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 460, 430, 188),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:577 heading row */}
         <div style={{ ...abs(16, 14, 398, 30), overflow: "hidden" }}>
           <img
@@ -329,7 +405,13 @@ export function PartnershipsScreen() {
       </div>
 
       {/* ---------- 1523:596 · 03 / Partner Grid ---------- */}
-      <div style={{ ...abs(0, 648, 430, 300), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 648, 430, 300),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:597 heading */}
         <div
           className={playfair.className}
@@ -363,7 +445,10 @@ export function PartnershipsScreen() {
 
         {/* 1523:599 / 1523:609 partner rows (tiles are placeholders, not clickable) */}
         {PARTNER_ROWS.map((row, r) => (
-          <div key={r} style={{ ...abs(16, 84 + r * 100, 398, 88), overflow: "hidden" }}>
+          <div
+            key={r}
+            style={{ ...abs(16, 84 + r * 100, 398, 88), overflow: "hidden" }}
+          >
             {row.map((p) => (
               <div
                 key={p.label}
@@ -408,7 +493,13 @@ export function PartnershipsScreen() {
       </div>
 
       {/* ---------- 1523:619 · 04 / Why GoldRose ---------- */}
-      <div style={{ ...abs(0, 948, 430, 560), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 948, 430, 560),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:620 heading */}
         <div
           className={playfair.className}
@@ -427,7 +518,10 @@ export function PartnershipsScreen() {
         <Advantage
           top={48}
           background="rgba(247, 218, 225, 0.66)"
-          img={{ src: "1523-622", alt: "Gold-dipped rose against a bokeh backdrop" }}
+          img={{
+            src: "1523-622",
+            alt: "Gold-dipped rose against a bokeh backdrop",
+          }}
           imgSide="left"
           title="120+ Curated Colors"
           body="Built for campaigns, seasons and distinct markets."
@@ -435,7 +529,10 @@ export function PartnershipsScreen() {
         <Advantage
           top={174}
           background="#FFFFFF"
-          img={{ src: "1523-630", alt: "Blue preserved rose with gold-trimmed petals" }}
+          img={{
+            src: "1523-630",
+            alt: "Blue preserved rose with gold-trimmed petals",
+          }}
           imgSide="right"
           title="Authentic Rose Craft"
           body="Real preserved roses finished by hand in precious metal."
@@ -443,7 +540,10 @@ export function PartnershipsScreen() {
         <Advantage
           top={300}
           background="rgba(247, 218, 225, 0.66)"
-          img={{ src: "1523-632", alt: "Pink velvet GoldRose gift box with a gold rose" }}
+          img={{
+            src: "1523-632",
+            alt: "Pink velvet GoldRose gift box with a gold rose",
+          }}
           imgSide="left"
           title="Premium Presentation"
           body="Gift-ready packaging designed for high-value retail."
@@ -451,7 +551,10 @@ export function PartnershipsScreen() {
         <Advantage
           top={426}
           background="#FFFFFF"
-          img={{ src: "1523-640", alt: "Boxed red preserved rose with its authenticity certificate" }}
+          img={{
+            src: "1523-640",
+            alt: "Boxed red preserved rose with its authenticity certificate",
+          }}
           imgSide="right"
           title={"Patent & Copyright Protection"}
           titleTop={6}
@@ -466,7 +569,13 @@ export function PartnershipsScreen() {
       </div>
 
       {/* ---------- 1523:641 · 05 / Partnership Process + CTA ---------- */}
-      <div style={{ ...abs(0, 1508, 430, 340), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 1508, 430, 340),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:642 heading */}
         <div
           className={playfair.className}
@@ -559,7 +668,12 @@ export function PartnershipsScreen() {
         {/* 1523:661 CTA · Apply for Wholesale */}
         <Link
           href="/business/wholesale"
-          style={{ ...abs(16, 212, 398, 48), display: "block", background: "#3B2F2F", borderRadius: 10 }}
+          style={{
+            ...abs(16, 212, 398, 48),
+            display: "block",
+            background: "#3B2F2F",
+            borderRadius: 10,
+          }}
         >
           <div
             className={notoSC.className}
@@ -650,7 +764,10 @@ export function PartnershipsScreen() {
               style={{ ...abs(10, 1, 50, 57), display: "block" }}
             />
           );
-          const style: React.CSSProperties = { ...abs(tab.x, 0, 70, 59), display: "block" };
+          const style: React.CSSProperties = {
+            ...abs(tab.x, 0, 70, 59),
+            display: "block",
+          };
           // Every tab on this screen links out, so there is no inert fallback.
           return (
             <Link key={tab.label} href={tab.href} style={style}>

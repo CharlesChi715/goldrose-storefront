@@ -32,7 +32,8 @@ async function priceDraft(
     ...priced,
     shipping_cents: 0,
     shipping_free: false,
-    total_cents: priced.subtotal_cents - priced.discount_cents + priced.tax_cents,
+    total_cents:
+      priced.subtotal_cents - priced.discount_cents + priced.tax_cents,
   };
 }
 
@@ -75,10 +76,16 @@ export async function createDraftOrder(input: {
 export async function markDraftPaid(id: string, actor: string): Promise<void> {
   const store = getStore();
   const order = (await store.all("orders")).find((row) => row.id === id);
-  if (!order || order.source !== "draft" || order.financial_status !== "pending") {
+  if (
+    !order ||
+    order.source !== "draft" ||
+    order.financial_status !== "pending"
+  ) {
     throw new Error("Only pending draft orders can be marked as paid.");
   }
-  const lines = (await store.all("order_lines")).filter((line) => line.order_id === id);
+  const lines = (await store.all("order_lines")).filter(
+    (line) => line.order_id === id,
+  );
 
   await store.update("orders", { id }, { financial_status: "paid" });
   for (const line of lines) {
@@ -140,7 +147,8 @@ export async function listAbandonedCheckouts(
     .filter(
       (checkout) =>
         checkout.status === "open" &&
-        now.getTime() - new Date(checkout.created_at).getTime() >= ABANDONED_AFTER_MS,
+        now.getTime() - new Date(checkout.created_at).getTime() >=
+          ABANDONED_AFTER_MS,
     )
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .map((checkout) => {
@@ -154,10 +162,15 @@ export async function listAbandonedCheckouts(
       return {
         checkout,
         itemsLabel: labels.join(", "),
-        itemCount: checkout.cart.lines.reduce((sum, line) => sum + line.quantity, 0),
+        itemCount: checkout.cart.lines.reduce(
+          (sum, line) => sum + line.quantity,
+          0,
+        ),
         ageHours:
           Math.round(
-            ((now.getTime() - new Date(checkout.created_at).getTime()) / (60 * 60 * 1000)) * 10,
+            ((now.getTime() - new Date(checkout.created_at).getTime()) /
+              (60 * 60 * 1000)) *
+              10,
           ) / 10,
       };
     });

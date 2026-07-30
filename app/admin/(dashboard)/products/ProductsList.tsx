@@ -39,7 +39,11 @@ export type ProductListItem = {
   sku: string;
 };
 
-const STATUS_TONE = { active: "success", draft: "info", archived: undefined } as const;
+const STATUS_TONE = {
+  active: "success",
+  draft: "info",
+  archived: undefined,
+} as const;
 
 export function ProductsList({ items }: { items: ProductListItem[] }) {
   const t = useAdminT();
@@ -75,8 +79,14 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, tab, query]);
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
-    useIndexResourceState(filtered as unknown as { [key: string]: unknown }[]);
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange,
+    clearSelection,
+  } = useIndexResourceState(
+    filtered as unknown as { [key: string]: unknown }[],
+  );
 
   function runBulk(action: () => Promise<void>) {
     startTransition(async () => {
@@ -89,15 +99,18 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
   const bulkActions = [
     {
       content: t("products.bulk.setActive"),
-      onAction: () => runBulk(() => setProductStatusAction(selectedResources, "active")),
+      onAction: () =>
+        runBulk(() => setProductStatusAction(selectedResources, "active")),
     },
     {
       content: t("products.bulk.setDraft"),
-      onAction: () => runBulk(() => setProductStatusAction(selectedResources, "draft")),
+      onAction: () =>
+        runBulk(() => setProductStatusAction(selectedResources, "draft")),
     },
     {
       content: t("products.bulk.archive"),
-      onAction: () => runBulk(() => setProductStatusAction(selectedResources, "archived")),
+      onAction: () =>
+        runBulk(() => setProductStatusAction(selectedResources, "archived")),
     },
     {
       content: t("products.bulk.delete"),
@@ -111,7 +124,9 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
       return t("products.inventory.untracked");
     }
     if (item.variantCount <= 1) {
-      return interpolate(t("products.inventory.summaryOne"), { available: item.totalOnHand });
+      return interpolate(t("products.inventory.summaryOne"), {
+        available: item.totalOnHand,
+      });
     }
     return interpolate(t("products.inventory.summary"), {
       available: item.totalOnHand,
@@ -142,9 +157,14 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
           />
         </div>
         <IndexTable
-          resourceName={{ singular: t("products.column.product"), plural: t("nav.products") }}
+          resourceName={{
+            singular: t("products.column.product"),
+            plural: t("nav.products"),
+          }}
           itemCount={filtered.length}
-          selectedItemsCount={allResourcesSelected ? "All" : selectedResources.length}
+          selectedItemsCount={
+            allResourcesSelected ? "All" : selectedResources.length
+          }
           onSelectionChange={handleSelectionChange}
           promotedBulkActions={bulkActions}
           loading={pending}
@@ -211,7 +231,12 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
               setConfirmDelete(false);
             }),
         }}
-        secondaryActions={[{ content: t("common.cancel"), onAction: () => setConfirmDelete(false) }]}
+        secondaryActions={[
+          {
+            content: t("common.cancel"),
+            onAction: () => setConfirmDelete(false),
+          },
+        ]}
       >
         <Modal.Section>
           <Text as="p">{t("products.delete.body")}</Text>

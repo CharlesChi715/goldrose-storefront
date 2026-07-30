@@ -23,7 +23,10 @@ import {
 } from "@shopify/polaris";
 import { DeleteIcon, EditIcon } from "@shopify/polaris-icons";
 import { interpolate } from "@/lib/admin/i18n";
-import { supabaseBrowserAuthClient, useWebAuthnSupported } from "@/lib/supabase/browser-auth";
+import {
+  supabaseBrowserAuthClient,
+  useWebAuthnSupported,
+} from "@/lib/supabase/browser-auth";
 import { useAdminT } from "../../../PolarisShell";
 
 type PasskeyItem = {
@@ -103,7 +106,9 @@ export function SecurityView({ hosted }: { hosted: boolean }) {
     }
     setBusy(`remove:${passkeyId}`);
     setError(false);
-    const { error: deleteError } = await supabase.auth.passkey.delete({ passkeyId });
+    const { error: deleteError } = await supabase.auth.passkey.delete({
+      passkeyId,
+    });
     if (deleteError) {
       setError(true);
     } else {
@@ -122,7 +127,9 @@ export function SecurityView({ hosted }: { hosted: boolean }) {
   return (
     <Page title={t("security.title")} subtitle={t("security.subtitle")}>
       <BlockStack gap="400">
-        {!hosted ? <Banner tone="info">{t("security.hostedOnly")}</Banner> : null}
+        {!hosted ? (
+          <Banner tone="info">{t("security.hostedOnly")}</Banner>
+        ) : null}
         {hosted && !supported ? (
           <Banner tone="warning">{t("security.unsupported")}</Banner>
         ) : null}
@@ -172,7 +179,10 @@ export function SecurityView({ hosted }: { hosted: boolean }) {
                               >
                                 {t("common.save")}
                               </Button>
-                              <Button variant="plain" onClick={() => setRenamingId(null)}>
+                              <Button
+                                variant="plain"
+                                onClick={() => setRenamingId(null)}
+                              >
                                 {t("common.cancel")}
                               </Button>
                             </InlineStack>
@@ -219,7 +229,11 @@ export function SecurityView({ hosted }: { hosted: boolean }) {
                   </BlockStack>
                 )}
                 <InlineStack>
-                  <Button variant="primary" loading={busy === "add"} onClick={add}>
+                  <Button
+                    variant="primary"
+                    loading={busy === "add"}
+                    onClick={add}
+                  >
                     {busy === "add" ? t("security.addBusy") : t("security.add")}
                   </Button>
                 </InlineStack>

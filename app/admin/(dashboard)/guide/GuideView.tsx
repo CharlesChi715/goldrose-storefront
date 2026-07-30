@@ -9,7 +9,14 @@
  * 2026-07-22: EN and 中文 next to each other), stacking on narrow screens.
  */
 
-import { BlockStack, Card, InlineGrid, List, Page, Text } from "@shopify/polaris";
+import {
+  BlockStack,
+  Card,
+  InlineGrid,
+  List,
+  Page,
+  Text,
+} from "@shopify/polaris";
 import { useAdminT } from "../../PolarisShell";
 
 type Block =
@@ -43,7 +50,10 @@ function parse(markdown: string): Block[] {
   const blocks: Block[] = [];
   // Paragraphs and bullets may wrap across lines; group by blank lines.
   for (const chunk of markdown.split(/\n\s*\n/)) {
-    const lines = chunk.split("\n").map((line) => line.trim()).filter(Boolean);
+    const lines = chunk
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
     if (lines.length === 0) {
       continue;
     }
@@ -127,7 +137,11 @@ export function GuideView({ markdown }: { markdown: string }) {
           </Text>
         </Card>
       ) : (
-        <InlineGrid columns={{ xs: 1, lg: versions.length }} gap="400" alignItems="start">
+        <InlineGrid
+          columns={{ xs: 1, lg: versions.length }}
+          gap="400"
+          alignItems="start"
+        >
           {versions.map((version, index) => (
             <GuideColumn key={index} blocks={parse(version)} />
           ))}

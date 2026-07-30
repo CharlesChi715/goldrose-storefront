@@ -24,7 +24,9 @@ async function logIn(page: Page) {
   await page.waitForURL(/\/admin$/);
 }
 
-test("logged-out visit to /admin redirects to the login page", async ({ page }) => {
+test("logged-out visit to /admin redirects to the login page", async ({
+  page,
+}) => {
   await page.goto("/admin/orders");
   await page.waitForURL(/\/admin\/login/);
   await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
@@ -35,11 +37,15 @@ test("wrong password is rejected with a vague error", async ({ page }) => {
   await page.getByLabel("Email").fill("owner@goldrose.local");
   await page.getByLabel("Password").fill("not-the-password");
   await page.getByRole("button", { name: "Log in" }).click();
-  await expect(page.getByText("Your email or password is incorrect.")).toBeVisible();
+  await expect(
+    page.getByText("Your email or password is incorrect."),
+  ).toBeVisible();
   expect(page.url()).toContain("/admin/login");
 });
 
-test("owner logs in and sees the Shopify-clone nav and top bar", async ({ page }) => {
+test("owner logs in and sees the Shopify-clone nav and top bar", async ({
+  page,
+}) => {
   await logIn(page);
 
   const nav = page.getByRole("navigation");
@@ -53,7 +59,9 @@ test("owner logs in and sees the Shopify-clone nav and top bar", async ({ page }
     "Discounts",
     "Settings",
   ]) {
-    await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
+    await expect(
+      nav.getByRole("link", { name: label, exact: true }),
+    ).toBeVisible();
   }
   // Top bar: search + account menu with the signed-in email.
   await expect(page.getByPlaceholder("Search")).toBeVisible();
@@ -72,19 +80,31 @@ test("EN/中文 toggle switches every label and persists across pages and reload
   await page.getByRole("menuitem", { name: "中文" }).click();
 
   const nav = page.getByRole("navigation");
-  await expect(nav.getByRole("link", { name: "订单", exact: true })).toBeVisible();
+  await expect(
+    nav.getByRole("link", { name: "订单", exact: true }),
+  ).toBeVisible();
   await expect(nav.getByRole("link", { name: "产品" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "设置" })).toBeVisible();
   await expect(page.getByPlaceholder("搜索")).toBeVisible();
 
   // Persists across a navigation and a hard reload.
   await page.goto("/admin/orders");
-  await expect(page.getByRole("navigation").getByRole("link", { name: "订单", exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation")
+      .getByRole("link", { name: "订单", exact: true }),
+  ).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("navigation").getByRole("link", { name: "订单", exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation")
+      .getByRole("link", { name: "订单", exact: true }),
+  ).toBeVisible();
 
   // And back to English for the suite's other tests.
   await page.getByText("owner@goldrose.local").click();
   await page.getByRole("menuitem", { name: "English" }).click();
-  await expect(page.getByRole("navigation").getByRole("link", { name: "Orders" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation").getByRole("link", { name: "Orders" }),
+  ).toBeVisible();
 });

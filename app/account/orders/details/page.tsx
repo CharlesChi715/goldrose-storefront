@@ -20,8 +20,19 @@ export const metadata: Metadata = {
 
 export default function AccountOrderDetailsPage() {
   return (
-    <ScaleFrame height={1188} background="#FFFBF6" fontClass={notoSC.className} nav={false}>
-      <OrderConfirmedScreen orderName="" total={null} method={null} mock={false} backFallback="/account/orders" />
+    <ScaleFrame
+      height={1188}
+      background="#FFFBF6"
+      fontClass={notoSC.className}
+      nav={false}
+    >
+      <OrderConfirmedScreen
+        orderName=""
+        total={null}
+        method={null}
+        mock={false}
+        backFallback="/account/orders"
+      />
     </ScaleFrame>
   );
 }

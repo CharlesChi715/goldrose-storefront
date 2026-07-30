@@ -48,7 +48,10 @@ const saveProductSchema = z.object({
     .trim()
     // Empty = derive from the title; otherwise the canonical handle format
     // (docs/ixd/naming/product-handles.md §3).
-    .regex(/^$|^[a-z0-9]+(-[a-z0-9]+)*$/, "Handle must be lowercase words separated by single hyphens")
+    .regex(
+      /^$|^[a-z0-9]+(-[a-z0-9]+)*$/,
+      "Handle must be lowercase words separated by single hyphens",
+    )
     .max(120)
     .nullable(),
   charge_tax: z.boolean(),
@@ -60,26 +63,35 @@ const saveProductSchema = z.object({
   weight_oz: z.number().min(0).max(10_000).nullable(),
   option_names: z.array(z.string().trim().min(1).max(120)).max(3),
   images: z
-    .array(z.object({ path: z.string().min(1).max(500), alt: z.string().max(500) }))
+    .array(
+      z.object({ path: z.string().min(1).max(500), alt: z.string().max(500) }),
+    )
     .max(20),
   variants: z.array(variantSchema).min(1).max(100),
 });
 
 export type SaveProductResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string };
+  { ok: true; id: string } | { ok: false; error: string };
 
-export async function saveProductAction(payload: unknown): Promise<SaveProductResult> {
+export async function saveProductAction(
+  payload: unknown,
+): Promise<SaveProductResult> {
   const session = await requireAdmin();
   const parsed = saveProductSchema.safeParse(payload);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
   }
   try {
     const id = await saveProduct(parsed.data, session.email);
     return { ok: true, id };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Save failed" };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Save failed",
+    };
   }
 }
 
@@ -95,7 +107,10 @@ export async function duplicateProductAction(
     );
     return { ok: true, id: newId };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Duplicate failed" };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Duplicate failed",
+    };
   }
 }
 
@@ -156,7 +171,9 @@ const adjustSchema = z.object({
   note: z.string().trim().max(500).nullable(),
 });
 
-export async function adjustInventoryAction(payload: unknown): Promise<{ ok: boolean }> {
+export async function adjustInventoryAction(
+  payload: unknown,
+): Promise<{ ok: boolean }> {
   const session = await requireAdmin();
   const parsed = adjustSchema.parse(payload);
   if (parsed.delta !== 0) {
@@ -175,7 +192,9 @@ export type MovementView = {
 };
 
 /** Adjustment history for the §9.6 "View adjustment history" modal. */
-export async function movementsAction(variantId: string): Promise<MovementView[]> {
+export async function movementsAction(
+  variantId: string,
+): Promise<MovementView[]> {
   await requireAdmin();
   return variantMovements(z.string().min(1).parse(variantId));
 }

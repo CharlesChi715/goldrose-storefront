@@ -60,10 +60,14 @@ export function OrdersList({ items }: { items: OrderListItem[] }) {
         if (!item.archived) return false;
       } else {
         if (item.archived) return false;
-        if (mode === "unfulfilled" && (item.fulfillmentStatus !== "unfulfilled" || item.cancelled)) {
+        if (
+          mode === "unfulfilled" &&
+          (item.fulfillmentStatus !== "unfulfilled" || item.cancelled)
+        ) {
           return false;
         }
-        if (mode === "unpaid" && item.financialStatus !== "pending") return false;
+        if (mode === "unpaid" && item.financialStatus !== "pending")
+          return false;
       }
       const needle = query.trim().toLowerCase();
       if (!needle) return true;
@@ -75,15 +79,23 @@ export function OrdersList({ items }: { items: OrderListItem[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, tab, query]);
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
-    useIndexResourceState(filtered as unknown as { [key: string]: unknown }[]);
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange,
+    clearSelection,
+  } = useIndexResourceState(
+    filtered as unknown as { [key: string]: unknown }[],
+  );
 
   const showingArchived = tabs[tab].id === "archived";
 
   return (
     <Page
       title={t("nav.orders")}
-      secondaryActions={[{ content: t("orders.export"), url: "/api/admin/orders/export" }]}
+      secondaryActions={[
+        { content: t("orders.export"), url: "/api/admin/orders/export" },
+      ]}
     >
       <Card padding="0">
         <Tabs tabs={tabs} selected={tab} onSelect={setTab} />
@@ -100,17 +112,27 @@ export function OrdersList({ items }: { items: OrderListItem[] }) {
           />
         </div>
         <IndexTable
-          resourceName={{ singular: t("orders.column.order"), plural: t("nav.orders") }}
+          resourceName={{
+            singular: t("orders.column.order"),
+            plural: t("nav.orders"),
+          }}
           itemCount={filtered.length}
-          selectedItemsCount={allResourcesSelected ? "All" : selectedResources.length}
+          selectedItemsCount={
+            allResourcesSelected ? "All" : selectedResources.length
+          }
           onSelectionChange={handleSelectionChange}
           loading={pending}
           promotedBulkActions={[
             {
-              content: showingArchived ? t("orders.bulk.unarchive") : t("orders.bulk.archive"),
+              content: showingArchived
+                ? t("orders.bulk.unarchive")
+                : t("orders.bulk.archive"),
               onAction: () =>
                 startTransition(async () => {
-                  await archiveOrdersAction(selectedResources, !showingArchived);
+                  await archiveOrdersAction(
+                    selectedResources,
+                    !showingArchived,
+                  );
                   clearSelection();
                   router.refresh();
                 }),
@@ -159,7 +181,11 @@ export function OrdersList({ items }: { items: OrderListItem[] }) {
               <IndexTable.Cell>
                 <Badge
                   tone={item.financialStatus === "paid" ? undefined : "warning"}
-                  progress={item.financialStatus === "paid" ? "complete" : "partiallyComplete"}
+                  progress={
+                    item.financialStatus === "paid"
+                      ? "complete"
+                      : "partiallyComplete"
+                  }
                 >
                   {t(`orders.status.${item.financialStatus}`)}
                 </Badge>
@@ -169,15 +195,25 @@ export function OrdersList({ items }: { items: OrderListItem[] }) {
                   <Badge tone="critical">{t("orders.status.cancelled")}</Badge>
                 ) : (
                   <Badge
-                    tone={item.fulfillmentStatus === "fulfilled" ? undefined : "attention"}
-                    progress={item.fulfillmentStatus === "fulfilled" ? "complete" : "incomplete"}
+                    tone={
+                      item.fulfillmentStatus === "fulfilled"
+                        ? undefined
+                        : "attention"
+                    }
+                    progress={
+                      item.fulfillmentStatus === "fulfilled"
+                        ? "complete"
+                        : "incomplete"
+                    }
                   >
                     {t(`orders.status.${item.fulfillmentStatus}`)}
                   </Badge>
                 )}
               </IndexTable.Cell>
               <IndexTable.Cell>
-                {interpolate(t("orders.items.count"), { count: item.itemCount })}
+                {interpolate(t("orders.items.count"), {
+                  count: item.itemCount,
+                })}
               </IndexTable.Cell>
               <IndexTable.Cell>
                 <Badge tone={item.source === "mock" ? "info" : undefined}>

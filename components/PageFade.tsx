@@ -50,7 +50,10 @@ export function PageFade() {
     const outer = requestAnimationFrame(() => {
       inner = requestAnimationFrame(() => root.classList.remove(FADING));
     });
-    const safety = globalThis.setTimeout(() => root.classList.remove(FADING), SAFETY_MS);
+    const safety = globalThis.setTimeout(
+      () => root.classList.remove(FADING),
+      SAFETY_MS,
+    );
     return () => {
       cancelAnimationFrame(outer);
       cancelAnimationFrame(inner);
@@ -104,7 +107,8 @@ export function FadeLink({
       style={style}
       aria-label={ariaLabel}
       onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)
+          return;
         if (href === pathname || !wantsMotion()) return;
         e.preventDefault();
         document.documentElement.classList.add(FADING);

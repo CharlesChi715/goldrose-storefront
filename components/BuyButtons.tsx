@@ -51,7 +51,13 @@ export function BuyButtons({
           cursor: variantId ? "pointer" : "default",
         }}
       >
-        <div style={{ ...abs(38, 18, 102), ...txt(15, 18.153, "#3B2F2F"), fontWeight: 500 }}>
+        <div
+          style={{
+            ...abs(38, 18, 102),
+            ...txt(15, 18.153, "#3B2F2F"),
+            fontWeight: 500,
+          }}
+        >
           ADD TO CART
         </div>
       </div>

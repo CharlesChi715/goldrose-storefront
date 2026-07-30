@@ -29,7 +29,9 @@ export async function listDiscounts(): Promise<DiscountListRow[]> {
  * @param id - Discount row id.
  */
 export async function getDiscount(id: string): Promise<DiscountRow | null> {
-  return (await getStore().all("discounts")).find((row) => row.id === id) ?? null;
+  return (
+    (await getStore().all("discounts")).find((row) => row.id === id) ?? null
+  );
 }
 
 export type SaveDiscountInput = {
@@ -58,19 +60,24 @@ export async function saveDiscount(input: SaveDiscountInput): Promise<string> {
   const discounts = await store.all("discounts");
   const clash = discounts.find(
     (row) =>
-      row.code.toLowerCase() === input.code.toLowerCase() && row.id !== input.id,
+      row.code.toLowerCase() === input.code.toLowerCase() &&
+      row.id !== input.id,
   );
   if (clash) {
     throw new Error(`The code "${input.code}" is already in use.`);
   }
 
-  const existing = input.id ? discounts.find((row) => row.id === input.id) : null;
+  const existing = input.id
+    ? discounts.find((row) => row.id === input.id)
+    : null;
   const row: DiscountRow = {
     id: existing?.id ?? randomUUID(),
     code: input.code,
     type: input.type,
     value: input.value,
-    applies_to: input.appliesToProductIds ? { product_ids: input.appliesToProductIds } : null,
+    applies_to: input.appliesToProductIds
+      ? { product_ids: input.appliesToProductIds }
+      : null,
     min_purchase_cents: input.minPurchaseCents,
     usage_limit: input.usageLimit,
     once_per_customer: input.oncePerCustomer,

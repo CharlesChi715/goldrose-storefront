@@ -12,7 +12,12 @@
  * placeholder — the owner supplies real rates before launch (§4).
  */
 
-import type { DbTables, ProductRow, ProductVariantRow, ProductImageRow } from "./types.ts";
+import type {
+  DbTables,
+  ProductRow,
+  ProductVariantRow,
+  ProductImageRow,
+} from "./types.ts";
 
 export const DEFAULT_PROMO_SLOGAN =
   "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦";
@@ -51,7 +56,11 @@ const SEED_PRODUCTS: SeedProduct[] = [
       seo_description: null,
       best_for: "Anniversaries, birthdays, and classic romantic gifting.",
       badge: "Save 44%",
-      details: ["Real rose base", "Clear display stand", "Gift-ready presentation"],
+      details: [
+        "Real rose base",
+        "Clear display stand",
+        "Gift-ready presentation",
+      ],
       option_names: ["Gift option"],
       status: "active",
       position: 1,
@@ -128,7 +137,11 @@ const SEED_PRODUCTS: SeedProduct[] = [
       seo_description: null,
       best_for: "Valentine's Day, Mother's Day, and milestone moments.",
       badge: "Gift-ready",
-      details: ["Embossed keepsake box", "Message card option", "Premium visual finish"],
+      details: [
+        "Embossed keepsake box",
+        "Message card option",
+        "Premium visual finish",
+      ],
       option_names: ["Gift option"],
       status: "active",
       position: 2,
@@ -205,7 +218,11 @@ const SEED_PRODUCTS: SeedProduct[] = [
       seo_description: null,
       best_for: "Customers who want the most complete gift option.",
       badge: "Best value",
-      details: ["Detail-focused finish", "Premium insert option", "Strongest gift presentation"],
+      details: [
+        "Detail-focused finish",
+        "Premium insert option",
+        "Strongest gift presentation",
+      ],
       option_names: ["Gift option"],
       status: "active",
       position: 3,
@@ -317,7 +334,10 @@ export const SEED_SETTINGS: SettingsShape = {
       placeholder: true,
     },
   ],
-  tax: { rate_percent: 0, note: "0 while testing — real approach on the launch checklist" },
+  tax: {
+    rate_percent: 0,
+    note: "0 while testing — real approach on the launch checklist",
+  },
   checkout: { discount_field_enabled: true },
   low_stock_threshold: 50,
   notifications: {
@@ -352,7 +372,13 @@ const V_BND = "0a2b1a10-4b7e-4d7a-9d24-000000000301"; // Bundle / Gift message
 // "do01" reached the live db as an insert error on 2026-07-22). Each non-hex
 // letter gets a fixed digit; the digit slots can't collide with the letter
 // tails (k01→d101 vs c01→dc01).
-const DEMO_TAIL_HEX: Record<string, string> = { k: "1", l: "2", o: "0", p: "9", v: "5" };
+const DEMO_TAIL_HEX: Record<string, string> = {
+  k: "1",
+  l: "2",
+  o: "0",
+  p: "9",
+  v: "5",
+};
 
 /**
  * Build a deterministic uuid for a demo row from a 3-character mnemonic tail
@@ -379,7 +405,9 @@ function demoId(tail: string): string {
  * @param now - ISO timestamp all relative "hours ago" times are computed from.
  * @returns The demo rows keyed by table name (demo tables only).
  */
-function buildDemoRows(now: string): Pick<
+function buildDemoRows(
+  now: string,
+): Pick<
   { [T in keyof DbTables]: DbTables[T][] },
   | "customers"
   | "customer_events"
@@ -715,45 +743,220 @@ function buildDemoRows(now: string): Pick<
     scroll_pct: engagement?.scrollPct ?? null,
     sections: engagement?.sections ?? null,
     last_section: engagement?.sections
-      ? Object.keys(engagement.sections)[Object.keys(engagement.sections).length - 1]
+      ? Object.keys(engagement.sections)[
+          Object.keys(engagement.sections).length - 1
+        ]
       : null,
   });
 
   return {
     customers: [emily, james, mia],
     customer_events: [
-      { id: demoId("e01"), customer_id: emily.id, kind: "system", message: "Customer created", created_by: null, created_at: ago(24 * 6) },
-      { id: demoId("e02"), customer_id: emily.id, kind: "system", message: "Placed order #901", created_by: null, created_at: ago(24 * 6) },
-      { id: demoId("e03"), customer_id: emily.id, kind: "system", message: "Placed order #904", created_by: null, created_at: ago(22) },
-      { id: demoId("e04"), customer_id: emily.id, kind: "comment", message: "Asked about engraving options for next order.", created_by: LOCAL_OWNER.email, created_at: ago(24 * 4) },
-      { id: demoId("e05"), customer_id: james.id, kind: "system", message: "Customer created", created_by: null, created_at: ago(24 * 3) },
-      { id: demoId("e06"), customer_id: james.id, kind: "system", message: "Placed order #902", created_by: null, created_at: ago(24 * 3) },
-      { id: demoId("e07"), customer_id: mia.id, kind: "system", message: "Customer created", created_by: null, created_at: ago(24 * 2) },
-      { id: demoId("e08"), customer_id: mia.id, kind: "system", message: "Placed order #903", created_by: null, created_at: ago(24 * 2) },
+      {
+        id: demoId("e01"),
+        customer_id: emily.id,
+        kind: "system",
+        message: "Customer created",
+        created_by: null,
+        created_at: ago(24 * 6),
+      },
+      {
+        id: demoId("e02"),
+        customer_id: emily.id,
+        kind: "system",
+        message: "Placed order #901",
+        created_by: null,
+        created_at: ago(24 * 6),
+      },
+      {
+        id: demoId("e03"),
+        customer_id: emily.id,
+        kind: "system",
+        message: "Placed order #904",
+        created_by: null,
+        created_at: ago(22),
+      },
+      {
+        id: demoId("e04"),
+        customer_id: emily.id,
+        kind: "comment",
+        message: "Asked about engraving options for next order.",
+        created_by: LOCAL_OWNER.email,
+        created_at: ago(24 * 4),
+      },
+      {
+        id: demoId("e05"),
+        customer_id: james.id,
+        kind: "system",
+        message: "Customer created",
+        created_by: null,
+        created_at: ago(24 * 3),
+      },
+      {
+        id: demoId("e06"),
+        customer_id: james.id,
+        kind: "system",
+        message: "Placed order #902",
+        created_by: null,
+        created_at: ago(24 * 3),
+      },
+      {
+        id: demoId("e07"),
+        customer_id: mia.id,
+        kind: "system",
+        message: "Customer created",
+        created_by: null,
+        created_at: ago(24 * 2),
+      },
+      {
+        id: demoId("e08"),
+        customer_id: mia.id,
+        kind: "system",
+        message: "Placed order #903",
+        created_by: null,
+        created_at: ago(24 * 2),
+      },
     ],
     orders,
     order_lines: [
-      line("l01", demoId("o01"), V_SIG, "signature-gold-rose", "GR-SIG-001-1", "GoldRose Signature 24K Gold Rose", "Gift box included", 1, 4999),
-      line("l02", demoId("o01"), V_BOX, "boxed-keepsake-rose", "GR-BOX-002-1", "GoldRose Boxed Keepsake Rose", "Valentine card", 1, 6499),
-      line("l03", demoId("o02"), V_BND, "premium-gift-bundle", "GR-BND-003-1", "GoldRose Premium Gift Bundle", "Gift message", 1, 7999),
-      line("l04", demoId("o03"), V_BOX, "boxed-keepsake-rose", "GR-BOX-002-1", "GoldRose Boxed Keepsake Rose", "Valentine card", 2, 6499),
-      line("l05", demoId("o04"), V_SIG, "signature-gold-rose", "GR-SIG-001-1", "GoldRose Signature 24K Gold Rose", "Gift box included", 1, 4999),
-      line("l06", demoId("o05"), V_BND, "premium-gift-bundle", "GR-BND-003-1", "GoldRose Premium Gift Bundle", "Gift message", 1, 7999),
+      line(
+        "l01",
+        demoId("o01"),
+        V_SIG,
+        "signature-gold-rose",
+        "GR-SIG-001-1",
+        "GoldRose Signature 24K Gold Rose",
+        "Gift box included",
+        1,
+        4999,
+      ),
+      line(
+        "l02",
+        demoId("o01"),
+        V_BOX,
+        "boxed-keepsake-rose",
+        "GR-BOX-002-1",
+        "GoldRose Boxed Keepsake Rose",
+        "Valentine card",
+        1,
+        6499,
+      ),
+      line(
+        "l03",
+        demoId("o02"),
+        V_BND,
+        "premium-gift-bundle",
+        "GR-BND-003-1",
+        "GoldRose Premium Gift Bundle",
+        "Gift message",
+        1,
+        7999,
+      ),
+      line(
+        "l04",
+        demoId("o03"),
+        V_BOX,
+        "boxed-keepsake-rose",
+        "GR-BOX-002-1",
+        "GoldRose Boxed Keepsake Rose",
+        "Valentine card",
+        2,
+        6499,
+      ),
+      line(
+        "l05",
+        demoId("o04"),
+        V_SIG,
+        "signature-gold-rose",
+        "GR-SIG-001-1",
+        "GoldRose Signature 24K Gold Rose",
+        "Gift box included",
+        1,
+        4999,
+      ),
+      line(
+        "l06",
+        demoId("o05"),
+        V_BND,
+        "premium-gift-bundle",
+        "GR-BND-003-1",
+        "GoldRose Premium Gift Bundle",
+        "Gift message",
+        1,
+        7999,
+      ),
     ],
     order_events: [
       event("v01", demoId("o01"), "system", "Order placed (mock)", ago(24 * 6)),
-      event("v02", demoId("o01"), "system", "Payment of $103.48 captured via mock", ago(24 * 6)),
-      event("v03", demoId("o01"), "system", "Order fulfilled — tracking DEMO-1Z999AA10123456784", ago(24 * 5)),
-      event("v04", demoId("o01"), "comment", "Included a handwritten thank-you note.", ago(24 * 5), LOCAL_OWNER.email),
+      event(
+        "v02",
+        demoId("o01"),
+        "system",
+        "Payment of $103.48 captured via mock",
+        ago(24 * 6),
+      ),
+      event(
+        "v03",
+        demoId("o01"),
+        "system",
+        "Order fulfilled — tracking DEMO-1Z999AA10123456784",
+        ago(24 * 5),
+      ),
+      event(
+        "v04",
+        demoId("o01"),
+        "comment",
+        "Included a handwritten thank-you note.",
+        ago(24 * 5),
+        LOCAL_OWNER.email,
+      ),
       event("v05", demoId("o02"), "system", "Order placed (mock)", ago(24 * 3)),
-      event("v06", demoId("o02"), "system", "Payment of $99.94 captured via mock", ago(24 * 3)),
+      event(
+        "v06",
+        demoId("o02"),
+        "system",
+        "Payment of $99.94 captured via mock",
+        ago(24 * 3),
+      ),
       event("v07", demoId("o03"), "system", "Order placed (mock)", ago(24 * 2)),
-      event("v08", demoId("o03"), "system", "Payment of $149.93 captured via mock", ago(24 * 2)),
-      event("v09", demoId("o03"), "system", "Order fulfilled — tracking DEMO-RR123456785JP", ago(24)),
-      event("v10", demoId("o03"), "system", "Refunded $20.00", ago(12), LOCAL_OWNER.email),
+      event(
+        "v08",
+        demoId("o03"),
+        "system",
+        "Payment of $149.93 captured via mock",
+        ago(24 * 2),
+      ),
+      event(
+        "v09",
+        demoId("o03"),
+        "system",
+        "Order fulfilled — tracking DEMO-RR123456785JP",
+        ago(24),
+      ),
+      event(
+        "v10",
+        demoId("o03"),
+        "system",
+        "Refunded $20.00",
+        ago(12),
+        LOCAL_OWNER.email,
+      ),
       event("v11", demoId("o04"), "system", "Order placed (mock)", ago(22)),
-      event("v12", demoId("o04"), "system", "Payment of $55.94 captured via mock", ago(22)),
-      event("v13", demoId("o04"), "system", "Order cancelled — Customer changed their mind, payment refunded, items restocked", ago(20), LOCAL_OWNER.email),
+      event(
+        "v12",
+        demoId("o04"),
+        "system",
+        "Payment of $55.94 captured via mock",
+        ago(22),
+      ),
+      event(
+        "v13",
+        demoId("o04"),
+        "system",
+        "Order cancelled — Customer changed their mind, payment refunded, items restocked",
+        ago(20),
+        LOCAL_OWNER.email,
+      ),
       event("v14", demoId("o05"), "system", "Order placed (draft)", ago(4)),
     ],
     checkouts: [
@@ -772,7 +975,11 @@ function buildDemoRows(now: string): Pick<
       },
       {
         id: demoId("k02"),
-        cart: { lines: [{ variant_id: V_BND, quantity: 1 }], country: "GB", visitor_id: "demo-visitor-james" },
+        cart: {
+          lines: [{ variant_id: V_BND, quantity: 1 }],
+          country: "GB",
+          visitor_id: "demo-visitor-james",
+        },
         email: james.email,
         discount_code: null,
         subtotal_cents: 7999,
@@ -788,7 +995,8 @@ function buildDemoRows(now: string): Pick<
     forum_threads: [
       {
         id: demoId("a01"),
-        title: "📢 Welcome to the GoldRose testing forum · 欢迎来到 GoldRose 测试论坛",
+        title:
+          "📢 Welcome to the GoldRose testing forum · 欢迎来到 GoldRose 测试论坛",
         nickname: "GoldRose Team",
         created_at: ago(48),
       },
@@ -874,23 +1082,120 @@ function buildDemoRows(now: string): Pick<
     page_views: [
       // Section names are the ones actually tagged in components/home today;
       // untagged bands are simply not measured.
-      view("p01", "demo-visitor-emily", "demo-session-e1", "/", ago(24 * 6 + 1), "https://www.google.com/", null, "US",
-        { activeMs: 64_000, scrollPct: 82, sections: { "HOME-HERO-SECTION": 21_000, "HOME-FEATURED-SECTION": 26_000, "HOME-PROMISE-SECTION": 9_000 } }),
-      view("p02", "demo-visitor-emily", "demo-session-e1", "/shop", ago(24 * 6 + 0.9), "https://www.google.com/", null, "US",
-        { activeMs: 41_000, scrollPct: 55 }),
-      view("p03", "demo-visitor-emily", "demo-session-e1", "/products/signature-24k-gold-rose", ago(24 * 6 + 0.8), null, null, "US",
-        { activeMs: 96_000, scrollPct: 91 }),
-      view("p04", "demo-visitor-emily", "demo-session-e1", "/checkout", ago(24 * 6 + 0.5), null, null, "US",
-        { activeMs: 148_000, scrollPct: 100 }),
-      view("p05", "demo-visitor-james", "demo-session-j1", "/shop", ago(24 * 3 + 1), null, { utm_source: "instagram", utm_campaign: "gifts", utm_acc: "rose_daily" }, "GB",
-        { activeMs: 18_000, scrollPct: 34 }),
-      view("p06", "demo-visitor-james", "demo-session-j1", "/products/premium-gold-rose-gift-bundle", ago(24 * 3 + 0.8), null, { utm_source: "instagram", utm_campaign: "gifts", utm_acc: "rose_daily" }, "GB",
-        { activeMs: 73_000, scrollPct: 78 }),
-      view("p07", "demo-visitor-james", "demo-session-j1", "/checkout", ago(24 * 3 + 0.4), null, null, "GB",
-        { activeMs: 52_000, scrollPct: 88 }),
+      view(
+        "p01",
+        "demo-visitor-emily",
+        "demo-session-e1",
+        "/",
+        ago(24 * 6 + 1),
+        "https://www.google.com/",
+        null,
+        "US",
+        {
+          activeMs: 64_000,
+          scrollPct: 82,
+          sections: {
+            "HOME-HERO-SECTION": 21_000,
+            "HOME-FEATURED-SECTION": 26_000,
+            "HOME-PROMISE-SECTION": 9_000,
+          },
+        },
+      ),
+      view(
+        "p02",
+        "demo-visitor-emily",
+        "demo-session-e1",
+        "/shop",
+        ago(24 * 6 + 0.9),
+        "https://www.google.com/",
+        null,
+        "US",
+        { activeMs: 41_000, scrollPct: 55 },
+      ),
+      view(
+        "p03",
+        "demo-visitor-emily",
+        "demo-session-e1",
+        "/products/signature-24k-gold-rose",
+        ago(24 * 6 + 0.8),
+        null,
+        null,
+        "US",
+        { activeMs: 96_000, scrollPct: 91 },
+      ),
+      view(
+        "p04",
+        "demo-visitor-emily",
+        "demo-session-e1",
+        "/checkout",
+        ago(24 * 6 + 0.5),
+        null,
+        null,
+        "US",
+        { activeMs: 148_000, scrollPct: 100 },
+      ),
+      view(
+        "p05",
+        "demo-visitor-james",
+        "demo-session-j1",
+        "/shop",
+        ago(24 * 3 + 1),
+        null,
+        {
+          utm_source: "instagram",
+          utm_campaign: "gifts",
+          utm_acc: "rose_daily",
+        },
+        "GB",
+        { activeMs: 18_000, scrollPct: 34 },
+      ),
+      view(
+        "p06",
+        "demo-visitor-james",
+        "demo-session-j1",
+        "/products/premium-gold-rose-gift-bundle",
+        ago(24 * 3 + 0.8),
+        null,
+        {
+          utm_source: "instagram",
+          utm_campaign: "gifts",
+          utm_acc: "rose_daily",
+        },
+        "GB",
+        { activeMs: 73_000, scrollPct: 78 },
+      ),
+      view(
+        "p07",
+        "demo-visitor-james",
+        "demo-session-j1",
+        "/checkout",
+        ago(24 * 3 + 0.4),
+        null,
+        null,
+        "GB",
+        { activeMs: 52_000, scrollPct: 88 },
+      ),
       // A visit still in progress: engagement lands only when it ends.
-      view("p08", "demo-visitor-window", "demo-session-w1", "/", ago(5), null, null, "AU"),
-      view("p09", "demo-visitor-window", "demo-session-w1", "/shop", ago(4.9), null, null, "AU"),
+      view(
+        "p08",
+        "demo-visitor-window",
+        "demo-session-w1",
+        "/",
+        ago(5),
+        null,
+        null,
+        "AU",
+      ),
+      view(
+        "p09",
+        "demo-visitor-window",
+        "demo-session-w1",
+        "/shop",
+        ago(4.9),
+        null,
+        null,
+        "AU",
+      ),
     ],
   };
 }
@@ -913,19 +1218,20 @@ export function buildSeedTables(
   now: string,
   options: { includeLocalAdmin?: boolean; includeDemo?: boolean } = {},
 ): { [T in keyof DbTables]: DbTables[T][] } {
-  const demo = (options.includeDemo ?? true)
-    ? buildDemoRows(now)
-    : {
-        customers: [],
-        customer_events: [],
-        orders: [],
-        order_lines: [],
-        order_events: [],
-        checkouts: [],
-        discounts: [],
-        page_views: [],
-        feedback: [],
-      };
+  const demo =
+    (options.includeDemo ?? true)
+      ? buildDemoRows(now)
+      : {
+          customers: [],
+          customer_events: [],
+          orders: [],
+          order_lines: [],
+          order_events: [],
+          checkouts: [],
+          discounts: [],
+          page_views: [],
+          feedback: [],
+        };
   return {
     products: SEED_PRODUCTS.map(({ product }) => ({
       ...product,
@@ -955,7 +1261,10 @@ export function buildSeedTables(
         updated_at: now,
       },
     ],
-    settings: Object.entries(SEED_SETTINGS).map(([key, value]) => ({ key, value })),
+    settings: Object.entries(SEED_SETTINGS).map(([key, value]) => ({
+      key,
+      value,
+    })),
     admin_users: options.includeLocalAdmin ? [{ ...LOCAL_OWNER }] : [],
   };
 }

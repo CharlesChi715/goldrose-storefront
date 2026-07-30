@@ -31,7 +31,11 @@ import {
   type ReadMarks,
 } from "@/lib/forum-unread";
 import { useAdminT } from "../../PolarisShell";
-import { changeNicknameAction, createThreadAction, type ForumFormState } from "./actions";
+import {
+  changeNicknameAction,
+  createThreadAction,
+  type ForumFormState,
+} from "./actions";
 import { AttachmentsField, useAttachments } from "./AttachmentsField";
 
 export type ThreadItem = {
@@ -48,7 +52,10 @@ const INITIAL_STATE: ForumFormState = { error: null };
 
 function NewThreadForm() {
   const t = useAdminT();
-  const [state, formAction, pending] = useActionState(createThreadAction, INITIAL_STATE);
+  const [state, formAction, pending] = useActionState(
+    createThreadAction,
+    INITIAL_STATE,
+  );
 
   return (
     <Card>
@@ -59,7 +66,9 @@ function NewThreadForm() {
           </Text>
           {state.error ? (
             <Banner tone="critical">
-              {state.error === "files" ? t("forum.error.files") : t("forum.error.empty")}
+              {state.error === "files"
+                ? t("forum.error.files")
+                : t("forum.error.empty")}
             </Banner>
           ) : null}
           <NewThreadFields pending={pending} />
@@ -108,7 +117,13 @@ function NewThreadFields({ pending }: { pending: boolean }) {
   );
 }
 
-export function ForumList({ items, nickname }: { items: ThreadItem[]; nickname: string }) {
+export function ForumList({
+  items,
+  nickname,
+}: {
+  items: ThreadItem[];
+  nickname: string;
+}) {
   const t = useAdminT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -165,21 +180,26 @@ export function ForumList({ items, nickname }: { items: ThreadItem[]; nickname: 
               return (
                 <Card key={item.id}>
                   <BlockStack gap="100">
-                    <Link href={`/admin/forum/${item.id}`} style={{ textDecoration: "none" }}>
+                    <Link
+                      href={`/admin/forum/${item.id}`}
+                      style={{ textDecoration: "none" }}
+                    >
                       <InlineStack gap="200" blockAlign="center">
                         <Text as="h3" variant="headingSm">
                           {item.title}
                         </Text>
                         {unread > 0 ? (
                           <Badge tone="new">
-                            {interpolate(t("forum.newCount"), { count: unread })}
+                            {interpolate(t("forum.newCount"), {
+                              count: unread,
+                            })}
                           </Badge>
                         ) : null}
                       </InlineStack>
                     </Link>
                     <Text as="span" tone="subdued" variant="bodySm">
-                      {item.nickname} · {formatDateTime(item.createdAt)} · {item.replyCount}{" "}
-                      {t("forum.replies")}
+                      {item.nickname} · {formatDateTime(item.createdAt)} ·{" "}
+                      {item.replyCount} {t("forum.replies")}
                     </Text>
                   </BlockStack>
                 </Card>
@@ -200,7 +220,10 @@ export function ForumList({ items, nickname }: { items: ThreadItem[]; nickname: 
           onAction: saveNickname,
         }}
         secondaryActions={[
-          { content: t("common.cancel"), onAction: () => setNicknameOpen(false) },
+          {
+            content: t("common.cancel"),
+            onAction: () => setNicknameOpen(false),
+          },
         ]}
       >
         <Modal.Section>

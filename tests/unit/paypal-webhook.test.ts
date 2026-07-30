@@ -44,7 +44,9 @@ function refundEvent(refundId: string, amount: string, cumulative: string) {
       id: refundId,
       status: "COMPLETED",
       amount: { currency_code: "USD", value: amount },
-      seller_payable_breakdown: { total_refunded_amount: { value: cumulative } },
+      seller_payable_breakdown: {
+        total_refunded_amount: { value: cumulative },
+      },
       supplementary_data: { related_ids: { order_id: PROVIDER_ORDER_ID } },
     },
   };
@@ -78,7 +80,9 @@ test("capture webhook repairs a missing order from the checkout row", async () =
   assert.equal(outcome, "repaired");
 
   const orders = await getStore().all("orders");
-  const order = orders.find((row) => row.provider_order_id === PROVIDER_ORDER_ID);
+  const order = orders.find(
+    (row) => row.provider_order_id === PROVIDER_ORDER_ID,
+  );
   assert.ok(order);
   assert.equal(order.source, "site");
   assert.equal(order.financial_status, "paid");
@@ -87,7 +91,9 @@ test("capture webhook repairs a missing order from the checkout row", async () =
   assert.equal(order.provider_capture_id, "3C679366HH908993F");
 
   const checkouts = await getStore().all("checkouts");
-  const own = checkouts.find((row) => row.id === "11111111-1111-4111-8111-111111111111");
+  const own = checkouts.find(
+    (row) => row.id === "11111111-1111-4111-8111-111111111111",
+  );
   assert.equal(own?.status, "completed");
 });
 
@@ -102,7 +108,9 @@ test("a replayed capture webhook never duplicates the order", async () => {
 });
 
 test("partial refund webhook flips status to partially_refunded", async () => {
-  const outcome = await handlePayPalEvent(refundEvent("REF-1", "10.00", "10.00"));
+  const outcome = await handlePayPalEvent(
+    refundEvent("REF-1", "10.00", "10.00"),
+  );
   assert.equal(outcome, "refund_synced");
   const order = (await getStore().all("orders")).find(
     (row) => row.provider_order_id === PROVIDER_ORDER_ID,
@@ -112,7 +120,9 @@ test("partial refund webhook flips status to partially_refunded", async () => {
 });
 
 test("a replayed refund webhook doesn't double-count", async () => {
-  const outcome = await handlePayPalEvent(refundEvent("REF-1", "10.00", "10.00"));
+  const outcome = await handlePayPalEvent(
+    refundEvent("REF-1", "10.00", "10.00"),
+  );
   assert.equal(outcome, "duplicate");
   const order = (await getStore().all("orders")).find(
     (row) => row.provider_order_id === PROVIDER_ORDER_ID,
@@ -121,7 +131,9 @@ test("a replayed refund webhook doesn't double-count", async () => {
 });
 
 test("full refund flips status to refunded", async () => {
-  const outcome = await handlePayPalEvent(refundEvent("REF-2", "45.94", "55.94"));
+  const outcome = await handlePayPalEvent(
+    refundEvent("REF-2", "45.94", "55.94"),
+  );
   assert.equal(outcome, "refund_synced");
   const order = (await getStore().all("orders")).find(
     (row) => row.provider_order_id === PROVIDER_ORDER_ID,

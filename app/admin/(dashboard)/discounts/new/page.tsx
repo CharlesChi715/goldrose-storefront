@@ -30,7 +30,10 @@ export default async function NewDiscountPage() {
   return (
     <DiscountForm
       initial={initial}
-      products={products.map((row) => ({ id: row.product.id, title: row.product.title }))}
+      products={products.map((row) => ({
+        id: row.product.id,
+        title: row.product.title,
+      }))}
     />
   );
 }

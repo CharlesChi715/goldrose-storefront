@@ -115,27 +115,54 @@ function matchesTab(order: OrdersListOrder, tab: Tab): boolean {
   return order.chip === tab.toLowerCase();
 }
 
-export function OrdersListScreen({ orders }: { orders?: OrdersListOrder[] | null }) {
+export function OrdersListScreen({
+  orders,
+}: {
+  orders?: OrdersListOrder[] | null;
+}) {
   const [tab, setTab] = useState<Tab>("All");
-  const list = (orders ?? MOCK_ORDERS).filter((order) => matchesTab(order, tab));
+  const list = (orders ?? MOCK_ORDERS).filter((order) =>
+    matchesTab(order, tab),
+  );
   // 218px card pitch from y=248; keep at least the frame's height.
   const height = Math.max(932, 248 + Math.max(list.length, 1) * 218 + 40);
 
   return (
-    <ScaleFrame height={height} background={CREAM} fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={height}
+      background={CREAM}
+      fontClass={notoSC.className}
+      nav={false}
+    >
       {/* 1523:3469 Brand Navigation — the frame's own art: 返回 arrow
           (1523:3470, box starts 1px off-canvas) + wordmark render (1523:3471) */}
-      <BackButton fallback="/account" src="/veloria/screens/1523-3470.png" style={abs(-1, 18, 40, 42)} />
+      <BackButton
+        fallback="/account"
+        src="/veloria/screens/1523-3470.png"
+        style={abs(-1, 18, 40, 42)}
+      />
       <GoldRoseWordmark x={152} y={13.5} w={140} h={51} />
 
       {/* 1523:3425/3426 title + subtitle */}
-      <div className={playfair.className} style={{ ...abs(27, 77, 240), ...txt(33, 44, INK), fontWeight: 600 }}>
+      <div
+        className={playfair.className}
+        style={{ ...abs(27, 77, 240), ...txt(33, 44, INK), fontWeight: 600 }}
+      >
         My Orders
       </div>
-      <div style={{ ...abs(27, 126.2, 360), ...txt(13, 15.6, INK) }}>Track, review, and manage recent purchases.</div>
+      <div style={{ ...abs(27, 126.2, 360), ...txt(13, 15.6, INK) }}>
+        Track, review, and manage recent purchases.
+      </div>
 
       {/* 1523:3427 status tabs — real filters; active pill ink (1523:3428) */}
-      <div style={{ ...abs(22, 180, 386, 50), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 16 }} />
+      <div
+        style={{
+          ...abs(22, 180, 386, 50),
+          background: SHEET,
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 16,
+        }}
+      />
       {TABS.map((label, i) => {
         const x = [22, 118, 216, 294][i];
         const w = [96, 98, 78, 114][i];
@@ -146,12 +173,34 @@ export function OrdersListScreen({ orders }: { orders?: OrdersListOrder[] | null
             type="button"
             aria-pressed={active}
             onClick={() => setTab(label)}
-            style={{ ...abs(x, 185, w, 40), border: 0, padding: 0, background: "transparent", cursor: "pointer" }}
+            style={{
+              ...abs(x, 185, w, 40),
+              border: 0,
+              padding: 0,
+              background: "transparent",
+              cursor: "pointer",
+            }}
           >
-            {active ? <span style={{ ...abs(5, 1, w - 10, 40), background: INK, borderRadius: 12, display: "block" }} /> : null}
+            {active ? (
+              <span
+                style={{
+                  ...abs(5, 1, w - 10, 40),
+                  background: INK,
+                  borderRadius: 12,
+                  display: "block",
+                }}
+              />
+            ) : null}
             <span
               className={playfair.className}
-              style={{ position: "absolute", left: 0, right: 0, top: 11, ...txt(13, 17.33, active ? CREAM : INK, "center"), fontWeight: 600 }}
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 11,
+                ...txt(13, 17.33, active ? CREAM : INK, "center"),
+                fontWeight: 600,
+              }}
             >
               {label}
             </span>
@@ -171,19 +220,40 @@ export function OrdersListScreen({ orders }: { orders?: OrdersListOrder[] | null
         const y = 248 + i * 218;
         return (
           <div key={`${order.title}-${i}`}>
-            <div style={{ ...abs(22, y, 386, 202), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 14 }} />
+            <div
+              style={{
+                ...abs(22, y, 386, 202),
+                background: SHEET,
+                boxShadow: `inset 0 0 0 1px ${SAND}`,
+                borderRadius: 14,
+              }}
+            />
             <img
               src={order.photoSrc ?? "/placeholder.png"}
               alt=""
               width={118}
               height={116}
-              style={{ ...abs(36, y + 16, 118, 116), borderRadius: 12, objectFit: "cover", display: "block" }}
+              style={{
+                ...abs(36, y + 16, 118, 116),
+                borderRadius: 12,
+                objectFit: "cover",
+                display: "block",
+              }}
             />
-            <div style={{ ...abs(168, y + 19, 116), ...txt(10, 12, INK) }} data-live-text>
+            <div
+              style={{ ...abs(168, y + 19, 116), ...txt(10, 12, INK) }}
+              data-live-text
+            >
               {order.date}
             </div>
             <div
-              style={{ ...abs(168, y + 46, 214, 40), ...txt(15, 18, INK), fontWeight: 700, whiteSpace: "normal", overflow: "hidden" }}
+              style={{
+                ...abs(168, y + 46, 214, 40),
+                ...txt(15, 18, INK),
+                fontWeight: 700,
+                whiteSpace: "normal",
+                overflow: "hidden",
+              }}
               data-live-text
             >
               {order.title}
@@ -200,11 +270,25 @@ export function OrdersListScreen({ orders }: { orders?: OrdersListOrder[] | null
             >
               {order.status}
             </div>
-            <div style={{ ...abs(168, y + 115.4, 120), ...txt(21, 25.2, INK), fontWeight: 700 }} data-live-text>
+            <div
+              style={{
+                ...abs(168, y + 115.4, 120),
+                ...txt(21, 25.2, INK),
+                fontWeight: 700,
+              }}
+              data-live-text
+            >
               {order.price}
             </div>
             {/* status chip — Figma render (emoji + label baked in) */}
-            <div style={{ ...abs(292, y + 12, 100, 34), background: CHIP_BG[order.chip], boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 10 }}>
+            <div
+              style={{
+                ...abs(292, y + 12, 100, 34),
+                background: CHIP_BG[order.chip],
+                boxShadow: `inset 0 0 0 1px ${SAND}`,
+                borderRadius: 10,
+              }}
+            >
               <img
                 src={`/veloria/screens/${CHIP_ART[order.chip]}.png`}
                 alt={order.chip}
@@ -214,14 +298,46 @@ export function OrdersListScreen({ orders }: { orders?: OrdersListOrder[] | null
               />
             </div>
             {order.primary.href ? (
-              <Link href={order.primary.href} style={{ ...abs(36, y + 148, 166, 38), background: INK, borderRadius: 8, display: "block" }}>
-                <span style={{ position: "absolute", left: 4, right: 4, top: 12, ...txt(11, 13.2, CREAM, "center"), fontWeight: 500 }}>
+              <Link
+                href={order.primary.href}
+                style={{
+                  ...abs(36, y + 148, 166, 38),
+                  background: INK,
+                  borderRadius: 8,
+                  display: "block",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 4,
+                    right: 4,
+                    top: 12,
+                    ...txt(11, 13.2, CREAM, "center"),
+                    fontWeight: 500,
+                  }}
+                >
                   {order.primary.label}
                 </span>
               </Link>
             ) : (
-              <div style={{ ...abs(36, y + 148, 166, 38), background: INK, borderRadius: 8 }}>
-                <span style={{ position: "absolute", left: 4, right: 4, top: 12, ...txt(11, 13.2, CREAM, "center"), fontWeight: 500 }}>
+              <div
+                style={{
+                  ...abs(36, y + 148, 166, 38),
+                  background: INK,
+                  borderRadius: 8,
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 4,
+                    right: 4,
+                    top: 12,
+                    ...txt(11, 13.2, CREAM, "center"),
+                    fontWeight: 500,
+                  }}
+                >
                   {order.primary.label}
                 </span>
               </div>
@@ -230,9 +346,24 @@ export function OrdersListScreen({ orders }: { orders?: OrdersListOrder[] | null
                 batch; href wired ahead of the route per assignment). */}
             <Link
               href="/account/orders/details"
-              style={{ ...abs(214, y + 148, 178, 38), background: SHEET, boxShadow: `inset 0 0 0 1px ${SAND}`, borderRadius: 8, display: "block" }}
+              style={{
+                ...abs(214, y + 148, 178, 38),
+                background: SHEET,
+                boxShadow: `inset 0 0 0 1px ${SAND}`,
+                borderRadius: 8,
+                display: "block",
+              }}
             >
-              <span style={{ position: "absolute", left: 6, right: 6, top: 12, ...txt(11, 13.2, INK, "center"), fontWeight: 500 }}>
+              <span
+                style={{
+                  position: "absolute",
+                  left: 6,
+                  right: 6,
+                  top: 12,
+                  ...txt(11, 13.2, INK, "center"),
+                  fontWeight: 500,
+                }}
+              >
                 VIEW DETAILS
               </span>
             </Link>

@@ -39,7 +39,10 @@ export default async function EditProductPage({
     hs: detail.product.hs_code ?? "",
     seoTitle: detail.product.seo_title ?? "",
     seoDescription: detail.product.seo_description ?? "",
-    weightOz: detail.variants[0]?.weight_oz != null ? String(detail.variants[0].weight_oz) : "",
+    weightOz:
+      detail.variants[0]?.weight_oz != null
+        ? String(detail.variants[0].weight_oz)
+        : "",
     optionNames: detail.product.option_names,
     images: detail.images.map((image) => ({
       path: image.path,

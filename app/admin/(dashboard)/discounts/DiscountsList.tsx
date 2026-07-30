@@ -30,7 +30,11 @@ export type DiscountListItem = {
   usageLimit: number | null;
 };
 
-const STATUS_TONE = { active: "success", scheduled: "info", expired: undefined } as const;
+const STATUS_TONE = {
+  active: "success",
+  scheduled: "info",
+  expired: undefined,
+} as const;
 
 export function DiscountsList({ items }: { items: DiscountListItem[] }) {
   const t = useAdminT();
@@ -38,8 +42,12 @@ export function DiscountsList({ items }: { items: DiscountListItem[] }) {
   const [pending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
-    useIndexResourceState(items as unknown as { [key: string]: unknown }[]);
+  const {
+    selectedResources,
+    allResourcesSelected,
+    handleSelectionChange,
+    clearSelection,
+  } = useIndexResourceState(items as unknown as { [key: string]: unknown }[]);
 
   function typeLabel(item: DiscountListItem): string {
     if (item.type === "free_shipping") {
@@ -49,20 +57,30 @@ export function DiscountsList({ items }: { items: DiscountListItem[] }) {
       ? t("discounts.type.products")
       : t("discounts.type.order");
     const value =
-      item.type === "percentage" ? `${item.value}%` : `$${(item.value / 100).toFixed(2)}`;
+      item.type === "percentage"
+        ? `${item.value}%`
+        : `$${(item.value / 100).toFixed(2)}`;
     return `${category} · ${value}`;
   }
 
   return (
     <Page
       title={t("nav.discounts")}
-      primaryAction={{ content: t("discounts.create"), url: "/admin/discounts/new" }}
+      primaryAction={{
+        content: t("discounts.create"),
+        url: "/admin/discounts/new",
+      }}
     >
       <Card padding="0">
         <IndexTable
-          resourceName={{ singular: t("discounts.column.code"), plural: t("nav.discounts") }}
+          resourceName={{
+            singular: t("discounts.column.code"),
+            plural: t("nav.discounts"),
+          }}
           itemCount={items.length}
-          selectedItemsCount={allResourcesSelected ? "All" : selectedResources.length}
+          selectedItemsCount={
+            allResourcesSelected ? "All" : selectedResources.length
+          }
           onSelectionChange={handleSelectionChange}
           loading={pending}
           promotedBulkActions={[
@@ -131,7 +149,12 @@ export function DiscountsList({ items }: { items: DiscountListItem[] }) {
               router.refresh();
             }),
         }}
-        secondaryActions={[{ content: t("common.cancel"), onAction: () => setConfirmDelete(false) }]}
+        secondaryActions={[
+          {
+            content: t("common.cancel"),
+            onAction: () => setConfirmDelete(false),
+          },
+        ]}
       >
         <Modal.Section>
           <Text as="p">{t("discounts.delete.body")}</Text>

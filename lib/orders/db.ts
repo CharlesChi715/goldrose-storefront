@@ -58,7 +58,10 @@ export type CreateOrderInput = {
  * @param orderName - The display name of the order (e.g. "#1042") for the event message.
  * @returns The customer id, or null when the order has no email.
  */
-async function upsertCustomer(input: CreateOrderInput, orderName: string): Promise<string | null> {
+async function upsertCustomer(
+  input: CreateOrderInput,
+  orderName: string,
+): Promise<string | null> {
   const email = input.email?.trim().toLowerCase();
   if (!email) {
     return null;
@@ -134,8 +137,7 @@ async function upsertCustomer(input: CreateOrderInput, orderName: string): Promi
 async function orderNumberPrefix(): Promise<string> {
   const settings = await getStore().all("settings");
   const store = settings.find((row) => row.key === "store")?.value as
-    | { order_number_prefix?: string }
-    | undefined;
+    { order_number_prefix?: string } | undefined;
   return store?.order_number_prefix ?? "#";
 }
 

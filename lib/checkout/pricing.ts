@@ -64,7 +64,9 @@ export async function getShippingZones(): Promise<ShippingZone[]> {
  * @param zones - Active shipping zones.
  * @returns Code/name pairs in COUNTRIES display order.
  */
-export function servedCountries(zones: ShippingZone[]): Array<{ code: string; name: string }> {
+export function servedCountries(
+  zones: ShippingZone[],
+): Array<{ code: string; name: string }> {
   const hasRestOfWorld = zones.some((zone) => zone.countries.includes("*"));
   if (hasRestOfWorld) {
     return COUNTRIES;
@@ -80,8 +82,7 @@ export function servedCountries(zones: ShippingZone[]): Array<{ code: string; na
 export async function getTaxRatePercent(): Promise<number> {
   const settings = await getStore().all("settings");
   const tax = settings.find((row) => row.key === "tax")?.value as
-    | { rate_percent?: number }
-    | undefined;
+    { rate_percent?: number } | undefined;
   const rate = tax?.rate_percent ?? 0;
   return Number.isFinite(rate) && rate >= 0 ? rate : 0;
 }
@@ -128,7 +129,10 @@ export async function priceCart(input: {
     if (!variant || !product || product.status !== "active") {
       throw new Error("An item in your cart is no longer available.");
     }
-    const quantity = Math.min(MAX_QUANTITY, Math.max(1, Math.floor(line.quantity)));
+    const quantity = Math.min(
+      MAX_QUANTITY,
+      Math.max(1, Math.floor(line.quantity)),
+    );
     return {
       variant_id: variant.id,
       product_id: product.id,
@@ -169,7 +173,9 @@ export async function priceCart(input: {
   const taxable = lines
     .filter((line) => line.charge_tax)
     .reduce((sum, line) => sum + line.line_total_cents, 0);
-  const tax = Math.round((Math.max(0, taxable - discountCents) * taxRate) / 100);
+  const tax = Math.round(
+    (Math.max(0, taxable - discountCents) * taxRate) / 100,
+  );
 
   return {
     lines,

@@ -38,7 +38,10 @@ export function LoginForm({
   passkeyEnabled: boolean;
 }) {
   const t = useAdminT();
-  const [state, formAction, pending] = useActionState(loginAction, INITIAL_STATE);
+  const [state, formAction, pending] = useActionState(
+    loginAction,
+    INITIAL_STATE,
+  );
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

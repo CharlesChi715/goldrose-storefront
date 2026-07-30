@@ -37,7 +37,11 @@ export function MenuButton({
           ...style,
         }}
       >
-        <img src={src} alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+        <img
+          src={src}
+          alt=""
+          style={{ display: "block", width: "100%", height: "100%" }}
+        />
       </button>
       <MenuDrawer open={open} onClose={() => setOpen(false)} />
     </>

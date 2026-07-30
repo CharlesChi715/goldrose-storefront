@@ -43,7 +43,10 @@ type DbFile = {
  * @param row - The table row to test.
  * @param match - Column/value pairs that must all match.
  */
-function matches<T extends TableName>(row: DbTables[T], match: Match<T>): boolean {
+function matches<T extends TableName>(
+  row: DbTables[T],
+  match: Match<T>,
+): boolean {
   return Object.entries(match).every(
     ([key, value]) => (row as Record<string, unknown>)[key] === value,
   );
@@ -123,7 +126,10 @@ class LocalStore implements TableStore {
       // in-memory copy so the site demos instead of erroring. Data written
       // here does not survive the instance — hosted Supabase is the fix.
       this.ephemeral = true;
-      console.warn("[local-db] filesystem not writable — running in-memory:", error);
+      console.warn(
+        "[local-db] filesystem not writable — running in-memory:",
+        error,
+      );
     }
   }
 
@@ -143,7 +149,10 @@ class LocalStore implements TableStore {
     });
   }
 
-  where<T extends TableName>(table: T, match: Match<T>): Promise<DbTables[T][]> {
+  where<T extends TableName>(
+    table: T,
+    match: Match<T>,
+  ): Promise<DbTables[T][]> {
     return this.locked(async () => {
       const db = await this.load();
       const rows = db.tables[table] as DbTables[T][];
@@ -206,7 +215,9 @@ class LocalStore implements TableStore {
   }): Promise<void> {
     return this.locked(async () => {
       const db = await this.load();
-      const variant = db.tables.product_variants.find((v) => v.id === input.variantId);
+      const variant = db.tables.product_variants.find(
+        (v) => v.id === input.variantId,
+      );
       if (!variant) {
         throw new Error(`adjust_inventory: unknown variant ${input.variantId}`);
       }

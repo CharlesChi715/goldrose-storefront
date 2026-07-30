@@ -60,8 +60,10 @@ export function sectionScore(box: SectionBox, viewportHeight: number): number {
 
   // Distance between the section's midpoint and the screen's, as a fraction of
   // a screen. Full credit at dead-centre, down to half a screen away.
-  const sectionCentre = (Math.max(box.top, 0) + Math.min(box.bottom, viewportHeight)) / 2;
-  const offCentre = Math.abs(sectionCentre - viewportHeight / 2) / viewportHeight;
+  const sectionCentre =
+    (Math.max(box.top, 0) + Math.min(box.bottom, viewportHeight)) / 2;
+  const offCentre =
+    Math.abs(sectionCentre - viewportHeight / 2) / viewportHeight;
   const centreBias = 1 - Math.min(offCentre, 0.5);
 
   return Math.min(coverage, 1) * centreBias;
@@ -74,7 +76,10 @@ export function sectionScore(box: SectionBox, viewportHeight: number): number {
  * @param viewportHeight Visible height of the window, in px.
  * @returns The winning section name, or null when nothing scores.
  */
-export function pickSection(boxes: SectionBox[], viewportHeight: number): string | null {
+export function pickSection(
+  boxes: SectionBox[],
+  viewportHeight: number,
+): string | null {
   let best: string | null = null;
   let bestScore = 0;
   for (const box of boxes) {
@@ -161,7 +166,7 @@ export function createEngagementClock(startedAt: number): EngagementClock {
 
   return {
     setVisible(next, now) {
-      settle(now);                 // bank under the OLD visibility first
+      settle(now); // bank under the OLD visibility first
       visible = next;
       // Coming back to the tab is itself an interaction, otherwise a visitor
       // returning after a long break would resume already idle.
@@ -169,7 +174,7 @@ export function createEngagementClock(startedAt: number): EngagementClock {
     },
 
     activity(now) {
-      settle(now);                 // bank under the OLD idle state first
+      settle(now); // bank under the OLD idle state first
       lastActivityAt = now;
     },
 
@@ -180,11 +185,11 @@ export function createEngagementClock(startedAt: number): EngagementClock {
 
     tick(now, section) {
       if (section === currentSection) {
-        pending = null;            // incumbent reconfirmed
+        pending = null; // incumbent reconfirmed
       } else if (!pending || pending.name !== section) {
         pending = { name: section, since: now };
       } else if (now - pending.since >= MIN_SECTION_MS) {
-        settle(now);               // close the incumbent's account first
+        settle(now); // close the incumbent's account first
         currentSection = section;
         if (section) lastSection = section;
         pending = null;

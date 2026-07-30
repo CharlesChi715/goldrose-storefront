@@ -11,15 +11,21 @@ import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
-test("shop cards and product page show live catalog values", async ({ page }) => {
+test("shop cards and product page show live catalog values", async ({
+  page,
+}) => {
   await page.goto("/shop", { waitUntil: "networkidle" });
   // Seeded catalog values inside the designated boxes.
   await expect(page.getByText("Signature Rose").first()).toBeVisible();
   await expect(page.getByText("$49.99").first()).toBeVisible();
   await expect(page.getByText("$89.99").first()).toBeVisible(); // compare-at
 
-  await page.goto("/products/signature-24k-gold-rose", { waitUntil: "networkidle" });
-  await expect(page.getByText("GoldRose Signature 24K Gold Rose").first()).toBeVisible();
+  await page.goto("/products/signature-24k-gold-rose", {
+    waitUntil: "networkidle",
+  });
+  await expect(
+    page.getByText("GoldRose Signature 24K Gold Rose").first(),
+  ).toBeVisible();
   await expect(page.getByText("BUY NOW · $49.99")).toBeVisible();
 });
 
@@ -41,10 +47,14 @@ test("long names ellipsize without layout shift (masked diff still gates)", asyn
   await setTitle(LONG_TITLE);
   try {
     await page.setViewportSize({ width: 430, height: 932 });
-    await page.goto("/products/signature-24k-gold-rose", { waitUntil: "networkidle" });
+    await page.goto("/products/signature-24k-gold-rose", {
+      waitUntil: "networkidle",
+    });
     // The long title renders (ellipsized) and the page still matches the
     // masked baseline — i.e. zero layout shift outside the designated boxes.
-    await expect(page.getByText(/GoldRose Signature 24K Gold Rose — Extra/).first()).toBeVisible();
+    await expect(
+      page.getByText(/GoldRose Signature 24K Gold Rose — Extra/).first(),
+    ).toBeVisible();
     await page.evaluate(async () => {
       await document.fonts.ready;
       const step = window.innerHeight;
@@ -73,7 +83,10 @@ test("a new product appears on the storefront without a redeploy", async ({
   await adminLogin(page);
 
   const title = `Stage Nine Fresh Rose ${Date.now()}`;
-  const handle = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const handle = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
   await page.goto("/admin/products/new");
   await page.getByRole("textbox", { name: /^Title\*?$/ }).fill(title);
@@ -91,14 +104,19 @@ test("a new product appears on the storefront without a redeploy", async ({
     expect(html).toContain('"@type":"Product"');
     expect(html).toContain('"price":"99.00"');
     // And the sitemap lists it.
-    expect(await (await request.get("/sitemap.xml")).text()).toContain(`/products/${handle}`);
+    expect(await (await request.get("/sitemap.xml")).text()).toContain(
+      `/products/${handle}`,
+    );
   } finally {
     await page.goto("/admin/products");
     const row = page.getByRole("row").filter({ hasText: title });
     await row.first().getByText(title).last().click();
     await page.waitForURL(/\/admin\/products\/[a-z0-9-]+$/);
     await page.getByRole("button", { name: "Delete product" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Delete", exact: true }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Delete", exact: true })
+      .click();
     await page.waitForURL(/\/admin\/products$/);
   }
 });

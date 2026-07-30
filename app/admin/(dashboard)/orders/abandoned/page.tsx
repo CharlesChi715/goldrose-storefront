@@ -9,13 +9,15 @@ import { AbandonedList, type AbandonedItem } from "./AbandonedList";
 
 export default async function AbandonedCheckoutsPage() {
   const rows = await listAbandonedCheckouts();
-  const items: AbandonedItem[] = rows.map(({ checkout, itemsLabel, ageHours }) => ({
-    id: checkout.id,
-    createdAt: checkout.created_at,
-    email: checkout.email,
-    itemsLabel,
-    totalCents: checkout.total_cents,
-    ageHours,
-  }));
+  const items: AbandonedItem[] = rows.map(
+    ({ checkout, itemsLabel, ageHours }) => ({
+      id: checkout.id,
+      createdAt: checkout.created_at,
+      email: checkout.email,
+      itemsLabel,
+      totalCents: checkout.total_cents,
+      ageHours,
+    }),
+  );
   return <AbandonedList items={items} />;
 }

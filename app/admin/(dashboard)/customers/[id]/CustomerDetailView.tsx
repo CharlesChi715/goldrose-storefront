@@ -51,7 +51,11 @@ type EventView = {
 
 function AddressLines({ address }: { address: Address | null }) {
   if (!address) {
-    return <Text as="p" tone="subdued">—</Text>;
+    return (
+      <Text as="p" tone="subdued">
+        —
+      </Text>
+    );
   }
   return (
     <BlockStack gap="050">
@@ -59,7 +63,9 @@ function AddressLines({ address }: { address: Address | null }) {
         address.name,
         address.address1,
         address.address2,
-        [address.city, address.state, address.postal_code].filter(Boolean).join(", "),
+        [address.city, address.state, address.postal_code]
+          .filter(Boolean)
+          .join(", "),
         address.country,
       ]
         .filter(Boolean)
@@ -90,7 +96,8 @@ export function CustomerDetailView({
   const [tagsText, setTagsText] = useState(customer.tags.join(", "));
   const [comment, setComment] = useState("");
 
-  const name = `${customer.first_name} ${customer.last_name}`.trim() || customer.email;
+  const name =
+    `${customer.first_name} ${customer.last_name}`.trim() || customer.email;
   const lastOrder = orders[0];
 
   function run(action: () => Promise<void>) {
@@ -101,7 +108,11 @@ export function CustomerDetailView({
   }
 
   return (
-    <Page title={name} backAction={{ url: "/admin/customers" }} subtitle={customer.email}>
+    <Page
+      title={name}
+      backAction={{ url: "/admin/customers" }}
+      subtitle={customer.email}
+    >
       <Layout>
         <Layout.Section>
           <BlockStack gap="400">
@@ -136,11 +147,23 @@ export function CustomerDetailView({
                 <Divider />
                 <BlockStack gap="200">
                   {orders.map((order) => (
-                    <InlineStack key={order.id} align="space-between" blockAlign="center">
+                    <InlineStack
+                      key={order.id}
+                      align="space-between"
+                      blockAlign="center"
+                    >
                       <InlineStack gap="200" blockAlign="center">
-                        <PolarisLink url={`/admin/orders/${order.id}`}>{order.name}</PolarisLink>
-                        <Badge>{t(`orders.status.${order.financialStatus}` as never)}</Badge>
-                        <Badge>{t(`orders.status.${order.fulfillmentStatus}` as never)}</Badge>
+                        <PolarisLink url={`/admin/orders/${order.id}`}>
+                          {order.name}
+                        </PolarisLink>
+                        <Badge>
+                          {t(`orders.status.${order.financialStatus}` as never)}
+                        </Badge>
+                        <Badge>
+                          {t(
+                            `orders.status.${order.fulfillmentStatus}` as never,
+                          )}
+                        </Badge>
                       </InlineStack>
                       <Text as="span" numeric>
                         {formatMoney(order.totalCents)}
@@ -172,7 +195,10 @@ export function CustomerDetailView({
                     onClick={() =>
                       run(async () => {
                         if (comment.trim()) {
-                          await addCustomerCommentAction(customer.id, comment.trim());
+                          await addCustomerCommentAction(
+                            customer.id,
+                            comment.trim(),
+                          );
                           setComment("");
                         }
                       })
@@ -185,7 +211,12 @@ export function CustomerDetailView({
                 <BlockStack gap="300">
                   {events.map((event) => (
                     <BlockStack key={event.id} gap="050">
-                      <Text as="span" fontWeight={event.kind === "comment" ? "regular" : "medium"}>
+                      <Text
+                        as="span"
+                        fontWeight={
+                          event.kind === "comment" ? "regular" : "medium"
+                        }
+                      >
                         {event.message}
                       </Text>
                       <Text as="span" tone="subdued" variant="bodySm">
@@ -228,7 +259,9 @@ export function CustomerDetailView({
                 {note !== customer.note ? (
                   <Button
                     size="slim"
-                    onClick={() => run(() => saveCustomerNoteAction(customer.id, note))}
+                    onClick={() =>
+                      run(() => saveCustomerNoteAction(customer.id, note))
+                    }
                   >
                     {t("common.save")}
                   </Button>

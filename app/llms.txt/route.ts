@@ -25,7 +25,9 @@ export async function GET() {
     const countries = servedCountries(zones);
     const products = catalog
       .map((product) => {
-        const price = ((product.variants[0]?.price_cents ?? 0) / 100).toFixed(2);
+        const price = ((product.variants[0]?.price_cents ?? 0) / 100).toFixed(
+          2,
+        );
         const stock = product.variants.some((variant) => variant.in_stock)
           ? "in stock"
           : "out of stock";

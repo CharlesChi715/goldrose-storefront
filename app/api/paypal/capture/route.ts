@@ -13,7 +13,10 @@ import { z } from "zod";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createOrder } from "@/lib/orders/db";
 import { capturePayPalOrder, getPayPalConfig } from "@/lib/paypal/client";
-import { mapCaptureResponse, type PayPalCaptureResponse } from "@/lib/paypal/mapping";
+import {
+  mapCaptureResponse,
+  type PayPalCaptureResponse,
+} from "@/lib/paypal/mapping";
 import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 
@@ -21,7 +24,10 @@ const requestSchema = z.object({ orderID: z.string().min(1).max(64) });
 
 export async function POST(request: Request) {
   if (!getPayPalConfig().configured) {
-    return NextResponse.json({ error: "PayPal is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { error: "PayPal is not configured." },
+      { status: 503 },
+    );
   }
 
   let parsed: z.infer<typeof requestSchema>;
@@ -32,18 +38,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    const response = (await capturePayPalOrder(parsed.orderID)) as PayPalCaptureResponse;
+    const response = (await capturePayPalOrder(
+      parsed.orderID,
+    )) as PayPalCaptureResponse;
     const mapped = mapCaptureResponse(response);
     if (!mapped.completed) {
       return NextResponse.json(
-        { error: `Payment not completed (status: ${mapped.captureStatus ?? "unknown"}).` },
+        {
+          error: `Payment not completed (status: ${mapped.captureStatus ?? "unknown"}).`,
+        },
         { status: 400 },
       );
     }
 
     // Recover the server-priced cart from the checkout row (§10.2).
     const checkouts = await getStore().all("checkouts");
-    const checkout = checkouts.find((row) => row.provider_order_id === parsed.orderID);
+    const checkout = checkouts.find(
+      (row) => row.provider_order_id === parsed.orderID,
+    );
     if (!checkout) {
       return NextResponse.json({ error: "Unknown checkout." }, { status: 400 });
     }
@@ -61,7 +73,10 @@ export async function POST(request: Request) {
       email: mapped.email ?? checkout.email,
     });
 
-    if (mapped.amountCents !== null && mapped.amountCents !== priced.total_cents) {
+    if (
+      mapped.amountCents !== null &&
+      mapped.amountCents !== priced.total_cents
+    ) {
       // Amount drift (e.g. price edited mid-checkout) — keep the record, flag it.
       console.error(
         `[paypal/capture] amount mismatch: captured ${mapped.amountCents}, priced ${priced.total_cents}`,
@@ -92,11 +107,17 @@ export async function POST(request: Request) {
       total: String(order.total_cents),
       mock: "0",
     });
-    return NextResponse.json({ ok: true, redirectUrl: `/checkout/success?${params.toString()}` });
+    return NextResponse.json({
+      ok: true,
+      redirectUrl: `/checkout/success?${params.toString()}`,
+    });
   } catch (error) {
     console.error("[paypal/capture]", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not capture payment." },
+      {
+        error:
+          error instanceof Error ? error.message : "Could not capture payment.",
+      },
       { status: 400 },
     );
   }

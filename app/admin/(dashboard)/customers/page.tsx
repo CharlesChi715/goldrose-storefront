@@ -9,13 +9,16 @@ import { CustomersList, type CustomerListItem } from "./CustomersList";
 
 export default async function CustomersPage() {
   const rows = await listCustomers();
-  const items: CustomerListItem[] = rows.map(({ customer, ordersCount, totalSpentCents, location }) => ({
-    id: customer.id,
-    name: `${customer.first_name} ${customer.last_name}`.trim() || customer.email,
-    email: customer.email,
-    location,
-    ordersCount,
-    totalSpentCents,
-  }));
+  const items: CustomerListItem[] = rows.map(
+    ({ customer, ordersCount, totalSpentCents, location }) => ({
+      id: customer.id,
+      name:
+        `${customer.first_name} ${customer.last_name}`.trim() || customer.email,
+      email: customer.email,
+      location,
+      ordersCount,
+      totalSpentCents,
+    }),
+  );
   return <CustomersList items={items} />;
 }

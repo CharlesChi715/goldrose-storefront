@@ -9,7 +9,8 @@
 
 import type { CardInput } from "@/lib/checkout/types";
 
-export type CardBrand = "Visa" | "Mastercard" | "American Express" | "Discover" | "Card";
+export type CardBrand =
+  "Visa" | "Mastercard" | "American Express" | "Discover" | "Card";
 
 export type CardValidation = {
   valid: boolean;
@@ -35,7 +36,11 @@ export function detectBrand(digits: string): CardBrand {
   if (/^4\d{12}(\d{3})?$/.test(digits)) {
     return "Visa";
   }
-  if (/^(5[1-5]\d{14}|2(2[2-9]\d{12}|[3-6]\d{13}|7[01]\d{12}|720\d{12}))$/.test(digits)) {
+  if (
+    /^(5[1-5]\d{14}|2(2[2-9]\d{12}|[3-6]\d{13}|7[01]\d{12}|720\d{12}))$/.test(
+      digits,
+    )
+  ) {
     return "Mastercard";
   }
   if (/^3[47]\d{13}$/.test(digits)) {
@@ -89,7 +94,8 @@ function expiryInFuture(expiry: string): boolean {
     return false;
   }
 
-  const year = match[2].length === 2 ? 2000 + Number(match[2]) : Number(match[2]);
+  const year =
+    match[2].length === 2 ? 2000 + Number(match[2]) : Number(match[2]);
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;

@@ -24,9 +24,19 @@ const BENEFITS = [
 ];
 
 const RESULTS = [
-  { x: 35, icon: "501-105", value: "50K+", label: "Custom Gift Sets\nDelivered" },
+  {
+    x: 35,
+    icon: "501-105",
+    value: "50K+",
+    label: "Custom Gift Sets\nDelivered",
+  },
   { x: 128, icon: "501-111", value: "90%+", label: "Repeat Order\nRate" },
-  { x: 221, icon: "501-117", value: "1,200+", label: "Event & Corporate\nProjects" },
+  {
+    x: 221,
+    icon: "501-117",
+    value: "1,200+",
+    label: "Event & Corporate\nProjects",
+  },
   { x: 314, icon: "501-123", value: "98%+", label: "On-Time Delivery\nRate" },
 ];
 
@@ -39,7 +49,13 @@ const AUDIENCES = [
 
 export function A10() {
   return (
-    <div style={{ ...abs(0, 7152, 430, 748), background: "#372B2A", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, 7152, 430, 748),
+        background: "#372B2A",
+        overflow: "hidden",
+      }}
+    >
       {/* 496:115 · reference rebuild layer: solid + radial glow */}
       <div
         style={{
@@ -82,7 +98,9 @@ export function A10() {
             whiteSpace: "pre-line",
           }}
         >
-          {"Thoughtful rose gift solutions for retailers, corporate buyers,\nevents and custom orders—designed to delight and built to last."}
+          {
+            "Thoughtful rose gift solutions for retailers, corporate buyers,\nevents and custom orders—designed to delight and built to last."
+          }
         </div>
 
         {/* ---- A10/02 Selected Partnerships (496:117) ---- */}
@@ -116,32 +134,65 @@ export function A10() {
           {"1.  SELECTED PARTNERSHIPS & PROJECTS"}
         </div>
         {/* Partner-logo strip: non-clickable placeholder (B-3/B-4 not built) */}
-        <div style={{ ...abs(30, 170, 370, 39), borderRadius: 4, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(30, 170, 370, 39),
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
           <img
             src={PARTNER_IMG}
             alt="Partner brand logos"
             width={430}
             height={708}
             // Full-module source image; negative offsets crop the strip.
-            style={{ ...abs(-30, -166, 430, 708), display: "block", objectFit: "cover", maxWidth: "none" }}
+            style={{
+              ...abs(-30, -166, 430, 708),
+              display: "block",
+              objectFit: "cover",
+              maxWidth: "none",
+            }}
           />
         </div>
-        <div style={{ ...abs(31, 211, 181, 111), borderRadius: 4, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(31, 211, 181, 111),
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
           <img
             src={PARTNER_IMG}
             alt="Appreciation gift project photo"
             width={430}
             height={708}
-            style={{ ...abs(-31, -207, 430, 708), display: "block", objectFit: "cover", maxWidth: "none" }}
+            style={{
+              ...abs(-31, -207, 430, 708),
+              display: "block",
+              objectFit: "cover",
+              maxWidth: "none",
+            }}
           />
         </div>
-        <div style={{ ...abs(217, 211, 181, 111), borderRadius: 4, overflow: "hidden" }}>
+        <div
+          style={{
+            ...abs(217, 211, 181, 111),
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
           <img
             src={PARTNER_IMG}
             alt="Partnership gift project photo"
             width={430}
             height={708}
-            style={{ ...abs(-217, -207, 430, 708), display: "block", objectFit: "cover", maxWidth: "none" }}
+            style={{
+              ...abs(-217, -207, 430, 708),
+              display: "block",
+              objectFit: "cover",
+              maxWidth: "none",
+            }}
           />
         </div>
 
@@ -346,7 +397,8 @@ export function A10() {
         <div
           style={{
             ...abs(25, 652, 380, 32),
-            background: "linear-gradient(90deg, #94591F 0%, #C98530 50%, #94591F 100%)",
+            background:
+              "linear-gradient(90deg, #94591F 0%, #C98530 50%, #94591F 100%)",
             borderRadius: 6,
             overflow: "hidden",
           }}
@@ -370,7 +422,12 @@ export function A10() {
             alt="→"
             width={28}
             height={27}
-            style={{ ...abs(315, 0, 28, 27), display: "block", objectFit: "none", objectPosition: "center center" }}
+            style={{
+              ...abs(315, 0, 28, 27),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "center center",
+            }}
           />
         </div>
         <div
@@ -400,7 +457,12 @@ export function A10() {
             alt="→"
             width={28}
             height={24}
-            style={{ ...abs(306, 0, 28, 24), display: "block", objectFit: "none", objectPosition: "center center" }}
+            style={{
+              ...abs(306, 0, 28, 24),
+              display: "block",
+              objectFit: "none",
+              objectPosition: "center center",
+            }}
           />
         </div>
         <img

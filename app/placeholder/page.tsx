@@ -25,19 +25,40 @@ export default function PlaceholderPage() {
       className={inter.className}
       style={{ minHeight: "100vh", background: "#FFF6EC", color: "#3B2F2F" }}
     >
-      <div style={{ maxWidth: 430, margin: "0 auto", padding: "64px 24px 140px" }}>
+      <div
+        style={{ maxWidth: 430, margin: "0 auto", padding: "64px 24px 140px" }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/placeholder.png"
           alt="Placeholder"
-          style={{ width: "100%", maxWidth: 260, display: "block", borderRadius: 12 }}
+          style={{
+            width: "100%",
+            maxWidth: 260,
+            display: "block",
+            borderRadius: 12,
+          }}
         />
-        <h1 style={{ marginTop: 28, fontSize: 24, fontWeight: 700, lineHeight: "30px" }}>
+        <h1
+          style={{
+            marginTop: 28,
+            fontSize: 24,
+            fontWeight: 700,
+            lineHeight: "30px",
+          }}
+        >
           Placeholder page
         </h1>
-        <p style={{ marginTop: 12, fontSize: 13, lineHeight: "21px", color: "#7c6e50" }}>
-          This is where a carousel card will take you once its real destination is
-          decided. Nothing here is final.
+        <p
+          style={{
+            marginTop: 12,
+            fontSize: 13,
+            lineHeight: "21px",
+            color: "#7c6e50",
+          }}
+        >
+          This is where a carousel card will take you once its real destination
+          is decided. Nothing here is final.
         </p>
         <Link
           href="/shop"

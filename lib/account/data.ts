@@ -111,7 +111,11 @@ async function linkedCustomer(user: User): Promise<CustomerRow | null> {
 
   const byEmail = customers.find((row) => row.email.toLowerCase() === email);
   if (byEmail) {
-    await store.update("customers", { id: byEmail.id }, { auth_user_id: user.id });
+    await store.update(
+      "customers",
+      { id: byEmail.id },
+      { auth_user_id: user.id },
+    );
     await store.insert("customer_events", [
       {
         id: randomUUID(),

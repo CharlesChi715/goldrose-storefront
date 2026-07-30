@@ -32,7 +32,9 @@ export function getPayPalConfig(): PayPalConfig {
     configured: Boolean(clientId && secret),
     env,
     baseUrl:
-      env === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com",
+      env === "live"
+        ? "https://api-m.paypal.com"
+        : "https://api-m.sandbox.paypal.com",
     clientId,
     secret,
     webhookId: process.env.PAYPAL_WEBHOOK_ID?.trim() ?? "",
@@ -84,7 +86,9 @@ async function paypalFetch(
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      ...(init.idempotencyKey ? { "PayPal-Request-Id": init.idempotencyKey } : {}),
+      ...(init.idempotencyKey
+        ? { "PayPal-Request-Id": init.idempotencyKey }
+        : {}),
       ...init.headers,
     },
     cache: "no-store",
@@ -128,14 +132,29 @@ export async function createPayPalOrder(
           currency_code: priced.currency,
           value: dollars(priced.total_cents),
           breakdown: {
-            item_total: { currency_code: priced.currency, value: dollars(itemTotal) },
-            shipping: { currency_code: priced.currency, value: dollars(priced.shipping_cents) },
-            tax_total: { currency_code: priced.currency, value: dollars(priced.tax_cents) },
-            discount: { currency_code: priced.currency, value: dollars(priced.discount_cents) },
+            item_total: {
+              currency_code: priced.currency,
+              value: dollars(itemTotal),
+            },
+            shipping: {
+              currency_code: priced.currency,
+              value: dollars(priced.shipping_cents),
+            },
+            tax_total: {
+              currency_code: priced.currency,
+              value: dollars(priced.tax_cents),
+            },
+            discount: {
+              currency_code: priced.currency,
+              value: dollars(priced.discount_cents),
+            },
           },
         },
         items: priced.lines.map((line) => ({
-          name: `${line.name}${line.option ? ` (${line.option})` : ""}`.slice(0, 127),
+          name: `${line.name}${line.option ? ` (${line.option})` : ""}`.slice(
+            0,
+            127,
+          ),
           quantity: String(line.quantity),
           sku: line.sku.slice(0, 127) || undefined,
           unit_amount: {
@@ -163,11 +182,15 @@ export async function createPayPalOrder(
  * @returns The raw capture response (mapped later by lib/paypal/mapping.ts).
  */
 export async function capturePayPalOrder(orderId: string): Promise<unknown> {
-  return paypalFetch(getPayPalConfig(), `/v2/checkout/orders/${orderId}/capture`, {
-    method: "POST",
-    body: "{}",
-    idempotencyKey: `capture-${orderId}`,
-  });
+  return paypalFetch(
+    getPayPalConfig(),
+    `/v2/checkout/orders/${orderId}/capture`,
+    {
+      method: "POST",
+      body: "{}",
+      idempotencyKey: `capture-${orderId}`,
+    },
+  );
 }
 
 /**
@@ -185,15 +208,21 @@ export async function refundPayPalCapture(
   amountCents: number | null,
   currency = "USD",
 ): Promise<unknown> {
-  return paypalFetch(getPayPalConfig(), `/v2/payments/captures/${captureId}/refund`, {
-    method: "POST",
-    body: JSON.stringify(
-      amountCents === null
-        ? {}
-        : { amount: { currency_code: currency, value: dollars(amountCents) } },
-    ),
-    idempotencyKey: `refund-${captureId}-${amountCents ?? "full"}`,
-  });
+  return paypalFetch(
+    getPayPalConfig(),
+    `/v2/payments/captures/${captureId}/refund`,
+    {
+      method: "POST",
+      body: JSON.stringify(
+        amountCents === null
+          ? {}
+          : {
+              amount: { currency_code: currency, value: dollars(amountCents) },
+            },
+      ),
+      idempotencyKey: `refund-${captureId}-${amountCents ?? "full"}`,
+    },
+  );
 }
 
 /**
@@ -213,17 +242,21 @@ export async function verifyWebhookSignature(input: {
   if (!config.webhookId) {
     return false;
   }
-  const result = (await paypalFetch(config, "/v1/notifications/verify-webhook-signature", {
-    method: "POST",
-    body: JSON.stringify({
-      auth_algo: input.headers.get("paypal-auth-algo"),
-      cert_url: input.headers.get("paypal-cert-url"),
-      transmission_id: input.headers.get("paypal-transmission-id"),
-      transmission_sig: input.headers.get("paypal-transmission-sig"),
-      transmission_time: input.headers.get("paypal-transmission-time"),
-      webhook_id: config.webhookId,
-      webhook_event: JSON.parse(input.rawBody),
-    }),
-  })) as { verification_status?: string };
+  const result = (await paypalFetch(
+    config,
+    "/v1/notifications/verify-webhook-signature",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        auth_algo: input.headers.get("paypal-auth-algo"),
+        cert_url: input.headers.get("paypal-cert-url"),
+        transmission_id: input.headers.get("paypal-transmission-id"),
+        transmission_sig: input.headers.get("paypal-transmission-sig"),
+        transmission_time: input.headers.get("paypal-transmission-time"),
+        webhook_id: config.webhookId,
+        webhook_event: JSON.parse(input.rawBody),
+      }),
+    },
+  )) as { verification_status?: string };
   return result.verification_status === "SUCCESS";
 }

@@ -8,7 +8,10 @@
  * the Supabase session cookie exists.
  */
 
-import { getAccountOverview, type AccountOverview } from "@/lib/account/data.ts";
+import {
+  getAccountOverview,
+  type AccountOverview,
+} from "@/lib/account/data.ts";
 
 export async function accountOverviewAction(): Promise<AccountOverview | null> {
   return getAccountOverview();

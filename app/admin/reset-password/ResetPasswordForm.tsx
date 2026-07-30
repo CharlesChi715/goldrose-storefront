@@ -161,7 +161,12 @@ export function ResetPasswordForm() {
                   onChange={setConfirm}
                   autoComplete="new-password"
                 />
-                <Button variant="primary" fullWidth loading={saving} onClick={save}>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  loading={saving}
+                  onClick={save}
+                >
                   {t("reset.submit")}
                 </Button>
               </BlockStack>

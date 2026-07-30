@@ -33,7 +33,8 @@ export default function NoCalcScale({
   height?: number;
 }) {
   useEffect(() => {
-    if (window.CSS?.supports?.("transform", `scale(calc(100vw / ${base}px))`)) return;
+    if (window.CSS?.supports?.("transform", `scale(calc(100vw / ${base}px))`))
+      return;
     const el = document.querySelector<HTMLElement>(stage);
     if (!el) return;
     const zoomable = "zoom" in el.style;

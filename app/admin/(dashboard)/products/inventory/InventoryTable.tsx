@@ -22,9 +22,16 @@ import {
   Text,
   TextField,
 } from "@shopify/polaris";
-import { INVENTORY_REASONS, type InventoryReason } from "@/lib/supabase/types.ts";
+import {
+  INVENTORY_REASONS,
+  type InventoryReason,
+} from "@/lib/supabase/types.ts";
 import { useAdminT } from "../../../PolarisShell";
-import { adjustInventoryAction, movementsAction, type MovementView } from "../actions";
+import {
+  adjustInventoryAction,
+  movementsAction,
+  type MovementView,
+} from "../actions";
 import { formatDateTime } from "@/lib/dates";
 
 export type InventoryItem = {
@@ -87,7 +94,10 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
   }));
 
   return (
-    <Page title={t("nav.products.inventory")} backAction={{ url: "/admin/products" }}>
+    <Page
+      title={t("nav.products.inventory")}
+      backAction={{ url: "/admin/products" }}
+    >
       <Card padding="0">
         <IndexTable
           resourceName={{
@@ -107,7 +117,11 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
           ]}
         >
           {items.map((item, index) => (
-            <IndexTable.Row id={item.variantId} key={item.variantId} position={index}>
+            <IndexTable.Row
+              id={item.variantId}
+              key={item.variantId}
+              position={index}
+            >
               <IndexTable.Cell>
                 <BlockStack gap="050">
                   <Text as="span" fontWeight="semibold">
@@ -151,7 +165,11 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
                         size="slim"
                         disabled={!item.tracked}
                         onClick={() =>
-                          setOpenPopover(openPopover === item.variantId ? null : item.variantId)
+                          setOpenPopover(
+                            openPopover === item.variantId
+                              ? null
+                              : item.variantId,
+                          )
                         }
                       >
                         {t("inventory.adjust")}
@@ -172,7 +190,9 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
                             label={t("inventory.reason")}
                             options={reasonOptions}
                             value={reason}
-                            onChange={(value) => setReason(value as InventoryReason)}
+                            onChange={(value) =>
+                              setReason(value as InventoryReason)
+                            }
                           />
                           <TextField
                             label={t("inventory.note")}
@@ -191,7 +211,11 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
                       </div>
                     </Box>
                   </Popover>
-                  <Button size="slim" variant="plain" onClick={() => openHistory(item)}>
+                  <Button
+                    size="slim"
+                    variant="plain"
+                    onClick={() => openHistory(item)}
+                  >
                     {t("inventory.history")}
                   </Button>
                 </InlineStack>
@@ -218,7 +242,11 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
           ) : (
             <BlockStack gap="300">
               {history.map((movement) => (
-                <InlineStack key={movement.id} align="space-between" blockAlign="start">
+                <InlineStack
+                  key={movement.id}
+                  align="space-between"
+                  blockAlign="start"
+                >
                   <BlockStack gap="050">
                     <Text as="span" fontWeight="semibold">
                       {t(`reason.${movement.reason as InventoryReason}`)}

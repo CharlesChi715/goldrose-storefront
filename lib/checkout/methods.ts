@@ -35,9 +35,13 @@ export const paymentMethods: PaymentMethod[] = [
 ];
 
 /** Just the express-kind methods (the top-of-checkout buttons, i.e. PayPal). */
-export const expressMethods = paymentMethods.filter((method) => method.kind === "express");
+export const expressMethods = paymentMethods.filter(
+  (method) => method.kind === "express",
+);
 
-const methodsById = new Map(paymentMethods.map((method) => [method.id, method]));
+const methodsById = new Map(
+  paymentMethods.map((method) => [method.id, method]),
+);
 
 /**
  * Type guard for untrusted input (e.g. a request body field): true only for

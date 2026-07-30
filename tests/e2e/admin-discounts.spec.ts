@@ -38,7 +38,11 @@ async function readDb() {
         financial_status: string;
       }>;
       discounts: Array<{ code: string; used_count: number }>;
-      inventory_movements: Array<{ reason: string; delta: number; note: string | null }>;
+      inventory_movements: Array<{
+        reason: string;
+        delta: number;
+        note: string | null;
+      }>;
     };
   };
 }
@@ -56,7 +60,9 @@ test("create a 10% discount in the admin", async ({ page }) => {
   await expect(row.getByText("Amount off order · 10%")).toBeVisible();
 });
 
-test("the code applies at checkout, server-priced, and counts usage", async ({ page }) => {
+test("the code applies at checkout, server-priced, and counts usage", async ({
+  page,
+}) => {
   await page.addInitScript(
     ([key, value]) => window.localStorage.setItem(key, value),
     [
@@ -82,7 +88,9 @@ test("the code applies at checkout, server-priced, and counts usage", async ({ p
   await page.fill("#card-cvc", "123");
   await page.getByRole("button", { name: /^Pay \$/ }).click();
   await page.waitForURL(/\/checkout\/success\?/);
-  const orderName = (await page.locator("[data-order-name]").innerText()).trim();
+  const orderName = (
+    await page.locator("[data-order-name]").innerText()
+  ).trim();
 
   const db = await readDb();
   const order = db.tables.orders.find((row) => row.name === orderName);
@@ -90,7 +98,9 @@ test("the code applies at checkout, server-priced, and counts usage", async ({ p
   expect(order!.discount_cents).toBe(500); // 10% of $49.99
   expect(order!.shipping_cents).toBe(595); // discounted subtotal under threshold
   expect(order!.total_cents).toBe(4999 - 500 + 595);
-  expect(db.tables.discounts.find((row) => row.code === CODE_10)?.used_count).toBe(1);
+  expect(
+    db.tables.discounts.find((row) => row.code === CODE_10)?.used_count,
+  ).toBe(1);
 });
 
 test("expired and unknown codes are rejected at checkout", async ({ page }) => {
@@ -155,20 +165,25 @@ test("draft order → Mark as paid → stock decrement", async ({ page }) => {
   await page.goto("/admin/orders/drafts/new");
   await page.getByLabel("Product").selectOption(SIGNATURE_VARIANT);
   await page.getByLabel("Quantity").fill("2");
-  await page.getByLabel("Customer email (optional)").fill("draft-buyer@example.com");
+  await page
+    .getByLabel("Customer email (optional)")
+    .fill("draft-buyer@example.com");
   await page.getByLabel("Note").fill("Phone order");
   await page.getByRole("button", { name: "Save draft" }).click();
   await page.waitForURL(/\/admin\/orders\/[0-9a-f-]+$/);
 
   await expect(page.getByText("Draft", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Pending", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText("Pending", { exact: true }).first(),
+  ).toBeVisible();
   const draftName = (await page.locator("h1").first().innerText()).trim();
 
   // No stock movement yet.
   let db = await readDb();
   expect(
     db.tables.inventory_movements.some(
-      (movement) => movement.note === `Order ${draftName}` && movement.reason === "order",
+      (movement) =>
+        movement.note === `Order ${draftName}` && movement.reason === "order",
     ),
   ).toBe(false);
 
@@ -195,7 +210,9 @@ test("draft order → Mark as paid → stock decrement", async ({ page }) => {
   await expect(page.getByText(draftName, { exact: true })).toBeVisible();
 });
 
-test("abandoned checkouts page renders (rule unit-tested)", async ({ page }) => {
+test("abandoned checkouts page renders (rule unit-tested)", async ({
+  page,
+}) => {
   await adminLogin(page);
   await page.goto("/admin/orders/abandoned");
   await expect(page.getByText("Recovery emails ship in V2.")).toBeVisible();

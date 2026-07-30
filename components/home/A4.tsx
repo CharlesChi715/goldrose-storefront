@@ -16,7 +16,13 @@ import { playfair, playfairSC, notoSC, goudy } from "@/lib/fonts";
 export function A4() {
   return (
     // 138:60 — module frame, clips content (left bleed of the ribbon, MORI's tail)
-    <div style={{ ...abs(0, 2417, 430, 787), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, 2417, 430, 787),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       {/* 160:69 — eyebrow glyph strip (✿ ornaments), placed at its render bounds */}
       <img
         src="/veloria/home/160-69.svg"
@@ -53,38 +59,68 @@ export function A4() {
           textAlign: "center",
         }}
       >
-        Every GoldRose begins with a genuine natural rose, carefully preserved and
-        finished as a lasting keepsake.
+        Every GoldRose begins with a genuine natural rose, carefully preserved
+        and finished as a lasting keepsake.
       </div>
 
       {/* 160:72/74/76 — three step photos: one shared full-bleed source render
           (160:73, 430x709 at frame origin) shown through small clip windows,
           hence the negative offsets. */}
-      <div style={{ ...abs(29, 136, 107, 88), borderRadius: 8, overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(29, 136, 107, 88),
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+      >
         <img
           src="/veloria/home/160-73.png"
           alt="Fresh natural pink rose"
           width={430}
           height={709}
-          style={{ ...abs(-29, -136, 430, 709), display: "block", maxWidth: "none" }}
+          style={{
+            ...abs(-29, -136, 430, 709),
+            display: "block",
+            maxWidth: "none",
+          }}
         />
       </div>
-      <div style={{ ...abs(161, 136, 104, 88), borderRadius: 8, overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(161, 136, 104, 88),
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+      >
         <img
           src="/veloria/home/160-73.png"
           alt="Hands carefully holding the preserved rose"
           width={430}
           height={709}
-          style={{ ...abs(-161, -136, 430, 709), display: "block", maxWidth: "none" }}
+          style={{
+            ...abs(-161, -136, 430, 709),
+            display: "block",
+            maxWidth: "none",
+          }}
         />
       </div>
-      <div style={{ ...abs(291, 136, 108, 88), borderRadius: 8, overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(291, 136, 108, 88),
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+      >
         <img
           src="/veloria/home/160-73.png"
           alt="Finished gold-dipped rose in a gift box"
           width={430}
           height={709}
-          style={{ ...abs(-291, -136, 430, 709), display: "block", maxWidth: "none" }}
+          style={{
+            ...abs(-291, -136, 430, 709),
+            display: "block",
+            maxWidth: "none",
+          }}
         />
       </div>
 
@@ -143,7 +179,13 @@ export function A4() {
       />
 
       {/* 162:69 — MORI Gift Finder Panel */}
-      <div style={{ ...abs(0, 355, 430, 432), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 355, 430, 432),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 162:71 — MORI entry title (three design lines) */}
         <div
           className={playfairSC.className}
@@ -161,10 +203,15 @@ export function A4() {
         {/* 162:72 — MORI entry copy (wraps in a 190px column) */}
         <div
           className={goudy.className}
-          style={{ ...abs(26, 144, 190, 40), fontSize: 11, lineHeight: "17px", color: "#3B2F2F" }}
+          style={{
+            ...abs(26, 144, 190, 40),
+            fontSize: 11,
+            lineHeight: "17px",
+            color: "#3B2F2F",
+          }}
         >
-          I&rsquo;ll help you find the right rose for the person and moment you&rsquo;re
-          celebrating.
+          I&rsquo;ll help you find the right rose for the person and moment
+          you&rsquo;re celebrating.
         </div>
 
         {/* 162:75 — MORI signature */}
@@ -192,7 +239,8 @@ export function A4() {
             background: "#271C15",
             borderRadius: 11,
             // 1.25px inside stroke + Figma INNER_SHADOW
-            boxShadow: "inset 0 0 0 1.25px #D19E40, inset 0 2px 5px rgba(46,28,15,0.18)",
+            boxShadow:
+              "inset 0 0 0 1.25px #D19E40, inset 0 2px 5px rgba(46,28,15,0.18)",
             overflow: "hidden",
           }}
         >
@@ -250,7 +298,8 @@ export function A4() {
             display: "block",
             background: "#FFF9F0",
             borderRadius: 11,
-            boxShadow: "inset 0 0 0 1px #E3C294, 0px 2px 5px rgba(74,48,26,0.07)",
+            boxShadow:
+              "inset 0 0 0 1px #E3C294, 0px 2px 5px rgba(74,48,26,0.07)",
             overflow: "hidden",
           }}
         >
@@ -308,7 +357,8 @@ export function A4() {
             display: "block",
             background: "#FFF9F0",
             borderRadius: 11,
-            boxShadow: "inset 0 0 0 1px #E3C294, 0px 2px 5px rgba(74,48,26,0.07)",
+            boxShadow:
+              "inset 0 0 0 1px #E3C294, 0px 2px 5px rgba(74,48,26,0.07)",
             overflow: "hidden",
           }}
         >
@@ -420,7 +470,11 @@ export function A4() {
         alt="MORI, the GoldRose gift-box cat mascot holding a gold rose"
         width={237}
         height={237}
-        style={{ ...abs(205, 379, 237, 237), display: "block", mixBlendMode: "darken" }}
+        style={{
+          ...abs(205, 379, 237, 237),
+          display: "block",
+          mixBlendMode: "darken",
+        }}
       />
     </div>
   );

@@ -45,7 +45,11 @@ import {
 import { notoSC } from "@/lib/fonts";
 import { formatMoney } from "@/lib/money";
 import { useCart, type CartLine } from "@/lib/cart/store";
-import { computeShipping, zoneForCountry, type ShippingZone } from "@/lib/checkout/zones";
+import {
+  computeShipping,
+  zoneForCountry,
+  type ShippingZone,
+} from "@/lib/checkout/zones";
 import { fileUrl } from "@/lib/files-url";
 import { getVisitorId } from "@/components/Beacon";
 import type { PaymentMethodId } from "@/lib/checkout/types";
@@ -92,7 +96,11 @@ const VALUE: React.CSSProperties = {
 };
 
 /** 755:131 card-well type (the payment card's wells set 10/12, not 11/13.2). */
-const WELL_VALUE: React.CSSProperties = { ...VALUE, fontSize: 10, lineHeight: "12px" };
+const WELL_VALUE: React.CSSProperties = {
+  ...VALUE,
+  fontSize: 10,
+  lineHeight: "12px",
+};
 
 function StageStyles() {
   return (
@@ -285,7 +293,15 @@ function PayPalSdkButtons({
     const scriptId = "paypal-sdk";
 
     function renderButtons() {
-      const paypal = (window as unknown as { paypal?: { Buttons: (options: unknown) => { render: (el: HTMLElement) => void } } }).paypal;
+      const paypal = (
+        window as unknown as {
+          paypal?: {
+            Buttons: (options: unknown) => {
+              render: (el: HTMLElement) => void;
+            };
+          };
+        }
+      ).paypal;
       if (!paypal || !containerRef.current || cancelled) {
         return;
       }
@@ -318,7 +334,11 @@ function PayPalSdkButtons({
             window.location.assign(result.redirectUrl);
           },
           onError: (error: unknown) => {
-            onFail(error instanceof Error ? error.message : "PayPal checkout failed.");
+            onFail(
+              error instanceof Error
+                ? error.message
+                : "PayPal checkout failed.",
+            );
           },
         })
         .render(containerRef.current);
@@ -382,7 +402,12 @@ export function CheckoutClient({
     state: "",
     postalCode: "",
   });
-  const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
+  const [card, setCard] = useState({
+    name: "",
+    number: "",
+    expiry: "",
+    cvc: "",
+  });
   /**
    * B-2's Standard / Express / Next-Day picker (755:101). Per-method shipping
    * pricing has no backend yet — every method ships at the zone rate — so on
@@ -406,7 +431,9 @@ export function CheckoutClient({
   }, []);
 
   const zone = useMemo(() => zoneForCountry(zones, country), [zones, country]);
-  const discountCents = discount ? Math.min(discount.discountCents, subtotal) : 0;
+  const discountCents = discount
+    ? Math.min(discount.discountCents, subtotal)
+    : 0;
   const shippingInfo = useMemo(() => {
     if (subtotal === 0 || !zone) {
       return { amount: 0, free: false };
@@ -535,8 +562,12 @@ export function CheckoutClient({
     return (
       <main className="grid min-h-screen place-items-center bg-[#f4ede1] px-6 py-16 text-[#211a0e]">
         <div className="w-full max-w-md rounded-md border border-[#d9c48a] bg-[#fbf6ec] p-10 text-center shadow-[0_22px_60px_rgba(33,26,14,0.10)]">
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#9a7826]">{brandName}</p>
-          <h1 className="font-serif text-3xl font-medium text-[#211a0e]">Your cart is empty.</h1>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#9a7826]">
+            {brandName}
+          </p>
+          <h1 className="font-serif text-3xl font-medium text-[#211a0e]">
+            Your cart is empty.
+          </h1>
           <p className="mt-3 text-sm leading-7 text-[#5c4f38]">
             Add a gold rose gift to start checkout.
           </p>
@@ -562,7 +593,10 @@ export function CheckoutClient({
   const extraLines = lines.slice(1);
   const feedbackRow = discountError || discount ? 1 : 0;
   /** Discount feedback + extra item rows, inserted under the item module. */
-  const bandA = feedbackRow || extraLines.length ? 12 + feedbackRow * 20 + extraLines.length * 40 : 0;
+  const bandA =
+    feedbackRow || extraLines.length
+      ? 12 + feedbackRow * 20 + extraLines.length * 40
+      : 0;
   /** Gift message + the USD/duties note — B-2 has no field for either. */
   const NOTE_BAND = 116;
   /** The four card fields share one error line (their wells have no room). */
@@ -592,7 +626,12 @@ export function CheckoutClient({
   const canvasHeight = T_TAIL + 281 + 96;
 
   return (
-    <ScaleFrame height={canvasHeight} background="#FFF6EC" fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={canvasHeight}
+      background="#FFF6EC"
+      fontClass={notoSC.className}
+      nav={false}
+    >
       {/* One wrapper so the stage's own coordinates are also this file's. */}
       <div className="b2-stage" style={abs(0, 0, 430, canvasHeight)}>
         <StageStyles />
@@ -611,9 +650,17 @@ export function CheckoutClient({
             ? { imageSrc: fileUrl(firstImage.path), imageAlt: firstImage.alt }
             : { imageSrc: BLANK_PIXEL, imageAlt: "" })}
           title={first?.product.short_name ?? ""}
-          qtyLine={first ? `${first.variant.option_values.join(" · ")} · Qty ${first.quantity}` : ""}
+          qtyLine={
+            first
+              ? `${first.variant.option_values.join(" · ")} · Qty ${first.quantity}`
+              : ""
+          }
           engravingLine={note.trim() ? `Gift message · ${note.trim()}` : ""}
-          giftLine={first && first.quantity > 1 ? `${formatMoney(first.variant.price_cents)} each` : ""}
+          giftLine={
+            first && first.quantity > 1
+              ? `${formatMoney(first.variant.price_cents)} each`
+              : ""
+          }
           price={first ? formatMoney(first.lineTotal) : ""}
           qty={first ? String(first.quantity) : ""}
           {...(first
@@ -634,7 +681,14 @@ export function CheckoutClient({
             as a dev band. Settings → Checkout can switch it off. */}
         {showDiscountField ? (
           <>
-            <div style={{ ...abs(16, T_BAND_A + 4, 398, 46), background: "#FFFFFF", boxShadow: HAIRLINE, borderRadius: 10 }} />
+            <div
+              style={{
+                ...abs(16, T_BAND_A + 4, 398, 46),
+                background: "#FFFFFF",
+                boxShadow: HAIRLINE,
+                borderRadius: 10,
+              }}
+            />
             <LiveInput
               id="discount-code"
               x={28}
@@ -678,12 +732,30 @@ export function CheckoutClient({
 
         {/* ---------- Band · discount feedback + any extra item rows ---------- */}
         {discountError ? (
-          <Txt x={16} y={T_FEEDBACK + 6} w={398} size={11} lh={13.2} color={RED} weight={500} wrap>
+          <Txt
+            x={16}
+            y={T_FEEDBACK + 6}
+            w={398}
+            size={11}
+            lh={13.2}
+            color={RED}
+            weight={500}
+            wrap
+          >
             {discountError}
           </Txt>
         ) : discount ? (
           <>
-            <Txt x={16} y={T_FEEDBACK + 6} w={300} size={11} lh={13.2} color={GREEN} weight={500} live>
+            <Txt
+              x={16}
+              y={T_FEEDBACK + 6}
+              w={300}
+              size={11}
+              lh={13.2}
+              color={GREEN}
+              weight={500}
+              live
+            >
               {`Code ${discount.code} applied.`}
             </Txt>
             <button
@@ -721,10 +793,27 @@ export function CheckoutClient({
                   overflow: "hidden",
                 }}
               />
-              <Txt x={28} y={y + 5} w={190} size={11} lh={13.2} color={INK} weight={500} live>
+              <Txt
+                x={28}
+                y={y + 5}
+                w={190}
+                size={11}
+                lh={13.2}
+                color={INK}
+                weight={500}
+                live
+              >
                 {line.product.short_name}
               </Txt>
-              <Txt x={28} y={y + 20} w={190} size={8} lh={9.6} color={MUTED} live>
+              <Txt
+                x={28}
+                y={y + 20}
+                w={190}
+                size={8}
+                lh={9.6}
+                color={MUTED}
+                live
+              >
                 {`${line.variant.option_values.join(" · ")} · Qty ${line.quantity}`}
               </Txt>
               <StepperButton
@@ -735,7 +824,17 @@ export function CheckoutClient({
               >
                 {"−"}
               </StepperButton>
-              <Txt x={248} y={y + 12} w={18} size={10} lh={12} color={INK} weight={500} align="center" live>
+              <Txt
+                x={248}
+                y={y + 12}
+                w={18}
+                size={10}
+                lh={12}
+                color={INK}
+                weight={500}
+                align="center"
+                live
+              >
                 {String(line.quantity)}
               </Txt>
               <StepperButton
@@ -746,7 +845,17 @@ export function CheckoutClient({
               >
                 +
               </StepperButton>
-              <Txt x={298} y={y + 11} w={56} size={11} lh={13.2} color={GREEN} weight={500} align="right" live>
+              <Txt
+                x={298}
+                y={y + 11}
+                w={56}
+                size={11}
+                lh={13.2}
+                color={GREEN}
+                weight={500}
+                align="right"
+                live
+              >
                 {formatMoney(line.lineTotal)}
               </Txt>
               <button
@@ -812,7 +921,11 @@ export function CheckoutClient({
           onChange={(event) => setCountry(event.target.value)}
           aria-label="Country / region"
           autoComplete="country"
-          style={{ ...abs(295, T_CONTACT + 190, 82), ...VALUE, cursor: "pointer" }}
+          style={{
+            ...abs(295, T_CONTACT + 190, 82),
+            ...VALUE,
+            cursor: "pointer",
+          }}
         >
           {countries.map((entry) => (
             <option key={entry.code} value={entry.code}>
@@ -836,7 +949,12 @@ export function CheckoutClient({
             />
             {/* 1523:472 is a picker in the design, but there is no state list
                 behind it, so the ⌄ is covered and the field is free text. */}
-            <div style={{ ...abs(262, T_CONTACT + 191, 12, 14), background: "#FFFFFF" }} />
+            <div
+              style={{
+                ...abs(262, T_CONTACT + 191, 12, 14),
+                background: "#FFFFFF",
+              }}
+            />
             <LiveInput
               id="ship-state"
               x={214}
@@ -877,7 +995,14 @@ export function CheckoutClient({
               errorY={T_CONTACT + 308}
               autoComplete="address-line1"
             />
-            <Txt x={269} y={T_CONTACT + 293} w={8} size={11} lh={13.2} color={MUTED}>
+            <Txt
+              x={269}
+              y={T_CONTACT + 293}
+              w={8}
+              size={11}
+              lh={13.2}
+              color={MUTED}
+            >
               ·
             </Txt>
             <LiveInput
@@ -907,7 +1032,14 @@ export function CheckoutClient({
         ) : (
           /* Neither branch sends an address, so the design's boxes stay empty
              rather than collecting one the request never carries. */
-          <Txt x={16} y={T_CONTACT + 400} w={398} size={9} lh={10.8} color={MUTED}>
+          <Txt
+            x={16}
+            y={T_CONTACT + 400}
+            w={398}
+            size={9}
+            lh={10.8}
+            color={MUTED}
+          >
             {paypalClientId
               ? "PayPal collects the delivery address in its own secure window."
               : "Test mode — no delivery address is collected."}
@@ -927,7 +1059,15 @@ export function CheckoutClient({
           }}
         />
         {/* 753:188 label type */}
-        <Txt x={28} y={T_NOTE + 16} w={130} size={8} lh={9.6} color="#C88217" weight={500}>
+        <Txt
+          x={28}
+          y={T_NOTE + 16}
+          w={130}
+          size={8}
+          lh={9.6}
+          color="#C88217"
+          weight={500}
+        >
           GIFT MESSAGE (OPTIONAL)
         </Txt>
         <textarea
@@ -942,7 +1082,15 @@ export function CheckoutClient({
           aria-label="Gift message (optional)"
           style={{ ...abs(28, T_NOTE + 28, 374, 48), ...VALUE, resize: "none" }}
         />
-        <Txt x={16} y={T_NOTE + 90} w={398} size={9} lh={10.8} color={MUTED} wrap>
+        <Txt
+          x={16}
+          y={T_NOTE + 90}
+          w={398}
+          size={9}
+          lh={10.8}
+          color={MUTED}
+          wrap
+        >
           Prices are in USD. Any import duties or taxes are the recipient&apos;s
           responsibility.
         </Txt>
@@ -963,7 +1111,9 @@ export function CheckoutClient({
           discountLabel={discount ? `Discount (${discount.code})` : ""}
           discount={discount ? `−${formatMoney(discountCents)}` : ""}
           shippingLabel={`Shipping${zone ? ` (${zone.name})` : ""}`}
-          shipping={shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)}
+          shipping={
+            shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)
+          }
           shippingColor={shippingInfo.free ? GREEN : INK}
           total={formatMoney(total)}
           // The wells are parked empty in every branch; in the mock branch the
@@ -1008,7 +1158,9 @@ export function CheckoutClient({
               well
               label="Card number"
               value={card.number}
-              onChange={(value) => setCard((c) => ({ ...c, number: formatCardNumber(value) }))}
+              onChange={(value) =>
+                setCard((c) => ({ ...c, number: formatCardNumber(value) }))
+              }
               error={fieldErrors.cardNumber}
               placeholder="4242 4242 4242 4242"
               inputMode="numeric"
@@ -1038,7 +1190,9 @@ export function CheckoutClient({
               well
               label="Expiry (MM/YY)"
               value={card.expiry}
-              onChange={(value) => setCard((c) => ({ ...c, expiry: formatExpiry(value) }))}
+              onChange={(value) =>
+                setCard((c) => ({ ...c, expiry: formatExpiry(value) }))
+              }
               error={fieldErrors.cardExpiry}
               placeholder="MM / YY"
               inputMode="numeric"
@@ -1052,7 +1206,12 @@ export function CheckoutClient({
               well
               label="CVC"
               value={card.cvc}
-              onChange={(value) => setCard((c) => ({ ...c, cvc: value.replace(/\D/g, "").slice(0, 4) }))}
+              onChange={(value) =>
+                setCard((c) => ({
+                  ...c,
+                  cvc: value.replace(/\D/g, "").slice(0, 4),
+                }))
+              }
               error={fieldErrors.cardCvc}
               placeholder="CVV"
               inputMode="numeric"
@@ -1061,7 +1220,15 @@ export function CheckoutClient({
             {/* The wells are 36px tall with no room under them, so the card's
                 field errors share the foot of 1523:534. */}
             {cardErrorText ? (
-              <Txt x={36} y={T_SHIP_PAY + 508} w={358} size={9} lh={10.8} color={RED} weight={500}>
+              <Txt
+                x={36}
+                y={T_SHIP_PAY + 508}
+                w={358}
+                size={9}
+                lh={10.8}
+                color={RED}
+                weight={500}
+              >
                 {cardErrorText}
               </Txt>
             ) : null}
@@ -1072,7 +1239,14 @@ export function CheckoutClient({
              typed into a field whose value goes nowhere is a PCI/security
              hazard. The design's wells stay empty and say so, at their own
              foot. */
-          <Txt x={36} y={T_SHIP_PAY + 508} w={358} size={9} lh={10.8} color={MUTED}>
+          <Txt
+            x={36}
+            y={T_SHIP_PAY + 508}
+            w={358}
+            size={9}
+            lh={10.8}
+            color={MUTED}
+          >
             {paypalClientId
               ? "Card and bank details are collected in PayPal's own window."
               : "Test mode — no payment details are collected."}
@@ -1136,12 +1310,30 @@ export function CheckoutClient({
                 borderRadius: 8,
               }}
             />
-            <Txt x={26} y={T_TAIL + 298} w={378} size={10} lh={12} color={RED} weight={500} wrap>
+            <Txt
+              x={26}
+              y={T_TAIL + 298}
+              w={378}
+              size={10}
+              lh={12}
+              color={RED}
+              weight={500}
+              wrap
+            >
               {error}
             </Txt>
           </>
         ) : null}
-        <Txt x={16} y={T_TAIL + 331} w={398} size={9} lh={10.8} color={MUTED} align="center" wrap>
+        <Txt
+          x={16}
+          y={T_TAIL + 331}
+          w={398}
+          size={9}
+          lh={10.8}
+          color={MUTED}
+          align="center"
+          wrap
+        >
           {pendingMethod === "paypal"
             ? "Starting PayPal checkout…"
             : skipPayment

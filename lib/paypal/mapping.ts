@@ -49,12 +49,17 @@ export type PayPalCaptureResponse = {
  * @param address - PayPal address object; null result when absent.
  * @returns Our Address, or null when PayPal sent no address.
  */
-function mapAddress(name: PayPalName | undefined, address: PayPalAddress | undefined): Address | null {
+function mapAddress(
+  name: PayPalName | undefined,
+  address: PayPalAddress | undefined,
+): Address | null {
   if (!address) {
     return null;
   }
   return {
-    name: name?.full_name ?? [name?.given_name, name?.surname].filter(Boolean).join(" "),
+    name:
+      name?.full_name ??
+      [name?.given_name, name?.surname].filter(Boolean).join(" "),
     address1: address.address_line_1,
     address2: address.address_line_2,
     city: address.admin_area_2,
@@ -89,20 +94,25 @@ export type MappedCapture = {
  * @param response - Raw JSON from PayPal's capture endpoint.
  * @returns Flat provider-neutral fields ready for the order row.
  */
-export function mapCaptureResponse(response: PayPalCaptureResponse): MappedCapture {
+export function mapCaptureResponse(
+  response: PayPalCaptureResponse,
+): MappedCapture {
   const unit = response.purchase_units?.[0];
   const capture = unit?.payments?.captures?.[0];
   const shipping = mapAddress(unit?.shipping?.name, unit?.shipping?.address);
   const billing = mapAddress(response.payer?.name, response.payer?.address);
   const amountValue = capture?.amount?.value;
   const amountCents =
-    amountValue !== undefined ? Math.round(Number.parseFloat(amountValue) * 100) : null;
+    amountValue !== undefined
+      ? Math.round(Number.parseFloat(amountValue) * 100)
+      : null;
 
   return {
     providerOrderId: response.id ?? null,
     captureId: capture?.id ?? null,
     captureStatus: capture?.status ?? null,
-    completed: response.status === "COMPLETED" && capture?.status === "COMPLETED",
+    completed:
+      response.status === "COMPLETED" && capture?.status === "COMPLETED",
     email: response.payer?.email_address ?? null,
     phone: response.payer?.phone?.phone_number?.national_number ?? null,
     shippingAddress: shipping,

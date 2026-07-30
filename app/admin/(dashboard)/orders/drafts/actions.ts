@@ -24,19 +24,31 @@ const createSchema = z.object({
   discountCode: z.string().trim().max(64).nullable(),
 });
 
-export type DraftResult = { ok: true; id: string } | { ok: false; error: string };
+export type DraftResult =
+  { ok: true; id: string } | { ok: false; error: string };
 
-export async function createDraftAction(payload: unknown): Promise<DraftResult> {
+export async function createDraftAction(
+  payload: unknown,
+): Promise<DraftResult> {
   const session = await requireAdmin();
   const parsed = createSchema.safeParse(payload);
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
   }
   try {
-    const order = await createDraftOrder({ ...parsed.data, actor: session.email });
+    const order = await createDraftOrder({
+      ...parsed.data,
+      actor: session.email,
+    });
     return { ok: true, id: order.id };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Save failed" };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Save failed",
+    };
   }
 }
 
@@ -46,6 +58,9 @@ export async function markDraftPaidAction(id: string): Promise<DraftResult> {
     await markDraftPaid(z.string().min(1).parse(id), session.email);
     return { ok: true, id };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Action failed" };
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Action failed",
+    };
   }
 }

@@ -6,7 +6,13 @@
  * reply box, and delete-thread in the page menu.
  */
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   Banner,
@@ -55,10 +61,20 @@ function Attachments({ attachments }: { attachments: ForumAttachment[] }) {
             key={index}
             src={fileUrl(attachment.path)}
             alt={attachment.name}
-            style={{ maxWidth: "100%", maxHeight: 480, borderRadius: 8, alignSelf: "flex-start" }}
+            style={{
+              maxWidth: "100%",
+              maxHeight: 480,
+              borderRadius: 8,
+              alignSelf: "flex-start",
+            }}
           />
         ) : (
-          <a key={index} href={fileUrl(attachment.path)} target="_blank" rel="noreferrer">
+          <a
+            key={index}
+            href={fileUrl(attachment.path)}
+            target="_blank"
+            rel="noreferrer"
+          >
             📎 {attachment.name}
           </a>
         ),
@@ -72,7 +88,10 @@ const INITIAL_STATE: ForumFormState = { error: null };
 function ReplyForm({ threadId }: { threadId: string }) {
   const t = useAdminT();
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(replyAction, INITIAL_STATE);
+  const [state, formAction, pending] = useActionState(
+    replyAction,
+    INITIAL_STATE,
+  );
   const [body, setBody] = useState("");
   const attachments = useAttachments();
   const submitted = useRef(false);
@@ -94,7 +113,9 @@ function ReplyForm({ threadId }: { threadId: string }) {
         <BlockStack gap="300">
           {state.error ? (
             <Banner tone="critical">
-              {state.error === "files" ? t("forum.error.files") : t("forum.error.emptyReply")}
+              {state.error === "files"
+                ? t("forum.error.files")
+                : t("forum.error.emptyReply")}
             </Banner>
           ) : null}
           <input type="hidden" name="threadId" value={threadId} />
@@ -142,7 +163,8 @@ export function ThreadView({
   // Being on the thread means reading it: move this device's read mark to
   // the newest post on screen (also fires after replies arrive), which
   // updates the nav badge and the list's "new" badges.
-  const latestPostAt = posts.length > 0 ? posts[posts.length - 1].createdAt : null;
+  const latestPostAt =
+    posts.length > 0 ? posts[posts.length - 1].createdAt : null;
   useEffect(() => {
     if (latestPostAt) {
       markThreadRead(threadId, latestPostAt);
@@ -183,7 +205,10 @@ export function ThreadView({
                       maxLength={5000}
                     />
                     <InlineStack align="end" gap="200">
-                      <Button onClick={() => setEditingId(null)} disabled={pending}>
+                      <Button
+                        onClick={() => setEditingId(null)}
+                        disabled={pending}
+                      >
                         {t("common.cancel")}
                       </Button>
                       <Button

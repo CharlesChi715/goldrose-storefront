@@ -53,9 +53,19 @@ const INPUT_RESET: React.CSSProperties = {
 };
 
 /** Field label type (1523:463 etc.): Noto Sans SC 500 8/9.6 in #C88217. */
-const FIELD_LABEL = { size: 8, lh: 9.6, weight: 500, color: "#C88217" } as const;
+const FIELD_LABEL = {
+  size: 8,
+  lh: 9.6,
+  weight: 500,
+  color: "#C88217",
+} as const;
 /** Field value type (1523:464 etc.): Noto Sans SC 400 11/13.2 in #3B2F2F. */
-const FIELD_VALUE = { size: 11, lh: 13.2, weight: 400, color: "#3B2F2F" } as const;
+const FIELD_VALUE = {
+  size: 11,
+  lh: 13.2,
+  weight: 400,
+  color: "#3B2F2F",
+} as const;
 
 /**
  * The design paints empty boxes in #8C8075 and filled values in #3B2F2F;
@@ -88,7 +98,20 @@ type TxtProps = {
 };
 
 /** One design TEXT node: exact absolute box + exact type. */
-function Txt({ x, y, w, face = "noto", size, lh, color, weight, ls, live, wrap, children }: TxtProps) {
+function Txt({
+  x,
+  y,
+  w,
+  face = "noto",
+  size,
+  lh,
+  color,
+  weight,
+  ls,
+  live,
+  wrap,
+  children,
+}: TxtProps) {
   const className = (face === "playfair" ? playfair : notoSC).className;
   const style: React.CSSProperties = {
     ...abs(x, y, w),
@@ -161,7 +184,15 @@ type TapProps = {
 };
 
 /** The design box; a real button when its callback is supplied. */
-function Tap({ style, children, onClick, label, role, checked, expanded }: TapProps) {
+function Tap({
+  style,
+  children,
+  onClick,
+  label,
+  role,
+  checked,
+  expanded,
+}: TapProps) {
   if (!onClick) {
     return <div style={style}>{children}</div>;
   }
@@ -211,9 +242,20 @@ export type CheckoutHeaderProps = {
   onStepClick?: (index: number) => void;
 };
 
-export function CheckoutHeader({ top = 0, activeStep = 3, onBack, onStepClick }: CheckoutHeaderProps) {
+export function CheckoutHeader({
+  top = 0,
+  activeStep = 3,
+  onBack,
+  onStepClick,
+}: CheckoutHeaderProps) {
   return (
-    <div style={{ ...abs(0, top, 430, 143), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, top, 430, 143),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       {/* 1523:424 Brand Navigation — clips the logo's 4.5px top bleed */}
       <div style={{ ...abs(16, 15, 398, 42), overflow: "hidden" }}>
         <Tap onClick={onBack} label="Back" style={{ ...abs(0, 0, 40, 42) }}>
@@ -262,7 +304,15 @@ export function CheckoutHeader({ top = 0, activeStep = 3, onBack, onStepClick }:
               {done ? (
                 <Glyph src="753-142.svg" alt="✓" x={8} y={6} w={8} h={12} />
               ) : (
-                <Txt x={9} y={6} w={6} size={10} lh={12} weight={500} color="#C88217">
+                <Txt
+                  x={9}
+                  y={6}
+                  w={6}
+                  size={10}
+                  lh={12}
+                  weight={500}
+                  color="#C88217"
+                >
                   {String(i + 1)}
                 </Txt>
               )}
@@ -331,7 +381,13 @@ export function CheckoutOrderItem({
 }: CheckoutOrderItemProps) {
   const stepper = onQtyUp !== undefined || onQtyDown !== undefined;
   return (
-    <div style={{ ...abs(0, top, 430, 202), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, top, 430, 202),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       {/* 1523:445 Checkout Item card */}
       <div style={{ ...abs(16, 8, 398, 142), ...CARD, borderRadius: 14 }}>
         {/* 1523:446 product render (Figma IMAGE fill) */}
@@ -340,27 +396,78 @@ export function CheckoutOrderItem({
           alt={imageAlt}
           width={112}
           height={118}
-          style={{ ...abs(12, 12, 112, 118), display: "block", borderRadius: 8 }}
+          style={{
+            ...abs(12, 12, 112, 118),
+            display: "block",
+            borderRadius: 8,
+          }}
         />
 
         {/* 1523:447 Checkout Item Details */}
         <div style={{ ...abs(136, 12, 250, 118), overflow: "hidden" }}>
-          <Txt x={0} y={0} w={250} face="playfair" size={18} lh={23.99} weight={500} color="#3B2F2F" live>
+          <Txt
+            x={0}
+            y={0}
+            w={250}
+            face="playfair"
+            size={18}
+            lh={23.99}
+            weight={500}
+            color="#3B2F2F"
+            live
+          >
             {title}
           </Txt>
-          <Txt x={0} y={22} w={109} size={10} lh={12} weight={400} color="#3B2F2F" live>
+          <Txt
+            x={0}
+            y={22}
+            w={109}
+            size={10}
+            lh={12}
+            weight={400}
+            color="#3B2F2F"
+            live
+          >
             {qtyLine}
           </Txt>
-          <Txt x={0} y={34} w={250} size={10} lh={12} weight={400} color="#3B2F2F" live>
+          <Txt
+            x={0}
+            y={34}
+            w={250}
+            size={10}
+            lh={12}
+            weight={400}
+            color="#3B2F2F"
+            live
+          >
             {engravingLine}
           </Txt>
-          <Txt x={0} y={56} w={250} size={10} lh={12} weight={400} color="#3B2F2F" live>
+          <Txt
+            x={0}
+            y={56}
+            w={250}
+            size={10}
+            lh={12}
+            weight={400}
+            color="#3B2F2F"
+            live
+          >
             {giftLine}
           </Txt>
 
           {/* 1523:452 Item Price row — clips the 29px price line to 28px */}
           <div style={{ ...abs(0, 78, 250, 28), overflow: "hidden" }}>
-            <Txt x={0} y={0} w={74} face="playfair" size={22} lh={29.33} weight={500} color="#09442E" live>
+            <Txt
+              x={0}
+              y={0}
+              w={74}
+              face="playfair"
+              size={22}
+              lh={29.33}
+              weight={500}
+              color="#09442E"
+              live
+            >
               {price}
             </Txt>
             {/* Additive opt-in quantity stepper (not in the outline) */}
@@ -369,25 +476,57 @@ export function CheckoutOrderItem({
                 <Tap
                   onClick={onQtyDown}
                   label="Decrease quantity"
-                  style={{ ...abs(84, 4, 20, 20), boxShadow: HAIRLINE, borderRadius: 6 }}
+                  style={{
+                    ...abs(84, 4, 20, 20),
+                    boxShadow: HAIRLINE,
+                    borderRadius: 6,
+                  }}
                 >
-                  <Txt x={0} y={4} w={20} size={10} lh={12} weight={500} color="#3B2F2F">
+                  <Txt
+                    x={0}
+                    y={4}
+                    w={20}
+                    size={10}
+                    lh={12}
+                    weight={500}
+                    color="#3B2F2F"
+                  >
                     {"−"}
                   </Txt>
                 </Tap>
                 <div
                   data-live-text
                   className={notoSC.className}
-                  style={{ ...abs(106, 8, 18), fontSize: 10, lineHeight: "12px", fontWeight: 500, color: "#3B2F2F", textAlign: "center", whiteSpace: "nowrap" }}
+                  style={{
+                    ...abs(106, 8, 18),
+                    fontSize: 10,
+                    lineHeight: "12px",
+                    fontWeight: 500,
+                    color: "#3B2F2F",
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                  }}
                 >
                   {qty}
                 </div>
                 <Tap
                   onClick={onQtyUp}
                   label="Increase quantity"
-                  style={{ ...abs(126, 4, 20, 20), boxShadow: HAIRLINE, borderRadius: 6 }}
+                  style={{
+                    ...abs(126, 4, 20, 20),
+                    boxShadow: HAIRLINE,
+                    borderRadius: 6,
+                  }}
                 >
-                  <Txt x={0} y={4} w={20} size={10} lh={12} weight={500} color="#3B2F2F">
+                  <Txt
+                    x={0}
+                    y={4}
+                    w={20}
+                    size={10}
+                    lh={12}
+                    weight={500}
+                    color="#3B2F2F"
+                  >
                     +
                   </Txt>
                 </Tap>
@@ -395,8 +534,20 @@ export function CheckoutOrderItem({
             ) : null}
             {/* Additive opt-in remove link (not in the outline) */}
             {onRemove ? (
-              <Tap onClick={onRemove} label="Remove item" style={{ ...abs(152, 8.5, 56, 11) }}>
-                <Txt x={0} y={0} w={56} size={9} lh={10.8} weight={500} color="#8C8075">
+              <Tap
+                onClick={onRemove}
+                label="Remove item"
+                style={{ ...abs(152, 8.5, 56, 11) }}
+              >
+                <Txt
+                  x={0}
+                  y={0}
+                  w={56}
+                  size={9}
+                  lh={10.8}
+                  weight={500}
+                  color="#8C8075"
+                >
                   REMOVE
                 </Txt>
               </Tap>
@@ -404,8 +555,19 @@ export function CheckoutOrderItem({
             {/* 1523:454 EDIT → (one Figma render carrying the arrow glyph);
                 the node is a 24px box with v-centred 10.8px type, so the ink
                 sits 6.5px under the row top */}
-            <Tap onClick={onEdit} label="Edit this item" style={{ ...abs(216, 6.5, 34, 11) }}>
-              <Glyph src="753-165.svg" alt={`EDIT${NB} →`} x={0} y={0} w={34} h={11} />
+            <Tap
+              onClick={onEdit}
+              label="Edit this item"
+              style={{ ...abs(216, 6.5, 34, 11) }}
+            >
+              <Glyph
+                src="753-165.svg"
+                alt={`EDIT${NB} →`}
+                x={0}
+                y={0}
+                w={34}
+                h={11}
+              />
             </Tap>
           </div>
         </div>
@@ -415,9 +577,30 @@ export function CheckoutOrderItem({
           (⌂ / ▱ / ♔ hit different fallback fonts in Chrome, so each TEXT node
           is its own render) */}
       <div style={{ ...abs(16, 158, 398, 44), overflow: "hidden" }}>
-        <Glyph src="1523-456.svg" alt="Ships from the U.S." x={0} y={15.5} w={99} h={13} />
-        <Glyph src="1523-457.svg" alt="3–5 day delivery" x={162} y={15.5} w={87} h={13} />
-        <Glyph src="1523-458.svg" alt="Free over $50" x={312} y={15.5} w={76} h={13} />
+        <Glyph
+          src="1523-456.svg"
+          alt="Ships from the U.S."
+          x={0}
+          y={15.5}
+          w={99}
+          h={13}
+        />
+        <Glyph
+          src="1523-457.svg"
+          alt="3–5 day delivery"
+          x={162}
+          y={15.5}
+          w={87}
+          h={13}
+        />
+        <Glyph
+          src="1523-458.svg"
+          alt="Free over $50"
+          x={312}
+          y={15.5}
+          w={76}
+          h={13}
+        />
       </div>
     </div>
   );
@@ -462,7 +645,11 @@ function Field({
   autoComplete,
   inputMode = "text",
 }: FieldProps) {
-  const box: React.CSSProperties = { ...abs(x, y, w, h), ...CARD, borderRadius: 7 };
+  const box: React.CSSProperties = {
+    ...abs(x, y, w, h),
+    ...CARD,
+    borderRadius: 7,
+  };
   const labelEl = (
     <Txt x={9} y={5} w={labelW} {...FIELD_LABEL}>
       {label}
@@ -545,13 +732,19 @@ function SelectField({
   name,
   autoComplete,
 }: SelectFieldProps) {
-  const box: React.CSSProperties = { ...abs(x, y, w, 48), ...CARD, borderRadius: 7 };
+  const box: React.CSSProperties = {
+    ...abs(x, y, w, 48),
+    ...CARD,
+    borderRadius: 7,
+  };
   const labelEl = (
     <Txt x={9} y={5} w={labelW} {...FIELD_LABEL}>
       {label}
     </Txt>
   );
-  const chevron = <Glyph src={glyph.src} alt="" x={w - 17} y={19} w={8} h={10} pos="right" />;
+  const chevron = (
+    <Glyph src={glyph.src} alt="" x={w - 17} y={19} w={8} h={10} pos="right" />
+  );
 
   if (onChange && options && options.length > 0) {
     return (
@@ -614,7 +807,14 @@ function SelectField({
     <div style={box}>
       {labelEl}
       {value === designValue ? (
-        <Glyph src={glyph.src} alt={`${designValue} ⌄`} x={9} y={17} w={valueW} h={22} />
+        <Glyph
+          src={glyph.src}
+          alt={`${designValue} ⌄`}
+          x={9}
+          y={17}
+          w={valueW}
+          h={22}
+        />
       ) : (
         <>
           <Txt x={9} y={17} w={valueW} {...FIELD_VALUE} live>
@@ -681,12 +881,27 @@ export function CheckoutContactDelivery({
   onPhoneChange,
 }: CheckoutContactDeliveryProps) {
   return (
-    <div style={{ ...abs(0, top, 430, 410), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, top, 430, 410),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       <FieldStyles />
 
       {/* 1523:460 Contact Information */}
       <div style={{ ...abs(16, 10, 398, 108), ...CARD, borderRadius: 12 }}>
-        <Txt x={12} y={10} w={167} face="playfair" size={18} lh={23.99} weight={500} color="#3B2F2F">
+        <Txt
+          x={12}
+          y={10}
+          w={167}
+          face="playfair"
+          size={18}
+          lh={23.99}
+          weight={500}
+          color="#3B2F2F"
+        >
           {contactHeading}
         </Txt>
         <Field
@@ -727,7 +942,16 @@ export function CheckoutContactDelivery({
       {/* 1523:466 Delivery Address — the reflow's grid: recipient + state +
           country on one row, a full-width 33px ZIP, street, then city + phone */}
       <div style={{ ...abs(16, 128, 398, 270), ...CARD, borderRadius: 12 }}>
-        <Txt x={12} y={10} w={138} face="playfair" size={18} lh={23.99} weight={500} color="#3B2F2F">
+        <Txt
+          x={12}
+          y={10}
+          w={138}
+          face="playfair"
+          size={18}
+          lh={23.99}
+          weight={500}
+          color="#3B2F2F"
+        >
           {addressHeading}
         </Txt>
         <Field
@@ -832,9 +1056,33 @@ export function CheckoutContactDelivery({
 
 /** 1523:495 / 1523:502 / 1523:509 — card-relative geometry + design copy. */
 const SHIP_ROWS = [
-  { y: 40, name: "Standard Delivery", nameW: 86, sub: "3–5 business days", priceX: 341, priceW: 25, priceColor: "#09442E" },
-  { y: 90, name: "Express Delivery", nameW: 78, sub: "2–3 business days", priceX: 334, priceW: 32, priceColor: "#3B2F2F" },
-  { y: 140, name: "Next-Day Delivery", nameW: 85, sub: "Order before 2 PM", priceX: 334, priceW: 32, priceColor: "#3B2F2F" },
+  {
+    y: 40,
+    name: "Standard Delivery",
+    nameW: 86,
+    sub: "3–5 business days",
+    priceX: 341,
+    priceW: 25,
+    priceColor: "#09442E",
+  },
+  {
+    y: 90,
+    name: "Express Delivery",
+    nameW: 78,
+    sub: "2–3 business days",
+    priceX: 334,
+    priceW: 32,
+    priceColor: "#3B2F2F",
+  },
+  {
+    y: 140,
+    name: "Next-Day Delivery",
+    nameW: 85,
+    sub: "Order before 2 PM",
+    priceX: 334,
+    priceW: 32,
+    priceColor: "#3B2F2F",
+  },
 ] as const;
 
 export type PaymentMethod = "card" | "paypal" | "applePay" | "afterpay";
@@ -924,7 +1172,10 @@ function CardField({
         placeholder={placeholder}
         {...(value !== undefined ? { value } : {})}
         {...(onChange
-          ? { onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value) }
+          ? {
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange(e.target.value),
+            }
           : { readOnly: value !== undefined })}
         style={{
           ...abs(10, 12, inputW),
@@ -974,13 +1225,28 @@ export function CheckoutShippingPayment({
 }: CheckoutShippingPaymentProps) {
   const prices = [standardPrice, expressPrice, nextDayPrice];
   return (
-    <div style={{ ...abs(0, top, 430, 692), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, top, 430, 692),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       <FieldStyles />
 
       {/* 1523:493 Shipping Method — the card's own clip crops the last row's
           bottom 6px, exactly as the frame draws it */}
       <div style={{ ...abs(16, 10, 398, 178), ...CARD, borderRadius: 12 }}>
-        <Txt x={12} y={10} w={140} face="playfair" size={18} lh={23.99} weight={500} color="#3B2F2F">
+        <Txt
+          x={12}
+          y={10}
+          w={140}
+          face="playfair"
+          size={18}
+          lh={23.99}
+          weight={500}
+          color="#3B2F2F"
+        >
           {shippingHeading}
         </Txt>
         {SHIP_ROWS.map((r, i) => {
@@ -1001,14 +1267,46 @@ export function CheckoutShippingPayment({
               }}
             >
               {/* 1523:497 / 1523:504 radio glyph */}
-              <Glyph src={on ? "755-105.svg" : "755-112.svg"} alt="" x={8} y={14} w={13} h={16} />
-              <Txt x={29} y={5} w={r.nameW} size={10} lh={12} weight={500} color="#3B2F2F">
+              <Glyph
+                src={on ? "755-105.svg" : "755-112.svg"}
+                alt=""
+                x={8}
+                y={14}
+                w={13}
+                h={16}
+              />
+              <Txt
+                x={29}
+                y={5}
+                w={r.nameW}
+                size={10}
+                lh={12}
+                weight={500}
+                color="#3B2F2F"
+              >
                 {r.name}
               </Txt>
-              <Txt x={29} y={17} w={67} size={8} lh={9.6} weight={400} color="#8C8075">
+              <Txt
+                x={29}
+                y={17}
+                w={67}
+                size={8}
+                lh={9.6}
+                weight={400}
+                color="#8C8075"
+              >
                 {r.sub}
               </Txt>
-              <Txt x={r.priceX} y={16} w={r.priceW} size={10} lh={12} weight={500} color={r.priceColor} live>
+              <Txt
+                x={r.priceX}
+                y={16}
+                w={r.priceW}
+                size={10}
+                lh={12}
+                weight={500}
+                color={r.priceColor}
+                live
+              >
                 {prices[i]}
               </Txt>
             </Tap>
@@ -1018,56 +1316,159 @@ export function CheckoutShippingPayment({
 
       {/* 1523:516 Final Order Summary — a white card since the reflow */}
       <div style={{ ...abs(16, 198, 398, 150), ...CARD, borderRadius: 12 }}>
-        <Txt x={20} y={10} w={133} face="playfair" size={18} lh={23.99} weight={500} color="#3B2F2F">
+        <Txt
+          x={20}
+          y={10}
+          w={133}
+          face="playfair"
+          size={18}
+          lh={23.99}
+          weight={500}
+          color="#3B2F2F"
+        >
           {summaryHeading}
         </Txt>
 
         {/* 1523:518 Total / Subtotal */}
-        <Txt x={20} y={42.5} w={44} size={11} lh={13.2} weight={400} color="#3B2F2F">
+        <Txt
+          x={20}
+          y={42.5}
+          w={44}
+          size={11}
+          lh={13.2}
+          weight={400}
+          color="#3B2F2F"
+        >
           {subtotalLabel}
         </Txt>
-        <Txt x={337} y={42.5} w={41} size={11} lh={13.2} weight={500} color="#3B2F2F" live>
+        <Txt
+          x={337}
+          y={42.5}
+          w={41}
+          size={11}
+          lh={13.2}
+          weight={500}
+          color="#3B2F2F"
+          live
+        >
           {subtotal}
         </Txt>
 
         {/* 1523:521 Total / Discount */}
-        <Txt x={20} y={68.5} w={78} size={11} lh={13.2} weight={400} color="#3B2F2F" live>
+        <Txt
+          x={20}
+          y={68.5}
+          w={78}
+          size={11}
+          lh={13.2}
+          weight={400}
+          color="#3B2F2F"
+          live
+        >
           {discountLabel}
         </Txt>
         {discount === "−$28.35" ? (
           // 1523:523 — Figma bakes the U+2212 minus into a render; live values
           // fall through to DOM text below.
-          <Glyph src="756-108.svg" alt={discount} x={337} y={68.5} w={41} h={13} />
+          <Glyph
+            src="756-108.svg"
+            alt={discount}
+            x={337}
+            y={68.5}
+            w={41}
+            h={13}
+          />
         ) : (
-          <Txt x={337} y={68.5} w={41} size={11} lh={13.2} weight={500} color="#B82924" live>
+          <Txt
+            x={337}
+            y={68.5}
+            w={41}
+            size={11}
+            lh={13.2}
+            weight={500}
+            color="#B82924"
+            live
+          >
             {discount}
           </Txt>
         )}
 
         {/* 1523:524 Total / Shipping */}
-        <Txt x={20} y={94.5} w={46} size={11} lh={13.2} weight={400} color="#3B2F2F">
+        <Txt
+          x={20}
+          y={94.5}
+          w={46}
+          size={11}
+          lh={13.2}
+          weight={400}
+          color="#3B2F2F"
+        >
           {shippingLabel}
         </Txt>
-        <Txt x={351} y={94.5} w={27} size={11} lh={13.2} weight={500} color={shippingColor} live>
+        <Txt
+          x={351}
+          y={94.5}
+          w={27}
+          size={11}
+          lh={13.2}
+          weight={500}
+          color={shippingColor}
+          live
+        >
           {shipping}
         </Txt>
 
         {/* 1523:527 Total / Order Total */}
-        <Txt x={20} y={121.5} w={89} face="playfair" size={17} lh={22.66} weight={500} color="#3B2F2F">
+        <Txt
+          x={20}
+          y={121.5}
+          w={89}
+          face="playfair"
+          size={17}
+          lh={22.66}
+          weight={500}
+          color="#3B2F2F"
+        >
           {totalLabel}
         </Txt>
-        <Txt x={297} y={117} w={81} face="playfair" size={24} lh={31.99} weight={500} color="#3B2F2F" live>
+        <Txt
+          x={297}
+          y={117}
+          w={81}
+          face="playfair"
+          size={24}
+          lh={31.99}
+          weight={500}
+          color="#3B2F2F"
+          live
+        >
           {total}
         </Txt>
       </div>
 
       {/* 1523:530 Payment */}
       <div style={{ ...abs(16, 358, 398, 326), ...CARD, borderRadius: 12 }}>
-        <Txt x={12} y={10} w={72} face="playfair" size={18} lh={23.99} weight={500} color="#3B2F2F">
+        <Txt
+          x={12}
+          y={10}
+          w={72}
+          face="playfair"
+          size={18}
+          lh={23.99}
+          weight={500}
+          color="#3B2F2F"
+        >
           {paymentHeading}
         </Txt>
         {/* 1523:533 VISA ●● AMEX */}
-        <Glyph src="755-127.svg" alt="Visa, Mastercard and Amex accepted" x={304} y={10} w={82} h={12} />
+        <Glyph
+          src="755-127.svg"
+          alt="Visa, Mastercard and Amex accepted"
+          x={304}
+          y={10}
+          w={82}
+          h={12}
+        />
 
         {/* 1523:534 Credit Card Selected — a 31%-opacity cream well since the
             reflow. Stays a div: the card wells are real inputs and form
@@ -1083,13 +1484,22 @@ export function CheckoutShippingPayment({
           }}
         >
           <Tap
-            onClick={onSelectPayment ? () => onSelectPayment("card") : undefined}
+            onClick={
+              onSelectPayment ? () => onSelectPayment("card") : undefined
+            }
             role="radio"
             checked={selectedPayment === "card"}
             label="Pay by credit card"
             style={{ ...abs(8, 8, 76, 13) }}
           >
-            <Glyph src="755-129.svg" alt="Credit Card" x={0} y={0} w={76} h={13} />
+            <Glyph
+              src="755-129.svg"
+              alt="Credit Card"
+              x={0}
+              y={0}
+              w={76}
+              h={13}
+            />
           </Tap>
           <CardField
             x={8}
@@ -1128,21 +1538,37 @@ export function CheckoutShippingPayment({
 
         {/* 1523:543 Payment / PayPal — bottom-only 1px stroke */}
         <Tap
-          onClick={onSelectPayment ? () => onSelectPayment("paypal") : undefined}
+          onClick={
+            onSelectPayment ? () => onSelectPayment("paypal") : undefined
+          }
           role="radio"
           checked={selectedPayment === "paypal"}
           label="Pay with PayPal"
-          style={{ ...abs(12, 174, 374, 36), boxShadow: BOTTOM_HAIRLINE, overflow: "hidden" }}
+          style={{
+            ...abs(12, 174, 374, 36),
+            boxShadow: BOTTOM_HAIRLINE,
+            overflow: "hidden",
+          }}
         >
           <Glyph src="1523-544.svg" alt="PayPal" x={8} y={12} w={47} h={12} />
-          <Txt x={334} y={12} w={32} size={10} lh={12} weight={500} color="#144DB2">
+          <Txt
+            x={334}
+            y={12}
+            w={32}
+            size={10}
+            lh={12}
+            weight={500}
+            color="#144DB2"
+          >
             PayPal
           </Txt>
         </Tap>
 
         {/* 1523:546 — the whole row (○ mark, copy,  Pay and its rule) is one render */}
         <Tap
-          onClick={onSelectPayment ? () => onSelectPayment("applePay") : undefined}
+          onClick={
+            onSelectPayment ? () => onSelectPayment("applePay") : undefined
+          }
           role="radio"
           checked={selectedPayment === "applePay"}
           label="Pay with Apple Pay"
@@ -1159,7 +1585,9 @@ export function CheckoutShippingPayment({
 
         {/* 1523:549 — likewise for Afterpay */}
         <Tap
-          onClick={onSelectPayment ? () => onSelectPayment("afterpay") : undefined}
+          onClick={
+            onSelectPayment ? () => onSelectPayment("afterpay") : undefined
+          }
           role="radio"
           checked={selectedPayment === "afterpay"}
           label="Pay with Afterpay"
@@ -1242,7 +1670,13 @@ export function CheckoutHelpCta({
   payButtonSlot,
 }: CheckoutHelpCtaProps) {
   return (
-    <div style={{ ...abs(0, top, 430, 281), background: "#FFF6EC", overflow: "hidden" }}>
+    <div
+      style={{
+        ...abs(0, top, 430, 281),
+        background: "#FFF6EC",
+        overflow: "hidden",
+      }}
+    >
       {/* 1523:554 Auri Checkout Help */}
       <div
         style={{
@@ -1252,14 +1686,42 @@ export function CheckoutHelpCta({
         }}
       >
         <Glyph src="1523-555.svg" alt="✦" x={12} y={13} w={21} h={32} />
-        <Txt x={43} y={9} w={130} face="playfair" size={14} lh={18.66} weight={500} color="#3B2F2F">
+        <Txt
+          x={43}
+          y={9}
+          w={130}
+          face="playfair"
+          size={14}
+          lh={18.66}
+          weight={500}
+          color="#3B2F2F"
+        >
           {helpTitle}
         </Txt>
-        <Txt x={43} y={29} w={114} size={9} lh={10.8} weight={400} color="#3B2F2F">
+        <Txt
+          x={43}
+          y={29}
+          w={114}
+          size={9}
+          lh={10.8}
+          weight={400}
+          color="#3B2F2F"
+        >
           {helpBody}
         </Txt>
-        <Tap onClick={onAskAuri} label="Ask Auri" style={{ ...abs(301, 23.5, 53, 11) }}>
-          <Glyph src="1523-559.svg" alt={`ASK AURI${NB} →`} x={0} y={0} w={53} h={11} />
+        <Tap
+          onClick={onAskAuri}
+          label="Ask Auri"
+          style={{ ...abs(301, 23.5, 53, 11) }}
+        >
+          <Glyph
+            src="1523-559.svg"
+            alt={`ASK AURI${NB} →`}
+            x={0}
+            y={0}
+            w={53}
+            h={11}
+          />
         </Tap>
       </div>
 
@@ -1273,7 +1735,15 @@ export function CheckoutHelpCta({
             expanded={onToggleFaq ? open : undefined}
             style={{ ...abs(16, row.y, 398, 38), boxShadow: BOTTOM_HAIRLINE }}
           >
-            <Txt x={16} y={12} w={row.w} size={12} lh={14.4} weight={400} color="#3B2F2F">
+            <Txt
+              x={16}
+              y={12}
+              w={row.w}
+              size={12}
+              lh={14.4}
+              weight={400}
+              color="#3B2F2F"
+            >
               {faqs?.[i] ?? row.q}
             </Txt>
             {/* ＋ render; the design has no open state, so it turns 45° */}
@@ -1294,7 +1764,17 @@ export function CheckoutHelpCta({
 
       {/* 1523:563 Secure Pay Bar */}
       <div style={{ ...abs(16, 214, 398, 58), overflow: "hidden" }}>
-        <Txt x={8} y={15} w={71} face="playfair" size={21} lh={27.99} weight={500} color="#3B2F2F" live>
+        <Txt
+          x={8}
+          y={15}
+          w={71}
+          face="playfair"
+          size={21}
+          lh={27.99}
+          weight={500}
+          color="#3B2F2F"
+          live
+        >
           {barTotal}
         </Txt>
         {/* 1523:565 CTA / Pay Securely (clipsContent false — no overflow
@@ -1304,16 +1784,37 @@ export function CheckoutHelpCta({
         <Tap
           onClick={payButtonSlot !== undefined ? undefined : onPay}
           label={payLabel}
-          style={{ ...abs(118, 5, 276, 48), background: "#3B2F2F", borderRadius: 10 }}
+          style={{
+            ...abs(118, 5, 276, 48),
+            background: "#3B2F2F",
+            borderRadius: 10,
+          }}
         >
           {payButtonSlot !== undefined ? (
             <div style={{ ...abs(0, 0, 276, 48) }}>{payButtonSlot}</div>
           ) : (
             <>
-              <Txt x={49.5} y={17} w={150} size={12} lh={14.4} weight={500} ls={1.1} color="#FFF6EC" live>
+              <Txt
+                x={49.5}
+                y={17}
+                w={150}
+                size={12}
+                lh={14.4}
+                weight={500}
+                ls={1.1}
+                color="#FFF6EC"
+                live
+              >
                 {payLabel}
               </Txt>
-              <Glyph src="I753-116_145-55.svg" alt="" x={211.5} y={15} w={15} h={18} />
+              <Glyph
+                src="I753-116_145-55.svg"
+                alt=""
+                x={211.5}
+                y={15}
+                w={15}
+                h={18}
+              />
             </>
           )}
         </Tap>

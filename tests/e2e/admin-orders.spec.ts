@@ -7,7 +7,12 @@
  * local adapter with mock orders placed through the real API.
  */
 
-import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
+import {
+  test,
+  expect,
+  type APIRequestContext,
+  type Page,
+} from "@playwright/test";
 import { promises as fs } from "fs";
 import path from "path";
 import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
@@ -40,7 +45,12 @@ async function placeMockOrder(
         state: "CA",
         postalCode: "90001",
       },
-      card: { number: "4242424242424242", expiry: "12/33", cvc: "123", name: "Stage Five" },
+      card: {
+        number: "4242424242424242",
+        expiry: "12/33",
+        cvc: "123",
+        name: "Stage Five",
+      },
     },
   });
   expect(response.ok()).toBe(true);
@@ -76,7 +86,9 @@ test("orders list shows the placed order with statuses and source badge", async 
   await expect(page.getByText(orderName, { exact: true })).toHaveCount(0);
 });
 
-test("order detail: cards, gift note in Notes, timeline + comment", async ({ page }) => {
+test("order detail: cards, gift note in Notes, timeline + comment", async ({
+  page,
+}) => {
   await adminLogin(page);
   await openOrder(page, orderName);
 
@@ -104,8 +116,12 @@ test("order detail: cards, gift note in Notes, timeline + comment", async ({ pag
 
   // Timeline system events + a typed comment.
   await expect(page.getByText("Order placed (mock)")).toBeVisible();
-  await expect(page.getByText(/Payment of \$55\.94 captured via mock/)).toBeVisible();
-  await page.getByPlaceholder("Leave a comment…").fill("Called the buyer about delivery");
+  await expect(
+    page.getByText(/Payment of \$55\.94 captured via mock/),
+  ).toBeVisible();
+  await page
+    .getByPlaceholder("Leave a comment…")
+    .fill("Called the buyer about delivery");
   await page.getByRole("button", { name: "Post" }).click();
   await expect(page.getByText("Called the buyer about delivery")).toBeVisible();
 });
@@ -119,12 +135,16 @@ test("fulfill flow stores tracking and flips status", async ({ page }) => {
   // "Other" carrier: the pre-carrier path — admin pastes the full URL.
   await modal.getByLabel("Carrier").selectOption("other");
   await modal.getByLabel("Tracking number").fill("TRACK-12345");
-  await modal.getByLabel("Tracking URL (optional)").fill("https://example.com/track/TRACK-12345");
+  await modal
+    .getByLabel("Tracking URL (optional)")
+    .fill("https://example.com/track/TRACK-12345");
   await modal.getByRole("button", { name: "Fulfill items" }).click();
 
   await expect(page.getByText("Fulfilled").first()).toBeVisible();
   await expect(page.getByRole("link", { name: "TRACK-12345" })).toBeVisible();
-  await expect(page.getByText(/Order fulfilled — tracking TRACK-12345/)).toBeVisible();
+  await expect(
+    page.getByText(/Order fulfilled — tracking TRACK-12345/),
+  ).toBeVisible();
 });
 
 test("fulfill with the default UPS carrier auto-builds the tracking link", async ({
@@ -132,7 +152,10 @@ test("fulfill with the default UPS carrier auto-builds the tracking link", async
   request,
 }) => {
   // Own buyer email: the customer test counts BUYER_EMAIL's orders (exactly 2).
-  const upsOrderName = await placeMockOrder(request, `ups-buyer-${Date.now()}@example.com`);
+  const upsOrderName = await placeMockOrder(
+    request,
+    `ups-buyer-${Date.now()}@example.com`,
+  );
   await adminLogin(page);
   await openOrder(page, upsOrderName);
 
@@ -145,14 +168,20 @@ test("fulfill with the default UPS carrier auto-builds the tracking link", async
 
   await expect(page.getByText("Fulfilled").first()).toBeVisible();
   await expect(page.getByText(/UPS ·/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "1Z999AA10123456784" })).toHaveAttribute(
+  await expect(
+    page.getByRole("link", { name: "1Z999AA10123456784" }),
+  ).toHaveAttribute(
     "href",
     "https://www.ups.com/track?tracknum=1Z999AA10123456784",
   );
-  await expect(page.getByText(/Order fulfilled — UPS tracking 1Z999AA10123456784/)).toBeVisible();
+  await expect(
+    page.getByText(/Order fulfilled — UPS tracking 1Z999AA10123456784/),
+  ).toBeVisible();
 });
 
-test("refund: partial → partially refunded, remainder → refunded", async ({ page }) => {
+test("refund: partial → partially refunded, remainder → refunded", async ({
+  page,
+}) => {
   await adminLogin(page);
   await openOrder(page, orderName);
 
@@ -169,10 +198,15 @@ test("refund: partial → partially refunded, remainder → refunded", async ({ 
   await expect(modal.getByLabel("Refund amount")).toHaveValue("45.94");
   await modal.getByRole("button", { name: "Refund", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(page.getByText("Refunded", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText("Refunded", { exact: true }).first(),
+  ).toBeVisible();
 });
 
-test("cancel with refund + restock writes movement and timeline", async ({ page, request }) => {
+test("cancel with refund + restock writes movement and timeline", async ({
+  page,
+  request,
+}) => {
   secondOrderName = await placeMockOrder(request);
   await adminLogin(page);
   await openOrder(page, secondOrderName);
@@ -184,7 +218,9 @@ test("cancel with refund + restock writes movement and timeline", async ({ page,
 
   await expect(page.getByText("Cancelled").first()).toBeVisible();
   await expect(
-    page.getByText(/Order cancelled — Buyer changed their mind, payment refunded, items restocked/),
+    page.getByText(
+      /Order cancelled — Buyer changed their mind, payment refunded, items restocked/,
+    ),
   ).toBeVisible();
 
   // Restock movement recorded (return_restock, §7.3).
@@ -192,7 +228,11 @@ test("cancel with refund + restock writes movement and timeline", async ({ page,
     await fs.readFile(path.join(process.cwd(), ".data", "db.json"), "utf8"),
   ) as {
     tables: {
-      inventory_movements: Array<{ reason: string; delta: number; note: string | null }>;
+      inventory_movements: Array<{
+        reason: string;
+        delta: number;
+        note: string | null;
+      }>;
     };
   };
   expect(
@@ -215,7 +255,9 @@ test("archive moves the order to the Archived tab", async ({ page }) => {
   await expect(page.getByText(secondOrderName, { exact: true })).toBeVisible();
 });
 
-test("customer auto-created with profile, orders and its own timeline", async ({ page }) => {
+test("customer auto-created with profile, orders and its own timeline", async ({
+  page,
+}) => {
   await adminLogin(page);
   await page.goto("/admin/customers");
   const row = page.getByRole("row").filter({ hasText: BUYER_EMAIL });
@@ -224,9 +266,13 @@ test("customer auto-created with profile, orders and its own timeline", async ({
 
   await row.getByText("Stage Five").last().click();
   await page.waitForURL(/\/admin\/customers\/[0-9a-f-]+$/);
-  await expect(page.getByRole("heading", { name: "Last order placed" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Last order placed" }),
+  ).toBeVisible();
   await expect(page.getByText(orderName, { exact: true })).toBeVisible();
-  await expect(page.getByText(secondOrderName, { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText(secondOrderName, { exact: true }).first(),
+  ).toBeVisible();
   await expect(page.getByText("Customer created")).toBeVisible();
   await expect(page.getByText(`Placed order ${orderName}`)).toBeVisible();
 
@@ -235,7 +281,9 @@ test("customer auto-created with profile, orders and its own timeline", async ({
   await expect(page.getByText("VIP gift buyer")).toBeVisible();
 });
 
-test("webhook rejects unverifiable deliveries with 401", async ({ request }) => {
+test("webhook rejects unverifiable deliveries with 401", async ({
+  request,
+}) => {
   const response = await request.post("/api/webhooks/paypal", {
     data: { event_type: "PAYMENT.CAPTURE.COMPLETED", resource: { id: "FAKE" } },
   });

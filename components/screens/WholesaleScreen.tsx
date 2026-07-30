@@ -101,7 +101,14 @@ const CARDS = [
 const ROWS = [
   {
     top: 84,
-    glyph: { src: "1523-703.svg", alt: "○", y: 21, w: 18, h: 22, raster: false },
+    glyph: {
+      src: "1523-703.svg",
+      alt: "○",
+      y: 21,
+      w: 18,
+      h: 22,
+      raster: false,
+    },
     label: { x: 36, text: `01${NB} Contact Name` },
     input: {
       placeholder: "Your full name",
@@ -125,7 +132,14 @@ const ROWS = [
   },
   {
     top: 232,
-    glyph: { src: "1523-715.svg", alt: "⌕", y: 21, w: 12, h: 22, raster: false },
+    glyph: {
+      src: "1523-715.svg",
+      alt: "⌕",
+      y: 21,
+      w: 12,
+      h: 22,
+      raster: false,
+    },
     label: { x: 30, text: `03${NB} Phone / WhatsApp` },
     input: {
       placeholder: "Country code + number",
@@ -137,7 +151,14 @@ const ROWS = [
   },
   {
     top: 306,
-    glyph: { src: "1523-721.svg", alt: "▥", y: 21, w: 18, h: 22, raster: false },
+    glyph: {
+      src: "1523-721.svg",
+      alt: "▥",
+      y: 21,
+      w: 18,
+      h: 22,
+      raster: false,
+    },
     label: { x: 36, text: `04${NB} Company / Store` },
     input: {
       placeholder: "Optional business name",
@@ -150,7 +171,14 @@ const ROWS = [
 ] as const;
 
 /** A selection chip: box x/w relative to the field row, text tx/tw to the chip. */
-type Chip = { x: number; w: number; dark: boolean; label: string; tx: number; tw: number };
+type Chip = {
+  x: number;
+  w: number;
+  dark: boolean;
+  label: string;
+  tx: number;
+  tw: number;
+};
 
 // 1523:729–1523:738 — sales-channel chips. `dark` is the design's own selected
 // state, kept static (nothing here is interactive).
@@ -221,7 +249,13 @@ export function WholesaleScreen() {
       <style>{`.b4-field::placeholder { color: #94857A; opacity: 1; }`}</style>
 
       {/* ---- 1523:674 · 01 / Application Hero ---- */}
-      <div style={{ ...abs(0, 0, 430, 444), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 0, 430, 444),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:675 Brand Navigation — clips, and the wordmark (1523:677) sits
             4.5px above the band's top edge, cropped by design. */}
         <div style={{ ...abs(16, 14, 398, 42), overflow: "hidden" }}>
@@ -230,18 +264,30 @@ export function WholesaleScreen() {
             alt=""
             width={40}
             height={42}
-            style={{ ...abs(0, 0, 40, 42), display: "block", objectFit: "cover" }}
+            style={{
+              ...abs(0, 0, 40, 42),
+              display: "block",
+              objectFit: "cover",
+            }}
           />
           <img
             src={`${A}/1523-677.png`}
             alt="GoldRose"
             width={140}
             height={51}
-            style={{ ...abs(131, -4.5, 140, 51), display: "block", objectFit: "cover" }}
+            style={{
+              ...abs(131, -4.5, 140, 51),
+              display: "block",
+              objectFit: "cover",
+            }}
           />
         </div>
         {/* 1523:676 back button — transparent hit area over its art */}
-        <Link href="/" aria-label="Back to home" style={{ ...abs(16, 14, 40, 42), display: "block" }} />
+        <Link
+          href="/"
+          aria-label="Back to home"
+          style={{ ...abs(16, 14, 40, 42), display: "block" }}
+        />
 
         {/* 1523:678 title */}
         <div
@@ -269,8 +315,8 @@ export function WholesaleScreen() {
             color: "#3B2F2F",
           }}
         >
-          Tell us about your business. Our team will review your goals and prepare a tailored
-          proposal.
+          Tell us about your business. Our team will review your goals and
+          prepare a tailored proposal.
         </div>
 
         {/* 1523:680 hero image */}
@@ -279,12 +325,23 @@ export function WholesaleScreen() {
           alt="Pink velvet GoldRose gift box beside a gold-dipped rose"
           width={398}
           height={230}
-          style={{ ...abs(16, 204, 398, 230), display: "block", objectFit: "cover", borderRadius: 16 }}
+          style={{
+            ...abs(16, 204, 398, 230),
+            display: "block",
+            objectFit: "cover",
+            borderRadius: 16,
+          }}
         />
       </div>
 
       {/* ---- 1523:681 · 02 / Business Direction Cards ---- */}
-      <div style={{ ...abs(0, 444, 430, 440), background: "#FFFFFF", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 444, 430, 440),
+          background: "#FFFFFF",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:682 section heading */}
         <div
           className={playfair.className}
@@ -353,7 +410,13 @@ export function WholesaleScreen() {
       </div>
 
       {/* ---- 1523:698 · 03 / Application Form Part A ---- */}
-      <div style={{ ...abs(0, 884, 430, 380), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 884, 430, 380),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:699 heading */}
         <div
           className={playfair.className}
@@ -384,7 +447,10 @@ export function WholesaleScreen() {
         </div>
 
         {ROWS.map((r) => (
-          <div key={r.input.name} style={{ ...abs(16, r.top, 398, 64), ...FIELD_BOX }}>
+          <div
+            key={r.input.name}
+            style={{ ...abs(16, r.top, 398, 64), ...FIELD_BOX }}
+          >
             {/* 1523:703 etc. label glyph — Figma crops glyph exports to the
                 ink, so SVGs sit unstretched at the TEXT node's own box; the ✉
                 render crop is the node box itself and scales to fit. */}
@@ -400,7 +466,10 @@ export function WholesaleScreen() {
                 objectPosition: "left center",
               }}
             />
-            <div className={notoSC.className} style={{ ...abs(r.label.x, 20, 112), ...FIELD_LABEL }}>
+            <div
+              className={notoSC.className}
+              style={{ ...abs(r.label.x, 20, 112), ...FIELD_LABEL }}
+            >
               {r.label.text}
             </div>
             {/* 1523:705 etc. input well */}
@@ -420,10 +489,19 @@ export function WholesaleScreen() {
       </div>
 
       {/* ---- 1523:725 · 04 / Application Form Part B ---- */}
-      <div style={{ ...abs(0, 1264, 430, 430), background: "#FFFFFF", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 1264, 430, 430),
+          background: "#FFFFFF",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:726 Field 05 / Sales Channels */}
         <div style={{ ...abs(16, 12, 398, 94), ...FIELD_BOX }}>
-          <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
+          <div
+            className={notoSC.className}
+            style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}
+          >
             {`05${NB} Sales Channels${NB} ·${NB} Select all that apply`}
           </div>
           <ChipRow chips={CHANNEL_CHIPS} />
@@ -431,7 +509,10 @@ export function WholesaleScreen() {
 
         {/* 1523:739 Field 06 / First Order Volume */}
         <div style={{ ...abs(16, 116, 398, 94), ...FIELD_BOX }}>
-          <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
+          <div
+            className={notoSC.className}
+            style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}
+          >
             {`06${NB} Estimated First Order Volume`}
           </div>
           <ChipRow chips={VOLUME_CHIPS} />
@@ -439,7 +520,10 @@ export function WholesaleScreen() {
 
         {/* 1523:752 Field 07 / Target Regions */}
         <div style={{ ...abs(16, 220, 398, 70), ...FIELD_BOX }}>
-          <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
+          <div
+            className={notoSC.className}
+            style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}
+          >
             {`07${NB} Target Sales Regions`}
           </div>
           <div style={{ ...abs(10, 42, 378, 34), ...INPUT_WELL }}>
@@ -456,7 +540,10 @@ export function WholesaleScreen() {
 
         {/* 1523:756 Field 08 / Additional Notes */}
         <div style={{ ...abs(16, 300, 398, 112), ...FIELD_BOX }}>
-          <div className={notoSC.className} style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}>
+          <div
+            className={notoSC.className}
+            style={{ ...abs(10, 10, 378), ...FIELD_LABEL }}
+          >
             {`08${NB} Additional Notes`}
           </div>
           <div style={{ ...abs(10, 42, 378, 64), ...INPUT_WELL }}>
@@ -476,7 +563,13 @@ export function WholesaleScreen() {
       </div>
 
       {/* ---- 1523:760 · 05 / Submit + Bottom Navigation ---- */}
-      <div style={{ ...abs(0, 1694, 430, 202), background: "#FFF6EC", overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(0, 1694, 430, 202),
+          background: "#FFF6EC",
+          overflow: "hidden",
+        }}
+      >
         {/* 1523:761 consent line — a real TEXT node in the 07-29 frame (the old
             baked SVG is gone); wraps to two centred lines in its 398×24 box.
             The ♢ keeps the design's double space after it. */}
@@ -496,7 +589,13 @@ export function WholesaleScreen() {
 
         {/* 1523:762 CTA · Submit Wholesale Application — non-submitting
             placeholder: there is no wholesale backend yet. */}
-        <div style={{ ...abs(16, 46, 398, 50), background: "#3B2F2F", borderRadius: 10 }}>
+        <div
+          style={{
+            ...abs(16, 46, 398, 50),
+            background: "#3B2F2F",
+            borderRadius: 10,
+          }}
+        >
           <div
             className={notoSC.className}
             style={{
@@ -577,7 +676,8 @@ export function WholesaleScreen() {
             whiteSpace: "nowrap",
           }}
         >
-          GoldRose business specialists typically respond within 1–2 business days.
+          GoldRose business specialists typically respond within 1–2 business
+          days.
         </div>
       </div>
 

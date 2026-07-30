@@ -39,7 +39,11 @@ test("utm_source spellings collapse into the owner's channels", () => {
     ["yt", "YouTube"],
   ];
   for (const [source, channel] of cases) {
-    assert.equal(channelOf(view({ utm: { utm_source: source } })), channel, source);
+    assert.equal(
+      channelOf(view({ utm: { utm_source: source } })),
+      channel,
+      source,
+    );
   }
 });
 
@@ -61,7 +65,10 @@ test("referrer hostnames map to the same channels", () => {
 });
 
 test("YouTube wins over Google despite shared ownership hints", () => {
-  assert.equal(channelOf(view({ referrer: "https://www.youtube.com/" })), "YouTube");
+  assert.equal(
+    channelOf(view({ referrer: "https://www.youtube.com/" })),
+    "YouTube",
+  );
 });
 
 test("utm_source outranks the referrer", () => {
@@ -75,8 +82,14 @@ test("utm_source outranks the referrer", () => {
 test("no signal means Direct; unknown sources pass through unchanged", () => {
   assert.equal(channelOf(undefined), "Direct");
   assert.equal(channelOf(view({})), "Direct");
-  assert.equal(channelOf(view({ utm: { utm_source: "Newsletter" } })), "Newsletter");
-  assert.equal(channelOf(view({ referrer: "https://example.com/blog" })), "example.com");
+  assert.equal(
+    channelOf(view({ utm: { utm_source: "Newsletter" } })),
+    "Newsletter",
+  );
+  assert.equal(
+    channelOf(view({ referrer: "https://example.com/blog" })),
+    "example.com",
+  );
 });
 
 test("accountOf labels the posting account from utm_acc, prefixed with the channel", () => {
@@ -102,15 +115,25 @@ test("accountOf is null without a utm_acc tag", () => {
   assert.equal(accountOf(undefined), null);
   assert.equal(accountOf(view({})), null);
   assert.equal(accountOf(view({ utm: { utm_source: "tiktok" } })), null);
-  assert.equal(accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "  " } })), null);
+  assert.equal(
+    accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "  " } })),
+    null,
+  );
 });
 
 test("accountOf ignores utm_content — ad-variant values must never become accounts", () => {
   // Decision 2026-07-24 (docs/features/posting-account-attribution.md): no
   // fallback, so a tool-filled utm_content=banner_a can't corrupt commissions.
-  assert.equal(accountOf(view({ utm: { utm_source: "tiktok", utm_content: "banner_a" } })), null);
   assert.equal(
-    accountOf(view({ utm: { utm_source: "tiktok", utm_acc: "amy", utm_content: "banner_a" } })),
+    accountOf(view({ utm: { utm_source: "tiktok", utm_content: "banner_a" } })),
+    null,
+  );
+  assert.equal(
+    accountOf(
+      view({
+        utm: { utm_source: "tiktok", utm_acc: "amy", utm_content: "banner_a" },
+      }),
+    ),
     "TikTok · amy",
   );
 });

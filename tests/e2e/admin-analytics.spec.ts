@@ -26,7 +26,9 @@ test("browsing the storefront writes page views and checkout carries the visitor
   // like an owner marketing link — utm_acc names the posting account so
   // the order can be traced back to it (commission attribution).
   const beacon = page.waitForResponse("**/api/beacon");
-  await page.goto("/shop?utm_source=tiktok&utm_acc=amy&utm_campaign=stage7-video");
+  await page.goto(
+    "/shop?utm_source=tiktok&utm_acc=amy&utm_campaign=stage7-video",
+  );
   await beacon;
   const beacon2 = page.waitForResponse("**/api/beacon");
   await page.goto("/products/signature-24k-gold-rose");
@@ -56,18 +58,26 @@ test("browsing the storefront writes page views and checkout carries the visitor
     await fs.readFile(path.join(process.cwd(), ".data", "db.json"), "utf8"),
   ) as {
     tables: {
-      page_views: Array<{ path: string; visitor_id: string; session_id: string }>;
+      page_views: Array<{
+        path: string;
+        visitor_id: string;
+        session_id: string;
+      }>;
       orders: Array<{ name: string; visitor_id: string | null }>;
     };
   };
   expect(db.tables.page_views.some((view) => view.path === "/shop")).toBe(true);
   expect(
-    db.tables.page_views.some((view) => view.path === "/products/signature-24k-gold-rose"),
+    db.tables.page_views.some(
+      (view) => view.path === "/products/signature-24k-gold-rose",
+    ),
   ).toBe(true);
   const order = db.tables.orders.find((row) => row.name === orderName);
   expect(order?.visitor_id).toBeTruthy();
   // The order's visitor matches a beaconed visitor id.
-  expect(db.tables.page_views.some((view) => view.visitor_id === order!.visitor_id)).toBe(true);
+  expect(
+    db.tables.page_views.some((view) => view.visitor_id === order!.visitor_id),
+  ).toBe(true);
 });
 
 test("the completed order shows its Conversion summary", async ({ page }) => {
@@ -75,25 +85,35 @@ test("the completed order shows its Conversion summary", async ({ page }) => {
   await page.goto("/admin/orders");
   await page.getByText(orderName, { exact: true }).first().click();
   await page.waitForURL(/\/admin\/orders\/[0-9a-f-]+$/);
-  await expect(page.getByRole("heading", { name: "Conversion summary" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Conversion summary" }),
+  ).toBeVisible();
   await expect(page.getByText(/\d+ sessions before this order/)).toBeVisible();
   await expect(page.getByText(/First visit: /)).toBeVisible();
   // Commission attribution: the order traces back to the posting account.
-  await expect(page.getByText("Referred by account: TikTok · amy")).toBeVisible();
+  await expect(
+    page.getByText("Referred by account: TikTok · amy"),
+  ).toBeVisible();
 });
 
-test("Home shows metric cards, chart and the things-to-do feed", async ({ page }) => {
+test("Home shows metric cards, chart and the things-to-do feed", async ({
+  page,
+}) => {
   await adminLogin(page);
   await expect(page.getByText("Today", { exact: true })).toBeVisible();
   await expect(page.getByText("Last 7 days").first()).toBeVisible();
   await expect(page.getByText("Last 30 days").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Things to do" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Things to do" }),
+  ).toBeVisible();
   await expect(page.getByText(/\d+ orders to fulfill/)).toBeVisible();
   // Sessions + conversion cards are live (beaconed browsing above).
   await expect(page.getByText(/Sessions — Last 7 days/)).toBeVisible();
 });
 
-test("analytics cards compute for a chosen range with live visitors", async ({ page }) => {
+test("analytics cards compute for a chosen range with live visitors", async ({
+  page,
+}) => {
   await adminLogin(page);
   await page.goto("/admin/analytics?range=7d");
 
@@ -131,12 +151,16 @@ test("analytics cards compute for a chosen range with live visitors", async ({ p
   // attribution rows read Direct / Unknown.
   await expect(page.getByText("Updates every 30 seconds")).toBeVisible();
   await expect(page.getByText("Direct", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Unknown", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText("Unknown", { exact: true }).first(),
+  ).toBeVisible();
 
   // Range picker navigates.
   await page.getByLabel("Date range").selectOption("today");
   await page.waitForURL(/range=today/);
-  await expect(page.getByText("Total sales", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText("Total sales", { exact: true }).first(),
+  ).toBeVisible();
 });
 
 test("⌘K finds an order by number, a product by SKU, a customer by email", async ({
@@ -154,12 +178,16 @@ test("⌘K finds an order by number, a product by SKU, a customer by email", asy
 
   // Product by SKU.
   await searchBox.fill("GR-SIG-001-1");
-  await expect(modal.getByText("GoldRose Signature 24K Gold Rose")).toBeVisible();
+  await expect(
+    modal.getByText("GoldRose Signature 24K Gold Rose"),
+  ).toBeVisible();
 
   // Customer by email → navigate to the profile.
   await searchBox.fill(BUYER_EMAIL);
   await expect(modal.getByText("Stage Seven")).toBeVisible();
   await modal.getByText("Stage Seven").click();
   await page.waitForURL(/\/admin\/customers\/[0-9a-f-]+$/);
-  await expect(page.getByRole("heading", { name: "Last order placed" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Last order placed" }),
+  ).toBeVisible();
 });

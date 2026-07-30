@@ -46,7 +46,10 @@ const EXTENSION_TYPES: Record<string, string> = {
  * @param fileName - File name or path to inspect.
  */
 export function contentTypeFor(fileName: string): string {
-  return EXTENSION_TYPES[path.extname(fileName).toLowerCase()] ?? "application/octet-stream";
+  return (
+    EXTENSION_TYPES[path.extname(fileName).toLowerCase()] ??
+    "application/octet-stream"
+  );
 }
 
 /**
@@ -68,7 +71,8 @@ const ATTACHMENT_TYPES: Record<string, string> = {
   ".csv": "text/csv",
   ".zip": "application/zip",
   ".doc": "application/msword",
-  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".docx":
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ".xls": "application/vnd.ms-excel",
   ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ".mp4": "video/mp4",
@@ -108,7 +112,12 @@ export async function uploadAttachment(file: File): Promise<StoredFile> {
     if (error) {
       throw new Error(`storage upload: ${error.message}`);
     }
-    return { path: key, name: file.name, size: bytes.length, uploadedAt: new Date().toISOString() };
+    return {
+      path: key,
+      name: file.name,
+      size: bytes.length,
+      uploadedAt: new Date().toISOString(),
+    };
   }
 
   // Local: flatten the prefix into the filename (uploads dir is flat).
@@ -167,7 +176,12 @@ export async function uploadFile(file: File): Promise<StoredFile> {
     if (error) {
       throw new Error(`storage upload: ${error.message}`);
     }
-    return { path: key, name: file.name, size: bytes.length, uploadedAt: new Date().toISOString() };
+    return {
+      path: key,
+      name: file.name,
+      size: bytes.length,
+      uploadedAt: new Date().toISOString(),
+    };
   }
 
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
@@ -188,7 +202,10 @@ export async function listFiles(): Promise<StoredFile[]> {
   if (getSupabaseEnv().hosted) {
     const { data, error } = await storageClient()
       .storage.from(BUCKET)
-      .list("", { limit: 1000, sortBy: { column: "created_at", order: "desc" } });
+      .list("", {
+        limit: 1000,
+        sortBy: { column: "created_at", order: "desc" },
+      });
     if (error) {
       throw new Error(`storage list: ${error.message}`);
     }
@@ -237,7 +254,9 @@ export async function deleteFile(storedPath: string): Promise<void> {
   if (storedPath.startsWith("/")) {
     return; // repo public asset — never deleted from the admin
   }
-  const { error } = await storageClient().storage.from(BUCKET).remove([storedPath]);
+  const { error } = await storageClient()
+    .storage.from(BUCKET)
+    .remove([storedPath]);
   if (error) {
     throw new Error(`storage delete: ${error.message}`);
   }

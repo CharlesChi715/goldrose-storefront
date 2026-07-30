@@ -44,8 +44,14 @@ test("a short centred section beats a tall one that owns more pixels", () => {
   // The objection that shaped the formula: a 120px band between two tall bands
   // occupies far fewer viewport pixels, yet it is what the visitor is looking
   // at. Scoring against "the most it could show" lets it win.
-  const shortCentred = sectionScore({ name: "S", top: 340, bottom: 460 }, VIEWPORT);
-  const tallPartial = sectionScore({ name: "T", top: 460, bottom: 2460 }, VIEWPORT);
+  const shortCentred = sectionScore(
+    { name: "S", top: 340, bottom: 460 },
+    VIEWPORT,
+  );
+  const tallPartial = sectionScore(
+    { name: "T", top: 460, bottom: 2460 },
+    VIEWPORT,
+  );
 
   assert.ok(
     shortCentred > tallPartial,
@@ -62,8 +68,14 @@ test("a fully visible section of any height can reach the top score", () => {
 });
 
 test("an off-screen section scores zero", () => {
-  assert.equal(sectionScore({ name: "A", top: -500, bottom: -10 }, VIEWPORT), 0);
-  assert.equal(sectionScore({ name: "B", top: 900, bottom: 1400 }, VIEWPORT), 0);
+  assert.equal(
+    sectionScore({ name: "A", top: -500, bottom: -10 }, VIEWPORT),
+    0,
+  );
+  assert.equal(
+    sectionScore({ name: "B", top: 900, bottom: 1400 }, VIEWPORT),
+    0,
+  );
 });
 
 test("a tall section still beats a sliver clinging to the edge", () => {
@@ -104,7 +116,7 @@ test("a backgrounded tab adds zero active time", () => {
   const before = clock.snapshot(t).activeMs;
 
   clock.setVisible(false, t);
-  t = run(clock, t, 60_000, "HOME-HERO-SECTION");   // 60s in the background
+  t = run(clock, t, 60_000, "HOME-HERO-SECTION"); // 60s in the background
   clock.setVisible(true, t);
 
   assert.equal(clock.snapshot(t).activeMs, before);
@@ -122,7 +134,10 @@ test("idle time beyond the cut is dropped, and interaction resumes the clock", (
 
   clock.activity(t);
   t = run(clock, t, 5_000, "HOME-HERO-SECTION");
-  assert.ok(clock.snapshot(t).activeMs > idled, "interaction should restart the clock");
+  assert.ok(
+    clock.snapshot(t).activeMs > idled,
+    "interaction should restart the clock",
+  );
 });
 
 test("a section must lead for the minimum dwell before it earns any time", () => {
@@ -147,17 +162,25 @@ test("a section that leads past the floor does take the clock", () => {
   t = run(clock, t, MIN_SECTION_MS + 5_000, "HOME-STORY-SECTION");
 
   const snap = clock.snapshot(t);
-  assert.ok(snap.sections["HOME-STORY-SECTION"] > 0, "story section should have banked time");
+  assert.ok(
+    snap.sections["HOME-STORY-SECTION"] > 0,
+    "story section should have banked time",
+  );
 });
 
 test("per-section time never exceeds page active time — the invariant", () => {
   const clock = createEngagementClock(0);
   let t = 0;
-  const bands = ["HOME-HERO-SECTION", "HOME-STORY-SECTION", "HOME-CRAFT-SECTION"];
+  const bands = [
+    "HOME-HERO-SECTION",
+    "HOME-STORY-SECTION",
+    "HOME-CRAFT-SECTION",
+  ];
   for (let i = 0; i < 12; i += 1) {
     t = run(clock, t, 3_000, bands[i % bands.length]);
     clock.activity(t);
-    if (i % 4 === 3) {                 // duck out of the tab now and then
+    if (i % 4 === 3) {
+      // duck out of the tab now and then
       clock.setVisible(false, t);
       t = run(clock, t, 9_000, bands[i % bands.length]);
       clock.setVisible(true, t);
@@ -176,7 +199,7 @@ test("per-section time never exceeds page active time — the invariant", () => 
 test("scroll depth only ever increases", () => {
   const clock = createEngagementClock(0);
   clock.reportScroll(64);
-  clock.reportScroll(20);            // scrolled back up
+  clock.reportScroll(20); // scrolled back up
   assert.equal(clock.snapshot(0).scrollPct, 64);
 });
 

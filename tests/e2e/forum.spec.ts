@@ -26,7 +26,9 @@ async function logIn(page: Page) {
   await page.waitForURL(/\/admin$/);
 }
 
-test("the login page has no nickname field outside open-access mode", async ({ page }) => {
+test("the login page has no nickname field outside open-access mode", async ({
+  page,
+}) => {
   await page.goto("/admin/login");
   await expect(page.getByLabel(/Nickname|昵称/)).toHaveCount(0);
 });
@@ -45,13 +47,20 @@ test("start a discussion, reply, edit, see it in the list, then delete it", asyn
 }) => {
   await logIn(page);
 
-  await page.getByRole("navigation").getByRole("link", { name: "Forum" }).click();
+  await page
+    .getByRole("navigation")
+    .getByRole("link", { name: "Forum" })
+    .click();
   await page.waitForURL(/\/admin\/forum$/);
   await expect(page.getByText("Posting as: owner")).toBeVisible();
 
   // The seeded announcement threads greet testers.
-  await expect(page.getByText("📢 Welcome to the GoldRose testing forum")).toBeVisible();
-  await expect(page.getByText("📢 What to test — and what to expect")).toBeVisible();
+  await expect(
+    page.getByText("📢 Welcome to the GoldRose testing forum"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("📢 What to test — and what to expect"),
+  ).toBeVisible();
 
   await page.getByLabel("Title").fill(TITLE);
   await page.getByLabel("Message").fill(OPENING);
@@ -98,13 +107,17 @@ test("start a discussion, reply, edit, see it in the list, then delete it", asyn
   await expect(page.getByText(TITLE)).toHaveCount(0);
 });
 
-test("unread badges count new messages and clear after reading", async ({ page }) => {
+test("unread badges count new messages and clear after reading", async ({
+  page,
+}) => {
   await logIn(page);
 
   // Fresh browser context = nothing read yet on this device, so the seeded
   // announcement threads (posted by "GoldRose Team") are unread: the Forum
   // nav item carries a count badge.
-  const forumNavLink = page.getByRole("navigation").getByRole("link", { name: /Forum/ });
+  const forumNavLink = page
+    .getByRole("navigation")
+    .getByRole("link", { name: /Forum/ });
   const navBadge = forumNavLink.getByText(/^\d+$/);
   await expect(navBadge).toBeVisible();
   const initialUnread = Number(await navBadge.innerText());
@@ -131,7 +144,9 @@ test("unread badges count new messages and clear after reading", async ({ page }
   await expect(forumNavLink.getByText(/^\d+$/)).toHaveCount(0);
 });
 
-test("the display-name popup overrides the account identity", async ({ page }) => {
+test("the display-name popup overrides the account identity", async ({
+  page,
+}) => {
   await logIn(page);
   await page.goto("/admin/forum");
 

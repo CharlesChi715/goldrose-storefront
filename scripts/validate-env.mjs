@@ -19,21 +19,17 @@ const requiredSupabaseEnv = {
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL?.trim(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY:
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim(),
-  SUPABASE_SERVICE_ROLE_KEY:
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
 };
 
 const entries = Object.entries(requiredSupabaseEnv);
 const present = entries
   .filter(([, value]) => Boolean(value))
   .map(([name]) => name);
-const missing = entries
-  .filter(([, value]) => !value)
-  .map(([name]) => name);
+const missing = entries.filter(([, value]) => !value).map(([name]) => name);
 
 const partiallyConfigured = present.length > 0 && missing.length > 0;
-const vercelTarget =
-  process.env.VERCEL_TARGET_ENV ?? process.env.VERCEL_ENV;
+const vercelTarget = process.env.VERCEL_TARGET_ENV ?? process.env.VERCEL_ENV;
 const productionVercel = vercelTarget === "production";
 
 if (partiallyConfigured || (productionVercel && missing.length > 0)) {
@@ -60,7 +56,8 @@ console.log(
 const skipPayment = ["1", "true"].includes(
   (process.env.CHECKOUT_SKIP_PAYMENT ?? "").trim().toLowerCase(),
 );
-const paypalLive = (process.env.PAYPAL_ENV ?? "").trim().toLowerCase() === "live";
+const paypalLive =
+  (process.env.PAYPAL_ENV ?? "").trim().toLowerCase() === "live";
 
 if (skipPayment && paypalLive) {
   console.error(

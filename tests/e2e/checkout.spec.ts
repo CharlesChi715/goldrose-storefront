@@ -30,8 +30,17 @@ type Db = {
       total_cents: number;
       financial_status: string;
     }>;
-    order_lines: Array<{ order_id: string; variant_id: string | null; quantity: number }>;
-    inventory_movements: Array<{ variant_id: string; delta: number; reason: string; note: string | null }>;
+    order_lines: Array<{
+      order_id: string;
+      variant_id: string | null;
+      quantity: number;
+    }>;
+    inventory_movements: Array<{
+      variant_id: string;
+      delta: number;
+      reason: string;
+      note: string | null;
+    }>;
     checkouts: Array<{ status: string; total_cents: number }>;
     customers: Array<{ email: string }>;
   };
@@ -48,7 +57,10 @@ test("mock checkout: cart → pay → success → order recorded with note + mov
 }) => {
   await page.addInitScript(
     ([key, value]) => window.localStorage.setItem(key, value),
-    [CART_KEY, JSON.stringify([{ variantId: SIGNATURE_VARIANT, quantity: 1 }])] as const,
+    [
+      CART_KEY,
+      JSON.stringify([{ variantId: SIGNATURE_VARIANT, quantity: 1 }]),
+    ] as const,
   );
 
   await page.goto("/checkout");
@@ -72,9 +84,13 @@ test("mock checkout: cart → pay → success → order recorded with note + mov
 
   await page.waitForURL(/\/checkout\/success\?/);
   // Success page is now the C-2 "Order Confirmed" design.
-  await expect(page.getByRole("heading", { name: "Order Confirmed" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Order Confirmed" }),
+  ).toBeVisible();
   await expect(page.getByText(/TEST ORDER · MOCK MODE/)).toBeVisible();
-  const orderName = (await page.locator("[data-order-name]").innerText()).trim();
+  const orderName = (
+    await page.locator("[data-order-name]").innerText()
+  ).trim();
   expect(orderName).toMatch(/^#1\d{3}$/);
 
   const db = await readDb();
@@ -98,16 +114,25 @@ test("mock checkout: cart → pay → success → order recorded with note + mov
   expect(movement?.delta).toBe(-1);
 
   // Customer auto-created; checkout row completed.
-  expect(db.tables.customers.some((row) => row.email === "stage4-test@example.com")).toBe(true);
   expect(
-    db.tables.checkouts.some((row) => row.status === "completed" && row.total_cents === 5594),
+    db.tables.customers.some((row) => row.email === "stage4-test@example.com"),
+  ).toBe(true);
+  expect(
+    db.tables.checkouts.some(
+      (row) => row.status === "completed" && row.total_cents === 5594,
+    ),
   ).toBe(true);
 });
 
-test("non-US address gets its zone's shipping rate (Rest of world)", async ({ page }) => {
+test("non-US address gets its zone's shipping rate (Rest of world)", async ({
+  page,
+}) => {
   await page.addInitScript(
     ([key, value]) => window.localStorage.setItem(key, value),
-    [CART_KEY, JSON.stringify([{ variantId: SIGNATURE_VARIANT, quantity: 1 }])] as const,
+    [
+      CART_KEY,
+      JSON.stringify([{ variantId: SIGNATURE_VARIANT, quantity: 1 }]),
+    ] as const,
   );
 
   await page.goto("/checkout");
@@ -120,7 +145,9 @@ test("non-US address gets its zone's shipping rate (Rest of world)", async ({ pa
   await page.getByRole("button", { name: "PayPal" }).click();
   await page.waitForURL(/\/checkout\/success\?/);
 
-  const orderName = (await page.locator("[data-order-name]").innerText()).trim();
+  const orderName = (
+    await page.locator("[data-order-name]").innerText()
+  ).trim();
   const db = await readDb();
   const order = db.tables.orders.find((row) => row.name === orderName);
   expect(order!.shipping_cents).toBe(1995);
@@ -152,7 +179,10 @@ test("tampered client prices are ignored — the server prices from the DB", asy
   expect(result.order.total).toBe(5594); // DB price, not the tampered one
 });
 
-test("an admin price edit changes the checkout total", async ({ page, request }) => {
+test("an admin price edit changes the checkout total", async ({
+  page,
+  request,
+}) => {
   test.setTimeout(90_000);
   await page.setViewportSize(ADMIN_VIEWPORT);
   await adminLogin(page);

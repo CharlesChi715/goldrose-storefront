@@ -31,7 +31,10 @@ export async function POST(request: Request) {
   try {
     parsed = requestSchema.parse(await request.json());
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Invalid request." },
+      { status: 400 },
+    );
   }
 
   try {

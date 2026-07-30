@@ -53,7 +53,9 @@ test("a signed-in buyer's order carries their auth uid", async () => {
 
   // And it survives the round trip to storage — this is the value /account
   // actually reads back.
-  const stored = (await getStore().all("orders")).find((row) => row.id === order.id);
+  const stored = (await getStore().all("orders")).find(
+    (row) => row.id === order.id,
+  );
   assert.equal(stored?.auth_user_id, BUYER_UID);
 });
 

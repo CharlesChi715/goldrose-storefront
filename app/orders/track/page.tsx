@@ -28,7 +28,12 @@ export default async function TrackOrderPage({
 }) {
   const params = await searchParams;
   return (
-    <ScaleFrame height={1519} background="#FFFBF6" fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={1519}
+      background="#FFFBF6"
+      fontClass={notoSC.className}
+      nav={false}
+    >
       <TrackOrderScreen returnOpen={params.return === "1"} />
     </ScaleFrame>
   );

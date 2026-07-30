@@ -21,7 +21,11 @@ import {
   Text,
 } from "@shopify/polaris";
 import { formatMoney } from "@/lib/money";
-import type { AnalyticsSummary, MetricPair, RangeKey } from "@/lib/admin/analytics";
+import type {
+  AnalyticsSummary,
+  MetricPair,
+  RangeKey,
+} from "@/lib/admin/analytics";
 import { useAdminLang, useAdminT } from "../../PolarisShell";
 import { SalesChart } from "../SalesChart";
 
@@ -29,7 +33,9 @@ function DeltaBadge({ pair }: { pair: MetricPair }) {
   if (pair.previous === 0) {
     return null;
   }
-  const delta = Math.round(((pair.current - pair.previous) / pair.previous) * 100);
+  const delta = Math.round(
+    ((pair.current - pair.previous) / pair.previous) * 100,
+  );
   return (
     <Badge tone={delta >= 0 ? "success" : "critical"}>
       {`${delta >= 0 ? "+" : ""}${delta}%`}
@@ -139,8 +145,9 @@ export function AnalyticsDashboard({
     }
     try {
       return (
-        new Intl.DisplayNames([lang === "zh" ? "zh-CN" : "en"], { type: "region" }).of(code) ??
-        code
+        new Intl.DisplayNames([lang === "zh" ? "zh-CN" : "en"], {
+          type: "region",
+        }).of(code) ?? code
       );
     } catch {
       return code;

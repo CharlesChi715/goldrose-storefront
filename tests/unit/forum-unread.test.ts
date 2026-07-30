@@ -41,7 +41,13 @@ test("your own posts never count as unread", () => {
 
 test("totalUnread sums per-thread counts using each thread's own mark", () => {
   const activity = [
-    { threadId: "a", posts: [{ at: T1, by: "boss" }, { at: T3, by: "boss" }] },
+    {
+      threadId: "a",
+      posts: [
+        { at: T1, by: "boss" },
+        { at: T3, by: "boss" },
+      ],
+    },
     { threadId: "b", posts: [{ at: T2, by: "boss" }] },
     { threadId: "c", posts: [{ at: T2, by: "owner" }] },
   ];

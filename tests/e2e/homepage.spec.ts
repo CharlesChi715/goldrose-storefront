@@ -8,7 +8,9 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("H-03 · hero carousel and pagination dots", () => {
-  test("dots select slides, highlight the current one, and wrap around", async ({ page }) => {
+  test("dots select slides, highlight the current one, and wrap around", async ({
+    page,
+  }) => {
     await page.goto("/");
     const dots = page.getByRole("button", { name: /^Show hero slide / });
     await expect(dots).toHaveCount(4);
@@ -33,10 +35,14 @@ test.describe("H-03 · hero carousel and pagination dots", () => {
     // that mapping is undecided (OQ-3).
     await page.getByRole("link", { name: "hero slide 1" }).click();
     await expect(page).toHaveURL(/\/placeholder$/);
-    await expect(page.getByRole("heading", { name: "Placeholder page" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Placeholder page" }),
+    ).toBeVisible();
   });
 
-  test("the track follows the finger and holds wherever it pauses", async ({ page }) => {
+  test("the track follows the finger and holds wherever it pauses", async ({
+    page,
+  }) => {
     await page.goto("/");
     const card = page.getByRole("link", { name: "hero slide 1" });
     const track = card.locator("..");
@@ -89,9 +95,13 @@ test.describe("H-03 · hero carousel and pagination dots", () => {
     await expect(track).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
   });
 
-  test("the track slides horizontally rather than crossfading", async ({ page }) => {
+  test("the track slides horizontally rather than crossfading", async ({
+    page,
+  }) => {
     await page.goto("/");
-    const track = page.getByRole("link", { name: "hero slide 1" }).locator("..");
+    const track = page
+      .getByRole("link", { name: "hero slide 1" })
+      .locator("..");
     await expect(track).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
     await page.getByRole("button", { name: "Show hero slide 2" }).click();
     // One window width to the left — the outgoing slide travels off, the next

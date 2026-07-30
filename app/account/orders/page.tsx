@@ -24,7 +24,11 @@ function formatDate(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime())
     ? ""
-    : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
 }
 
 /** Map one real order onto the design's card fields. */
@@ -55,7 +59,9 @@ function toCard(order: AccountOrder): OrdersListOrder {
 
 export default function AccountOrdersPage() {
   // undefined = still asking; null = no session/local mode (mock renders).
-  const [orders, setOrders] = useState<OrdersListOrder[] | null | undefined>(undefined);
+  const [orders, setOrders] = useState<OrdersListOrder[] | null | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     let cancelled = false;

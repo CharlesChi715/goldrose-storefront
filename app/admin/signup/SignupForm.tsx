@@ -23,7 +23,10 @@ const SIGNUP_INITIAL: SignUpState = { status: "idle", error: null };
 
 export function SignupForm() {
   const t = useAdminT();
-  const [state, formAction, pending] = useActionState(requestAccessAction, SIGNUP_INITIAL);
+  const [state, formAction, pending] = useActionState(
+    requestAccessAction,
+    SIGNUP_INITIAL,
+  );
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

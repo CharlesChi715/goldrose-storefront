@@ -47,7 +47,12 @@ export default async function CheckoutSuccessPage({
   return (
     // The redesigned C-2 frame (1541:362, 07-29) is 430×1188 and dropped its
     // glyph tab bar entirely, so this route opts out of BottomNav.
-    <ScaleFrame height={1188} background="#FFFBF6" fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={1188}
+      background="#FFFBF6"
+      fontClass={notoSC.className}
+      nav={false}
+    >
       <OrderConfirmedScreen
         orderName={params.order ?? ""}
         total={hasTotal ? formatMoney(totalCents) : null}

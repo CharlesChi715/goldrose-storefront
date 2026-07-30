@@ -36,13 +36,27 @@ export const HeartIcon = () => (
   </svg>
 );
 
-export const ListviewIcon = ({ color = "#14142B" }: { color?: string } = {}) => (
+export const ListviewIcon = ({
+  color = "#14142B",
+}: { color?: string } = {}) => (
   <svg width="26" height="24" viewBox="0 0 26 24" fill="none">
     <g opacity="0.5">
       <path d="M12.7699 17H20.9011" stroke={color} strokeWidth="1.00221" />
       <path d="M12.794 6.99999H20.9252" stroke={color} strokeWidth="1.00221" />
-      <rect x="2.60633" y="3.45509" width="7.37011" height="7.00001" stroke={color} />
-      <rect x="2.60633" y="13.5144" width="7.37011" height="7.00001" stroke={color} />
+      <rect
+        x="2.60633"
+        y="3.45509"
+        width="7.37011"
+        height="7.00001"
+        stroke={color}
+      />
+      <rect
+        x="2.60633"
+        y="13.5144"
+        width="7.37011"
+        height="7.00001"
+        stroke={color}
+      />
     </g>
   </svg>
 );
@@ -50,7 +64,10 @@ export const ListviewIcon = ({ color = "#14142B" }: { color?: string } = {}) => 
 export const DownIcon = ({ color = "#1B362B" }: { color?: string } = {}) => (
   <svg width="21" height="20" viewBox="0 0 21 20" fill="none">
     <g opacity="0.5">
-      <path d="M8.35172 11.6087L4.73531 6.72329L11.9681 6.72329L8.35172 11.6087Z" fill={color} />
+      <path
+        d="M8.35172 11.6087L4.73531 6.72329L11.9681 6.72329L8.35172 11.6087Z"
+        fill={color}
+      />
     </g>
   </svg>
 );
@@ -68,8 +85,16 @@ export const FilterIcon = ({ color = "#DD8560" }: { color?: string } = {}) => (
 
 export const CloseIcon = ({ color = "#555555" }: { color?: string } = {}) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M4 4.00002L12.5161 12.5161" stroke={color} strokeLinejoin="round" />
-    <path d="M4 12.5163L12.5161 4.00015" stroke={color} strokeLinejoin="round" />
+    <path
+      d="M4 4.00002L12.5161 12.5161"
+      stroke={color}
+      strokeLinejoin="round"
+    />
+    <path
+      d="M4 12.5163L12.5161 4.00015"
+      stroke={color}
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -100,15 +125,26 @@ export function PromoBar({
   const brown = variant === "brown";
   return (
     <>
-      <div style={{ ...abs(0, 0, 430, 32), background: brown ? "#3B2F2F" : "#06372E" }} />
+      <div
+        style={{
+          ...abs(0, 0, 430, 32),
+          background: brown ? "#3B2F2F" : "#06372E",
+        }}
+      />
       {isDefault || !slogan ? (
         // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
         <img
           src={brown ? "/veloria/home/549-95.svg" : "/veloria/glyph-promo.png"}
-          alt={slogan ?? "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"}
+          alt={
+            slogan ??
+            "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"
+          }
           width={brown ? 352 : 358}
           height={brown ? 10 : 20}
-          style={{ ...(brown ? abs(39, 11, 352, 10) : abs(36, 6, 358, 20)), display: "block" }}
+          style={{
+            ...(brown ? abs(39, 11, 352, 10) : abs(36, 6, 358, 20)),
+            display: "block",
+          }}
         />
       ) : (
         // Owner-edited → real text in the same box; minor glyph drift
@@ -154,20 +190,50 @@ export function VHeader({
       <div style={{ ...abs(0, 32, 430, 62), background: "#FCF8F4" }} />
       {/* Owner-supplied top-nav art (public/top-nav/*), cropped to content;
           each box is centred on the old 24×24 Figma icon position. */}
-      <img src="/top-nav/menu.png" alt="" style={{ ...abs(4.5, 50, 33, 26), objectFit: "contain" }} />
+      <img
+        src="/top-nav/menu.png"
+        alt=""
+        style={{ ...abs(4.5, 50, 33, 26), objectFit: "contain" }}
+      />
       <BackButton fallback={backHref} style={abs(83, 50, 14, 26)} />
-      <Link href="/" style={{ ...abs(147, 43.5, 136, 39), display: "block" }} aria-label="Home">
-        <img src="/veloria/logo.png" alt="GoldRose" width={136} height={39} style={{ display: "block", width: 136, height: 39 }} />
+      <Link
+        href="/"
+        style={{ ...abs(147, 43.5, 136, 39), display: "block" }}
+        aria-label="Home"
+      >
+        <img
+          src="/veloria/logo.png"
+          alt="GoldRose"
+          width={136}
+          height={39}
+          style={{ display: "block", width: 136, height: 39 }}
+        />
       </Link>
       {right === "search" ? (
         // 925:159 — the 07-27 detail-page frames replace the wishlist heart
         // with the search art (355b911e), which opens the SEARCH-OPEN overlay.
         <SearchButton style={abs(313, 41.5, 40, 43)} />
       ) : (
-        <WishlistButton slug={wishlistSlug ?? ""} style={abs(322.5, 50.5, 35, 26)} />
+        <WishlistButton
+          slug={wishlistSlug ?? ""}
+          style={abs(322.5, 50.5, 35, 26)}
+        />
       )}
-      <Link href="/checkout" style={{ ...abs(392.5, 50, 33, 26), display: "block" }} aria-label="Cart">
-        <img src="/top-nav/cart.png" alt="" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
+      <Link
+        href="/checkout"
+        style={{ ...abs(392.5, 50, 33, 26), display: "block" }}
+        aria-label="Cart"
+      >
+        <img
+          src="/top-nav/cart.png"
+          alt=""
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
       </Link>
     </>
   );
@@ -184,8 +250,18 @@ export function HomeHeader() {
     <>
       <div style={{ ...abs(-1, 36, 430, 62), background: "#FFF6EC" }} />
       <MenuButton style={abs(6.5, 45.5, 40, 43)} />
-      <Link href="/" style={{ ...abs(145.5, 47, 136, 40), display: "block" }} aria-label="Home">
-        <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
+      <Link
+        href="/"
+        style={{ ...abs(145.5, 47, 136, 40), display: "block" }}
+        aria-label="Home"
+      >
+        <img
+          src="/veloria/home/549-90.png"
+          alt="GoldRose"
+          width={136}
+          height={40}
+          style={{ display: "block", width: 136, height: 40 }}
+        />
       </Link>
       {/* The magnifier art is a live search button here too (owner, 07-27):
           the homepage is where visitors actually look for it. */}
@@ -194,8 +270,16 @@ export function HomeHeader() {
           the B-1 design but shows the mock's own line items — repointing the
           icon there would hide the shopper's real basket. Swap once /bag reads
           lib/cart/store.ts. */}
-      <Link href="/checkout" style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }} aria-label="Cart">
-        <img src="/veloria/screens/1523-1682.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+      <Link
+        href="/checkout"
+        style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }}
+        aria-label="Cart"
+      >
+        <img
+          src="/veloria/screens/1523-1682.png"
+          alt=""
+          style={{ display: "block", width: "100%", height: "100%" }}
+        />
       </Link>
     </>
   );
@@ -210,14 +294,36 @@ export function ShopHeader() {
     <>
       <div style={{ ...abs(0, 32, 430, 62), background: "#FFF6EC" }} />
       <MenuButton style={abs(7, 41.5, 40, 43)} />
-      <BackButton fallback="/" src="/veloria/home/56-71.png" style={abs(77, 41.5, 40, 43)} />
-      <Link href="/" style={{ ...abs(147, 43, 136, 40), display: "block" }} aria-label="Home">
-        <img src="/veloria/home/549-90.png" alt="GoldRose" width={136} height={40} style={{ display: "block", width: 136, height: 40 }} />
+      <BackButton
+        fallback="/"
+        src="/veloria/home/56-71.png"
+        style={abs(77, 41.5, 40, 43)}
+      />
+      <Link
+        href="/"
+        style={{ ...abs(147, 43, 136, 40), display: "block" }}
+        aria-label="Home"
+      >
+        <img
+          src="/veloria/home/549-90.png"
+          alt="GoldRose"
+          width={136}
+          height={40}
+          style={{ display: "block", width: 136, height: 40 }}
+        />
       </Link>
       {/* Search art opens the SEARCH-OPEN overlay (914:114, 07-27). */}
       <SearchButton style={abs(313, 41.5, 40, 43)} />
-      <Link href="/checkout" style={{ ...abs(383, 41.5, 40, 43), display: "block" }} aria-label="Cart">
-        <img src="/veloria/screens/1523-1682.png" alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+      <Link
+        href="/checkout"
+        style={{ ...abs(383, 41.5, 40, 43), display: "block" }}
+        aria-label="Cart"
+      >
+        <img
+          src="/veloria/screens/1523-1682.png"
+          alt=""
+          style={{ display: "block", width: "100%", height: "100%" }}
+        />
       </Link>
     </>
   );
@@ -249,10 +355,34 @@ type Tab = {
 // one tab state the 07-25 home set never rendered — B-4 ships it (1523:771), so
 // that id carries a set prefix.
 const TABS: Tab[] = [
-  { id: "Home", href: "/", img: "763-123", activeImg: "763-113", label: "Home" },
-  { id: "Shop", href: "/shop", img: "763-115", activeImg: "763-125", label: "Shop" },
-  { id: "Wholesale", href: "/business/wholesale", img: "763-117", activeImg: "screens/1523-771", label: "Wholesale" },
-  { id: "Account", href: "/account", img: "921-251", activeImg: "939-174", label: "Me" },
+  {
+    id: "Home",
+    href: "/",
+    img: "763-123",
+    activeImg: "763-113",
+    label: "Home",
+  },
+  {
+    id: "Shop",
+    href: "/shop",
+    img: "763-115",
+    activeImg: "763-125",
+    label: "Shop",
+  },
+  {
+    id: "Wholesale",
+    href: "/business/wholesale",
+    img: "763-117",
+    activeImg: "screens/1523-771",
+    label: "Wholesale",
+  },
+  {
+    id: "Account",
+    href: "/account",
+    img: "921-251",
+    activeImg: "939-174",
+    label: "Me",
+  },
 ];
 
 // Bare ids resolve against the 07-25 home render set; an id containing "/" is a
@@ -261,7 +391,10 @@ const tabArtSrc = (id: string) =>
   id.includes("/") ? `/veloria/${id}.png` : `/veloria/home/${id}.png`;
 
 // Every tab's art sits at the same spot inside its 70×59 hit area.
-const TAB_ART_STYLE: React.CSSProperties = { ...abs(10, 1, 50, 57), display: "block" };
+const TAB_ART_STYLE: React.CSSProperties = {
+  ...abs(10, 1, 50, 57),
+  display: "block",
+};
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
   return (
@@ -316,8 +449,13 @@ export function BottomNav({
         >
           {TABS.map((tab, i) => {
             const x = [18, 126, 234, 342][i];
-            const style: React.CSSProperties = { ...abs(x, 0, 70, 59), display: "block" };
-            const content = <TabContent tab={tab} isActive={tab.id === active} />;
+            const style: React.CSSProperties = {
+              ...abs(x, 0, 70, 59),
+              display: "block",
+            };
+            const content = (
+              <TabContent tab={tab} isActive={tab.id === active} />
+            );
             return tab.href ? (
               // FadeLink, not Link: switching tabs cross-fades the canvas.
               <FadeLink key={tab.id} href={tab.href} style={style}>

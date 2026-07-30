@@ -23,7 +23,10 @@ const FORGOT_INITIAL: ForgotState = { status: "idle" };
 
 export function ForgotForm() {
   const t = useAdminT();
-  const [state, formAction, pending] = useActionState(forgotPasswordAction, FORGOT_INITIAL);
+  const [state, formAction, pending] = useActionState(
+    forgotPasswordAction,
+    FORGOT_INITIAL,
+  );
   const [email, setEmail] = useState("");
 
   return (

@@ -32,7 +32,9 @@ export function productHandle(title: string): string {
     .replace(/^-+|-+$/g, "");
 
   if (handle.length > HANDLE_MAX_LENGTH || !HANDLE_PATTERN.test(handle)) {
-    throw new Error(`Cannot derive a URL handle from "${title}" — set one manually.`);
+    throw new Error(
+      `Cannot derive a URL handle from "${title}" — set one manually.`,
+    );
   }
   return handle;
 }

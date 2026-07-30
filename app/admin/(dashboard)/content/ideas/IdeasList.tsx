@@ -8,7 +8,14 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { BlockStack, Button, Card, InlineStack, Page, Text } from "@shopify/polaris";
+import {
+  BlockStack,
+  Button,
+  Card,
+  InlineStack,
+  Page,
+  Text,
+} from "@shopify/polaris";
 import { formatDateTime } from "@/lib/dates";
 import { useAdminT } from "../../../PolarisShell";
 import { deleteIdeaAction } from "./actions";
@@ -44,7 +51,8 @@ export function IdeasList({ items }: { items: IdeaItem[] }) {
                 <InlineStack align="space-between" blockAlign="center">
                   <Text as="span" tone="subdued" variant="bodySm">
                     {[item.name, item.email].filter(Boolean).join(" · ") || "—"}
-                    {item.path ? ` · ${item.path}` : ""} · {formatDateTime(item.createdAt)}
+                    {item.path ? ` · ${item.path}` : ""} ·{" "}
+                    {formatDateTime(item.createdAt)}
                   </Text>
                   <Button
                     size="micro"

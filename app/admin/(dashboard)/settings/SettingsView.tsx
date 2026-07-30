@@ -56,7 +56,9 @@ function toCents(value: string): number | null {
     return null;
   }
   const parsed = Number.parseFloat(trimmed);
-  return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) : null;
+  return Number.isFinite(parsed) && parsed >= 0
+    ? Math.round(parsed * 100)
+    : null;
 }
 
 export function SettingsView({
@@ -66,7 +68,11 @@ export function SettingsView({
   policies,
 }: {
   settings: SettingsShape;
-  payment: { mode: "mock" | "sandbox" | "live"; clientIdTail: string | null; webhookConfigured: boolean };
+  payment: {
+    mode: "mock" | "sandbox" | "live";
+    clientIdTail: string | null;
+    webhookConfigured: boolean;
+  };
   owners: string[];
   policies: { refund: string; privacy: string; terms: string };
 }) {
@@ -78,11 +84,17 @@ export function SettingsView({
 
   // General
   const [storeName, setStoreName] = useState(settings.store.name);
-  const [contactEmail, setContactEmail] = useState(settings.store.contact_email);
-  const [orderPrefix, setOrderPrefix] = useState(settings.store.order_number_prefix);
+  const [contactEmail, setContactEmail] = useState(
+    settings.store.contact_email,
+  );
+  const [orderPrefix, setOrderPrefix] = useState(
+    settings.store.order_number_prefix,
+  );
 
   // Checkout
-  const [discountField, setDiscountField] = useState(settings.checkout.discount_field_enabled);
+  const [discountField, setDiscountField] = useState(
+    settings.checkout.discount_field_enabled,
+  );
 
   // Shipping zones
   const [zones, setZones] = useState<ZoneDraft[]>(
@@ -101,7 +113,9 @@ export function SettingsView({
 
   // Notifications + low stock
   const [notifications, setNotifications] = useState(settings.notifications);
-  const [lowStock, setLowStock] = useState(String(settings.low_stock_threshold));
+  const [lowStock, setLowStock] = useState(
+    String(settings.low_stock_threshold),
+  );
 
   // Policies
   const [refund, setRefund] = useState(policies.refund);
@@ -113,8 +127,12 @@ export function SettingsView({
   const [homeDescription, setHomeDescription] = useState(
     settings.search_engine.home_description,
   );
-  const [socialImage, setSocialImage] = useState(settings.search_engine.social_image);
-  const [allowAi, setAllowAi] = useState(settings.search_engine.allow_ai_crawlers);
+  const [socialImage, setSocialImage] = useState(
+    settings.search_engine.social_image,
+  );
+  const [allowAi, setAllowAi] = useState(
+    settings.search_engine.allow_ai_crawlers,
+  );
 
   function save(action: () => Promise<void>) {
     setError(null);
@@ -131,7 +149,9 @@ export function SettingsView({
 
   function updateZone(index: number, patch: Partial<ZoneDraft>) {
     setZones((current) =>
-      current.map((zone, zoneIndex) => (zoneIndex === index ? { ...zone, ...patch } : zone)),
+      current.map((zone, zoneIndex) =>
+        zoneIndex === index ? { ...zone, ...patch } : zone,
+      ),
     );
   }
 
@@ -241,7 +261,9 @@ export function SettingsView({
                 loading={pending}
                 onClick={() =>
                   save(() =>
-                    saveCheckoutSettingsAction({ discount_field_enabled: discountField }),
+                    saveCheckoutSettingsAction({
+                      discount_field_enabled: discountField,
+                    }),
                   )
                 }
               >
@@ -261,7 +283,9 @@ export function SettingsView({
               <BlockStack key={zone.id} gap="200">
                 {index > 0 ? <Divider /> : null}
                 {zone.placeholder ? (
-                  <Banner tone="warning">{t("settings.shipping.placeholderNote")}</Banner>
+                  <Banner tone="warning">
+                    {t("settings.shipping.placeholderNote")}
+                  </Banner>
                 ) : null}
                 <InlineGrid columns={{ xs: 1, md: 4 }} gap="300">
                   <TextField
@@ -273,7 +297,9 @@ export function SettingsView({
                   <TextField
                     label={t("settings.shipping.zone.countries")}
                     value={zone.countriesText}
-                    onChange={(countriesText) => updateZone(index, { countriesText })}
+                    onChange={(countriesText) =>
+                      updateZone(index, { countriesText })
+                    }
                     autoComplete="off"
                   />
                   <TextField
@@ -341,7 +367,9 @@ export function SettingsView({
                           .split(/[,，\s]+/)
                           .map((code) => code.trim().toUpperCase())
                           .filter(Boolean)
-                          .map((code) => (code === "*" ? "*" : code.slice(0, 2))),
+                          .map((code) =>
+                            code === "*" ? "*" : code.slice(0, 2),
+                          ),
                         rate_cents: toCents(zone.rate) ?? 0,
                         free_over_cents: toCents(zone.freeOver),
                         ...(zone.placeholder !== undefined
@@ -370,7 +398,8 @@ export function SettingsView({
             <BlockStack gap="100">
               {zones.map((zone) => (
                 <Text as="p" key={zone.id} variant="bodySm">
-                  <strong>{zone.name || "—"}</strong>: {zone.countriesText || "—"}
+                  <strong>{zone.name || "—"}</strong>:{" "}
+                  {zone.countriesText || "—"}
                 </Text>
               ))}
             </BlockStack>
@@ -421,14 +450,20 @@ export function SettingsView({
               label={t("settings.notifications.orderConfirmation")}
               checked={notifications.order_confirmation}
               onChange={(order_confirmation) =>
-                setNotifications((current) => ({ ...current, order_confirmation }))
+                setNotifications((current) => ({
+                  ...current,
+                  order_confirmation,
+                }))
               }
             />
             <Checkbox
               label={t("settings.notifications.shippingConfirmation")}
               checked={notifications.shipping_confirmation}
               onChange={(shipping_confirmation) =>
-                setNotifications((current) => ({ ...current, shipping_confirmation }))
+                setNotifications((current) => ({
+                  ...current,
+                  shipping_confirmation,
+                }))
               }
             />
             <Checkbox
@@ -455,7 +490,9 @@ export function SettingsView({
                 onClick={() =>
                   save(async () => {
                     await saveNotificationsAction(notifications);
-                    await saveLowStockAction(Number.parseInt(lowStock, 10) || 0);
+                    await saveLowStockAction(
+                      Number.parseInt(lowStock, 10) || 0,
+                    );
                   })
                 }
               >
@@ -597,7 +634,9 @@ export function SettingsView({
         </Card>
       </BlockStack>
 
-      {toast ? <Toast content={toast} onDismiss={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast content={toast} onDismiss={() => setToast(null)} />
+      ) : null}
     </Page>
   );
 }

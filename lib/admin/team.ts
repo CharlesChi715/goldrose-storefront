@@ -65,7 +65,10 @@ export async function listTeam(): Promise<TeamMember[]> {
   const perPage = 200;
   const users: User[] = [];
   for (let page = 1; ; page++) {
-    const { data, error } = await client.auth.admin.listUsers({ page, perPage });
+    const { data, error } = await client.auth.admin.listUsers({
+      page,
+      perPage,
+    });
     if (error) {
       throw new Error(`listUsers: ${error.message}`);
     }
@@ -85,7 +88,11 @@ export async function listTeam(): Promise<TeamMember[]> {
       createdAt: user.created_at ?? null,
       approved: approvedIds.has(user.id),
     }))
-    .sort((a, b) => Number(a.approved) - Number(b.approved) || a.email.localeCompare(b.email));
+    .sort(
+      (a, b) =>
+        Number(a.approved) - Number(b.approved) ||
+        a.email.localeCompare(b.email),
+    );
 }
 
 /**
@@ -95,7 +102,10 @@ export async function listTeam(): Promise<TeamMember[]> {
  * @param userId - Auth user id to approve.
  * @param email - Email stored alongside for display.
  */
-export async function approveMember(userId: string, email: string): Promise<void> {
+export async function approveMember(
+  userId: string,
+  email: string,
+): Promise<void> {
   const existing = await getStore().all("admin_users");
   if (existing.some((row) => row.user_id === userId)) {
     return;

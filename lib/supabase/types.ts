@@ -99,7 +99,8 @@ export type Address = {
 };
 
 export type OrderSource = "mock" | "site" | "draft";
-export type FinancialStatus = "pending" | "paid" | "partially_refunded" | "refunded";
+export type FinancialStatus =
+  "pending" | "paid" | "partially_refunded" | "refunded";
 export type FulfillmentStatus = "unfulfilled" | "fulfilled";
 
 export type OrderRow = {

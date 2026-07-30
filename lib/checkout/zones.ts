@@ -23,7 +23,10 @@ export type ShippingZone = {
  * @param country - ISO alpha-2 ship-to country code.
  * @returns The matching zone, or null when nothing serves this country.
  */
-export function zoneForCountry(zones: ShippingZone[], country: string): ShippingZone | null {
+export function zoneForCountry(
+  zones: ShippingZone[],
+  country: string,
+): ShippingZone | null {
   return (
     zones.find((zone) => zone.countries.includes(country)) ??
     zones.find((zone) => zone.countries.includes("*")) ??
@@ -43,6 +46,7 @@ export function computeShipping(
   zone: ShippingZone,
   subtotalCents: number,
 ): { amount: number; free: boolean } {
-  const free = zone.free_over_cents !== null && subtotalCents >= zone.free_over_cents;
+  const free =
+    zone.free_over_cents !== null && subtotalCents >= zone.free_over_cents;
   return { amount: free ? 0 : zone.rate_cents, free };
 }

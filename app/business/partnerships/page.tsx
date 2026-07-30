@@ -16,13 +16,19 @@ import { PartnershipsScreen } from "@/components/screens/PartnershipsScreen";
 
 export const metadata: Metadata = {
   title: "Corporate partnerships",
-  description: "GoldRose gifting partnerships for retailers, corporate buyers and events.",
+  description:
+    "GoldRose gifting partnerships for retailers, corporate buyers and events.",
   alternates: { canonical: "/business/partnerships" },
 };
 
 export default function PartnershipsPage() {
   return (
-    <ScaleFrame height={1907} background="#FFF6EC" fontClass={notoSC.className} nav={false}>
+    <ScaleFrame
+      height={1907}
+      background="#FFF6EC"
+      fontClass={notoSC.className}
+      nav={false}
+    >
       <PartnershipsScreen />
     </ScaleFrame>
   );

@@ -61,7 +61,14 @@ export function A8() {
     // 138:64 -- module root; children below are frame-absolute minus (0, 5336).
     // Eyebrow 165:99, tag 165:104 and steps-title 165:106 are HIDDEN in Figma.
     // id="personalize" — scroll target for the A-4 "PERSONALIZE YOUR ROSE" card (H-16).
-    <div id="personalize" style={{ ...abs(0, 5336, 430, 805), background: "#FBF4EE", overflow: "hidden" }}>
+    <div
+      id="personalize"
+      style={{
+        ...abs(0, 5336, 430, 805),
+        background: "#FBF4EE",
+        overflow: "hidden",
+      }}
+    >
       {/* 165:101 · A8 Intro */}
       <div
         className={goudy.className}
@@ -81,18 +88,35 @@ export function A8() {
 
       {/* 165:102 · Image · Personalized GoldRose -- 382x264 window over a
           433x757 source; the negative offsets are the design's own crop. */}
-      <div style={{ ...abs(23, 172, 382, 264), borderRadius: 10, overflow: "hidden" }}>
+      <div
+        style={{
+          ...abs(23, 172, 382, 264),
+          borderRadius: 10,
+          overflow: "hidden",
+        }}
+      >
         <img
           src="/veloria/home/165-103.png"
           alt="Gold-dipped rose in a pink gift box with engraved plaque and message card, with Your Message, Name, Rose and Packaging callouts"
           width={433}
           height={757}
-          style={{ ...abs(-27, -193, 433, 757), display: "block", objectFit: "cover", maxWidth: "none" }}
+          style={{
+            ...abs(-27, -193, 433, 757),
+            display: "block",
+            objectFit: "cover",
+            maxWidth: "none",
+          }}
         />
       </div>
 
       {/* 466:121 · Button · Continue Personalizing -- placeholder, not wired */}
-      <div style={{ ...abs(23, 679, 382, 50), background: "#351E10", borderRadius: 8 }}>
+      <div
+        style={{
+          ...abs(23, 679, 382, 50),
+          background: "#351E10",
+          borderRadius: 8,
+        }}
+      >
         <div
           className={goudy.className}
           style={{
@@ -111,7 +135,12 @@ export function A8() {
           alt="→"
           width={15}
           height={18}
-          style={{ ...abs(298.5, 16, 15, 18), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(298.5, 16, 15, 18),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
       </div>
 
@@ -142,7 +171,12 @@ export function A8() {
           alt="♡"
           width={18}
           height={22}
-          style={{ ...abs(300.5, 14, 18, 22), display: "block", objectFit: "none", objectPosition: "left center" }}
+          style={{
+            ...abs(300.5, 14, 18, 22),
+            display: "block",
+            objectFit: "none",
+            objectPosition: "left center",
+          }}
         />
       </div>
 
@@ -181,7 +215,13 @@ export function A8() {
                 {s.n}
               </div>
             </div>
-            <img src={s.icon} alt="" width={44} height={34} style={{ ...abs(62, 6, 44, 34), display: "block" }} />
+            <img
+              src={s.icon}
+              alt=""
+              width={44}
+              height={34}
+              style={{ ...abs(62, 6, 44, 34), display: "block" }}
+            />
             {/* Content */}
             <div style={{ ...abs(116, 6, 225, 34), overflow: "hidden" }}>
               <div
@@ -216,7 +256,12 @@ export function A8() {
               alt="→"
               width={15}
               height={18}
-              style={{ ...abs(351, 14, 15, 18), display: "block", objectFit: "none", objectPosition: "left center" }}
+              style={{
+                ...abs(351, 14, 15, 18),
+                display: "block",
+                objectFit: "none",
+                objectPosition: "left center",
+              }}
             />
           </div>
         ))}

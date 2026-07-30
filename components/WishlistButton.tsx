@@ -93,7 +93,12 @@ export function WishlistButton({
       <img
         src={saved ? "/top-nav/wishlist-active.png" : "/top-nav/wishlist.png"}
         alt=""
-        style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+        }}
       />
     </button>
   );

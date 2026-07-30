@@ -38,7 +38,11 @@ import {
   QuestionCircleIcon,
   SettingsIcon,
 } from "@shopify/polaris-icons";
-import { searchAdminAction, setAdminLangAction, signOutAction } from "../actions";
+import {
+  searchAdminAction,
+  setAdminLangAction,
+  signOutAction,
+} from "../actions";
 import { useAdminLang, useAdminT, useSetAdminLang } from "../PolarisShell";
 import type { AdminAlert } from "@/lib/admin/analytics";
 import type { SearchResults } from "@/lib/admin/analytics";
@@ -51,7 +55,11 @@ import {
 
 export type PaymentMode = "mock" | "sandbox" | "live";
 
-const EMPTY_RESULTS: SearchResults = { orders: [], products: [], customers: [] };
+const EMPTY_RESULTS: SearchResults = {
+  orders: [],
+  products: [],
+  customers: [],
+};
 
 export function AdminFrame({
   email,
@@ -82,7 +90,8 @@ export function AdminFrame({
   // ⌘K global search (§9.1): modal opened by the shortcut or the top-bar field.
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResults>(EMPTY_RESULTS);
+  const [searchResults, setSearchResults] =
+    useState<SearchResults>(EMPTY_RESULTS);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -146,7 +155,9 @@ export function AdminFrame({
   }, []);
 
   const selected = (url: string, exact = false) =>
-    exact ? pathname === url : pathname === url || pathname.startsWith(`${url}/`);
+    exact
+      ? pathname === url
+      : pathname === url || pathname.startsWith(`${url}/`);
 
   const navigation = (
     <Navigation location={pathname}>
@@ -165,7 +176,10 @@ export function AdminFrame({
             selected: selected("/admin/orders"),
             subNavigationItems: [
               { url: "/admin/orders/drafts", label: t("nav.orders.drafts") },
-              { url: "/admin/orders/abandoned", label: t("nav.orders.abandoned") },
+              {
+                url: "/admin/orders/abandoned",
+                label: t("nav.orders.abandoned"),
+              },
             ],
           },
           {
@@ -174,7 +188,10 @@ export function AdminFrame({
             icon: ProductIcon,
             selected: selected("/admin/products"),
             subNavigationItems: [
-              { url: "/admin/products/inventory", label: t("nav.products.inventory") },
+              {
+                url: "/admin/products/inventory",
+                label: t("nav.products.inventory"),
+              },
             ],
           },
           {
@@ -211,7 +228,9 @@ export function AdminFrame({
             icon: ChatIcon,
             selected: selected("/admin/forum"),
             badge:
-              forumUnread > 0 ? <Badge tone="new">{String(forumUnread)}</Badge> : undefined,
+              forumUnread > 0 ? (
+                <Badge tone="new">{String(forumUnread)}</Badge>
+              ) : undefined,
           },
           {
             url: "/admin/guide",
@@ -232,7 +251,10 @@ export function AdminFrame({
             selected: selected("/admin/settings"),
             subNavigationItems: [
               { url: "/admin/settings/team", label: t("nav.settings.team") },
-              { url: "/admin/settings/security", label: t("nav.settings.security") },
+              {
+                url: "/admin/settings/security",
+                label: t("nav.settings.security"),
+              },
             ],
           },
         ]}
@@ -353,7 +375,12 @@ export function AdminFrame({
       showMobileNavigation={mobileNavOpen}
       onNavigationDismiss={() => setMobileNavOpen(false)}
     >
-      <Box paddingBlockEnd="200" paddingInlineStart="400" paddingInlineEnd="400" paddingBlockStart="200">
+      <Box
+        paddingBlockEnd="200"
+        paddingInlineStart="400"
+        paddingInlineEnd="400"
+        paddingBlockStart="200"
+      >
         <Banner tone={bannerTone}>{bannerText}</Banner>
       </Box>
       {children}
@@ -380,8 +407,16 @@ export function AdminFrame({
             {(
               [
                 ["search.group.orders", searchResults.orders, "/admin/orders/"],
-                ["search.group.products", searchResults.products, "/admin/products/"],
-                ["search.group.customers", searchResults.customers, "/admin/customers/"],
+                [
+                  "search.group.products",
+                  searchResults.products,
+                  "/admin/products/",
+                ],
+                [
+                  "search.group.customers",
+                  searchResults.customers,
+                  "/admin/customers/",
+                ],
               ] as const
             ).map(([labelKey, hits, prefix]) =>
               hits.length > 0 ? (
