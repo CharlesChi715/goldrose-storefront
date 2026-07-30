@@ -25,6 +25,11 @@ const DATA_DIR = path.join(process.cwd(), ".data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
 type DbFile = {
+  _meta: {
+    data_status: "mock";
+    purpose: string;
+    warning: string;
+  };
   seeded_at: string;
   /** Shopify-style order number counter; #1001 is the first order. */
   next_order_number: number;
@@ -54,6 +59,12 @@ function matches<T extends TableName>(row: DbTables[T], match: Match<T>): boolea
  */
 export function buildFreshDb(now = new Date().toISOString()): DbFile {
   return {
+    _meta: {
+      data_status: "mock",
+      purpose: "Local development and automated testing only.",
+      warning:
+        "Do not treat this as real customer, order, payment, or analytics data. Do not enter production data here.",
+    },
     seeded_at: now,
     next_order_number: 1001,
     tables: buildSeedTables(now, { includeLocalAdmin: true }),
