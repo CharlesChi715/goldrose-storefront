@@ -357,6 +357,46 @@ zero) and was imported once — please delete or differentiate the duplicate.
   inline in the components. Band diffs land at 0.7–1.8% overall (font-AA
   envelope), verified per-frame against scale-2 renders.
 
+## 07-30 checkout reflow — developer findings
+
+The B-2 checkout frame (now `1523:421 "/checkout · default · mobile"`,
+430×1728 — was 561:88 at 430×2102) was re-delivered as **"B-2 / Redesigned
+English / 430"**: the express-wallet module (Shop Pay / PayPal / Apple Pay
+buttons) and the discount-code card were deleted, the order summary moved
+between shipping and payment (its card is now white), the address grid became
+recipient + state + country / full-width ZIP / street / city + phone, the item
+card's text rows tightened, module 06 shrank to help + FAQ + pay bar on cream,
+and the fulfillment assurances became three Playfair text nodes. Re-imported
+2026-07-30; all e2e green.
+
+**Dev decisions, for the design team to confirm:**
+
+- **Discount entry kept as a dev band.** The reflow deleted the code-entry
+  card, but the Order Summary still prices a Discount row and the admin
+  feature (§8) is live — a customer with a code would have nowhere to type
+  it. The old card's geometry ships as a dev-added band between modules 02
+  and 04, in the design's own field language. Delete it only if discounts
+  are being dropped as a feature.
+- **The live PayPal button moved into the Pay-Securely CTA.** The express
+  module that hosted the PayPal JS-SDK button no longer exists, so with
+  PayPal configured the SDK's iframe button fills the CTA's 276×48 box; in
+  mock mode the payment section's PayPal row is the mock entry.
+- **ELDREVE again:** the frame's wordmark image reads ELDREVE — the GoldRose
+  treatment was substituted at the same box (DQ-34 precedent).
+
+**Mock-data / geometry oddities, shipped verbatim:**
+
+- The summary's math is wrong: $189.00 − $28.35 + FREE ≠ $159.00 (placeholder
+  data; the live page prices from the real cart anyway).
+- The STATE (75px) and COUNTRY (116px) fields both carry 165px-wide value
+  texts — the design clips "California ⌄" / "United States ⌄" at the field
+  edge.
+- The Shipping Method card (178px) clips the Next-Day row's bottom 6px
+  (rows at 40/90/140 + 44 > 178).
+- ZIP CODE is the one 33px-tall field in a grid of 48s.
+- The MM / YY well dropped the CVV hint; the live checkout still collects
+  CVV inside that well (the number is still required to charge a card).
+
 ## 07-29 screen imports — developer findings
 
 The design team reorganized the whole file into a click-depth sitemap

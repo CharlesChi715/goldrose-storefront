@@ -58,7 +58,9 @@ open messages.
 - Built: storefront, admin, accounts, catalog, checkout/order flow,
   analytics, and the SEO/GEO baseline. PayPal Orders v2 wallet checkout
   works in sandbox. Supplied Figma screens are imported through the
-  2026-07-29 redesign batch — a file-wide restyle plus `/account/privacy`,
+  2026-07-30 B-2 checkout reflow (1523:421; express module and discount card
+  deleted by design — discount entry kept as a flagged dev band, PayPal SDK
+  button relocated into the pay CTA) and the 2026-07-29 redesign batch — a file-wide restyle plus `/account/privacy`,
   `/account/orders/details`, `/orders/track` (redesigned, with an unlinked
   return sheet), `/story` and `/craft` (routes, placeholders, and design
   conflicts: [`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ The delivery

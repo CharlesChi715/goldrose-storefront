@@ -114,7 +114,9 @@ test("the homepage gift-path cards reach the shop and the on-page sections", asy
   await expect(page.locator("#craft")).toHaveCount(1);
   await expect(page.locator('a[href="#personalize"]')).toHaveCount(1);
   await expect(page.locator('a[href="/craft"]')).toHaveCount(1);
-  await expect(page.locator('a[href="/story"]')).toHaveCount(1);
+  // Two /story links since 07-30: A-11's READ OUR STORY plus A-6's Read
+  // Customer Stories (H-24, wired per the owner's Figma comment).
+  await expect(page.locator('a[href="/story"]')).toHaveCount(2);
   await expect(
     page.getByRole("link", { name: /Valentine/i }).first(),
   ).toBeVisible();
