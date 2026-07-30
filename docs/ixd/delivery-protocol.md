@@ -55,7 +55,7 @@ Run once per frame, before the frame moves to 已完成.
 
 | # | 中文 | English | Prevents (real incident) |
 |---|---|---|---|
-| 1 | 画板命名符合命名规范 | Frame named per the [naming guide](figma-naming-guide.md) | Frames identified only by node id (`914:117`) |
+| 1 | 画板命名符合命名规范 | Frame named per the [naming guide](from-teammates-figma-naming-guide.md) | Frames identified only by node id (`914:117`) |
 | 2 | 每个元素图层名 = 元素编号 | Every element's Figma **layer name** is its ID | Names live only in code; nobody can point at a thing in Figma |
 | 3 | 每个可点击元素已连原型线，或明确标注「暂无目标」 | Every clickable layer is prototype-linked to its target frame, or explicitly marked **no target yet** | 13 groups of inert buttons (DQ-01…DQ-10) |
 | 4 | 状态齐全：默认 / 按下 / 禁用 / 加载中 / 空 / 错误 | All states drawn: default, pressed, disabled, loading, empty, error | B-2's pay button has no disabled state (DQ-14) |
@@ -84,13 +84,15 @@ but we do not import it.
 
 ## 3. What we do on receipt  ·  **Adopted**
 
-1. **Archive the source verbatim.** The design team's original file goes to
-   `temp/` untouched (`temp/主页_shop页机制.numbers`,
-   `temp/frontend-function-draft.numbers`). Chinese exports are archived beside
-   them. **On wording disputes the Chinese source wins.**
+1. **Archive the source verbatim.** The design team's original file arrives in
+   [`team-deliveries/inbox/`](../../team-deliveries/README.md) and, once parsed, is kept
+   untouched in `team-deliveries/originals/<YYYY-MM-DD>-<slug>/` with its `batch.md`
+   (every file, its sha256 and size). Chinese exports are archived beside them.
+   **On wording disputes the Chinese source wins.** Before parsing anything,
+   run the duplicate/re-delivery check in `team-deliveries/README.md` — a hash that
+   already exists means stop and ask, not re-import.
 2. **Transcribe, never paraphrase.** The English working copies in this folder
-   ([homepage.md](homepage.md), [shop.md](shop.md),
-   [order-detail.md](order-detail.md)) are translations. Preserve the wording;
+   ([shop.md](shop.md), [order-detail.md](order-detail.md)) are translations. Preserve the wording;
    problems found in the source are marked inline with `⚠️ Developer note`, not
    silently corrected.
 3. **Give every entry a stable ID** (`H-09`, `ORDER-DETAIL-SHARE-TRACKING`) and
@@ -112,7 +114,7 @@ The design team's own instruction, from [README.md](README.md):
 > recording the question, what we shipped meanwhile, and a recommendation.
 
 Safest placeholder, in order of preference: leave the element inert → point it
-at the nearest honest existing page → use `temp/PlaceholderPicture.png` for
+at the nearest honest existing page → use `assets/PlaceholderPicture.png` for
 unknown imagery. Never a control that looks live but goes nowhere — a card
 field that submits nothing is a security hazard, not a placeholder.
 
@@ -160,7 +162,7 @@ analytics event   ─┘
 
 Grammar, vocabulary and enforcement: [element-names.md](element-names.md)
 (guarded by `tests/unit/element-names.test.ts`). The owner's source vocabulary:
-[figma-naming-guide.md](figma-naming-guide.md).
+[from-teammates-figma-naming-guide.md](from-teammates-figma-naming-guide.md).
 
 ⚠️ **Currently only half-live.** Code carries `data-el` and the test enforces
 it, but the Figma layers are not yet named this way — which is why checklist
@@ -173,10 +175,10 @@ item 2 is the highest-leverage ask on the list.
 | Artifact | Lives in | Owned by |
 |---|---|---|
 | Figma frames | the design team's Figma file | design team |
-| Mechanism table (机制表), original | `temp/*.numbers` + `temp/*.zh.md` | design team |
+| Mechanism table (机制表), original | `team-deliveries/originals/<batch>/*.numbers` + `*.zh.md` | design team |
 | Mechanism table, English working copy | `docs/ixd/{homepage,shop,order-detail}.md` | dev (translation) |
 | Annotated screenshots | `docs/ixd/assets/` | design team's prototype, archived by dev |
-| Naming vocabulary, owner's source | `docs/ixd/figma-naming-guide.md` | owner (verbatim transcription) |
+| Naming vocabulary, owner's source | `docs/ixd/from-teammates-figma-naming-guide.md` | owner (verbatim transcription) |
 | Naming convention as applied | `docs/ixd/element-names.md` | dev |
 | Import findings and conflicts | `docs/ixd/README.md` | dev |
 | Open questions for the design team | `docs/TODO/design-team-questions.md` | dev, answered by design team |

@@ -100,7 +100,7 @@ produces code that is technically valid and visibly foreign.
 - Mock fields are styled `<div>`s — **never live `<input>`s**.
 - Inert controls must not render as `<button>`.
 - Placeholder copy, prices, and imagery are marked as placeholder in the file
-  header. Unknown images use `temp/PlaceholderPicture.png`.
+  header. Unknown images use `assets/PlaceholderPicture.png`.
 
 ### B6 · Admin screens only
 
@@ -185,6 +185,6 @@ the test and correcting the doc.
 
 - The design-team side of the hand-over — that is
   [`delivery-protocol.md`](delivery-protocol.md) §2.
-- Frame naming, which is still **Proposed** and has an open question about deep
-  routes ([`frame-names.md`](frame-names.md) §4).
+- Frame and section naming, which lives in
+  [`naming/figma-route-rule.md`](naming/figma-route-rule.md).
 - Backend, schema, and payment work.

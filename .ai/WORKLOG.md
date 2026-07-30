@@ -3423,3 +3423,274 @@ in-frame band and still scrolls away — this change was scoped to wholesale.
   pages show the same cards while sorted (three products, eight slots); the
   PDP hero is still frame art, so a card's photo differs from the page it
   opens; sort is client state, so a reload resets it to "New".
+
+## 2026-07-29 — Customer path tests
+
+- Walked 10 common shopper journeys against local dev + hosted Supabase with
+  `CHECKOUT_SKIP_PAYMENT=1`; created mock orders #1011 and #1012.
+- Buy flow (browse → add to cart → checkout → place order) passes and persists.
+- Recorded results and 7 issues in `docs/user-path-tests.md`.
+
+## 2026-07-29 — Link orders to the signed-in customer (step 1 of 4)
+
+**Reported symptom.** Signed-in customer sees the account greeting, but the
+order-confirmed page shows an email that is not theirs and `/account` lists no
+orders.
+
+**Diagnosis — four independent faults, not one mismatch:**
+
+1. `components/screens/OrderConfirmedScreen.tsx:132` renders a hardcoded Figma
+   placeholder `j***@gmail.com`; the success page never receives an email prop.
+2. `app/checkout/CheckoutClient.tsx:363` starts the email box empty and never
+   prefills from the session — the two most recent hosted orders (#1013, #1014)
+   were stored with `email = NULL` and `customer_id = NULL`.
+3. `lib/account/data.ts:28` gates order matching on
+   `EMAIL_VERIFIED_PROVIDERS = {google, apple}`, but all 9 live auth identities
+   use provider `email` (emailed OTP), so both filter branches were false for
+   every row — the list was structurally always empty.
+4. Schema drift: migration `0002_customer_auth` is recorded as applied, yet
+   `customers.auth_user_id` and its unique index are absent from the hosted
+   database (verified via `pg_attribute` as `postgres`). Meanwhile
+   `orders.auth_user_id` — from the deleted `0004` — still exists live with
+   0 of 17 rows populated.
+
+**Delivered (step 1).** Restored the sign-in-method-agnostic link that commit
+`125b72f` removed:
+
+- `supabase/migrations/0006_orders_auth_user_id.sql` — new, idempotent
+  (`add column if not exists`), so it is a no-op on the hosted database and
+  correct on a fresh one. **Not yet pushed** — awaiting approval.
+- `lib/supabase/server-auth.ts` — new `currentAuthUserId()`; returns null on
+  signed-out, local mode, or any auth error so checkout never breaks.
+- `lib/orders/db.ts` + `lib/supabase/types.ts` — `auth_user_id` on
+  `CreateOrderInput` / `OrderRow`, written in `createOrder`.
+- `app/api/checkout/route.ts`, `app/api/paypal/capture/route.ts` — resolve the
+  uid at the route level and pass it in. Deliberately *not* read inside
+  `createOrder`: the webhook repair path has no buyer session.
+- `lib/account/data.ts` — match `order.auth_user_id === user.id` first.
+- `tests/unit/order-auth-link.test.ts` — 3 new tests.
+
+**Verification.** `tsc --noEmit` clean, `eslint` clean, `npm run test:unit`
+63/63 pass, `npm run build` succeeds. End-to-end signed-in checkout against
+hosted **not yet run** — needs migration approval and an OTP sign-in.
+
+**Known limitations.** Orders #1013/#1014 carry no email and no uid, so no fix
+can retroactively surface them. Webhook-repaired and admin-draft orders get a
+null uid by design. Steps 2–4 (checkout email prefill, the placeholder email
+panel, the `0002` drift repair) are not started.
+
+## 2026-07-30 — Product handle rule (deterministic title → handle)
+
+Added `docs/naming/product-handles.md` v1.0 (Proposed, awaiting sign-off): a strict
+ordered algorithm deriving `products.handle` from `products.title`, written so
+any person or AI model produces the identical string.
+
+- **Why:** `handle` is the public URL and must be reproducible and stable. The
+  question that started this was whether `handle` could be `lower(sku)` — it
+  cannot: `handle` is on `products` (one per page), `sku` is on
+  `product_variants` (one per variant), so the relation is 1:N. Deriving the
+  handle from a SKU stem also collides (stripping COLOR leaves only ~4 stems
+  for far more listings) and couples public URLs to ops renumbering.
+- **Three decisions that buy determinism:** closed word lists instead of
+  judgment (§7 deliberately excludes "marketing fluff" — taste is not
+  reproducible); `option_names` is a required second input, because a title
+  alone cannot say whether a colour word is a variant axis; and generic results
+  fail loudly rather than shipping `rose` or appending `-2`.
+- **Verified:** all 10 fixtures in §6 pass against the reference
+  implementation extracted from the document's own code block (not a separate
+  copy). Regexes converted from literal combining marks to `\uXXXX` escapes so
+  copy-paste between models and editors cannot corrupt them — the same hazard
+  `ixd/frame-names.md` documents for the U+00B7 middle dot.
+- **Not done, needs decisions:** the `product_redirects` migration (an active
+  handle cannot be changed safely without it) and wiring the format check into
+  `lib/admin/products.ts` plus a unit test over the fixtures.
+
+Read-only side finding from the same session: the Figma file
+`3CXNpmuuyNyCW70qOci0oM` groups frames by click depth (一级…五级), which has
+already produced two different sections both named `mepage-Account & Privacy`
+(`1541:252`, `1523:953`).
+
+## 2026-07-30 — Label local JSON database as mock data
+
+- Added persistent `_meta` mock-data guidance to the local database generator.
+- Updated the current `.data/db.json`; verified JSON parsing, generated metadata, and TypeScript.
+
+## 2026-07-30 — Consolidate the IxD naming docs; add `archive/`
+
+Docs cleanup requested by Charles across one session.
+
+**File operations**
+- Deleted `docs/ixd/frame-names.md` (Charles removed it) — superseded by
+  `naming/figma-route-rule.md`, which *inverts* the rule: lowercase
+  leading-slash frame routes plus UPPERCASE route sections, replacing the
+  UPPERCASE slash-dropped scheme adopted 2026-07-29.
+- Moved `docs/naming/` → `docs/ixd/naming/` (`figma-route-rule.md`,
+  `product-handles.md`).
+- `figma-naming-guide.md` → `from-teammates-figma-naming-guide.md` (Charles
+  renamed; all six references updated).
+- Deleted `docs/ixd/bottom-nav-buttons.md` (one line, already recorded in
+  README's 07-27 findings) and `docs/ixd/feedback-2026-07-28.md` (a derived
+  draft whose own header names README § "07-28 screen imports" as its source of
+  record).
+- Moved `docs/ixd/homepage.md` → `temp/homepage.md`.
+- Created `archive/` + `archive/README.md` — a *tracked* home for superseded
+  docs, whose defining rule is "nothing in here is referenced anywhere in the
+  repo", with the `archive/` vs gitignored-`temp/` distinction spelled out.
+
+**Eleven references repaired** across `docs/ixd/README.md`, `element-names.md`,
+`delivery-protocol.md`, `order-detail.md`, `frontend-definition-of-done.md`,
+`naming/product-handles.md` (including `../Database.md` → `../../Database.md`
+after the move), `docs/TODO/2026-07-28-design-team-navigation-questions.md`, and
+`tests/e2e/homepage.spec.ts`. `.ai/WORKLOG.md` mentions left as-is — history is
+never rewritten.
+
+**Verified:** 63/63 unit tests pass, including the four in
+`tests/unit/element-names.test.ts` that parse `element-names.md`; `tsc --noEmit`
+clean; every relative markdown link under `docs/ixd/` and `archive/` resolves;
+no live markdown link to any of the five removed files remains.
+
+**Three things the `frame-names.md` deletion dropped, not re-homed in
+`naming/figma-route-rule.md`:**
+1. The **U+00B7 look-alike warning.** The new rule's whole syntax hangs on `·`,
+   yet it carries no warning about `•` (U+2022) or `・` (U+30FB) — and the design
+   team types on Chinese IMEs, which insert the katakana dot by default. The
+   most consequential loss of the three.
+2. The **five blocking route decisions** (`/bag` vs `/cart`; `/care` vs `/help`;
+   whether the four settings pages move under `/account/settings/`; whether B2B
+   gets its own namespace; whether privacy-policy / keepsake / track move to
+   `/policies/`, `/gift/`, `/track`). Sixteen frames were held on these.
+3. The `data-el` **deep-route separator question** (old §4).
+
+The 40-frame rename worklist also went, but it was already stale — keyed on
+pre-reorganisation node ids that the 07-29 delivery replaced wholesale. A fresh
+live mapping of all 53 frames against the 32 storefront routes was read this
+session and is not yet written down anywhere.
+
+**`naming/figma-route-rule.md` gaps:** no status/version header, so nobody can
+tell whether it is Proposed or Adopted (every sibling naming doc has one); an
+unanswered inline stub "Q: how to name handle?" that `naming/product-handles.md`
+in the same folder now answers; and two example routes that do not exist in
+`app/**` — `/shop/cart` (the cart route is `/bag`) and `/products` as a listing
+page (only `/products/[slug]` exists).
+
+**`temp/` is gitignored** (`.gitignore:46`, zero tracked files), so
+`temp/homepage.md` has left version control: absent from GitHub, local to the
+iMac, and `git clean -xfd` would erase it. Its `H-01…H-37` ids are still cited
+in 26 places across `components/home/`, `components/MenuDrawer.tsx`,
+`StoryScreen.tsx` and others, so the dictionary for those comments now sits
+outside the repo. `archive/` is the tracked alternative if that matters.
+
+## 2026-07-30 — Repository AI tag system
+
+- Added root `AGENT-INBOX.md` as the detailed source of truth for concise
+  in-place `AI-TAG(AI-nnn)` comments.
+- Defined `OWNER-TODO`, `OWNER-DECISION`, `AGENT-UNSURE`, `AGENT-BLOCKED`,
+  `PLACEHOLDER`, and `AGENT-DECISION`.
+- Added representative tags `AI-001`–`AI-003` for shipping, the placeholder
+  bag, and privacy-policy content.
+- Updated `AGENTS.md` and `SUMMARY.md` so future agents discover and maintain
+  the system.
+- Verified tag/inbox ID parity, local links, ESLint, Prettier for documentation,
+  and whitespace errors.
+
+## 2026-07-30 — Delivery intake folders; `temp/` → `trash/`
+
+Owner's workflow request: one folder to drop raw upstream deliveries into, a
+second to keep the originals after parsing, READMEs carrying his own words.
+
+- **New `team-deliveries/`** — `inbox/` (raw drops, empty = nothing pending) and
+  `originals/<YYYY-MM-DD>-<slug>/` (delivered files kept untouched, each batch
+  with a `batch.md` listing every file's sha256 and size). Named `originals/`
+  after `parsed/` misled the owner on first read — the folder holds what was
+  *sent*, not what parsing produced.
+- **The hashes are load-bearing.** The owner's rule is "check before you parse,
+  and stop rather than act": hash match = duplicate, same subject + different
+  hash = re-delivery. Without a manifest that check degrades into eyeballing
+  filenames, which is how the byte-identical `1232:114` duplicate got imported
+  twice on 07-28.
+- **Resolved the gitignore hole flagged in the entry above.** The three delivered
+  sources moved out of gitignored `temp/` into version control; `homepage.md`
+  went back to `docs/ixd/`, so the `H-01…H-37` ids cited across
+  `components/home/` resolve to a tracked file again.
+- **`temp/` → `trash/`**, but only *after* the sources left — renaming first
+  would have relabelled the H-01…H-37 dictionary as garbage.
+  `PlaceholderPicture.png` was rescued to `assets/` for the same reason: it is a
+  live asset (`SUMMARY.md` cites it), not scratch.
+- Three folders, three non-overlapping rules, all stated in `archive/README.md`:
+  `team-deliveries/` tracked + constantly cited; `archive/` tracked + never cited;
+  `trash/` gitignored + never cited.
+- Updated 24 references across 11 files. Left `supabase/.temp/` alone — it is the
+  Supabase CLI's own folder and a blind `temp/` replace would have broken
+  `scripts/apply-auth-email-templates.mjs`.
+- Renamed to `team-deliveries/` at the owner's request. Added `team-deliveries/originals/` to `.prettierignore`: reformatting a verbatim
+  source would rewrite what the design team actually sent.
+- Re-based 39 relative links inside the moved `.zh.md` files (`../docs/ixd/…` →
+  `../../../docs/ixd/…`). Those screenshot embeds are plumbing we added at
+  import, not delivered text; recorded in each `batch.md`.
+- New tags: `AI-004` (routing table not yet written — agents must stop and ask)
+  and `AI-005` (unclear whether the Figma naming `.xlsx` is an incoming delivery
+  or a generated export; kept, not guessed).
+- Verified: 63/63 unit tests, `tsc --noEmit` clean, ESLint clean, all markdown
+  links resolve, no `temp/` references left outside `supabase/.temp/`.
+  Nothing committed — the working tree carries unrelated changes.
+
+## 2026-07-30 — Stable-first Figma frame naming
+
+- Revised `docs/ixd/naming/figma-route-rule.md` so every frame begins with the
+  fixed prefix `<exact route> · <viewport>`.
+- Made screen description, state, and future metadata flexible trailing parts.
+- Corrected examples to real routes: `/shop`, `/products/[slug]`, and `/bag`.
+- Linked the separate product-handle rule and verified Markdown formatting and
+  route-file existence.
+
+## 2026-07-30 — Removed repository AGENTS protocol
+
+- Deleted root `AGENTS.md` at the owner's request.
+- Changed `CLAUDE.md` from the deleted import to `@SUMMARY.md`.
+- Removed the obsolete `AGENTS.md` entry from the `SUMMARY.md` repository tree.
+- Verified there are no remaining `AGENTS.md` references and Markdown formatting
+  passes.
+- **Caught in verification:** the manifest hashes for the two `.zh.md` files were
+  computed *before* the link re-base, so `batch.md` disagreed with the file on
+  disk — which would have made a genuine duplicate read as a re-delivery, the
+  exact failure the check exists to prevent. Each edited file now records both
+  `as received` (what the check compares against) and `on disk now`, and the
+  README states which is which.
+
+## 2026-07-30 — Created agent-delivery structure
+
+- Created `agent-delivery/README.md`, `INBOX.md`, and `DELIVERIES.md`.
+- Moved the root Agent Inbox into the new folder, separating instructions from
+  the five open `AI-nnn` records.
+- Updated every active in-place tag, team-delivery reference, and `SUMMARY.md`
+  discovery link.
+- Verified ID parity, local Markdown links, Prettier, ESLint, and whitespace.
+
+## 2026-07-30 — Removed agent delivery log
+
+- Deleted `agent-delivery/DELIVERIES.md` at the owner's request.
+- Removed its workflow instructions and updated `SUMMARY.md`.
+- Verified the folder now contains only `README.md` and `INBOX.md`, with no
+  remaining delivery-log references.
+
+**Follow-up, same day:** added one rule to `naming/product-handles.md` §2 —
+*keep variant words out of titles* (`Eternal Rose` + `option_names: ["Color"]`,
+never `Eternal Rose — Ruby Red`). Step 9 only fires when a title contains a
+colour or size word, so titles that never name a variant make `option_names`
+irrelevant to handle derivation and collapse the rule back to a single input.
+Prose only — §6 fixtures and the §10 reference implementation are untouched.
+Still open from the review above: `option_values` vs `option_names` precision
+(§7), and `option_names` is unenforced free text (`text[]`, `z.string()`) while
+the three seeded products use `["Gift option"]`, which step 9 does not match.
+
+**Correction to the follow-up above** (same session, after Charles clarified):
+the change is not a permanent "titles rule" but a **staged input decision** —
+`naming/product-handles.md` §2 now records *current stage: derive from `title`
+alone, `option_names` is not an input*, safe only because handles are unfrozen
+pre-launch (three placeholder products, no inbound links). Made consistent in
+four places: the §2 inputs table and callouts, step 9 (marked **inert** while
+`option_names` is `[]`), the §6 fixture note (only rows 4/5/6/8 can occur now),
+and the §11 paste-to-a-model prompt block (title-only input). `option_names`
+becomes required when variants ship, and every handle must be re-derived before
+go-live — the last moment a handle is free to change (§8). §6 fixtures and the
+§10 reference implementation are otherwise unchanged; no test parses this doc.

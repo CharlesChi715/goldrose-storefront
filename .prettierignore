@@ -11,12 +11,16 @@ package-lock.json
 next-env.d.ts
 
 # Scratch and local state (all gitignored, listed so `npm run format` is fast)
-temp/
+trash/
 .data/
 test-results/
 playwright-report/
 .vercel/
 supabase/.temp/
+
+# Delivered originals — verbatim sources. A reformat would rewrite what the
+# design team actually sent, which is the one thing that must not change.
+team-deliveries/originals/
 
 # Assets — binary, and the Figma exports are named by node id
 public/

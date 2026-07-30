@@ -1,6 +1,6 @@
 # Homepage Interaction Spec (H-01…H-37)
 
-> English working copy, translated by the dev side 2026-07-25 from the design team's Chinese original. On wording disputes the design team's source wins: verbatim Chinese export archived at [`temp/homepage.zh.md`](../../temp/homepage.zh.md); editable source is `temp/主页_shop页机制.numbers`. Retranslate here after the source updates.
+> English working copy, translated by the dev side 2026-07-25 from the design team's Chinese original. On wording disputes the design team's source wins: verbatim Chinese export archived at [`homepage.zh.md`](../../team-deliveries/originals/2026-07-25-home-shop-mechanism/homepage.zh.md); editable source is `主页_shop页机制.numbers` in the [same batch](../../team-deliveries/originals/2026-07-25-home-shop-mechanism/). Retranslate here after the source updates.
 
 Source: design team's `主页_shop页机制.numbers`, sheet 「主页机制」. Screenshots are the design team's annotated Figma prototype (iPhone 15 Pro Max); the red box marks the element each row refers to. Citation rules: see [README](README.md).
 

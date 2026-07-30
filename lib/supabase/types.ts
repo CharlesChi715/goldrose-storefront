@@ -138,6 +138,11 @@ export type OrderRow = {
   archived_at: string | null;
   placed_at: string;
   raw: unknown;
+  /** Supabase Auth user who placed the order, stamped at checkout so
+   * /account can find it whatever the sign-in method was. Null for guest
+   * checkouts, admin drafts, and webhook-repaired orders (no buyer session).
+   * Optional: rows written before the column existed have none. */
+  auth_user_id?: string | null;
 };
 
 export type OrderLineRow = {

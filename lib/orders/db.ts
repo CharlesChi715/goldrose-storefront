@@ -38,6 +38,10 @@ export type CreateOrderInput = {
   note?: string | null;
   visitor_id?: string | null;
   checkout_id?: string | null;
+  /** Signed-in buyer's Supabase auth uid, resolved by the calling route —
+   * this is what lets /account find the order whatever the sign-in method
+   * was. Null for guests, admin drafts, and webhook repairs. */
+  auth_user_id?: string | null;
   raw?: unknown;
   actor?: string;
   /** Drafts are created without touching stock; "Mark as paid" decrements. */
@@ -201,6 +205,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     archived_at: null,
     placed_at: now,
     raw: input.raw ?? null,
+    auth_user_id: input.auth_user_id ?? null,
   };
 
   const lines: OrderLineRow[] = input.priced.lines.map((line) => ({

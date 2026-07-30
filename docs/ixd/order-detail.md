@@ -3,13 +3,14 @@
 > English working copy, translated by the dev side 2026-07-27 from the design
 > team's Chinese original. On wording disputes the design team's source wins:
 > verbatim Chinese export archived at
-> [`temp/frontend-function-draft.zh.md`](../../temp/frontend-function-draft.zh.md);
-> editable source is `temp/frontend-function-draft.numbers` (received
+> [`frontend-function-draft.zh.md`](../../team-deliveries/originals/2026-07-27-order-detail/frontend-function-draft.zh.md);
+> editable source is `frontend-function-draft.numbers` in the
+> [same batch](../../team-deliveries/originals/2026-07-27-order-detail/) (received
 > 2026-07-27). Retranslate here after the source updates.
 
 Source: design team's `frontend-function-draft.numbers`, Sheet 1 · Table 1.
 Entry IDs follow the owner's Figma naming guide
-([figma-naming-guide.md](figma-naming-guide.md)); reference them the same way
+([from-teammates-figma-naming-guide.md](from-teammates-figma-naming-guide.md)); reference them the same way
 as H-xx entries, e.g. `implements ORDER-DETAIL-SHARE-TRACKING`. Citation
 rules: see [README](README.md).
 

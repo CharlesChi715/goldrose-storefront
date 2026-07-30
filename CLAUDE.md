@@ -1,1 +1,1 @@
-@AGENTS.md
+@SUMMARY.md

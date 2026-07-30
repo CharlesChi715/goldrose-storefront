@@ -5,15 +5,21 @@ clickability, triggers, navigation, and states. This directory is a read-only
 mirror for developers. Preserve the wording verbatim; do not edit the body
 manually. Mark problems found in the source inline with `⚠️ Developer note`.
 
-**Source:** [homepage.md](homepage.md) (English working copy) and
-[shop.md](shop.md). The design team's editable original is
-`temp/主页_shop页机制.numbers` (received 2026-07-25); when it updates,
-re-import into this directory. The verbatim Chinese export of the homepage
-sheet is archived at `temp/homepage.zh.md` — on wording disputes, the Chinese
-source wins. A second source, `temp/frontend-function-draft.numbers`
+**Source:** [shop.md](shop.md) and [homepage.md](homepage.md) (English working
+copies; `homepage.md` carries the `H-01…H-37` ids cited throughout
+`components/home/`). The design team's editable original is
+[`主页_shop页机制.numbers`](../../team-deliveries/originals/2026-07-25-home-shop-mechanism/)
+(received 2026-07-25), kept with its verbatim Chinese export; when it updates,
+re-import into this directory. On wording disputes, the Chinese source wins. A
+second source,
+[`frontend-function-draft.numbers`](../../team-deliveries/originals/2026-07-27-order-detail/)
 (received 2026-07-27), covers the order-detail page: verbatim Chinese export
-at `temp/frontend-function-draft.zh.md`, English working copy at
-[order-detail.md](order-detail.md); the same rules apply.
+beside it, English working copy at [order-detail.md](order-detail.md); the same
+rules apply.
+
+Originals live under [`team-deliveries/originals/`](../../team-deliveries/README.md) and
+are version-controlled — until 2026-07-30 they sat in the gitignored scratch
+folder (since renamed `trash/`), outside version control entirely.
 
 ## Files
 
@@ -21,13 +27,14 @@ at `temp/frontend-function-draft.zh.md`, English working copy at
   the three hand-overs (design team → dev → bosses), the per-frame delivery
   checklist (交付清单), what we do on receipt, and what to do when something is
   missing. Start here if you are asking "how does this get delivered?"
-- [homepage.md](homepage.md) — 37 homepage entries (H-01…H-37), English
-  translation of the archived Chinese export
 - [shop.md](shop.md) — 15 Shop page entries (N-01…N-15), still verbatim
   Chinese (translation pending)
+- [homepage.md](homepage.md) — homepage entries (H-01…H-37), English working
+  copy; the ids cited across `components/home/` and `tests/e2e/homepage.spec.ts`
+  resolve here
 - [order-detail.md](order-detail.md) — 3 order-detail entries
-  (ORDER-DETAIL-…), English translation of
-  `temp/frontend-function-draft.zh.md`; IDs follow the Figma naming guide;
+  (ORDER-DETAIL-…), English translation of the delivered
+  `frontend-function-draft.zh.md`; IDs follow the Figma naming guide;
   screenshots pending from the design team
 - `assets/` — 52 annotated screenshots (red box = the element for that entry);
   filename = entry ID; JPEG-compressed from the originals
@@ -38,17 +45,22 @@ at `temp/frontend-function-draft.zh.md`, English working copy at
   and changelog. Every visible element carries its name in `data-el`; guarded
   by `tests/unit/element-names.test.ts`, which parses the vocabulary straight
   out of the document so the two cannot drift
-- [frame-names.md](frame-names.md) — the **page-level chapter**: a frame name
-  is its route, uppercased, with `/` between path levels and `·` for states and
-  overlays. Also carries the live 40-frame rename worklist, keyed on Figma node
-  id, with a `Do now? / Hold / Blocked` column
-- [figma-naming-guide.md](figma-naming-guide.md) — a **frozen archive** of the
+- [naming/figma-route-rule.md](naming/figma-route-rule.md) — the **page-level
+  chapter**: an UPPERCASE section per top-level route segment, and a frame named
+  for its exact route followed by `·`-separated design metadata (screen,
+  viewport, state). Replaced the deleted `frame-names.md` on 2026-07-30.
+  ⚠️ Unlike the other naming docs it carries no status/version header, so it is
+  not yet clear whether it is Proposed or Adopted
+- [naming/product-handles.md](naming/product-handles.md) — the deterministic
+  algorithm deriving a product's `/products/<handle>` URL segment from its
+  title, so any person or model produces the identical string
+- [from-teammates-figma-naming-guide.md](from-teammates-figma-naming-guide.md) — a **frozen archive** of the
   guide received from the design team on 2026-07-25, transcribed verbatim from
-  `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`. ⚠️ Corrected 2026-07-29: this is
+  [`Figma_UI_Naming_Guide_GoldRose.xlsx`](../../team-deliveries/originals/2026-07-25-figma-naming-guide/).
+  ⚠️ Corrected 2026-07-29: this is
   a record, **not** the source of truth. The markdown is the master; the
   spreadsheet is now an export produced for the design team
-- [bottom-nav-buttons.md](bottom-nav-buttons.md), [login-import.md](login-import.md)
-  — per-import notes for the nav art and the 登录界面 frame
+- [login-import.md](login-import.md) — per-import notes for the 登录界面 frame
 
 ## How to reference an entry
 
@@ -404,8 +416,8 @@ designed path is the hub's Session card → `/account/logout`.
   (deviating from the 07-26 "VELORIA verbatim" precedent — a masthead is not
   a mock string). DQ-34; DQ-22 now has a third brand string.
 - **Layer names now carry element IDs** (`ACCOUNT-FIRST-NAME-INPUT`…) —
-  checklist item 2 executed at last. Frame names did NOT adopt the
-  frame-names.md rule (a sixth naming convention instead); no prototype
+  checklist item 2 executed at last. Frame names did NOT adopt our frame-naming
+  rule (a sixth naming convention instead); no prototype
   links anywhere (item 3 still unmet).
 - **The file was edited while we imported.** CRAFT grew during the batch;
   STORY's placeholder plates became real photos the same day (re-imported);

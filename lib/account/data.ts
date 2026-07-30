@@ -181,6 +181,10 @@ export async function getAccountOverview(): Promise<AccountOverview | null> {
   const orders = (await getStore().all("orders"))
     .filter(
       (order) =>
+        // Primary link: the uid stamped on the order at checkout. Works for
+        // every sign-in method, needs no email, and cannot be spoofed by
+        // typing someone else's address into the checkout form.
+        order.auth_user_id === user.id ||
         (customer && order.customer_id === customer.id) ||
         (canMatchByEmail && order.email?.toLowerCase() === email),
     )

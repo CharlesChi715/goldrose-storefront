@@ -2,7 +2,7 @@
 
 Parsed 2026-07-25 from 3 WeChat images the owner sent (originals kept in
 [assets/supplier-color-charts/](../assets/supplier-color-charts/); the raw
-uploads in `temp/inventory/` are scratch). **This is the supplier's full color
+uploads were scratch and are gone). **This is the supplier's full color
 catalog — 124 colors — i.e. the "120-SKU" product list** referenced by
 [features/product-content-pipeline.md](features/product-content-pipeline.md)
 and the SKU naming vocabulary in [Database.md](Database.md) (finalize COLOR

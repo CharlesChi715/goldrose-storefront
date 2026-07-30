@@ -16,6 +16,7 @@ import { skipPaymentEnabled } from "@/lib/checkout/mode";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createOrder } from "@/lib/orders/db";
 import { getPayPalConfig } from "@/lib/paypal/client";
+import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type { Address } from "@/lib/supabase/types.ts";
 
@@ -163,6 +164,7 @@ export async function POST(request: Request) {
       note: parsed.note ?? null,
       visitor_id: parsed.visitorId ?? null,
       checkout_id: checkoutId,
+      auth_user_id: await currentAuthUserId(),
     });
 
     const params = new URLSearchParams({

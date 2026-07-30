@@ -13,8 +13,9 @@
 
 - This file: every element in the imported Figma screens whose destination page
   is unknown, unbuilt, or marked "to be confirmed", swept from
-  `docs/ixd/homepage.md`, `docs/ixd/shop.md`, `docs/ixd/order-detail.md`,
-  `docs/ixd/login-import.md`, `docs/ixd/bottom-nav-buttons.md`.
+  `docs/ixd/shop.md`, `docs/ixd/order-detail.md`, `docs/ixd/login-import.md`,
+  `docs/ixd/homepage.md`, and the since-deleted
+  `docs/ixd/bottom-nav-buttons.md`.
 - 27 unresolved entries grouped into **13 questions by destination page**, not
   by screen — the gaps repeat heavily (7 elements point at one undesigned
   personalization flow, 4 at one undesigned brand-story page). Ask once per

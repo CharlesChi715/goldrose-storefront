@@ -6,7 +6,7 @@
 | **Decided** | 2026-07-29 |
 | **Owner** | Charles (technical decisions). Customer-facing words and the PAGE vocabulary need the owners' sign-off. |
 | **Review by** | **2026-08-05 — silence means adopted.** A rule that stays "Proposed" forever is not a rule; it is a discussion. |
-| **Companion** | [frame-names.md](frame-names.md) names the *page*. This file names everything *inside* a page. One system, two chapters. |
+| **Companion** | [naming/figma-route-rule.md](naming/figma-route-rule.md) names the *page* — its section and its frame. This file names everything *inside* a page. One system, two chapters. |
 
 Every visible piece of the storefront (section, image, button, price…) carries
 one stable, human-readable name. The same string appears in **three** places:
@@ -40,9 +40,9 @@ merge.
 | File | Role | Direction |
 | --- | --- | --- |
 | **this file** | **the convention** — grammar, rules, vocabulary, enforcement | master |
-| [frame-names.md](frame-names.md) | the page-level chapter, plus the live rename worklist | master |
-| [figma-naming-guide.md](figma-naming-guide.md) | verbatim archive of the guide received 2026-07-25 | frozen record — never edit it to change the convention |
-| `temp/Figma_UI_Naming_Guide_GoldRose.xlsx` | a spreadsheet **exported for** the design team | generated |
+| [naming/figma-route-rule.md](naming/figma-route-rule.md) | the page-level chapter — section and frame names derived from the route | master |
+| [from-teammates-figma-naming-guide.md](from-teammates-figma-naming-guide.md) | verbatim archive of the guide received 2026-07-25 | frozen record — never edit it to change the convention |
+| [`Figma_UI_Naming_Guide_GoldRose.xlsx`](../../team-deliveries/originals/2026-07-25-figma-naming-guide/) | a spreadsheet **exported for** the design team | generated — but see `AI-005`, the copy on disk predates this correction |
 
 > **Version-control the text; generate the binary. Never the reverse.**
 > This holds beyond naming — it is why schemas live in migrations rather than in
@@ -450,7 +450,7 @@ in `docs/features/card-payments.md`.
 | **Status** | Adopted 2026-07-29 for everything below marked ✅. Open review until **2026-08-05**; silence adopts. |
 | **Technical owner** | Charles — separators, enforcement, file layout, process |
 | **Needs the owners** | customer-facing words, and retiring `PDP` (it is their spreadsheet) |
-| **Needs the design team** | the frame renames in [frame-names.md](frame-names.md) |
+| **Needs the design team** | the frame and section renames in [naming/figma-route-rule.md](naming/figma-route-rule.md) |
 
 **Decided vs implemented** — kept honest, deliberately:
 

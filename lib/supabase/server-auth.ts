@@ -42,3 +42,27 @@ export async function supabaseServerAuthClient() {
     },
   });
 }
+
+/**
+ * Read the signed-in customer's auth user id from the request cookies, for
+ * stamping onto an order at checkout. Never throws: a signed-out buyer, a
+ * local (non-hosted) run, or a broken auth call all return null so guest
+ * checkout keeps working.
+ *
+ * @returns The Supabase auth user id, or null when there is no usable session.
+ */
+export async function currentAuthUserId(): Promise<string | null> {
+  if (!getSupabaseEnv().hosted) {
+    return null;
+  }
+  try {
+    const supabase = await supabaseServerAuthClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    // Checkout must never fail because auth is unavailable.
+    return null;
+  }
+}

@@ -4,6 +4,10 @@ Start here. This file is the repository's startup context: goal, current
 state, safety gates, release queue, and the index of deeper docs. Open linked
 resources only when the task needs them.
 
+After this file, read [`agent-delivery/README.md`](agent-delivery/README.md) and
+[`agent-delivery/INBOX.md`](agent-delivery/INBOX.md) for the agent workflow and
+open messages.
+
 ## How to update this file
 
 - Keep this file as concise startup context for any AI agent working on the
@@ -60,9 +64,11 @@ resources only when the task needs them.
   conflicts: [`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ The delivery
   stamped an "ELDREVE" placeholder wordmark on many frames — GoldRose was
   substituted everywhere; DQ-34 asks the design team to confirm.
-- Page/section dwell tracking is built, its hosted schema is live (`0005`), and
-  the code sits on branch `feat/engagement-tracking` awaiting preview review —
-  **not merged to `main`**, so production records no engagement yet
+- Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
+  its hosted schema live (`0005`), so it deploys with production. Section
+  coverage is partial: only 3 of the home page's 17 bands carry a
+  `data-el="…-SECTION"` tag, and tagging the rest is blocked on the PROPOSED
+  section vocabulary in [`element-names.md`](docs/ixd/element-names.md)
   ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
 - `/bag` items, tracking timeline, shipping choices, and card fields are
   visual placeholders; the real cart enters through `/checkout`.
@@ -160,14 +166,14 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
   `/shop` cards now show the real catalog photos, which are supplier
   composites with English text baked in — replace before launch. Only three
   products fill the eight-card grid, so cards repeat.
-- Use `temp/PlaceholderPicture.png` for explicitly unknown images.
+- Use `assets/PlaceholderPicture.png` for explicitly unknown images.
 
 ## Repository structure
 
 ```text
 goldrose-storefront/
-├── AGENTS.md            # Canonical AI collaboration and teaching protocol
-├── CLAUDE.md            # Claude import of the canonical agent instructions
+├── agent-delivery/      # Agent instructions and open inbox
+├── CLAUDE.md            # Claude entry point importing SUMMARY.md
 ├── .codex/              # Local Codex hooks, including the working-mode selector
 ├── app/                 # Next.js routes, pages, and API endpoints
 ├── components/          # Storefront, screen, and shared React UI
@@ -178,7 +184,9 @@ goldrose-storefront/
 ├── scripts/             # Seed, validation, and feature utilities
 ├── tests/               # Playwright end-to-end and unit tests
 ├── docs/                # Specs, roadmaps, guides
-├── temp/                # Raw imports and scratch material; not served
+├── team-deliveries/     # Upstream deliveries: inbox/ + originals/ (kept)
+├── archive/             # Superseded repo docs; never referenced from anywhere
+├── trash/               # Scratch, gitignored, deletable; never referenced
 ├── .data/               # Local file-adapter database and uploads
 ├── .ai/                 # Optional work history; never startup context
 ├── .mcp.json            # Project MCP servers (supabase read-only, next-devtools, playwright)
@@ -192,12 +200,14 @@ goldrose-storefront/
 
 | Need | Open |
 |---|---|
+| Agent instructions and open messages | [`agent-delivery/`](agent-delivery/README.md) |
 | Workflow rules: branching, parallel sessions, CI gates, environments | [`docs/engineering-playbook.md`](docs/engineering-playbook.md) |
 | Feature status and roadmap | [`docs/features/README.md`](docs/features/README.md) |
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
 | Front-end Definition of Done (Proposed, awaiting sign-off) | [`docs/ixd/frontend-definition-of-done.md`](docs/ixd/frontend-definition-of-done.md) |
 | How work is handed over: design team → dev → bosses, delivery checklist | [`docs/ixd/delivery-protocol.md`](docs/ixd/delivery-protocol.md) |
+| Where raw deliveries land, and how to parse one without re-importing it | [`team-deliveries/README.md`](team-deliveries/README.md) |
 | Database decisions and SKU rules | [`docs/Database.md`](docs/Database.md) |
 | SEO/GEO implementation and supporting research | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |
 | Testing procedure | [`docs/TESTER-GUIDE.md`](docs/TESTER-GUIDE.md) |

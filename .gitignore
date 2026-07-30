@@ -42,8 +42,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# temp
-temp/
+# scratch — deletable at any time; nothing in the repo may reference it
+trash/
 .claude/
 
 # local file-adapter database and its uploads (see lib/orders/db.ts)

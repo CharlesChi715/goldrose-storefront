@@ -69,23 +69,17 @@ is there any way to get how long time do user stay on a page or stay on a sectio
 
 
 ## TODO from me:
+
+figma 英语命名 统一
+privacy policy page should reachable
+domain
+
 frontend naming convention
 CI/CD
-
 payment
 order tracking test
 frontend ixd
-domain
 
 
 - meeting
 
-figma 英语命名 统一
-
-在想backup plan
-
-支付用 PayPal Advanced Cards
-
-email tracking order 
-
-supabase CLI
