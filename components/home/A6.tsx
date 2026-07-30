@@ -392,8 +392,8 @@ export function A6() {
           so it stays static art rather than pointing at a missing slide. */}
       <div style={{ ...abs(239, 4522.5, 7, 7), background: "#E0CCB2", borderRadius: 9999 }} />
 
-      {/* Button · Read Customer Stories (163:111) — live since 07-30 per
-          Charles's Figma comment on 1523:1655: navigates to /story */}
+      {/* Button · Read Customer Stories (163:111) — live since 07-30; target
+          from the Figma prototype link on 1523:1992 (ON_CLICK → 1573:106 /story) */}
       <Link
         href="/story"
         aria-label="Read customer stories"
