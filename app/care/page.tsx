@@ -3,8 +3,7 @@
  * /care — the Customer Care page (Figma CARE-* frames 1097:116…119,
  * imported 2026-07-27). One route, four Help-Center tab states; ?tab=
  * deep-links a tab so other surfaces can land in context (the order
- * confirmation's CONTACT SUPPORT card uses ?tab=order-issues, per
- * docs/ixd/order-detail.md).
+ * confirmation's CONTACT SUPPORT card uses ?tab=order-issues).
  */
 
 import type { Metadata } from "next";

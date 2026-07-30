@@ -44,8 +44,8 @@ Extend the existing first-party beacon to measure **active time** per page and
 per named section, aggregate it **in the browser**, and send **one summary at the
 end of the visit** that updates that visit's existing `page_views` row.
 
-Section identity reuses the `data-el="…-SECTION"` names we already ship
-(`docs/ixd/element-names.md`). No new attribute, no new table, no extra rows.
+Section identity reuses the `data-el="…-SECTION"` names we already ship. No
+new attribute, no new table, no extra rows.
 
 ## Options considered
 
@@ -154,9 +154,9 @@ and an e2e run asserting a timed visit surfaces on the admin card.
 
 Stage 2 is blocked on element naming, not on code. Only A-1, A-2, A-3 carry
 `data-el` today; A-4 … A-11, `/shop` and `/products/[slug]` are untagged, and the
-SECTION vocabulary those bands need (`STORY`, `CRAFT`, `OCCASION`, …) is still
-**PROPOSED, awaiting the owner's OK** (`docs/ixd/element-names.md`). Tagging
-before that sign-off means renaming across ~8 files later.
+SECTION vocabulary those bands need (`STORY`, `CRAFT`, `OCCASION`, …) is not
+yet defined and signed off. Tagging before a vocabulary exists means renaming
+across ~8 files later.
 
 No feature-record id exists for element naming, so `dependsOn` stays empty and
 the dependency is recorded here in prose.
@@ -256,7 +256,5 @@ mechanism is complete and generic, coverage grows as tagging lands.
 
 ## Related links
 
-- [`docs/ixd/element-names.md`](../../ixd/element-names.md) — section name vocabulary and rules
 - [`docs/features/posting-account-attribution.md`](../posting-account-attribution.md) — the `utm_acc` tag on the same beacon
-- [`docs/google-analytics-concepts.md`](../../google-analytics-concepts.md) — engagement-rate and funnel-event background
 - `components/Beacon.tsx`, `app/api/beacon/route.ts`, `lib/admin/analytics.ts`

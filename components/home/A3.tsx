@@ -8,7 +8,7 @@
  * 430px stage; y-range 1484–2417.
  *
  * This one file draws THREE named bands — NEW-ARRIVALS, READY-TO-SHIP and
- * PROMISE (docs/ixd/element-names.md) — as flat siblings with no per-band
+ * PROMISE — as flat siblings with no per-band
  * wrapper element, so each band's `data-el` names start at its heading.
  */
 

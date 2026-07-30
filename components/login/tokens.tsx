@@ -7,8 +7,8 @@
  * palette and the same glyph pipeline, so the values live here rather than
  * being restated per frame.
  *
- * See docs/ixd/login-import.md for how these frames were produced from the
- * Figma sources, including the two export traps this pipeline works around.
+ * The frames were produced from the Figma sources by the import pipeline,
+ * which works around two export traps (per-import notes are in git history).
  */
 
 /* Palette, verbatim from the frames. */

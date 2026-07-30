@@ -27,8 +27,8 @@ const SESSION_GAP_MS = 30 * 60 * 1000;  // Google Analytics defaults to a 30-min
  *  handful of sections the IntersectionObserver says are on screen. */
 const TICK_MS = 500;
 
-/** Sections are the elements already named for Figma/tests — no new attribute
- *  (docs/ixd/element-names.md rule 5 warns against a second parallel marker). */
+/** Sections are the elements already named for Figma/tests — no new attribute;
+ *  the naming convention forbids a second parallel marker. */
 const SECTION_SELECTOR = '[data-el$="-SECTION"]';
 
 function randomId(): string {

@@ -416,28 +416,24 @@ export async function deleteProductsAction(ids: string[]): Promise<void> {
     throw new Error(`Unknown product: ${input.id}`);
   }
 
-  const id = existing?.id ?? (await uniqueHandle(input.title));
+  const id = existing?.id ?? handle;
 ```
 
-1. **Identity.** On create, the product's `id` is derived from the title by [uniqueHandle()](../../lib/admin/products.ts#L129-L145): slugify ("Gold Rose 24K" → `gold-rose-24k`), then append `-2`, `-3`… until it collides with nothing. So the id doubles as the first URL handle.
+1. **Identity.** On create, the product's `id` is the handle derived from the title by [productHandle()](../../lib/admin/product-handle.ts) — the deterministic algorithm in [docs/ixd/naming/product-handles.md](../ixd/naming/product-handles.md) ("Gold Rose 24K" → `gold-rose-24k`). So the id doubles as the first URL handle. On a collision the save **throws** with a readable error instead of appending `-2` — the handle rule forbids auto-disambiguation; the admin revises the title or sets a manual handle.
 
    ```ts
-   // lib/admin/products.ts:130-144
-     const products = await getStore().all("products");
-     const base = slugify(title);
-     let candidate = base;
-     let counter = 2;
-     while (
-       products.some(
-         (product) =>
-           (product.handle === candidate || product.id === candidate) &&
-           product.id !== ignoreId,
-       )
-     ) {
-       candidate = `${base}-${counter}`;
-       counter += 1;
-     }
-     return candidate;
+   // lib/admin/product-handle.ts
+   const handle = title
+     .normalize("NFKD")
+     .replace(/[\u0300-\u036f]/g, "")
+     .toLowerCase()
+     .replace(/['\u2019]/g, "")
+     .replace(/[^a-z0-9]+/g, "-")
+     .replace(/^-+|-+$/g, "");
+
+   if (handle.length > HANDLE_MAX_LENGTH || !HANDLE_PATTERN.test(handle)) {
+     throw new Error(`Cannot derive a URL handle from "${title}" — set one manually.`);
+   }
    ```
 
 2. **The row.** One complete `ProductRow` object is assembled ([products.ts:228-251](../../lib/admin/products.ts#L228-L251)); fields the form doesn't own (like `position` and `created_at`) are carried over from the existing row or defaulted.

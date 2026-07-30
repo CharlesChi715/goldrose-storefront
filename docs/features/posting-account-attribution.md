@@ -83,4 +83,4 @@ None. The only step left is human acceptance (owner click-test), which is the UA
 ## Related links
 
 - Walkthrough: [../learning/02-posting-account-attribution.md](../learning/02-posting-account-attribution.md)
-- Owner instructions: [TESTER-GUIDE → "Marketing links"](../TESTER-GUIDE.md#marketing-links-for-the-owner)
+- Owner instructions: the tester guide's "Marketing links" section (since retired, in git history)

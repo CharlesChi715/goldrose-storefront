@@ -10,6 +10,11 @@ import "server-only";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/supabase/store.ts";
+import {
+  HANDLE_MAX_LENGTH,
+  HANDLE_PATTERN,
+  productHandle,
+} from "@/lib/admin/product-handle.ts";
 import type {
   InventoryMovementRow,
   InventoryReason,
@@ -108,40 +113,30 @@ export async function getProductDetail(id: string): Promise<ProductDetail | null
   };
 }
 
-/** URL-safe slug from a title, e.g. "Gold Rose 24K" → "gold-rose-24k" (max 60 chars, never empty). */
-function slugify(value: string): string {
-  return (
-    value
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 60) || "product"
-  );
-}
-
 /**
- * A unique product id/handle derived from the title — appends -2, -3, …
- * until it clashes with no other product's handle or id.
+ * Throws when another product already uses `handle` as its handle or id.
+ * The handle rule (docs/ixd/naming/product-handles.md §3) forbids
+ * auto-disambiguation (`-2`): a collision means the title must be revised
+ * or a deliberate manual handle set.
  *
- * @param title - Product title to slugify.
+ * @param products - All product rows to check against.
+ * @param handle - Candidate handle (also used as the id on create).
  * @param ignoreId - Product whose own handle/id shouldn't count as a clash (editing).
  */
-export async function uniqueHandle(title: string, ignoreId?: string): Promise<string> {
-  const products = await getStore().all("products");
-  const base = slugify(title);
-  let candidate = base;
-  let counter = 2;
-  while (
-    products.some(
-      (product) =>
-        (product.handle === candidate || product.id === candidate) &&
-        product.id !== ignoreId,
-    )
-  ) {
-    candidate = `${base}-${counter}`;
-    counter += 1;
+function assertHandleAvailable(
+  products: ProductRow[],
+  handle: string,
+  ignoreId?: string,
+): void {
+  const clash = products.some(
+    (product) =>
+      (product.handle === handle || product.id === handle) && product.id !== ignoreId,
+  );
+  if (clash) {
+    throw new Error(
+      `Handle "${handle}" is already used by another product — revise the title or set a manual handle.`,
+    );
   }
-  return candidate;
 }
 
 export type SaveProductInput = {
@@ -185,8 +180,10 @@ export type SaveProductInput = {
  *
  * @param input - Full form payload; id null = create.
  * @param actor - Admin name recorded on inventory movements.
- * @returns The saved product's id (derived from the title on create).
- *   Throws when a non-blank SKU is already taken (SKU rules, Database.md).
+ * @returns The saved product's id (= the handle derived from the title on
+ *   create, docs/ixd/naming/product-handles.md). Throws when a non-blank SKU
+ *   is already taken (SKU rules, Database.md), when a handle cannot be
+ *   derived or collides, or when a non-draft product's handle would change.
  */
 export async function saveProduct(
   input: SaveProductInput,
@@ -201,7 +198,29 @@ export async function saveProduct(
     throw new Error(`Unknown product: ${input.id}`);
   }
 
-  const id = existing?.id ?? (await uniqueHandle(input.title));
+  // Handle rule (docs/ixd/naming/product-handles.md): derived once from the
+  // title at creation, manual handles must pass the same validation, and a
+  // non-draft product's handle is frozen until product_redirects exists (§5).
+  const manualHandle = input.handle?.trim() || null;
+  if (manualHandle && (manualHandle.length > HANDLE_MAX_LENGTH || !HANDLE_PATTERN.test(manualHandle))) {
+    throw new Error(`Handle "${manualHandle}" is invalid — lowercase words separated by single hyphens.`);
+  }
+  const handle = existing
+    ? (manualHandle ?? existing.handle)
+    : (manualHandle ?? productHandle(input.title));
+  if (existing && handle !== existing.handle) {
+    if (existing.status !== "draft") {
+      throw new Error(
+        `Handle "${existing.handle}" is frozen: the product is ${existing.status} and product_redirects does not exist yet.`,
+      );
+    }
+    assertHandleAvailable(products, handle, existing.id);
+  }
+  if (!existing) {
+    assertHandleAvailable(products, handle);
+  }
+
+  const id = existing?.id ?? handle;
 
   // SKU rules (docs/Database.md): non-blank SKUs are unique storewide. The
   // 0003 partial index enforces this on Postgres; this check covers the
@@ -219,10 +238,6 @@ export async function saveProduct(
       throw new Error(`SKU "${taken.sku}" is already used by another product.`);
     }
   }
-  const handle = existing
-    ? (input.handle?.trim() || existing.handle)
-    : (input.handle?.trim() || id);
-
   const maxPosition = products.reduce((max, row) => Math.max(max, row.position), 0);
 
   const row: ProductRow = {
@@ -337,7 +352,9 @@ export async function saveProduct(
 /**
  * Shopify's Duplicate action: full copy (variants + media) as a new draft
  * with zeroed inventory and cleared SKUs (non-blank SKUs are unique
- * storewide — SKU rules, Database.md). Throws on an unknown product.
+ * storewide — SKU rules, Database.md). Throws on an unknown product, or when
+ * the copy's title derives a handle that is taken or underivable (handle
+ * rule: no -2 suffixes).
  *
  * @param id - Product to copy.
  * @param copySuffix - Localized "Copy of" text put before the new title.
@@ -351,8 +368,13 @@ export async function duplicateProduct(id: string, copySuffix: string): Promise<
   const store = getStore();
   const now = new Date().toISOString();
   const title = `${copySuffix} ${detail.product.title}`.trim();
-  const newId = await uniqueHandle(title);
   const products = await store.all("products");
+  // Handle rule: derive from the copy's title, never auto-disambiguate. When
+  // the localized prefix adds no a-z0-9 characters (e.g. 副本), the copy's
+  // handle collides with the original's and this throws — rename the copy's
+  // title (or the original's) and duplicate again.
+  const newId = productHandle(title);
+  assertHandleAvailable(products, newId);
   const maxPosition = products.reduce((max, row) => Math.max(max, row.position), 0);
 
   await store.insert("products", [

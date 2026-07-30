@@ -122,7 +122,7 @@ Two tests worth knowing individually:
         // …
   ```
 
-- [element-names.test.ts](../../tests/unit/element-names.test.ts) is a *convention linter written as a test*. It parses the allowed vocabulary out of `docs/ixd/element-names.md` and checks every `data-el` attribute in the codebase against it. The doc isn't copied into the test — it's *parsed* — so the two cannot drift:
+- `element-names.test.ts` (since retired, in git history) was a *convention linter written as a test*. It parsed the allowed vocabulary out of a convention doc and checked every `data-el` attribute in the codebase against it. The doc isn't copied into the test — it's *parsed* — so the two cannot drift:
 
   ```ts
   // tests/unit/element-names.test.ts:33-41

@@ -22,9 +22,9 @@ const requestSchema = z.object({
   visitorId: z.string().trim().min(4).max(64),
   activeMs: z.number().int().min(0).max(MAX_ACTIVE_MS),
   scrollPct: z.number().int().min(0).max(100),
-  // Section name -> active ms. Names follow the data-el grammar
-  // (docs/ixd/element-names.md); the cap stops a hostile client bloating the
-  // jsonb blob, and 64 sections is far past any real page.
+  // Section name -> active ms. Names follow the data-el grammar; the cap
+  // stops a hostile client bloating the jsonb blob, and 64 sections is far
+  // past any real page.
   sections: z
     .record(z.string().max(80), z.number().int().min(0).max(MAX_ACTIVE_MS))
     .nullable()

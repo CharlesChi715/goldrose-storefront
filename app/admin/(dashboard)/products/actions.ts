@@ -46,7 +46,9 @@ const saveProductSchema = z.object({
   handle: z
     .string()
     .trim()
-    .regex(/^[a-z0-9-]*$/)
+    // Empty = derive from the title; otherwise the canonical handle format
+    // (docs/ixd/naming/product-handles.md §3).
+    .regex(/^$|^[a-z0-9]+(-[a-z0-9]+)*$/, "Handle must be lowercase words separated by single hyphens")
     .max(120)
     .nullable(),
   charge_tax: z.boolean(),

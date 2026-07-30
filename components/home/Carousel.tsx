@@ -76,7 +76,7 @@ const EDGE_RESISTANCE = 3;
  * @param idleColor - Dot colour when not current.
  * @param href - Destination for a card tap.
  * @param label - Human name used in the dots' accessible labels.
- * @param name - Element-name prefix (docs/ixd/element-names.md), e.g.
+ * @param name - Element-name prefix, e.g.
  * `HOME-HERO`. Stamps `data-el` on the window (`-MEDIA`), each slide
  * (`-SLIDE-n`) and each dot (`-DOT-n`). Omit to leave the rail untagged.
  * @param cellWidth - Width of one slide; defaults to the whole window.

@@ -23,7 +23,8 @@
  * lands on /auth/confirm, whose default destination is /account; one tap on
  * the Business tab returns here signed in.
  *
- * See docs/ixd/login-import.md for how this was produced from the sources.
+ * Produced from the Figma sources by the import pipeline (per-import notes
+ * are in git history).
  */
 
 import { useMemo, useRef, useState } from "react";

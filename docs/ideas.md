@@ -82,4 +82,5 @@ frontend ixd
 
 
 - meeting
-
+naming
+hwo to add ixd in figma
