@@ -82,5 +82,11 @@ frontend ixd
 
 
 - meeting
+
 naming
+  section
+  route state viewport
+  mark for dev 
+
 hwo to add ixd in figma
+  transition: instand

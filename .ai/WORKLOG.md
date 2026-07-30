@@ -3886,3 +3886,19 @@ mechanisms, refund buttons, checkout payment module).
 - Findings for the design team recorded in docs/ixd/README.md ("07-30 checkout
   reflow"). Verified: tsc, eslint, 63 unit tests, checkout+discount e2e (10/10),
   full-page screenshot vs frame render.
+
+## 2026-07-30 — Domain research and recommendation (OQ-4)
+
+RDAP-checked candidate domains: all natural `goldrose*.com` variants taken;
+`goldrose.co`, `goldrose.shop`, `goldrose.store` available. Recommended to
+bosses: `goldrose.co` at Cloudflare Registrar in a boss-owned account
+(~US$25–30/yr), `goldrose.shop` as defensive redirect; parked `goldrose.com`
+purchasable aftermarket if they want it. Registrar rationale: at-cost, neutral
+of Vercel (host switch = one DNS record). Switch caveats recorded in SUMMARY
+OQ-4: passkey RP ID pinned to vercel domain, Supabase auth URLs, PayPal
+return URLs. Awaiting boss name sign-off before registering.
+
+## 2026-07-30 — Shop filter-chip overlap
+
+- Moved the `Gift Sets` chip to leave an 8px design-space gap after `Ruby Red`.
+- Verified with ESLint, TypeScript, and the live `/shop` page; the rendered chips no longer overlap.

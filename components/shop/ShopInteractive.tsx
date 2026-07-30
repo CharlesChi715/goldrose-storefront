@@ -373,7 +373,7 @@ export function ShopInteractive({
           pair before them; the drawer is the interactive surface. */}
       {[
         { x: 17, w: 109, label: "Ruby Red", labelX: 10, labelW: 67, closeX: 83 },
-        { x: 119, w: 103, label: "Gift Sets", labelX: 10, labelW: 61, closeX: 77 },
+        { x: 134, w: 103, label: "Gift Sets", labelX: 10, labelW: 61, closeX: 77 },
       ].map((chip) => (
         <div key={chip.label} style={abs(chip.x, 359, chip.w, 32)}>
           <div style={{ ...abs(-1, -1, chip.w + 2, 34), border: `1px solid ${SAND}`, borderRadius: 31 }} />

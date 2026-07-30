@@ -172,6 +172,12 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
   `/shop` cards now show the real catalog photos, which are supplier
   composites with English text baked in — replace before launch. Only three
   products fill the eight-card grid, so cards repeat.
+- **OQ-4 — open (2026-07-30):** custom domain. RDAP check: every natural
+  `goldrose*.com` is taken; `goldrose.co` (and `.shop`/`.store`) are free.
+  Recommendation to bosses: register `goldrose.co` at Cloudflare Registrar
+  (boss-owned account), optionally buy the parked `goldrose.com` aftermarket.
+  ⚠️ Domain switch must plan around the passkey RP ID pinned to the vercel
+  domain, plus Supabase auth URLs and PayPal return URLs.
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
 
 ## Repository structure
