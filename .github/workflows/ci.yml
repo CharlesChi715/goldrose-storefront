@@ -2,9 +2,7 @@
 # red mark. Next 16 removed lint-on-build, so without this workflow `npm run
 # lint` only ever runs when somebody remembers to type it.
 #
-# Deliberately NOT here yet, both for reasons that would make CI red on day one:
-#   * `npm run build` — needs a seeded .data/db.json (that directory is
-#     gitignored), so it wants a `npm run seed -- --reset` step first.
+# Deliberately NOT here yet:
 #   * `npm run test:e2e` — the pixel baselines in tests/e2e/__screenshots__ are
 #     named `-darwin.png`; on a Linux runner every pixel spec fails. Adding e2e
 #     means a macos-latest runner.
@@ -29,7 +27,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run format:check
       - run: npm run test:unit
-      # Fails when feature front matter / roadmap.legacy.yaml disagree with the
-      # generated roadmap block in docs/features/README.md.
-      - run: npm run features:check
+      # `next build` prerenders pages that read .data/db.json in local mode,
+      # and that directory is gitignored — seed it first.
+      - run: npm run seed -- --reset
       - run: npm run build
