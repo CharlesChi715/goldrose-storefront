@@ -182,6 +182,13 @@ import.
 Normative for ties: if prose and code disagree, the **prose wins** and the code
 is a bug.
 
+⚠️ **This block is a specification artifact, not shipped code.** Nothing imports
+it and nothing in the app runs it. It exists to remove ambiguity for whoever
+implements the real function — a person or an AI model — and to give the §5
+fixtures something exact to check against. The production implementation belongs
+in `lib/`; once it exists, replace this block with a pointer to it
+([§7](#7-enforcement)).
+
 ```js
 const MAX_LENGTH = 120;
 
