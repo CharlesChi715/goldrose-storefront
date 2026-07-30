@@ -2,9 +2,9 @@
 schemaVersion: 1
 id: region-alignment
 kind: feature
-parent: backend
+parent: infrastructure
 area: backend
-order: 30
+order: 10
 
 delivery: verified
 rollout: test-deployment
@@ -15,7 +15,11 @@ blockedBy: []
 
 verification:
   automated: []
-  human: null
+  human:
+    by: charles
+    date: 2026-07-26
+    environment: production
+    evidence: "curl -sI …/api/beacon shows x-vercel-id: syd1::pdx1 (see note below)"
 ---
 
 # Region alignment — put Vercel compute beside the Oregon database

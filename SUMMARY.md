@@ -76,6 +76,10 @@ open messages.
   derives handles, collisions throw (no `-2`), non-draft handles are frozen, and a
   unit test replays the doc's fixtures. ⚠️ Duplicate in the Chinese admin (副本
   prefix) now errors by design; `product_redirects` still doesn't exist.
+- The feature roadmap in [`docs/features/README.md`](docs/features/README.md)
+  is **generated** (2026-07-31) from record front matter + `roadmap.legacy.yaml`:
+  edit the source, run `npm run features:generate`; CI's `features:check`
+  fails on drift.
 - `/bag` items, tracking timeline, shipping choices, and card fields are
   visual placeholders; the real cart enters through `/checkout`.
 - The [owner walkthrough](docs/admin-design.md#143-final-acceptance) is
@@ -213,7 +217,7 @@ goldrose-storefront/
 | Need | Open |
 |---|---|
 | Agent instructions and open messages | [`agent-delivery/`](agent-delivery/README.md) |
-| Feature status and roadmap | [`docs/features/README.md`](docs/features/README.md) |
+| Feature status and roadmap (generated — `npm run features:generate`) | [`docs/features/README.md`](docs/features/README.md) |
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
 | Naming rules — Figma sections/frames, components (`data-el`), and product URL handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md) |

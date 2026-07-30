@@ -3902,3 +3902,37 @@ return URLs. Awaiting boss name sign-off before registering.
 
 - Moved the `Gift Sets` chip to leave an 8px design-space gap after `Ruby Red`.
 - Verified with ESLint, TypeScript, and the live `/shop` page; the rendered chips no longer overlap.
+
+## 2026-07-31 — Deliveries
+
+- Aligned the test-layers markdown table and de-squeezed the CI ASCII diagram
+  in `docs/learning/09-tests-and-ci.md` (cosmetic whitespace only).
+- Created user-level `/align` skill (`~/.claude/skills/align/SKILL.md`)
+  capturing the method: pad table cells to widest entry; realign ASCII
+  diagrams via measure → uniform script shift (stretch arrows) → verify,
+  never by eye. Not mirrored to Codex `.agents/skills/` (offered, pending).
+- Ran `/align` on the catalog-read diagram in
+  `docs/learning/04-how-pages-read-the-database.md`: single-anchored the
+  ragged inner branch column, widened the box edge 78→82 (whitespace only).
+- Renamed the features README heading "Status tree (= roadmap)" →
+  "Roadmap (status tree)" and updated its two in-file references
+  (`docs/features/README.md`); verified no other file or anchor links to the
+  old name.
+- Ran `/align` over `docs/features/README.md`: lifecycle-diagram annotations
+  anchored under their stages, file-format table cells padded; status trees
+  intentionally untouched (doc mandates inline meters + narrow lines).
+
+## 2026-07-31 — Feature-registry tooling: generated roadmap + CI drift check
+
+- Built the missing half of the front-matter feature registry (schema landed
+  in #20): `scripts/features/lib.mjs` (YAML-subset parser + zod validation +
+  roadmap renderer) and new CLI commands generate/check/validate/list.
+- docs/features/README.md roadmap trees are now GENERATED between
+  `roadmap:begin/end` markers from record front matter, 15 new
+  `<area>/<group-id>/_group.md` group nodes, and roadmap.legacy.yaml
+  (45 pre-system leaves transcribed from the hand tree; shrinks as leaves
+  graduate). Old DONE label renders as VERIFIED per TEMPLATE.md.
+- npm scripts features:generate / features:check added; features:check wired
+  into CI; unit test tests/unit/features-registry.test.ts guards the parser
+  and live registry. Fixed stale/missing front matter in order-tracking,
+  region-alignment, promotion-emails, engagement-tracking, db-backups.

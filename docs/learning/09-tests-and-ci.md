@@ -8,11 +8,11 @@ The other docs trace features a customer or an operator uses. This one traces th
 **What it does**
 Three layers, each answering a different question:
 
-| Layer | Question | Command | Where it runs |
-| --- | --- | --- | --- |
-| Typecheck + lint | does it hold together? | `npm run typecheck`, `npm run lint` | CI + local |
-| Unit tests | is this rule correct in isolation? | `npm run test:unit` | CI + local |
-| End-to-end | does the whole thing actually work? | `npm run test:e2e` | **local only** |
+| Layer            | Question                             | Command                             | Where it runs  |
+| ---------------- | ------------------------------------ | ----------------------------------- | -------------- |
+| Typecheck + lint | does it hold together?               | `npm run typecheck`, `npm run lint` | CI + local     |
+| Unit tests       | is this rule correct in isolation?   | `npm run test:unit`                 | CI + local     |
+| End-to-end       | does the whole thing actually work?  | `npm run test:e2e`                  | **local only** |
 
 **Why it exists**
 Because "it worked when I tried it" doesn't survive the fiftieth change. Two design commitments shape all of it:
@@ -29,17 +29,17 @@ Key jargon:
 ## Code Trace
 
 ```text
- DEVELOPER MACHINE                              GITHUB (every push / PR)
- ─────────────────                              ────────────────────────
- npm run typecheck   tsc --noEmit  ──────────▶  .github/workflows/ci.yml
- npm run lint        eslint                       ubuntu-latest, Node 24
- npm run test:unit   node --test tests/unit/*.ts    ├─ npm ci
-        │                                           ├─ npm run lint
-        │  9 files, node:test, zero deps            ├─ npm run typecheck
-        │  temp-dir chdir for DB isolation          └─ npm run test:unit
+ DEVELOPER MACHINE                                      GITHUB (every push / PR)
+ ─────────────────                                      ────────────────────────
+ npm run typecheck   tsc --noEmit  ──────────────────▶  .github/workflows/ci.yml
+ npm run lint        eslint                               ubuntu-latest, Node 24
+ npm run test:unit   node --test tests/unit/*.ts            ├─ npm ci
+        │                                                   ├─ npm run lint
+        │  9 files, node:test, zero deps                    ├─ npm run typecheck
+        │  temp-dir chdir for DB isolation                  └─ npm run test:unit
         │
- npm run test:e2e    playwright                  ✗ e2e NOT run in CI
-        │                                          (baselines are -darwin)
+ npm run test:e2e    playwright                         ✗ e2e NOT run in CI
+        │                                                 (baselines are -darwin)
         ├─ webServer: next build && next start -p 3001
         │    env: PAYPAL_* = ""     → mock checkout, no money
         │         SUPABASE_* = ""   → local .data/db.json, never the live DB

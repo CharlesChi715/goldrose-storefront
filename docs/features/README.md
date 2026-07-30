@@ -1,17 +1,17 @@
 # docs/features/
 
 One file per feature: the **decision** (what we chose and why, with pros/cons)
-and the **plan** (work items, status). The **Status tree below doubles as the
-project roadmap** — every leaf carries its current status so agents can survey
-everything without opening the files.
+and the **plan** (work items, status). The **Roadmap below is a status tree**
+— every leaf carries its current status so agents can survey everything
+without opening the files.
 
 ## Lifecycle
 
 Every future thought moves one way through the docs — never lives in two places:
 
 ```
-docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md  →  .ai/WORKLOG.md
-  (raw inbox,      (decision, plan, STATUS)       (release queue only)       (dated history)
+docs/ideas.md  →  docs/features/<name>.md   →  SUMMARY.md            →  .ai/WORKLOG.md
+(raw inbox,       (decision, plan, STATUS)     (release queue only)     (dated history)
 ```
 
 - An idea graduates: add its feature file, delete its line from ideas.md.
@@ -19,28 +19,47 @@ docs/ideas.md  →  docs/features/<name>.md  →  SUMMARY.md  →  .ai/WORKLOG.m
   and only if the product's promised behavior changed.
 - Superseded docs are deleted; their history stays in git.
 
-## Status line
+## Status model (front matter)
 
-Line 1 of every feature file, bold, fixed vocabulary:
+Status lives ONLY in machine-readable front matter — never as prose in a
+body. Three kinds of node feed the Roadmap below:
 
-**BACKLOG → READY → IN PROGRESS → UAT → DONE** (+ **DROPPED**, exit from any state)
+- **Records** — `<id>.md` files in this folder; front matter per
+  [`TEMPLATE.md`](TEMPLATE.md).
+- **Groups** — `<area>/<group-id>/_group.md` with `kind: group`; no status of
+  their own, an optional `qualifier` is the caveat shown after the group name.
+- **Legacy leaves** — features shipped before this system, one line each in
+  [`roadmap.legacy.yaml`](roadmap.legacy.yaml); that file shrinks as leaves
+  graduate into records.
 
-- BACKLOG — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a feature file is born BACKLOG)
+Two status axes, fixed vocabulary:
+
+**delivery** — `backlog → ready → in-progress → uat → verified` (+ `dropped`, exit from any state)
+
+- BACKLOG — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a record is born BACKLOG)
 - READY — approach chosen (options + pros/cons recorded)
 - IN PROGRESS — being built
-- UAT (user acceptance testing) — live on production, **awaiting human verification** (a queue, not an activity — dormant/sandbox features sit here too; automated tests were already green to land)
-- DONE — **works well on the live site, verified by a human** (owner/Charles clicked through it); nothing known to fix — only future improvements remain possible
-- DROPPED — considered and rejected; keep the file, the "why not" is the value
+- UAT (user acceptance testing) — deployed, **awaiting human verification** (a queue, not an activity; automated tests were already green to land)
+- VERIFIED (formerly DONE) — **works on the deployed site, verified by a human** (owner/Charles clicked through it); requires `verification.human` evidence
+- DROPPED — considered and rejected; keep the node, the "why not" is the value
 
-Format — full pipeline with the **current stage bold**, then date + qualifier:
+**rollout** — `not-deployed | local-only | test-deployment | dormant | live` —
+where the code actually runs, independent of delivery. This replaces the old
+hand-written "dormant / sandbox" caveats: the roadmap prints them
+automatically whenever rollout is surprising for the delivery stage.
 
-`Status: BACKLOG → **READY** → IN PROGRESS → UAT → DONE · 2026-07-24, not yet implemented`
+`statusChangedAt` updates whenever delivery changes; `priority` / `owner` /
+`target` are required while delivery is ready/in-progress/uat.
 
-(DROPPED replaces the whole pipeline: `Status: **DROPPED** · date, why`.)
+## Commands
 
-RULE: whoever changes a feature's status updates BOTH the file's status line
-and its leaf in the Status tree below, **in the same commit** — the two must
-never disagree.
+| Command | Does |
+|---|---|
+| `npm run features:new -- <id> --area <a> --parent <group-id>` | scaffold a record from TEMPLATE.md, then regenerate the roadmap |
+| `npm run features:generate` | validate the registry, rebuild the Roadmap block below |
+| `npm run features:check` | fail when the registry is invalid or the Roadmap is stale (runs in CI) |
+
+(`node scripts/features/cli.mjs list` prints a flat status table.)
 
 ## File format
 
@@ -54,43 +73,45 @@ Verification evidence → Related links.
 Two **optional** sections, added 2026-07-28 (records created before then do not
 carry them):
 
-| Section | Holds | Sits there because |
-|---|---|---|
-| *Tech details* | platform constraints and traps found while planning | reference for whoever executes the Plan above it |
-| *Open questions* | OQ-1, OQ-2… choices still **ours** to make | next to Blockers, which are someone **else's** to clear |
+| Section          | Holds                                               | Sits there because                                      |
+| ---------------- | --------------------------------------------------- | ------------------------------------------------------- |
+| *Tech details*   | platform constraints and traps found while planning | reference for whoever executes the Plan above it        |
+| *Open questions* | OQ-1, OQ-2… choices still **ours** to make          | next to Blockers, which are someone **else's** to clear |
 
 Data shape and invariants (column names, "X must never exceed Y") go in
 *Tech details*; the checkbox that proves them goes in *Acceptance criteria*.
 
-## Status tree (= roadmap)
+## Roadmap (status tree)
 
-Two sections, Frontend and Backend. **Each feature is the root of its own
-mini-tree; its functions are the children** (nest deeper when a function has
-sub-functions). **The status meter is appended inline at the end of every
-leaf line**; roots and branch nodes carry no meter — at most a shared caveat
-after an em-dash. Kept narrow so lines never wrap in terminals or app views.
-A node named `*.md` is a tracked record in this folder (its inline status
-synced with the file's status line); everything else predates this system and
-is maintained directly here until a new decision earns it a file.
+Two sections, Frontend and Backend. **Each group is the root of its own
+mini-tree; its functions are the children.** A leaf named `*.md` is a record
+in this folder; every other leaf lives in `roadmap.legacy.yaml`.
 
-Meter = milestones completed after planning. BACKLOG is the empty meter — on 
+**The trees between the markers are generated — never edit them by hand.**
+Change a status in its source (front matter or the legacy file), run
+`npm run features:generate`, and commit both together; CI's `features:check`
+fails while they disagree.
+
+Meter = milestones completed after planning. BACKLOG is the empty meter — on
 the roadmap, nothing started; a filled dot always means a real step happened:
 
-`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ UAT · ●●●● DONE · ✕ DROPPED`
+`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ UAT · ●●●● VERIFIED · ✕ DROPPED`
 
-Text after the status ONLY when the bare status would mislead (e.g. deployed
-but dormant/sandbox) or to name the blocker to the next stage — never to
-restate the status.
+Text after a status appears only when the bare meter would mislead (deployment
+caveats print automatically from `rollout`) or when a `qualifier` names the
+blocker to the next stage.
 
 
+
+<!-- roadmap:begin — generated by `npm run features:generate`; edit front matter or roadmap.legacy.yaml, then regenerate -->
 
 ### Frontend (storefront)
 
 ```text
 Figma pixel-exact pages
-├── / (home) ●●●● DONE
-├── /shop ●●●● DONE
-├── /products/[slug] ●●●● DONE
+├── / (home) ●●●● VERIFIED
+├── /shop ●●●● VERIFIED
+├── /products/[slug] ●●●● VERIFIED
 └── wishlist button ●●●○ UAT
 
 Native checkout (PayPal Orders v2)
@@ -99,21 +120,23 @@ Native checkout (PayPal Orders v2)
 ├── shipping rates ●●●○ UAT — RoW $19.95 placeholder (OQ-2)
 ├── PayPal create/capture ●●●○ UAT — sandbox until launch
 ├── PayPal webhooks ●●●○ UAT
-└── card-payments.md ●○○○ READY — Advanced Cards (OQ-1); owner enables it first
+└── card-payments.md ●○○○ READY — owner must enable Advanced Checkout first
 
 Guest order lookup
 └── /orders ●●●○ UAT
 
 Customer accounts /account — dormant: owner config pending
-├── email one-time code ●●○○ IN PROGRESS — needs Supabase OTP template + SMTP
+├── email one-time code ●●○○ IN PROGRESS — dormant; needs Supabase OTP template
+│       + SMTP
 ├── Google OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
 ├── Apple OAuth ✕ DROPPED — absent from the 07-25 design (lib kept)
-├── passkeys ✕ DROPPED — owner 07-25 "no passkey" (storefront only; admin keeps them)
+├── passkeys ✕ DROPPED — owner 07-25 'no passkey' (storefront only; admin keeps
+│       them)
 ├── order matching (verified email) ●●●○ UAT
-├── nav tab "Login" ⇄ "Me" ●●●○ UAT
+├── nav tab 'Login' ⇄ 'Me' ●●●○ UAT
 ├── login screen 74:53 ●●●○ UAT — imported pixel-exact 07-25
 └── login screen 74:55 (B2B) ●●●○ UAT — imported 07-25; enquiries email the
-    owner, nothing persisted; needs RESEND_API_KEY + a store contact email
+        owner, nothing persisted; needs RESEND_API_KEY + a store contact email
 
 Concierge chat (mascot + bar overlay)
 ├── feedback panel → admin Ideas ●●●○ UAT
@@ -143,11 +166,12 @@ Admin suite (EN/中文) — §14.3 owner walkthrough pending
 └── Analytics
     ├── first-party beacon ●●●○ UAT
     ├── channel/UTM/country reports ●●●○ UAT
-    ├── posting-account-attribution.md ●●●○ UAT — utm_acc tag
-    └── engagement-tracking.md ●●○○ IN PROGRESS — page/section dwell time
+    ├── posting-account-attribution.md ●●●○ UAT
+    └── engagement-tracking.md ●●○○ IN PROGRESS — deployed (test); 3/17 home
+            sections tagged; vocabulary sign-off pending
 
 Product content — 120 SKUs (OQ-3)
-└── product-content-pipeline.md ○○○○ BACKLOG — live-wire pages + CSV/image import
+└── product-content-pipeline.md ○○○○ BACKLOG
 
 Admin auth
 ├── login + access approvals ●●●○ UAT
@@ -163,16 +187,19 @@ Shipping & tracking
 └── order-tracking.md ●●●○ UAT — owner must verify a real carrier link
 
 Marketing
-└── promotion-emails.md ○○○○ BACKLOG — consent + unsubscribe first
+└── promotion-emails.md ○○○○ BACKLOG
 
 Supabase hosted DB
-├── migrations (0001–0003) ●●●● DONE — 0003 verified hosted 2026-07-25
-├── seed (--reset / --demo) ●●●● DONE — owner's --demo run pending
-└── db-backups.md ○○○○ BACKLOG — nightly pg_dump→S3; scheduler sign-off
+├── migrations (0001–0005) ●●●● VERIFIED — 0004 permanently skipped, repaired
+│       07-28
+├── seed (--reset / --demo) ●●●● VERIFIED — owner's --demo run pending
+└── db-backups.md ○○○○ BACKLOG
 
 Infrastructure
-└── region-alignment.md ●●●● DONE — functions verified in pdx1 2026-07-26; EU-replica option stays future
+└── region-alignment.md ●●●● VERIFIED
 ```
+
+<!-- roadmap:end -->
 
 Refs (links can't render inside the code blocks, so shorthands above resolve
 here):

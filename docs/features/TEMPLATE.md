@@ -10,7 +10,7 @@ delivery: backlog              # backlog | ready | in-progress | uat | verified 
 rollout: not-deployed          # not-deployed | local-only | test-deployment | dormant | live
 statusChangedAt: 2026-01-01    # update whenever delivery changes
 
-# Optional fields — uncomment as the feature advances (required from READY onward):
+# Optional fields — uncomment as the feature advances (required while delivery is ready/in-progress/uat):
 # priority: p1                 # p0 | p1 | p2
 # owner: charles
 # target: v1-launch

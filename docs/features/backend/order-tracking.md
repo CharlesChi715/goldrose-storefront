@@ -2,13 +2,18 @@
 schemaVersion: 1
 id: order-tracking
 kind: feature
-parent: backend
+parent: shipping-tracking
 area: backend
 order: 10
 
 delivery: uat
 rollout: test-deployment
 statusChangedAt: 2026-07-25
+
+priority: p1
+owner: charles
+target: v1-launch
+qualifier: "owner must verify a real carrier link"
 
 dependsOn: []
 blockedBy: []

@@ -7,11 +7,11 @@ area: backend
 order: 40
 
 delivery: in-progress
-rollout: local-only
+rollout: test-deployment
 priority: p2
 owner: charles
 target: v1-launch
-qualifier: "hosted schema live; app code not yet deployed"
+qualifier: "3/17 home sections tagged; vocabulary sign-off pending"
 statusChangedAt: 2026-07-28
 
 dependsOn: []

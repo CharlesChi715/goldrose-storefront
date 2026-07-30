@@ -30,20 +30,20 @@ This is the industry principle of **least privilege**: each key can do exactly w
  ───────                        ─────────────────────────────────────
  opens /shop ─────────────────▶ app/shop/page.tsx   (server component, revalidate = 300)
                                  │ getCatalog()          lib/supabase/catalog.ts
-                                 │   hosted?  ──────────────┬─────────────────┐
-                                 │   yes ▼                  no ▼              │
-                                 │  anon supabase client   getStore().all()   │
-                                 │  .from("catalog_products")  ×3 tables,     │
-                                 │  .select("*").order(...)    same shape     │
-                                 │        │                    built in TS    │
-                                 │        ▼                                   │
-                                 │  Postgres runs the VIEW:                   │
-                                 │   products WHERE status='active'           │
-                                 │   + images/variants as nested JSON         │
-                                 │   (no cost_cents, no stock counts,         │
-                                 │    only in_stock true/false)               │
-                                 ▼                                            │
-                                 HTML, cached up to 300 s  ◀──────────────────┘
+                                 │   hosted?  ─────────────────┬──────────────────┐
+                                 │   yes ▼                     no ▼               │
+                                 │  anon supabase client       getStore().all()   │
+                                 │  .from("catalog_products")  ×3 tables,         │
+                                 │  .select("*").order(...)    same shape         │
+                                 │        │                    built in TS        │
+                                 │        ▼                                       │
+                                 │  Postgres runs the VIEW:                       │
+                                 │   products WHERE status='active'               │
+                                 │   + images/variants as nested JSON             │
+                                 │   (no cost_cents, no stock counts,             │
+                                 │    only in_stock true/false)                   │
+                                 ▼                                                │
+                                 HTML, cached up to 300 s  ◀──────────────────────┘
                                  (admin Save → revalidatePath → cache stamped stale)
 
  OWNER                          SERVER (admin world — service key)

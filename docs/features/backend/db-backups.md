@@ -4,7 +4,7 @@ id: db-backups
 kind: feature
 parent: supabase-db
 area: backend
-order: 10
+order: 30
 
 delivery: backlog
 rollout: not-deployed
