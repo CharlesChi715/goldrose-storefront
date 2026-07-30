@@ -2,27 +2,32 @@
 
 /**
  * ROLE OF THIS FILE
- * The client half of /checkout (§8, §10), wearing the B-2 · Checkout design:
- * the six pixel-exact modules of components/checkout/CheckoutSkin are stacked at
- * their frame offsets and this file supplies every live value and control. The
- * checkout itself is unchanged — cart summary with quantity controls, ship-to
- * country selector (zone-priced shipping), optional gift message (→ the order's
- * Notes card), and payment. With PayPal configured the real JS-SDK buttons drive
- * /api/paypal/create + /capture; otherwise the mock express button and the
- * local card form drive /api/checkout — full click-through, no money anywhere.
- * With `skipPayment` (the testing CHECKOUT_SKIP_PAYMENT flag, §10.4) both of
- * those are replaced by a single Place order CTA; the payment code below is
- * untouched, only unrendered.
+ * The client half of /checkout (§8, §10), wearing the B-2 · Checkout design
+ * (1523:421, the 2026-07-30 reflow): the five pixel-exact modules of
+ * components/checkout/CheckoutSkin are stacked at their frame offsets and this
+ * file supplies every live value and control. The checkout itself is unchanged
+ * — cart summary with quantity controls, ship-to country selector (zone-priced
+ * shipping), optional gift message (→ the order's Notes card), and payment.
+ * With PayPal configured the real JS-SDK button drives /api/paypal/create +
+ * /capture from inside the Pay-Securely CTA's slot (the reflow removed the
+ * express-wallet module that used to host it); otherwise the payment section's
+ * PayPal row and the local card form drive /api/checkout — full click-through,
+ * no money anywhere. With `skipPayment` (the testing CHECKOUT_SKIP_PAYMENT
+ * flag, §10.4) both of those are replaced by a single Place order CTA; the
+ * payment code below is untouched, only unrendered.
  *
  * WHY THE CONTROLS LIVE HERE AND NOT IN THE SKIN
  * The skin's fields take no `id`, and B-2 has no gift-message field, no
- * code-valued country picker, no split expiry/CVV pair and only one item card.
- * So each module paints its own card + label with an empty value and the real
- * control is rendered here at that field's own value-box coordinates
- * (frame-absolute, the house idiom); the skin's parked read-only inputs are
- * kept out of the tab order by one scoped rule in <StageStyles>. Everything the
- * design shows that has no backend (Shop Pay / Apple Pay / Afterpay, the
- * marketing and save-card opt-ins, the FAQ rows, Ask Auri) stays inert art.
+ * discount-code card (the reflow deleted it, but the summary still prices a
+ * Discount row and §8 keeps the feature, so a band in the design's own field
+ * language carries it — flagged to the design team), no code-valued country
+ * picker and only one item card. So each module paints its own card + label
+ * with an empty value and the real control is rendered here at that field's
+ * own value-box coordinates (frame-absolute, the house idiom); the skin's
+ * parked read-only inputs are kept out of the tab order by one scoped rule in
+ * <StageStyles>. Everything the design shows that has no backend (Apple Pay /
+ * Afterpay, the marketing and save-card opt-ins, the FAQ rows, Ask Auri)
+ * stays inert art.
  */
 
 import Link from "next/link";
@@ -31,13 +36,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ScaleFrame } from "@/components/chrome";
 import { abs } from "@/lib/figma-layout";
 import {
-  CHECKOUT_CANVAS_HEIGHT,
   CheckoutContactDelivery,
-  CheckoutExpress,
   CheckoutHeader,
+  CheckoutHelpCta,
   CheckoutOrderItem,
   CheckoutShippingPayment,
-  CheckoutSummaryCta,
 } from "@/components/checkout/CheckoutSkin";
 import { notoSC } from "@/lib/fonts";
 import { formatMoney } from "@/lib/money";
@@ -389,8 +392,6 @@ export function CheckoutClient({
    * `shippingInfo`/`total` below, and the rows show no per-method price.
    */
   const [shipMethod, setShipMethod] = useState(0);
-  /** Scroll anchor on the express PayPal box (see the pay CTA in live mode). */
-  const expressRef = useRef<HTMLDivElement>(null);
 
   const [pendingMethod, setPendingMethod] = useState<SubmitMethod | null>(null);
   const [error, setError] = useState("");
@@ -550,7 +551,7 @@ export function CheckoutClient({
     );
   }
 
-  /* ---------- B-2 stage geometry (747:103 … 747:108) ---------- */
+  /* ---------- B-2 stage geometry (1523:423 … 1523:553) ---------- */
 
   /** The mock-card branch: the only branch whose form is actually submitted. */
   const mockForm = !skipPayment && !paypalClientId;
@@ -575,18 +576,20 @@ export function CheckoutClient({
     .join(" · ");
 
   // Module heights come from the frame; each top is the previous module's foot,
-  // so an inserted band (or the express module dropping out in skip-payment
-  // mode, which has no express UI) moves everything below it as one piece.
+  // so an inserted band moves everything below it as one piece.
   const T_ITEM = 143;
-  const T_BAND_A = T_ITEM + 258;
-  const T_EXPRESS = T_BAND_A + bandA;
-  const T_CONTACT = T_EXPRESS + (skipPayment ? 0 : 230);
+  const T_BAND_A = T_ITEM + 202;
+  /** The reflow deleted the design's discount-code card; §8 keeps the feature,
+      so the band repaints the old card in the design's field language. */
+  const DISCOUNT_BAND = showDiscountField ? 54 : 0;
+  const T_FEEDBACK = T_BAND_A + DISCOUNT_BAND;
+  const T_CONTACT = T_FEEDBACK + bandA;
   const T_NOTE = T_CONTACT + 410;
   const T_SHIP_PAY = T_NOTE + NOTE_BAND;
-  const T_SUMMARY = T_SHIP_PAY + 536;
-  // 1577 is the summary module's own frame offset, so the tail (its 500px frame
-  // plus the canvas's 25px reserve) stays exactly what 561:88 reserves.
-  const canvasHeight = T_SUMMARY + (CHECKOUT_CANVAS_HEIGHT - 1577);
+  const T_TAIL = T_SHIP_PAY + 692;
+  // The frame ends flush with module 06 (281px), so the error box and status
+  // line that used to sit in the old tail's white space get their own reserve.
+  const canvasHeight = T_TAIL + 281 + 96;
 
   return (
     <ScaleFrame height={canvasHeight} background="#FFF6EC" fontClass={notoSC.className} nav={false}>
@@ -601,7 +604,7 @@ export function CheckoutClient({
         {/* The design's back chevron replaces the old "Continue shopping" link. */}
         <CheckoutHeader top={0} onBack={() => router.push("/shop")} />
 
-        {/* ---------- 02 · Order item + promo (747:104) ---------- */}
+        {/* ---------- 02 · Order item + assurances (1523:444) ---------- */}
         <CheckoutOrderItem
           top={T_ITEM}
           {...(firstImage
@@ -618,50 +621,69 @@ export function CheckoutClient({
                 onQtyDown: () => changeQuantity(first.variantId, -1),
                 onQtyUp: () => changeQuantity(first.variantId, 1),
                 onRemove: () => remove(first.variantId),
-                // 753:165 EDIT → the item's own product page (variant choice).
+                // 1523:454 EDIT → the item's own product page (variant choice).
                 onEdit: () => router.push(`/products/${first.product.handle}`),
               }
             : {})}
-          // The promo well is parked empty; #discount-code is the live twin.
-          promoCode=""
-          promoPlaceholder=""
-          applyLabel={discountBusy ? "…" : "APPLY"}
-          {...(showDiscountField
-            ? {
-                onApplyPromo: () => {
-                  if (!discountBusy) {
-                    applyDiscount();
-                  }
-                },
-              }
-            : {})}
         />
+
+        {/* ---------- Band · discount code ---------- */}
+        {/* The reflow deleted this card from the frame, but the summary still
+            prices a Discount row and §8 keeps the feature, so the old card
+            (561:88's 753:166 geometry, the design's own field language) stays
+            as a dev band. Settings → Checkout can switch it off. */}
         {showDiscountField ? (
-          <LiveInput
-            id="discount-code"
-            x={28}
-            y={T_ITEM + 174.5}
-            w={294}
-            label="Discount code"
-            value={discountInput}
-            onChange={setDiscountInput}
-            placeholder="Discount code"
-            autoComplete="off"
-          />
-        ) : (
-          /* Settings → Checkout can switch the discount field off (§8); the
-             design's card is painted over in the module's own fill. */
-          <div style={{ ...abs(16, T_ITEM + 158, 398, 46), background: "#FFF6EC" }} />
-        )}
+          <>
+            <div style={{ ...abs(16, T_BAND_A + 4, 398, 46), background: "#FFFFFF", boxShadow: HAIRLINE, borderRadius: 10 }} />
+            <LiveInput
+              id="discount-code"
+              x={28}
+              y={T_BAND_A + 20.5}
+              w={294}
+              label="Discount code"
+              value={discountInput}
+              onChange={setDiscountInput}
+              placeholder="Discount code"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (!discountBusy) {
+                  applyDiscount();
+                }
+              }}
+              aria-label="Apply discount code"
+              className={notoSC.className}
+              style={{
+                ...abs(330, T_BAND_A + 10, 78, 34),
+                appearance: "none",
+                border: 0,
+                margin: 0,
+                padding: 0,
+                background: GREEN,
+                borderRadius: 8,
+                color: "#FFFFFF",
+                fontSize: 9,
+                lineHeight: "34px",
+                fontWeight: 500,
+                textAlign: "center",
+                cursor: "pointer",
+              }}
+            >
+              {discountBusy ? "…" : "APPLY"}
+            </button>
+          </>
+        ) : null}
 
         {/* ---------- Band · discount feedback + any extra item rows ---------- */}
         {discountError ? (
-          <Txt x={16} y={T_BAND_A + 6} w={398} size={11} lh={13.2} color={RED} weight={500} wrap>
+          <Txt x={16} y={T_FEEDBACK + 6} w={398} size={11} lh={13.2} color={RED} weight={500} wrap>
             {discountError}
           </Txt>
         ) : discount ? (
           <>
-            <Txt x={16} y={T_BAND_A + 6} w={300} size={11} lh={13.2} color={GREEN} weight={500} live>
+            <Txt x={16} y={T_FEEDBACK + 6} w={300} size={11} lh={13.2} color={GREEN} weight={500} live>
               {`Code ${discount.code} applied.`}
             </Txt>
             <button
@@ -672,7 +694,7 @@ export function CheckoutClient({
               }}
               className={notoSC.className}
               style={{
-                ...abs(330, T_BAND_A + 6, 84, 14),
+                ...abs(330, T_FEEDBACK + 6, 84, 14),
                 ...VALUE,
                 fontSize: 9,
                 lineHeight: "10.8px",
@@ -687,7 +709,7 @@ export function CheckoutClient({
           </>
         ) : null}
         {extraLines.map((line, index) => {
-          const y = T_BAND_A + 6 + feedbackRow * 20 + index * 40;
+          const y = T_FEEDBACK + 6 + feedbackRow * 20 + index * 40;
           return (
             <div key={line.variantId}>
               <div
@@ -749,46 +771,7 @@ export function CheckoutClient({
           );
         })}
 
-        {/* ---------- 03 · Express checkout (747:105) ---------- */}
-        {/* Skip-payment mode has no express UI at all, so the module drops out
-            rather than showing three boxes that do nothing. */}
-        {skipPayment ? null : (
-          <>
-            <CheckoutExpress
-              top={T_EXPRESS}
-              {...(paypalClientId
-                ? {
-                    /* The SDK's own iframe button fills 753:177 (the design's
-                       PayPal box) — it cannot be restyled, and the box's own
-                       clip keeps the SDK's vertical funding stack to its top
-                       (PayPal) button. Shop Pay / Apple Pay have no backend in
-                       any mode, so they stay design art. */
-                    payButtonSlot: (
-                      <PayPalSdkButtons
-                        clientId={paypalClientId}
-                        buildPayload={() => checkoutPayload(rawLines)}
-                        onFail={setError}
-                      />
-                    ),
-                  }
-                : {
-                    onPayPal: () => {
-                      if (!isBusy) {
-                        submitMockCheckout("paypal", false);
-                      }
-                    },
-                  })}
-            />
-            {/* Scroll target for the pay bar when PayPal owns the payment. */}
-            <div
-              ref={expressRef}
-              aria-hidden
-              style={{ ...abs(16, T_EXPRESS + 95, 398, 42), pointerEvents: "none" }}
-            />
-          </>
-        )}
-
-        {/* ---------- 04 · Contact + delivery address (747:106) ---------- */}
+        {/* ---------- 04 · Contact + delivery address (1523:459) ---------- */}
         {/* Every value is passed empty: the module paints each card, label and
             chevron, and the live twins below carry the ids and the state. */}
         <CheckoutContactDelivery
@@ -816,9 +799,11 @@ export function CheckoutClient({
           inputMode="email"
           autoComplete="email"
         />
-        {/* 753:194 — shipping is priced from this country's zone (§10.3), so the
-            picker is a real <select> over the design's field (its options are
-            ISO codes, which the skin's name-valued select cannot express). */}
+        {/* 1523:469 — shipping is priced from this country's zone (§10.3), so
+            the picker is a real <select> over the design's field (its options
+            are ISO codes, which the skin's name-valued select cannot express).
+            The reflow gives the field 116px; the select stops short of the
+            baked ⌄ at the field's right inset. */}
         <select
           id="ship-country"
           data-live-text
@@ -827,7 +812,7 @@ export function CheckoutClient({
           onChange={(event) => setCountry(event.target.value)}
           aria-label="Country / region"
           autoComplete="country"
-          style={{ ...abs(37, T_CONTACT + 186, 148), ...VALUE, cursor: "pointer" }}
+          style={{ ...abs(295, T_CONTACT + 190, 82), ...VALUE, cursor: "pointer" }}
         >
           {countries.map((entry) => (
             <option key={entry.code} value={entry.code}>
@@ -837,68 +822,68 @@ export function CheckoutClient({
         </select>
         {mockForm ? (
           <>
-            {/* 753:197 is a picker in the design, but there is no state list
-                behind it, so the ⌄ is covered and the field is free text. */}
-            <div style={{ ...abs(383, T_CONTACT + 186, 12, 14), background: "#FFFFFF" }} />
-            <LiveInput
-              id="ship-state"
-              x={228}
-              y={T_CONTACT + 186}
-              w={165}
-              label="State / province"
-              value={shipping.state}
-              onChange={(value) => setShippingField("state", value)}
-              error={fieldErrors.state}
-              errorY={T_CONTACT + 201}
-              autoComplete="address-level1"
-            />
             <LiveInput
               id="ship-name"
               x={37}
-              y={T_CONTACT + 241}
-              w={165}
+              y={T_CONTACT + 190}
+              w={153}
               label="Recipient full name"
               value={shipping.name}
               onChange={(value) => setShippingField("name", value)}
               error={fieldErrors.name}
-              errorY={T_CONTACT + 256}
+              errorY={T_CONTACT + 205}
               autoComplete="name"
+            />
+            {/* 1523:472 is a picker in the design, but there is no state list
+                behind it, so the ⌄ is covered and the field is free text. */}
+            <div style={{ ...abs(262, T_CONTACT + 191, 12, 14), background: "#FFFFFF" }} />
+            <LiveInput
+              id="ship-state"
+              x={214}
+              y={T_CONTACT + 190}
+              w={57}
+              label="State / province"
+              value={shipping.state}
+              onChange={(value) => setShippingField("state", value)}
+              error={fieldErrors.state}
+              errorY={T_CONTACT + 205}
+              autoComplete="address-level1"
             />
             <LiveInput
               id="ship-zip"
-              x={228}
-              y={T_CONTACT + 241}
-              w={165}
+              x={37}
+              y={T_CONTACT + 249}
+              w={356}
               label="Postal code"
               value={shipping.postalCode}
               onChange={(value) => setShippingField("postalCode", value)}
               error={fieldErrors.postalCode}
-              errorY={T_CONTACT + 256}
+              errorY={T_CONTACT + 264}
               inputMode="numeric"
               autoComplete="postal-code"
             />
-            {/* 753:200's value reads "123 Rose Avenue · Apt 5B", so the street
+            {/* 1523:484's value reads "123 Rose Avenue · Apt 5B", so the street
                 line keeps both of the checkout's address fields, split at the
                 design's own separator. */}
             <LiveInput
               id="ship-address1"
               x={37}
-              y={T_CONTACT + 296}
+              y={T_CONTACT + 293}
               w={226}
               label="Street address"
               value={shipping.address1}
               onChange={(value) => setShippingField("address1", value)}
               error={fieldErrors.address1}
-              errorY={T_CONTACT + 311}
+              errorY={T_CONTACT + 308}
               autoComplete="address-line1"
             />
-            <Txt x={269} y={T_CONTACT + 296} w={8} size={11} lh={13.2} color={MUTED}>
+            <Txt x={269} y={T_CONTACT + 293} w={8} size={11} lh={13.2} color={MUTED}>
               ·
             </Txt>
             <LiveInput
               id="ship-address2"
               x={279}
-              y={T_CONTACT + 296}
+              y={T_CONTACT + 293}
               w={114}
               label="Apartment, suite (optional)"
               value={shipping.address2}
@@ -909,13 +894,13 @@ export function CheckoutClient({
             <LiveInput
               id="ship-city"
               x={37}
-              y={T_CONTACT + 351}
+              y={T_CONTACT + 352}
               w={165}
               label="City"
               value={shipping.city}
               onChange={(value) => setShippingField("city", value)}
               error={fieldErrors.city}
-              errorY={T_CONTACT + 366}
+              errorY={T_CONTACT + 367}
               autoComplete="address-level2"
             />
           </>
@@ -962,7 +947,7 @@ export function CheckoutClient({
           responsibility.
         </Txt>
 
-        {/* ---------- 05 · Shipping method + payment (747:107) ---------- */}
+        {/* ---------- 05 · Shipping + summary + payment (1523:492) ---------- */}
         <CheckoutShippingPayment
           top={T_SHIP_PAY}
           selectedShipping={shipMethod}
@@ -973,21 +958,52 @@ export function CheckoutClient({
           standardPrice=""
           expressPrice=""
           nextDayPrice=""
+          // 1523:516 — the reflow's summary card, priced live.
+          subtotal={formatMoney(subtotal)}
+          discountLabel={discount ? `Discount (${discount.code})` : ""}
+          discount={discount ? `−${formatMoney(discountCents)}` : ""}
+          shippingLabel={`Shipping${zone ? ` (${zone.name})` : ""}`}
+          shipping={shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)}
+          shippingColor={shippingInfo.free ? GREEN : INK}
+          total={formatMoney(total)}
           // The wells are parked empty in every branch; in the mock branch the
           // live twins below sit on top of them.
           cardNumber=""
           cardNumberPlaceholder=""
           cardName=""
           cardNamePlaceholder=""
-          cardExpiryCvv=""
-          cardExpiryCvvPlaceholder=""
+          cardExpiry=""
+          cardExpiryPlaceholder=""
         />
+        {/* 1523:543 — in mock mode the PayPal row is the mock express entry
+            (the reflow removed the express module that used to carry it), so a
+            transparent live twin sits on the row's own box. */}
+        {mockForm ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (!isBusy) {
+                submitMockCheckout("paypal", false);
+              }
+            }}
+            aria-label="Pay with PayPal"
+            style={{
+              ...abs(28, T_SHIP_PAY + 532, 374, 36),
+              appearance: "none",
+              border: 0,
+              margin: 0,
+              padding: 0,
+              background: "transparent",
+              cursor: "pointer",
+            }}
+          />
+        ) : null}
         {mockForm ? (
           <>
             <LiveInput
               id="card-number"
               x={46}
-              y={T_SHIP_PAY + 278}
+              y={T_SHIP_PAY + 438}
               w={338}
               well
               label="Card number"
@@ -1001,7 +1017,7 @@ export function CheckoutClient({
             <LiveInput
               id="card-name"
               x={46}
-              y={T_SHIP_PAY + 320}
+              y={T_SHIP_PAY + 480}
               w={151}
               well
               label="Name on card"
@@ -1011,11 +1027,13 @@ export function CheckoutClient({
               placeholder="Name on card"
               autoComplete="cc-name"
             />
-            {/* 755:135 is one MM / YY  CVV well; the checkout keeps them apart. */}
+            {/* 1523:541 is one MM / YY well; the checkout keeps expiry and CVV
+                apart inside it (the reflow dropped the CVV hint from the
+                placeholder, not the need for the number). */}
             <LiveInput
               id="card-expiry"
               x={225}
-              y={T_SHIP_PAY + 320}
+              y={T_SHIP_PAY + 480}
               w={70}
               well
               label="Expiry (MM/YY)"
@@ -1029,7 +1047,7 @@ export function CheckoutClient({
             <LiveInput
               id="card-cvc"
               x={305}
-              y={T_SHIP_PAY + 320}
+              y={T_SHIP_PAY + 480}
               w={79}
               well
               label="CVC"
@@ -1041,9 +1059,9 @@ export function CheckoutClient({
               autoComplete="cc-csc"
             />
             {/* The wells are 36px tall with no room under them, so the card's
-                field errors share the foot of 755:128. */}
+                field errors share the foot of 1523:534. */}
             {cardErrorText ? (
-              <Txt x={36} y={T_SHIP_PAY + 348} w={358} size={9} lh={10.8} color={RED} weight={500}>
+              <Txt x={36} y={T_SHIP_PAY + 508} w={358} size={9} lh={10.8} color={RED} weight={500}>
                 {cardErrorText}
               </Txt>
             ) : null}
@@ -1052,24 +1070,18 @@ export function CheckoutClient({
           /* Deliberately no live card fields outside the mock branch: with
              PayPal live the card is collected in PayPal's own window, and a PAN
              typed into a field whose value goes nowhere is a PCI/security
-             hazard. The design's wells stay empty and say so. */
-          <Txt x={16} y={T_SHIP_PAY + 524} w={398} size={9} lh={10.8} color={MUTED}>
+             hazard. The design's wells stay empty and say so, at their own
+             foot. */
+          <Txt x={36} y={T_SHIP_PAY + 508} w={358} size={9} lh={10.8} color={MUTED}>
             {paypalClientId
               ? "Card and bank details are collected in PayPal's own window."
               : "Test mode — no payment details are collected."}
           </Txt>
         )}
 
-        {/* ---------- 06 · Summary + help + secure CTA (747:108) ---------- */}
-        <CheckoutSummaryCta
-          top={T_SUMMARY}
-          subtotal={formatMoney(subtotal)}
-          discountLabel={discount ? `Discount (${discount.code})` : ""}
-          discount={discount ? `−${formatMoney(discountCents)}` : ""}
-          shippingLabel={`Shipping${zone ? ` (${zone.name})` : ""}`}
-          shipping={shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)}
-          shippingColor={shippingInfo.free ? GREEN : INK}
-          total={formatMoney(total)}
+        {/* ---------- 06 · Help + FAQ + secure CTA (1523:553) ---------- */}
+        <CheckoutHelpCta
+          top={T_TAIL}
           barTotal={formatMoney(total)}
           payLabel={
             skipPayment
@@ -1080,44 +1092,56 @@ export function CheckoutClient({
                 ? pendingMethod === "card"
                   ? "Processing…"
                   : `Pay ${formatMoney(total)} Securely`
-                : "Continue to PayPal"
+                : "Pay with PayPal"
           }
-          // 756:132 has no disabled state, so the guard the old button's
+          // 1523:565 has no disabled state, so the guard the old button's
           // `disabled={isBusy}` gave it lives in the handler.
-          onPay={
-            skipPayment
-              ? () => {
-                  if (!isBusy) {
-                    submitMockCheckout("none", false);
-                  }
-                }
-              : mockForm
-                ? () => {
-                    if (!isBusy) {
-                      submitMockCheckout("card", true);
+          {...(!skipPayment && paypalClientId
+            ? {
+                /* With PayPal live the SDK's own iframe button is the only
+                   thing that can start a payment; the reflow removed the
+                   express module that used to host it, so it fills the CTA's
+                   own 276×48 box. */
+                payButtonSlot: (
+                  <PayPalSdkButtons
+                    clientId={paypalClientId}
+                    buildPayload={() => checkoutPayload(rawLines)}
+                    onFail={setError}
+                  />
+                ),
+              }
+            : {
+                onPay: skipPayment
+                  ? () => {
+                      if (!isBusy) {
+                        submitMockCheckout("none", false);
+                      }
                     }
-                  }
-                : // With PayPal live the SDK's own button is the only thing that
-                  // can start a payment, so the CTA goes to it.
-                  () => expressRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
-          }
+                  : () => {
+                      if (!isBusy) {
+                        submitMockCheckout("card", true);
+                      }
+                    },
+              })}
         />
+        {/* The frame ends flush with the pay bar, so the error box and status
+            line live in the canvas's added reserve below module 06. */}
         {error ? (
           <>
             <div
               style={{
-                ...abs(16, T_SUMMARY + 428, 398, 34),
+                ...abs(16, T_TAIL + 289, 398, 34),
                 background: "#FBEFEE",
                 boxShadow: `inset 0 0 0 1px ${RED}`,
                 borderRadius: 8,
               }}
             />
-            <Txt x={26} y={T_SUMMARY + 437} w={378} size={10} lh={12} color={RED} weight={500} wrap>
+            <Txt x={26} y={T_TAIL + 298} w={378} size={10} lh={12} color={RED} weight={500} wrap>
               {error}
             </Txt>
           </>
         ) : null}
-        <Txt x={16} y={T_SUMMARY + 466} w={398} size={9} lh={10.8} color={MUTED} align="center" wrap>
+        <Txt x={16} y={T_TAIL + 331} w={398} size={9} lh={10.8} color={MUTED} align="center" wrap>
           {pendingMethod === "paypal"
             ? "Starting PayPal checkout…"
             : skipPayment

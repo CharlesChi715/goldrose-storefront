@@ -3870,3 +3870,19 @@ the homepage frame pins the A-6 "Read Customer Stories" button → wired it to
 unchanged). tsc clean, homepage e2e 5/5 green. Also surfaced 16 unactioned
 QA comments from 苏苏白衣 (fixed top nav, PDP bag targets, shop二级 back
 mechanisms, refund buttons, checkout payment module).
+
+## 2026-07-30 — /checkout re-imported from Figma (B-2 reflow)
+
+- Re-imported B-2 checkout from the reorganized frame 1523:421 (430×1728, was
+  561:88 at 430×2102): express-wallet module and discount-code card deleted by
+  design, order summary moved between shipping and payment, address grid
+  re-flowed, module 06 reduced to help/FAQ/pay-bar.
+- Kept discount entry as a dev band (feature §8 is live); moved the PayPal
+  JS-SDK button into the Pay-Securely CTA slot; mock PayPal now enters via the
+  payment section's PayPal row. ELDREVE wordmark substituted with GoldRose
+  (DQ-34 precedent).
+- Rewrote components/checkout/CheckoutSkin.tsx (5 modules) and re-wired
+  app/checkout/CheckoutClient.tsx live twins; 14 fresh Figma asset exports.
+- Findings for the design team recorded in docs/ixd/README.md ("07-30 checkout
+  reflow"). Verified: tsc, eslint, 63 unit tests, checkout+discount e2e (10/10),
+  full-page screenshot vs frame render.
