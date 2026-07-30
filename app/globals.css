@@ -77,17 +77,3 @@ summary {
     transition: none;
   }
 }
-
-/* Page dissolve — replayed by app/template.tsx on every navigation. */
-.page-dissolve {
-  animation: page-dissolve 350ms ease;
-}
-
-@keyframes page-dissolve {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
