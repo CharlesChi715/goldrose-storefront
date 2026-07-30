@@ -3694,3 +3694,179 @@ and the §11 paste-to-a-model prompt block (title-only input). `option_names`
 becomes required when variants ship, and every handle must be re-derived before
 go-live — the last moment a handle is free to change (§8). §6 fixtures and the
 §10 reference implementation are otherwise unchanged; no test parses this doc.
+
+### Deliveries — 2026-07-30 (continued)
+
+- `f681037` (branch `docs/naming-guide-source-path`, pushed, no PR opened):
+  `from-teammates-figma-naming-guide.md` cited `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`
+  in both its intro and Source-file row. That xlsx moved to tracked
+  `team-deliveries/originals/2026-07-25-figma-naming-guide/` in `c53435d`, which
+  fixed `element-names.md` but missed this file. Repointed both, and dropped
+  "version-controlled"/"scratch folder" from the rationale — the xlsx is tracked
+  now, so transcription buys greppability, not version control.
+- `SUMMARY.md` doc index gained two rows: `docs/ixd/naming/` (Figma
+  section/frame + product-handle rules) and `element-names.md` (inside-a-page
+  `data-el` names). Both were unreachable from the entrypoint, so an agent asked
+  to name a frame or mint a handle would not have found the rules.
+
+Reviewed but **not** changed — `lib/admin/products.ts:112-145` (`slugify` /
+`uniqueHandle`) contradicts `naming/product-handles.md` on every fixture: no NFKD
+(`Rosé Éternelle` → `ros-ternelle`), no boilerplate/brand stripping
+(`24k-gold-dipped-eternal-rose` vs `eternal-rose`), a `|| "product"` fallback, and
+`-2` collision numbering that §5 and §11 explicitly forbid. No handle unit test
+exists and `product_redirects` still does not. Recommended to Charles: port the
+§10 reference implementation, throw on collision, and run the §6 fixtures as a
+test **before** the 120-SKU import — while the signature is still one argument.
+Also advised that aggressive trimming is optional (Shopify/IKEA ship full-title
+slugs; keyword-in-URL is a weak signal) and that it manufactures the collisions
+§4.6 exists to catch — 2 of 10 fixtures already fall through to manual.
+
+## 2026-07-30 — Finalized product handle stop-word rule
+
+- Finalized `docs/ixd/naming/product-handles.md` as adopted version 2.1.
+- Decided that full-title slugification retains stop words; there is no
+  automatic stop-word removal list.
+- Replaced speculative SEO claims with official Google and Shopify guidance.
+- Verified Markdown, section references, whitespace, and ten handle fixtures.
+- Application enforcement and the redirect table remain future work.
+
+### Deliveries — 2026-07-30 (product handles v2.x)
+
+`naming/product-handles.md` rewritten to full-title slugification and cut
+**334 → 193 lines**. Charles chose the approach after weighing it against v1.0's
+semantic trimming; he then bumped it to v2.1 **Adopted**, added §3 "Stop words are
+retained" with Google/Shopify citations, and fixed the section cross-references.
+
+Deleted as no longer reachable: the `option_names` input and §2 entirely, all six
+closed lists (stop words, brand tokens, boilerplate phrases, colour tokens, size
+tokens, generic stems), the 60-char truncation step, "what is deliberately not
+automated", and the paste-to-a-model prompt block. The algorithm is now six steps
+and the reference implementation is one expression chain.
+
+Three things the change buys, worth recording as the rationale:
+- **No manual cases.** v1.0 sent 2 of 10 fixtures to "manual handle required";
+  v2.1 sends none. The trimming was manufacturing the collisions that the §4.6
+  generic-stem reject list and the no-`-2` rule existed to catch.
+- **`option_names` is gone permanently**, not just deferred. v1.0 needed to know
+  whether a colour word was a variant axis before deciding to strip it; nothing is
+  stripped now, so the fact is never needed — including once variants ship.
+- **The code gap shrank.** `slugify`/`uniqueHandle` in `lib/admin/products.ts` was
+  four bugs plus a wholly different token pipeline away from v1.0. Against v2.1 it
+  is three things: NFKD, apostrophe deletion, and throwing instead of appending
+  `-2` / falling back to `"product"`.
+
+**Verified:** all 8 §5 fixtures and all 3 §3 prose examples pass against the
+implementation *extracted from the document's own code block* (not a copy), and
+the empty / punctuation-only / em-dash-only inputs throw as §4 specifies. Caught
+and fixed one regression I introduced: the reference implementation's regexes had
+literal combining marks and a literal U+2019 rather than `\uXXXX` escapes — the
+invisible copy-paste corruption hazard the doc was written to avoid. Code block is
+now ASCII-only apart from an em dash inside the error string.
+
+**Still open, unactioned:** port §8 into `lib/admin/products.ts`, throw on
+collision, encode §5 as a unit test, and add the `product_redirects` migration —
+all before the 120-SKU import.
+
+**Follow-up:** §5 fixtures labelled as mock, per Charles — every title there is an
+invented test input, not a product name, and none is a proposal (no title is
+decided; OQ-3). Added a row-by-row table of what each fixture pins (digit/letter
+tokens, apostrophe vs hyphen, stop word retained, NFKD, separator-run collapsing,
+comma, colour word retained, 74-char no-truncation) and the instruction to **keep**
+these rows when real titles land — a fixture locks the algorithm, it does not
+describe the catalogue, so swapping in real names would lose the edge cases and go
+stale on every marketing rename. Re-verified: extraction still yields exactly 8
+fixtures + 3 prose examples, 0 failing, so the added table did not pollute the
+parse.
+
+## 2026-07-30 — Product-handle rule enforced in code (conflicts fixed)
+
+- `docs/ixd/naming/product-handles.md` (v2.1, canonical): fixed the dead
+  anchors and section numbering left by the manual trim; added an
+  Implementation row pointing at the new code.
+- New `lib/admin/product-handle.ts`: the one `productHandle()` implementation
+  (NFKD, apostrophe deletion, no truncation, throws instead of inventing).
+- `lib/admin/products.ts`: removed `slugify`/`uniqueHandle` (`-2` suffixes,
+  60-char cut, "product" fallback). Collisions now throw; manual handles are
+  validated; non-draft handles are frozen until `product_redirects` exists.
+- `app/admin/(dashboard)/products/actions.ts`: zod handle regex tightened to
+  the canonical format. `ProductForm.tsx`: handle input collapses hyphen runs.
+- New `tests/unit/product-handle.test.ts`: parses the doc's fixture table and
+  replays it through `productHandle()` (element-names pattern, no drift).
+- `docs/learning/03-admin-product-crud.md`: updated the identity step to the
+  new behaviour.
+- Verified: tsc clean, eslint clean, 67 unit tests pass, admin-products e2e
+  passes. ⚠️ Known consequence: duplicating in the Chinese admin (prefix
+  副本) derives the same handle as the original and now errors by design.
+
+## 2026-07-30 — Removed component naming from route rule
+
+- Removed the reusable-components section and component capitalization bullet
+  from `docs/ixd/naming/figma-route-rule.md`.
+- Kept the document focused on page-level sections, routes, viewports, and
+  states.
+- Verified formatting, whitespace, and removal of the old examples.
+
+## 2026-07-30 — elements→components merge
+
+- element-names.md stub deleted; docs/ixd/naming/component-names.md is the
+  single successor (Figma components + in-page data-el components; word is
+  now "component"). Repointed SUMMARY naming row, ixd README, migration 0005
+  comment; concurrent session had already cleaned the other references.
+
+## 2026-07-30 — Figma write access verified; homepage frame renamed (test)
+
+- Confirmed Figma MCP can write to the VELORIA file (`3CXNpmuuyNyCW70qOci0oM`) after the design team granted `qiyaofu715@gmail.com` edit access.
+- Test rename applied: frame `1523:1655` "Homepage" → `/ · mobile · homepage` (per `docs/ixd/naming/figma-route-rule.md`); verified with a fresh read.
+- Gotcha: `figma.saveVersionHistoryAsync` is not supported via the MCP bridge — rely on Figma's automatic version history + recorded old→new name list for rollback.
+- Next: full naming pass — read all top-level frames, map to route + viewport, get Charles's sign-off on the old→new list, then apply.
+
+## 2026-07-30 — Removed default Figma frame states
+
+- Removed every `default` state from `docs/ixd/naming/figma-route-rule.md`.
+- Normal frames now omit state metadata; explicit states remain only when they
+  distinguish a variation.
+- Cleaned one trailing space and verified formatting and whitespace.
+
+## 2026-07-30 — Removed Chinese default frame states
+
+- Removed every `默认` state from the account examples in
+  `docs/ixd/naming/figma-route-rule.md`.
+- Verified no `默认` text remains and formatting passes.
+
+## 2026-07-30 — Figma frame names aligned to the route rule
+
+Applied `figma-route-rule.md` to the Figma file (3CXNpmuuyNyCW70qOci0oM), per
+Charles's scheme: prefix `<exact route> · <viewport>` and keep the team's
+original frame name verbatim as the metadata suffix (e.g. `shoppage` →
+`/shop · mobile · shoppage`). 47 frames renamed, verified by read-back.
+Skipped (flagged, no route exists): Business·Procurement, BLOG-JOURNAL-PAGE,
+RETURNS-REQUEST-SUBMITTED-PAGE, plus the two component-sheet frames. Sections
+left on the team's click-depth scheme (shop一级/me二级…) — renaming them to
+uppercase route sections is a design-team conversation, not done unilaterally.
+
+## 2026-07-30 — Clarified Figma developer-facing prefix
+
+- Added matching English and Chinese instructions to
+  `docs/ixd/naming/figma-route-rule.md`.
+- Defined `<exact route> · <viewport>` as the only developer-facing part;
+  trailing descriptions and states are design-only metadata.
+- Verified both language rules, formatting, and whitespace.
+
+## 2026-07-30 — Frame-naming rule v2.0 and re-apply
+
+Charles amended his rule: the viewport is now the ownership boundary —
+`<route> · <state> · <viewport> · <team's parts>`; dev owns the three parts
+before the viewport (`default` when the page is plain; `return`, `filter
+open`, `signed out`… otherwise), the design team owns everything after.
+`figma-route-rule.md` rewritten as Adopted v2.0 (EN + 简明版) and all 48
+routed frames re-renamed in the Figma file with explicit states, verified
+by the tool's mutation return (48/48, none missing).
+
+## 2026-07-30 — H-24 wired to /story per Figma comment
+
+Read the file's comments via REST (renewed token). Charles's test comment on
+the homepage frame pins the A-6 "Read Customer Stories" button → wired it to
+`/story` in `components/home/A6.tsx` (placeholder div → Link, geometry
+unchanged). tsc clean, homepage e2e 5/5 green. Also surfaced 16 unactioned
+QA comments from 苏苏白衣 (fixed top nav, PDP bag targets, shop二级 back
+mechanisms, refund buttons, checkout payment module).

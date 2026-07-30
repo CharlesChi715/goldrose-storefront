@@ -14,8 +14,8 @@ re-import into this directory. On wording disputes, the Chinese source wins. A
 second source,
 [`frontend-function-draft.numbers`](../../team-deliveries/originals/2026-07-27-order-detail/)
 (received 2026-07-27), covers the order-detail page: verbatim Chinese export
-beside it, English working copy at [order-detail.md](order-detail.md); the same
-rules apply.
+beside it (no English working copy — translate from the archived source if
+needed); the same rules apply.
 
 Originals live under [`team-deliveries/originals/`](../../team-deliveries/README.md) and
 are version-controlled — until 2026-07-30 they sat in the gitignored scratch
@@ -23,28 +23,18 @@ folder (since renamed `trash/`), outside version control entirely.
 
 ## Files
 
-- [delivery-protocol.md](delivery-protocol.md) — **how work is handed over**:
-  the three hand-overs (design team → dev → bosses), the per-frame delivery
-  checklist (交付清单), what we do on receipt, and what to do when something is
-  missing. Start here if you are asking "how does this get delivered?"
 - [shop.md](shop.md) — 15 Shop page entries (N-01…N-15), still verbatim
   Chinese (translation pending)
 - [homepage.md](homepage.md) — homepage entries (H-01…H-37), English working
   copy; the ids cited across `components/home/` and `tests/e2e/homepage.spec.ts`
   resolve here
-- [order-detail.md](order-detail.md) — 3 order-detail entries
-  (ORDER-DETAIL-…), English translation of the delivered
-  `frontend-function-draft.zh.md`; IDs follow the Figma naming guide;
-  screenshots pending from the design team
 - `assets/` — 52 annotated screenshots (red box = the element for that entry);
   filename = entry ID; JPEG-compressed from the originals
-**Naming — one system, three files.** Read them in this order:
 
-- [element-names.md](element-names.md) — **the convention itself, and the
-  master copy.** Grammar, 7 rules, vocabulary, enforcement levels, governance
-  and changelog. Every visible element carries its name in `data-el`; guarded
-  by `tests/unit/element-names.test.ts`, which parses the vocabulary straight
-  out of the document so the two cannot drift
+**Naming.** An element-level convention doc (the `data-el` grammar and
+vocabulary) does not exist yet — Charles will author it; the `data-el`
+attributes themselves are in code. Current naming docs:
+
 - [naming/figma-route-rule.md](naming/figma-route-rule.md) — the **page-level
   chapter**: an UPPERCASE section per top-level route segment, and a frame named
   for its exact route followed by `·`-separated design metadata (screen,
@@ -54,13 +44,12 @@ folder (since renamed `trash/`), outside version control entirely.
 - [naming/product-handles.md](naming/product-handles.md) — the deterministic
   algorithm deriving a product's `/products/<handle>` URL segment from its
   title, so any person or model produces the identical string
-- [from-teammates-figma-naming-guide.md](from-teammates-figma-naming-guide.md) — a **frozen archive** of the
+- [naming/from-teammates-figma-naming-guide.md](naming/from-teammates-figma-naming-guide.md) — a **frozen archive** of the
   guide received from the design team on 2026-07-25, transcribed verbatim from
   [`Figma_UI_Naming_Guide_GoldRose.xlsx`](../../team-deliveries/originals/2026-07-25-figma-naming-guide/).
   ⚠️ Corrected 2026-07-29: this is
   a record, **not** the source of truth. The markdown is the master; the
   spreadsheet is now an export produced for the design team
-- [login-import.md](login-import.md) — per-import notes for the 登录界面 frame
 
 ## How to reference an entry
 
@@ -83,16 +72,9 @@ Message from me to ai agents: leave placeholder in unsure things
 
 ## Items to confirm with the design team
 
-> **Open questions now live in one place:**
-> [`docs/TODO/design-team-questions.md`](../TODO/design-team-questions.md).
+> The `DQ-nn` question docs are not kept in the repo (git history has them).
 > The findings below stay here as the record of what was discovered during
-> each import; anything still unanswered has been carried over into that doc
-> with a `DQ-nn` id. Add new questions there, not here.
-
-> **Unresolved navigation targets** — every element whose destination page is
-> unknown, unbuilt, or "to be confirmed" is collected as 13 grouped questions in
-> [`docs/TODO/2026-07-28-design-team-navigation-questions.md`](../TODO/2026-07-28-design-team-navigation-questions.md).
-> The list below is the older, narrower set of source-quality questions.
+> each import.
 
 1. **Routes:** H-06, H-08, H-17, H-28, H-29, H-32, and H-37 are marked
    “suggested route, pending developer confirmation.” Finalize them after
@@ -136,6 +118,11 @@ H-17/H-31 craft, H-20/H-23/H-35 blog/FAQ, H-24 stories, H-32 workshop,
 H-33 corporate, H-34 story, Wholesale tab — renders pixel-exact but is
 **not clickable** until its target page exists (per the "leave placeholder"
 instruction above).
+
+**Update 2026-07-30 — H-24 Read Customer Stories is now wired.** Charles's
+Figma comment on the homepage frame (1523:1655, pin at the A-6 button)
+directed it to `/story`; the placeholder button in `components/home/A6.tsx`
+is now a link there (geometry unchanged, A-11 CTA pattern).
 
 **Update 2026-07-29 — the bottom-nav Wholesale tab is now wired.** Its target
 page exists, so the "until its target page exists" condition above is spent:
@@ -419,6 +406,13 @@ designed path is the hub's Session card → `/account/logout`.
   checklist item 2 executed at last. Frame names did NOT adopt our frame-naming
   rule (a sixth naming convention instead); no prototype
   links anywhere (item 3 still unmet).
+  **Update 2026-07-30 — resolved for frames:** all 48 routed frames were
+  renamed in the file to `<exact route> · <state> · <viewport> · <original
+  team name>` (rule v2.0: the viewport is the ownership boundary — dev sets
+  everything before it, the team keeps everything after it verbatim).
+  Not prefixed (no route exists yet): Business·Procurement, BLOG-JOURNAL-PAGE,
+  RETURNS-REQUEST-SUBMITTED-PAGE. Sections keep the team's click-depth scheme
+  (`shop一级`…) pending a design-team conversation.
 - **The file was edited while we imported.** CRAFT grew during the batch;
   STORY's placeholder plates became real photos the same day (re-imported);
   the care frames briefly showed one identical FAQ list on all four tabs
