@@ -87,7 +87,7 @@ Key jargon used below:
 
 ### Step 1 — Entry point: the tagged link and the beacon
 
-The feature "starts" outside the code: the owner tags each account's links per the convention in [docs/TESTER-GUIDE.md](../TESTER-GUIDE.md) ("Marketing links", EN + 中文) — same `utm_content` in every link that account posts.
+The feature "starts" outside the code: the owner tags each account's links per the "Marketing links" convention (EN + 中文, in the since-retired tester guide) — same `utm_content` in every link that account posts.
 
 [components/Beacon.tsx](../../components/Beacon.tsx) is a client component rendered on every storefront page (never `/admin`). On each navigation it reads the five standard UTM params from the URL — `utm_content` included, values capped at 120 chars ([Beacon.tsx:78-87](../../components/Beacon.tsx#L78-L87)):
 

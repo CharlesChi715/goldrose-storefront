@@ -18,7 +18,6 @@ These repository areas have different purposes:
 |---|---|
 | `agent-delivery/` | Unresolved messages from AI agents to Charles |
 | `team-deliveries/` | Incoming source files delivered by the design team or another upstream source |
-| `docs/TODO/` | Detailed hand-offs and decisions belonging to a particular task |
 | `.ai/WORKLOG.md` | Legacy optional work history; do not use as startup context |
 
 Actual code, documents, images, and other deliverables stay in their proper

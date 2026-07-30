@@ -59,5 +59,5 @@ own — stop and ask.
 
 ## Related
 
-- `docs/ixd/delivery-protocol.md` — the full hand-over protocol. §3 covers what
-  is done on receipt; do not restate it here.
+- `docs/ixd/README.md` — where parse output lands and how it is transcribed
+  (verbatim mirror, `⚠️ Developer note` for problems).

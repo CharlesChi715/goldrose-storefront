@@ -67,9 +67,13 @@ open messages.
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
   coverage is partial: only 3 of the home page's 17 bands carry a
-  `data-el="…-SECTION"` tag, and tagging the rest is blocked on the PROPOSED
-  section vocabulary in [`element-names.md`](docs/ixd/element-names.md)
-  ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
+  `data-el="…-SECTION"` tag; tagging the rest waits on a signed-off section
+  vocabulary ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
+- The product-handle rule ([`product-handles.md`](docs/ixd/naming/product-handles.md),
+  v2.1) is **Adopted and enforced in code** (2026-07-30): `lib/admin/product-handle.ts`
+  derives handles, collisions throw (no `-2`), non-draft handles are frozen, and a
+  unit test replays the doc's fixtures. ⚠️ Duplicate in the Chinese admin (副本
+  prefix) now errors by design; `product_redirects` still doesn't exist.
 - `/bag` items, tracking timeline, shipping choices, and card fields are
   visual placeholders; the real cart enters through `/checkout`.
 - The [owner walkthrough](docs/admin-design.md#143-final-acceptance) is
@@ -201,19 +205,12 @@ goldrose-storefront/
 | Need | Open |
 |---|---|
 | Agent instructions and open messages | [`agent-delivery/`](agent-delivery/README.md) |
-| Workflow rules: branching, parallel sessions, CI gates, environments | [`docs/engineering-playbook.md`](docs/engineering-playbook.md) |
 | Feature status and roadmap | [`docs/features/README.md`](docs/features/README.md) |
 | Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
-| Front-end Definition of Done (Proposed, awaiting sign-off) | [`docs/ixd/frontend-definition-of-done.md`](docs/ixd/frontend-definition-of-done.md) |
-| How work is handed over: design team → dev → bosses, delivery checklist | [`docs/ixd/delivery-protocol.md`](docs/ixd/delivery-protocol.md) |
-| Naming rules — Figma sections/frames, and product URL handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md) |
-| Naming rules — elements inside a page (`data-el`) | [`docs/ixd/element-names.md`](docs/ixd/element-names.md) |
+| Naming rules — Figma sections/frames, components (`data-el`), and product URL handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md) |
 | Where raw deliveries land, and how to parse one without re-importing it | [`team-deliveries/README.md`](team-deliveries/README.md) |
 | Database decisions and SKU rules | [`docs/Database.md`](docs/Database.md) |
 | SEO/GEO implementation and supporting research | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |
-| Testing procedure | [`docs/TESTER-GUIDE.md`](docs/TESTER-GUIDE.md) |
 | End-to-end feature traces, written to learn from | [`docs/learning/README.md`](docs/learning/README.md) |
 | Owner ideas, kept verbatim | [`docs/ideas.md`](docs/ideas.md) |
-| Per-task hand-offs awaiting the owner's decisions | [`docs/TODO/`](docs/TODO/README.md) |
-| Open questions for the front-end design team (frame → route, missing states) | [`docs/TODO/design-team-questions.md`](docs/TODO/design-team-questions.md) |

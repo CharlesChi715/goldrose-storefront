@@ -96,4 +96,4 @@ verification:
 
 ## Related links
 
-<!-- Specs, learning docs, TESTER-GUIDE sections. -->
+<!-- Specs and learning docs. -->

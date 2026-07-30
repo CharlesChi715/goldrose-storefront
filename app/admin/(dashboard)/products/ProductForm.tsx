@@ -766,7 +766,9 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 <TextField
                   label={t("form.seo.handle")}
                   value={handle}
-                  onChange={(value) => setHandle(value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                  onChange={(value) =>
+                    setHandle(value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-"))
+                  }
                   autoComplete="off"
                   helpText={t("form.seo.handleWarning")}
                 />

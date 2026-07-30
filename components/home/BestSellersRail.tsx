@@ -39,7 +39,7 @@ const PITCH = 267;
 
 /**
  * One best-seller card, drawn at its cell's own origin. `n` is the 1-based
- * slide number: the element names (docs/ixd/element-names.md) carry it so the
+ * slide number: the element names carry it so the
  * rail's repeated copies stay unique in the DOM. Built at runtime, so the
  * static naming test skips them, exactly as it does for Carousel's own
  * `name`-derived names.

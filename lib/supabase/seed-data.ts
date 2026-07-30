@@ -872,8 +872,8 @@ function buildDemoRows(now: string): Pick<
       },
     ],
     page_views: [
-      // Section names are the ones actually tagged in components/home today
-      // (docs/ixd/element-names.md); untagged bands are simply not measured.
+      // Section names are the ones actually tagged in components/home today;
+      // untagged bands are simply not measured.
       view("p01", "demo-visitor-emily", "demo-session-e1", "/", ago(24 * 6 + 1), "https://www.google.com/", null, "US",
         { activeMs: 64_000, scrollPct: 82, sections: { "HOME-HERO-SECTION": 21_000, "HOME-FEATURED-SECTION": 26_000, "HOME-PROMISE-SECTION": 9_000 } }),
       view("p02", "demo-visitor-emily", "demo-session-e1", "/shop", ago(24 * 6 + 0.9), "https://www.google.com/", null, "US",

@@ -83,8 +83,7 @@ AI agent. Read [`README.md`](README.md) for the tag definitions and workflow.
 - **Affected place:** [2026-07-25 naming-guide batch](../team-deliveries/originals/2026-07-25-figma-naming-guide/batch.md)
 - **What is uncertain:** Whether `Figma_UI_Naming_Guide_GoldRose.xlsx` is the
   spreadsheet the design team **sent us** on 2026-07-25, or one **we generated
-  for them** later. [`docs/ixd/element-names.md`](../docs/ixd/element-names.md#L45)
-  calls it "a spreadsheet exported for the design team — generated", but the
+  for them** later. The since-retired element-names doc called it "a spreadsheet exported for the design team — generated", but the
   file's modification time is 25 Jul, before the 2026-07-29 correction that made
   the markdown the master.
 - **Why it matters:** An incoming delivery belongs in `team-deliveries/originals/`; a

@@ -19,7 +19,7 @@ alter table page_views add column if not exists active_ms integer;
 alter table page_views add column if not exists scroll_pct smallint;
 
 -- Per-section active milliseconds, keyed by the data-el name the section
--- already carries in Figma, code and tests (docs/ixd/element-names.md):
+-- already carries in Figma, code and tests (docs/ixd/naming/component-names.md):
 --   {"HOME-HERO-SECTION": 8200, "HOME-STORY-SECTION": 19500}
 -- Exactly one section owns the clock at a time, so these sum to <= active_ms;
 -- the gap is unattributed skim time and is itself a signal.

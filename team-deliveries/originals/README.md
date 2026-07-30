@@ -7,9 +7,8 @@ sent**, not what parsing produced — the parse output lives in the repo proper
 One folder per batch, `<YYYY-MM-DD>-<slug>/`, each carrying a `batch.md` that
 lists every file with its sha256 and size.
 
-These files are the authority — on wording disputes the Chinese source wins
-(`docs/ixd/delivery-protocol.md` §3). Do not delete them, and never change a
-delivered word.
+These files are the authority — on wording disputes the Chinese source wins.
+Do not delete them, and never change a delivered word.
 
 One mechanical exception: a batch that moves may have its **relative link paths**
 re-based so the file still opens. That touches plumbing we added during import,
