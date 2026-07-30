@@ -207,6 +207,8 @@ goldrose-storefront/
 | Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
 | Front-end Definition of Done (Proposed, awaiting sign-off) | [`docs/ixd/frontend-definition-of-done.md`](docs/ixd/frontend-definition-of-done.md) |
 | How work is handed over: design team → dev → bosses, delivery checklist | [`docs/ixd/delivery-protocol.md`](docs/ixd/delivery-protocol.md) |
+| Naming rules — Figma sections/frames, and product URL handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md) |
+| Naming rules — elements inside a page (`data-el`) | [`docs/ixd/element-names.md`](docs/ixd/element-names.md) |
 | Where raw deliveries land, and how to parse one without re-importing it | [`team-deliveries/README.md`](team-deliveries/README.md) |
 | Database decisions and SKU rules | [`docs/Database.md`](docs/Database.md) |
 | SEO/GEO implementation and supporting research | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |

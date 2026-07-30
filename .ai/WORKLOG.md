@@ -3694,3 +3694,29 @@ and the §11 paste-to-a-model prompt block (title-only input). `option_names`
 becomes required when variants ship, and every handle must be re-derived before
 go-live — the last moment a handle is free to change (§8). §6 fixtures and the
 §10 reference implementation are otherwise unchanged; no test parses this doc.
+
+### Deliveries — 2026-07-30 (continued)
+
+- `f681037` (branch `docs/naming-guide-source-path`, pushed, no PR opened):
+  `from-teammates-figma-naming-guide.md` cited `temp/Figma_UI_Naming_Guide_GoldRose.xlsx`
+  in both its intro and Source-file row. That xlsx moved to tracked
+  `team-deliveries/originals/2026-07-25-figma-naming-guide/` in `c53435d`, which
+  fixed `element-names.md` but missed this file. Repointed both, and dropped
+  "version-controlled"/"scratch folder" from the rationale — the xlsx is tracked
+  now, so transcription buys greppability, not version control.
+- `SUMMARY.md` doc index gained two rows: `docs/ixd/naming/` (Figma
+  section/frame + product-handle rules) and `element-names.md` (inside-a-page
+  `data-el` names). Both were unreachable from the entrypoint, so an agent asked
+  to name a frame or mint a handle would not have found the rules.
+
+Reviewed but **not** changed — `lib/admin/products.ts:112-145` (`slugify` /
+`uniqueHandle`) contradicts `naming/product-handles.md` on every fixture: no NFKD
+(`Rosé Éternelle` → `ros-ternelle`), no boilerplate/brand stripping
+(`24k-gold-dipped-eternal-rose` vs `eternal-rose`), a `|| "product"` fallback, and
+`-2` collision numbering that §5 and §11 explicitly forbid. No handle unit test
+exists and `product_redirects` still does not. Recommended to Charles: port the
+§10 reference implementation, throw on collision, and run the §6 fixtures as a
+test **before** the 120-SKU import — while the signature is still one argument.
+Also advised that aggressive trimming is optional (Shopify/IKEA ship full-title
+slugs; keyword-in-URL is a weak signal) and that it manufactures the collisions
+§4.6 exists to catch — 2 of 10 fixtures already fall through to manual.
