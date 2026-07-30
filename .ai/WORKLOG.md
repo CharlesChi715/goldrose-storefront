@@ -3766,3 +3766,14 @@ now ASCII-only apart from an em dash inside the error string.
 **Still open, unactioned:** port §8 into `lib/admin/products.ts`, throw on
 collision, encode §5 as a unit test, and add the `product_redirects` migration —
 all before the 120-SKU import.
+
+**Follow-up:** §5 fixtures labelled as mock, per Charles — every title there is an
+invented test input, not a product name, and none is a proposal (no title is
+decided; OQ-3). Added a row-by-row table of what each fixture pins (digit/letter
+tokens, apostrophe vs hyphen, stop word retained, NFKD, separator-run collapsing,
+comma, colour word retained, 74-char no-truncation) and the instruction to **keep**
+these rows when real titles land — a fixture locks the algorithm, it does not
+describe the catalogue, so swapping in real names would lose the edge cases and go
+stale on every marketing rename. Re-verified: extraction still yields exactly 8
+fixtures + 3 prose examples, 0 failing, so the added table did not pollute the
+parse.

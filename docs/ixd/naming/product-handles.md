@@ -104,6 +104,26 @@ title or set a deliberate, unique manual handle.
 
 Any implementation or model must reproduce every row exactly.
 
+⚠️ **Every title below is an invented test input, not a product name.** No
+GoldRose product title is decided yet (OQ-3), and none of these is a proposal.
+Each row exists only to pin one behaviour of the algorithm:
+
+| Row | Pins |
+| --- | --- |
+| 1 | digits and letters in one token (`24k`) |
+| 2 | apostrophe deleted, not hyphenated; em dash as a separator |
+| 3 | stop word retained ([§3](#3-stop-words-are-retained)) |
+| 4 | NFKD — diacritics stripped, not turned into separators |
+| 5 | a run of space + `&` + double space collapsing to a single `-` |
+| 6 | comma as a separator; size word retained |
+| 7 | colour word retained — the v1.0 contrast case |
+| 8 | length: 74 characters, not truncated |
+
+**Keep these rows when real titles arrive.** A fixture's job is to lock the
+algorithm, not to describe the catalogue — swapping in real product names would
+lose the edge cases and make the table go stale every time marketing renames
+something. Add rows for genuinely new edge cases instead.
+
 | # | `title` | Expected handle |
 | --- | --- | --- |
 | 1 | `24K Gold Dipped Eternal Rose` | `24k-gold-dipped-eternal-rose` |
