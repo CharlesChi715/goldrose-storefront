@@ -3720,3 +3720,49 @@ test **before** the 120-SKU import — while the signature is still one argument
 Also advised that aggressive trimming is optional (Shopify/IKEA ship full-title
 slugs; keyword-in-URL is a weak signal) and that it manufactures the collisions
 §4.6 exists to catch — 2 of 10 fixtures already fall through to manual.
+
+## 2026-07-30 — Finalized product handle stop-word rule
+
+- Finalized `docs/ixd/naming/product-handles.md` as adopted version 2.1.
+- Decided that full-title slugification retains stop words; there is no
+  automatic stop-word removal list.
+- Replaced speculative SEO claims with official Google and Shopify guidance.
+- Verified Markdown, section references, whitespace, and ten handle fixtures.
+- Application enforcement and the redirect table remain future work.
+
+### Deliveries — 2026-07-30 (product handles v2.x)
+
+`naming/product-handles.md` rewritten to full-title slugification and cut
+**334 → 193 lines**. Charles chose the approach after weighing it against v1.0's
+semantic trimming; he then bumped it to v2.1 **Adopted**, added §3 "Stop words are
+retained" with Google/Shopify citations, and fixed the section cross-references.
+
+Deleted as no longer reachable: the `option_names` input and §2 entirely, all six
+closed lists (stop words, brand tokens, boilerplate phrases, colour tokens, size
+tokens, generic stems), the 60-char truncation step, "what is deliberately not
+automated", and the paste-to-a-model prompt block. The algorithm is now six steps
+and the reference implementation is one expression chain.
+
+Three things the change buys, worth recording as the rationale:
+- **No manual cases.** v1.0 sent 2 of 10 fixtures to "manual handle required";
+  v2.1 sends none. The trimming was manufacturing the collisions that the §4.6
+  generic-stem reject list and the no-`-2` rule existed to catch.
+- **`option_names` is gone permanently**, not just deferred. v1.0 needed to know
+  whether a colour word was a variant axis before deciding to strip it; nothing is
+  stripped now, so the fact is never needed — including once variants ship.
+- **The code gap shrank.** `slugify`/`uniqueHandle` in `lib/admin/products.ts` was
+  four bugs plus a wholly different token pipeline away from v1.0. Against v2.1 it
+  is three things: NFKD, apostrophe deletion, and throwing instead of appending
+  `-2` / falling back to `"product"`.
+
+**Verified:** all 8 §5 fixtures and all 3 §3 prose examples pass against the
+implementation *extracted from the document's own code block* (not a copy), and
+the empty / punctuation-only / em-dash-only inputs throw as §4 specifies. Caught
+and fixed one regression I introduced: the reference implementation's regexes had
+literal combining marks and a literal U+2019 rather than `\uXXXX` escapes — the
+invisible copy-paste corruption hazard the doc was written to avoid. Code block is
+now ASCII-only apart from an em dash inside the error string.
+
+**Still open, unactioned:** port §8 into `lib/admin/products.ts`, throw on
+collision, encode §5 as a unit test, and add the `product_redirects` migration —
+all before the 120-SKU import.
