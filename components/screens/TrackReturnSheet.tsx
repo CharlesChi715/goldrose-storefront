@@ -9,9 +9,10 @@
  * over the track page, cream sheet from y286 with the 10 return reasons.
  *
  * Interaction is the design's visual layer only: picking a reason fills its
- * radio (ink dot), Confirm Return stays an inert styled div — there is no
- * returns backend, and the frame draws no post-confirm state. Close (× or
- * the dim area) returns to the plain track page. Portalled to <body> and
+ * radio (ink dot). Confirm Return follows the prototype wiring (1523:1430 →
+ * 1593:114) to /account/returns/request-submitted — a coming-soon scaffold,
+ * since that target frame is not Ready-for-dev and there is no returns
+ * backend. Close (× or the dim area) returns to the plain track page. Portalled to <body> and
  * bottom-anchored (the PdpOverlays stage pattern — ScaleFrame's transform
  * would swallow position:fixed).
  *
@@ -246,8 +247,11 @@ export function TrackReturnSheet() {
         >
           $129.00
         </div>
-        {/* Confirm Return — inert (no returns backend, no post-confirm frame) */}
-        <div
+        {/* Confirm Return — prototype 1523:1430 navigates to the un-ready
+            RETURNS-REQUEST-SUBMITTED-PAGE (1593:114), so this lands on the
+            coming-soon scaffold until that frame is marked Ready-for-dev. */}
+        <Link
+          href="/account/returns/request-submitted"
           style={{
             ...abs(174, 820, 180, 58),
             background: INK,
@@ -265,7 +269,7 @@ export function TrackReturnSheet() {
           >
             Confirm Return
           </div>
-        </div>
+        </Link>
       </div>
       <NoCalcScale
         base={430}

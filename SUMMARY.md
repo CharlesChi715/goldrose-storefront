@@ -78,10 +78,17 @@ Charles first.
   navigation, info-storage, Cancel discards → defaults" behavior was
   **confirmed by the owner in the Figma comments**. **Not imported:**
   BLOG-JOURNAL-PAGE (built 2026-07-31 then **reverted** — its frame was never
-  marked Ready-for-dev) and RETURNS-REQUEST-SUBMITTED-PAGE (exit wired, no entry
-  trigger; not Ready-for-dev). A newer batch also added a `/gift-guide` long
-  page (1942:182) and edited the blog frame's chrome — both untouched, no owner
-  sign-off yet ([`docs/ixd/README.md`](docs/ixd/README.md)).
+  marked Ready-for-dev) and RETURNS-REQUEST-SUBMITTED-PAGE (not Ready-for-dev;
+  its entry now exists — the return sheet's Confirm lands on a coming-soon
+  scaffold at `/account/returns/request-submitted`, AI-007). A newer batch also
+  added a `/gift-guide` long page (1942:182) and edited the blog frame's chrome
+  — both untouched, no owner sign-off yet. The 07-31 sync processed the file's
+  first prototype map (59 links): reminders toggles now default Email on / SMS
+  off per the owner's frame comment; prototype links that would fake live
+  features (cart→`/bag`, pay→keepsake, inert Save/submit) were not adopted
+  (AI-008). Pending from design: a simplified homepage (owner-acked — do not
+  re-import the current frame) and an unmarked AFTER-SALES 13-screen section
+  (returns flow + reminders pickers) ([`docs/ixd/README.md`](docs/ixd/README.md)).
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
   coverage is partial: only 3 of the home page's 17 bands carry a

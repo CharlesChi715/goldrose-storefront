@@ -97,6 +97,31 @@ test("the reminders Edit control opens the edit sheet; Cancel closes it", async 
   );
 });
 
+test("the reminders notification toggles start Email on, SMS off", async ({
+  page,
+}) => {
+  await page.goto("/account/reminders");
+  // Owner's Figma note on 1523:3473: the Email switch starts on, the SMS
+  // switch below it starts off (toggle-knob-open / toggle-knob-close).
+  await expect(
+    page.getByRole("switch", { name: "Email reminders" }),
+  ).toHaveAttribute("aria-checked", "true");
+  await expect(
+    page.getByRole("switch", { name: "SMS reminders" }),
+  ).toHaveAttribute("aria-checked", "false");
+});
+
+test("the return sheet's Confirm Return lands on the request-submitted scaffold", async ({
+  page,
+}) => {
+  await page.goto("/orders/track?return=1");
+  // Prototype wiring 1523:1430 → 1593:114; the target frame is not
+  // Ready-for-dev yet, so the link resolves to the coming-soon scaffold.
+  await page.getByRole("link", { name: "Confirm Return" }).click();
+  await expect(page).toHaveURL(/\/account\/returns\/request-submitted$/);
+  await expect(page.getByText("Return request received")).toBeVisible();
+});
+
 test("the shop pagination walks pages and reorders the placeholder cards", async ({
   page,
 }) => {

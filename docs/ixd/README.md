@@ -495,6 +495,55 @@ prototype exits (no blog-detail frame exists); and the ✉ / cart glyphs need th
 frame-render-crop and shared-SVG workarounds (blog's own raster export was
 `.notdef` / null).
 
+## 07-31 delivery sync — developer findings
+
+Processed the full file state as of 2026-07-31 13:26 (version 2382365737171469532).
+Seven sections carry Ready-for-dev; everything under them was already imported,
+so this pass was drift-alignment plus the file's first real prototype map
+(59 interactions; was 11).
+
+**Imported/changed:**
+
+- **Reminders page (1523:3473):** the SMS toggle now defaults **off** and the
+  Email toggle **on** — set by the owner's comment for AI agents on the frame
+  ("the switch right here is 'on', and switch below is 'off'"); the off-state
+  track is the design's cool grey `#E4E8ED` (component `toggle-knob-close`),
+  not sand; the summary caption moved up 6px in the `bottom-add-bin` regroup.
+  Item 1's Edit/Delete became two separate text nodes (a pipe still renders) —
+  visually identical, shipped unchanged. Band diff 2.78% (AA envelope).
+- **`/account/returns/request-submitted` (coming-soon scaffold):** the
+  Ready-for-dev return sheet's Confirm Return (1523:1430) prototype-navigates
+  to RETURNS-REQUEST-SUBMITTED-PAGE (1593:114), which is **not** Ready-for-dev
+  — so the button now lands on a scaffold route (no real content) until that
+  frame is marked and imported. This also closes DQ-36's "no entry trigger"
+  gap in the other direction: the sheet now has an exit.
+
+**Prototype wiring checked, deliberately not adopted (live behavior wins):**
+
+- Cart icons and PDP "Add to Cart" → `/bag` (1523:3059): `/bag` still shows
+  the mock's line items; the live basket is `/checkout`. Kept as-is (AI-008).
+- Checkout "Pay Securely" CTA → keepsake share card (1523:1432): the CTA
+  performs the real PayPal payment; a design-flow jump would fake success.
+- Signup submit → login, Delete-account submit → login, Personal-info /
+  Privacy Save → hub: all sit on deliberately inert screens (live-input
+  hazard rule); navigating would fake a save/submit/deletion.
+- Menu BLOG row → BLOG-JOURNAL-PAGE (1593:115): the frame is still not
+  Ready-for-dev (owner had the 07-31 import reverted); the row stays inert.
+
+**Pending from design (owner-acked or team-announced in comments):**
+
+- **Homepage:** the team is replacing it with a simplified version ("首页重新
+  换精简版") and told Charles to ignore the current frame — he ok'd. The 8673
+  → 6582px frame shrink is that edit in progress; nothing re-imported.
+- **AFTER-SALES · 13 EDITABLE SCREENS (2030:181):** a whole returns flow
+  (`/account/returns/*`) plus the reminders date/timezone/unit pickers —
+  answers to the modal's open dropdown threads. Not Ready-for-dev yet; the
+  modal's date/number/unit fields stay static until it is.
+- Signup: password fields being deleted at source ("删掉密码") — converging on
+  the email-code decision. Dashboard: address management coming ("增加地址
+  管理"). Keepsake: back button coming ("缺少返回键"). `/gift-guide`
+  (1942:182) and the edited blog frame remain unmarked.
+
 ## Reminders edit modal — developer findings (owner-directed via comments)
 
 The gift-reminder edit sheet (REMINDERS-EDIT-OPEN-MODAL-PAGE 1599:245,
