@@ -4186,6 +4186,19 @@ Agent-inbox: detail pane formatting
     agent-delivery/sessions/figma-sync-07-31-feat-figma-sync-0731.md
     (AI-007, AI-008).
 
+## 2026-08-01 — Figma delivery sync (timezone → Pacific; me三级 pulled back)
+
+- Deliveries:
+  - Re-polled the file (edited 07-31 14:22): section me三级 lost its
+    Ready-for-dev mark — reminders edit modal growing 548→614px with the
+    date/timezone pickers; nothing re-imported from it.
+  - Applied the one comment-delegated change: reminders timezone value
+    EST (UTC−5) → PST (UTC−8) (Pacific-only accepted by Charles; exact
+    offset still unanswered by design — AI-009).
+  - Noted the simplified homepage's second frame (2024:378) in build and the
+    unresolved login-checkbox style debate; docs/ixd README § "08-01
+    delivery sync", session hand-off figma-sync-08-01-feat-figma-sync-0801.
+
 ## 2026-08-01 — features-generator teardown merged to main
 
 - Squash-merged `learn/features-rebuild` into `main`: removed the legacy

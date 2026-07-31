@@ -86,9 +86,12 @@ Charles first.
   first prototype map (59 links): reminders toggles now default Email on / SMS
   off per the owner's frame comment; prototype links that would fake live
   features (cart→`/bag`, pay→keepsake, inert Save/submit) were not adopted
-  (AI-008). Pending from design: a simplified homepage (owner-acked — do not
-  re-import the current frame) and an unmarked AFTER-SALES 13-screen section
-  (returns flow + reminders pickers) ([`docs/ixd/README.md`](docs/ixd/README.md)).
+  (AI-008). The 08-01 sync: design un-marked `me三级` (reminders cluster pulled
+  back for picker work — no re-imports from it until re-marked); the reminders
+  timezone is now Pacific-only, shown as `PST (UTC−8)` per a comment Charles
+  accepted (AI-009). Pending from design: the simplified homepage (second frame
+  2024:378 now in build — keep ignoring both homepage frames) and an unmarked
+  AFTER-SALES 13-screen section ([`docs/ixd/README.md`](docs/ixd/README.md)).
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
   coverage is partial: only 3 of the home page's 17 bands carry a
