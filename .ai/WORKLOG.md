@@ -3947,3 +3947,9 @@ return URLs. Awaiting boss name sign-off before registering.
   as successors. Verified the `ORDER-DETAIL-*` IDs come from the 2026-07-27
   delivery, not this guide. Also listed the previously-unlisted
   `naming/component-names.md` in the ixd README.
+
+## 2026-07-31 — Storefront carousel and shop-menu QA
+
+- Normalized the first pagination dot to match its siblings across every homepage carousel.
+- Moved the mobile `/shop` sort menu 8px closer to its trigger.
+- Verified the changes in the live browser; TypeScript, ESLint, and Next.js runtime checks passed.

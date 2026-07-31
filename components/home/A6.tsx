@@ -411,7 +411,7 @@ export function A6() {
       <div style={{ ...abs(176, 4176, 80, 8), overflow: "hidden" }}>
         <div
           style={{
-            ...abs(0, 0, 8, 8),
+            ...abs(0.5, 0.5, 7, 7),
             background: "#C46E29",
             borderRadius: 9999,
           }}

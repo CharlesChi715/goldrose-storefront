@@ -259,7 +259,7 @@ export function A3() {
       <div
         data-el="HOME-NEW-ARRIVALS-DOT-1"
         style={{
-          ...abs(185, 1974, 9, 9),
+          ...abs(186, 1974, 7, 7),
           background: "#D4AF37",
           borderRadius: 9999,
         }}
@@ -460,7 +460,7 @@ export function A3() {
       <div
         data-el="HOME-READY-TO-SHIP-DOT-1"
         style={{
-          ...abs(181, 2268, 9, 9),
+          ...abs(182, 2268, 7, 7),
           background: "#D4AF37",
           borderRadius: 9999,
         }}

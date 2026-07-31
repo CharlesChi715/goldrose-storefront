@@ -516,7 +516,7 @@ export function ShopInteractive({
           role="menu"
           className={playfair.className}
           style={{
-            ...abs(206, 365, 206, 190),
+            ...abs(206, 357, 206, 190),
             background: CARD_BG,
             boxShadow: `inset 0 0 0 1px ${SAND}, 0 8px 20px rgba(36,23,18,0.16)`,
             borderRadius: 14,

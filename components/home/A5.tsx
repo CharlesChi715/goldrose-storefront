@@ -318,7 +318,7 @@ export function A5() {
       <div style={{ ...abs(145, 424, 135, 10), overflow: "hidden" }}>
         <div
           style={{
-            ...abs(0, 0.5, 9, 9),
+            ...abs(0.5, 1, 8, 8),
             background: "#B27A38",
             borderRadius: 9999,
           }}

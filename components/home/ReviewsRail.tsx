@@ -58,12 +58,11 @@ const REVIEWS: readonly Review[] = [
   },
 ];
 
-/* Review pagination dots (442:161), canvas-absolute and verbatim: the design
-   draws the active dot at 8px and the rest at 7px. It draws FOUR dots for
-   three review cards, so only the first three are wired to a slide; the fourth
-   stays the inert ellipse the import drew (rendered by A-6). */
+/* Review pagination dots (442:161), normalized to the same visible size. The
+   design draws FOUR dots for three review cards, so only the first three are
+   wired to a slide; the fourth stays the inert ellipse rendered by A-6. */
 const REVIEW_DOTS = [
-  { x: 184, y: 4522, size: 8 },
+  { x: 184.5, y: 4522.5, size: 7 },
   { x: 203, y: 4522.5, size: 7 },
   { x: 221, y: 4522.5, size: 7 },
 ];
