@@ -6,7 +6,13 @@ resources only when the task needs them.
 
 After this file, read [`agent-delivery/README.md`](agent-delivery/README.md) and
 [`agent-delivery/INBOX.md`](agent-delivery/INBOX.md) for the agent workflow and
-open messages.
+open messages. Before finishing, write back: anything you could not resolve or
+must not guess goes into your own session file under
+[`agent-delivery/sessions/`](agent-delivery/sessions), tagged `AI-nnn`, with a
+row added to the inbox index and a matching comment beside the affected code.
+Closed matters are archived, never deleted; never read
+[`agent-delivery/archive/`](agent-delivery/archive/README.md) without asking
+Charles first.
 
 ## How to update this file
 
@@ -66,6 +72,16 @@ open messages.
   conflicts: [`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ The delivery
   stamped an "ELDREVE" placeholder wordmark on many frames — GoldRose was
   substituted everywhere; DQ-34 asks the design team to confirm.
+- A later batch (node ids 1593/1596/1599) delivered three more frames.
+  **Imported:** the REMINDERS-EDIT-OPEN modal (1599:245) → a bottom sheet on
+  `/account/reminders`, opened by Add reminder / each card's Edit; its "no
+  navigation, info-storage, Cancel discards → defaults" behavior was
+  **confirmed by the owner in the Figma comments**. **Not imported:**
+  BLOG-JOURNAL-PAGE (built 2026-07-31 then **reverted** — its frame was never
+  marked Ready-for-dev) and RETURNS-REQUEST-SUBMITTED-PAGE (exit wired, no entry
+  trigger; not Ready-for-dev). A newer batch also added a `/gift-guide` long
+  page (1942:182) and edited the blog frame's chrome — both untouched, no owner
+  sign-off yet ([`docs/ixd/README.md`](docs/ixd/README.md)).
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
   coverage is partial: only 3 of the home page's 17 bands carry a
@@ -188,7 +204,7 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
 
 ```text
 goldrose-storefront/
-├── agent-delivery/      # Agent instructions and open inbox
+├── agent-delivery/      # Golden rules of how agent delivery work outcome
 ├── CLAUDE.md            # Claude entry point importing SUMMARY.md
 ├── .codex/              # Local Codex hooks, including the working-mode selector
 ├── app/                 # Next.js routes, pages, and API endpoints
@@ -214,15 +230,15 @@ goldrose-storefront/
 
 ## Find details on demand
 
-| Need | Open |
-|---|---|
-| Agent instructions and open messages | [`agent-delivery/`](agent-delivery/README.md) |
-| Feature status and roadmap (generated — `npm run features:generate`) | [`docs/features/README.md`](docs/features/README.md) |
-| Authoritative admin/product requirements (`§` references) | [`docs/admin-design.md`](docs/admin-design.md) |
-| Figma imports, route decisions, interactions, design issues | [`docs/ixd/README.md`](docs/ixd/README.md) |
-| Naming rules — Figma sections/frames, components (`data-el`), and product URL handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md) |
-| Where raw deliveries land, and how to parse one without re-importing it | [`team-deliveries/README.md`](team-deliveries/README.md) |
-| Database decisions and SKU rules | [`docs/Database.md`](docs/Database.md) |
-| SEO/GEO implementation and supporting research | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |
-| End-to-end feature traces, written to learn from | [`docs/learning/README.md`](docs/learning/README.md) |
-| Owner ideas, kept verbatim | [`docs/ideas.md`](docs/ideas.md) |
+| Need                                                                                  | Open                                                                                                 |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Agent instructions and open messages (`npm run agent-inbox`)                          | [`agent-delivery/`](agent-delivery/README.md)                                                        |
+| Feature status and roadmap (generated — `npm run features:generate`)                  | [`docs/features/README.md`](docs/features/README.md)                                                 |
+| Authoritative admin/product requirements (`§` references)                             | [`docs/admin-design.md`](docs/admin-design.md)                                                       |
+| Figma imports, route decisions, interactions, design issues                           | [`docs/ixd/README.md`](docs/ixd/README.md)                                                           |
+| Naming rules — Figma sections/frames, components (`data-el`), and product URL handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md)                                            |
+| Where raw deliveries land, and how to parse one without re-importing it               | [`team-deliveries/README.md`](team-deliveries/README.md)                                             |
+| Database decisions and SKU rules                                                      | [`docs/Database.md`](docs/Database.md)                                                               |
+| SEO/GEO implementation and supporting research                                        | [`docs/seo-geo/search-discovery-implementation.md`](docs/seo-geo/search-discovery-implementation.md) |
+| End-to-end feature traces, written to learn from                                      | [`docs/learning/README.md`](docs/learning/README.md)                                                 |
+| Owner ideas, kept verbatim                                                            | [`docs/ideas.md`](docs/ideas.md)                                                                     |

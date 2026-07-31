@@ -272,11 +272,11 @@ Keying on `!url` instead means a half-configured deploy locks itself: `isOpenAcc
 
 There are three different "is this hosted?" tests in the codebase and they disagree on purpose:
 
-| Predicate | Definition | Why |
-| --- | --- | --- |
-| [`env.hosted`](../../lib/supabase/env.ts#L32) | `url && serviceKey` | data layer — needs the write key |
-| [proxy](../../proxy.ts#L36-L38) | `url && anonKey` | edge — only calls `getUser()` |
-| [`isOpenAccess()`](../../lib/admin/auth.ts#L58) | `!url && !devPassword` | fails closed on partial config |
+| Predicate                                       | Definition             | Why                              |
+| ----------------------------------------------- | ---------------------- | -------------------------------- |
+| [`env.hosted`](../../lib/supabase/env.ts#L32)   | `url && serviceKey`    | data layer — needs the write key |
+| [proxy](../../proxy.ts#L36-L38)                 | `url && anonKey`       | edge — only calls `getUser()`    |
+| [`isOpenAccess()`](../../lib/admin/auth.ts#L58) | `!url && !devPassword` | fails closed on partial config   |
 
 ### Step 6 — Defence in depth: RLS as the second wall
 

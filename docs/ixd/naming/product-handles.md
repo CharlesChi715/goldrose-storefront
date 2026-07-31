@@ -1,14 +1,14 @@
 # Product handle rule — one title, one handle, every time
 
-|  |  |
-| --- | --- |
-| **What this is** | A deterministic algorithm for deriving `products.handle` (the `/products/<handle>` URL segment) from `products.title`. Any person or AI model following it must produce the **identical** string. |
-| **Scope** | Public product URLs only. SKU naming is [`Database.md`](../../Database.md#sku-naming-convention-2026-07-25); Figma frame and section naming is [`figma-route-rule.md`](figma-route-rule.md) in this folder. |
-| **Status** | **Adopted** — this is the final rule for new GoldRose product handles. |
-| **Version** | 2.1 — full-title slugification with stop words retained, adopted 2026-07-30. Replaced v1.0, which stripped boilerplate, stop words, brand and variant tokens and truncated at 60 chars. |
-| **Owner** | Charles |
+|                    |                                                                                                                                                                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **What this is**   | A deterministic algorithm for deriving `products.handle` (the `/products/<handle>` URL segment) from `products.title`. Any person or AI model following it must produce the **identical** string.                                                              |
+| **Scope**          | Public product URLs only. SKU naming is [`Database.md`](../../Database.md#sku-naming-convention-2026-07-25); Figma frame and section naming is [`figma-route-rule.md`](figma-route-rule.md) in this folder.                                                    |
+| **Status**         | **Adopted** — this is the final rule for new GoldRose product handles.                                                                                                                                                                                         |
+| **Version**        | 2.1 — full-title slugification with stop words retained, adopted 2026-07-30. Replaced v1.0, which stripped boilerplate, stop words, brand and variant tokens and truncated at 60 chars.                                                                        |
+| **Owner**          | Charles                                                                                                                                                                                                                                                        |
 | **Implementation** | `productHandle()` in [`lib/admin/product-handle.ts`](../../../lib/admin/product-handle.ts); the fixtures below are enforced by [`tests/unit/product-handle.test.ts`](../../../tests/unit/product-handle.test.ts), which parses this file (`npm run test:unit`) |
-| **Depends on** | A `product_redirects` table, which **does not exist yet** (see [§5](#5-freeze-and-redirects)) |
+| **Depends on**     | A `product_redirects` table, which **does not exist yet** (see [§5](#5-freeze-and-redirects))                                                                                                                                                                  |
 
 ---
 
@@ -73,32 +73,32 @@ Any implementation or model must reproduce every row exactly.
 GoldRose product title is decided yet (OQ-3), and none of these is a proposal.
 Each row exists only to pin one behaviour of the algorithm:
 
-| Row | Pins |
-| --- | --- |
-| 1 | digits and letters in one token (`24k`) |
-| 2 | apostrophe deleted, not hyphenated; em dash as a separator |
-| 3 | stop word retained (deliberate, see [§1](#1-why-this-document-exists)) |
-| 4 | NFKD — diacritics stripped, not turned into separators |
-| 5 | a run of space + `&` + double space collapsing to a single `-` |
-| 6 | comma as a separator; size word retained |
-| 7 | colour word retained — the v1.0 contrast case |
-| 8 | length: 74 characters, not truncated |
+| Row | Pins                                                                   |
+| --- | ---------------------------------------------------------------------- |
+| 1   | digits and letters in one token (`24k`)                                |
+| 2   | apostrophe deleted, not hyphenated; em dash as a separator             |
+| 3   | stop word retained (deliberate, see [§1](#1-why-this-document-exists)) |
+| 4   | NFKD — diacritics stripped, not turned into separators                 |
+| 5   | a run of space + `&` + double space collapsing to a single `-`         |
+| 6   | comma as a separator; size word retained                               |
+| 7   | colour word retained — the v1.0 contrast case                          |
+| 8   | length: 74 characters, not truncated                                   |
 
 **Keep these rows when real titles arrive.** A fixture's job is to lock the
 algorithm, not to describe the catalogue — swapping in real product names would
 lose the edge cases and make the table go stale every time marketing renames
 something. Add rows for genuinely new edge cases instead.
 
-| # | `title` | Expected handle |
-| --- | --- | --- |
-| 1 | `24K Gold Dipped Eternal Rose` | `24k-gold-dipped-eternal-rose` |
-| 2 | `24K Gold Dipped Rose — Valentine's Gift Set` | `24k-gold-dipped-rose-valentines-gift-set` |
-| 3 | `Eternal Rose in Glass Dome` | `eternal-rose-in-glass-dome` |
-| 4 | `Rosé Éternelle` | `rose-eternelle` |
-| 5 | `Rose & Box  Set` | `rose-box-set` |
-| 6 | `Display Box, Large` | `display-box-large` |
-| 7 | `24K Gold Dipped Rose — Ruby Red` | `24k-gold-dipped-rose-ruby-red` |
-| 8 | `Eternal Rose Anniversary Keepsake Collection Gift Box Presentation Edition` | `eternal-rose-anniversary-keepsake-collection-gift-box-presentation-edition` |
+| #   | `title`                                                                      | Expected handle                                                              |
+| --- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | `24K Gold Dipped Eternal Rose`                                               | `24k-gold-dipped-eternal-rose`                                               |
+| 2   | `24K Gold Dipped Rose — Valentine's Gift Set`                                | `24k-gold-dipped-rose-valentines-gift-set`                                   |
+| 3   | `Eternal Rose in Glass Dome`                                                 | `eternal-rose-in-glass-dome`                                                 |
+| 4   | `Rosé Éternelle`                                                             | `rose-eternelle`                                                             |
+| 5   | `Rose & Box  Set`                                                            | `rose-box-set`                                                               |
+| 6   | `Display Box, Large`                                                         | `display-box-large`                                                          |
+| 7   | `24K Gold Dipped Rose — Ruby Red`                                            | `24k-gold-dipped-rose-ruby-red`                                              |
+| 8   | `Eternal Rose Anniversary Keepsake Collection Gift Box Presentation Edition` | `eternal-rose-anniversary-keepsake-collection-gift-box-presentation-edition` |
 
 Row 5 shows a run of spaces, `&` and spaces collapsing to one `-`. Row 8 is 74
 characters and is **not** truncated. No row requires a manual handle.
@@ -107,11 +107,11 @@ characters and is **not** truncated. No row requires a manual handle.
 
 ## 5. Freeze and redirects
 
-| `products.status`(0001_init.sql) | Handle |
-| --- | --- |
-| `draft` | generated, freely editable |
-| `active` | **frozen** |
-| `archived` | frozen |
+| `products.status`(0001_init.sql) | Handle                     |
+| -------------------------------- | -------------------------- |
+| `draft`                          | generated, freely editable |
+| `active`                         | **frozen**                 |
+| `archived`                       | frozen                     |
 
 Changing an active product's handle requires a `product_redirects` row
 (`old_handle → product_id`) so the old URL returns 301, not 404.

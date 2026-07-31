@@ -53,11 +53,11 @@ automatically whenever rollout is surprising for the delivery stage.
 
 ## Commands
 
-| Command | Does |
-|---|---|
-| `npm run features:new -- <id> --area <a> --parent <group-id>` | scaffold a record from TEMPLATE.md, then regenerate the roadmap |
-| `npm run features:generate` | validate the registry, rebuild the Roadmap block below |
-| `npm run features:check` | fail when the registry is invalid or the Roadmap is stale (runs in CI) |
+| Command                                                       | Does                                                                   |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `npm run features:new -- <id> --area <a> --parent <group-id>` | scaffold a record from TEMPLATE.md, then regenerate the roadmap        |
+| `npm run features:generate`                                   | validate the registry, rebuild the Roadmap block below                 |
+| `npm run features:check`                                      | fail when the registry is invalid or the Roadmap is stale (runs in CI) |
 
 (`node scripts/features/cli.mjs list` prints a flat status table.)
 

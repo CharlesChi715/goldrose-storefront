@@ -158,10 +158,10 @@ The name `__ZZ_CONSTRAINT_PROBE__` is chosen so it is impossible to confuse with
 
 ### Step 4 — Reading the verdict
 
-| Response | Meaning | Action |
-| --- | --- | --- |
-| `HTTP 400`, SQLSTATE `23514` | ✅ Constraint **exists** — `23514` is Postgres's `check_violation`, and the message names it | none; nothing was written |
-| `HTTP 201` + the row echoed back | ❌ Constraint **missing** — a bad row now exists | delete it, then apply the constraint |
+| Response                         | Meaning                                                                                      | Action                               |
+| -------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `HTTP 400`, SQLSTATE `23514`     | ✅ Constraint **exists** — `23514` is Postgres's `check_violation`, and the message names it | none; nothing was written            |
+| `HTTP 201` + the row echoed back | ❌ Constraint **missing** — a bad row now exists                                             | delete it, then apply the constraint |
 
 The actual result on 2026-07-25:
 
@@ -286,9 +286,9 @@ where conrelid = 'discounts'::regclass;
 
 **Important distinction, because it caused the original mess:**
 
-| In the dashboard SQL editor | Verdict |
-| --- | --- |
-| `SELECT …` — reading, inspecting the catalog | ✅ **Fine.** Harmless, often the fastest way to look |
+| In the dashboard SQL editor                   | Verdict                                              |
+| --------------------------------------------- | ---------------------------------------------------- |
+| `SELECT …` — reading, inspecting the catalog  | ✅ **Fine.** Harmless, often the fastest way to look |
 | `CREATE TABLE`, `ALTER TABLE`, `CREATE INDEX` | ❌ **Don't.** Bypasses CLI tracking → history desync |
 
 Schema changes belong in a numbered file under [supabase/migrations/](../../supabase/migrations/) applied with `supabase db push`. That is **infrastructure as code**: the schema lives in git, is reviewable in a PR, and can be replayed onto a fresh database in order. Clicking SQL into a dashboard leaves no trace of any of that — which is exactly why `schema_migrations` was empty and why this whole doc had to exist.

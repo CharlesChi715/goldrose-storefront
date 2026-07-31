@@ -328,7 +328,7 @@ export const SEED_SETTINGS: SettingsShape = {
       id: "zone-row",
       name: "Rest of world",
       countries: ["*"],
-      // AI-TAG(AI-001): OWNER-DECISION — confirm the real rate. See /agent-delivery/INBOX.md#ai-001.
+      // AI-TAG(AI-001): OWNER-DECISION — confirm the real rate. See /agent-delivery/sessions/initial-inbox-07-30.md.
       rate_cents: 1995,
       free_over_cents: null,
       placeholder: true,

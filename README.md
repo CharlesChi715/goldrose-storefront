@@ -76,6 +76,31 @@ npm run test:e2e       # Playwright vs a production build, own port 3001
 hosted db. The e2e suite always pins itself to the local file adapter.
 Money is sandbox/mock only — `PAYPAL_ENV=live` is an owner-only switch.
 
+## Housekeeping commands
+
+**Forgot a command? Run `npm run` with no arguments — npm prints every script
+in `package.json`.** The ones that are not obvious:
+
+```bash
+npm run agent-inbox          # what questions are waiting on you
+npm run agent-inbox:close    # close one — picks from a list, archives it
+npm run agent-inbox:try      # same menus, writes nothing (practice run)
+npm run agent-inbox:check    # are the inbox's three records still in sync
+npm run features:generate    # rebuild docs/features/README.md from the records
+npm run features:check       # fail if that roadmap has drifted (CI runs this)
+npm run format               # Prettier over the repo
+npm run polish               # format + features:generate, before committing
+```
+
+Two conventions worth knowing before you touch either:
+
+- **Agent inbox** — unresolved questions from AI agents live in
+  [`agent-delivery/`](agent-delivery/README.md). Closing one always archives
+  it; nothing is deleted, and `agent-delivery/archive/` is private.
+- **Worklog** — every completed deliverable gets a dated entry in
+  [`.ai/WORKLOG.md`](.ai/WORKLOG.md). It is append-only history, never startup
+  context; do not read it unless Charles asks.
+
 ## Deploy
 
 Push to `main` → Vercel production deploy (preview URLs for other branches).

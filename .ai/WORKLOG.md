@@ -3947,3 +3947,214 @@ return URLs. Awaiting boss name sign-off before registering.
   as successors. Verified the `ORDER-DETAIL-*` IDs come from the 2026-07-27
   delivery, not this guide. Also listed the previously-unlisted
   `naming/component-names.md` in the ixd README.
+
+## 2026-07-31 — Markdown table alignment (repo-wide)
+
+Ran the `/align` skill across every markdown file carrying a GFM table:
+34 files, 136 tables, padding only. Cells were padded to the widest entry
+per column (measured in monospace display columns, so CJK and emoji tables
+line up) and separator rows stretched to match, preserving alignment colons.
+
+- Excluded `team-deliveries/originals/` — verbatim upstream sources.
+- `docs/Database.md` included under the explicit repo-wide request.
+- ASCII diagrams and trees were not touched; tables only.
+- Verified: content identical to HEAD after normalising padding, every row
+  of every table equal display width, and the pass is idempotent.
+
+Note: `.prettierignore` still excludes `*.md`, so nothing enforces this —
+its comment anticipates "revisit as its own commit once the docs restructure
+settles". Re-enabling Prettier for markdown is still an open call.
+
+## 2026-07-31 16:57 AEST
+
+- Imported the blog journal page from Figma (BLOG-JOURNAL-PAGE 1593:115, a new
+  batch above the 07-30 node-id ceiling) → `/blog`:
+  `components/screens/BlogScreen.tsx` + `app/blog/page.tsx`, pixel-exact from
+  REST node data (intro/featured/2×2 chips/4 article cards/CTA), assets rendered
+  at scale 2 into `public/veloria/screens/`.
+- Wired the menu drawer's BLOG row (inert since 07-25) to `/blog`; the frame's
+  own prototype (new this batch — 11 interactions, previously zero) draws the
+  same `Menu · BLOG →` click.
+- Verified: content band diff 1.4% vs the scale-2 frame render (font-AA
+  envelope); typecheck + lint + prettier clean, 66 unit tests pass, added and
+  passed an e2e for the menu→/blog navigation.
+- Shipped as a visible placeholder (mock journal copy — OQ-3), consistent with
+  the recorded "blog content TBD → leave with placeholder" instruction, not a
+  "no blog" decision. DQs logged in docs/ixd/README.md (clipped titles, no exit
+  wiring, chrome substitutions). Two sibling frames stay unimported
+  (returns-submitted, reminders edit-modal) pending Ready-for-dev + triggers.
+
+## 2026-07-31 19:41 AEST
+
+- Checked Figma for updates: file was re-modified (new /gift-guide long page
+  1942:182, blog frame chrome edited). Then, per owner instruction, read the
+  Figma COMMENTS (`GET /v1/files/:key/comments`) and implemented only the
+  thread the owner marked "ok".
+- The two "ok" replies both land on node 1599:245 (reminders edit modal):
+  owner asked "add navigation", design said "info-storage modal, no jump page,
+  Cancel discards → default", owner said "ok". Built exactly that:
+  `components/screens/ReminderEditModal.tsx`, a pixel-exact 430×548 bottom
+  sheet wired into `/account/reminders` (Add reminder + each card's Edit open
+  it; ×/Cancel/dim/Escape discard and close; Save closes; nothing persists).
+- Glyphs via Figma SVG exports; ✉ reuses the reminders page's .notdef-safe PNG
+  crop. Verified: modal band diff 1.6% (font-AA envelope); typecheck + lint +
+  prettier clean, 66 unit tests pass, added + passed an e2e (open → Cancel/Add
+  → Escape). Left the /gift-guide page and blog-chrome edits untouched (no
+  owner "ok"). Uncommitted (tree carries an unrelated repo-wide reformat).
+
+## 2026-07-31 20:08 AEST
+
+Agent-delivery restructured into per-session files
+
+- Replaced the single `agent-delivery/INBOX.md` message list with
+  `agent-delivery/sessions/`: one markdown file per agent session, named
+  `<session-name>-MM-DD[-branch].md`. Reason: the monolithic file made every
+  agent edit the same table and the same `Next ID` line — a guaranteed merge
+  conflict once two agents work in parallel.
+- `INBOX.md` is now an index only (open-matters table + session-file table).
+- Removed the stored `Next ID`. The next ID is the highest `AI-nnn` in
+  `sessions/` plus one:
+  `grep -rho 'AI-[0-9]\{3\}' agent-delivery/sessions/ | sort -u | tail -1`.
+- Each session file ends with a `## Delivered this session` bullet list — the
+  short hand-off note. Detailed history stays here in the worklog.
+- Migrated AI-001…AI-005 into `sessions/initial-inbox-07-30.md` and repointed
+  their five in-place `AI-TAG(...)` links (seed-data.ts, app/bag,
+  app/account/privacy-policy, team-deliveries/README.md, the naming-guide
+  batch) from `/agent-delivery/INBOX.md#ai-nnn` to the session file.
+- Raised AI-006: the `sessions/` folder name is a placeholder pending Charles's
+  choice, and renaming later means touching every in-place tag link.
+- `SUMMARY.md` now tells agents to **write back** before finishing, not only to
+  read the folder at startup.
+
+## 2026-07-31 20:13 AEST
+
+Agent-inbox CLI
+
+- Added `scripts/agent-inbox.mjs` (`npm run agent-inbox` / `inbox:resolve` /
+  `inbox:check`). `resolve` deletes a matter's three records together — the
+  `INBOX.md` row, the session-file entry, and the in-place `AI-TAG(...)`
+  comment — with `--dry-run`, `--archive` (appends to `RESOLVED.md`), and
+  `--reason`.
+- `check` fails when an index row and a session entry disagree, and warns when
+  a matter has no in-place tag. It warns rather than fails because a matter
+  about a folder or a whole document has no single line to pin a comment to —
+  AI-006 is the current example.
+- Verified end to end with a throwaway AI-999 planted in all three places: after
+  `resolve`, all three files were byte-identical to their pre-test state.
+
+## 2026-07-31 20:20 AEST
+
+Agent-inbox CLI — interactive close
+
+- `npm run agent-inbox:close` with no arguments now lists the open matters,
+  asks which to close, and asks delete-or-archive. Removes the need to read an
+  id off the list and retype it behind npm's `--`.
+- Ids accepted as `4`, `ai-4`, or `AI-004`; written form stays uppercase so
+  in-place tags read as code markers (`TODO`-style) and grep cleanly.
+- Prompts refuse to run without a TTY, so CI fails fast instead of hanging.
+  Enter, `c`, or Ctrl+D cancels; Ctrl+D previously threw an AbortError stack
+  trace and now exits cleanly.
+- Verified the interactive path through a real pty with a throwaway AI-999
+  planted in all three places: after the close, all three files were
+  byte-identical to their pre-test state.
+
+## 2026-07-31 20:29 AEST
+
+Agent-inbox: closing archives, never deletes
+
+- Removed the delete path from `npm run agent-inbox:close`. Closing now writes
+  `agent-delivery/archive/AI-nnn-<slug>.md` **first**, then removes the index
+  row, the session entry, and the in-place tag. If the archive write fails,
+  nothing is removed.
+- Archived files are `chmod 0444`. Verified: appending to one is refused by
+  the shell. Read-only is a guard against absent-minded edits, not security.
+- Ids are never reused, and `resolve` refuses an id that already has an
+  archive file — so a closed matter cannot be silently overwritten.
+- Archive is private: added `permissions.ask` entries in
+  `.claude/settings.json` so Claude Code prompts before reading the folder,
+  plus the written rule in `SUMMARY.md`, `agent-delivery/README.md`, and
+  `agent-delivery/archive/README.md`. The rule is the real control; the
+  prompt is a reminder. Nothing in the archive is project context.
+- Verified end to end with a throwaway AI-999: archive file created read-only
+  with the closing date and reason, and all three live files returned
+  byte-identical to their pre-test state.
+
+## 2026-07-31 20:30 AEST
+
+Agent-inbox renamed, commands documented
+
+- `scripts/inbox.mjs` → `scripts/agent-inbox.mjs`; npm scripts are now
+  `agent-inbox` (list), `agent-inbox:close`, `agent-inbox:check`. The
+  verb is "close" everywhere now that closing always archives — "resolve" still
+  works as a hidden alias so older notes keep running.
+- Added "Housekeeping commands" to `README.md`: the non-obvious npm scripts,
+  plus the reminder that bare `npm run` lists every script in package.json,
+  and one-line notes on the two conventions that are easy to forget — the agent
+  inbox and the worklog.
+
+## 2026-07-31 20:37 AEST
+
+Agent-inbox: arrow-key menus
+
+- `npm run agent-inbox:close` now walks three menus instead of typed answers:
+  pick the matter, confirm, then pick why it is closed — `answered`, `done`,
+  `dropped`, or `other` which drops to a free-text line. ↑/↓ or j/k move, a
+  digit jumps, Enter chooses, Esc/Ctrl+C cancels.
+- Implemented with `readline.emitKeypressEvents` + raw mode and two ANSI
+  escapes (`\x1b[NA` to move up N lines, `\x1b[2K` to clear a line) — no
+  new dependency. Raw-mode menus and readline never run at once: the free-text
+  prompt is only opened after the menus have released stdin.
+- Verified by driving a real pty with arrow-key bytes: the cursor moved, the
+  redraw was clean, and the chosen reason reached the archive file.
+
+## 2026-07-31 20:44 AEST
+
+Agent-inbox: menu redraw fix
+
+- Bug (found by Charles): navigating the close menu duplicated and clobbered
+  lines. Cause — the redraw moves the cursor up by `options.length`, but a
+  label longer than the terminal width wraps onto two rows, so the list is
+  taller than the option count and the cursor lands mid-list.
+- Fix: truncate every label to `process.stdout.columns - 3` with an ellipsis,
+  guaranteeing one row per option. Also hide the cursor during the menu and
+  restore it on every exit path via a `process.on("exit")` hook.
+- Verified by driving a pty at 40, 60, and 100 columns: six clean rows at each
+  width, correct item selected, and the dry run still wrote nothing.
+
+## 2026-07-31 21:07 AEST
+
+Agent-inbox: detail pane and alternate screen
+
+- → on the close menu opens the selected matter's full entry (read from its
+  session file, soft-wrapped, with the source filename); ← returns to the list.
+  Esc closes the pane first and only cancels from the list.
+- Menus moved onto the alternate screen buffer (`\x1b[?1049h`), the buffer
+  `less` and `vim` use. Each keypress now repaints the entire view instead of
+  moving the cursor up N lines, which removes the row-counting fragility behind
+  the earlier clobbering bug, and the terminal's scrollback is restored intact
+  on exit. Enter/leave are guarded on `isTTY` and undone in a
+  `process.on("exit")` hook so no exit path strands the terminal.
+- The pane truncates to the window height with a "… N more line(s)" footer
+  rather than scrolling; long entries are read in the session file.
+- Verified through a pty at 84 columns: ↓↓→ shows AI-003's entry, ← returns,
+  and Enter still completes the flow. Dry run wrote nothing.
+
+## 2026-07-31 21:12 AEST
+
+Agent-inbox: detail pane formatting
+
+- The pane was printing raw markdown (`- **Affected place:** [text](../../path)`).
+  It now parses the entry into label/value fields and renders each as a bold
+  label with its value wrapped and indented beneath — a definition list rather
+  than a bullet dump.
+- `plain()` converts markdown for a terminal: a file link collapses to its
+  repo-relative path (the actionable part), a URL keeps `text — url`, and
+  `**bold**`, backticks, and `_italics_` markers are stripped.
+- Continuation lines are folded back into their field before wrapping, so a
+  value that wrapped in the source markdown no longer wraps at the wrong place
+  on screen.
+- Pane header is now `AI-003 · OWNER-TODO` with the one-line summary as the
+  first paragraph, instead of reusing the padded list row.
+- Checked at 84 and 52 columns and against the longest entry (AI-006, which has
+  two links in one field and overflows the window — it truncates with the
+  "… N more line(s)" footer).

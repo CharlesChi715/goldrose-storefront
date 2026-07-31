@@ -20,11 +20,11 @@ browsing instead of by archaeology.
 
 **Three folders, three rules — the difference matters:**
 
-| | Version-controlled? | Referenced from the repo? | What it holds |
-| --- | --- | --- | --- |
-| `archive/` | **yes** | **never** | superseded repo docs, kept deliberately |
-| `team-deliveries/` | **yes** | **constantly** | upstream deliveries; the authority on wording |
-| `trash/` | no — gitignored | **never** | scratch; deletable at any time |
+|                    | Version-controlled? | Referenced from the repo? | What it holds                                 |
+| ------------------ | ------------------- | ------------------------- | --------------------------------------------- |
+| `archive/`         | **yes**             | **never**                 | superseded repo docs, kept deliberately       |
+| `team-deliveries/` | **yes**             | **constantly**            | upstream deliveries; the authority on wording |
+| `trash/`           | no — gitignored     | **never**                 | scratch; deletable at any time                |
 
 So anything worth keeping goes here or in `team-deliveries/`, never in `trash/`.
 Raw material that arrived from the design team is a *delivery*, not an archive —
@@ -42,6 +42,6 @@ cited.
 
 ## Contents
 
-| File | Archived | Superseded by |
-| ---- | -------- | ------------- |
+| File                                   | Archived   | Superseded by                                                                          |
+| -------------------------------------- | ---------- | -------------------------------------------------------------------------------------- |
 | `from-teammates-figma-naming-guide.md` | 2026-07-31 | `docs/ixd/naming/` — `figma-route-rule.md`, `component-names.md`, `product-handles.md` |

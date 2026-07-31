@@ -52,23 +52,23 @@ table below; Option A proposed, awaiting sign-off).
 
 Platform (decided 2026-07-22, moved from Database.md):
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-| Supabase Pro backups only | zero build | $25/mo during testing; same vendor holds data AND backups | ❌ now — at launch yes, alongside S3 |
-| Supabase Free + DIY pg_dump→S3 | cents/month; vendor-independent second copy; AWS practice | restores + monitoring are on us | ✅ **chosen** |
-| Raw AWS RDS / Azure Postgres | full control | no free tier; loses Supabase Auth/API — weeks of rebuild | ❌ |
-| Self-host the Supabase stack | — | we become the ops team | ❌ |
+| Option                         | Pros                                                      | Cons                                                      | Verdict                              |
+| ------------------------------ | --------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------ |
+| Supabase Pro backups only      | zero build                                                | $25/mo during testing; same vendor holds data AND backups | ❌ now — at launch yes, alongside S3 |
+| Supabase Free + DIY pg_dump→S3 | cents/month; vendor-independent second copy; AWS practice | restores + monitoring are on us                           | ✅ **chosen**                        |
+| Raw AWS RDS / Azure Postgres   | full control                                              | no free tier; loses Supabase Auth/API — weeks of rebuild  | ❌                                   |
+| Self-host the Supabase stack   | —                                                         | we become the ops team                                    | ❌                                   |
 
 (Supabase hosted runs on AWS and is standard Postgres underneath — data
 migrates out cleanly if ever needed.)
 
 Scheduler (open):
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-| A. GitHub Actions nightly cron | free; built-in secrets manager; a red run emails us; ~30-line workflow | runners are IPv4-only → must dump via the Supabase **session pooler** URL (direct connection is IPv6); cron can drift minutes | ✅ **proposed** |
-| B. AWS EventBridge + Lambda | max AWS practice | `pg_dump` binary needs a Lambda layer/container image; more moving parts | ❌ V1 — revisit later |
-| C. cron on Charles's Mac | trivial | machine must be awake nightly; not professional practice | ❌ |
+| Option                         | Pros                                                                   | Cons                                                                                                                          | Verdict               |
+| ------------------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| A. GitHub Actions nightly cron | free; built-in secrets manager; a red run emails us; ~30-line workflow | runners are IPv4-only → must dump via the Supabase **session pooler** URL (direct connection is IPv6); cron can drift minutes | ✅ **proposed**       |
+| B. AWS EventBridge + Lambda    | max AWS practice                                                       | `pg_dump` binary needs a Lambda layer/container image; more moving parts                                                      | ❌ V1 — revisit later |
+| C. cron on Charles's Mac       | trivial                                                                | machine must be awake nightly; not professional practice                                                                      | ❌                    |
 
 ## Acceptance criteria
 
@@ -86,13 +86,13 @@ Scheduler (open):
 
 ## Plan
 
-| # | Work item |
-|---|---|
-| 1 | S3 bucket (private, SSE, block-public-access) + 30-day lifecycle rule |
-| 2 | IAM user for the job, least-privilege `s3:PutObject` on the bucket path; keys + session-pooler `DATABASE_URL` → GitHub Actions secrets |
-| 3 | Workflow `.github/workflows/db-backup.yml`: nightly cron → `pg_dump --format=custom` (client pinned to the server's Postgres major) → upload to S3 |
-| 4 | Restore runbook + first drill; monthly reminder |
-| 5 | At launch: owner upgrades to Pro (managed second copy); after the pipeline is proven, decide Pro cancellation |
+| #   | Work item                                                                                                                                          |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | S3 bucket (private, SSE, block-public-access) + 30-day lifecycle rule                                                                              |
+| 2   | IAM user for the job, least-privilege `s3:PutObject` on the bucket path; keys + session-pooler `DATABASE_URL` → GitHub Actions secrets             |
+| 3   | Workflow `.github/workflows/db-backup.yml`: nightly cron → `pg_dump --format=custom` (client pinned to the server's Postgres major) → upload to S3 |
+| 4   | Restore runbook + first drill; monthly reminder                                                                                                    |
+| 5   | At launch: owner upgrades to Pro (managed second copy); after the pipeline is proven, decide Pro cancellation                                      |
 
 ## Blockers and dependencies
 

@@ -67,11 +67,11 @@ Before any of this, the checkout page picks a mode ([app/checkout/page.tsx:43-47
       : null;
 ```
 
-| Mode | When | Path |
-| --- | --- | --- |
+| Mode         | When                      | Path                              |
+| ------------ | ------------------------- | --------------------------------- |
 | skip-payment | `CHECKOUT_SKIP_PAYMENT=1` | `/api/checkout`, `method: "none"` |
-| PayPal live | PayPal client id present | `/api/paypal/create` → `/capture` |
-| mock | otherwise | `/api/checkout`, fake card |
+| PayPal live  | PayPal client id present  | `/api/paypal/create` → `/capture` |
+| mock         | otherwise                 | `/api/checkout`, fake card        |
 
 And the mock endpoint refuses to run when PayPal is configured ([api/checkout/route.ts:62-68](../../app/api/checkout/route.ts#L62-L68)):
 
@@ -408,11 +408,11 @@ Three things:
 
 **The three-way decision** ([:92-136](../../lib/paypal/webhook.ts#L92-L136)):
 
-| State | Outcome | Why |
-| --- | --- | --- |
-| order exists, `paid` | `"duplicate"`, no writes | the normal case — capture route already worked |
-| order exists, `pending` | mark paid → `"confirmed"` | we knew about it, PayPal confirms |
-| no order at all | rebuild from the `checkouts` row → `"repaired"` | the safety net firing |
+| State                   | Outcome                                         | Why                                            |
+| ----------------------- | ----------------------------------------------- | ---------------------------------------------- |
+| order exists, `paid`    | `"duplicate"`, no writes                        | the normal case — capture route already worked |
+| order exists, `pending` | mark paid → `"confirmed"`                       | we knew about it, PayPal confirms              |
+| no order at all         | rebuild from the `checkouts` row → `"repaired"` | the safety net firing                          |
 
 The first two branches are the whole "already knew about it" half ([:92-103](../../lib/paypal/webhook.ts#L92-L103)):
 

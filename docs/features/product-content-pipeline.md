@@ -46,10 +46,10 @@ the ship-critical owner activation items (target 2026-07-30).
 
 ## Options considered
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-| Admin form editing only (already built) | Ships today; forms cover title/price/media/variants/SEO | 120 SKUs one-by-one is slow; most fields aren't displayed on the storefront yet, so edits are invisible | ❌ alone — needed but insufficient |
-| Live-wire pages + CSV/image-folder bulk import | One spreadsheet for all SKUs (Shopify's own convention — our admin is a Shopify clone); storefront syncs via existing revalidation; re-runnable for later content passes | Real build effort; import needs dry-run preview + row-level error report to avoid mass corruption; live-wiring must renegotiate the pixel-diff guard for those regions | ✅ **recommended** |
+| Option                                         | Pros                                                                                                                                                                     | Cons                                                                                                                                                                   | Verdict                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Admin form editing only (already built)        | Ships today; forms cover title/price/media/variants/SEO                                                                                                                  | 120 SKUs one-by-one is slow; most fields aren't displayed on the storefront yet, so edits are invisible                                                                | ❌ alone — needed but insufficient |
+| Live-wire pages + CSV/image-folder bulk import | One spreadsheet for all SKUs (Shopify's own convention — our admin is a Shopify clone); storefront syncs via existing revalidation; re-runnable for later content passes | Real build effort; import needs dry-run preview + row-level error report to avoid mass corruption; live-wiring must renegotiate the pixel-diff guard for those regions | ✅ **recommended**                 |
 
 ## Acceptance criteria
 

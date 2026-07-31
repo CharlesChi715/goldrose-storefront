@@ -42,11 +42,11 @@ Move the account name to a **dedicated `utm_acc=` query tag** (`...?utm_source=t
 
 ## Options considered
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-| Keep `utm_content=amy` (as built) | Zero work; standard UTM param, never stripped by apps | `utm_content` conventionally = ad variant; future Google/Meta ad templates (`utm_content=banner_a`) create fake "salespeople" and silently corrupt the commission report; `accountOf()` can't tell a person from a variant | ❌ |
-| Dedicated `acct=amy` | Collision with ad tools impossible by construction; ~10-line change; rides in the beacon's existing `utm` JSON blob — no schema change, no migration; `utm_content` freed for real ad variants | Non-standard param — a rare link-sanitizing app could strip it where it keeps `utm_*` (mitigation: owner click-tests each new link once, checks it appears in Analytics) | ✅ **chosen** |
-| `acct=` with `utm_content` fallback | Old links keep working | Fallback re-opens the exact ad-variant corruption being fixed; there are no live links to preserve anyway | ❌ |
+| Option                              | Pros                                                                                                                                                                                           | Cons                                                                                                                                                                                                                       | Verdict       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| Keep `utm_content=amy` (as built)   | Zero work; standard UTM param, never stripped by apps                                                                                                                                          | `utm_content` conventionally = ad variant; future Google/Meta ad templates (`utm_content=banner_a`) create fake "salespeople" and silently corrupt the commission report; `accountOf()` can't tell a person from a variant | ❌            |
+| Dedicated `acct=amy`                | Collision with ad tools impossible by construction; ~10-line change; rides in the beacon's existing `utm` JSON blob — no schema change, no migration; `utm_content` freed for real ad variants | Non-standard param — a rare link-sanitizing app could strip it where it keeps `utm_*` (mitigation: owner click-tests each new link once, checks it appears in Analytics)                                                   | ✅ **chosen** |
+| `acct=` with `utm_content` fallback | Old links keep working                                                                                                                                                                         | Fallback re-opens the exact ad-variant corruption being fixed; there are no live links to preserve anyway                                                                                                                  | ❌            |
 
 ## Acceptance criteria
 
@@ -61,15 +61,15 @@ Move the account name to a **dedicated `utm_acc=` query tag** (`...?utm_source=t
 
 All done 2026-07-24 (tag named `utm_acc`):
 
-| # | File | Change |
-|---|---|---|
-| 1 | `components/Beacon.tsx` (~line 80) | ✅ Added `"utm_acc"` to the captured query keys |
-| 2 | `lib/admin/channels.ts` `accountOf()` | ✅ Reads `utm.utm_acc` instead of `utm_content`; doc comment updated |
-| 3 | `lib/admin/orders.ts`, `lib/admin/analytics.ts` | ✅ Comment wording only — logic already goes through `accountOf()` |
-| 4 | `lib/admin/i18n.ts` | ✅ `analytics.emptyAccount` EN + 中文 now say `utm_acc` |
-| 5 | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | ✅ Switched to `utm_acc`; new unit test pins "utm_content is ignored" |
-| 6 | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
-| 7 | — | ✅ Unit tests + analytics e2e spec green |
+| #   | File                                                                                                       | Change                                                                        |
+| --- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 1   | `components/Beacon.tsx` (~line 80)                                                                         | ✅ Added `"utm_acc"` to the captured query keys                               |
+| 2   | `lib/admin/channels.ts` `accountOf()`                                                                      | ✅ Reads `utm.utm_acc` instead of `utm_content`; doc comment updated          |
+| 3   | `lib/admin/orders.ts`, `lib/admin/analytics.ts`                                                            | ✅ Comment wording only — logic already goes through `accountOf()`            |
+| 4   | `lib/admin/i18n.ts`                                                                                        | ✅ `analytics.emptyAccount` EN + 中文 now say `utm_acc`                       |
+| 5   | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | ✅ Switched to `utm_acc`; new unit test pins "utm_content is ignored"         |
+| 6   | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md              | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
+| 7   | —                                                                                                          | ✅ Unit tests + analytics e2e spec green                                      |
 
 ## Blockers and dependencies
 

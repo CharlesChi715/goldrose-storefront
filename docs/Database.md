@@ -41,12 +41,12 @@ there.
 
 For a 120-SKU line of gold-dipped roses that could look like:
 
-| Segment | Fixed vocabulary (examples) |
-| --- | --- |
-| Brand | `GR` always |
-| Type | `ROSE` single rose · `SET` gift set · `BOX` display box · `ACC` accessory |
-| Color | `RED`, `PNK`, `BLU`, `PUR`, `WHT`, `RNB` (rainbow), `GLD` |
-| ATTRIBUTE (only if needed) | `VAL` valentine, `ANN` anniversary, `L`/`S` size |
+| Segment                    | Fixed vocabulary (examples)                                               |
+| -------------------------- | ------------------------------------------------------------------------- |
+| Brand                      | `GR` always                                                               |
+| Type                       | `ROSE` single rose · `SET` gift set · `BOX` display box · `ACC` accessory |
+| Color                      | `RED`, `PNK`, `BLU`, `PUR`, `WHT`, `RNB` (rainbow), `GLD`                 |
+| ATTRIBUTE (only if needed) | `VAL` valentine, `ANN` anniversary, `L`/`S` size                          |
 
 - **Pattern** — fixed segments, general → specific: `GR-TYPE-COLOR[-VARIANT]`
   (e.g. `GR-ROSE-RED`, `GR-ROSE-RNB-L`, `GR-SET-VAL`). Matches the existing

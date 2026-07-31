@@ -76,11 +76,11 @@ pages come later, if ever.
 
 ## Options considered
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-| A. Status quo — admin pastes number + full URL | Zero work; already at UAT | URL typos = dead links for buyers; no carrier on record for reports | ❌ |
-| B. Carrier dropdown (UPS first) + URL auto-built from number; email/link-out unchanged | Small change (~1 field + URL template map); kills the typo risk; carrier stored for later use; provider-neutral | Still no live status; one more migration | ✅ **chosen 2026-07-25** |
-| C. Full integration — UPS Track API or aggregator (AfterShip/17TRACK/Shippo): live status on our own page, "delivered" emails | Best buyer UX; enables delivery-based automations | Carrier API contracts + webhooks/polling to build and babysit; aggregators cost money (17TRACK ~$9/mo past 100 shipments); overkill before real volume | ❌ for V1 — revisit post-ship |
+| Option                                                                                                                        | Pros                                                                                                            | Cons                                                                                                                                                   | Verdict                       |
+| ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| A. Status quo — admin pastes number + full URL                                                                                | Zero work; already at UAT                                                                                       | URL typos = dead links for buyers; no carrier on record for reports                                                                                    | ❌                            |
+| B. Carrier dropdown (UPS first) + URL auto-built from number; email/link-out unchanged                                        | Small change (~1 field + URL template map); kills the typo risk; carrier stored for later use; provider-neutral | Still no live status; one more migration                                                                                                               | ✅ **chosen 2026-07-25**      |
+| C. Full integration — UPS Track API or aggregator (AfterShip/17TRACK/Shippo): live status on our own page, "delivered" emails | Best buyer UX; enables delivery-based automations                                                               | Carrier API contracts + webhooks/polling to build and babysit; aggregators cost money (17TRACK ~$9/mo past 100 shipments); overkill before real volume | ❌ for V1 — revisit post-ship |
 
 ## Acceptance criteria
 
@@ -101,16 +101,16 @@ pages come later, if ever.
 
 ## Plan
 
-| # | Work item | Status |
-|---|---|---|
-| 1 | Migration `0003`: nullable `tracking_carrier` on `orders` (+ literal defaults in `lib/orders/db.ts`, seed) — bundled with the agreed 0003 hardening: SKU partial unique index, FK indexes, `discounts.value` check (Database.md) | ✅ 2026-07-25 |
-| 2 | `lib/shipping/carriers.ts`: carrier → tracking-URL template map (UPS, USPS per owner scope), JSDoc'd; unit tests | ✅ 2026-07-25 |
-| 3 | `fulfillOrder` accepts `carrier`; builds URL from template when the URL field is left blank; carrier in the timeline event | ✅ 2026-07-25 |
-| 4 | Admin fulfill dialog: carrier dropdown (UPS default, USPS, Other), URL optional with help text; i18n EN + 中文 | ✅ 2026-07-25 |
-| 5 | Email: "Carrier: UPS" line in the shipping confirmation | ✅ 2026-07-25 |
-| 6 | e2e: manual-URL ("Other") + UPS auto-build fulfill paths in the admin orders spec | ✅ 2026-07-25 |
-| 7 | Me section `/account`: delivery-status pill (Preparing / Shipped via X / Cancelled) + Track link (owner ask 07-25) | ✅ 2026-07-25 |
-| 8 | SKU-guard side effects of the 0003 bundle: `saveProduct` rejects taken SKUs; Duplicate clears copied SKUs | ✅ 2026-07-25 |
+| #   | Work item                                                                                                                                                                                                                        | Status        |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 1   | Migration `0003`: nullable `tracking_carrier` on `orders` (+ literal defaults in `lib/orders/db.ts`, seed) — bundled with the agreed 0003 hardening: SKU partial unique index, FK indexes, `discounts.value` check (Database.md) | ✅ 2026-07-25 |
+| 2   | `lib/shipping/carriers.ts`: carrier → tracking-URL template map (UPS, USPS per owner scope), JSDoc'd; unit tests                                                                                                                 | ✅ 2026-07-25 |
+| 3   | `fulfillOrder` accepts `carrier`; builds URL from template when the URL field is left blank; carrier in the timeline event                                                                                                       | ✅ 2026-07-25 |
+| 4   | Admin fulfill dialog: carrier dropdown (UPS default, USPS, Other), URL optional with help text; i18n EN + 中文                                                                                                                   | ✅ 2026-07-25 |
+| 5   | Email: "Carrier: UPS" line in the shipping confirmation                                                                                                                                                                          | ✅ 2026-07-25 |
+| 6   | e2e: manual-URL ("Other") + UPS auto-build fulfill paths in the admin orders spec                                                                                                                                                | ✅ 2026-07-25 |
+| 7   | Me section `/account`: delivery-status pill (Preparing / Shipped via X / Cancelled) + Track link (owner ask 07-25)                                                                                                               | ✅ 2026-07-25 |
+| 8   | SKU-guard side effects of the 0003 bundle: `saveProduct` rejects taken SKUs; Duplicate clears copied SKUs                                                                                                                        | ✅ 2026-07-25 |
 
 Out of scope here (own decisions later): guest tracking page (tokenized
 order-status link in the email) and live-status integration (Option C —

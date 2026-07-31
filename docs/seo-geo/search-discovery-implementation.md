@@ -60,17 +60,17 @@ Work is labelled:
 
 ## 3. Current repository baseline
 
-| Area | Existing implementation | Gap before launch |
-|---|---|---|
-| Product routes | `/products/[slug]`, `/shop`, canonical metadata | Remove unsupported visible claims; show useful DB-backed descriptions and variant facts |
-| Discovery | `app/sitemap.ts`, `app/robots.ts` | Verify the production domain; separate search crawlers from training-policy choices |
-| Structured data | Product JSON-LD on product pages; site data on home | Escape `<` safely; use absolute URLs; model real variants, seller, shipping, and returns |
-| AI summary | Dynamic `/llms.txt` | Replace example contact data and ensure every value matches the storefront |
-| Catalog data | `lib/supabase/catalog.ts` and `catalog_products` view | Normalize complete merchant fields and validation; the internal view is not an external feed API |
-| Policies | Values exist in admin settings | Publish Contact, Shipping, Returns/Refunds, Privacy, and Terms routes |
-| Inventory/checkout | Native cart and PayPal flow | Resolve Tier 1 integrity defects in the repository review before feeds amplify stock and order errors |
-| Analytics | First-party page-view beacon with UTM/referrer | Classify AI referrals and measure the complete conversion funnel |
-| External setup | Not represented in the repository | Production domain, Search Console, Merchant Center, business verification, and feed enrolment |
+| Area               | Existing implementation                               | Gap before launch                                                                                     |
+| ------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Product routes     | `/products/[slug]`, `/shop`, canonical metadata       | Remove unsupported visible claims; show useful DB-backed descriptions and variant facts               |
+| Discovery          | `app/sitemap.ts`, `app/robots.ts`                     | Verify the production domain; separate search crawlers from training-policy choices                   |
+| Structured data    | Product JSON-LD on product pages; site data on home   | Escape `<` safely; use absolute URLs; model real variants, seller, shipping, and returns              |
+| AI summary         | Dynamic `/llms.txt`                                   | Replace example contact data and ensure every value matches the storefront                            |
+| Catalog data       | `lib/supabase/catalog.ts` and `catalog_products` view | Normalize complete merchant fields and validation; the internal view is not an external feed API      |
+| Policies           | Values exist in admin settings                        | Publish Contact, Shipping, Returns/Refunds, Privacy, and Terms routes                                 |
+| Inventory/checkout | Native cart and PayPal flow                           | Resolve Tier 1 integrity defects in the repository review before feeds amplify stock and order errors |
+| Analytics          | First-party page-view beacon with UTM/referrer        | Classify AI referrals and measure the complete conversion funnel                                      |
+| External setup     | Not represented in the repository                     | Production domain, Search Console, Merchant Center, business verification, and feed enrolment         |
 
 The relevant security and commerce-integrity defects were tracked in the
 2026-07-23 repository review (doc since removed; in git history). This plan
@@ -108,25 +108,25 @@ size or freshness requirements later justify the operational cost.
 Create one typed record per purchasable variant. Product-level fields may be
 shared, but price and availability must describe the exact offer.
 
-| Field | Required handling |
-|---|---|
-| `id` | Stable variant/feed ID; never recycle it for a different item |
-| `itemGroupId` | Stable parent product ID for variants |
-| `title` | Accurate product + variant title; no promotional stuffing |
-| `description` | Plain factual copy that is also visible on the landing page |
-| `link` | Absolute canonical product URL, with a way to select the exact variant where necessary |
-| `imageLink` | Absolute URL to the main image for the represented variant |
-| `additionalImageLinks` | Approved, accessible product images only |
-| `availability` | Derived from the same atomic inventory rule used by checkout |
-| `price` / `currency` | Exact purchasable USD price; integer cents internally |
-| `salePrice` | Emit only when a genuine, currently active comparison price exists |
-| `brand` | Real, consistent brand name |
-| `gtin` / `mpn` | Real assigned identifiers only; never invent them |
-| `condition` | Normally `new`, backed by the actual product state |
-| `material`, colour, size | Exact variant/product attributes shown to buyers |
-| `shipping` | Country scope, service, cost, and delivery estimate from real settings |
-| `returns` | Public policy URL and structured rules matching the checkout policy |
-| `updatedAt` | Time the commercial record last changed |
+| Field                    | Required handling                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `id`                     | Stable variant/feed ID; never recycle it for a different item                          |
+| `itemGroupId`            | Stable parent product ID for variants                                                  |
+| `title`                  | Accurate product + variant title; no promotional stuffing                              |
+| `description`            | Plain factual copy that is also visible on the landing page                            |
+| `link`                   | Absolute canonical product URL, with a way to select the exact variant where necessary |
+| `imageLink`              | Absolute URL to the main image for the represented variant                             |
+| `additionalImageLinks`   | Approved, accessible product images only                                               |
+| `availability`           | Derived from the same atomic inventory rule used by checkout                           |
+| `price` / `currency`     | Exact purchasable USD price; integer cents internally                                  |
+| `salePrice`              | Emit only when a genuine, currently active comparison price exists                     |
+| `brand`                  | Real, consistent brand name                                                            |
+| `gtin` / `mpn`           | Real assigned identifiers only; never invent them                                      |
+| `condition`              | Normally `new`, backed by the actual product state                                     |
+| `material`, colour, size | Exact variant/product attributes shown to buyers                                       |
+| `shipping`               | Country scope, service, cost, and delivery estimate from real settings                 |
+| `returns`                | Public policy URL and structured rules matching the checkout policy                    |
+| `updatedAt`              | Time the commercial record last changed                                                |
 
 Validation must reject or quarantine an item when a required value is missing,
 malformed, contradictory, inaccessible, or unsupported. It must not silently
@@ -312,22 +312,22 @@ the review process is documented.
 
 ## 8. Prioritized backlog
 
-| ID | Tag | Work | Dependency | Done when |
-|---|---|---|---|---|
-| SD-00 | Shared | Complete repository-review launch blockers | None | Gate 0 integrity fixes are verified |
-| SD-01 | Shared | Replace placeholder claims and publish policy/contact pages | Real owner inputs | Gate 0 truth review passes |
-| SD-02 | SEO | Verify production domain and Search Console; submit sitemap | Stable domain | Property ownership and sitemap status confirmed |
-| SD-03 | Shared | Fix JSON-LD escaping, absolute URLs, and exact variants | SD-01 | Representative pages pass structured-data tests |
-| SD-04 | Commerce | Define canonical record and missing source fields | SD-00, SD-01 | Typed model and field ownership documented |
-| SD-05 | Commerce | Implement normalizer, validator, and tests | SD-04 | Invalid records fail closed; fixtures pass |
-| SD-06 | Commerce | Implement and test Google scheduled feed | SD-05 | Parse test passes and live route contains only valid items |
-| SD-07 | Commerce | Configure Merchant Center and resolve diagnostics | SD-02, SD-06 | Eligible products approved/current |
-| SD-08 | GEO | Correct crawler categories and `llms.txt` identity/data | SD-01 | Public output is accurate; private routes remain protected |
-| SD-09 | Shared | Publish the first evidence-led guide/FAQ set | SD-01, SD-02 | Each page passes the content gate |
-| SD-10 | GEO/Commerce | Apply for OpenAI merchant program and build current adapter if accepted | SD-05, SD-07 | Accepted transport validates and stays synchronized |
-| SD-11 | Commerce | Reuse/import feed in Microsoft when market value justifies it | SD-07 | No separate manual catalog |
-| SD-12 | Shared | Implement genuine reviews and conditional markup | Fulfilled orders | Visible verified data backs markup |
-| SD-13 | Shared | Add AI-referral classification and funnel reporting | Stable analytics | Monthly report separates attributable channels |
+| ID    | Tag          | Work                                                                    | Dependency        | Done when                                                  |
+| ----- | ------------ | ----------------------------------------------------------------------- | ----------------- | ---------------------------------------------------------- |
+| SD-00 | Shared       | Complete repository-review launch blockers                              | None              | Gate 0 integrity fixes are verified                        |
+| SD-01 | Shared       | Replace placeholder claims and publish policy/contact pages             | Real owner inputs | Gate 0 truth review passes                                 |
+| SD-02 | SEO          | Verify production domain and Search Console; submit sitemap             | Stable domain     | Property ownership and sitemap status confirmed            |
+| SD-03 | Shared       | Fix JSON-LD escaping, absolute URLs, and exact variants                 | SD-01             | Representative pages pass structured-data tests            |
+| SD-04 | Commerce     | Define canonical record and missing source fields                       | SD-00, SD-01      | Typed model and field ownership documented                 |
+| SD-05 | Commerce     | Implement normalizer, validator, and tests                              | SD-04             | Invalid records fail closed; fixtures pass                 |
+| SD-06 | Commerce     | Implement and test Google scheduled feed                                | SD-05             | Parse test passes and live route contains only valid items |
+| SD-07 | Commerce     | Configure Merchant Center and resolve diagnostics                       | SD-02, SD-06      | Eligible products approved/current                         |
+| SD-08 | GEO          | Correct crawler categories and `llms.txt` identity/data                 | SD-01             | Public output is accurate; private routes remain protected |
+| SD-09 | Shared       | Publish the first evidence-led guide/FAQ set                            | SD-01, SD-02      | Each page passes the content gate                          |
+| SD-10 | GEO/Commerce | Apply for OpenAI merchant program and build current adapter if accepted | SD-05, SD-07      | Accepted transport validates and stays synchronized        |
+| SD-11 | Commerce     | Reuse/import feed in Microsoft when market value justifies it           | SD-07             | No separate manual catalog                                 |
+| SD-12 | Shared       | Implement genuine reviews and conditional markup                        | Fulfilled orders  | Visible verified data backs markup                         |
+| SD-13 | Shared       | Add AI-referral classification and funnel reporting                     | Stable analytics  | Monthly report separates attributable channels             |
 
 ## 9. Verification
 
@@ -355,14 +355,14 @@ the review process is documented.
 
 Track outcomes by funnel stage, not a single “GEO score”:
 
-| Stage | Measures |
-|---|---|
-| Technical | Valid indexed URLs, excluded/error reasons, structured-data errors |
-| Catalog | Valid/approved item ratio, feed age, price/stock mismatches, disapprovals |
-| Discovery | Search impressions/clicks/CTR; attributable AI and shopping referrals |
-| Engagement | Product views, useful-page engagement, add-to-cart rate |
-| Commerce | Checkout starts, approved payments, revenue, cancellations, refunds, returns |
-| Quality | Unsupported-claim count, stale-policy incidents, feed validation failures |
+| Stage      | Measures                                                                     |
+| ---------- | ---------------------------------------------------------------------------- |
+| Technical  | Valid indexed URLs, excluded/error reasons, structured-data errors           |
+| Catalog    | Valid/approved item ratio, feed age, price/stock mismatches, disapprovals    |
+| Discovery  | Search impressions/clicks/CTR; attributable AI and shopping referrals        |
+| Engagement | Product views, useful-page engagement, add-to-cart rate                      |
+| Commerce   | Checkout starts, approved payments, revenue, cancellations, refunds, returns |
+| Quality    | Unsupported-claim count, stale-policy incidents, feed validation failures    |
 
 Do not report “mentioned by an AI” as success unless it produces accurate,
 repeatable, attributable user value.

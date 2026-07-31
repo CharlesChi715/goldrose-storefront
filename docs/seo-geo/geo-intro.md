@@ -69,15 +69,15 @@ This makes topical coverage and clear facts more useful than repeating one exact
 
 Platforms combine different sources:
 
-| Source | Typical role | GoldRose control |
-|---|---|---|
-| Crawled/indexed pages | Discover the brand, products, guides, policies, and supporting evidence | High |
-| Merchant feeds and catalog APIs | Precise title, variant, price, availability, image, shipping, and policy facts | High |
-| Marketplace/payment catalogs | Product discovery and sometimes cart/checkout | Medium; requires enrollment |
-| Reviews, Q&A, creators, forums, and publishers | Trust, comparisons, use cases, and external corroboration | Indirect |
-| Knowledge graphs and entity databases | Brand/product identity and relationship resolution | Indirect |
-| Conversation and user preferences | Personal relevance | Low |
-| Advertising inventory | Sponsored placement where offered | Optional; should be labelled separately |
+| Source                                         | Typical role                                                                   | GoldRose control                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------- |
+| Crawled/indexed pages                          | Discover the brand, products, guides, policies, and supporting evidence        | High                                    |
+| Merchant feeds and catalog APIs                | Precise title, variant, price, availability, image, shipping, and policy facts | High                                    |
+| Marketplace/payment catalogs                   | Product discovery and sometimes cart/checkout                                  | Medium; requires enrollment             |
+| Reviews, Q&A, creators, forums, and publishers | Trust, comparisons, use cases, and external corroboration                      | Indirect                                |
+| Knowledge graphs and entity databases          | Brand/product identity and relationship resolution                             | Indirect                                |
+| Conversation and user preferences              | Personal relevance                                                             | Low                                     |
+| Advertising inventory                          | Sponsored placement where offered                                              | Optional; should be labelled separately |
 
 Examples:
 
@@ -119,16 +119,16 @@ Google explicitly requires honest, transparent, accurate representation and a fu
 
 No platform publishes a complete formula or fixed weighting. The recurring signal families are:
 
-| Signal family | What it means in practice | Evidence |
-|---|---|---|
-| Intent relevance | The product directly satisfies category, occasion, budget, material, style, location, and timing constraints | All major systems |
-| Data completeness | Clear title, factual description, category, images, identifiers, variants, dimensions, and policies | Google, Microsoft, OpenAI |
-| Freshness and consistency | Current stock, price, currency, shipping, and landing-page agreement | Google, Microsoft, OpenAI |
-| Product quality and trust | Genuine ratings/reviews, credible sources, detailed evidence, safe merchant | Google, OpenAI, Amazon |
-| Offer attractiveness | Landed price, delivery speed, availability, returns, and seller quality | OpenAI and Amazon explicitly |
-| Seller relationship | Maker or primary seller may be preferred when equivalent offers exist | OpenAI explicitly |
-| Popularity/performance | Purchases and product performance can inform ranking on some systems | Amazon explicitly; optional performance fields in OpenAI feeds |
-| Personal fit | User preferences, activity, memory, or loyalty relationship | Google, OpenAI, Amazon |
+| Signal family             | What it means in practice                                                                                    | Evidence                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Intent relevance          | The product directly satisfies category, occasion, budget, material, style, location, and timing constraints | All major systems                                              |
+| Data completeness         | Clear title, factual description, category, images, identifiers, variants, dimensions, and policies          | Google, Microsoft, OpenAI                                      |
+| Freshness and consistency | Current stock, price, currency, shipping, and landing-page agreement                                         | Google, Microsoft, OpenAI                                      |
+| Product quality and trust | Genuine ratings/reviews, credible sources, detailed evidence, safe merchant                                  | Google, OpenAI, Amazon                                         |
+| Offer attractiveness      | Landed price, delivery speed, availability, returns, and seller quality                                      | OpenAI and Amazon explicitly                                   |
+| Seller relationship       | Maker or primary seller may be preferred when equivalent offers exist                                        | OpenAI explicitly                                              |
+| Popularity/performance    | Purchases and product performance can inform ranking on some systems                                         | Amazon explicitly; optional performance fields in OpenAI feeds |
+| Personal fit              | User preferences, activity, memory, or loyalty relationship                                                  | Google, OpenAI, Amazon                                         |
 
 OpenAI says product selection is independent of ads or commercial partnerships. It separately ranks merchant offers using factors such as availability, price, quality, whether the merchant is the maker or primary seller, and user context. Amazon’s published EU explanation describes intent matching followed by ranking and says offer attractiveness includes landed price and delivery speed. ([OpenAI shopping results](https://help.openai.com/en/articles/11128490-improved-shopping-results-from-chatgpt-search), [Amazon compliance report, Annex 1](https://assets.aboutamazon.com/50/7b/92fca0af4323afd758ebd636b4db/amazon-compliance-report-2025-annex-1.pdf))
 
@@ -156,15 +156,15 @@ OpenAI is prioritising product discovery and merchant-owned checkout over its ea
 
 ## 2. What each major platform currently uses
 
-| Platform | Discovery inputs | Public merchant route | Important qualification |
-|---|---|---|---|
-| ChatGPT | Bing/web search, crawled pages, providers such as Shopify, direct merchant product data | Apply to OpenAI’s merchant program; feed supports daily full snapshot plus intraday updates | Shopping is currently live in the US; applications include Australian-headquartered merchants, but access is waitlisted |
-| Google Search, AI Overviews, AI Mode and Gemini | Google index, Knowledge Graph, Shopping Graph, Merchant Center | Merchant Center free listings; structured data; UCP waitlist for agentic actions | Normal Search eligibility still applies; no special AI file or schema is required |
-| Microsoft Copilot | Web index plus Microsoft Merchant Center | MMC feed, API, or Google feed import; opt in to agentic commerce | Copilot Checkout’s current documented buyer scope is US/English/USD |
-| Perplexity | Web search, PerplexityBot index, third-party and commerce data | Eligible products through supported merchant/payment pathways, including PayPal Store Sync | Instant Buy availability is currently limited, including US scope |
-| Amazon Alexa for Shopping | Amazon catalog, customer actions, reviews, Q&A, and web sources | Sell on Amazon and maintain strong listing/catalog quality | It is primarily an Amazon shopping surface, not an open-web merchant feed |
-| Claude | Web search across cited sources and user-requested page fetches | No verified public product-feed or merchant-ranking program found | Optimise crawlable factual pages; `Claude-SearchBot` is distinct from training crawler `ClaudeBot` |
-| Meta AI shopping mode | Marketplace, public web, creators, Groups, Reels, and posts | No general external-merchant feed program was verified in this review | Marketplace/community presence matters more than adding a special website file |
+| Platform                                        | Discovery inputs                                                                        | Public merchant route                                                                       | Important qualification                                                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| ChatGPT                                         | Bing/web search, crawled pages, providers such as Shopify, direct merchant product data | Apply to OpenAI’s merchant program; feed supports daily full snapshot plus intraday updates | Shopping is currently live in the US; applications include Australian-headquartered merchants, but access is waitlisted |
+| Google Search, AI Overviews, AI Mode and Gemini | Google index, Knowledge Graph, Shopping Graph, Merchant Center                          | Merchant Center free listings; structured data; UCP waitlist for agentic actions            | Normal Search eligibility still applies; no special AI file or schema is required                                       |
+| Microsoft Copilot                               | Web index plus Microsoft Merchant Center                                                | MMC feed, API, or Google feed import; opt in to agentic commerce                            | Copilot Checkout’s current documented buyer scope is US/English/USD                                                     |
+| Perplexity                                      | Web search, PerplexityBot index, third-party and commerce data                          | Eligible products through supported merchant/payment pathways, including PayPal Store Sync  | Instant Buy availability is currently limited, including US scope                                                       |
+| Amazon Alexa for Shopping                       | Amazon catalog, customer actions, reviews, Q&A, and web sources                         | Sell on Amazon and maintain strong listing/catalog quality                                  | It is primarily an Amazon shopping surface, not an open-web merchant feed                                               |
+| Claude                                          | Web search across cited sources and user-requested page fetches                         | No verified public product-feed or merchant-ranking program found                           | Optimise crawlable factual pages; `Claude-SearchBot` is distinct from training crawler `ClaudeBot`                      |
+| Meta AI shopping mode                           | Marketplace, public web, creators, Groups, Reels, and posts                             | No general external-merchant feed program was verified in this review                       | Marketplace/community presence matters more than adding a special website file                                          |
 
 ### ChatGPT details
 
@@ -261,27 +261,27 @@ The original academic “GEO” paper found that adding citations, quotations, a
 
 The audit used the repository and the live production endpoints on 23 July 2026.
 
-| Area | Observed state | Why it matters | Priority |
-|---|---|---|---|
-| Product page truth | Visible page contains static “BEST SELLER,” 4.9/286 reviews, 15% off, US warehouse, 3–5 business days, and 120 colours; many visible options are also static | Misleading or inconsistent claims can cause merchant disapproval and bad AI summaries | **P0** |
-| Product description | Database description is used in metadata/schema but is not shown as meaningful visible product copy | Search and shoppers need accessible evidence; schema should match visible content | **P0** |
-| Policies/business trust | No public privacy, terms, shipping, returns/refunds, or contact routes were found; live `llms.txt` uses an example-domain support address | Merchant trust and eligibility depend on real business and policy information | **P0** |
-| Crawler controls | `robots.txt` allows `GPTBot`, `ClaudeBot`, `Claude-Web`, `PerplexityBot`, `Google-Extended`, `CCBot`, and `Bytespider` | It omits current search-specific agents such as `OAI-SearchBot` and `Claude-SearchBot`; training and search controls are conflated | **P0** |
-| Product schema | Product JSON-LD includes name, description, first-variant SKU/price, images, and broad stock status | Live image URL is relative; variants, shipping, returns, seller/brand, and legitimate identifiers are incomplete | **P1** |
-| Feed readiness | Supabase holds useful product and variant data, including internal barcode/weight fields, but there is no public merchant-feed export | Feed is the most controllable source for current product facts | **P1** |
-| Sitemap/metadata | Active products are in the sitemap; pages have canonical, Open Graph, metadata, and Product JSON-LD | Good foundation; preserve it while fixing accuracy | Strength |
-| `llms.txt` | Dynamically lists products, prices, stock, links, countries, and contact | Helpful optional summary, but not a Google requirement or proven ranking factor; current content must be made truthful | **P1** |
-| Attribution | First-party beacon captures UTM/referrer, but channel grouping lacks ChatGPT, Perplexity, Claude, Copilot, and Gemini | AI traffic will fragment into raw source labels | **P2** |
+| Area                    | Observed state                                                                                                                                               | Why it matters                                                                                                                     | Priority |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Product page truth      | Visible page contains static “BEST SELLER,” 4.9/286 reviews, 15% off, US warehouse, 3–5 business days, and 120 colours; many visible options are also static | Misleading or inconsistent claims can cause merchant disapproval and bad AI summaries                                              | **P0**   |
+| Product description     | Database description is used in metadata/schema but is not shown as meaningful visible product copy                                                          | Search and shoppers need accessible evidence; schema should match visible content                                                  | **P0**   |
+| Policies/business trust | No public privacy, terms, shipping, returns/refunds, or contact routes were found; live `llms.txt` uses an example-domain support address                    | Merchant trust and eligibility depend on real business and policy information                                                      | **P0**   |
+| Crawler controls        | `robots.txt` allows `GPTBot`, `ClaudeBot`, `Claude-Web`, `PerplexityBot`, `Google-Extended`, `CCBot`, and `Bytespider`                                       | It omits current search-specific agents such as `OAI-SearchBot` and `Claude-SearchBot`; training and search controls are conflated | **P0**   |
+| Product schema          | Product JSON-LD includes name, description, first-variant SKU/price, images, and broad stock status                                                          | Live image URL is relative; variants, shipping, returns, seller/brand, and legitimate identifiers are incomplete                   | **P1**   |
+| Feed readiness          | Supabase holds useful product and variant data, including internal barcode/weight fields, but there is no public merchant-feed export                        | Feed is the most controllable source for current product facts                                                                     | **P1**   |
+| Sitemap/metadata        | Active products are in the sitemap; pages have canonical, Open Graph, metadata, and Product JSON-LD                                                          | Good foundation; preserve it while fixing accuracy                                                                                 | Strength |
+| `llms.txt`              | Dynamically lists products, prices, stock, links, countries, and contact                                                                                     | Helpful optional summary, but not a Google requirement or proven ranking factor; current content must be made truthful             | **P1**   |
+| Attribution             | First-party beacon captures UTM/referrer, but channel grouping lacks ChatGPT, Perplexity, Claude, Copilot, and Gemini                                        | AI traffic will fragment into raw source labels                                                                                    | **P2**   |
 
 ### Crawler policy that GoldRose should use
 
 Treat these categories separately:
 
-| Purpose | Examples | Recommended default |
-|---|---|---|
-| Search/index discovery | `OAI-SearchBot`, `PerplexityBot`, `Claude-SearchBot`, normal search bots | Allow public catalog/content; block account, admin, API, and checkout |
-| User-triggered retrieval | `ChatGPT-User`, `Perplexity-User`, `Claude-User` | Do not rely on robots as access control; keep private pages authenticated |
-| Model training | `GPTBot`, `ClaudeBot`, `Google-Extended` and other declared training controls | Owner policy choice; independent of search visibility |
+| Purpose                  | Examples                                                                      | Recommended default                                                       |
+| ------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Search/index discovery   | `OAI-SearchBot`, `PerplexityBot`, `Claude-SearchBot`, normal search bots      | Allow public catalog/content; block account, admin, API, and checkout     |
+| User-triggered retrieval | `ChatGPT-User`, `Perplexity-User`, `Claude-User`                              | Do not rely on robots as access control; keep private pages authenticated |
+| Model training           | `GPTBot`, `ClaudeBot`, `Google-Extended` and other declared training controls | Owner policy choice; independent of search visibility                     |
 
 Never use `robots.txt` to protect private data. Authentication and authorisation must do that.
 
@@ -302,18 +302,18 @@ becoming a second, drifting roadmap.
 
 ## 6. Myths and risky tactics
 
-| Claim | Assessment |
-|---|---|
-| “`llms.txt` makes Google rank the store in AI answers.” | Unsupported. Google explicitly says no new AI file is needed. Keep the file only as an accurate optional summary. |
-| “Allowing `GPTBot` enables ChatGPT Search.” | Incorrect. `OAI-SearchBot` is the search crawler; `GPTBot` is for training. |
-| “Schema alone is enough.” | Incorrect. It improves understanding/eligibility, but must match visible page and merchant-feed data. |
-| “A merchant feed guarantees recommendations.” | Incorrect. It improves data control and eligibility, not guaranteed placement. |
-| “More keywords or AI-written pages create authority.” | Unsupported and risky. Relevance, factual depth, and external trust matter more. |
-| “Ads improve organic AI selection.” | Not established. OpenAI says shopping selection is independent of ads; Google separates organic and paid reporting. |
-| “Citations or statistics produce a guaranteed 40% boost.” | Incorrect interpretation of one controlled academic benchmark. |
-| “Mentioning the brand on many low-quality sites helps.” | Risky. It can create spam, policy, and reputation problems without genuine authority. |
-| “Fake reviews are acceptable until real reviews arrive.” | False and high risk. They mislead users, feeds, search systems, and regulators. |
-| “Agentic checkout should be built before catalog quality.” | Backwards. Reliable discovery, policies, stock, pricing, and order handling are prerequisites. |
+| Claim                                                      | Assessment                                                                                                          |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| “`llms.txt` makes Google rank the store in AI answers.”    | Unsupported. Google explicitly says no new AI file is needed. Keep the file only as an accurate optional summary.   |
+| “Allowing `GPTBot` enables ChatGPT Search.”                | Incorrect. `OAI-SearchBot` is the search crawler; `GPTBot` is for training.                                         |
+| “Schema alone is enough.”                                  | Incorrect. It improves understanding/eligibility, but must match visible page and merchant-feed data.               |
+| “A merchant feed guarantees recommendations.”              | Incorrect. It improves data control and eligibility, not guaranteed placement.                                      |
+| “More keywords or AI-written pages create authority.”      | Unsupported and risky. Relevance, factual depth, and external trust matter more.                                    |
+| “Ads improve organic AI selection.”                        | Not established. OpenAI says shopping selection is independent of ads; Google separates organic and paid reporting. |
+| “Citations or statistics produce a guaranteed 40% boost.”  | Incorrect interpretation of one controlled academic benchmark.                                                      |
+| “Mentioning the brand on many low-quality sites helps.”    | Risky. It can create spam, policy, and reputation problems without genuine authority.                               |
+| “Fake reviews are acceptable until real reviews arrive.”   | False and high risk. They mislead users, feeds, search systems, and regulators.                                     |
+| “Agentic checkout should be built before catalog quality.” | Backwards. Reliable discovery, policies, stock, pricing, and order handling are prerequisites.                      |
 
 ## 7. Readiness handoff
 
