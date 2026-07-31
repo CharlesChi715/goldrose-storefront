@@ -1,7 +1,8 @@
 # 2026-07-25 · Figma UI naming guide
 
-Transcribed verbatim into
-[`docs/ixd/from-teammates-figma-naming-guide.md`](../../../docs/ixd/from-teammates-figma-naming-guide.md).
+Transcribed verbatim into `docs/ixd/naming/from-teammates-figma-naming-guide.md`,
+which was archived on 2026-07-31 — the naming docs under
+[`docs/ixd/naming/`](../../../docs/ixd/naming/) supersede it.
 
 Came from the gitignored `temp/` on 2026-07-30.
 

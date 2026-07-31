@@ -44,4 +44,4 @@ cited.
 
 | File | Archived | Superseded by |
 | ---- | -------- | ------------- |
-| _(empty — nothing archived yet)_ | | |
+| `from-teammates-figma-naming-guide.md` | 2026-07-31 | `docs/ixd/naming/` — `figma-route-rule.md`, `component-names.md`, `product-handles.md` |

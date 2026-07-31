@@ -3936,3 +3936,14 @@ return URLs. Awaiting boss name sign-off before registering.
   into CI; unit test tests/unit/features-registry.test.ts guards the parser
   and live registry. Fixed stale/missing front matter in order-tracking,
   region-alignment, promotion-emails, engagement-tracking, db-backups.
+
+## 2026-07-31 16:01 AEST
+
+- Archived `docs/ixd/naming/from-teammates-figma-naming-guide.md` to
+  `archive/` via `git mv`, following the archive/README procedure: removed the
+  bullet in `docs/ixd/README.md`, de-linked the stale pointer in
+  `team-deliveries/originals/2026-07-25-figma-naming-guide/batch.md`, and added
+  the ledger row naming `docs/ixd/naming/{figma-route-rule,component-names,product-handles}.md`
+  as successors. Verified the `ORDER-DETAIL-*` IDs come from the 2026-07-27
+  delivery, not this guide. Also listed the previously-unlisted
+  `naming/component-names.md` in the ixd README.

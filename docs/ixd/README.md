@@ -44,12 +44,12 @@ attributes themselves are in code. Current naming docs:
 - [naming/product-handles.md](naming/product-handles.md) — the deterministic
   algorithm deriving a product's `/products/<handle>` URL segment from its
   title, so any person or model produces the identical string
-- [naming/from-teammates-figma-naming-guide.md](naming/from-teammates-figma-naming-guide.md) — a **frozen archive** of the
-  guide received from the design team on 2026-07-25, transcribed verbatim from
-  [`Figma_UI_Naming_Guide_GoldRose.xlsx`](../../team-deliveries/originals/2026-07-25-figma-naming-guide/).
-  ⚠️ Corrected 2026-07-29: this is
-  a record, **not** the source of truth. The markdown is the master; the
-  spreadsheet is now an export produced for the design team
+- [naming/component-names.md](naming/component-names.md) — the `data-el`
+  attribute vocabulary tying a rendered element back to its design component
+
+The 2026-07-25 design-team naming guide was archived on 2026-07-31; the three
+docs above supersede it. Its raw source stays in
+[`team-deliveries/originals/2026-07-25-figma-naming-guide/`](../../team-deliveries/originals/2026-07-25-figma-naming-guide/).
 
 ## How to reference an entry
 
