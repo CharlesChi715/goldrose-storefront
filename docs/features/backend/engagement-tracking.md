@@ -51,14 +51,14 @@ new attribute, no new table, no extra rows.
 
 ### How engagement is recorded
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
+| Option                                                                | Pros                                                                                                                  | Cons                                                                                          | Verdict       |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------- |
 | Client aggregates, one flush per visit, `UPDATE` the `page_views` row | **row count unchanged**; existing indexes and every existing query keep working; one payload to reason about and test | a lost final beacon means no engagement data for that visit — stored as `NULL`, never as zero | ✅ **chosen** |
 
 ### How a section is identified
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
+| Option                      | Pros                                                                                                                          | Cons                                                        | Verdict       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------- |
 | Reuse `data-el="…-SECTION"` | the name is already the shared vocabulary across Figma, code, tests; owner can point at a band and read its row in the report | only A-1…A-3 are tagged today; the rest needs tagging first | ✅ **chosen** |
 
 ## Measurement rules
@@ -85,12 +85,12 @@ Precision here is the whole feature — vague rules produce numbers nobody trust
 
 Three columns added to `page_views`, written by one `UPDATE`:
 
-| Column | Type | Example |
-|---|---|---|
-| `active_ms` | `integer` | `41200` |
-| `scroll_pct` | `smallint` | `78` |
-| `sections` | `jsonb` | `{"HOME-HERO-SECTION": 8200, "HOME-STORY-SECTION": 19500}` |
-| `last_section` | `text` | `"HOME-STORY-SECTION"` |
+| Column         | Type       | Example                                                    |
+| -------------- | ---------- | ---------------------------------------------------------- |
+| `active_ms`    | `integer`  | `41200`                                                    |
+| `scroll_pct`   | `smallint` | `78`                                                       |
+| `sections`     | `jsonb`    | `{"HOME-HERO-SECTION": 8200, "HOME-STORY-SECTION": 19500}` |
+| `last_section` | `text`     | `"HOME-STORY-SECTION"`                                     |
 
 `last_section` was added during implementation. The drop-off report needs the
 final section reached, and that **cannot** be read off the end of `sections`:
@@ -141,11 +141,11 @@ consent-wording review that gates launch rather than opening that question now.
 
 Staged so stage 1 ships without waiting on design-team decisions.
 
-| # | Stage | Work | Depends on |
-|---|---|---|---|
-| 1 | Page dwell | migration `0005`; `viewId` on arrival; active-time + scroll clock in `Beacon.tsx`; `POST /api/beacon/engagement`; "Time on page" card | nothing |
-| 2 | Section timing | `IntersectionObserver` over `[data-el$="-SECTION"]`; `sections` jsonb; Section attention card | `data-el` tagging of A-4…A-11, `/shop`, `/products/[slug]` |
-| 3 | Drop-off | last-section-reached ranking | stage 2 |
+| #   | Stage          | Work                                                                                                                                  | Depends on                                                 |
+| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | Page dwell     | migration `0005`; `viewId` on arrival; active-time + scroll clock in `Beacon.tsx`; `POST /api/beacon/engagement`; "Time on page" card | nothing                                                    |
+| 2   | Section timing | `IntersectionObserver` over `[data-el$="-SECTION"]`; `sections` jsonb; Section attention card                                         | `data-el` tagging of A-4…A-11, `/shop`, `/products/[slug]` |
+| 3   | Drop-off       | last-section-reached ranking                                                                                                          | stage 2                                                    |
 
 Tests: a unit test pinning the clock rules (hidden = 0, idle cut, sum invariant),
 and an e2e run asserting a timed visit surfaces on the admin card.
@@ -169,10 +169,10 @@ When three bands are partly on screen at once, which one is the visitor
 "viewing"? This is a judgement call, not an API limit — IntersectionObserver
 reports all three, and we choose the rule.
 
-| Rule | Consequence |
-|---|---|
-| Any pixel visible counts | Every band on screen runs its clock, so section times overlap and sum to far more than the page total. The numbers stop meaning anything. |
-| Element ≥50% visible | Breaks for tall bands — a section taller than the screen can never be 50% visible, so the longest bands always read zero. |
+| Rule                               | Consequence                                                                                                                                                                                                                         |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Any pixel visible counts           | Every band on screen runs its clock, so section times overlap and sum to far more than the page total. The numbers stop meaning anything.                                                                                           |
+| Element ≥50% visible               | Breaks for tall bands — a section taller than the screen can never be 50% visible, so the longest bands always read zero.                                                                                                           |
 | Biggest share of the viewport wins | Exactly one section holds the clock at a time, and the sum stays ≤ page active time. Cost: during a fast scroll the winner flips every few frames, so it needs a minimum-dwell floor (~1 s) to avoid crediting meaningless slivers. |
 
 **DECIDED 2026-07-28 (owner): biggest share of the viewport, with a 1 s minimum

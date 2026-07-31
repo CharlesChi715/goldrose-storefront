@@ -52,11 +52,11 @@ our email provider; Broadcasts gives hosted unsubscribe handling for free.
 
 ## Options considered
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-| A. Resend Audiences + Broadcasts | Provider already integrated (one API key, one dashboard); managed unsubscribe link + suppression; free tier fits our volume; consent stays in our DB (provider-neutral) | Basic segmentation only; no e-commerce automations (abandoned cart, win-back) | ✅ **proposed** for V1 |
-| B. Klaviyo (or Mailchimp) | E-commerce standard: segments, flows, revenue attribution | Second vendor + cost; catalog/order sync work; overkill before real volume | ❌ now — the consent data we store works there too, so switching later is cheap |
-| C. Hand-rolled: loop `deliver()` over customer emails | Full control, no new vendor | We'd own unsubscribe, suppression, bounces, throttling, deliverability — a solved problem rebuilt, with legal risk when it's buggy | ❌ |
+| Option                                                | Pros                                                                                                                                                                    | Cons                                                                                                                               | Verdict                                                                         |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| A. Resend Audiences + Broadcasts                      | Provider already integrated (one API key, one dashboard); managed unsubscribe link + suppression; free tier fits our volume; consent stays in our DB (provider-neutral) | Basic segmentation only; no e-commerce automations (abandoned cart, win-back)                                                      | ✅ **proposed** for V1                                                          |
+| B. Klaviyo (or Mailchimp)                             | E-commerce standard: segments, flows, revenue attribution                                                                                                               | Second vendor + cost; catalog/order sync work; overkill before real volume                                                         | ❌ now — the consent data we store works there too, so switching later is cheap |
+| C. Hand-rolled: loop `deliver()` over customer emails | Full control, no new vendor                                                                                                                                             | We'd own unsubscribe, suppression, bounces, throttling, deliverability — a solved problem rebuilt, with legal risk when it's buggy | ❌                                                                              |
 
 ## Acceptance criteria
 
@@ -74,15 +74,15 @@ our email provider; Broadcasts gives hosted unsubscribe handling for free.
 
 ## Plan
 
-| # | Work item |
-|---|---|
-| 1 | Migration `0003`/`0004`: `marketing_consent` boolean + `marketing_consent_at` on `customers` (+ file-adapter default) |
-| 2 | Checkout: consent checkbox (unchecked default), EN copy; writes through order → customer upsert |
-| 3 | `/account`: consent toggle backed by a server action |
-| 4 | `lib/marketing/resend-audience.ts`: server-side sync of consented contacts to a Resend Audience (JSDoc'd); Resend webhook or periodic sync-back for unsubscribes |
-| 5 | Admin: show consented-contact count (Settings or Customers header); campaigns themselves stay in the Resend dashboard for V1 — no in-admin campaign builder |
-| 6 | Deliverability prerequisite: verified sending domain (SPF/DKIM DNS records) so mail comes from `@goldrose` not `onboarding@resend.dev` — owner DNS task, goes on the activation checklist |
-| 7 | Unit + e2e: consent capture, toggle, "customers always have email" pin |
+| #   | Work item                                                                                                                                                                                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Migration `0003`/`0004`: `marketing_consent` boolean + `marketing_consent_at` on `customers` (+ file-adapter default)                                                                     |
+| 2   | Checkout: consent checkbox (unchecked default), EN copy; writes through order → customer upsert                                                                                           |
+| 3   | `/account`: consent toggle backed by a server action                                                                                                                                      |
+| 4   | `lib/marketing/resend-audience.ts`: server-side sync of consented contacts to a Resend Audience (JSDoc'd); Resend webhook or periodic sync-back for unsubscribes                          |
+| 5   | Admin: show consented-contact count (Settings or Customers header); campaigns themselves stay in the Resend dashboard for V1 — no in-admin campaign builder                               |
+| 6   | Deliverability prerequisite: verified sending domain (SPF/DKIM DNS records) so mail comes from `@goldrose` not `onboarding@resend.dev` — owner DNS task, goes on the activation checklist |
+| 7   | Unit + e2e: consent capture, toggle, "customers always have email" pin                                                                                                                    |
 
 ## Blockers and dependencies
 

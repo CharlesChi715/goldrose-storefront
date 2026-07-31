@@ -418,11 +418,11 @@ Three consequences that are policy decisions, not accidents:
 
 Three server routes can price a cart. All three call `priceCart()`, and all three validate the request with a zod schema **in which no price field exists**:
 
-| Route | Purpose |
-| --- | --- |
-| [app/api/checkout/route.ts](../../app/api/checkout/route.ts#L86-L92) | mock / card checkout |
-| [app/api/paypal/create/route.ts](../../app/api/paypal/create/route.ts#L45-L50) | open a PayPal order |
-| [app/api/discount/route.ts](../../app/api/discount/route.ts#L38-L43) | preview a code (advisory only) |
+| Route                                                                          | Purpose                        |
+| ------------------------------------------------------------------------------ | ------------------------------ |
+| [app/api/checkout/route.ts](../../app/api/checkout/route.ts#L86-L92)           | mock / card checkout           |
+| [app/api/paypal/create/route.ts](../../app/api/paypal/create/route.ts#L45-L50) | open a PayPal order            |
+| [app/api/discount/route.ts](../../app/api/discount/route.ts#L38-L43)           | preview a code (advisory only) |
 
 Here is the whole accepted shape of a checkout request — read the `lines` array and notice what is *not* in it:
 

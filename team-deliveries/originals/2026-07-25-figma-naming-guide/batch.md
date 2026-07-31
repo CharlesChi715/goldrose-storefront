@@ -14,4 +14,4 @@ Came from the gitignored `temp/` on 2026-07-30.
 ## Open
 
 AI-TAG(AI-005): AGENT-UNSURE — is this file an incoming delivery or a generated
-export? See /agent-delivery/INBOX.md#ai-005.
+export? See /agent-delivery/sessions/initial-inbox-07-30.md.

@@ -13,14 +13,17 @@
  * upcoming" count and the EST time zone are design placeholders — there is
  * no reminders backend yet (promotion-email consent and scheduling are a
  * tracked later feature). The two notification toggles and the Upcoming/All
- * tabs flip visually so the control states can be reviewed; Add / Edit /
- * Delete stay inert placeholders (docs/ixd/README.md).
+ * tabs flip visually so the control states can be reviewed; Delete stays an
+ * inert placeholder. Add reminder and each card's Edit now open the edit
+ * bottom sheet (ReminderEditModal, 1599:245) — an info-storage modal with no
+ * navigation, per the owner-confirmed Figma comment thread.
  */
 
 import { useState } from "react";
 import { BackButton } from "@/components/BackButton";
 import { ScaleFrame } from "@/components/chrome";
 import { Glyph } from "@/components/screens/glyphs";
+import { ReminderEditModal } from "@/components/screens/ReminderEditModal";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
@@ -105,6 +108,8 @@ export function RemindersScreen() {
   const [tab, setTab] = useState<"Upcoming" | "All">("Upcoming");
   const [email, setEmail] = useState(true);
   const [sms, setSms] = useState(true);
+  // null = closed; "add"/"edit" open the same sheet with a different title.
+  const [edit, setEdit] = useState<null | "add" | "edit">(null);
 
   return (
     <ScaleFrame
@@ -161,8 +166,17 @@ export function RemindersScreen() {
       <div style={{ ...abs(108, 234, 174), ...txt(10, 12, INK) }}>
         Stay ready for every special moment.
       </div>
-      <div
-        style={{ ...abs(292, 208, 100, 42), background: ROSE, borderRadius: 9 }}
+      <button
+        type="button"
+        onClick={() => setEdit("add")}
+        style={{
+          ...abs(292, 208, 100, 42),
+          background: ROSE,
+          borderRadius: 9,
+          border: 0,
+          padding: 0,
+          cursor: "pointer",
+        }}
       >
         <span
           style={{
@@ -176,7 +190,7 @@ export function RemindersScreen() {
         >
           +&nbsp; Add reminder
         </span>
-      </div>
+      </button>
 
       {/* Upcoming / All tabs — visual filter over the same mock list */}
       <div
@@ -337,15 +351,33 @@ export function RemindersScreen() {
                 Upcoming
               </span>
             </div>
-            {/* Edit | Delete — pixel placeholders (no backend) */}
+            {/* Edit opens the edit sheet; Delete stays an inert placeholder. */}
             <div
               style={{
                 ...abs(300, y + 63.7, 94, 28),
-                ...txt(10.5, 12.6, ROSE, "center"),
+                ...txt(10.5, 12.6, ROSE),
                 fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              Edit&nbsp;&nbsp; | &nbsp;&nbsp;Delete
+              <button
+                type="button"
+                onClick={() => setEdit("edit")}
+                aria-label={`Edit ${item.title}`}
+                style={{
+                  border: 0,
+                  padding: 0,
+                  background: "transparent",
+                  cursor: "pointer",
+                  font: "inherit",
+                  color: ROSE,
+                }}
+              >
+                Edit
+              </button>
+              <span>&nbsp;&nbsp; | &nbsp;&nbsp;Delete</span>
             </div>
           </div>
         );
@@ -426,6 +458,13 @@ export function RemindersScreen() {
           "You control all reminders manually.\nAdd, edit, or delete dates anytime."
         }
       </div>
+
+      <ReminderEditModal
+        key={edit ?? "closed"}
+        open={edit !== null}
+        mode={edit === "add" ? "add" : "edit"}
+        onClose={() => setEdit(null)}
+      />
     </ScaleFrame>
   );
 }

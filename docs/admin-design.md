@@ -1,12 +1,12 @@
 # GoldRose Admin & Native Checkout — Design Document
 
-| | |
-|---|---|
-| **Status** | Approved for implementation. **§0 authorizes a one-shot autonomous build** — open questions resolve to working assumptions, missing resources are mocked |
-| **Owner** | Charles — store dev |
-| **Users** | Charles' teammates |
-| **Audience** | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below |
-| **Version** | Rev 4.4 · 2026-07-22 — full history in §17 |
+|                  |                                                                                                                                                                                                                                                                                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**       | Approved for implementation. **§0 authorizes a one-shot autonomous build** — open questions resolve to working assumptions, missing resources are mocked                                                                                                                                                   |
+| **Owner**        | Charles — store dev                                                                                                                                                                                                                                                                                        |
+| **Users**        | Charles' teammates                                                                                                                                                                                                                                                                                         |
+| **Audience**     | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below                                                                                                                                                                                                                     |
+| **Version**      | Rev 4.4 · 2026-07-22 — full history in §17                                                                                                                                                                                                                                                                 |
 | **Related docs** | `SUMMARY.md` (repository entrypoint + current operations/release state) · `docs/seo-geo/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** the former `docs/archive/` (deleted 2026-07-27; in git history), Shopify-era README sections |
 
 ## Table of contents
@@ -54,13 +54,13 @@
 
 ### 0.2 Resource fallbacks — mock, don't ask
 
-| Missing resource | Fallback |
-|---|---|
+| Missing resource               | Fallback                                                                                                                                                                                                                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Hosted Supabase project (OQ-4) | Run the full stack against **local Supabase** (`supabase start`, Docker) with the same migration + seed. If Docker is unavailable, a file/in-memory adapter behind `lib/supabase/*` so every screen and test still runs. Hosted activation = pasting env vars, nothing more |
-| PayPal sandbox credentials | Implement the real PayPal routes and webhook; verify via mock mode (§10.4) + tests with recorded fixture payloads; the live sandbox E2E moves to the activation checklist |
-| Resend key | Console-log email mode (already specced, §10.3) |
-| Vercel production env | `next build` must pass locally both with and without DB env vars; production env setup goes on the checklist |
-| Shopify admin unreachable | Build from this doc + Polaris defaults; note affected screens in the build report |
+| PayPal sandbox credentials     | Implement the real PayPal routes and webhook; verify via mock mode (§10.4) + tests with recorded fixture payloads; the live sandbox E2E moves to the activation checklist                                                                                                   |
+| Resend key                     | Console-log email mode (already specced, §10.3)                                                                                                                                                                                                                             |
+| Vercel production env          | `next build` must pass locally both with and without DB env vars; production env setup goes on the checklist                                                                                                                                                                |
+| Shopify admin unreachable      | Build from this doc + Polaris defaults; note affected screens in the build report                                                                                                                                                                                           |
 
 ### 0.3 Guardrails (hard rules — no self-granted exceptions)
 
@@ -177,16 +177,16 @@ Two operating rules make "exactly like Shopify" cheap instead of expensive:
 
 ### 3.2 Guiding constraints
 
-| Constraint | Consequence |
-|---|---|
-| Owner is non-technical and already runs the store through Shopify's admin | The clone preserves that muscle memory; layout and wording are copied (EN + Shopify's own 简体中文 vocabulary), not reinvented |
-| Storefront appearance is a fixed pixel-exact Figma build | Everything under Shopify's Online Store channel (themes, theme editor, pages, blog, navigation, preferences) is **dropped** — the one deliberate hole in the clone |
-| Sells internationally — not US-only (decided 2026-07-21) | Zone-based shipping, Markets settings page, customs fields on products; USD-only pricing in V1 (payment provider settles USD, the buyer's bank converts) |
-| No customers yet — still testing | Breaking the temporary Shopify checkout is acceptable; no transition rail, no data-compat baggage |
-| Local dev must work without payment keys | Mock checkout mode stays: full click-through with no money moving |
-| Admin-driven data slots into existing Figma text boxes | Storefront layouts don't change when data goes live |
-| We never store card data | Payment details live with the payment provider only, in every phase of the business |
-| Owner can't lock himself out | Orders are never deletable (same as Shopify); login is managed in the Supabase dashboard where password reset exists |
+| Constraint                                                                | Consequence                                                                                                                                                        |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Owner is non-technical and already runs the store through Shopify's admin | The clone preserves that muscle memory; layout and wording are copied (EN + Shopify's own 简体中文 vocabulary), not reinvented                                     |
+| Storefront appearance is a fixed pixel-exact Figma build                  | Everything under Shopify's Online Store channel (themes, theme editor, pages, blog, navigation, preferences) is **dropped** — the one deliberate hole in the clone |
+| Sells internationally — not US-only (decided 2026-07-21)                  | Zone-based shipping, Markets settings page, customs fields on products; USD-only pricing in V1 (payment provider settles USD, the buyer's bank converts)           |
+| No customers yet — still testing                                          | Breaking the temporary Shopify checkout is acceptable; no transition rail, no data-compat baggage                                                                  |
+| Local dev must work without payment keys                                  | Mock checkout mode stays: full click-through with no money moving                                                                                                  |
+| Admin-driven data slots into existing Figma text boxes                    | Storefront layouts don't change when data goes live                                                                                                                |
+| We never store card data                                                  | Payment details live with the payment provider only, in every phase of the business                                                                                |
+| Owner can't lock himself out                                              | Orders are never deletable (same as Shopify); login is managed in the Supabase dashboard where password reset exists                                               |
 
 ### 3.3 Fidelity model & the cut list (non-goals)
 
@@ -200,17 +200,17 @@ Every Shopify admin feature lands in one of three buckets. Dropped features
   Payments; one stock location, so no location picker).
 - **Dropped** — feature doesn't apply to this business; omitted entirely.
 
-| Shopify feature | Why dropped |
-|---|---|
-| **Online Store channel: Themes / theme editor / Pages / Blog / Navigation / Preferences** | **The "appearance" — explicitly excluded by the owner.** Storefront is a fixed Figma build; its look is not editable by design. Exception: the SEO fields buried in Preferences (homepage search listing, social image) are not appearance — they survive, adapted into Settings → Search engine & AI (§9.11) |
-| Apps & app store, Shopify Flow, Sales channels / POS | No app platform, no other channels |
-| Marketing (campaigns, automations) | No marketing channels connected; revisit post-launch |
-| Multi-location, B2B | One stock location; no wholesale |
-| Plan / Billing / Payouts | No Shopify billing; the payment provider pays out directly |
-| Collections, Gift cards, Customer segments | Storefront has one product grid; gift cards & segments are post-launch ideas |
-| Fraud analysis card | The payment provider's job — replaced by seller-protection status on the order |
-| Shipping label purchasing | Owner ships manually; rates config stays (Settings → Shipping) |
-| Order editing, returns workflow (refund-with-restock exists), partial fulfillment, Send invoice (drafts), Buy X get Y discounts, bulk editor, saved list views, editable email templates, Reports builder, the Live View globe screen (a live visitor-count card ships in V1), abandoned-checkout recovery emails, product CSV import, mobile push notifications | V2 — listed in §16 |
+| Shopify feature                                                                                                                                                                                                                                                                                                                                                  | Why dropped                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Online Store channel: Themes / theme editor / Pages / Blog / Navigation / Preferences**                                                                                                                                                                                                                                                                        | **The "appearance" — explicitly excluded by the owner.** Storefront is a fixed Figma build; its look is not editable by design. Exception: the SEO fields buried in Preferences (homepage search listing, social image) are not appearance — they survive, adapted into Settings → Search engine & AI (§9.11) |
+| Apps & app store, Shopify Flow, Sales channels / POS                                                                                                                                                                                                                                                                                                             | No app platform, no other channels                                                                                                                                                                                                                                                                            |
+| Marketing (campaigns, automations)                                                                                                                                                                                                                                                                                                                               | No marketing channels connected; revisit post-launch                                                                                                                                                                                                                                                          |
+| Multi-location, B2B                                                                                                                                                                                                                                                                                                                                              | One stock location; no wholesale                                                                                                                                                                                                                                                                              |
+| Plan / Billing / Payouts                                                                                                                                                                                                                                                                                                                                         | No Shopify billing; the payment provider pays out directly                                                                                                                                                                                                                                                    |
+| Collections, Gift cards, Customer segments                                                                                                                                                                                                                                                                                                                       | Storefront has one product grid; gift cards & segments are post-launch ideas                                                                                                                                                                                                                                  |
+| Fraud analysis card                                                                                                                                                                                                                                                                                                                                              | The payment provider's job — replaced by seller-protection status on the order                                                                                                                                                                                                                                |
+| Shipping label purchasing                                                                                                                                                                                                                                                                                                                                        | Owner ships manually; rates config stays (Settings → Shipping)                                                                                                                                                                                                                                                |
+| Order editing, returns workflow (refund-with-restock exists), partial fulfillment, Send invoice (drafts), Buy X get Y discounts, bulk editor, saved list views, editable email templates, Reports builder, the Live View globe screen (a live visitor-count card ships in V1), abandoned-checkout recovery emails, product CSV import, mobile push notifications | V2 — listed in §16                                                                                                                                                                                                                                                                                            |
 
 ---
 
@@ -219,25 +219,25 @@ Every Shopify admin feature lands in one of three buckets. Dropped features
 Open questions block **only** the stages they name. Everything else
 proceeds.
 
-| ID | Question | Working assumption (build against this) | Blocks | Owner action |
-|---|---|---|---|---|
+| ID       | Question                                                                               | Working assumption (build against this)                                                                                                                                                                                                           | Blocks                                                          | Owner action                                                              |
+| -------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | **OQ-1** | **Payment provider** — PayPal only, Stripe, or both? (owner unsure, raised 2026-07-22) | **PayPal-direct** — account verified, real payment proven 2026-07-15. The schema is provider-neutral (§7.4: `payment_provider`, `provider_order_id`, `provider_capture_id`), so adding/switching providers later changes routes, not the database | Stage 4 payment routes only; stages 0–3 are payment-independent | Charles decides; "add Stripe for cards" re-evaluated at launch either way |
-| **OQ-2** | Which countries do we ship to, at what rates? | Seed zones: *United States* · *Rest of world* (placeholder rate) | Nothing in the build; real rates needed before launch | Charles supplies country list + rates |
-| **OQ-3** | Real product info (names, prices, photos) | Placeholder design text stays on the storefront | Stage 9 | Charles supplies |
-| **OQ-4** | Supabase project not yet created | — | Stages 1+ | Charles creates it (checklist in §13) |
+| **OQ-2** | Which countries do we ship to, at what rates?                                          | Seed zones: *United States* · *Rest of world* (placeholder rate)                                                                                                                                                                                  | Nothing in the build; real rates needed before launch           | Charles supplies country list + rates                                     |
+| **OQ-3** | Real product info (names, prices, photos)                                              | Placeholder design text stays on the storefront                                                                                                                                                                                                   | Stage 9                                                         | Charles supplies                                                          |
+| **OQ-4** | Supabase project not yet created                                                       | —                                                                                                                                                                                                                                                 | Stages 1+                                                       | Charles creates it (checklist in §13)                                     |
 
 ---
 
 ## 5. Alternatives considered
 
-| Decision | Chosen | Alternatives & why not |
-|---|---|---|
-| Keep Shopify vs replace it | Custom admin + native checkout | Keeping Shopify: monthly cost + two systems behind a fully custom storefront. A gradual transition rail (Rev 1) was designed, then cut — no customers to protect (Rev 2) |
-| Admin UI | `@shopify/polaris` | Plain Tailwind admin (the Rev 2 plan): faster to start but only approximates Shopify — fails the owner's "exactly the same" requirement (Rev 3). Hand-cloning Shopify's look without Polaris: strictly more work for a worse copy |
-| Database / auth / storage | Supabase | One vendor covers Postgres + Auth + Storage with an owner-usable dashboard; RLS enables the "storefront reads only a safe view" security model (§7.13). Separate DB + NextAuth + S3: more moving parts for a solo owner |
-| Payment provider | PayPal-direct (**working assumption — OQ-1**) | Stripe: best card/wallet UX but a new account + verification and loses the PayPal button many gift buyers prefer. Both providers: best conversion, roughly double the money-code — deferred to launch. Decision recorded when OQ-1 closes |
-| Visitor analytics | First-party `page_views` beacon (§7.12) | GA4 / external tools: blocked by ad-blockers (20–40% undercount), cookie-consent burden for international traffic, and the data lives outside our DB so it can't power the admin's Shopify-style cards or the order Conversion summary. Ad-platform pixels are added when paid ads start (§16) — additive, coexists with the beacon |
-| Dev/prod isolation | One shared Supabase project (planned ap-southeast-2; actually created in `us-west-2` — see [features/backend/region-alignment.md](features/backend/region-alignment.md)) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join |
+| Decision                   | Chosen                                                                                                                                                                   | Alternatives & why not                                                                                                                                                                                                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Keep Shopify vs replace it | Custom admin + native checkout                                                                                                                                           | Keeping Shopify: monthly cost + two systems behind a fully custom storefront. A gradual transition rail (Rev 1) was designed, then cut — no customers to protect (Rev 2)                                                                                                                                                            |
+| Admin UI                   | `@shopify/polaris`                                                                                                                                                       | Plain Tailwind admin (the Rev 2 plan): faster to start but only approximates Shopify — fails the owner's "exactly the same" requirement (Rev 3). Hand-cloning Shopify's look without Polaris: strictly more work for a worse copy                                                                                                   |
+| Database / auth / storage  | Supabase                                                                                                                                                                 | One vendor covers Postgres + Auth + Storage with an owner-usable dashboard; RLS enables the "storefront reads only a safe view" security model (§7.13). Separate DB + NextAuth + S3: more moving parts for a solo owner                                                                                                             |
+| Payment provider           | PayPal-direct (**working assumption — OQ-1**)                                                                                                                            | Stripe: best card/wallet UX but a new account + verification and loses the PayPal button many gift buyers prefer. Both providers: best conversion, roughly double the money-code — deferred to launch. Decision recorded when OQ-1 closes                                                                                           |
+| Visitor analytics          | First-party `page_views` beacon (§7.12)                                                                                                                                  | GA4 / external tools: blocked by ad-blockers (20–40% undercount), cookie-consent burden for international traffic, and the data lives outside our DB so it can't power the admin's Shopify-style cards or the order Conversion summary. Ad-platform pixels are added when paid ads start (§16) — additive, coexists with the beacon |
+| Dev/prod isolation         | One shared Supabase project (planned ap-southeast-2; actually created in `us-west-2` — see [features/backend/region-alignment.md](features/backend/region-alignment.md)) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join                                                                                                                                                                                                 |
 
 ---
 
@@ -245,18 +245,18 @@ proceeds.
 
 ### 6.1 Where data lives
 
-| Data | Today | After this build |
-|---|---|---|
-| Products, variants & prices | Hardcoded `lib/products.ts` | **Supabase** |
-| Inventory | Hand-edited numbers in the same file | **Supabase** (+ movement log) |
-| Orders | Shopify admin (1 test order) / ephemeral JSON for mocks | **Supabase** (source: mock / site / draft) |
-| Customers | Shopify | **Supabase** (auto-created from paid orders) |
-| Discount codes | — (never used) | **Supabase** |
-| Visitor behavior (page views, sessions) | — (not collected) | **Supabase** `page_views` (first-party beacon) |
-| Site copy (promo slogan …) | Baked into page code / PNG crops | **Supabase** `site_content` |
-| Business settings (shipping zones, tax, store details) | Constants in `lib/business.ts` | **Supabase** `settings` |
-| Customer payment details | Shopify + PayPal | **Payment provider only** |
-| Cart | Buyer's browser localStorage | unchanged (keyed by variant, `goldrose-cart-v2`) |
+| Data                                                   | Today                                                   | After this build                                 |
+| ------------------------------------------------------ | ------------------------------------------------------- | ------------------------------------------------ |
+| Products, variants & prices                            | Hardcoded `lib/products.ts`                             | **Supabase**                                     |
+| Inventory                                              | Hand-edited numbers in the same file                    | **Supabase** (+ movement log)                    |
+| Orders                                                 | Shopify admin (1 test order) / ephemeral JSON for mocks | **Supabase** (source: mock / site / draft)       |
+| Customers                                              | Shopify                                                 | **Supabase** (auto-created from paid orders)     |
+| Discount codes                                         | — (never used)                                          | **Supabase**                                     |
+| Visitor behavior (page views, sessions)                | — (not collected)                                       | **Supabase** `page_views` (first-party beacon)   |
+| Site copy (promo slogan …)                             | Baked into page code / PNG crops                        | **Supabase** `site_content`                      |
+| Business settings (shipping zones, tax, store details) | Constants in `lib/business.ts`                          | **Supabase** `settings`                          |
+| Customer payment details                               | Shopify + PayPal                                        | **Payment provider only**                        |
+| Cart                                                   | Buyer's browser localStorage                            | unchanged (keyed by variant, `goldrose-cart-v2`) |
 
 ### 6.2 System diagram
 
@@ -317,23 +317,23 @@ Migration file: `supabase/migrations/0001_init.sql`. All money is integer cents.
 
 Shared, non-variant fields — mirrors Shopify's product form.
 
-| Column | Type | Notes |
-|---|---|---|
-| `id` | text **PK** | Slug-style (`"signature-gold-rose"`) |
-| `handle` | text unique | URL slug → `/products/[handle]`. Form warns: *don't change after launch* |
-| `title` / `short_name` | text | Shopify's "Title" / our card display name |
-| `description` | text | Plain multiline V1 (storefront renders plain text); rich text is V2 |
-| `vendor`, `product_type` | text | Shopify's "Product organization" card |
-| `tags` | text[] | |
-| `charge_tax` | bool | Shopify's "Charge tax on this product" — drives tax calc at launch |
-| `requires_shipping` | bool | Shipping card |
-| `country_of_origin`, `hs_code` | text | Customs information (Shipping card) — needed for international shipments |
-| `seo_title`, `seo_description` | text | "Search engine listing" card with Google preview |
-| `best_for`, `badge`, `details` | text / text[] | GoldRose copy fields |
-| `option_names` | text[] ≤ 3 | Shopify's option model (e.g. `{Box color}`) |
-| `status` | active / draft / archived | Tabs on the list page |
-| `position` | int | Card order on /shop (storefront has no collections) |
-| `created_at`, `updated_at` | timestamptz | |
+| Column                         | Type                      | Notes                                                                    |
+| ------------------------------ | ------------------------- | ------------------------------------------------------------------------ |
+| `id`                           | text **PK**               | Slug-style (`"signature-gold-rose"`)                                     |
+| `handle`                       | text unique               | URL slug → `/products/[handle]`. Form warns: *don't change after launch* |
+| `title` / `short_name`         | text                      | Shopify's "Title" / our card display name                                |
+| `description`                  | text                      | Plain multiline V1 (storefront renders plain text); rich text is V2      |
+| `vendor`, `product_type`       | text                      | Shopify's "Product organization" card                                    |
+| `tags`                         | text[]                    |                                                                          |
+| `charge_tax`                   | bool                      | Shopify's "Charge tax on this product" — drives tax calc at launch       |
+| `requires_shipping`            | bool                      | Shipping card                                                            |
+| `country_of_origin`, `hs_code` | text                      | Customs information (Shipping card) — needed for international shipments |
+| `seo_title`, `seo_description` | text                      | "Search engine listing" card with Google preview                         |
+| `best_for`, `badge`, `details` | text / text[]             | GoldRose copy fields                                                     |
+| `option_names`                 | text[] ≤ 3                | Shopify's option model (e.g. `{Box color}`)                              |
+| `status`                       | active / draft / archived | Tabs on the list page                                                    |
+| `position`                     | int                       | Card order on /shop (storefront has no collections)                      |
+| `created_at`, `updated_at`     | timestamptz               |                                                                          |
 
 Products also get **media**: `product_images (id, product_id, path, alt,
 position)` — multi-image upload to the Storage bucket, drag to reorder,
@@ -349,16 +349,16 @@ never be deleted** — archive/cancel only, exactly like Shopify.
 Shopify's actual model: every product has ≥ 1 variant; an optionless product
 has a single hidden "Default Title" variant.
 
-| Column | Notes |
-|---|---|
-| `id` uuid PK, `product_id` FK, `position` | |
-| `option_values` text[] | Aligned with the product's `option_names` |
-| `sku`, `barcode` | Inventory card |
-| `price_cents`, `compare_at_price_cents` | Per-variant, like Shopify |
-| `cost_cents` | "Cost per item" — **PRIVATE**, never in the storefront view; form shows auto profit/margin |
-| `track_quantity` bool, `inventory_on_hand` int | On-hand mutated only via `adjust_inventory()` |
-| `continue_selling_when_oos` bool | Inventory card checkbox |
-| `weight_oz` numeric | Shipping card |
+| Column                                         | Notes                                                                                      |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `id` uuid PK, `product_id` FK, `position`      |                                                                                            |
+| `option_values` text[]                         | Aligned with the product's `option_names`                                                  |
+| `sku`, `barcode`                               | Inventory card                                                                             |
+| `price_cents`, `compare_at_price_cents`        | Per-variant, like Shopify                                                                  |
+| `cost_cents`                                   | "Cost per item" — **PRIVATE**, never in the storefront view; form shows auto profit/margin |
+| `track_quantity` bool, `inventory_on_hand` int | On-hand mutated only via `adjust_inventory()`                                              |
+| `continue_selling_when_oos` bool               | Inventory card checkbox                                                                    |
+| `weight_oz` numeric                            | Shipping card                                                                              |
 
 Inventory math (clone of Shopify's four columns): **On hand** = stored;
 **Committed** = paid-but-unfulfilled order lines (derived); **Available** =
@@ -393,24 +393,24 @@ can correct by hand.
 Payment columns are **provider-neutral** (OQ-1): V1 populates them from
 PayPal, but nothing renames if a provider is added or switched.
 
-| Column | Notes |
-|---|---|
-| `id` uuid PK, `number` int, `name` text | Shopify-style **#1001** (prefix configurable in Settings → General) |
-| `source` ∈ **mock / site / draft** | mock = dev/demo; site = real payment; draft = created in admin |
-| `customer_id` FK null | Auto-linked on capture (§7.7) |
-| `payment_provider` text | `'paypal'` in V1; `'mock'` for dev orders |
-| `provider_order_id` text **unique null** | Idempotency — webhook redeliveries upsert, never duplicate |
-| `provider_capture_id` text | Capture reference for refunds |
-| `email`, `phone`, `shipping_address` jsonb, `billing_address` jsonb | From the provider's payer + shipping data |
-| `subtotal_cents`, `discount_code`, `discount_cents`, `shipping_cents`, `shipping_free`, `tax_cents`, `total_cents`, `currency` | Payment card lines |
-| `financial_status` | pending / paid / partially_refunded / refunded |
-| `fulfillment_status` ∈ unfulfilled / fulfilled | Manual "Fulfill items" flow |
-| `tracking_number`, `tracking_url`, `shipped_at` | Single-fulfillment simplification (adapt) |
-| `cancelled_at`, `cancel_reason` | "Cancel order" action (unfulfilled only, optional refund + restock) |
-| `visitor_id` text null | Links the order to its `page_views` history → the Conversion summary card (§9.4) |
-| `note`, `tags` text[] | Right-column cards. `note` is prefilled with the buyer's optional checkout note / gift message and stays editable — exactly how Shopify lands the cart note in the order's Notes card |
-| `archived_at` | Shopify's archive, not delete |
-| `placed_at`, `raw` jsonb | Raw provider payload kept for audit |
+| Column                                                                                                                         | Notes                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id` uuid PK, `number` int, `name` text                                                                                        | Shopify-style **#1001** (prefix configurable in Settings → General)                                                                                                                   |
+| `source` ∈ **mock / site / draft**                                                                                             | mock = dev/demo; site = real payment; draft = created in admin                                                                                                                        |
+| `customer_id` FK null                                                                                                          | Auto-linked on capture (§7.7)                                                                                                                                                         |
+| `payment_provider` text                                                                                                        | `'paypal'` in V1; `'mock'` for dev orders                                                                                                                                             |
+| `provider_order_id` text **unique null**                                                                                       | Idempotency — webhook redeliveries upsert, never duplicate                                                                                                                            |
+| `provider_capture_id` text                                                                                                     | Capture reference for refunds                                                                                                                                                         |
+| `email`, `phone`, `shipping_address` jsonb, `billing_address` jsonb                                                            | From the provider's payer + shipping data                                                                                                                                             |
+| `subtotal_cents`, `discount_code`, `discount_cents`, `shipping_cents`, `shipping_free`, `tax_cents`, `total_cents`, `currency` | Payment card lines                                                                                                                                                                    |
+| `financial_status`                                                                                                             | pending / paid / partially_refunded / refunded                                                                                                                                        |
+| `fulfillment_status` ∈ unfulfilled / fulfilled                                                                                 | Manual "Fulfill items" flow                                                                                                                                                           |
+| `tracking_number`, `tracking_url`, `shipped_at`                                                                                | Single-fulfillment simplification (adapt)                                                                                                                                             |
+| `cancelled_at`, `cancel_reason`                                                                                                | "Cancel order" action (unfulfilled only, optional refund + restock)                                                                                                                   |
+| `visitor_id` text null                                                                                                         | Links the order to its `page_views` history → the Conversion summary card (§9.4)                                                                                                      |
+| `note`, `tags` text[]                                                                                                          | Right-column cards. `note` is prefilled with the buyer's optional checkout note / gift message and stays editable — exactly how Shopify lands the cart note in the order's Notes card |
+| `archived_at`                                                                                                                  | Shopify's archive, not delete                                                                                                                                                         |
+| `placed_at`, `raw` jsonb                                                                                                       | Raw provider payload kept for audit                                                                                                                                                   |
 
 `order_lines`: `order_id FK, variant_id FK (null on delete), product_id,
 sku, name, option, quantity, unit_amount_cents, line_total_cents` — name/sku
@@ -732,20 +732,20 @@ Automatic discounts and Buy X get Y are V2.
 
 ### 9.11 Settings (`/admin/settings`) — Shopify's settings index, applicable pages only
 
-| Shopify settings page | Ours |
-|---|---|
-| General | Store details (name, contact email), order number prefix — clone-lite |
-| Payments | Provider status: sandbox/live indicator, client-id tail, webhook health — adapt |
-| Checkout | Mock-mode indicator; discount field toggle — adapt |
-| Shipping and delivery | Zone-based rates: zones (seed: United States · Rest of world) → countries → rate + free-shipping threshold (replaces `lib/business.ts` constants) — adapt |
-| Markets | Countries GoldRose sells & ships to, grouped into the shipping zones; currency: USD for all markets in V1 — adapt |
-| Taxes and duties | Tax rate (0 while testing) + launch note; import duties are the buyer's responsibility, stated at checkout — adapt |
-| Notifications | Email toggles + previews: order confirmation (buyer), shipping confirmation (buyer), new-order alert (owner) — adapt, via Resend (§10.3) |
-| Users and permissions | Owner row from `admin_users`; staff = future — adapt |
-| Policies | Refund / privacy / terms editors (write `site_content`; storefront `/policies/*` pages are a launch task) — clone-lite |
-| Online Store → Preferences (homepage SEO) | Adapted into **Search engine & AI**: homepage search listing (meta title/description), social share image, AI-crawler (GEO) allow toggle — §8.1 |
-| Languages | Admin language note (the EN/中文 toggle also lives in the top bar) |
-| Locations, Domains, Plan, Billing, Brand, Custom data, Customer events | Dropped |
+| Shopify settings page                                                  | Ours                                                                                                                                                      |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| General                                                                | Store details (name, contact email), order number prefix — clone-lite                                                                                     |
+| Payments                                                               | Provider status: sandbox/live indicator, client-id tail, webhook health — adapt                                                                           |
+| Checkout                                                               | Mock-mode indicator; discount field toggle — adapt                                                                                                        |
+| Shipping and delivery                                                  | Zone-based rates: zones (seed: United States · Rest of world) → countries → rate + free-shipping threshold (replaces `lib/business.ts` constants) — adapt |
+| Markets                                                                | Countries GoldRose sells & ships to, grouped into the shipping zones; currency: USD for all markets in V1 — adapt                                         |
+| Taxes and duties                                                       | Tax rate (0 while testing) + launch note; import duties are the buyer's responsibility, stated at checkout — adapt                                        |
+| Notifications                                                          | Email toggles + previews: order confirmation (buyer), shipping confirmation (buyer), new-order alert (owner) — adapt, via Resend (§10.3)                  |
+| Users and permissions                                                  | Owner row from `admin_users`; staff = future — adapt                                                                                                      |
+| Policies                                                               | Refund / privacy / terms editors (write `site_content`; storefront `/policies/*` pages are a launch task) — clone-lite                                    |
+| Online Store → Preferences (homepage SEO)                              | Adapted into **Search engine & AI**: homepage search listing (meta title/description), social share image, AI-crawler (GEO) allow toggle — §8.1           |
+| Languages                                                              | Admin language note (the EN/中文 toggle also lives in the top bar)                                                                                        |
+| Locations, Domains, Plan, Billing, Brand, Custom data, Customer events | Dropped                                                                                                                                                   |
 
 ### 9.12 Bilingual admin — English / 中文
 
@@ -958,18 +958,18 @@ sandbox ("rows visible in dashboard", "sandbox payment completes",
 Studio and fixture-driven route tests — with the live-sandbox repeat listed
 on the activation checklist.
 
-| # | Stage | Key files | Accepted when |
-|---|---|---|---|
-| 0 | Test baseline | `playwright.config.ts`, `tests/e2e/*` | Pixel snapshots of `/`, `/shop`, product page committed; mock checkout click-through green (cart → pay → success → order recorded) |
-| 1 | Supabase + seed | `supabase/migrations/0001_init.sql`, `lib/supabase/*`, `scripts/seed.ts` | Seed prints 3 products with variants + default settings/content; rows visible in dashboard; site unchanged; Stage 0 green |
-| 2 | Auth + Shopify shell | `middleware.ts`, `app/admin/login`, `app/admin/layout.tsx` (Polaris), `lib/admin/i18n.ts` | Logged-out → redirected; owner logs in; non-admin 404s; nav/topbar pass a side-by-side squint test against the real Shopify admin; EN/中文 switches every label and persists across pages/reloads; storefront untouched |
-| 3 | Products + variants + inventory + files | `app/admin/products/*`, `lib/admin/*`, Content → Files | Create/edit/archive/delete works card-for-card per §9.5; multi-image upload + reorder; variant table edits price/qty/SKU; Duplicate copies a product to a new draft; inventory screen shows Committed/Available math; adjustment writes a movement with a Shopify reason |
-| 4 | **Native checkout + Shopify removal** | `app/api/paypal/*`, `lib/checkout/process.ts`, `app/api/checkout/route.ts`, `lib/cart/store.ts`, checkout page split, `lib/orders/db.ts`; **delete `lib/shopify/*`** | Sandbox payment completes end-to-end (create → approve → capture → order row + `order` movement + checkout completed + confirmation email logged); mock mode still full click-through with no keys; tamper-replay re-priced from DB; admin price edit changes checkout total; a non-US sandbox address gets its zone's shipping rate; the buyer's gift message lands in the order's Notes; pixel-diffs unchanged; no `SHOPIFY_*` reference left in code |
-| 5 | Orders + customers + webhook | `app/admin/orders/*`, `app/api/webhooks/paypal/route.ts` | Order list/detail matches §9.4 card-for-card; fulfill flow stores tracking; refund via sandbox flips status (+ restock option); cancel works; timeline records events + comments; customer auto-created and linked (profile shows orders + its own timeline); replayed webhook event → no duplicate; invalid signature → 401 |
-| 6 | Discounts + drafts + abandoned | `app/admin/discounts/*`, `app/admin/orders/drafts/*`, checkout discount field | Code created in admin applies at checkout (server-validated, re-priced); expired/limit-reached codes rejected; draft order "Mark as paid" creates order + stock decrement; abandoned list shows an open checkout > 1 h old |
-| 7 | Home + Analytics + beacon + search | `app/admin/(dashboard)`, `app/admin/analytics/*`, `components/Beacon.tsx`, `app/api/beacon/route.ts`, ⌘K search, notifications bell | Home metrics + feed match seeded data; browsing the storefront writes page views; sessions/conversion/traffic-source cards compute correctly for a chosen date range vs previous period; a completed order shows its Conversion summary; "Visitors right now" reflects a live visit; ⌘K finds an order by number, a product by SKU, a customer by email |
-| 8 | Settings + notifications + content + SEO/GEO | `app/admin/settings/*`, `app/admin/content/*`, `lib/content.ts`, `PromoBar` props, slim `lib/products.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/llms.txt/route.ts` | Shipping-zone/tax/prefix edits take effect at checkout (rate follows the ship-to country); notification toggles honored; policies save; default slogan → pixel-identical PNG; edited → text renders; reset → PNG returns; no importer of the hardcoded catalog remains; sitemap lists home/shop/active products from the DB; robots blocks /admin + /checkout and follows the AI-crawler toggle; product pages emit valid Product JSON-LD (price + availability from live stock); /llms.txt lists the store + active products; homepage search listing editable in Settings |
-| 9 | Real data on design pages *(gated on OQ-3)* | `app/shop/page.tsx`, `app/products/[slug]/page.tsx`, `app/page.tsx` (JSON-LD only) | Masked pixel-diff: only the designated text boxes changed; long names ellipsize without layout shift; new product appears without redeploy |
+| #   | Stage                                        | Key files                                                                                                                                                             | Accepted when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | Test baseline                                | `playwright.config.ts`, `tests/e2e/*`                                                                                                                                 | Pixel snapshots of `/`, `/shop`, product page committed; mock checkout click-through green (cart → pay → success → order recorded)                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| 1   | Supabase + seed                              | `supabase/migrations/0001_init.sql`, `lib/supabase/*`, `scripts/seed.ts`                                                                                              | Seed prints 3 products with variants + default settings/content; rows visible in dashboard; site unchanged; Stage 0 green                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 2   | Auth + Shopify shell                         | `middleware.ts`, `app/admin/login`, `app/admin/layout.tsx` (Polaris), `lib/admin/i18n.ts`                                                                             | Logged-out → redirected; owner logs in; non-admin 404s; nav/topbar pass a side-by-side squint test against the real Shopify admin; EN/中文 switches every label and persists across pages/reloads; storefront untouched                                                                                                                                                                                                                                                                                                                                                     |
+| 3   | Products + variants + inventory + files      | `app/admin/products/*`, `lib/admin/*`, Content → Files                                                                                                                | Create/edit/archive/delete works card-for-card per §9.5; multi-image upload + reorder; variant table edits price/qty/SKU; Duplicate copies a product to a new draft; inventory screen shows Committed/Available math; adjustment writes a movement with a Shopify reason                                                                                                                                                                                                                                                                                                    |
+| 4   | **Native checkout + Shopify removal**        | `app/api/paypal/*`, `lib/checkout/process.ts`, `app/api/checkout/route.ts`, `lib/cart/store.ts`, checkout page split, `lib/orders/db.ts`; **delete `lib/shopify/*`**  | Sandbox payment completes end-to-end (create → approve → capture → order row + `order` movement + checkout completed + confirmation email logged); mock mode still full click-through with no keys; tamper-replay re-priced from DB; admin price edit changes checkout total; a non-US sandbox address gets its zone's shipping rate; the buyer's gift message lands in the order's Notes; pixel-diffs unchanged; no `SHOPIFY_*` reference left in code                                                                                                                     |
+| 5   | Orders + customers + webhook                 | `app/admin/orders/*`, `app/api/webhooks/paypal/route.ts`                                                                                                              | Order list/detail matches §9.4 card-for-card; fulfill flow stores tracking; refund via sandbox flips status (+ restock option); cancel works; timeline records events + comments; customer auto-created and linked (profile shows orders + its own timeline); replayed webhook event → no duplicate; invalid signature → 401                                                                                                                                                                                                                                                |
+| 6   | Discounts + drafts + abandoned               | `app/admin/discounts/*`, `app/admin/orders/drafts/*`, checkout discount field                                                                                         | Code created in admin applies at checkout (server-validated, re-priced); expired/limit-reached codes rejected; draft order "Mark as paid" creates order + stock decrement; abandoned list shows an open checkout > 1 h old                                                                                                                                                                                                                                                                                                                                                  |
+| 7   | Home + Analytics + beacon + search           | `app/admin/(dashboard)`, `app/admin/analytics/*`, `components/Beacon.tsx`, `app/api/beacon/route.ts`, ⌘K search, notifications bell                                   | Home metrics + feed match seeded data; browsing the storefront writes page views; sessions/conversion/traffic-source cards compute correctly for a chosen date range vs previous period; a completed order shows its Conversion summary; "Visitors right now" reflects a live visit; ⌘K finds an order by number, a product by SKU, a customer by email                                                                                                                                                                                                                     |
+| 8   | Settings + notifications + content + SEO/GEO | `app/admin/settings/*`, `app/admin/content/*`, `lib/content.ts`, `PromoBar` props, slim `lib/products.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/llms.txt/route.ts` | Shipping-zone/tax/prefix edits take effect at checkout (rate follows the ship-to country); notification toggles honored; policies save; default slogan → pixel-identical PNG; edited → text renders; reset → PNG returns; no importer of the hardcoded catalog remains; sitemap lists home/shop/active products from the DB; robots blocks /admin + /checkout and follows the AI-crawler toggle; product pages emit valid Product JSON-LD (price + availability from live stock); /llms.txt lists the store + active products; homepage search listing editable in Settings |
+| 9   | Real data on design pages *(gated on OQ-3)*  | `app/shop/page.tsx`, `app/products/[slug]/page.tsx`, `app/page.tsx` (JSON-LD only)                                                                                    | Masked pixel-diff: only the designated text boxes changed; long names ellipsize without layout shift; new product appears without redeploy                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ### 14.3 Final acceptance
 
@@ -984,25 +984,25 @@ screenshot the Shopify admin (§12) and cancel Shopify.
 
 ## 15. Risks & mitigations
 
-| Risk | Mitigation |
-|---|---|
-| **Shopify-parity scope creep** — cloning a decade-old product | The cut list (§3.3) is aggressive; every feature is Clone/Adapt/Dropped — no stubs; stages ship alone so the build is always releasable; "open the real admin and copy it" kills design ambiguity for free |
-| Polaris + Next.js App Router friction (client components, CSS import) | Known pattern (AppProvider in a client layout); pin the Polaris version; smoke-tested in Stage 2 before anything is built on it |
-| Polaris license / Shopify trademark | Verify current license text at build time; the admin is a private internal tool — never distributed, sold, or presented as Shopify |
-| Native checkout is all-new money code | Built and verified entirely in the payment sandbox before any live key exists; server re-prices from DB (discounts included); capture + webhook are both idempotent by `provider_order_id` |
-| Payment provider still undecided (OQ-1) | Provider-neutral order schema; provider code isolated to routes + checkout buttons; stages 0–3 don't touch payments at all |
-| Buyer drops off between approval and capture | Capture webhook repairs the order record independently of the browser |
-| Committed/Available inventory math drifts | Derived in a single SQL view from order lines, never stored twice; covered by Stage 3 acceptance |
-| Sandbox/live key mix-ups | Single `PAYPAL_ENV` switch controls key set + SDK URL; the admin banner shows the active mode |
-| Build fails if Supabase is down (build-time DB reads) | try/catch → `[]` + dynamicParams; pages degrade to on-demand rendering |
-| Private data (costs, stock) leaking to the storefront | Enforced by the SQL view + RLS, not by code convention |
-| @supabase/ssr cookie API misuse silently breaks sessions | Use the current getAll/setAll pattern exactly |
-| Owner locks himself out | Orders can't be deleted; product delete requires Shopify's red confirm; login managed in Supabase dashboard where password reset exists |
-| Shared dev/prod database | Flagged; acceptable for a single owner; separate projects if staff join |
-| Tax/shipping become our job (were Shopify's) | Settings pages exist from Stage 8; testing phase runs tax 0 / seed zone rates; real approach on the launch checklist |
-| International selling adds currency/duties complexity | V1 stays minimal: USD-only, zone rates, duties on the buyer; customs fields captured from day one so labels/declarations work at launch |
-| First-party analytics undercounts (ad-blockers) or raises consent questions | Numbers are for trends, not billing — Shopify's differ from GA too; beacon is anonymous/cookieless/first-party by design; consent wording reviewed at launch for EU traffic |
-| Key storefront text ships as PNG crops — invisible to search & AI crawlers | The §8.1 machine-readable layer (meta tags, JSON-LD, /llms.txt, alt text) carries every fact; §11's edit rule converts slots to real text over time |
+| Risk                                                                        | Mitigation                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Shopify-parity scope creep** — cloning a decade-old product               | The cut list (§3.3) is aggressive; every feature is Clone/Adapt/Dropped — no stubs; stages ship alone so the build is always releasable; "open the real admin and copy it" kills design ambiguity for free |
+| Polaris + Next.js App Router friction (client components, CSS import)       | Known pattern (AppProvider in a client layout); pin the Polaris version; smoke-tested in Stage 2 before anything is built on it                                                                            |
+| Polaris license / Shopify trademark                                         | Verify current license text at build time; the admin is a private internal tool — never distributed, sold, or presented as Shopify                                                                         |
+| Native checkout is all-new money code                                       | Built and verified entirely in the payment sandbox before any live key exists; server re-prices from DB (discounts included); capture + webhook are both idempotent by `provider_order_id`                 |
+| Payment provider still undecided (OQ-1)                                     | Provider-neutral order schema; provider code isolated to routes + checkout buttons; stages 0–3 don't touch payments at all                                                                                 |
+| Buyer drops off between approval and capture                                | Capture webhook repairs the order record independently of the browser                                                                                                                                      |
+| Committed/Available inventory math drifts                                   | Derived in a single SQL view from order lines, never stored twice; covered by Stage 3 acceptance                                                                                                           |
+| Sandbox/live key mix-ups                                                    | Single `PAYPAL_ENV` switch controls key set + SDK URL; the admin banner shows the active mode                                                                                                              |
+| Build fails if Supabase is down (build-time DB reads)                       | try/catch → `[]` + dynamicParams; pages degrade to on-demand rendering                                                                                                                                     |
+| Private data (costs, stock) leaking to the storefront                       | Enforced by the SQL view + RLS, not by code convention                                                                                                                                                     |
+| @supabase/ssr cookie API misuse silently breaks sessions                    | Use the current getAll/setAll pattern exactly                                                                                                                                                              |
+| Owner locks himself out                                                     | Orders can't be deleted; product delete requires Shopify's red confirm; login managed in Supabase dashboard where password reset exists                                                                    |
+| Shared dev/prod database                                                    | Flagged; acceptable for a single owner; separate projects if staff join                                                                                                                                    |
+| Tax/shipping become our job (were Shopify's)                                | Settings pages exist from Stage 8; testing phase runs tax 0 / seed zone rates; real approach on the launch checklist                                                                                       |
+| International selling adds currency/duties complexity                       | V1 stays minimal: USD-only, zone rates, duties on the buyer; customs fields captured from day one so labels/declarations work at launch                                                                    |
+| First-party analytics undercounts (ad-blockers) or raises consent questions | Numbers are for trends, not billing — Shopify's differ from GA too; beacon is anonymous/cookieless/first-party by design; consent wording reviewed at launch for EU traffic                                |
+| Key storefront text ships as PNG crops — invisible to search & AI crawlers  | The §8.1 machine-readable layer (meta tags, JSON-LD, /llms.txt, alt text) carries every fact; §11's edit rule converts slots to real text over time                                                        |
 
 ---
 
@@ -1046,13 +1046,13 @@ Explicitly out of scope for this build:
 
 ## 17. Revision history
 
-| Rev | Date | Change |
-|---|---|---|
-| 1 | 2026-07-21 | Initial design: custom admin + native PayPal checkout, with a Shopify transition rail ("Phase A") protecting live checkout during migration |
-| 2 | 2026-07-21 | Transition rail cut — no customers to protect; single-phase build; bilingual EN/中文 admin requirement added |
-| 3 | 2026-07-21 | Admin UX respecified as a **screen-for-screen Shopify admin clone** (owner decision) built on Polaris; parity additions: variants, customers, discounts, drafts, abandoned checkouts, timeline, refunds, analytics, settings, order emails; live Shopify admin becomes the reference — cancel last |
-| 4 | 2026-07-21 | **International — not US-only** (owner decision): Markets adapted back in, zone-based shipping, customs fields, ship-to country selector; USD-only V1 |
-| 4.1 | 2026-07-22 | Parity tightening: Duplicate product, buyer gift message → order Notes, customer Timeline + CSV export, 2FA, mobile note; previously-unstated gaps named as V2 |
+| Rev | Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 2026-07-21 | Initial design: custom admin + native PayPal checkout, with a Shopify transition rail ("Phase A") protecting live checkout during migration                                                                                                                                                                                                                                                                                                                          |
+| 2   | 2026-07-21 | Transition rail cut — no customers to protect; single-phase build; bilingual EN/中文 admin requirement added                                                                                                                                                                                                                                                                                                                                                         |
+| 3   | 2026-07-21 | Admin UX respecified as a **screen-for-screen Shopify admin clone** (owner decision) built on Polaris; parity additions: variants, customers, discounts, drafts, abandoned checkouts, timeline, refunds, analytics, settings, order emails; live Shopify admin becomes the reference — cancel last                                                                                                                                                                   |
+| 4   | 2026-07-21 | **International — not US-only** (owner decision): Markets adapted back in, zone-based shipping, customs fields, ship-to country selector; USD-only V1                                                                                                                                                                                                                                                                                                                |
+| 4.1 | 2026-07-22 | Parity tightening: Duplicate product, buyer gift message → order Notes, customer Timeline + CSV export, 2FA, mobile note; previously-unstated gaps named as V2                                                                                                                                                                                                                                                                                                       |
 | 4.2 | 2026-07-22 | First-party visitor analytics moved into V1 (`page_views` beacon: sessions, conversion funnel, traffic sources, live visitors, order Conversion summary); ad pixels deferred until paid ads start; V2 list audited for completeness. **Document restructured** (this shape): metadata header, ToC, agent guide (§2), open questions (§4), alternatives (§5), changelog moved here; order payment columns made provider-neutral and payment provider reopened as OQ-1 |
-| 4.3 | 2026-07-22 | **SEO + GEO into V1** (owner request): DB-driven sitemap, robots, canonicals, Open Graph, Product/Organization/Breadcrumb JSON-LD; homepage search listing adapted into Settings → Search engine & AI; GEO = AI crawlers allowed (owner toggle) + `/llms.txt` + machine-readable-compensation rule for PNG text (§8.1); checkout country selector defaults via geo-IP |
-| 4.4 | 2026-07-22 | **§0 one-shot autonomous build directive** (owner request): full decision authority for the building agent, resource fallbacks (local/mocked Supabase, fixture-tested PayPal, console emails), hard guardrails (sandbox money only, owner-only actions preserved, `main` never broken), stage-by-stage commits, and required deliverables (BUILD-REPORT.md + owner activation checklist) |
+| 4.3 | 2026-07-22 | **SEO + GEO into V1** (owner request): DB-driven sitemap, robots, canonicals, Open Graph, Product/Organization/Breadcrumb JSON-LD; homepage search listing adapted into Settings → Search engine & AI; GEO = AI crawlers allowed (owner toggle) + `/llms.txt` + machine-readable-compensation rule for PNG text (§8.1); checkout country selector defaults via geo-IP                                                                                                |
+| 4.4 | 2026-07-22 | **§0 one-shot autonomous build directive** (owner request): full decision authority for the building agent, resource fallbacks (local/mocked Supabase, fixture-tested PayPal, console emails), hard guardrails (sandbox money only, owner-only actions preserved, `main` never broken), stage-by-stage commits, and required deliverables (BUILD-REPORT.md + owner activation checklist)                                                                             |

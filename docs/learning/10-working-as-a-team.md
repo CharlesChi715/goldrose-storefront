@@ -26,11 +26,11 @@ Key jargon:
 
 ## The three ambiguities
 
-| Ambiguity | How it feels day to day | The habit that removes it |
-| --- | --- | --- |
-| What is the current truth? | "Is this the latest version?" "Didn't we decide the opposite last week?" | One home per kind of truth: `main` for code, one task list for work, one doc per topic for decisions |
-| Who owns what, and what is "done"? | Two people build overlapping things; "done" work is missing half its cases | Small written tasks, one owner each, with a one-sentence definition of done |
-| How does work integrate? | Merge fights, giant two-week branches, "it works on my machine" | Short-lived branch → small PR → CI → review → squash-merge; robots enforce style so humans review substance |
+| Ambiguity                          | How it feels day to day                                                    | The habit that removes it                                                                                   |
+| ---------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| What is the current truth?         | "Is this the latest version?" "Didn't we decide the opposite last week?"   | One home per kind of truth: `main` for code, one task list for work, one doc per topic for decisions        |
+| Who owns what, and what is "done"? | Two people build overlapping things; "done" work is missing half its cases | Small written tasks, one owner each, with a one-sentence definition of done                                 |
+| How does work integrate?           | Merge fights, giant two-week branches, "it works on my machine"            | Short-lived branch → small PR → CI → review → squash-merge; robots enforce style so humans review substance |
 
 Big vague tasks are where collaboration goes to die: nobody can see progress, so nobody can help. Small tasks are the underrated fix — a day or two of work, visible, finishable.
 

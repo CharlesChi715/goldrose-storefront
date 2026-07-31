@@ -46,10 +46,10 @@ verification:
 
 <!-- The "why not X" record — only put the dismissed options here. -->
 
-| Option | Pros | Cons | Verdict |
-|---|---|---|---|
-|  |  |  | ✅ **chosen** |
-|  |  |  | ❌ |
+| Option | Pros | Cons | Verdict       |
+| ------ | ---- | ---- | ------------- |
+|        |      |      | ✅ **chosen** |
+|        |      |      | ❌            |
 
 ## Acceptance criteria
 

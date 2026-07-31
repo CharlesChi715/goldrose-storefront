@@ -48,14 +48,14 @@ Nothing leaves `inbox/` until its parse output is committed.
 ## Routing table
 
 AI-TAG(AI-004): OWNER-TODO — the routing rules are not written yet. See
-/agent-delivery/INBOX.md#ai-004.
+/agent-delivery/sessions/initial-inbox-07-30.md.
 
 Until this table is filled in, an agent must **not** choose a destination on its
 own — stop and ask.
 
-| Delivery contains | Parse output goes to |
-| --- | --- |
-| _(not yet defined)_ | _(not yet defined)_ |
+| Delivery contains   | Parse output goes to |
+| ------------------- | -------------------- |
+| _(not yet defined)_ | _(not yet defined)_  |
 
 ## Related
 

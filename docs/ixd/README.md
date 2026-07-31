@@ -60,13 +60,13 @@ reference them the same way.
 
 ## Status legend (target-page design progress)
 
-| Label | Meaning |
-|---|---|
-| Incomplete / Not done | The target-page design is not ready |
-| To be confirmed | Pending a decision from the design team |
-| Future iteration (not currently planned) | Out of scope for this release, such as personalization |
-| No separate page needed / Not currently planned | Inline interaction with no target page / deferred |
-| — | Not marked in the source table, usually because the page already exists |
+| Label                                           | Meaning                                                                 |
+| ----------------------------------------------- | ----------------------------------------------------------------------- |
+| Incomplete / Not done                           | The target-page design is not ready                                     |
+| To be confirmed                                 | Pending a decision from the design team                                 |
+| Future iteration (not currently planned)        | Out of scope for this release, such as personalization                  |
+| No separate page needed / Not currently planned | Inline interaction with no target page / deferred                       |
+| —                                               | Not marked in the source table, usually because the page already exists |
 
 Message from me to ai agents: leave placeholder in unsure things
 
@@ -239,18 +239,18 @@ was re-imported after its polish pass (购买流程 moved to the 已完成 lane)
 **Routes vs in-page states (owner instruction 2026-07-27: none of the 小页面
 frames get dedicated routes):**
 
-| Frame | Where it lives |
-|---|---|
-| SEARCH-OPEN | full-screen overlay, opened by the header search button on `/shop` + `/products/[slug]` (`SearchButton`/`SearchOverlay`, MenuDrawer pattern); Enter hands off to `/shop?q=…`, which really filters the catalog |
-| SHOP-SORT dropdown | in-page overlay on `/shop`; sorting is REAL (New = catalog order, the two price rows sort by cents; Recommended aliases the default until merchandising rules exist) |
-| SHOP-FILTER drawer | in-page overlay on `/shop`, cosmetic (catalog has no collection/occasion/recipient/availability fields; "Show 36 Results" is the mock's fixed count) |
-| PDP-REVIEW / PDP-COLOR / PDP-MEDIA / PDP-UNBOXING | overlays on `/products/[slug]`, opened from the rating row / "View All 120 Colors ›" / the hero photo / unboxing "View All ›" |
-| ACCOUNT-INFO-SHOPPING-DASHBOARD | the signed-in `/account` view (real name, initials, latest order number/date/status/total; mock "Jessica" state in local mode and design reviews) |
-| ACCOUNT-INFO-BUSINESS-DASHBOARD | `/account/business/dashboard`, an unlinked visual route (`/bag` precedent) until business auth exists |
-| ACCOUNT-ORDERS-LIST | `/account/orders` — real orders when signed in (number/date/status/total; neutral placeholder photo — the account feed has no line items), the mock's three cards otherwise; tabs filter for real |
-| ACCOUNT-GIFT-REMINDERS | `/account/reminders`, visual placeholder (no reminders backend); toggles/tabs flip visually |
-| AUTH-SIGNUP-SHOPPING | `/account/signup`, unlinked visual placeholder — see the password conflict below |
-| CARE-* | `/care`, one route, four real tabs; `?tab=` deep-links (order confirmation's CONTACT SUPPORT lands on order-issues) |
+| Frame                                             | Where it lives                                                                                                                                                                                                 |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEARCH-OPEN                                       | full-screen overlay, opened by the header search button on `/shop` + `/products/[slug]` (`SearchButton`/`SearchOverlay`, MenuDrawer pattern); Enter hands off to `/shop?q=…`, which really filters the catalog |
+| SHOP-SORT dropdown                                | in-page overlay on `/shop`; sorting is REAL (New = catalog order, the two price rows sort by cents; Recommended aliases the default until merchandising rules exist)                                           |
+| SHOP-FILTER drawer                                | in-page overlay on `/shop`, cosmetic (catalog has no collection/occasion/recipient/availability fields; "Show 36 Results" is the mock's fixed count)                                                           |
+| PDP-REVIEW / PDP-COLOR / PDP-MEDIA / PDP-UNBOXING | overlays on `/products/[slug]`, opened from the rating row / "View All 120 Colors ›" / the hero photo / unboxing "View All ›"                                                                                  |
+| ACCOUNT-INFO-SHOPPING-DASHBOARD                   | the signed-in `/account` view (real name, initials, latest order number/date/status/total; mock "Jessica" state in local mode and design reviews)                                                              |
+| ACCOUNT-INFO-BUSINESS-DASHBOARD                   | `/account/business/dashboard`, an unlinked visual route (`/bag` precedent) until business auth exists                                                                                                          |
+| ACCOUNT-ORDERS-LIST                               | `/account/orders` — real orders when signed in (number/date/status/total; neutral placeholder photo — the account feed has no line items), the mock's three cards otherwise; tabs filter for real              |
+| ACCOUNT-GIFT-REMINDERS                            | `/account/reminders`, visual placeholder (no reminders backend); toggles/tabs flip visually                                                                                                                    |
+| AUTH-SIGNUP-SHOPPING                              | `/account/signup`, unlinked visual placeholder — see the password conflict below                                                                                                                               |
+| CARE-*                                            | `/care`, one route, four real tabs; `?tab=` deep-links (order confirmation's CONTACT SUPPORT lands on order-issues)                                                                                            |
 
 **Wired beyond the routes:** tab bar renamed back to **Me** (the 07-27 frames
 finally ship both states — outline 921:251, filled 939:174 — so the
@@ -312,17 +312,17 @@ zero) and was imported once — please delete or differentiate the duplicate.
 
 **Routes (dev-decided, owner-delegation precedent):**
 
-| Frame | Where it lives |
-|---|---|
-| ACCOUNT-PERSONAL-INFO-DETAILS 1230:112 | `/account/personal-info` — visual placeholder ("Olivia Carter" is the mock's data; no profile-update backend, so fields are styled divs and Edit/Save stay inert) |
-| ACCOUNT-PREFERENCES-CONTROLS 1234:111 | `/account/preferences` — the four toggles flip visually; no notification/cookie-consent backend yet |
-| ACCOUNT-PRIVACY-SECURITY 1234:191 | `/account/security`, reached from the dashboard's "Account & Privacy" row (previously inert) |
-| ACCOUNT-PRIVACY-POLICY 1234:271 | `/account/privacy-policy` — collapsed accordion only (the design draws no expanded state); mock copy, not a reviewed legal policy |
-| ACCOUNT-LOGOUT-CONFIRM 1234:351 | `/account/logout` — the dashboard's dev "Sign out" row now lands here; **Log out really ends the Supabase session** and returns home, Cancel goes back. This closes the 07-27 "no sign-out control" flag |
-| ACCOUNT-DELETE-CONFIRM 1234:431 | `/account/delete` — unlinked visual route (`/bag` precedent), see the deletion note below |
-| ACCOUNT-RETURNS-AFTER-SALES 1230:119 | `/account/returns` — the dashboard's "Returns & After-Sales" row re-pointed here (was `/care?tab=after-sales`); tabs flip visually, both cases are mock |
-| CARE-SUPPORT-CHAT 1230:120 | `/care/chat` — wired from /care's "Chat with us" + "Contact support" shortcut and the returns "Contact Support" item; the whole conversation is the mock's |
-| ACCOUNT-KEEPSAKE-SHARE 1230:121 | `/account/keepsake` — unlinked visual route; a real card needs order data plus a share/image-render backend |
+| Frame                                  | Where it lives                                                                                                                                                                                           |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ACCOUNT-PERSONAL-INFO-DETAILS 1230:112 | `/account/personal-info` — visual placeholder ("Olivia Carter" is the mock's data; no profile-update backend, so fields are styled divs and Edit/Save stay inert)                                        |
+| ACCOUNT-PREFERENCES-CONTROLS 1234:111  | `/account/preferences` — the four toggles flip visually; no notification/cookie-consent backend yet                                                                                                      |
+| ACCOUNT-PRIVACY-SECURITY 1234:191      | `/account/security`, reached from the dashboard's "Account & Privacy" row (previously inert)                                                                                                             |
+| ACCOUNT-PRIVACY-POLICY 1234:271        | `/account/privacy-policy` — collapsed accordion only (the design draws no expanded state); mock copy, not a reviewed legal policy                                                                        |
+| ACCOUNT-LOGOUT-CONFIRM 1234:351        | `/account/logout` — the dashboard's dev "Sign out" row now lands here; **Log out really ends the Supabase session** and returns home, Cancel goes back. This closes the 07-27 "no sign-out control" flag |
+| ACCOUNT-DELETE-CONFIRM 1234:431        | `/account/delete` — unlinked visual route (`/bag` precedent), see the deletion note below                                                                                                                |
+| ACCOUNT-RETURNS-AFTER-SALES 1230:119   | `/account/returns` — the dashboard's "Returns & After-Sales" row re-pointed here (was `/care?tab=after-sales`); tabs flip visually, both cases are mock                                                  |
+| CARE-SUPPORT-CHAT 1230:120             | `/care/chat` — wired from /care's "Chat with us" + "Contact support" shortcut and the returns "Contact Support" item; the whole conversation is the mock's                                               |
+| ACCOUNT-KEEPSAKE-SHARE 1230:121        | `/account/keepsake` — unlinked visual route; a real card needs order data plus a share/image-render backend                                                                                              |
 
 **Things found while transcribing, for the design team:**
 
@@ -414,14 +414,14 @@ or fixed-overlay screenshot artifacts, noted below).
 
 **New pages this batch:**
 
-| Frame | Where it lives |
-|---|---|
-| mepage-Account & Privacy 1523:3878 | `/account/privacy` — the settings hub; the dashboard's "Account & Privacy" row lands here (was `/account/security`); Delete row stays inert (owner decision pending) |
-| Order Details 1541:362 (≡ my-orders view-details 1523:3347) | the redesigned C-2 serves `/checkout/success` AND the new `/account/orders/details` (orders list "VIEW DETAILS" target, static mock — the `/orders/track` precedent) |
-| track order 1541:254 (≡ 1523:775) | the redesigned C-1 at `/orders/track` (430×1519; vector route map served as one render) |
-| track order_return 1542:628 (≡ loose 1523:1266) | `/orders/track?return=1` — dim + bottom-sheet return-reason modal (absorbs the never-imported RETURNS-REASON-SELECT-OVERLAY 1339:112). **No element triggers it in the design** — unlinked state, DQ-36 |
-| MESTORY 1573:106 | `/story` — wired from the menu drawer's OUR STORY row and A-11's READ OUR STORY CTA (live for the first time) |
-| MECRAFT 1573:107 | `/craft` — wired from the menu OUR CRAFT row and A-4's EXPLORE OUR CRAFT card (was the `#craft` anchor). Imported from the live frame after it stabilized — it grew 509→657→1184→1368 px during the batch |
+| Frame                                                       | Where it lives                                                                                                                                                                                            |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| mepage-Account & Privacy 1523:3878                          | `/account/privacy` — the settings hub; the dashboard's "Account & Privacy" row lands here (was `/account/security`); Delete row stays inert (owner decision pending)                                      |
+| Order Details 1541:362 (≡ my-orders view-details 1523:3347) | the redesigned C-2 serves `/checkout/success` AND the new `/account/orders/details` (orders list "VIEW DETAILS" target, static mock — the `/orders/track` precedent)                                      |
+| track order 1541:254 (≡ 1523:775)                           | the redesigned C-1 at `/orders/track` (430×1519; vector route map served as one render)                                                                                                                   |
+| track order_return 1542:628 (≡ loose 1523:1266)             | `/orders/track?return=1` — dim + bottom-sheet return-reason modal (absorbs the never-imported RETURNS-REASON-SELECT-OVERLAY 1339:112). **No element triggers it in the design** — unlinked state, DQ-36   |
+| MESTORY 1573:106                                            | `/story` — wired from the menu drawer's OUR STORY row and A-11's READ OUR STORY CTA (live for the first time)                                                                                             |
+| MECRAFT 1573:107                                            | `/craft` — wired from the menu OUR CRAFT row and A-4's EXPLORE OUR CRAFT card (was the `#craft` anchor). Imported from the live frame after it stabilized — it grew 509→657→1184→1368 px during the batch |
 
 **Wiring changes:** order-details/track "CONTACT SUPPORT" cards → `/care/chat`
 (the sitemap hangs the chat frame off every support touchpoint — five
@@ -450,9 +450,11 @@ designed path is the hub's Session card → `/account/logout`.
   renamed in the file to `<exact route> · <state> · <viewport> · <original
   team name>` (rule v2.0: the viewport is the ownership boundary — dev sets
   everything before it, the team keeps everything after it verbatim).
-  Not prefixed (no route exists yet): Business·Procurement, BLOG-JOURNAL-PAGE,
-  RETURNS-REQUEST-SUBMITTED-PAGE. Sections keep the team's click-depth scheme
-  (`shop一级`…) pending a design-team conversation.
+  Not prefixed (no route exists yet): Business·Procurement (imported anyway →
+  `/account/business`, `BusinessLogin.tsx`), BLOG-JOURNAL-PAGE (built 2026-07-31
+  then reverted — never marked Ready-for-dev), RETURNS-REQUEST-SUBMITTED-PAGE.
+  Sections keep the team's click-depth scheme (`shop一级`…) pending a design-team
+  conversation.
 - **The file was edited while we imported.** CRAFT grew during the batch;
   STORY's placeholder plates became real photos the same day (re-imported);
   the care frames briefly showed one identical FAQ list on all four tabs
@@ -480,3 +482,40 @@ designed path is the hub's Session card → `/account/logout`.
   **20px top**).
 - B-2 checkout's deferred drift check closed: only the buy-button palette
   moved (green → ink, swapped); the skin's geometry is unchanged.
+
+## 07-31 blog — built then reverted
+
+BLOG-JOURNAL-PAGE (1593:115 / 1596:115, 430×1360) was imported to `/blog` on
+2026-07-31 and **reverted the same day**, because its frame was never marked
+Ready-for-dev in Figma. Nothing for it remains in the repo; the menu BLOG row is
+inert again. If it is re-imported once the frame is marked ready, note the DQs
+found the first time: the article card titles/subtitles clip to a 145px
+"Content" frame (cut off mid-word); the article and featured cards have no
+prototype exits (no blog-detail frame exists); and the ✉ / cart glyphs need the
+frame-render-crop and shared-SVG workarounds (blog's own raster export was
+`.notdef` / null).
+
+## Reminders edit modal — developer findings (owner-directed via comments)
+
+The gift-reminder edit sheet (REMINDERS-EDIT-OPEN-MODAL-PAGE 1599:245,
+430×548) is now imported → a bottom sheet on `/account/reminders`
+(`components/screens/ReminderEditModal.tsx`), opened by the list's "Add
+reminder" button and each card's "Edit" control (both were inert placeholders).
+Band diff 1.6% (font-AA envelope); e2e covers open + Cancel/Escape close.
+
+**Why now — the owner resolved the interaction in Figma comments.** The frame
+had zero prototype wiring, which earlier read as an unresolved gap. The Figma
+comment thread on 1599:245 settles it: Charles asked "add navigation", the
+design team replied it is an **info-storage modal with no jump page — Cancel =
+the entered info is not saved, return to default values**, and Charles replied
+"ok". So the sheet is bottom-anchored with a dim scrim, and ×/Cancel/dim-area
+all discard and close (Save just closes; nothing persists without a backend).
+
+**Still open in the same threads (shipped as static, pixel-exact):** whether
+the lead-time unit is a dropdown, whether the number is stepper vs typed, and
+the date-picker/timezone click states — the design team is "still considering",
+so the number/unit/date fields render as static controls, not live inputs.
+
+**Glyphs:** ▣ (date) ▤ (SMS) and the ⌃⌄/⌄ chevrons are Figma SVG text exports;
+the ✉ SVG-exports as a `.notdef` box (C-2 precedent), so it reuses the
+reminders page's own frame-render crop (`1523-3523.png`) with "Email" as text.

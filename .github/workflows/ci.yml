@@ -27,6 +27,9 @@ jobs:
       - run: npm run typecheck
       - run: npm run format:check
       - run: npm run test:unit
+      # Fails when feature front matter / roadmap.legacy.yaml disagree with the
+      # generated roadmap block in docs/features/README.md.
+      - run: npm run features:check
       # `next build` prerenders pages that read .data/db.json in local mode,
       # and that directory is gitignored — seed it first.
       - run: npm run seed -- --reset

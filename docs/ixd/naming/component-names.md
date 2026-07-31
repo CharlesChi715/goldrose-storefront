@@ -1,11 +1,11 @@
 # Component naming — purpose
 
-|  |  |
-| --- | --- |
+|                  |                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **What this is** | The single naming doc for **components**, in both senses used in this project: reusable Figma components (`GoldRose/Button`) and in-page components — the page bands and controls tagged `data-el` in code (`HOME-HERO-SECTION`). Successor to `docs/ixd/element-names.md` (removed 2026-07-30; old proposal in git history) — the vocabulary word is now **component**, never "element". |
-| **Scope** | Component names in Figma and `data-el` component IDs in code. Frame/section naming is [`figma-route-rule.md`](figma-route-rule.md); product URL handles are [`product-handles.md`](product-handles.md). |
-| **Status** | Draft — naming rules and vocabulary are not written yet |
-| **Owner** | Charles |
+| **Scope**        | Component names in Figma and `data-el` component IDs in code. Frame/section naming is [`figma-route-rule.md`](figma-route-rule.md); product URL handles are [`product-handles.md`](product-handles.md).                                                                                                                                                                                   |
+| **Status**       | Draft — naming rules and vocabulary are not written yet                                                                                                                                                                                                                                                                                                                                   |
+| **Owner**        | Charles                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
