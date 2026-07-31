@@ -34,6 +34,8 @@ const SHEET = "#FFFEFB";
 const ROSE = "#DB596B";
 const ROSE_BG = "#FFEBEB";
 const PINK = "#F3C6D1";
+// 1907:186 toggle-knob-close — the off-state track (cool grey, not sand).
+const TOGGLE_OFF = "#E4E8ED";
 
 // 1523:3488…3520 — the mock's three reminders, frame order.
 const REMINDERS = [
@@ -80,7 +82,7 @@ function Toggle({
       onClick={onFlip}
       style={{
         ...abs(338, y, 48, 20),
-        background: on ? ROSE : SAND,
+        background: on ? ROSE : TOGGLE_OFF,
         borderRadius: 10,
         border: 0,
         padding: 0,
@@ -106,8 +108,10 @@ function Toggle({
 
 export function RemindersScreen() {
   const [tab, setTab] = useState<"Upcoming" | "All">("Upcoming");
+  // Default states per the owner's Figma note on 1523:3473: Email (1907:184
+  // toggle-knob-open) starts on, SMS (1907:186 toggle-knob-close) starts off.
   const [email, setEmail] = useState(true);
-  const [sms, setSms] = useState(true);
+  const [sms, setSms] = useState(false);
   // null = closed; "add"/"edit" open the same sheet with a different title.
   const [edit, setEdit] = useState<null | "add" | "edit">(null);
 
@@ -163,7 +167,8 @@ export function RemindersScreen() {
       >
         3 upcoming
       </div>
-      <div style={{ ...abs(108, 234, 174), ...txt(10, 12, INK) }}>
+      {/* 1523:3481 — regrouped into bottom-add-bin (1907:179) and moved up. */}
+      <div style={{ ...abs(108, 228, 174), ...txt(10, 12, INK) }}>
         Stay ready for every special moment.
       </div>
       <button

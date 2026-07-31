@@ -4163,3 +4163,25 @@ Agent-inbox: detail pane formatting
 - Normalized the first pagination dot to match its siblings across every homepage carousel.
 - Moved the mobile `/shop` sort menu 8px closer to its trigger.
 - Verified the changes in the live browser; TypeScript, ESLint, and Next.js runtime checks passed.
+
+## 2026-07-31 — Branch and worktree cleanup
+
+- Verified `ci/github-actions`, `codex/storefront-qa-ux-fixes`, and `feat/product-reviews` were fully merged into main and their worktrees clean, then deleted all three branches (locally and on GitHub) and removed the three worktrees (/private/tmp QA copy, ~/.codex/worktrees/316b, ~/Developer/goldrose-reviews).
+- Repo is back to the workflow end state: `main` only, single main checkout. Fetch also pruned two stale remote-tracking refs.
+
+## 2026-07-31 — Figma delivery sync (reminders states, returns scaffold, prototype map)
+
+- Deliveries:
+  - Reminders page 1523:3473 aligned to today's edits: SMS toggle defaults
+    off / Email on (owner's "comments for ai agents" note), off-track grey
+    #E4E8ED, caption regroup nudge. Band diff 2.78%; modal 1599:245 had no
+    drift.
+  - New coming-soon scaffold /account/returns/request-submitted wired from
+    the return sheet's Confirm Return (prototype 1523:1430 → un-ready
+    1593:114); 2 new e2e tests; all 20 e2e + unit green.
+  - Processed the file's first prototype map (59 interactions), catalogued
+    the links deliberately not adopted (AI-008) and the pending-from-design
+    queue (simplified homepage, AFTER-SALES 13 screens, gift-guide, blog) in
+    docs/ixd/README.md § "07-31 delivery sync"; session hand-off
+    agent-delivery/sessions/figma-sync-07-31-feat-figma-sync-0731.md
+    (AI-007, AI-008).

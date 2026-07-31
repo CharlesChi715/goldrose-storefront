@@ -269,7 +269,10 @@ export function HomeHeader() {
       {/* Cart art still goes to /checkout, which IS the live cart. /bag holds
           the B-1 design but shows the mock's own line items — repointing the
           icon there would hide the shopper's real basket. Swap once /bag reads
-          lib/cart/store.ts. */}
+          lib/cart/store.ts.
+          AI-TAG(AI-008): AGENT-DECISION — the 07-31 prototype wires this icon
+          (and PDP Add to Cart) to /bag; kept on /checkout deliberately. See
+          /agent-delivery/sessions/figma-sync-07-31-feat-figma-sync-0731.md. */}
       <Link
         href="/checkout"
         style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }}
