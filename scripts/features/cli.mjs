@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Feature-registry CLI — record format and lifecycle: docs/features/README.md.
 // Commands: new, generate, check, validate, list.
+// Commands: new, generate, check, validate, list.
 
 import { parseArgs } from "node:util";
 <<<<<<< Updated upstream
@@ -63,6 +64,7 @@ function frontMatterId(file) {
 function cmdNew(argv) {
   const usage =
     'usage: npm run features:new -- <id> --area frontend|backend [--parent <group-id>] [--title "..."] [--dir <subfolder>] [--order <n>]';
+    'usage: npm run features:new -- <id> --area frontend|backend [--parent <group-id>] [--title "..."] [--dir <subfolder>] [--order <n>]';
   const { values, positionals } = parseArgs({
     args: argv,
     options: {
@@ -72,13 +74,26 @@ function cmdNew(argv) {
       title: { type: "string" },
       dir: { type: "string" },
       order: { type: "string" },
+      id: { type: "string" },
+      area: { type: "string" },
+      parent: { type: "string" },
+      title: { type: "string" },
+      dir: { type: "string" },
+      order: { type: "string" },
     },
     allowPositionals: true,
+  });
   });
 
   const id = values.id ?? positionals[0];
   if (!id) fail(`missing id\n${usage}`);
+  const id = values.id ?? positionals[0];
+  if (!id) fail(`missing id\n${usage}`);
   if (!ID_RE.test(id))
+    fail(
+      `invalid id "${id}" — kebab-case only: lowercase letters, digits, hyphens (e.g. gift-wrapping)`,
+    );
+  if (!values.area) fail(`missing --area\n${usage}`);
     fail(
       `invalid id "${id}" — kebab-case only: lowercase letters, digits, hyphens (e.g. gift-wrapping)`,
     );
@@ -134,6 +149,10 @@ function cmdNew(argv) {
     values.title ?? id[0].toUpperCase() + id.slice(1).replaceAll("-", " ");
   const today = new Date().toISOString().slice(0, 10);
   const record = readFileSync(TEMPLATE, "utf8")
+  const title =
+    values.title ?? id[0].toUpperCase() + id.slice(1).replaceAll("-", " ");
+  const today = new Date().toISOString().slice(0, 10);
+  const record = readFileSync(TEMPLATE, "utf8")
     .replace(/^(id:[ \t]*)example-feature/m, `$1${id}`)
 <<<<<<< Updated upstream
     .replace(
@@ -145,9 +164,13 @@ function cmdNew(argv) {
 >>>>>>> Stashed changes
     .replace(/^(area:[ \t]*)frontend/m, `$1${values.area}`)
     .replace(/^(order:[ \t]*)10/m, `$1${values.order ?? "10"}`)
+    .replace(/^(order:[ \t]*)10/m, `$1${values.order ?? "10"}`)
     .replace(/^(statusChangedAt:[ \t]*)\d{4}-\d{2}-\d{2}/m, `$1${today}`)
     .replace(/^# Feature name$/m, `# ${title}`);
+    .replace(/^# Feature name$/m, `# ${title}`);
 
+  mkdirSync(dirname(dest), { recursive: true });
+  writeFileSync(dest, record);
   mkdirSync(dirname(dest), { recursive: true });
   writeFileSync(dest, record);
 
