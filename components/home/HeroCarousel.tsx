@@ -16,11 +16,10 @@
 import { Carousel } from "@/components/home/Carousel";
 import { abs } from "@/lib/figma-layout";
 
-// 549:97 — the design draws the active dot at 9px and the rest at 7px, at
-// fixed x positions. Only the colour changes as the slide advances; moving or
-// resizing the dots would drift from the frame.
+// 549:97 — keep every indicator at the same visible size. The active slide is
+// communicated by colour, so it does not also need a larger first dot.
 const DOTS = [
-  { x: 184, y: 365, size: 9 },
+  { x: 185, y: 365, size: 7 },
   { x: 203, y: 365, size: 7 },
   { x: 220, y: 365, size: 7 },
   { x: 237, y: 365, size: 7 },

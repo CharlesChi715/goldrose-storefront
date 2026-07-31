@@ -24,9 +24,9 @@ import {
 } from "@/components/home/Carousel";
 import { playfair, notoSC } from "@/lib/fonts";
 
-/** 377:190 — dot x/size verbatim; only the colour changes as the rail moves. */
+/** 377:190 — equal-size dots; only the colour changes as the rail moves. */
 const DOTS = [
-  { x: 185, y: 619, size: 9 },
+  { x: 186, y: 619, size: 7 },
   { x: 204, y: 619, size: 7 },
   { x: 221, y: 619, size: 7 },
   { x: 238, y: 619, size: 7 },

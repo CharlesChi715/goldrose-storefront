@@ -4158,3 +4158,8 @@ Agent-inbox: detail pane formatting
 - Checked at 84 and 52 columns and against the longest entry (AI-006, which has
   two links in one field and overflows the window — it truncates with the
   "… N more line(s)" footer).
+## 2026-07-31 — Storefront carousel and shop-menu QA
+
+- Normalized the first pagination dot to match its siblings across every homepage carousel.
+- Moved the mobile `/shop` sort menu 8px closer to its trigger.
+- Verified the changes in the live browser; TypeScript, ESLint, and Next.js runtime checks passed.
