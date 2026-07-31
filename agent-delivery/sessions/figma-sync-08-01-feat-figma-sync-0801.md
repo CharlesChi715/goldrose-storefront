@@ -31,5 +31,12 @@ the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
   second frame (2024:378, 6087px) beside the old one — still unmarked, still
   ignored per the owner's ack; the login checkbox style debate is unresolved
   between Charles and the team.
+- Second pass (afternoon comments, file itself unchanged): drew the
+  system-default ✓ inside the login band's □ glyph, recolored to the band's
+  ink — the checkbox thread's resolution ("换个颜色，这个就行了") that
+  Charles accepted. The timezone thread also closed with "Ok" and no
+  concrete UTC, so AI-009's `PST (UTC−8)` stands. New team directive
+  "删掉Custom Archive这个框的内容" (dashboard 1523:2536) left alone —
+  pending an updated frame.
 - Details in [`docs/ixd/README.md`](../../docs/ixd/README.md) § "08-01
   delivery sync".

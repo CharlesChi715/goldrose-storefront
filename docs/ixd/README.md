@@ -563,8 +563,15 @@ Re-polled the file (version 2382387929276592531, edited 2026-07-31 14:22 —
 - **The simplified homepage is being built:** a second `/ · default · mobile ·
   homepage` frame (2024:378, 430×6087) now sits in 首页一级 beside the old
   6582px one. Still unmarked; still ignored per the owner-acked instruction.
-- **Login checkbox style debate unresolved:** team says system-default check
-  mark, Charles pushed back ("系统默认的挺丑的") — no dev action either way.
+- **Login check mark settled (afternoon comments, file unchanged):** the
+  thread on the loginpage's "Find Existing Order" □ glyph ended with "换个
+  颜色，这个就行了" and Charles's "Ok" — so the built band now draws the
+  system-default ✓ inside the □, recolored to the band's ink. The frame still
+  shows a bare □. The timezone thread also closed with "Ok" and no concrete
+  UTC — `PST (UTC−8)` stands (AI-009).
+- **New team directive, no action:** "删掉Custom Archive这个框的内容" on the
+  signed-in dashboard (1523:2536) — a design change to arrive as an updated
+  frame; nothing removed from the built dashboard yet.
 
 ## Reminders edit modal — developer findings (owner-directed via comments)
 

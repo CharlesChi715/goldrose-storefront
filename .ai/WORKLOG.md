@@ -4199,6 +4199,16 @@ Agent-inbox: detail pane formatting
     unresolved login-checkbox style debate; docs/ixd README § "08-01
     delivery sync", session hand-off figma-sync-08-01-feat-figma-sync-0801.
 
+## 2026-08-01 — Figma comments pass 2 (login ✓ glyph)
+
+- Deliveries:
+  - Drew the system-default ✓ (recolored to band ink) inside the login
+    page's Find-Existing-Order □ glyph — the checkbox thread's resolution
+    Charles accepted; frame still draws a bare □.
+  - Timezone thread closed with "Ok", no concrete UTC — PST (UTC−8) stands
+    (AI-009). Team's "删掉Custom Archive" dashboard directive noted as
+    pending-from-design.
+
 ## 2026-08-01 — features-generator teardown merged to main
 
 - Squash-merged `learn/features-rebuild` into `main`: removed the legacy
