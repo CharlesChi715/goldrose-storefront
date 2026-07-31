@@ -66,6 +66,37 @@ test("the header menu opens the drawer, navigates, and closes on Escape", async 
   await expect(page.getByRole("dialog", { name: "Menu" })).toHaveCount(0);
 });
 
+test("the reminders Edit control opens the edit sheet; Cancel closes it", async ({
+  page,
+}) => {
+  await page.goto("/account/reminders");
+  // The sheet is an info-storage modal with no navigation (owner-confirmed) —
+  // Edit opens it, Cancel/Escape discards and closes, the URL never changes.
+  await page
+    .getByRole("button", { name: /^Edit / })
+    .first()
+    .click();
+  const sheet = page.getByRole("dialog", { name: "Edit reminder" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByText("Anniversary with Emma")).toBeVisible();
+
+  await sheet.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByRole("dialog", { name: "Edit reminder" })).toHaveCount(
+    0,
+  );
+  await expect(page).toHaveURL(/\/account\/reminders$/);
+
+  // Add reminder opens the same sheet with the "Add" title; Escape closes it.
+  await page.getByRole("button", { name: /Add reminder/ }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Add reminder" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Add reminder" })).toHaveCount(
+    0,
+  );
+});
+
 test("the shop pagination walks pages and reorders the placeholder cards", async ({
   page,
 }) => {
