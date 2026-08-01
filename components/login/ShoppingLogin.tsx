@@ -547,6 +547,19 @@ function FindExistingOrder() {
         width={20}
         height={20}
       />
+      {/* Checked style settled in the Figma thread on 1523:2470 (Charles's
+          "Ok", 07-31): the system-default ✓ glyph, recolored to the band's
+          ink instead of its default color. The frame still draws a bare □. */}
+      <span
+        aria-hidden
+        style={{
+          ...abs(19, 31, 20, 20),
+          ...txt(13, 20, INK, "center"),
+          fontWeight: 600,
+        }}
+      >
+        ✓
+      </span>
       <div
         style={{
           ...abs(53, 20, 192, 16),

@@ -544,6 +544,35 @@ so this pass was drift-alignment plus the file's first real prototype map
   管理"). Keepsake: back button coming ("缺少返回键"). `/gift-guide`
   (1942:182) and the edited blog frame remain unmarked.
 
+## 08-01 delivery sync — developer findings
+
+Re-polled the file (version 2382387929276592531, edited 2026-07-31 14:22 —
+56 minutes after the previous sync's snapshot).
+
+- **`me三级` lost its Ready-for-dev mark.** The team pulled the reminders
+  cluster back into work: the edit modal grew 548→614px and the date/timezone
+  picker frames moved inside the section as `DATE-CONTROL-GROUP` variants.
+  Nothing re-imported — an un-marked section is out of scope until re-marked.
+- **Timezone → Pacific only (comment-delegated change).** On the reminders
+  page's timezone thread the team asked Charles ("夫哥") to use only Pacific
+  Time; he accepted ("好的") and asked which UTC — no concrete answer yet
+  ("问了一下gpt"). The built page now shows `PST (UTC−8)`, following the
+  frame's own standard-offset convention (EST=−5 ⇒ PST=−8); the frame itself
+  still says EST, so this row intentionally diverges until design updates it
+  (AI-009).
+- **The simplified homepage is being built:** a second `/ · default · mobile ·
+  homepage` frame (2024:378, 430×6087) now sits in 首页一级 beside the old
+  6582px one. Still unmarked; still ignored per the owner-acked instruction.
+- **Login check mark settled (afternoon comments, file unchanged):** the
+  thread on the loginpage's "Find Existing Order" □ glyph ended with "换个
+  颜色，这个就行了" and Charles's "Ok" — so the built band now draws the
+  system-default ✓ inside the □, recolored to the band's ink. The frame still
+  shows a bare □. The timezone thread also closed with "Ok" and no concrete
+  UTC — `PST (UTC−8)` stands (AI-009).
+- **New team directive, no action:** "删掉Custom Archive这个框的内容" on the
+  signed-in dashboard (1523:2536) — a design change to arrive as an updated
+  frame; nothing removed from the built dashboard yet.
+
 ## Reminders edit modal — developer findings (owner-directed via comments)
 
 The gift-reminder edit sheet (REMINDERS-EDIT-OPEN-MODAL-PAGE 1599:245,

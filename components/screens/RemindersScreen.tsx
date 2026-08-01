@@ -436,10 +436,16 @@ export function RemindersScreen() {
       <div style={{ ...abs(76, 788.1, 180), ...txt(11.5, 13.8, INK) }}>
         Time zone
       </div>
+      {/* Pacific-only per the team's comment Charles accepted 07-31 ("只用
+          一个太平洋时间"); the frame still says EST — the offset follows its
+          standard-time convention (EST=−5 ⇒ PST=−8) until design answers
+          "UTC 几".
+          AI-TAG(AI-009): AGENT-DECISION — PST (UTC−8) chosen; see
+          /agent-delivery/sessions/figma-sync-08-01-feat-figma-sync-0801.md. */}
       <div
         style={{ ...abs(272, 788.7, 114), ...txt(10.5, 12.6, INK, "right") }}
       >
-        EST (UTC−5)&nbsp;&nbsp;›
+        PST (UTC−8)&nbsp;&nbsp;›
       </div>
 
       {/* info note */}
