@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: engagement-tracking
-kind: feature
-parent: admin-analytics
 area: backend
-order: 40
 
 delivery: in-progress
 rollout: test-deployment

@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: db-backups
-kind: feature
-parent: supabase-db
 area: backend
-order: 30
 
 delivery: backlog
 rollout: not-deployed

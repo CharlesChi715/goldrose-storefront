@@ -86,10 +86,8 @@ npm run agent-inbox          # what questions are waiting on you
 npm run agent-inbox:close    # close one — picks from a list, archives it
 npm run agent-inbox:try      # same menus, writes nothing (practice run)
 npm run agent-inbox:check    # are the inbox's three records still in sync
-npm run features:generate    # rebuild docs/features/README.md from the records
-npm run features:check       # fail if that roadmap has drifted (CI runs this)
 npm run format               # Prettier over the repo
-npm run polish               # format + features:generate, before committing
+npm run polish               # format, before committing
 ```
 
 Two conventions worth knowing before you touch either:

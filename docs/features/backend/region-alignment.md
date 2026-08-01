@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: region-alignment
-kind: feature
-parent: infrastructure
 area: backend
-order: 10
 
 delivery: verified
 rollout: test-deployment

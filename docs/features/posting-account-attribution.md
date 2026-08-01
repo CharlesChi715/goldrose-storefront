@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: posting-account-attribution
-kind: feature
-parent: admin-analytics
 area: backend
-order: 30
 
 delivery: uat
 rollout: test-deployment

@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: card-payments
-kind: feature
-parent: native-checkout
 area: frontend
-order: 50
 
 delivery: ready
 rollout: not-deployed

@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: product-content-pipeline
-kind: feature
-parent: product-content
 area: backend
-order: 10
 
 delivery: backlog
 rollout: not-deployed
