@@ -3,23 +3,6 @@
 Agent session hand-off. Open matters first; what the session delivered is at
 the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
 
-## AI-006 · `OWNER-DECISION` · `OPEN`
-
-- **Affected place:** [`agent-delivery/sessions/`](../sessions) and its
-  [README description](../README.md#L10)
-- **What needs deciding:** The folder holding these per-session files is
-  currently named `sessions/`. Charles said he would pick the proper name
-  later, so this is a placeholder choice, not a settled convention.
-- **Why it matters:** The name appears in every in-place `AI-TAG(...)` link in
-  the codebase, so renaming later means a repo-wide find-and-replace. Cheap
-  today (7 links), more expensive every week it waits.
-- **Recommendation:** Keep `sessions/` — it says exactly what one file is (one
-  agent session's hand-off) and does not repeat the parent folder's word
-  "delivery". Alternatives considered: `inbox/` (collides with the index file's
-  own name), `notes/` (too vague), `handoffs/` (accurate but longer). If you
-  prefer a different word, say it and the rename is one commit.
-- **Charles's response:** _(write the chosen folder name here, or "keep")_
-
 ---
 
 ## Delivered this session
