@@ -99,8 +99,8 @@ Charles first.
   derives handles, collisions throw (no `-2`), non-draft handles are frozen, and a
   unit test replays the doc's fixtures. ⚠️ Duplicate in the Chinese admin (副本
   prefix) now errors by design; `product_redirects` still doesn't exist.
-- The feature-roadmap generator was **torn down 2026-08-01** and is being
-  rebuilt from scratch on `learn/features-rebuild` (roadmap generated from
+- The feature-roadmap generator was **torn down 2026-08-01** (merged to
+  `main`); a from-scratch rebuild is in progress (roadmap generated from
   record front matter only — no legacy registry, no groups). Until it lands,
   [`docs/features/README.md`](docs/features/README.md) has no generated block
   and there are no `features:*` npm scripts or CI check.

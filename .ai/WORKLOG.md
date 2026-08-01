@@ -4185,3 +4185,12 @@ Agent-inbox: detail pane formatting
     docs/ixd/README.md § "07-31 delivery sync"; session hand-off
     agent-delivery/sessions/figma-sync-07-31-feat-figma-sync-0731.md
     (AI-007, AI-008).
+
+## 2026-08-01 — features-generator teardown merged to main
+
+- Squash-merged `learn/features-rebuild` into `main`: removed the legacy
+  roadmap generator (registry YAML, `scripts/features/` lib+cli, unit test,
+  `features:*` npm scripts, per-record `_group.md` files) — ~1,370 lines.
+- SUMMARY.md updated: teardown is on `main`; the from-scratch rebuild
+  continues (record front matter only). Scratch `scripts/features/cli.mjs`
+  stays local/untracked until the rebuild is real.
