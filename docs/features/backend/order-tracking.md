@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: order-tracking
-kind: feature
-parent: shipping-tracking
 area: backend
-order: 10
 
 delivery: uat
 rollout: test-deployment

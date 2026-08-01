@@ -1,10 +1,6 @@
 ---
-schemaVersion: 1
 id: promotion-emails
-kind: feature
-parent: marketing
 area: backend
-order: 10
 
 delivery: backlog
 rollout: not-deployed

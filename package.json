@@ -15,14 +15,11 @@
     "test:e2e:update": "playwright test --update-snapshots",
     "seed": "node scripts/seed.ts",
     "test:unit": "node --test tests/unit/*.test.ts",
-    "features:new": "node scripts/features/cli.mjs new",
-    "features:generate": "node scripts/features/cli.mjs generate",
-    "features:check": "node scripts/features/cli.mjs check",
     "agent-inbox": "node scripts/agent-inbox.mjs list",
     "agent-inbox:close": "node scripts/agent-inbox.mjs close",
     "agent-inbox:try": "node scripts/agent-inbox.mjs close --dry-run",
     "agent-inbox:check": "node scripts/agent-inbox.mjs check",
-    "polish": "npm run format && npm run features:generate"
+    "polish": "npm run format"
   },
   "dependencies": {
     "@shopify/polaris": "^13.9.5",
