@@ -37,7 +37,7 @@ Actual code, documents, images, and other deliverables stay in their proper
 repository locations. This folder holds only the message about them.
 
 Other task-specific workflows are also skills (load-on-demand), e.g.
-`process-figma-delivery` for design-team deliveries.
+`figma-sync` for design-team deliveries.
 
 ## Never read the archive uninvited
 
