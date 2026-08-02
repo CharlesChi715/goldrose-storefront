@@ -99,10 +99,17 @@ Charles first.
   design's updated frame (AI-009 closed 08-02). The 08-02 sync imported the
   re-marked `me三级` section (returns flow, date pickers) and the checkout
   redesign; the timezone-picker sheet was NOT built (contradicts the accepted
-  Pacific-only comment). Pending from design: the simplified homepage (second
-  frame 2024:378 — keep ignoring both homepage frames), the ADDRESS-BOOK
-  section, the 7 policy pages, MENU/PDP/mepage/story-long redesigns, and
-  `/gift-guide` ([`docs/ixd/README.md`](docs/ixd/README.md)).
+  Pacific-only comment). A **second, scoped 08-02 pass** then synced just two
+  frames from the marked `me一级` section: `/account/signup` became the
+  unified **"Continue with your email"** page (no name field, CONTINUE button,
+  no Sign-in link, bottom nav band added), and the signed-in `/account`
+  dashboard re-imported from its new frame id 2210:310 (Custom Archive tile
+  back → four tiles; the inert "Address Management ›" row gone at source). The
+  same pass made the dashboard greeting fall back to the visitor's **full
+  email address** when they have no profile name. Pending from design: the
+  simplified homepage (second frame 2024:378 — keep ignoring both homepage
+  frames), the ADDRESS-BOOK section, the 7 policy pages, MENU/PDP/story-long
+  redesigns, and `/gift-guide` ([`docs/ixd/README.md`](docs/ixd/README.md)).
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
   coverage is partial: only 3 of the home page's 17 bands carry a

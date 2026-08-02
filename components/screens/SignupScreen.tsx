@@ -2,9 +2,12 @@
 /**
  * ROLE OF THIS FILE
  * /account/signup — pixel-exact implementation of "loginpage-Create a
- * shopping account", re-imported 2026-08-02 from 1523:3315: the password +
- * confirm-password fields were removed at source, so the form now matches
- * the email-code auth decision (Full name / email / verification code).
+ * shopping account", re-imported 2026-08-02 (second delivery of the day)
+ * from 1523:3315. The frame stopped being a sign-up form and became a
+ * unified email entry point: the hero now reads "Continue with your email",
+ * the Full name field is gone at source (email + verification code only),
+ * the button says CONTINUE, the canvas grew 932 → 974, and a bottom
+ * navigation band was added — Charles's "加一下nav吧" comment, delivered.
  * Geometry, colors, fonts and copy verbatim from the Figma REST data; input
  * icons are Figma's own SVG exports (the ✉ is a crop of the frame render —
  * it SVG-exports as a .notdef box, C-2 precedent).
@@ -15,12 +18,17 @@
  *
  * The form stays a VISUAL PLACEHOLDER of styled divs, inert until
  * customer-auth activation (release queue #2) — live-looking inputs that go
- * nowhere are the flagged hazard. Only "Sign in ›" is live and goes to
- * /account, where the real link-based flow already works; the login page
- * now links here in return.
+ * nowhere are the flagged hazard. The frame also deleted its "Already have
+ * an account? Sign in ›" link, so the page's live ways back are the header
+ * back arrow (→ /account) and the shared nav's Me tab; CONTINUE carries a
+ * prototype NAVIGATE action with a null destination, so there is nothing to
+ * wire it to.
+ *
+ * AI-TAG(AI-019): AGENT-DECISION — the frame deleted the "Already have an
+ * account? Sign in ›" link, so the build did too. See
+ * /agent-delivery/sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md.
  */
 
-import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
 import { ScaleFrame } from "@/components/chrome";
 import { GoldRoseWordmark } from "@/components/screens/account-chrome";
@@ -34,10 +42,10 @@ const CREAM = "#FFF6EC";
 const SHEET = "#FFFEFB";
 const HINT = "#75665E";
 
-// 1561:115/114/111 — the three fields, frame order (08-02: the two password
-// fields are gone at source; Verification code moved up to y548): box y,
-// icon export (ink = SVG natural size; crop = the ✉ render-crop's measured
-// box), hint text.
+// 1561:114/111 — the two remaining fields, frame order (08-02 second pass:
+// Full name is gone at source, so email moved up to y400 and the code field
+// to y474): box y, icon export (ink = SVG natural size; crop = the ✉
+// render-crop's measured box), hint text.
 const FIELDS: Array<{
   y: number;
   icon: string;
@@ -46,15 +54,14 @@ const FIELDS: Array<{
   hint: string;
   sendCode?: boolean;
 }> = [
-  { y: 400, icon: "1523-3322", ink: [14, 17], hint: "Full name" },
   {
-    y: 474,
+    y: 400,
     icon: "1523-3325",
-    crop: [50.5, 496.5, 21.5, 14.5],
+    crop: [50.5, 422.5, 21.5, 14.5],
     hint: "Enter your email address",
   },
   {
-    y: 548,
+    y: 474,
     icon: "1523-3328",
     ink: [22, 22],
     hint: "Verification code",
@@ -64,11 +71,12 @@ const FIELDS: Array<{
 
 export function SignupScreen() {
   return (
+    // Canvas 974 = the frame's nav band top (915) + 59.
     <ScaleFrame
-      height={932}
+      height={974}
       background={CREAM}
       fontClass={notoSC.className}
-      nav={false}
+      navActive="Account"
     >
       {/* Brand Navigation (1523:3343) — ‹ back; the owner's GoldRose art
           substituted for the frame's "ELDREVE" wordmark image at its box
@@ -89,16 +97,18 @@ export function SignupScreen() {
           whiteSpace: "pre-line",
         }}
       >
-        {"Create a\nshopping\naccount"}
+        {"Continue\nwith your\nemail"}
       </div>
       <div
         style={{
-          ...abs(28, 256.2, 225, 70),
+          ...abs(28, 247.8, 225, 70),
           ...txt(14, 16.8, INK),
           whiteSpace: "pre-line",
         }}
       >
-        {"Save favorites, track orders,\nand enjoy effortless gifting."}
+        {
+          "View your orders, track deliveries,\nand manage your shopping details\nsecurely."
+        }
       </div>
       <img
         src="/veloria/screens/1523-3318.png"
@@ -124,7 +134,7 @@ export function SignupScreen() {
           fontWeight: 700,
         }}
       >
-        Create your shopping account
+        Enter your email to continue
       </div>
 
       {FIELDS.map((field) => (
@@ -196,9 +206,11 @@ export function SignupScreen() {
         I agree to the Terms &amp; Privacy Policy
       </div>
 
-      {/* CREATE — inert placeholder (no password signup on the live flow) */}
+      {/* CONTINUE (2436:377) — inert placeholder: its prototype action is a
+          NAVIGATE with a null destination, and the real email flow lives on
+          /account until customer-auth activation */}
       <div
-        style={{ ...abs(32, 810, 366, 48), background: INK, borderRadius: 10 }}
+        style={{ ...abs(32, 829, 366, 48), background: INK, borderRadius: 10 }}
         aria-disabled="true"
       >
         <span
@@ -211,26 +223,9 @@ export function SignupScreen() {
             fontWeight: 500,
           }}
         >
-          CREATE SHOPPING ACCOUNT
+          CONTINUE
         </span>
       </div>
-
-      <Link
-        href="/account"
-        style={{ ...abs(56, 862, 318, 28), display: "block" }}
-      >
-        <span
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: 6.5,
-            ...txt(12.5, 15, INK, "center"),
-          }}
-        >
-          Already have an account?&nbsp;&nbsp;Sign in&nbsp;&nbsp;›
-        </span>
-      </Link>
     </ScaleFrame>
   );
 }

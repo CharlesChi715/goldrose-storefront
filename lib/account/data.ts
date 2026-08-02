@@ -64,7 +64,12 @@ function emailVerifiedByProvider(user: User): boolean {
 
 /**
  * Pick a display name from the user's metadata (full_name, name, nickname —
- * first non-empty wins), falling back to the email's local part, then "there".
+ * first non-empty wins), falling back to the full email address, then
+ * "there". The owner's rule (2026-08-02): greet people by their name, and
+ * when there is no name show the email account itself — the whole address,
+ * not just its local part, so the greeting names the account they signed in
+ * with. Accounts created by the email-code flow carry no name metadata, so
+ * the email branch is the common case until profile editing ships.
  *
  * @param user - The signed-in Supabase auth user.
  * @returns A trimmed, never-empty display name.
@@ -76,7 +81,7 @@ function displayNameOf(user: User): string {
       return meta[key].trim();
     }
   }
-  return (user.email ?? "").split("@")[0] || "there";
+  return (user.email ?? "").trim() || "there";
 }
 
 /**

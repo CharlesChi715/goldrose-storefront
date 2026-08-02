@@ -22,7 +22,7 @@ git checkout feat/figma-sync
 git fetch origin && git merge main
 ```
 
-⚠️ **This branch is TRUE-MERGE ONLY — never squash.** Unlike the rest of the
+**This branch is TRUE-MERGE ONLY — never squash.** Unlike the rest of the
 repo (squash-merge PRs), `feat/figma-sync` is long-lived: its PRs into `main`
 must use **"Create a merge commit"** on GitHub. A single squash breaks the
 shared history and causes phantom conflicts on later syncs.
