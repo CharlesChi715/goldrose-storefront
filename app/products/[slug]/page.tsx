@@ -3,6 +3,10 @@
  * ROLE OF THIS FILE
  * The product detail page (/products/[slug]) — a pixel-exact implementation
  * of the 详情页 frame (node 2:2, 430×2501) from the VELORIA Figma file.
+ *
+ * AI-TAG(AI-016): AGENT-UNSURE — Figma's Ready-for-dev PDP is now 1523:3971
+ * at 430×1616; this page is still the July layout. See
+ * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
  * Every coordinate, size, color, and font value comes verbatim from the
  * Figma REST API; photo assets in /public/veloria are exact 2x node renders.
  *

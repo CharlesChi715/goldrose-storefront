@@ -4222,3 +4222,76 @@ Agent-inbox: detail pane formatting
   pages stay reachable via the menu drawer's FOR BUSINESS row. Band diff vs
   frame 2024:284 = 1.15%. Home/shop/product-detail pixel baselines
   regenerated (the nav is captured in full-page shots). 89 e2e green.
+
+## 2026-08-02 — Figma sync: two-step checkout, returns flow, date pickers (feat/figma-sync)
+
+- Processed file version 2382879093671597823. `me三级` re-marked Ready-for-dev;
+  checkout redesigned as two steps (old frame deleted at source).
+- Rebuilt /checkout as the 2157:239/384 two-step flow (?step=payment), pay bar
+  fixed to viewport, PayPal/mock/skip branches preserved; CheckoutSkin.tsx
+  deleted; dev bands: country, cart rows, discount, gift note (AI-013).
+- Imported the returns flow (7 screens + reason sheet, all mock), replacing
+  the AI-007 scaffold and the old ReturnsScreen.
+- Reminder modal re-imported (430×589) with live Y/M/D dropdowns (AI-011);
+  timezone row → "Pacific Time (PT)UTC-8" (AI-009 closed); 2030:190 picker
+  sheet deliberately not built (AI-010).
+- Security 1526:111 (no password inputs), privacy hub restructure, policies
+  hub + 7 /policies/* scaffolds (AI-012), signup without passwords (now
+  linked), dashboard tiles/rows, login self-service card.
+- Verified: build, 63 unit + 91 e2e green, band-diffs 1.4–2.9% + modal 1.76%;
+  home/shop pixel baselines regenerated (pre-existing Chrome AA drift, 37px).
+- Hand-off: session file figma-sync-08-02-feat-figma-sync.md; closed AI-007,
+  AI-009; opened AI-010…AI-015; docs/ixd 08-02 section; SUMMARY refreshed.
+
+## 2026-08-02 (later) — owner answers on the 08-02 sync
+
+- AI-010 ANSWERED+APPLIED: design un-marked the timezone sheet; timezone now
+  auto-switches 冬令时/夏令时 via lib/reminders/timezone.ts (America/Los_Angeles
+  offset, 4 unit tests incl. the 2026 switch instants). Closed.
+- AI-011: cannot post the Figma reply — FIGMA_TOKEN is read-only
+  (file_comments:read; POST 403). Re-tagged OWNER-TODO with the reply text
+  ready to paste.
+- AI-012 ANSWERED: leave the /policies/* scaffolds untouched. Stays open as
+  the placeholder tracker; carries the AI-014 redirect instruction.
+- AI-013: entry rewritten in plain language (four missing controls, why each
+  exists). Still open pending Charles's OK.
+- AI-014 ANSWERED+CLOSED: keep /account/privacy-policy until /policies/privacy
+  imports, then redirect; instruction recorded in AI-012 + docs/ixd 08-02.
+- AI-015: explained Figma's DRAG trigger (a second prototype outcome on the
+  same button — presentation trick, not app behaviour). Open pending his call.
+
+## 2026-08-02 16:35 AEST
+
+- eldreve.com is LIVE on the storefront: attached `eldreve.com` + `www` to
+  the Vercel project via CLI, Charles added the two grey-cloud CNAMEs
+  (`@`/`www` → 4dc492244a7e5b81.vercel-dns-017.com) in Cloudflare, Vercel
+  verified both, Let's Encrypt cert issued (~90s), HTTPS 200. Verified
+  against official docs: Cloudflare Registrar locks nameservers to
+  Cloudflare (records-based setup is the only path); apex CNAME works via
+  Cloudflare flattening. Updated SUMMARY OQ-4 (re-applied after external
+  overwrite) and the gold_rose registration record. Pending: ICANN email
+  verification click, billing → hua PayPal, auth cutover (passkey RP ID /
+  Supabase / PayPal), GoldRose→ELDREVE rename.
+- Follow-ups from Charles's second round: AI-011 clarified (the scroll-wheel
+  dropdown IS implemented in code — DAYS 1–31 / MONTHS Jan–Dec generated,
+  menus scroll; only the reply to the team is still owner work, plus a second
+  reply on how to represent data-dependent destinations). AI-013 evidenced
+  (new item card 2157:263 has no qty/remove vs the deleted skin's
+  onQtyUp/onQtyDown/onRemove; summary 2157:479 keeps a Discount row; admin
+  discounts live at app/admin/(dashboard)/discounts; gift note is typed by
+  the CUSTOMER and read by the ADMIN on the order's Notes). AI-015 confirmed
+  and closed. Noted in docs/ixd: DQ-34 inverts — SUMMARY OQ-4 now says the
+  brand becomes ELDREVE, so the GoldRose wordmark substitution must stop for
+  new imports (rename itself is its own project).
+- 08-02 (later still): PDP ratings-summary block wired to the reviews drawer
+  (second prototype trigger, 1523:4109 — the star row was already wired);
+  filed AI-016 (PDP still renders the July 2:2 2501px frame while the
+  Ready-for-dev PDP is 1523:3971 at 1616px). Owner removed the checkout
+  quantity/remove band ("keep the same with figma") — deleted, extra cart
+  lines still listed read-only on both steps; filed AI-017 because cart
+  editing now exists nowhere in the live site until /bag is wired.
+- 08-02: owner also removed the COUNTRY / REGION band ("keep the same with
+  figma"). Country is now a read-only value from the server's geo-IP default;
+  the rest-of-world e2e drives x-vercel-ip-country instead of a select, which
+  exercises the real production path. Filed AI-018 (geo-IP mis-guess
+  mis-prices shipping; needs the "US-only at launch?" answer, bears on OQ-2).

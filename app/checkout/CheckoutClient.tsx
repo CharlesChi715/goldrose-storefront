@@ -1,50 +1,72 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * The client half of /checkout (§8, §10), wearing the B-2 · Checkout design
- * (1523:421, the 2026-07-30 reflow): the five pixel-exact modules of
- * components/checkout/CheckoutSkin are stacked at their frame offsets and this
- * file supplies every live value and control. The checkout itself is unchanged
- * — cart summary with quantity controls, ship-to country selector (zone-priced
- * shipping), optional gift message (→ the order's Notes card), and payment.
- * With PayPal configured the real JS-SDK button drives /api/paypal/create +
- * /capture from inside the Pay-Securely CTA's slot (the reflow removed the
- * express-wallet module that used to host it); otherwise the payment section's
- * PayPal row and the local card form drive /api/checkout — full click-through,
- * no money anywhere. With `skipPayment` (the testing CHECKOUT_SKIP_PAYMENT
- * flag, §10.4) both of those are replaced by a single Place order CTA; the
- * payment code below is untouched, only unrendered.
+ * The client half of /checkout (§8, §10), wearing the 2026-08-02 two-step
+ * checkout redesign: "/checkout · details-entry" (2157:239, 430×962) and
+ * "/checkout · saved-address · payment confirmation" (2157:384, 430×1576).
+ * The design deleted the old single-page B-2 frame (1523:421), so the flow is
+ * now one route with two steps — step "details" collects contact + delivery
+ * address and ends in CONTINUE TO PAYMENT; step "payment" shows the saved
+ * address, shipping method, payment methods, live order summary, and a pay
+ * bar **fixed to the viewport bottom** (the design team's "固定在底部"
+ * answer — the bar overflows its own frame, i.e. it is sticky by intent).
+ * The step lives in the ?step= query so browser Back returns to details.
  *
- * WHY THE CONTROLS LIVE HERE AND NOT IN THE SKIN
- * The skin's fields take no `id`, and B-2 has no gift-message field, no
- * discount-code card (the reflow deleted it, but the summary still prices a
- * Discount row and §8 keeps the feature, so a band in the design's own field
- * language carries it — flagged to the design team), no code-valued country
- * picker and only one item card. So each module paints its own card + label
- * with an empty value and the real control is rendered here at that field's
- * own value-box coordinates (frame-absolute, the house idiom); the skin's
- * parked read-only inputs are kept out of the tab order by one scoped rule in
- * <StageStyles>. Everything the design shows that has no backend (Apple Pay /
- * Afterpay, the marketing and save-card opt-ins, the FAQ rows, Ask Auri)
- * stays inert art.
+ * The checkout itself is unchanged: cart lines with quantity controls,
+ * ship-to country (zone-priced shipping), optional gift message (→ the
+ * order's Notes card), discount codes (§8), and payment. With PayPal
+ * configured the real JS-SDK button drives /api/paypal/create + /capture
+ * from inside the fixed pay bar's CTA slot; otherwise the payment section's
+ * PayPal row and the local card wells drive /api/checkout — full
+ * click-through, no money anywhere. With `skipPayment` (CHECKOUT_SKIP_PAYMENT,
+ * §10.4) both are replaced by a single Place-order CTA in the pay bar.
+ *
+ * DEV BANDS (design's field language, flagged to the design team):
+ * - Discount code: the design deleted the code-entry card again, but §8 keeps
+ *   the feature, so the band sits above the Order Summary on the payment step.
+ * - Gift message: no field in the design; the note is the order's Notes card,
+ *   so its band stays on the details step.
+ *
+ * NO BASKET CONTROLS AND NO COUNTRY FIELD (owner decisions, 2026-08-02):
+ * "keep the same with figma". The item card's "Qty 1" is static text with
+ * only EDIT →, and the address card ends at CITY / STATE / ZIP as drawn.
+ * Consequences, both filed with the agent inbox:
+ * - Quantity and remove exist nowhere in the live site until /bag is wired
+ *   to the real cart (AI-017).
+ * - Shipping is still zone-priced, but the zone now comes solely from
+ *   Vercel's geo-IP header (`x-vercel-ip-country`, "US" when absent) with no
+ *   way for the customer to correct a wrong guess (AI-018). The PayPal
+ *   branch is unaffected — PayPal collects the real address itself.
+ *
+ * AI-TAG(AI-017): AGENT-BLOCKED — no cart editing anywhere in the live site;
+ * wire /bag to the real cart. See
+ * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
+ * AI-TAG(AI-018): OWNER-DECISION — shipping zone comes from geo-IP alone; is
+ * the store US-only at launch? Same session file.
+ *
+ * Deliberately NOT imported: the shipping rows' mock prices ($14.99/$24.99) —
+ * the picker is cosmetic by the owner's decision (per-method pricing has no
+ * backend; the only charged figure is the summary's zone rate), so the rows
+ * carry no prices, same as the 07-30 build. The PHONE (Optional) field is
+ * inert art: /api/checkout's shipping payload has no phone. Apple Pay /
+ * Afterpay rows, the marketing opt-in line and the three FAQ accordions stay
+ * inert art (no backend / no expanded state designed).
+ *
+ * AI-TAG(AI-013): AGENT-DECISION — the dev bands and the stripped shipping
+ * prices above are reversible calls for Charles/design to confirm. See
+ * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
  */
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScaleFrame } from "@/components/chrome";
 import { abs } from "@/lib/figma-layout";
-import {
-  CheckoutContactDelivery,
-  CheckoutHeader,
-  CheckoutHelpCta,
-  CheckoutOrderItem,
-  CheckoutShippingPayment,
-} from "@/components/checkout/CheckoutSkin";
-import { notoSC } from "@/lib/fonts";
+import { notoSC, playfair } from "@/lib/fonts";
 import { formatMoney } from "@/lib/money";
-import { useCart, type CartLine } from "@/lib/cart/store";
+import { useCart, type CartLine, type CartLineView } from "@/lib/cart/store";
 import {
   computeShipping,
   zoneForCountry,
@@ -56,9 +78,11 @@ import type { PaymentMethodId } from "@/lib/checkout/types";
 import type { CatalogProduct } from "@/lib/supabase/types.ts";
 
 const brandName = "GoldRose";
+const A = "/veloria/screens";
 
 /** What /api/checkout accepts — "none" is the skip-payment testing flow. */
 type SubmitMethod = PaymentMethodId | "none";
+type Step = "details" | "payment";
 
 function formatCardNumber(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 19);
@@ -73,15 +97,25 @@ function formatExpiry(value: string): string {
   return `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }
 
-/* ---------- B-2 design tokens + the live controls parked on the skin ---------- */
+/* ---------- design tokens (2157:239 / 2157:384) ---------- */
 
 const INK = "#3B2F2F";
 const GREEN = "#09442E";
 const MUTED = "#8C8075";
 const RED = "#B82924";
-const HAIRLINE = "inset 0 0 0 1px #E5D9C9";
+const CREAM = "#FFF6EC";
+const SAND = "#E5D9C9";
+const GOLD = "#D4AF37"; // field labels, current-step ring, CTA arrows
+const AMBER = "#C88217"; // done-step fill, EDIT/CHANGE links, small labels
+const VISA_BLUE = "#144DB2";
+const PINK = "#F3C6D1"; // DEFAULT badge
+/** Credit-card panel fill: #FFF6EC @31% MULTIPLY flattened over white — CSS
+    blend modes are GPU-composited and not bit-deterministic, so the panel
+    ships the precomputed flat color instead. */
+const PANEL = "#FFFCF9";
+const HAIRLINE = `inset 0 0 0 1px ${SAND}`;
 
-/** 753:189 field-value type, on a control stripped of its own chrome. */
+/** Field-value type (the redesign's 13px value line). */
 const VALUE: React.CSSProperties = {
   appearance: "none",
   border: 0,
@@ -89,13 +123,18 @@ const VALUE: React.CSSProperties = {
   background: "transparent",
   padding: 0,
   margin: 0,
-  fontSize: 11,
-  lineHeight: "13.2px",
+  fontSize: 13,
+  lineHeight: "15.6px",
   fontWeight: 400,
   color: INK,
 };
 
-/** 755:131 card-well type (the payment card's wells set 10/12, not 11/13.2). */
+/** Small-field value type (CITY/STATE/ZIP row) and the card wells (10/12). */
+const SMALL_VALUE: React.CSSProperties = {
+  ...VALUE,
+  fontSize: 11,
+  lineHeight: "13.2px",
+};
 const WELL_VALUE: React.CSSProperties = {
   ...VALUE,
   fontSize: 10,
@@ -107,11 +146,6 @@ function StageStyles() {
     <style>{`
       .b2-live::placeholder{color:${MUTED};opacity:1}
       .b2-live:focus-visible{outline:2px solid ${GREEN};outline-offset:2px}
-      /* Each skin field paints the design's card + label with an empty value;
-         its own input is parked read-only because the live twin next to it
-         carries the id and the state, so keep the parked one out of the tab
-         order (and out of the accessibility tree). */
-      .b2-stage input[readonly]{display:none}
     `}</style>
   );
 }
@@ -126,6 +160,8 @@ function Txt({
   color,
   weight = 400,
   align,
+  ls,
+  serif,
   wrap,
   live,
   children,
@@ -138,6 +174,9 @@ function Txt({
   color: string;
   weight?: number;
   align?: "center" | "right";
+  ls?: number;
+  /** Playfair Display (the design's serif) instead of Noto Sans SC. */
+  serif?: boolean;
   wrap?: boolean;
   /** marks the box as carrying real data (`data-live-text`) */
   live?: boolean;
@@ -150,25 +189,23 @@ function Txt({
     color,
     fontWeight: weight,
     margin: 0,
+    ...(ls ? { letterSpacing: ls } : {}),
     ...(align ? { textAlign: align } : {}),
     ...(wrap ? {} : { whiteSpace: "nowrap" }),
   };
+  const cls = serif ? playfair.className : notoSC.className;
   return live ? (
-    <p data-live-text className={notoSC.className} style={style}>
+    <p data-live-text className={cls} style={style}>
       {children}
     </p>
   ) : (
-    <p className={notoSC.className} style={style}>
+    <p className={cls} style={style}>
       {children}
     </p>
   );
 }
 
-/**
- * One live text control on a B-2 field's value line, plus the inline error the
- * old form showed under its field (each 48px field box keeps ~14px free under
- * its value line; the 36px card wells put theirs at the foot of the card).
- */
+/** One live text control on a field's value line, plus its inline error. */
 function LiveInput({
   id,
   x,
@@ -182,6 +219,7 @@ function LiveInput({
   placeholder,
   inputMode,
   autoComplete,
+  small,
   well,
 }: {
   id: string;
@@ -192,11 +230,13 @@ function LiveInput({
   value: string;
   onChange: (value: string) => void;
   error?: string;
-  /** absolute y of the inline error; omitted keeps it 15px under the value */
+  /** absolute y of the inline error line */
   errorY?: number;
   placeholder?: string;
   inputMode?: "text" | "email" | "numeric";
   autoComplete?: string;
+  /** 11/13.2 type for the CITY/STATE/ZIP row */
+  small?: boolean;
   /** 10/12 type for the payment card's wells */
   well?: boolean;
 }) {
@@ -214,7 +254,10 @@ function LiveInput({
         placeholder={placeholder}
         inputMode={inputMode}
         autoComplete={autoComplete}
-        style={{ ...abs(x, y, w), ...(well ? WELL_VALUE : VALUE) }}
+        style={{
+          ...abs(x, y, w),
+          ...(well ? WELL_VALUE : small ? SMALL_VALUE : VALUE),
+        }}
       />
       {error && errorY !== undefined ? (
         <Txt x={x} y={errorY} w={w} size={9} lh={10.8} color={RED} weight={500}>
@@ -229,40 +272,313 @@ function LiveInput({
 const BLANK_PIXEL =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-/** The extra-rows band's quantity control, in the skin's 20×20 stepper box. */
-function StepperButton({
+/* ---------- 01 · header + progress (shared by both steps) ---------- */
+
+const STEP_X = [16, 118, 220, 322];
+const STEP_LABELS = ["Bag", "Details", "Payment", "Delivery"];
+
+/**
+ * Header band (0…143): back raster, the frame's own "GOLDROSE" text wordmark
+ * (this redesign sets the brand as text — no ELDREVE image here), and the
+ * four-step progress row. Step states verbatim from the frames: done = amber
+ * fill + white ✓, current = cream + gold ring + gold label, upcoming = cream
+ * + sand ring, and Delivery always draws white + amber ring (both frames).
+ */
+function CheckoutHeader({ step, onBack }: { step: Step; onBack: () => void }) {
+  const current = step === "details" ? 1 : 2; // index into STEP_LABELS
+  return (
+    <div style={{ ...abs(0, 0, 430, 143), background: CREAM }}>
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="Back"
+        style={{
+          ...abs(16, 14, 44, 44),
+          background: "transparent",
+          border: 0,
+          padding: 0,
+          cursor: "pointer",
+        }}
+      >
+        <img
+          src={`${A}/1523-425.png`}
+          alt=""
+          width={44}
+          height={44}
+          style={{ ...abs(0, 0, 44, 44), display: "block" }}
+        />
+      </button>
+      <Txt
+        x={151}
+        y={24}
+        w={170}
+        size={18}
+        lh={24}
+        color={INK}
+        weight={500}
+        align="center"
+        ls={3.5}
+        serif
+      >
+        GOLDROSE
+      </Txt>
+      {STEP_LABELS.map((label, i) => {
+        const x = STEP_X[i];
+        const done = i < current;
+        const active = i === current;
+        const isDelivery = i === 3;
+        const ring = done
+          ? `inset 0 0 0 2px ${AMBER}`
+          : active
+            ? `inset 0 0 0 1.5px ${GOLD}`
+            : isDelivery
+              ? `inset 0 0 0 2px ${AMBER}`
+              : `inset 0 0 0 1px ${SAND}`;
+        const fill = done ? AMBER : isDelivery ? "#FFFFFF" : CREAM;
+        const digit = active ? GOLD : isDelivery ? AMBER : INK;
+        return (
+          <div key={label} style={abs(x, 65, 92, 64)}>
+            <div
+              style={{
+                ...abs(34, 12, 24, 24),
+                background: fill,
+                boxShadow: ring,
+                borderRadius: 12,
+              }}
+            >
+              {done ? (
+                <img
+                  src={`${A}/2157-248.svg`}
+                  alt=""
+                  style={{ ...abs(8, 6, 8, 12), display: "block" }}
+                />
+              ) : (
+                <span
+                  className={notoSC.className}
+                  style={{
+                    ...abs(0, 6, 24),
+                    fontSize: 10,
+                    lineHeight: "12px",
+                    fontWeight: 500,
+                    color: digit,
+                    textAlign: "center",
+                    display: "block",
+                  }}
+                >
+                  {i + 1}
+                </span>
+              )}
+            </div>
+            <span
+              className={notoSC.className}
+              style={{
+                ...abs(0, 40, 92),
+                fontSize: 10,
+                lineHeight: "12px",
+                fontWeight: 500,
+                color: active ? GOLD : INK,
+                textAlign: "center",
+                display: "block",
+              }}
+            >
+              {label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------- 02 · order item + assurances (shared) ---------- */
+
+function OrderItemModule({
+  top,
+  line,
+  note,
+  onEdit,
+}: {
+  top: number;
+  line: CartLineView | null;
+  note: string;
+  onEdit: () => void;
+}) {
+  const image = line?.product.images[0] ?? null;
+  return (
+    <>
+      <div
+        style={{
+          ...abs(16, top, 398, 142),
+          background: "#FFFFFF",
+          boxShadow: HAIRLINE,
+          borderRadius: 14,
+        }}
+      />
+      <img
+        data-live-text
+        src={image ? fileUrl(image.path) : BLANK_PIXEL}
+        alt={image?.alt ?? ""}
+        width={112}
+        height={118}
+        style={{
+          ...abs(28, top + 12, 112, 118),
+          objectFit: "contain",
+          borderRadius: 8,
+          display: "block",
+        }}
+      />
+      <Txt
+        x={152}
+        y={top + 12}
+        w={200}
+        size={18}
+        lh={24}
+        color={INK}
+        weight={500}
+        serif
+        live
+      >
+        {line?.product.short_name ?? ""}
+      </Txt>
+      <Txt x={152} y={top + 34} w={250} size={10} lh={12} color={INK} live>
+        {line
+          ? `${line.variant.option_values.join("  ·  ")}  ·  Qty ${line.quantity}`
+          : ""}
+      </Txt>
+      <Txt x={152} y={top + 46} w={250} size={10} lh={12} color={INK} live>
+        {note.trim() ? `Gift message  ·  ${note.trim()}` : ""}
+      </Txt>
+      <Txt x={152} y={top + 68} w={250} size={10} lh={12} color={INK} live>
+        {line && line.quantity > 1
+          ? `${formatMoney(line.variant.price_cents)} each`
+          : ""}
+      </Txt>
+      <Txt
+        x={152}
+        y={top + 90}
+        w={150}
+        size={22}
+        lh={29.3}
+        color={GREEN}
+        weight={500}
+        serif
+        live
+      >
+        {line ? formatMoney(line.lineTotal) : ""}
+      </Txt>
+      <button
+        type="button"
+        onClick={onEdit}
+        aria-label="Edit item"
+        className={notoSC.className}
+        style={{
+          ...abs(368, top + 90, 40, 35),
+          background: "transparent",
+          border: 0,
+          padding: 0,
+          cursor: "pointer",
+          fontSize: 9,
+          lineHeight: "10.8px",
+          fontWeight: 500,
+          color: AMBER,
+          textAlign: "left",
+        }}
+      >
+        {"EDIT  →"}
+      </button>
+      {/* Fulfillment assurances (2157:273) — Playfair 10, C-flow green */}
+      <Txt
+        x={16}
+        y={top + 165.5}
+        w={110}
+        size={10}
+        lh={13.3}
+        color={GREEN}
+        weight={500}
+        serif
+      >
+        {"⌂  Ships from the U.S."}
+      </Txt>
+      <Txt
+        x={178}
+        y={top + 165.5}
+        w={100}
+        size={10}
+        lh={13.3}
+        color={GREEN}
+        weight={500}
+        serif
+      >
+        {"▱  3–5 day delivery"}
+      </Txt>
+      <Txt
+        x={328}
+        y={top + 165.5}
+        w={90}
+        size={10}
+        lh={13.3}
+        color={GREEN}
+        weight={500}
+        serif
+      >
+        {"♔  Free over $50"}
+      </Txt>
+    </>
+  );
+}
+
+/* ---------- design field boxes ---------- */
+
+/** A 374×52 checkout field (label + optional static value), the redesign's
+    core "Checkout Field" component (2159:254 documentation frame). */
+function FieldBox({
   x,
   y,
   label,
-  onClick,
-  children,
+  value,
+  valueMuted,
 }: {
   x: number;
   y: number;
   label: string;
-  onClick: () => void;
-  children: React.ReactNode;
+  /** static display text; omitted paints the box + label only */
+  value?: string;
+  valueMuted?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={notoSC.className}
-      style={{
-        ...abs(x, y, 20, 20),
-        ...VALUE,
-        fontSize: 10,
-        lineHeight: "20px",
-        fontWeight: 500,
-        textAlign: "center",
-        boxShadow: HAIRLINE,
-        borderRadius: 6,
-        cursor: "pointer",
-      }}
-    >
-      {children}
-    </button>
+    <>
+      <div
+        style={{
+          ...abs(x, y, 374, 52),
+          background: CREAM,
+          boxShadow: HAIRLINE,
+          borderRadius: 6,
+        }}
+      />
+      <Txt
+        x={x + 12}
+        y={y + 8}
+        w={336}
+        size={10}
+        lh={12}
+        color={GOLD}
+        weight={500}
+      >
+        {label}
+      </Txt>
+      {value ? (
+        <Txt
+          x={x + 12}
+          y={y + 26}
+          w={336}
+          size={13}
+          lh={15.6}
+          color={valueMuted ? MUTED : INK}
+        >
+          {value}
+        </Txt>
+      ) : null}
+    </>
   );
 }
 
@@ -362,6 +678,81 @@ function PayPalSdkButtons({
   return <div ref={containerRef} />;
 }
 
+/**
+ * The Secure Pay Bar (2157:526) — 430×75, fixed to the viewport bottom. In
+ * the frame it overflows the canvas, i.e. the design pins it ("固定在底部").
+ * position:fixed cannot live inside ScaleFrame's transform, so the bar is a
+ * sibling overlay with the same scale math (the BottomNav pattern).
+ */
+function PayBar({
+  total,
+  label,
+  onPay,
+  payButtonSlot,
+}: {
+  total: string;
+  label: string;
+  onPay?: () => void;
+  payButtonSlot?: React.ReactNode;
+}) {
+  return (
+    <>
+      <style>{`
+        .figv-paybar { position: fixed; bottom: 0; width: 430px; height: 75px; left: calc((100% - 430px) / 2); z-index: 30; }
+        @media (max-width: 480px) {
+          .figv-paybar { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
+        }
+      `}</style>
+      <div className={`figv-paybar ${notoSC.className}`}>
+        <div style={{ ...abs(0, 0, 430, 75), background: CREAM }} />
+        <Txt
+          x={8}
+          y={23.5}
+          w={130}
+          size={21}
+          lh={28}
+          color={INK}
+          weight={500}
+          serif
+          live
+        >
+          {total}
+        </Txt>
+        {payButtonSlot ? (
+          /* With PayPal live the SDK's own iframe button is the only thing
+             that can start a payment; it fills the CTA's 276×48 box. */
+          <div style={abs(150, 13.5, 276, 48)}>{payButtonSlot}</div>
+        ) : (
+          <button
+            type="button"
+            onClick={onPay}
+            className={notoSC.className}
+            style={{
+              ...abs(150, 13.5, 276, 48),
+              background: INK,
+              borderRadius: 10,
+              border: 0,
+              padding: 0,
+              cursor: "pointer",
+              fontSize: 12,
+              lineHeight: "48px",
+              fontWeight: 500,
+              letterSpacing: 1.1,
+              color: CREAM,
+              textAlign: "center",
+            }}
+          >
+            {label}
+            <span style={{ color: GOLD, marginLeft: 10, fontWeight: 500 }}>
+              →
+            </span>
+          </button>
+        )}
+      </div>
+    </>
+  );
+}
+
 export function CheckoutClient({
   catalog,
   zones,
@@ -380,11 +771,18 @@ export function CheckoutClient({
   skipPayment?: boolean;
 }) {
   const router = useRouter();
-  const { lines, rawLines, subtotal, hydrated, changeQuantity, remove, clear } =
-    useCart(catalog);
+  const searchParams = useSearchParams();
+  const step: Step =
+    searchParams.get("step") === "payment" ? "payment" : "details";
+  // No changeQuantity/remove here: the design draws no basket controls at
+  // checkout and the owner confirmed it stays that way (08-02).
+  const { lines, rawLines, subtotal, hydrated, clear } = useCart(catalog);
 
   const [email, setEmail] = useState("");
-  const [country, setCountry] = useState(defaultCountry);
+  // Read-only since 08-02: the design draws no country field, so the shipping
+  // zone comes from the server's geo-IP default and nothing on the page can
+  // change it (AI-018).
+  const country = defaultCountry;
   const [note, setNote] = useState("");
   const [discountInput, setDiscountInput] = useState("");
   const [discount, setDiscount] = useState<{
@@ -409,12 +807,11 @@ export function CheckoutClient({
     cvc: "",
   });
   /**
-   * B-2's Standard / Express / Next-Day picker (755:101). Per-method shipping
-   * pricing has no backend yet — every method ships at the zone rate — so on
-   * the owner's explicit decision the control is cosmetic: this state moves its
-   * selected ring and nothing else. It never reaches a price, a total or a
-   * request body; the summary's shipping line and the total keep coming from
-   * `shippingInfo`/`total` below, and the rows show no per-method price.
+   * The Standard / Express / Next-Day picker (2157:456). Per-method shipping
+   * pricing has no backend — every method ships at the zone rate — so on the
+   * owner's explicit decision the control is cosmetic: this state moves the
+   * selected ring and nothing else, and the rows carry none of the frame's
+   * mock prices. The charged figure is always the summary's zone rate.
    */
   const [shipMethod, setShipMethod] = useState(0);
 
@@ -429,6 +826,11 @@ export function CheckoutClient({
     window.addEventListener("pageshow", resetCheckoutState);
     return () => window.removeEventListener("pageshow", resetCheckoutState);
   }, []);
+
+  // Each step opens at its top, like a page change.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   const zone = useMemo(() => zoneForCountry(zones, country), [zones, country]);
   const discountCents = discount
@@ -492,6 +894,10 @@ export function CheckoutClient({
     setShipping((current) => ({ ...current, [key]: value }));
   }
 
+  function goToStep(next: Step) {
+    router.push(next === "payment" ? "/checkout?step=payment" : "/checkout");
+  }
+
   function checkoutPayload(cartLines: CartLine[]) {
     return {
       lines: cartLines.map((line) => ({
@@ -544,8 +950,18 @@ export function CheckoutClient({
       const result = await response.json();
       if (!response.ok || result.ok === false) {
         setError(result.error ?? "Checkout could not be completed.");
-        setFieldErrors(result.fieldErrors ?? {});
+        const errors: Record<string, string> = result.fieldErrors ?? {};
+        setFieldErrors(errors);
         setPendingMethod(null);
+        // Details-step fields live on the other step: jump back so the
+        // customer sees what needs fixing.
+        if (
+          ["email", "name", "address1", "city", "state", "postalCode"].some(
+            (key) => errors[key],
+          )
+        ) {
+          goToStep("details");
+        }
         return;
       }
       clear();
@@ -582,767 +998,1405 @@ export function CheckoutClient({
     );
   }
 
-  /* ---------- B-2 stage geometry (1523:423 … 1523:553) ---------- */
-
   /** The mock-card branch: the only branch whose form is actually submitted. */
   const mockForm = !skipPayment && !paypalClientId;
-
   const first = lines[0] ?? null;
-  const firstImage = first?.product.images[0] ?? null;
-  /** B-2 draws ONE item card; a multi-line cart keeps its extra rows in a band. */
+  /** The item card shows line 1; any further lines are listed read-only. */
   const extraLines = lines.slice(1);
-  const feedbackRow = discountError || discount ? 1 : 0;
-  /** Discount feedback + extra item rows, inserted under the item module. */
-  const bandA =
-    feedbackRow || extraLines.length
-      ? 12 + feedbackRow * 20 + extraLines.length * 40
-      : 0;
-  /** Gift message + the USD/duties note — B-2 has no field for either. */
-  const NOTE_BAND = 116;
-  /** The four card fields share one error line (their wells have no room). */
-  const cardErrorText = [
-    fieldErrors.cardNumber,
-    fieldErrors.cardName,
-    fieldErrors.cardExpiry,
-    fieldErrors.cardCvc,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const countryName =
+    countries.find((entry) => entry.code === country)?.name ?? country;
 
-  // Module heights come from the frame; each top is the previous module's foot,
-  // so an inserted band moves everything below it as one piece.
-  const T_ITEM = 143;
-  const T_BAND_A = T_ITEM + 202;
-  /** The reflow deleted the design's discount-code card; §8 keeps the feature,
-      so the band repaints the old card in the design's field language. */
-  const DISCOUNT_BAND = showDiscountField ? 54 : 0;
-  const T_FEEDBACK = T_BAND_A + DISCOUNT_BAND;
-  const T_CONTACT = T_FEEDBACK + bandA;
-  const T_NOTE = T_CONTACT + 410;
-  const T_SHIP_PAY = T_NOTE + NOTE_BAND;
-  const T_TAIL = T_SHIP_PAY + 692;
-  // The frame ends flush with module 06 (281px), so the error box and status
-  // line that used to sit in the old tail's white space get their own reserve.
-  const canvasHeight = T_TAIL + 281 + 96;
+  const payLabel = skipPayment
+    ? pendingMethod === "none"
+      ? "PLACING ORDER…"
+      : `PLACE ORDER · ${formatMoney(total)}`
+    : pendingMethod === "card"
+      ? "PROCESSING…"
+      : `PAY ${formatMoney(total)} SECURELY`;
 
-  return (
-    <ScaleFrame
-      height={canvasHeight}
-      background="#FFF6EC"
-      fontClass={notoSC.className}
-      nav={false}
-    >
-      {/* One wrapper so the stage's own coordinates are also this file's. */}
-      <div className="b2-stage" style={abs(0, 0, 430, canvasHeight)}>
-        <StageStyles />
-        {/* B-2 carries no page-title text (786:179 is the wordmark render and
-            753:139 the step names), so the document keeps a real heading. */}
-        <h1 className="sr-only">Checkout</h1>
+  /* =========================== step 1 · details =========================== */
 
-        {/* ---------- 01 · Header + progress (747:103) ---------- */}
-        {/* The design's back chevron replaces the old "Continue shopping" link. */}
-        <CheckoutHeader top={0} onBack={() => router.push("/shop")} />
+  if (step === "details") {
+    // Cart-management band: the redesigned item card has no steppers, so every
+    // Owner decision 2026-08-02: no quantity/remove controls at checkout —
+    // keep the page as the design draws it. Extra cart lines still LIST
+    // read-only (charging for an item the page never shows would be the real
+    // bug), matching the payment step's treatment; a single-line cart — what
+    // the frame draws — renders nothing extra at all.
+    const LINES_H = extraLines.length ? 8 + extraLines.length * 24 + 4 : 0;
+    const T_CONTACT = 355 + LINES_H; // contact card top (design 355)
+    const T_ADDRESS = 483 + LINES_H; // address card top (design 483)
+    const T_GIFT = T_ADDRESS + 314 + 8; // dev band: gift message + duties note
+    const T_ACTION = T_GIFT + 116; // entry action card (design 809)
+    const canvasHeight = T_ACTION + 141 + 12 + 96;
 
-        {/* ---------- 02 · Order item + assurances (1523:444) ---------- */}
-        <CheckoutOrderItem
-          top={T_ITEM}
-          {...(firstImage
-            ? { imageSrc: fileUrl(firstImage.path), imageAlt: firstImage.alt }
-            : { imageSrc: BLANK_PIXEL, imageAlt: "" })}
-          title={first?.product.short_name ?? ""}
-          qtyLine={
-            first
-              ? `${first.variant.option_values.join(" · ")} · Qty ${first.quantity}`
-              : ""
-          }
-          engravingLine={note.trim() ? `Gift message · ${note.trim()}` : ""}
-          giftLine={
-            first && first.quantity > 1
-              ? `${formatMoney(first.variant.price_cents)} each`
-              : ""
-          }
-          price={first ? formatMoney(first.lineTotal) : ""}
-          qty={first ? String(first.quantity) : ""}
-          {...(first
-            ? {
-                onQtyDown: () => changeQuantity(first.variantId, -1),
-                onQtyUp: () => changeQuantity(first.variantId, 1),
-                onRemove: () => remove(first.variantId),
-                // 1523:454 EDIT → the item's own product page (variant choice).
-                onEdit: () => router.push(`/products/${first.product.handle}`),
-              }
-            : {})}
-        />
+    return (
+      <ScaleFrame
+        height={canvasHeight}
+        background={CREAM}
+        fontClass={notoSC.className}
+        nav={false}
+      >
+        <div style={abs(0, 0, 430, canvasHeight)}>
+          <StageStyles />
+          <h1 className="sr-only">Checkout</h1>
+          <CheckoutHeader step="details" onBack={() => router.push("/shop")} />
+          <OrderItemModule
+            top={151}
+            line={first}
+            note={note}
+            onEdit={() =>
+              first && router.push(`/products/${first.product.handle}`)
+            }
+          />
 
-        {/* ---------- Band · discount code ---------- */}
-        {/* The reflow deleted this card from the frame, but the summary still
-            prices a Discount row and §8 keeps the feature, so the old card
-            (561:88's 753:166 geometry, the design's own field language) stays
-            as a dev band. Settings → Checkout can switch it off. */}
-        {showDiscountField ? (
-          <>
-            <div
-              style={{
-                ...abs(16, T_BAND_A + 4, 398, 46),
-                background: "#FFFFFF",
-                boxShadow: HAIRLINE,
-                borderRadius: 10,
-              }}
-            />
-            <LiveInput
-              id="discount-code"
-              x={28}
-              y={T_BAND_A + 20.5}
-              w={294}
-              label="Discount code"
-              value={discountInput}
-              onChange={setDiscountInput}
-              placeholder="Discount code"
-              autoComplete="off"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (!discountBusy) {
-                  applyDiscount();
-                }
-              }}
-              aria-label="Apply discount code"
-              className={notoSC.className}
-              style={{
-                ...abs(330, T_BAND_A + 10, 78, 34),
-                appearance: "none",
-                border: 0,
-                margin: 0,
-                padding: 0,
-                background: GREEN,
-                borderRadius: 8,
-                color: "#FFFFFF",
-                fontSize: 9,
-                lineHeight: "34px",
-                fontWeight: 500,
-                textAlign: "center",
-                cursor: "pointer",
-              }}
-            >
-              {discountBusy ? "…" : "APPLY"}
-            </button>
-          </>
-        ) : null}
+          {/* ---------- Extra cart lines, read-only ---------- */}
+          {/* The frame draws exactly one item card and no quantity or remove
+              control; per the owner (08-02) the page keeps it that way. A cart
+              with more than one line still lists the rest, because charging
+              for an item the page never shows would be dishonest. Editing the
+              basket belongs to /bag once it is wired to the live cart. */}
+          {extraLines.map((line, index) => {
+            const y = 353 + index * 24;
+            return (
+              <div key={line.variantId}>
+                <Txt
+                  x={28}
+                  y={y + 4}
+                  w={270}
+                  size={10}
+                  lh={12}
+                  color={INK}
+                  live
+                >
+                  {`${line.product.short_name} · Qty ${line.quantity}`}
+                </Txt>
+                <Txt
+                  x={298}
+                  y={y + 4}
+                  w={104}
+                  size={10}
+                  lh={12}
+                  color={GREEN}
+                  weight={500}
+                  align="right"
+                  live
+                >
+                  {formatMoney(line.lineTotal)}
+                </Txt>
+              </div>
+            );
+          })}
 
-        {/* ---------- Band · discount feedback + any extra item rows ---------- */}
-        {discountError ? (
+          {/* ---------- Contact Information (2157:278) ---------- */}
+          <div
+            style={{
+              ...abs(16, T_CONTACT, 398, 118),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
           <Txt
-            x={16}
-            y={T_FEEDBACK + 6}
-            w={398}
-            size={11}
-            lh={13.2}
-            color={RED}
+            x={28}
+            y={T_CONTACT + 10}
+            w={200}
+            size={18}
+            lh={24}
+            color={INK}
             weight={500}
-            wrap
+            serif
           >
-            {discountError}
+            Contact Information
           </Txt>
-        ) : discount ? (
-          <>
-            <Txt
-              x={16}
-              y={T_FEEDBACK + 6}
-              w={300}
-              size={11}
-              lh={13.2}
-              color={GREEN}
-              weight={500}
-              live
-            >
-              {`Code ${discount.code} applied.`}
-            </Txt>
-            <button
-              type="button"
-              onClick={() => {
-                setDiscount(null);
-                setDiscountInput("");
-              }}
-              className={notoSC.className}
-              style={{
-                ...abs(330, T_FEEDBACK + 6, 84, 14),
-                ...VALUE,
-                fontSize: 9,
-                lineHeight: "10.8px",
-                fontWeight: 500,
-                color: MUTED,
-                textAlign: "right",
-                cursor: "pointer",
-              }}
-            >
-              REMOVE
-            </button>
-          </>
-        ) : null}
-        {extraLines.map((line, index) => {
-          const y = T_FEEDBACK + 6 + feedbackRow * 20 + index * 40;
-          return (
-            <div key={line.variantId}>
+          <FieldBox x={28} y={T_CONTACT + 40} label="EMAIL" />
+          <LiveInput
+            id="email"
+            x={40}
+            y={T_CONTACT + 66}
+            w={350}
+            label="Email"
+            value={email}
+            onChange={setEmail}
+            error={fieldErrors.email}
+            errorY={T_CONTACT + 121}
+            placeholder="Email address"
+            inputMode="email"
+            autoComplete="email"
+          />
+          {/* Marketing opt-in — inert art (promotion-email consent is a
+              documented later feature) */}
+          <Txt
+            x={28}
+            y={T_CONTACT + 98}
+            w={374}
+            size={9}
+            lh={10.8}
+            color={GREEN}
+          >
+            {"☑  Send me private offers, gifting ideas and new arrivals."}
+          </Txt>
+
+          {/* ---------- Delivery Address (2157:284) ---------- */}
+          <div
+            style={{
+              ...abs(16, T_ADDRESS, 398, 314),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
+          <Txt
+            x={28}
+            y={T_ADDRESS + 10}
+            w={200}
+            size={18}
+            lh={24}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Delivery Address
+          </Txt>
+          <FieldBox
+            x={28}
+            y={T_ADDRESS + 45}
+            label="FULL NAME"
+            {...(mockForm
+              ? {}
+              : { value: "Enter full name", valueMuted: true })}
+          />
+          {/* CITY / STATE / ZIP row (2201:332) */}
+          {[
+            { x: 28, w: 116, label: "CITY", ph: "City" },
+            { x: 155, w: 75, label: "STATE", ph: "State" },
+            { x: 241, w: 160, label: "ZIP CODE", ph: "ZIP / Postal code" },
+          ].map((f) => (
+            <div key={f.label}>
               <div
                 style={{
-                  ...abs(16, y, 398, 36),
+                  ...abs(f.x, T_ADDRESS + 108, f.w, 48),
                   background: "#FFFFFF",
                   boxShadow: HAIRLINE,
-                  borderRadius: 8,
+                  borderRadius: 7,
                   overflow: "hidden",
                 }}
               />
               <Txt
-                x={28}
-                y={y + 5}
-                w={190}
-                size={11}
-                lh={13.2}
-                color={INK}
-                weight={500}
-                live
-              >
-                {line.product.short_name}
-              </Txt>
-              <Txt
-                x={28}
-                y={y + 20}
-                w={190}
+                x={f.x + 9}
+                y={T_ADDRESS + 113}
+                w={f.w - 18}
                 size={8}
                 lh={9.6}
-                color={MUTED}
-                live
-              >
-                {`${line.variant.option_values.join(" · ")} · Qty ${line.quantity}`}
-              </Txt>
-              <StepperButton
-                x={226}
-                y={y + 8}
-                label={`Decrease ${line.product.short_name} quantity`}
-                onClick={() => changeQuantity(line.variantId, -1)}
-              >
-                {"−"}
-              </StepperButton>
-              <Txt
-                x={248}
-                y={y + 12}
-                w={18}
-                size={10}
-                lh={12}
-                color={INK}
+                color={AMBER}
                 weight={500}
-                align="center"
-                live
               >
-                {String(line.quantity)}
+                {f.label}
               </Txt>
-              <StepperButton
-                x={270}
-                y={y + 8}
-                label={`Increase ${line.product.short_name} quantity`}
-                onClick={() => changeQuantity(line.variantId, 1)}
-              >
-                +
-              </StepperButton>
-              <Txt
-                x={298}
-                y={y + 11}
-                w={56}
-                size={11}
-                lh={13.2}
-                color={GREEN}
-                weight={500}
-                align="right"
-                live
-              >
-                {formatMoney(line.lineTotal)}
-              </Txt>
-              <button
-                type="button"
-                onClick={() => remove(line.variantId)}
-                aria-label={`Remove ${line.product.short_name}`}
-                className={notoSC.className}
-                style={{
-                  ...abs(358, y + 12, 44),
-                  ...VALUE,
-                  fontSize: 9,
-                  lineHeight: "10.8px",
-                  fontWeight: 500,
-                  color: MUTED,
-                  textAlign: "right",
-                  cursor: "pointer",
-                }}
-              >
-                REMOVE
-              </button>
+              {mockForm ? null : (
+                <Txt
+                  x={f.x + 9}
+                  y={T_ADDRESS + 125}
+                  w={f.w - 14}
+                  size={11}
+                  lh={13.2}
+                  color={MUTED}
+                >
+                  {f.ph}
+                </Txt>
+              )}
             </div>
-          );
-        })}
-
-        {/* ---------- 04 · Contact + delivery address (1523:459) ---------- */}
-        {/* Every value is passed empty: the module paints each card, label and
-            chevron, and the live twins below carry the ids and the state. */}
-        <CheckoutContactDelivery
-          top={T_CONTACT}
-          email=""
-          country=""
-          state=""
-          recipient=""
-          zip=""
-          street=""
-          city=""
-          phone=""
-        />
-        <LiveInput
-          id="email"
-          x={37}
-          y={T_CONTACT + 67}
-          w={356}
-          label="Email"
-          value={email}
-          onChange={setEmail}
-          error={fieldErrors.email}
-          errorY={T_CONTACT + 82}
-          placeholder="you@example.com"
-          inputMode="email"
-          autoComplete="email"
-        />
-        {/* 1523:469 — shipping is priced from this country's zone (§10.3), so
-            the picker is a real <select> over the design's field (its options
-            are ISO codes, which the skin's name-valued select cannot express).
-            The reflow gives the field 116px; the select stops short of the
-            baked ⌄ at the field's right inset. */}
-        <select
-          id="ship-country"
-          data-live-text
-          className={`${notoSC.className} b2-live`}
-          value={country}
-          onChange={(event) => setCountry(event.target.value)}
-          aria-label="Country / region"
-          autoComplete="country"
-          style={{
-            ...abs(295, T_CONTACT + 190, 82),
-            ...VALUE,
-            cursor: "pointer",
-          }}
-        >
-          {countries.map((entry) => (
-            <option key={entry.code} value={entry.code}>
-              {entry.name}
-            </option>
           ))}
-        </select>
-        {mockForm ? (
-          <>
-            <LiveInput
-              id="ship-name"
-              x={37}
-              y={T_CONTACT + 190}
-              w={153}
-              label="Recipient full name"
-              value={shipping.name}
-              onChange={(value) => setShippingField("name", value)}
-              error={fieldErrors.name}
-              errorY={T_CONTACT + 205}
-              autoComplete="name"
-            />
-            {/* 1523:472 is a picker in the design, but there is no state list
-                behind it, so the ⌄ is covered and the field is free text. */}
-            <div
-              style={{
-                ...abs(262, T_CONTACT + 191, 12, 14),
-                background: "#FFFFFF",
-              }}
-            />
-            <LiveInput
-              id="ship-state"
-              x={214}
-              y={T_CONTACT + 190}
-              w={57}
-              label="State / province"
-              value={shipping.state}
-              onChange={(value) => setShippingField("state", value)}
-              error={fieldErrors.state}
-              errorY={T_CONTACT + 205}
-              autoComplete="address-level1"
-            />
-            <LiveInput
-              id="ship-zip"
-              x={37}
-              y={T_CONTACT + 249}
-              w={356}
-              label="Postal code"
-              value={shipping.postalCode}
-              onChange={(value) => setShippingField("postalCode", value)}
-              error={fieldErrors.postalCode}
-              errorY={T_CONTACT + 264}
-              inputMode="numeric"
-              autoComplete="postal-code"
-            />
-            {/* 1523:484's value reads "123 Rose Avenue · Apt 5B", so the street
-                line keeps both of the checkout's address fields, split at the
-                design's own separator. */}
-            <LiveInput
-              id="ship-address1"
-              x={37}
-              y={T_CONTACT + 293}
-              w={226}
-              label="Street address"
-              value={shipping.address1}
-              onChange={(value) => setShippingField("address1", value)}
-              error={fieldErrors.address1}
-              errorY={T_CONTACT + 308}
-              autoComplete="address-line1"
-            />
+          <FieldBox
+            x={28}
+            y={T_ADDRESS + 167}
+            label="STREET ADDRESS"
+            {...(mockForm
+              ? {}
+              : { value: "Enter street address", valueMuted: true })}
+          />
+          {/* PHONE stays inert art: /api/checkout's shipping payload has no
+              phone field — collecting one that goes nowhere would be
+              dishonest. */}
+          <FieldBox
+            x={28}
+            y={T_ADDRESS + 230}
+            label=" PHONE (Optional)"
+            value="Enter phone number"
+            valueMuted
+          />
+          {mockForm ? (
+            <>
+              <LiveInput
+                id="ship-name"
+                x={40}
+                y={T_ADDRESS + 71}
+                w={350}
+                label="Recipient full name"
+                value={shipping.name}
+                onChange={(value) => setShippingField("name", value)}
+                error={fieldErrors.name}
+                errorY={T_ADDRESS + 97}
+                placeholder="Enter full name"
+                autoComplete="name"
+              />
+              <LiveInput
+                id="ship-city"
+                x={37}
+                y={T_ADDRESS + 125}
+                w={94}
+                small
+                label="City"
+                value={shipping.city}
+                onChange={(value) => setShippingField("city", value)}
+                error={fieldErrors.city}
+                errorY={T_ADDRESS + 157}
+                placeholder="City"
+                autoComplete="address-level2"
+              />
+              <LiveInput
+                id="ship-state"
+                x={164}
+                y={T_ADDRESS + 125}
+                w={57}
+                small
+                label="State / province"
+                value={shipping.state}
+                onChange={(value) => setShippingField("state", value)}
+                error={fieldErrors.state}
+                errorY={T_ADDRESS + 157}
+                placeholder="State"
+                autoComplete="address-level1"
+              />
+              <LiveInput
+                id="ship-zip"
+                x={250}
+                y={T_ADDRESS + 125}
+                w={140}
+                small
+                label="Postal code"
+                value={shipping.postalCode}
+                onChange={(value) => setShippingField("postalCode", value)}
+                error={fieldErrors.postalCode}
+                errorY={T_ADDRESS + 157}
+                placeholder="ZIP / Postal code"
+                inputMode="numeric"
+                autoComplete="postal-code"
+              />
+              {/* The saved-address card reads "123 Rose Avenue · Apt 5B", so
+                  the street line keeps both address fields, split at the
+                  design's own separator. */}
+              <LiveInput
+                id="ship-address1"
+                x={40}
+                y={T_ADDRESS + 193}
+                w={200}
+                label="Street address"
+                value={shipping.address1}
+                onChange={(value) => setShippingField("address1", value)}
+                error={fieldErrors.address1}
+                errorY={T_ADDRESS + 219}
+                placeholder="Enter street address"
+                autoComplete="address-line1"
+              />
+              <Txt
+                x={246}
+                y={T_ADDRESS + 193}
+                w={8}
+                size={13}
+                lh={15.6}
+                color={MUTED}
+              >
+                ·
+              </Txt>
+              <LiveInput
+                id="ship-address2"
+                x={256}
+                y={T_ADDRESS + 193}
+                w={134}
+                label="Apartment, suite (optional)"
+                value={shipping.address2}
+                onChange={(value) => setShippingField("address2", value)}
+                placeholder="Apt, suite"
+                autoComplete="address-line2"
+              />
+            </>
+          ) : (
+            /* Neither branch sends an address, so the design's boxes keep
+               their placeholders rather than collecting one the request
+               never carries. */
             <Txt
-              x={269}
-              y={T_CONTACT + 293}
-              w={8}
-              size={11}
-              lh={13.2}
+              x={28}
+              y={T_ADDRESS + 292}
+              w={374}
+              size={9}
+              lh={10.8}
               color={MUTED}
             >
-              ·
+              {paypalClientId
+                ? "PayPal collects the delivery address in its own secure window."
+                : "Test mode — no delivery address is collected."}
             </Txt>
-            <LiveInput
-              id="ship-address2"
-              x={279}
-              y={T_CONTACT + 293}
-              w={114}
-              label="Apartment, suite (optional)"
-              value={shipping.address2}
-              onChange={(value) => setShippingField("address2", value)}
-              placeholder="Apt, suite"
-              autoComplete="address-line2"
-            />
-            <LiveInput
-              id="ship-city"
-              x={37}
-              y={T_CONTACT + 352}
-              w={165}
-              label="City"
-              value={shipping.city}
-              onChange={(value) => setShippingField("city", value)}
-              error={fieldErrors.city}
-              errorY={T_CONTACT + 367}
-              autoComplete="address-level2"
-            />
-          </>
-        ) : (
-          /* Neither branch sends an address, so the design's boxes stay empty
-             rather than collecting one the request never carries. */
+          )}
+
+          {/* ---------- Band · gift message + duties note ---------- */}
+          <div
+            style={{
+              ...abs(16, T_GIFT + 8, 398, 76),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
+          <Txt
+            x={28}
+            y={T_GIFT + 16}
+            w={200}
+            size={8}
+            lh={9.6}
+            color={AMBER}
+            weight={500}
+          >
+            GIFT MESSAGE (OPTIONAL)
+          </Txt>
+          <textarea
+            id="gift-note"
+            data-live-text
+            className={`${notoSC.className} b2-live`}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            rows={3}
+            maxLength={1000}
+            placeholder="Add a note to the recipient…"
+            aria-label="Gift message (optional)"
+            style={{
+              ...abs(28, T_GIFT + 28, 374, 48),
+              ...VALUE,
+              resize: "none",
+            }}
+          />
           <Txt
             x={16}
-            y={T_CONTACT + 400}
+            y={T_GIFT + 90}
             w={398}
             size={9}
             lh={10.8}
             color={MUTED}
+            wrap
           >
-            {paypalClientId
-              ? "PayPal collects the delivery address in its own secure window."
-              : "Test mode — no delivery address is collected."}
+            Prices are in USD. Any import duties or taxes are the
+            recipient&apos;s responsibility.
           </Txt>
-        )}
 
-        {/* ---------- Band · gift message + duties note ---------- */}
-        {/* B-2 has no gift-message field (B-1 draws one in static art), but the
-            note is the order's Notes card (§8) and every branch sends it, so it
-            keeps a band of its own in the design's field language. */}
-        <div
-          style={{
-            ...abs(16, T_NOTE + 8, 398, 76),
-            background: "#FFFFFF",
-            boxShadow: HAIRLINE,
-            borderRadius: 12,
-          }}
-        />
-        {/* 753:188 label type */}
-        <Txt
-          x={28}
-          y={T_NOTE + 16}
-          w={130}
-          size={8}
-          lh={9.6}
-          color="#C88217"
-          weight={500}
-        >
-          GIFT MESSAGE (OPTIONAL)
-        </Txt>
-        <textarea
-          id="gift-note"
-          data-live-text
-          className={`${notoSC.className} b2-live`}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          rows={3}
-          maxLength={1000}
-          placeholder="Add a note to the recipient…"
-          aria-label="Gift message (optional)"
-          style={{ ...abs(28, T_NOTE + 28, 374, 48), ...VALUE, resize: "none" }}
-        />
-        <Txt
-          x={16}
-          y={T_NOTE + 90}
-          w={398}
-          size={9}
-          lh={10.8}
-          color={MUTED}
-          wrap
-        >
-          Prices are in USD. Any import duties or taxes are the recipient&apos;s
-          responsibility.
-        </Txt>
-
-        {/* ---------- 05 · Shipping + summary + payment (1523:492) ---------- */}
-        <CheckoutShippingPayment
-          top={T_SHIP_PAY}
-          selectedShipping={shipMethod}
-          onSelectShipping={setShipMethod}
-          // Cosmetic control (see `shipMethod`): the rows carry no prices, since
-          // per-method pricing has no backend and the only shipping figure the
-          // customer is charged is the summary's zone rate.
-          standardPrice=""
-          expressPrice=""
-          nextDayPrice=""
-          // 1523:516 — the reflow's summary card, priced live.
-          subtotal={formatMoney(subtotal)}
-          discountLabel={discount ? `Discount (${discount.code})` : ""}
-          discount={discount ? `−${formatMoney(discountCents)}` : ""}
-          shippingLabel={`Shipping${zone ? ` (${zone.name})` : ""}`}
-          shipping={
-            shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)
-          }
-          shippingColor={shippingInfo.free ? GREEN : INK}
-          total={formatMoney(total)}
-          // The wells are parked empty in every branch; in the mock branch the
-          // live twins below sit on top of them.
-          cardNumber=""
-          cardNumberPlaceholder=""
-          cardName=""
-          cardNamePlaceholder=""
-          cardExpiry=""
-          cardExpiryPlaceholder=""
-        />
-        {/* 1523:543 — in mock mode the PayPal row is the mock express entry
-            (the reflow removed the express module that used to carry it), so a
-            transparent live twin sits on the row's own box. */}
-        {mockForm ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (!isBusy) {
-                submitMockCheckout("paypal", false);
-              }
-            }}
-            aria-label="Pay with PayPal"
+          {/* ---------- Entry Action (2164:264) ---------- */}
+          <div
             style={{
-              ...abs(28, T_SHIP_PAY + 532, 374, 36),
-              appearance: "none",
-              border: 0,
-              margin: 0,
-              padding: 0,
-              background: "transparent",
-              cursor: "pointer",
+              ...abs(16, T_ACTION, 398, 141),
+              background: CREAM,
+              boxShadow: HAIRLINE,
+              borderRadius: 14,
             }}
           />
-        ) : null}
-        {mockForm ? (
-          <>
-            <LiveInput
-              id="card-number"
-              x={46}
-              y={T_SHIP_PAY + 438}
-              w={338}
-              well
-              label="Card number"
-              value={card.number}
-              onChange={(value) =>
-                setCard((c) => ({ ...c, number: formatCardNumber(value) }))
-              }
-              error={fieldErrors.cardNumber}
-              placeholder="4242 4242 4242 4242"
-              inputMode="numeric"
-              autoComplete="cc-number"
-            />
-            <LiveInput
-              id="card-name"
-              x={46}
-              y={T_SHIP_PAY + 480}
-              w={151}
-              well
-              label="Name on card"
-              value={card.name}
-              onChange={(value) => setCard((c) => ({ ...c, name: value }))}
-              error={fieldErrors.cardName}
-              placeholder="Name on card"
-              autoComplete="cc-name"
-            />
-            {/* 1523:541 is one MM / YY well; the checkout keeps expiry and CVV
-                apart inside it (the reflow dropped the CVV hint from the
-                placeholder, not the need for the number). */}
-            <LiveInput
-              id="card-expiry"
-              x={225}
-              y={T_SHIP_PAY + 480}
-              w={70}
-              well
-              label="Expiry (MM/YY)"
-              value={card.expiry}
-              onChange={(value) =>
-                setCard((c) => ({ ...c, expiry: formatExpiry(value) }))
-              }
-              error={fieldErrors.cardExpiry}
-              placeholder="MM / YY"
-              inputMode="numeric"
-              autoComplete="cc-exp"
-            />
-            <LiveInput
-              id="card-cvc"
-              x={305}
-              y={T_SHIP_PAY + 480}
-              w={79}
-              well
-              label="CVC"
-              value={card.cvc}
-              onChange={(value) =>
-                setCard((c) => ({
-                  ...c,
-                  cvc: value.replace(/\D/g, "").slice(0, 4),
-                }))
-              }
-              error={fieldErrors.cardCvc}
-              placeholder="CVV"
-              inputMode="numeric"
-              autoComplete="cc-csc"
-            />
-            {/* The wells are 36px tall with no room under them, so the card's
-                field errors share the foot of 1523:534. */}
-            {cardErrorText ? (
+          <Txt
+            x={32}
+            y={T_ACTION + 16}
+            w={300}
+            size={20}
+            lh={26.7}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Ready for payment?
+          </Txt>
+          <Txt x={32} y={T_ACTION + 51} w={366} size={12} lh={14.4} color={INK}>
+            Review your contact and delivery details before continuing.
+          </Txt>
+          <button
+            type="button"
+            onClick={() => goToStep("payment")}
+            className={notoSC.className}
+            style={{
+              ...abs(32, T_ACTION + 77, 366, 48),
+              background: INK,
+              borderRadius: 10,
+              border: 0,
+              padding: 0,
+              cursor: "pointer",
+              fontSize: 12,
+              lineHeight: "48px",
+              fontWeight: 500,
+              letterSpacing: 1.1,
+              color: CREAM,
+              textAlign: "center",
+            }}
+          >
+            CONTINUE TO PAYMENT
+            <span style={{ color: GOLD, marginLeft: 10 }}>→</span>
+          </button>
+
+          {error ? (
+            <>
+              <div
+                style={{
+                  ...abs(16, T_ACTION + 161, 398, 34),
+                  background: "#FBEFEE",
+                  boxShadow: `inset 0 0 0 1px ${RED}`,
+                  borderRadius: 8,
+                }}
+              />
               <Txt
-                x={36}
-                y={T_SHIP_PAY + 508}
-                w={358}
-                size={9}
-                lh={10.8}
+                x={26}
+                y={T_ACTION + 170}
+                w={378}
+                size={10}
+                lh={12}
                 color={RED}
                 weight={500}
+                wrap
               >
-                {cardErrorText}
+                {error}
               </Txt>
-            ) : null}
-          </>
-        ) : (
-          /* Deliberately no live card fields outside the mock branch: with
-             PayPal live the card is collected in PayPal's own window, and a PAN
-             typed into a field whose value goes nowhere is a PCI/security
-             hazard. The design's wells stay empty and say so, at their own
-             foot. */
+            </>
+          ) : null}
+        </div>
+      </ScaleFrame>
+    );
+  }
+
+  /* =========================== step 2 · payment =========================== */
+
+  // Read-only extra cart lines (the item card shows the first line).
+  const EXTRA_H = extraLines.length ? 8 + extraLines.length * 24 + 4 : 0;
+  const T_SAVED = 355 + EXTRA_H; // saved-address card (design 355, 398×230)
+  const T_SHIP = 613 + EXTRA_H; // shipping card (design 613, 398×193)
+  const T_PAYMENT = 816 + EXTRA_H; // payment card (design 816, 398×336)
+  const feedbackRow = discountError || discount ? 1 : 0;
+  const DISC_H = showDiscountField ? 54 + feedbackRow * 20 : 0;
+  const T_DISC = T_PAYMENT + 336 + 2; // discount band under the payment card
+  const T_SUMMARY = 1162 + EXTRA_H + DISC_H; // summary card (design 1162)
+  const SUMMARY_H = discount ? 150 : 124; // no discount → row collapses
+  const T_FAQ = T_SUMMARY + SUMMARY_H + 11; // design gap 1312 → 1323
+  const canvasHeight2 = T_FAQ + 130 + 96 + 91; // FAQ + reserve + pay-bar room
+
+  const savedCityLine = [
+    [shipping.city, shipping.state].filter(Boolean).join(", "),
+    shipping.postalCode,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <>
+      <ScaleFrame
+        height={canvasHeight2}
+        background={CREAM}
+        fontClass={notoSC.className}
+        nav={false}
+      >
+        <div style={abs(0, 0, 430, canvasHeight2)}>
+          <StageStyles />
+          <h1 className="sr-only">Checkout</h1>
+          <CheckoutHeader step="payment" onBack={() => goToStep("details")} />
+          <OrderItemModule
+            top={151}
+            line={first}
+            note={note}
+            onEdit={() =>
+              first && router.push(`/products/${first.product.handle}`)
+            }
+          />
+
+          {/* read-only extra lines (management lives on the details step) */}
+          {extraLines.map((line, index) => {
+            const y = 353 + index * 24;
+            return (
+              <div key={line.variantId}>
+                <Txt
+                  x={28}
+                  y={y + 4}
+                  w={270}
+                  size={10}
+                  lh={12}
+                  color={INK}
+                  live
+                >
+                  {`${line.product.short_name} · Qty ${line.quantity}`}
+                </Txt>
+                <Txt
+                  x={298}
+                  y={y + 4}
+                  w={104}
+                  size={10}
+                  lh={12}
+                  color={GREEN}
+                  weight={500}
+                  align="right"
+                  live
+                >
+                  {formatMoney(line.lineTotal)}
+                </Txt>
+              </div>
+            );
+          })}
+
+          {/* ---------- Saved Delivery Address (2157:429) ---------- */}
+          <div
+            style={{
+              ...abs(16, T_SAVED, 398, 230),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
+          <Txt
+            x={28}
+            y={T_SAVED + 10}
+            w={260}
+            size={18}
+            lh={24}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Saved Delivery Address
+          </Txt>
+          <div
+            style={{
+              ...abs(28, T_SAVED + 49, 374, 154),
+              background: CREAM,
+              boxShadow: HAIRLINE,
+              borderRadius: 6,
+            }}
+          />
+          {/* DEFAULT badge — design art; there is no saved-address backend,
+              the card mirrors what the details step collected. */}
+          <div
+            style={{
+              ...abs(42, T_SAVED + 64, 64, 22),
+              background: PINK,
+              borderRadius: 11,
+            }}
+          />
+          <Txt
+            x={55}
+            y={T_SAVED + 69.5}
+            w={50}
+            size={9}
+            lh={10.8}
+            color={GOLD}
+            weight={500}
+          >
+            DEFAULT
+          </Txt>
+          <button
+            type="button"
+            onClick={() => goToStep("details")}
+            aria-label="Change delivery details"
+            className={notoSC.className}
+            style={{
+              ...abs(335, T_SAVED + 69, 56, 12),
+              background: "transparent",
+              border: 0,
+              padding: 0,
+              cursor: "pointer",
+              fontSize: 10,
+              lineHeight: "12px",
+              fontWeight: 500,
+              color: GOLD,
+              textAlign: "left",
+            }}
+          >
+            {"CHANGE →"}
+          </button>
+          {mockForm ? (
+            <>
+              <Txt
+                x={42}
+                y={T_SAVED + 93}
+                w={280}
+                size={18}
+                lh={24}
+                color={INK}
+                weight={500}
+                serif
+                live
+              >
+                {shipping.name || "Recipient"}
+              </Txt>
+              <Txt
+                x={42}
+                y={T_SAVED + 123}
+                w={346}
+                size={12}
+                lh={14.4}
+                color={INK}
+                live
+              >
+                {[shipping.address1, shipping.address2]
+                  .filter(Boolean)
+                  .join(" · ") || "Add a street address in Details"}
+              </Txt>
+              <Txt
+                x={42}
+                y={T_SAVED + 147}
+                w={346}
+                size={12}
+                lh={14.4}
+                color={INK}
+                live
+              >
+                {[savedCityLine, countryName].filter(Boolean).join(" · ")}
+              </Txt>
+              <Txt
+                x={42}
+                y={T_SAVED + 171}
+                w={346}
+                size={12}
+                lh={14.4}
+                color={MUTED}
+                live
+              >
+                {email}
+              </Txt>
+            </>
+          ) : (
+            <>
+              <Txt
+                x={42}
+                y={T_SAVED + 93}
+                w={280}
+                size={18}
+                lh={24}
+                color={INK}
+                weight={500}
+                serif
+              >
+                {skipPayment ? "Test order" : "PayPal checkout"}
+              </Txt>
+              <Txt
+                x={42}
+                y={T_SAVED + 123}
+                w={346}
+                size={12}
+                lh={14.4}
+                color={INK}
+                wrap
+              >
+                {paypalClientId
+                  ? "PayPal collects the delivery address in its own secure window."
+                  : "Test mode — no delivery address is collected."}
+              </Txt>
+              <Txt
+                x={42}
+                y={T_SAVED + 171}
+                w={346}
+                size={12}
+                lh={14.4}
+                color={INK}
+                live
+              >
+                {`Ships to · ${countryName}`}
+              </Txt>
+            </>
+          )}
+
+          {/* ---------- Shipping Method (2157:456) — cosmetic picker ---------- */}
+          <div
+            style={{
+              ...abs(16, T_SHIP, 398, 193),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
+          <Txt
+            x={28}
+            y={T_SHIP + 10}
+            w={200}
+            size={18}
+            lh={24}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Shipping Method
+          </Txt>
+          {[
+            { title: "Standard Delivery", sub: "3–5 business days" },
+            { title: "Express Delivery", sub: "2–3 business days" },
+            { title: "Next-Day Delivery", sub: "Order before 2 PM" },
+          ].map((row, i) => {
+            const y = T_SHIP + 40 + i * 50;
+            const selected = shipMethod === i;
+            return (
+              <button
+                key={row.title}
+                type="button"
+                onClick={() => setShipMethod(i)}
+                aria-pressed={selected}
+                className={notoSC.className}
+                style={{
+                  ...abs(28, y, 374, 44),
+                  background: selected ? CREAM : "#FFFFFF",
+                  boxShadow: selected ? `inset 0 0 0 1px ${GREEN}` : HAIRLINE,
+                  borderRadius: 7,
+                  border: 0,
+                  padding: 0,
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <span
+                  style={{
+                    ...abs(8, 14, 14),
+                    fontSize: 13,
+                    lineHeight: "15.6px",
+                    fontWeight: 500,
+                    color: selected ? GREEN : MUTED,
+                    display: "block",
+                  }}
+                >
+                  {selected ? "●" : "○"}
+                </span>
+                <span
+                  style={{
+                    ...abs(29, 5, 250),
+                    fontSize: 10,
+                    lineHeight: "12px",
+                    fontWeight: 500,
+                    color: INK,
+                    display: "block",
+                  }}
+                >
+                  {row.title}
+                </span>
+                <span
+                  style={{
+                    ...abs(29, 17, 250),
+                    fontSize: 8,
+                    lineHeight: "9.6px",
+                    color: MUTED,
+                    display: "block",
+                  }}
+                >
+                  {row.sub}
+                </span>
+                {/* No per-method price: the picker is cosmetic (owner
+                    decision); the only charged figure is the summary's
+                    zone rate. */}
+              </button>
+            );
+          })}
+
+          {/* ---------- Payment (2157:493) ---------- */}
+          <div
+            style={{
+              ...abs(16, T_PAYMENT, 398, 336),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
+          <Txt
+            x={28}
+            y={T_PAYMENT + 10}
+            w={120}
+            size={18}
+            lh={24}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Payment
+          </Txt>
+          <Txt
+            x={320}
+            y={T_PAYMENT + 10}
+            w={82}
+            size={10}
+            lh={12}
+            color={VISA_BLUE}
+            weight={500}
+          >
+            {"VISA   ●●   AMEX"}
+          </Txt>
+          {/* Credit Card panel (2157:497) */}
+          <div
+            style={{
+              ...abs(28, T_PAYMENT + 41, 374, 126),
+              background: PANEL,
+              boxShadow: `inset 0 0 0 1px ${GREEN}`,
+              borderRadius: 8,
+            }}
+          />
           <Txt
             x={36}
-            y={T_SHIP_PAY + 508}
-            w={358}
+            y={T_PAYMENT + 49}
+            w={120}
+            size={11}
+            lh={13.2}
+            color={GREEN}
+            weight={500}
+          >
+            {"●  Credit Card"}
+          </Txt>
+          <div
+            style={{
+              ...abs(36, T_PAYMENT + 68, 358, 36),
+              boxShadow: HAIRLINE,
+              borderRadius: 6,
+            }}
+          />
+          <div
+            style={{
+              ...abs(36, T_PAYMENT + 110, 171, 36),
+              boxShadow: HAIRLINE,
+              borderRadius: 6,
+            }}
+          />
+          <div
+            style={{
+              ...abs(215, T_PAYMENT + 110, 179, 36),
+              boxShadow: HAIRLINE,
+              borderRadius: 6,
+            }}
+          />
+          {mockForm ? (
+            <>
+              <LiveInput
+                id="card-number"
+                x={46}
+                y={T_PAYMENT + 80}
+                w={338}
+                well
+                label="Card number"
+                value={card.number}
+                onChange={(value) =>
+                  setCard((c) => ({ ...c, number: formatCardNumber(value) }))
+                }
+                error={fieldErrors.cardNumber}
+                placeholder="Card number"
+                inputMode="numeric"
+                autoComplete="cc-number"
+              />
+              <LiveInput
+                id="card-name"
+                x={46}
+                y={T_PAYMENT + 122}
+                w={151}
+                well
+                label="Name on card"
+                value={card.name}
+                onChange={(value) => setCard((c) => ({ ...c, name: value }))}
+                error={fieldErrors.cardName}
+                placeholder="Name on card"
+                autoComplete="cc-name"
+              />
+              {/* The design's MM / YY well keeps expiry and CVV apart inside
+                  it — the number is still required to charge a card. */}
+              <LiveInput
+                id="card-expiry"
+                x={225}
+                y={T_PAYMENT + 122}
+                w={70}
+                well
+                label="Expiry (MM/YY)"
+                value={card.expiry}
+                onChange={(value) =>
+                  setCard((c) => ({ ...c, expiry: formatExpiry(value) }))
+                }
+                error={fieldErrors.cardExpiry}
+                placeholder="MM / YY"
+                inputMode="numeric"
+                autoComplete="cc-exp"
+              />
+              <LiveInput
+                id="card-cvc"
+                x={305}
+                y={T_PAYMENT + 122}
+                w={79}
+                well
+                label="CVC"
+                value={card.cvc}
+                onChange={(value) =>
+                  setCard((c) => ({
+                    ...c,
+                    cvc: value.replace(/\D/g, "").slice(0, 4),
+                  }))
+                }
+                error={fieldErrors.cardCvc}
+                placeholder="CVV"
+                inputMode="numeric"
+                autoComplete="cc-csc"
+              />
+              {[
+                fieldErrors.cardNumber,
+                fieldErrors.cardName,
+                fieldErrors.cardExpiry,
+                fieldErrors.cardCvc,
+              ].some(Boolean) ? (
+                <Txt
+                  x={36}
+                  y={T_PAYMENT + 152}
+                  w={358}
+                  size={9}
+                  lh={10.8}
+                  color={RED}
+                  weight={500}
+                >
+                  {[
+                    fieldErrors.cardNumber,
+                    fieldErrors.cardName,
+                    fieldErrors.cardExpiry,
+                    fieldErrors.cardCvc,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </Txt>
+              ) : null}
+            </>
+          ) : (
+            /* Deliberately no live card fields outside the mock branch: with
+               PayPal live the card is collected in PayPal's own window, and a
+               PAN typed into a field whose value goes nowhere is a
+               PCI/security hazard. */
+            <>
+              <Txt
+                x={46}
+                y={T_PAYMENT + 80}
+                w={338}
+                size={10}
+                lh={12}
+                color={MUTED}
+              >
+                {paypalClientId
+                  ? "Card and bank details are collected in PayPal's own window."
+                  : "Test mode — no payment details are collected."}
+              </Txt>
+              <Txt
+                x={46}
+                y={T_PAYMENT + 122}
+                w={151}
+                size={10}
+                lh={12}
+                color={MUTED}
+              >
+                Name on card
+              </Txt>
+              <Txt
+                x={225}
+                y={T_PAYMENT + 122}
+                w={100}
+                size={10}
+                lh={12}
+                color={MUTED}
+              >
+                {"MM / YY"}
+              </Txt>
+            </>
+          )}
+          {/* PayPal / Apple Pay / Afterpay rows (2170:258/263/268) */}
+          {[
+            { label: "PayPal", meta: "PayPal", y: T_PAYMENT + 174 },
+            { label: "Apple Pay", meta: " Pay", y: T_PAYMENT + 225 },
+            { label: "Afterpay", meta: "afterpay ↗", y: T_PAYMENT + 276 },
+          ].map((row) => (
+            <div key={row.label}>
+              <div
+                style={{
+                  ...abs(28, row.y, 374, 44),
+                  background: CREAM,
+                  boxShadow: HAIRLINE,
+                  borderRadius: 6,
+                }}
+              />
+              <div
+                style={{
+                  ...abs(40, row.y + 16, 12, 12),
+                  boxShadow: HAIRLINE,
+                  borderRadius: 6,
+                }}
+              />
+              <Txt
+                x={60}
+                y={row.y + 14}
+                w={120}
+                size={13}
+                lh={15.6}
+                color={INK}
+                weight={500}
+              >
+                {row.label}
+              </Txt>
+              <Txt
+                x={302}
+                y={row.y + 15.5}
+                w={88}
+                size={11}
+                lh={13.2}
+                color={INK}
+                align="right"
+              >
+                {row.meta}
+              </Txt>
+            </div>
+          ))}
+          {/* In mock mode the PayPal row is the mock express entry — a
+              transparent live twin sits on the row's own box. */}
+          {mockForm ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (!isBusy) {
+                  submitMockCheckout("paypal", false);
+                }
+              }}
+              aria-label="Pay with PayPal"
+              style={{
+                ...abs(28, T_PAYMENT + 174, 374, 44),
+                appearance: "none",
+                border: 0,
+                margin: 0,
+                padding: 0,
+                background: "transparent",
+                cursor: "pointer",
+              }}
+            />
+          ) : null}
+
+          {/* ---------- Band · discount code (§8 keeps the feature) ---------- */}
+          {showDiscountField ? (
+            <>
+              <div
+                style={{
+                  ...abs(16, T_DISC + 4, 398, 46),
+                  background: "#FFFFFF",
+                  boxShadow: HAIRLINE,
+                  borderRadius: 10,
+                }}
+              />
+              <LiveInput
+                id="discount-code"
+                x={28}
+                y={T_DISC + 20.5}
+                w={294}
+                small
+                label="Discount code"
+                value={discountInput}
+                onChange={setDiscountInput}
+                placeholder="Discount code"
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!discountBusy) {
+                    applyDiscount();
+                  }
+                }}
+                aria-label="Apply discount code"
+                className={notoSC.className}
+                style={{
+                  ...abs(330, T_DISC + 10, 78, 34),
+                  appearance: "none",
+                  border: 0,
+                  margin: 0,
+                  padding: 0,
+                  background: GREEN,
+                  borderRadius: 8,
+                  color: "#FFFFFF",
+                  fontSize: 9,
+                  lineHeight: "34px",
+                  fontWeight: 500,
+                  textAlign: "center",
+                  cursor: "pointer",
+                }}
+              >
+                {discountBusy ? "…" : "APPLY"}
+              </button>
+              {discountError ? (
+                <Txt
+                  x={16}
+                  y={T_DISC + 56}
+                  w={398}
+                  size={11}
+                  lh={13.2}
+                  color={RED}
+                  weight={500}
+                  wrap
+                >
+                  {discountError}
+                </Txt>
+              ) : discount ? (
+                <>
+                  <Txt
+                    x={16}
+                    y={T_DISC + 56}
+                    w={300}
+                    size={11}
+                    lh={13.2}
+                    color={GREEN}
+                    weight={500}
+                    live
+                  >
+                    {`Code ${discount.code} applied.`}
+                  </Txt>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDiscount(null);
+                      setDiscountInput("");
+                    }}
+                    className={notoSC.className}
+                    style={{
+                      ...abs(330, T_DISC + 56, 84, 14),
+                      ...VALUE,
+                      fontSize: 9,
+                      lineHeight: "10.8px",
+                      fontWeight: 500,
+                      color: MUTED,
+                      textAlign: "right",
+                      cursor: "pointer",
+                    }}
+                  >
+                    REMOVE
+                  </button>
+                </>
+              ) : null}
+            </>
+          ) : null}
+
+          {/* ---------- Final Order Summary (2157:479), priced live ---------- */}
+          <div
+            style={{
+              ...abs(16, T_SUMMARY, 398, SUMMARY_H),
+              background: "#FFFFFF",
+              boxShadow: HAIRLINE,
+              borderRadius: 12,
+            }}
+          />
+          <Txt
+            x={36}
+            y={T_SUMMARY + 10}
+            w={200}
+            size={18}
+            lh={24}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Order Summary
+          </Txt>
+          <Txt
+            x={36}
+            y={T_SUMMARY + 42.5}
+            w={150}
+            size={11}
+            lh={13.2}
+            color={INK}
+          >
+            Subtotal
+          </Txt>
+          <Txt
+            x={244}
+            y={T_SUMMARY + 42.5}
+            w={150}
+            size={11}
+            lh={13.2}
+            color={INK}
+            weight={500}
+            align="right"
+            live
+          >
+            {formatMoney(subtotal)}
+          </Txt>
+          {discount ? (
+            <>
+              <Txt
+                x={36}
+                y={T_SUMMARY + 68.5}
+                w={200}
+                size={11}
+                lh={13.2}
+                color={INK}
+                live
+              >
+                {`Discount (${discount.code})`}
+              </Txt>
+              <Txt
+                x={244}
+                y={T_SUMMARY + 68.5}
+                w={150}
+                size={11}
+                lh={13.2}
+                color={RED}
+                weight={500}
+                align="right"
+                live
+              >
+                {`−${formatMoney(discountCents)}`}
+              </Txt>
+            </>
+          ) : null}
+          <Txt
+            x={36}
+            y={T_SUMMARY + (discount ? 94.5 : 68.5)}
+            w={220}
+            size={11}
+            lh={13.2}
+            color={INK}
+            live
+          >
+            {`Shipping${zone ? ` (${zone.name})` : ""}`}
+          </Txt>
+          <Txt
+            x={244}
+            y={T_SUMMARY + (discount ? 94.5 : 68.5)}
+            w={150}
+            size={11}
+            lh={13.2}
+            color={shippingInfo.free ? GREEN : INK}
+            weight={500}
+            align="right"
+            live
+          >
+            {shippingInfo.free ? "FREE" : formatMoney(shippingInfo.amount)}
+          </Txt>
+          <Txt
+            x={36}
+            y={T_SUMMARY + (discount ? 121.5 : 95.5)}
+            w={150}
+            size={17}
+            lh={22.7}
+            color={INK}
+            weight={500}
+            serif
+          >
+            Order Total
+          </Txt>
+          <Txt
+            x={236}
+            y={T_SUMMARY + (discount ? 117 : 91)}
+            w={158}
+            size={24}
+            lh={32}
+            color={INK}
+            weight={500}
+            align="right"
+            serif
+            live
+          >
+            {formatMoney(total)}
+          </Txt>
+
+          {/* ---------- FAQ accordions (2157:523/524/525) — inert art ---------- */}
+          {[
+            "Delivery & Returns",
+            "Privacy & Security",
+            "Frequently Asked Questions",
+          ].map((q, i) => {
+            const y = T_FAQ + i * 46;
+            return (
+              <div key={q}>
+                <div
+                  style={{
+                    ...abs(16, y, 398, 38),
+                    boxShadow: `inset 0 -1px 0 0 ${SAND}`,
+                  }}
+                />
+                <Txt x={32} y={y + 12} w={280} size={12} lh={14.4} color={INK}>
+                  {q}
+                </Txt>
+                <Txt
+                  x={380}
+                  y={y + 8}
+                  w={18}
+                  size={18}
+                  lh={21.6}
+                  color={GOLD}
+                  weight={500}
+                >
+                  ＋
+                </Txt>
+              </div>
+            );
+          })}
+
+          {/* error box + status line, in the reserve under the FAQ rows */}
+          {error ? (
+            <>
+              <div
+                style={{
+                  ...abs(16, T_FAQ + 138, 398, 34),
+                  background: "#FBEFEE",
+                  boxShadow: `inset 0 0 0 1px ${RED}`,
+                  borderRadius: 8,
+                }}
+              />
+              <Txt
+                x={26}
+                y={T_FAQ + 147}
+                w={378}
+                size={10}
+                lh={12}
+                color={RED}
+                weight={500}
+                wrap
+              >
+                {error}
+              </Txt>
+            </>
+          ) : null}
+          <Txt
+            x={16}
+            y={T_FAQ + 180}
+            w={398}
             size={9}
             lh={10.8}
             color={MUTED}
+            align="center"
+            wrap
           >
-            {paypalClientId
-              ? "Card and bank details are collected in PayPal's own window."
-              : "Test mode — no payment details are collected."}
+            {pendingMethod === "paypal"
+              ? "Starting PayPal checkout…"
+              : skipPayment
+                ? "Testing phase — payment is switched off. The order is recorded in the admin with a test badge and no money moves."
+                : mockForm
+                  ? "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."
+                  : "PayPal collects shipping and payment in its own secure window."}
           </Txt>
-        )}
+        </div>
+      </ScaleFrame>
 
-        {/* ---------- 06 · Help + FAQ + secure CTA (1523:553) ---------- */}
-        <CheckoutHelpCta
-          top={T_TAIL}
-          barTotal={formatMoney(total)}
-          payLabel={
-            skipPayment
-              ? pendingMethod === "none"
-                ? "Placing order…"
-                : `Place order · ${formatMoney(total)}`
-              : mockForm
-                ? pendingMethod === "card"
-                  ? "Processing…"
-                  : `Pay ${formatMoney(total)} Securely`
-                : "Pay with PayPal"
-          }
-          // 1523:565 has no disabled state, so the guard the old button's
-          // `disabled={isBusy}` gave it lives in the handler.
-          {...(!skipPayment && paypalClientId
-            ? {
-                /* With PayPal live the SDK's own iframe button is the only
-                   thing that can start a payment; the reflow removed the
-                   express module that used to host it, so it fills the CTA's
-                   own 276×48 box. */
-                payButtonSlot: (
-                  <PayPalSdkButtons
-                    clientId={paypalClientId}
-                    buildPayload={() => checkoutPayload(rawLines)}
-                    onFail={setError}
-                  />
-                ),
-              }
-            : {
-                onPay: skipPayment
-                  ? () => {
-                      if (!isBusy) {
-                        submitMockCheckout("none", false);
-                      }
+      {/* The fixed Secure Pay Bar (2157:526) */}
+      <PayBar
+        total={formatMoney(total)}
+        label={payLabel}
+        {...(!skipPayment && paypalClientId
+          ? {
+              payButtonSlot: (
+                <PayPalSdkButtons
+                  clientId={paypalClientId}
+                  buildPayload={() => checkoutPayload(rawLines)}
+                  onFail={setError}
+                />
+              ),
+            }
+          : {
+              onPay: skipPayment
+                ? () => {
+                    if (!isBusy) {
+                      submitMockCheckout("none", false);
                     }
-                  : () => {
-                      if (!isBusy) {
-                        submitMockCheckout("card", true);
-                      }
-                    },
-              })}
-        />
-        {/* The frame ends flush with the pay bar, so the error box and status
-            line live in the canvas's added reserve below module 06. */}
-        {error ? (
-          <>
-            <div
-              style={{
-                ...abs(16, T_TAIL + 289, 398, 34),
-                background: "#FBEFEE",
-                boxShadow: `inset 0 0 0 1px ${RED}`,
-                borderRadius: 8,
-              }}
-            />
-            <Txt
-              x={26}
-              y={T_TAIL + 298}
-              w={378}
-              size={10}
-              lh={12}
-              color={RED}
-              weight={500}
-              wrap
-            >
-              {error}
-            </Txt>
-          </>
-        ) : null}
-        <Txt
-          x={16}
-          y={T_TAIL + 331}
-          w={398}
-          size={9}
-          lh={10.8}
-          color={MUTED}
-          align="center"
-          wrap
-        >
-          {pendingMethod === "paypal"
-            ? "Starting PayPal checkout…"
-            : skipPayment
-              ? "Testing phase — payment is switched off. The order is recorded in the admin with a test badge and no money moves."
-              : mockForm
-                ? "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."
-                : "PayPal collects shipping and payment in its own secure window."}
-        </Txt>
-      </div>
-    </ScaleFrame>
+                  }
+                : () => {
+                    if (!isBusy) {
+                      submitMockCheckout("card", true);
+                    }
+                  },
+            })}
+      />
+    </>
   );
 }

@@ -1047,6 +1047,17 @@ export function PdpOverlays() {
         onClick={() => setOpen("reviews")}
         style={{ ...RESET, ...abs(16, 468, 200, 28) }}
       />
+      {/* Ratings summary block inside "10 · Reviews" → the same drawer. The
+          prototype gives the reviews sheet TWO entries: the rating row above
+          (1523:3992) and the whole rating-summary block (1523:4109, 366×120).
+          The page still draws the July 2:2 layout, so the block sits at
+          y1886 here rather than the redesign's y757. */}
+      <button
+        type="button"
+        aria-label="Open reviews from the ratings summary"
+        onClick={() => setOpen("reviews")}
+        style={{ ...RESET, ...abs(32, 1886, 366, 120) }}
+      />
       {/* "View All 120 Colors ›" (configurator at 16,697) → color drawer */}
       <button
         type="button"

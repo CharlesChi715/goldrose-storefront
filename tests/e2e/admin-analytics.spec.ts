@@ -46,11 +46,13 @@ test("browsing the storefront writes page views and checkout carries the visitor
   await page.fill("#ship-city", "Testville");
   await page.fill("#ship-state", "CA");
   await page.fill("#ship-zip", "90001");
+  await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
+  await page.waitForURL(/step=payment/);
   await page.fill("#card-name", "Stage Seven");
   await page.fill("#card-number", "4242 4242 4242 4242");
   await page.fill("#card-expiry", "12/33");
   await page.fill("#card-cvc", "123");
-  await page.getByRole("button", { name: /^Pay \$/ }).click();
+  await page.getByRole("button", { name: /^PAY \$/ }).click();
   await page.waitForURL(/\/checkout\/success\?/);
   orderName = (await page.locator("[data-order-name]").innerText()).trim();
 

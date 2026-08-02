@@ -1,9 +1,10 @@
 /**
  * ROLE OF THIS FILE
- * /account/security — Figma ACCOUNT-PRIVACY-SECURITY 1234:191, imported 2026-07-28.
- * Visual placeholder; reached from the dashboard's Account & Privacy row. The
- * password/2FA design conflicts with the email-link auth decision — flagged
- * in docs/ixd/README.md.
+ * /account/security — Figma "mepage-Account & Privacy-Security", re-imported
+ * 2026-08-02 from the replacement frame 1526:111. Visual placeholder. The
+ * old password-inputs design was removed at source (masked value + inert
+ * "Change password" button now), which resolves the earlier conflict with
+ * the email-link auth decision.
  */
 
 import type { Metadata } from "next";

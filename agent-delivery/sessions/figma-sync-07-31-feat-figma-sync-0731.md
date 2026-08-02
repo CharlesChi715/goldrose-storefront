@@ -3,17 +3,6 @@
 Agent session hand-off. Open matters first; what the session delivered is at
 the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
 
-## AI-007 · `PLACEHOLDER` · `OPEN`
-
-- **Affected place:** [`/account/returns/request-submitted`](../../app/account/returns/request-submitted/page.tsx#L1)
-- **What is placeholder:** The whole route is a coming-soon scaffold. The
-  Ready-for-dev return sheet (`/orders/track?return=1`) prototype-navigates
-  its Confirm Return button to RETURNS-REQUEST-SUBMITTED-PAGE (1593:114),
-  which is not marked Ready-for-dev — so the link resolves to a plain
-  "return request received / still being designed" page with no real content.
-- **Resolves when:** the frame (or its AFTER-SALES successor 2030:185, which
-  names this exact route) is marked Ready-for-dev and imported over this file.
-
 ## AI-008 · `AGENT-DECISION` · `OPEN`
 
 - **Affected place:** [cart icon in shared chrome](../../components/chrome.tsx#L269)

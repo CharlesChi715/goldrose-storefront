@@ -3,11 +3,19 @@
 /**
  * ROLE OF THIS FILE
  * The signed-out storefront sign-in screen, imported pixel-exact from the
- * VELORIA frame 1523:2470 ("loginpage", 430×1232, 2026-07-29 delivery). Six
- * design modules stack on a 430-wide canvas: 01 Welcome Hero, 02 Account Type
- * Tabs, 03 Sign In, 04 Member Benefits, 05 GoldRose Membership, 06 Find
- * Existing Order. Module 13 (bottom nav) is the shared BottomNav — this
- * main-flow frame keeps the nav band the account-settings frames dropped.
+ * VELORIA frame 1523:2470 ("loginpage", now 430×1156 — 2026-08-02 re-sync).
+ * Five design modules stack on a 430-wide canvas: 01 Welcome Hero,
+ * 02 Account Type Tabs, 03 Sign In, 04 Member Benefits, and the self-service
+ * card, then 06 Find Existing Order. Module 13 (bottom nav) is the shared
+ * BottomNav — this main-flow frame keeps the nav band the account-settings
+ * frames dropped.
+ *
+ * 08-02 re-sync: the 05 GoldRose Membership module is gone at source,
+ * replaced by ACCOUNT-INFO-SERVICE-CARD (the dashboard's row card, here with
+ * Returns & After-Sales / Customer Care / Policies & Legal); Find Existing
+ * Order moved up to y1004 and the frame shrank 1232 → 1156. "Create a
+ * shopping account ›" now really navigates to /account/signup — that frame
+ * dropped its password fields, so the page may be linked (it stays inert).
  *
  * 07-29 restyle: the outer cards of modules 03/04/06 went WHITE on their sand
  * hairlines, and the inactive account-type tab went white too; inner tiles,
@@ -33,7 +41,7 @@ import { ScaleFrame } from "@/components/chrome";
 import { abs, txt } from "@/lib/figma-layout";
 import { FadeLink } from "@/components/PageFade";
 import { BackButton } from "@/components/BackButton";
-import { cormorant, inter } from "@/lib/fonts";
+import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
 import {
   INK,
@@ -304,8 +312,8 @@ function SignInCard({
             : "We’ll email you a secure sign-in link. Click it and you’re in — no password needed."}
       </div>
 
-      {/* Create account (1523:2492) — the same emailed-code flow creates the
-          account, so this just focuses the field. */}
+      {/* Create account (1523:2492) — 08-02: the signup frame dropped its
+          password fields, so this now really opens /account/signup. */}
       <div style={abs(16, 212, 366, 24)}>
         <span
           style={{
@@ -316,22 +324,18 @@ function SignInCard({
         >
           New here?
         </span>
-        <button
-          type="button"
-          onClick={() => emailRef.current?.focus()}
+        <Link
+          href="/account/signup"
           style={{
             ...abs(130.5, 4.5, 167, 15),
             ...txt(12, 14.52, INK),
             fontWeight: 600,
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
+            display: "block",
             textAlign: "left",
           }}
         >
           {`Create a shopping account${NB}${NB}›`}
-        </button>
+        </Link>
       </div>
     </form>
   );
@@ -463,82 +467,81 @@ function MemberBenefits() {
   );
 }
 
-/* ---------- 05 · GoldRose Membership (1523:2514, 398×205 @ 16,858) ---------- */
+/* ---------- self-service card (2210:378, 398×132 @ 16,858) ---------- */
 
-function Membership({ onCreate }: { onCreate: () => void }) {
+// 08-02: this card replaced the 05 GoldRose Membership module at source. It
+// is the dashboard's service-row card, in Noto Sans SC on this Inter frame.
+const SERVICE_ROWS = [
+  {
+    y: 13,
+    title: "Returns & After-Sales",
+    value: `Self-service${NB}${NB}›`,
+    href: "/account/returns",
+  },
+  {
+    y: 54,
+    title: "Customer Care",
+    value: `Online now${NB}${NB}›`,
+    href: "/care",
+  },
+  {
+    y: 95,
+    title: "Policies & Legal",
+    value: `View all${NB}${NB}›`,
+    href: "/account/policies-legal",
+  },
+];
+
+function ServiceCard() {
   return (
-    // #F3C6D1 at fill opacity 0.23 — the design tints the cream page, it does
-    // not paint solid pink.
     <div
       style={{
-        ...abs(16, 858, 398, 205),
-        background: "rgba(243,198,209,0.23)",
+        ...abs(16, 858, 398, 132),
+        background: CARD,
         borderRadius: 14,
+        boxShadow: `inset 0 0 0 1px ${HAIRLINE}`,
       }}
     >
-      <div
-        style={{
-          ...abs(16, 11, 250, 42),
-          ...txt(17, 20.57, INK),
-          fontWeight: 700,
-          whiteSpace: "normal",
-        }}
-      >
-        Join GoldRose Gift Membership
-      </div>
-      <div
-        style={{
-          ...abs(16, 54, 225, 80),
-          ...txt(11, 20, INK),
-          fontWeight: 500,
-          whiteSpace: "pre-line",
-        }}
-      >
-        {
-          "• Member-only offers\n• Occasion reminders\n• Early access to limited releases\n• Save recipient and card details"
-        }
-      </div>
-      <img
-        src={`${A}/76-108.png`}
-        alt=""
-        style={{
-          ...abs(210, 32, 188, 152),
-          display: "block",
-          objectFit: "cover",
-        }}
-      />
-      <button
-        type="button"
-        onClick={onCreate}
-        style={{
-          ...abs(16, 148, 178, 44),
-          background: INK,
-          borderRadius: 10,
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
-        <span
-          style={{
-            ...txt(12, 14.52, CANVAS),
-            fontWeight: 600,
-            display: "block",
-            textAlign: "center",
-          }}
-        >
-          {`CREATE ACCOUNT${NB}${NB}${NB}›`}
-        </span>
-      </button>
+      {SERVICE_ROWS.map((row, i) => (
+        <div key={row.title}>
+          <Link
+            href={row.href}
+            className={notoSC.className}
+            style={{ ...abs(0, row.y, 398, 30), display: "block" }}
+          >
+            <span
+              style={{
+                ...abs(16, 0, 230),
+                ...txt(12, 16, INK),
+                fontWeight: 500,
+              }}
+            >
+              {row.title}
+            </span>
+            <span style={{ ...abs(248, 0, 132), ...txt(11, 16, INK, "right") }}>
+              {row.value}
+            </span>
+          </Link>
+          {i < SERVICE_ROWS.length - 1 ? (
+            <div
+              style={{
+                ...abs(14, [42, 83][i], 370, 1),
+                background: HAIRLINE,
+              }}
+            />
+          ) : null}
+        </div>
+      ))}
     </div>
   );
 }
 
-/* ---------- 06 · Find Existing Order (1523:2520, 398×82 @ 16,1077) ---------- */
+/* ---------- 06 · Find Existing Order (1523:2520, 398×82 @ 16,1004) ---------- */
 
 function FindExistingOrder() {
   return (
     <div
-      style={{ ...abs(16, 1077, 398, 82), background: WHITE, borderRadius: 14 }}
+      style={{ ...abs(16, 1004, 398, 82), background: WHITE, borderRadius: 14 }}
     >
       <Glyph
         src={`${A}/76-112.svg`}
@@ -669,8 +672,9 @@ export function ShoppingLogin() {
   }
 
   return (
+    // Canvas 1097 = the frame's nav band top (1156 − 59).
     <ScaleFrame
-      height={1173}
+      height={1097}
       background={CANVAS}
       fontClass={inter.className}
       navActive="Account"
@@ -690,7 +694,7 @@ export function ShoppingLogin() {
         emailRef={emailRef}
       />
       <MemberBenefits />
-      <Membership onCreate={() => emailRef.current?.focus()} />
+      <ServiceCard />
       <FindExistingOrder />
     </ScaleFrame>
   );

@@ -9,10 +9,12 @@
  * meta text and ships no export of its own; the ✉ is a crop of the frame
  * render — it SVG-exports as a .notdef box, C-2 precedent).
  *
- * Everything is the mock's own content: the three reminders, the "3
- * upcoming" count and the EST time zone are design placeholders — there is
- * no reminders backend yet (promotion-email consent and scheduling are a
- * tracked later feature). The two notification toggles and the Upcoming/All
+ * Everything is the mock's own content: the three reminders and the "3
+ * upcoming" count are design placeholders — there is no reminders backend
+ * yet (promotion-email consent and scheduling are a tracked later feature).
+ * The one live value is the time-zone row, which computes the current
+ * Pacific offset so 冬令时/夏令时 switches itself (owner instruction
+ * 2026-08-02; lib/reminders/timezone.ts). The two notification toggles and the Upcoming/All
  * tabs flip visually so the control states can be reviewed; Delete stays an
  * inert placeholder. Add reminder and each card's Edit now open the edit
  * bottom sheet (ReminderEditModal, 1599:245) — an info-storage modal with no
@@ -26,6 +28,7 @@ import { Glyph } from "@/components/screens/glyphs";
 import { ReminderEditModal } from "@/components/screens/ReminderEditModal";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
+import { pacificTimeLabel } from "@/lib/reminders/timezone";
 
 const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
@@ -436,16 +439,20 @@ export function RemindersScreen() {
       <div style={{ ...abs(76, 788.1, 180), ...txt(11.5, 13.8, INK) }}>
         Time zone
       </div>
-      {/* Pacific-only per the team's comment Charles accepted 07-31 ("只用
-          一个太平洋时间"); the frame still says EST — the offset follows its
-          standard-time convention (EST=−5 ⇒ PST=−8) until design answers
-          "UTC 几".
-          AI-TAG(AI-009): AGENT-DECISION — PST (UTC−8) chosen; see
-          /agent-delivery/sessions/figma-sync-08-01-feat-figma-sync-0801.md. */}
+      {/* Pacific-only, switching itself between 冬令时 and 夏令时 — the team's
+          comment thread Charles accepted 07-31/08-01 ("只用一个太平洋时间",
+          "这个就冬夏时间自动切换吧，不用人为设置"), reconfirmed 08-02 when the
+          GIFT-REMINDERS-TIME-ZONE sheet was un-marked. The frame draws the
+          winter label; the live row derives the offset from the zone's US
+          daylight rules, so it reads UTC-7 in summer without anyone editing
+          it (lib/reminders/timezone.ts). */}
       <div
-        style={{ ...abs(272, 788.7, 114), ...txt(10.5, 12.6, INK, "right") }}
+        style={{
+          ...abs(272, 790.2, 114),
+          ...txt(10.5, 12.6, INK, "center"),
+        }}
       >
-        PST (UTC−8)&nbsp;&nbsp;›
+        {pacificTimeLabel()}
       </div>
 
       {/* info note */}

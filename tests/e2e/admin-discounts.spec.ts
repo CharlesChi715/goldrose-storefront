@@ -71,22 +71,27 @@ test("the code applies at checkout, server-priced, and counts usage", async ({
     ] as const,
   );
   await page.goto("/checkout");
-  await page.fill("#discount-code", CODE_10);
-  await page.getByRole("button", { name: "Apply" }).click();
-  await expect(page.getByText(`Code ${CODE_10} applied.`)).toBeVisible();
-  await expect(page.getByText("−$5.00")).toBeVisible();
-
+  // Two-step reflow (2026-08-02): details first, then the payment step
+  // carries the discount band, card wells and pay bar.
   await page.fill("#email", "discount-buyer@example.com");
   await page.fill("#ship-name", "Discount Buyer");
   await page.fill("#ship-address1", "6 Coupon Court");
   await page.fill("#ship-city", "Testville");
   await page.fill("#ship-state", "CA");
   await page.fill("#ship-zip", "90001");
+  await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
+  await page.waitForURL(/step=payment/);
+
+  await page.fill("#discount-code", CODE_10);
+  await page.getByRole("button", { name: "Apply" }).click();
+  await expect(page.getByText(`Code ${CODE_10} applied.`)).toBeVisible();
+  await expect(page.getByText("−$5.00")).toBeVisible();
+
   await page.fill("#card-name", "Discount Buyer");
   await page.fill("#card-number", "4242 4242 4242 4242");
   await page.fill("#card-expiry", "12/33");
   await page.fill("#card-cvc", "123");
-  await page.getByRole("button", { name: /^Pay \$/ }).click();
+  await page.getByRole("button", { name: /^PAY \$/ }).click();
   await page.waitForURL(/\/checkout\/success\?/);
   const orderName = (
     await page.locator("[data-order-name]").innerText()
@@ -120,6 +125,8 @@ test("expired and unknown codes are rejected at checkout", async ({ page }) => {
     ] as const,
   );
   await page.goto("/checkout");
+  await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
+  await page.waitForURL(/step=payment/);
   await page.fill("#discount-code", CODE_EXPIRED);
   await page.getByRole("button", { name: "Apply" }).click();
   await expect(page.getByText("This code has expired.")).toBeVisible();

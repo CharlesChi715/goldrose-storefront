@@ -76,12 +76,40 @@ test("delete account stays inert: no live input, no live delete button", async (
   await expect(box).toHaveAttribute("aria-checked", "true");
 });
 
-test("returns renders the mock cases and Contact Support reaches the chat", async ({
+test("the returns flow walks start → reason → photos → submitted (08-02 redesign)", async ({
   page,
 }) => {
   await page.goto("/account/returns");
   await expect(page.getByText("Returns & After-Sales")).toBeVisible();
-  await expect(page.getByText("Order #GR202507280642")).toBeVisible();
+  // Start tab: eligible order → reason sheet → Continue carries the slug.
+  await page.getByRole("button", { name: "Start Return" }).last().click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("radio", { name: "Received the wrong item" }).click();
+  await sheet.getByRole("link", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/account\/returns\/add-photos\?reason=/);
+  await expect(page.getByText("Received the wrong item")).toBeVisible();
+  // Submit lands on the real request-submitted page (ex-AI-007 scaffold).
+  await page.getByRole("link", { name: "Submit Request" }).click();
+  await expect(page).toHaveURL(/\/account\/returns\/request-submitted$/);
+  await expect(
+    page.getByText("Request Submitted", { exact: true }),
+  ).toBeVisible();
+  // Track Status deep-links back into the status tab.
+  await page.getByRole("link", { name: "Track Status" }).click();
+  await expect(page).toHaveURL(/\/account\/returns\?tab=status$/);
+  await expect(page.getByText("Your Requests")).toBeVisible();
+});
+
+test("the returns status cards open their per-request pages", async ({
+  page,
+}) => {
+  await page.goto("/account/returns?tab=status");
+  await page.getByRole("link", { name: /RR-GR202506150311/ }).click();
+  await expect(page).toHaveURL(/\/account\/returns\/approved$/);
+  await expect(page.getByText("Return Approved").first()).toBeVisible();
+  // Not-approved page carries the Contact Support hand-off to the chat.
+  await page.goto("/account/returns/request-not-approved");
   await page.getByRole("link", { name: /Contact Support/ }).click();
   await expect(page).toHaveURL(/\/care\/chat$/);
 });

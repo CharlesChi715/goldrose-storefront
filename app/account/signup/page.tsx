@@ -1,10 +1,10 @@
 /**
  * ROLE OF THIS FILE
- * /account/signup — AUTH-SIGNUP-SHOPPING (Figma 1097:114, imported
- * 2026-07-27) as a visual placeholder route. Nothing links here yet: the
- * live sign-in flow is the emailed sign-in link on /account, and this
- * design's password fields conflict with that decision (see the screen's
- * file header and docs/ixd/README.md).
+ * /account/signup — "loginpage-Create a shopping account" (Figma 1523:3315,
+ * re-imported 2026-08-02) as a visual placeholder route. The design's
+ * password fields were removed at source, so the login page's "Create a
+ * shopping account ›" now links here; the form itself stays inert until
+ * customer-auth activation (see the screen's file header).
  */
 
 import type { Metadata } from "next";

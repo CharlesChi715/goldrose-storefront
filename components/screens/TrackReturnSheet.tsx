@@ -10,9 +10,9 @@
  *
  * Interaction is the design's visual layer only: picking a reason fills its
  * radio (ink dot). Confirm Return follows the prototype wiring (1523:1430 →
- * 1593:114) to /account/returns/request-submitted — a coming-soon scaffold,
- * since that target frame is not Ready-for-dev and there is no returns
- * backend. Close (× or the dim area) returns to the plain track page. Portalled to <body> and
+ * 1593:114) to /account/returns/request-submitted — since 2026-08-02 the
+ * real AFTER-SALES confirmation screen (2030:185; formerly a coming-soon
+ * scaffold). Close (× or the dim area) returns to the plain track page. Portalled to <body> and
  * bottom-anchored (the PdpOverlays stage pattern — ScaleFrame's transform
  * would swallow position:fixed).
  *
