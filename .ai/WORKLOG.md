@@ -4306,3 +4306,13 @@ Agent-inbox: detail pane formatting
   tsc + ESLint clean, 16 account e2e tests pass.
 - Raised AI-019 (dropped Sign-in link) and AI-020 (signup frame is now a
   unified email page while its name/route/prototype disagree).
+- 08-02: bottom nav re-imported from the current frames (not cherry-picked):
+  3 tabs at x 18/179/340 with the frames' own tab renders in
+  public/veloria/nav/, 商务 dropped (/business/wholesale → navActive="none";
+  business still reachable via the menu drawer). The frames restore the
+  Login/Me session swap the 07-27 batch dropped — owner confirmed "before
+  login show Login, after login show Me" — so the account tab is a client
+  island (AccountTabArt) that defaults to Login and swaps on session.
+  ⚠️ Frame drift: home/shop draw "Login" outline while the PDP draws "Me"
+  outline; dashboard draws "Me" filled. Followed the majority + the owner's
+  rule. 91 e2e green, baselines regenerated.

@@ -21,6 +21,7 @@ import { inter } from "@/lib/fonts";
 import NoCalcScale from "@/components/NoCalcScale";
 import { MenuButton } from "@/components/MenuButton";
 import { SearchButton } from "@/components/SearchButton";
+import { AccountTabArt } from "@/components/AccountTabArt";
 import { abs } from "@/lib/figma-layout";
 
 /* ---------- Inline SVG icons (Figma node renders, format=svg) ---------- */
@@ -337,7 +338,7 @@ export function ShopHeader() {
 // Tabs are identified by a stable id rather than by their label — the account
 // tab has been labelled "Login" and "Me" across design revisions (currently
 // "Me", 07-27 frames).
-type TabId = "Home" | "Shop" | "Wholesale" | "Account";
+type TabId = "Home" | "Shop" | "Account";
 
 type Tab = {
   id: TabId;
@@ -347,44 +348,38 @@ type Tab = {
   label: string;
 };
 
-// Redesign nav art (2026-07-25): 2x renders of the frames' own tab images —
-// outline mascots, label baked in. The design ships active variants for Home
-// and Shop; Wholesale keeps its single state. The account tab was renamed
-// back to "Me" in the 07-27 frames, which finally ship both of its states:
-// outline (921:251, shop/PDP frames) and filled (939:174, the
-// ACCOUNT-INFO-*-DASHBOARD frames) — the Login/Me session swap is gone.
-// Wholesale points at the B-4 application form (DQ-13(a), answered 2026-07-29);
-// it had stayed inert while that page did not yet exist. Its active art is the
-// one tab state the 07-25 home set never rendered — B-4 ships it (1523:771), so
-// that id carries a set prefix.
+// Nav art imported 2026-08-02 from the current frames' own tab renders
+// (public/veloria/nav/). THREE TABS: the design dropped 商务 / Wholesale —
+// every screen frame under a Ready-for-dev section draws Home / Shop /
+// account at x 18 / 179 / 340 (2024:276 login, 2024:284 dashboard, 2024:292
+// PDP, 1523:1646 shop, 2380:812 home, 2436:368 the new auth screen), and the
+// team's comment on the simplified homepage reads "企业这一块要删掉先不做机制".
+// The business pages stay reachable through the menu drawer's FOR BUSINESS
+// row → /business/partnerships → APPLY FOR WHOLESALE.
+//
+// The account tab is a client island (AccountTabArt): these frames restore the
+// Login/Me session swap the 07-27 batch had dropped.
 const TABS: Tab[] = [
   {
     id: "Home",
     href: "/",
-    img: "763-123",
-    activeImg: "763-113",
+    img: "nav/home",
+    activeImg: "nav/home-active",
     label: "Home",
   },
   {
     id: "Shop",
     href: "/shop",
-    img: "763-115",
-    activeImg: "763-125",
+    img: "nav/shop",
+    activeImg: "nav/shop-active",
     label: "Shop",
-  },
-  {
-    id: "Wholesale",
-    href: "/business/wholesale",
-    img: "763-117",
-    activeImg: "screens/1523-771",
-    label: "Wholesale",
   },
   {
     id: "Account",
     href: "/account",
-    img: "921-251",
-    activeImg: "939-174",
-    label: "Me",
+    img: "nav/login",
+    activeImg: "nav/login-active",
+    label: "Login",
   },
 ];
 
@@ -400,6 +395,10 @@ const TAB_ART_STYLE: React.CSSProperties = {
 };
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
+  // The account tab's face depends on the session, so it renders itself.
+  if (tab.id === "Account") {
+    return <AccountTabArt isActive={isActive} />;
+  }
   return (
     <img
       src={tabArtSrc(isActive && tab.activeImg ? tab.activeImg : tab.img)}
@@ -451,7 +450,7 @@ export function BottomNav({
           }}
         >
           {TABS.map((tab, i) => {
-            const x = [18, 126, 234, 342][i];
+            const x = [18, 179, 340][i];
             const style: React.CSSProperties = {
               ...abs(x, 0, 70, 59),
               display: "block",
