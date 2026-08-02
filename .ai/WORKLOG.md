@@ -4254,3 +4254,27 @@ Agent-inbox: detail pane formatting
   imports, then redirect; instruction recorded in AI-012 + docs/ixd 08-02.
 - AI-015: explained Figma's DRAG trigger (a second prototype outcome on the
   same button — presentation trick, not app behaviour). Open pending his call.
+
+## 2026-08-02 16:35 AEST
+
+- eldreve.com is LIVE on the storefront: attached `eldreve.com` + `www` to
+  the Vercel project via CLI, Charles added the two grey-cloud CNAMEs
+  (`@`/`www` → 4dc492244a7e5b81.vercel-dns-017.com) in Cloudflare, Vercel
+  verified both, Let's Encrypt cert issued (~90s), HTTPS 200. Verified
+  against official docs: Cloudflare Registrar locks nameservers to
+  Cloudflare (records-based setup is the only path); apex CNAME works via
+  Cloudflare flattening. Updated SUMMARY OQ-4 (re-applied after external
+  overwrite) and the gold_rose registration record. Pending: ICANN email
+  verification click, billing → hua PayPal, auth cutover (passkey RP ID /
+  Supabase / PayPal), GoldRose→ELDREVE rename.
+- Follow-ups from Charles's second round: AI-011 clarified (the scroll-wheel
+  dropdown IS implemented in code — DAYS 1–31 / MONTHS Jan–Dec generated,
+  menus scroll; only the reply to the team is still owner work, plus a second
+  reply on how to represent data-dependent destinations). AI-013 evidenced
+  (new item card 2157:263 has no qty/remove vs the deleted skin's
+  onQtyUp/onQtyDown/onRemove; summary 2157:479 keeps a Discount row; admin
+  discounts live at app/admin/(dashboard)/discounts; gift note is typed by
+  the CUSTOMER and read by the ADMIN on the order's Notes). AI-015 confirmed
+  and closed. Noted in docs/ixd: DQ-34 inverts — SUMMARY OQ-4 now says the
+  brand becomes ELDREVE, so the GoldRose wordmark substitution must stop for
+  new imports (rename itself is its own project).

@@ -544,6 +544,24 @@ so this pass was drift-alignment plus the file's first real prototype map
   管理"). Keepsake: back button coming ("缺少返回键"). `/gift-guide`
   (1942:182) and the edited blog frame remain unmarked.
 
+## ⚠️ DQ-34 inverts — the brand is becoming ELDREVE (noted 2026-08-02)
+
+Every sync since 07-29 has treated the frames' **ELDREVE** wordmark as a
+placeholder and substituted the owner's GoldRose art at the same box
+(`GoldRoseWordmark`, ~23 call sites). `SUMMARY.md` § OQ-4 now records the
+opposite: **ELDREVE is the brand**, `eldreve.com` is registered and live, and
+the design team's wordmark was right all along. The rename is explicitly its
+own project (auth cutover, passkey RP ID, Supabase and PayPal URLs), so
+**nothing was renamed in this sync** — but do not keep applying the
+substitution reflexively:
+
+- New imports should carry the frame's own wordmark, not a GoldRose swap.
+- The rename project retires `GoldRoseWordmark` and the substitution note in
+  every screen comment; treat those comments as stale from 08-02 onward.
+- Note the file is itself inconsistent: the new checkout frames set the brand
+  as the **text** "GOLDROSE" (2163:254 / 2169:258) while the account frames
+  use an ELDREVE raster. Worth settling with the design team in the same pass.
+
 ## 08-02 delivery sync — developer findings
 
 Processed the file at version 2382879093671597823 (edited 2026-08-02 02:54).

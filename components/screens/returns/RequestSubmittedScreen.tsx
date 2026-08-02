@@ -14,8 +14,6 @@
  * ◇▤▣▰✓ prefixes shipped no exports and stay text glyphs (browser font
  * fallback, the established gotcha).
  *
- * AI-TAG(AI-015): AGENT-DECISION — returns-flow wiring diverges from the
- * prototype where labels won (Back to Orders, Track Status, Track Package).
  * See /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
  */
 

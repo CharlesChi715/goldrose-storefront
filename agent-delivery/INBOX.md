@@ -14,16 +14,15 @@ lives in the session file that raised it, under [`sessions/`](sessions). Read
 | `AI-004` | `OWNER-TODO`     | `OPEN` | The delivery routing table is empty, so agents cannot file a parse result.                  | [initial-inbox-07-30](sessions/initial-inbox-07-30.md) | [Team deliveries README](../team-deliveries/README.md#L50)                                   |
 | `AI-005` | `AGENT-UNSURE`   | `OPEN` | Unclear whether the Figma naming spreadsheet is an incoming delivery or a generated export. | [initial-inbox-07-30](sessions/initial-inbox-07-30.md) | [Naming-guide batch](../team-deliveries/originals/2026-07-25-figma-naming-guide/batch.md#L16) |
 | `AI-008` | `AGENT-DECISION` | `OPEN` | Prototype links that would fake live features (cart→/bag, pay→keepsake, inert Save/submit) were not adopted. | [figma-sync-07-31-feat-figma-sync-0731](sessions/figma-sync-07-31-feat-figma-sync-0731.md) | [Cart icon comment](../components/chrome.tsx#L269) |
-| `AI-011` | `OWNER-TODO`     | `OPEN` | Paste the prepared reply in the Figma scroll-wheel thread — the read-only token cannot post it. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Reminder edit modal](../components/screens/ReminderEditModal.tsx) |
+| `AI-011` | `OWNER-TODO`     | `OPEN` | Relay two prepared replies to the design team in Figma — the repo's read-only token cannot post them. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Reminder edit modal](../components/screens/ReminderEditModal.tsx) |
 | `AI-012` | `PLACEHOLDER`    | `OPEN` | Seven `/policies/*` routes are coming-soon scaffolds until their frames are Ready-for-dev. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Scaffold screen](../components/screens/PolicyComingSoon.tsx) |
 | `AI-013` | `AGENT-DECISION` | `OPEN` | The checkout rebuild adds four controls the new design left out (country, quantity/remove, discount, gift message). | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Checkout client](../app/checkout/CheckoutClient.tsx) |
-| `AI-015` | `AGENT-DECISION` | `OPEN` | Three returns links differ from the Figma prototype where the button's own label was more honest. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Request-submitted screen](../components/screens/returns/RequestSubmittedScreen.tsx) |
 
 ## Session files
 
 | Session file                                                             | Open | Delivered                                        |
 | ------------------------------------------------------------------------ | ---- | ------------------------------------------------ |
-| [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | 4    | 08-02 sync: two-step checkout, returns flow, date pickers, policies hub + scaffolds, security/signup/dashboard/login re-imports; auto 冬令时/夏令时 timezone. |
+| [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | 3    | 08-02 sync: two-step checkout, returns flow, date pickers, policies hub + scaffolds, security/signup/dashboard/login re-imports; auto 冬令时/夏令时 timezone. |
 | [figma-sync-08-01-feat-figma-sync-0801](sessions/figma-sync-08-01-feat-figma-sync-0801.md) | 1    | 08-01 sync: timezone → Pacific; me三级 pulled back by design. |
 | [figma-sync-07-31-feat-figma-sync-0731](sessions/figma-sync-07-31-feat-figma-sync-0731.md) | 2    | 07-31 Figma sync: reminders toggle states, returns scaffold, prototype-map review. |
 | [agent-delivery-restructure-07-31-feat-blog-journal-import](sessions/agent-delivery-restructure-07-31-feat-blog-journal-import.md) | 1    | Split the inbox into per-session markdown files. |

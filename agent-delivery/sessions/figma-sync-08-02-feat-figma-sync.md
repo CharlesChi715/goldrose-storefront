@@ -16,13 +16,28 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   years verbatim from the drawn list (2027→2020). The lead-time number stays
   static (its chevron frame 2024:372 is an empty stub — picker not delivered)
   and the unit is pinned as a fixed value per the team's 08-01 comment.
-- **Charles (08-02):** "can u do that claude?" — **no.** `FIGMA_TOKEN` is
-  read-only (`file_comments:read`); posting needs `file_comments:write`, and
-  the API refuses with 403. Two ways forward: paste the reply yourself, or
-  issue a token with `file_comments:write` and an agent can post it.
-- **Reply text, ready to paste:** 可以，滚轮下拉框我们前端自己实现，不用把所
-  有选项都画出来 — 菜单画一个示意就行（几个选项 + 选中态）。年月日的完整范围
-  我们在代码里生成：日 1–31、月 Jan–Dec、年沿用你们画的 2020–2027。
+- **Charles (08-02), on whether dev can build it:** **yes — already built,
+  nothing further needed from the design team.** The menus scroll
+  (`overflowY: auto`, and opening one scrolls the selected row into view) and
+  the option lists are generated in code, not drawn: `DAYS` is `1…31` from a
+  one-line generator and `MONTHS` is `Jan…Dec`
+  ([`ReminderEditModal.tsx`](../../components/screens/ReminderEditModal.tsx)).
+  Only the *look* came from the frames — 126×77 field, dark `#493026` selected
+  pill, Playfair options — so one drawn menu was enough to style all three.
+- **Charles (08-02), on whether an agent can post the reply:** **no.**
+  `FIGMA_TOKEN` is read-only (`file_comments:read`); posting needs
+  `file_comments:write`, and the API refuses with 403. Paste it yourself, or
+  issue a token with `file_comments:write` and an agent can post next time.
+- **Reply 1 — the scroll-wheel question (thread on 2053:207):** 可以，滚轮下
+  拉框我们前端自己实现，不用把所有选项都画出来 — 菜单画一个示意就行（几个选
+  项 + 选中态）。年月日的完整范围我们在代码里生成：日 1–31、月 Jan–Dec、年沿
+  用你们画的 2020–2027。
+- **Reply 2 — how to represent a data-dependent destination (see AI-015):**
+  按钮跳到哪一页要看后台的真实状态（审核通过 / 未通过 / 已退款），不能用
+  "拖拽" 触发去演示第二种结果。建议二选一：① 在按钮上写一条 Dev Mode 注释
+  说明"跳转到该申请当前状态对应的页面"，不连线；② 用 Figma 的 variable +
+  conditional 交互（if 状态 = 已通过 → A 页，否则 → B 页）。列表里每张卡片
+  各自连到自己的状态页（你们在 2030:188 已经这么做了）就是最准确的表达。
 
 ## AI-012 · `PLACEHOLDER` · seven /policies/* routes are coming-soon scaffolds
 
@@ -48,17 +63,27 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   things a working shop needs. Rather than drop the features or invent a new
   look, each one was rebuilt **as a copy of a box the designers already drew
   elsewhere on the page**, so it looks like it belongs:
-  1. **Country picker** — the new address card has City, State and ZIP but no
-     country, and shipping is priced by country (OQ-2). Without it we cannot
-     price an order.
-  2. **Quantity and Remove** — the new product card shows the item but lost
-     the +/− buttons and the remove link, so a customer could not change
-     their basket.
-  3. **Discount code** — deleted from the design again, but the order summary
-     still shows a Discount line and the admin can still create codes, so a
-     customer with a code would have nowhere to type it.
-  4. **Gift message** — never drawn, but it is what gets printed on the card
-     and it is stored on the order.
+  1. **Country picker** — the new address card (2157:284) has CITY, STATE and
+     ZIP CODE but no country, and shipping is priced by country (OQ-2).
+     Without it we cannot price an order.
+  2. **Quantity and Remove** — the new item card (2157:263) holds only the
+     photo, title, "Sapphire blue · Qty 1", two detail lines, the price and
+     `EDIT →`. The card it replaced drove `onQtyUp` / `onQtyDown` /
+     `onRemove` (deleted `CheckoutSkin.tsx`, lines 361-364 and 477-513 in
+     commit `d68d928~1`), so without our band a customer could not change
+     quantity or remove a line anywhere in the flow.
+  3. **Discount code** — deleted from the design again, yet the design's own
+     Final Order Summary (2157:479) still prices a `Discount (15%) −$28.35`
+     row (2157:484-486), and the admin really can create codes
+     (`app/admin/(dashboard)/discounts/`, with `lib/admin/discounts.ts` and
+     `lib/checkout/discounts.ts` behind it — an e2e test creates a code in
+     the admin and redeems it at checkout). A customer holding a code would
+     have nowhere to type it.
+  4. **Gift message** — the **customer** types it at checkout; it travels as
+     `note` through `/api/checkout` onto the order, and the admin order
+     detail shows it as the order's Notes, prefilled and editable, so whoever
+     packs the box can write the card. No frame in this delivery draws the
+     field.
 - **Also decided (no design change needed):** the shipping options show no
   prices — they are decoration until per-method rates exist, and printing
   $14.99 next to something we never charge would mislead; the phone field is
@@ -68,30 +93,6 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   screen, following the design's own "固定在底部" note.
 - **Recommendation:** show the design team the four additions next delivery
   and ask them to draw them properly, so we can delete our versions.
-
-## AI-015 · `AGENT-DECISION` · returns-flow wiring where labels beat the prototype
-
-- **Where:** [`components/screens/returns/RequestSubmittedScreen.tsx`](../../components/screens/returns/RequestSubmittedScreen.tsx)
-  (representative; details in docs/ixd 08-02).
-- **What:** three places where the built links differ from the clickable
-  Figma prototype, each in the customer's favour:
-  1. **"Back to Orders"** → `/account/orders`. The prototype sent it back to
-     the returns start page, which contradicts its own label.
-  2. **"Track Status"** → the after-sales status tab. In Figma this one
-     button carries **two** triggers: a normal click opens "Return Approved",
-     and a *drag* opens "Request Not Approved". A drag trigger fires when you
-     press and pull on the element — designers use it to demo a second
-     outcome without drawing a second button. It is a presentation trick, not
-     a real interaction: in the shop, which of those two screens a customer
-     sees is decided by our review of their request, not by how they touch
-     the button. So the button goes to the status list, which shows whichever
-     outcome is true.
-  3. **"Track Package"** on the approved screen stays dead. It means the
-     parcel the customer ships *back*, and nothing tracks return shipments —
-     pointing it at `/orders/track` would show them an unrelated outbound
-     delivery.
-- **Charles (08-02):** asked what "drag" meant here — answered above; awaiting
-  a keep-or-reverse call. Reversing any of the three is a one-line change.
 
 ## Delivered this session
 
