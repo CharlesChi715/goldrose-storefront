@@ -608,6 +608,12 @@ code, the code being the different-device fallback.
 points at production. Local testing must use the **code**, which `verifyOtp`
 checks against Supabase directly and therefore works from anywhere.
 
+**Verified live 2026-08-03.** Everything above was built against intercepted
+Supabase calls — no real mail, no auth users — and then confirmed for real:
+a code emailed through Resend signed a customer in from `/account/signup`.
+That closes the loop the repo had been unable to test since 07-27, when the
+emailed link first went to the wrong place with no code in it.
+
 ## ✅ DQ-34 ANSWERED — ELDREVE is the brand (confirmed 2026-08-03)
 
 Every sync since 07-29 has treated the frames' **ELDREVE** wordmark as a

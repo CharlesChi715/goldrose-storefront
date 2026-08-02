@@ -4392,3 +4392,7 @@ Agent-inbox: detail pane formatting
   feat/figma-sync; the nav commit (858f3ec) and this brand commit (bce603a)
   sit on test/integration and want cherry-picking to feat/figma-sync if that
   branch is meant to carry them.
+- **Verified live (2026-08-03).** A real 6-digit code was emailed through
+  Resend and signed a customer in from `/account/signup`. Development itself
+  ran entirely against intercepted Supabase calls, so this was the first real
+  round trip — and the first time the flow has worked since it was built.

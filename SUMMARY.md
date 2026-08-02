@@ -207,7 +207,9 @@ Charles first.
    applied from `scripts/apply-auth-email-templates.mjs` and carry both a
    `/auth/confirm?token_hash=…&next=/account` link and the 6-digit code;
    `mailer_otp_length` 8 → 6 to match the UI; send cap 2 → 30/hour.
-   Remaining: watch Resend's free tier (~3k/month) against real volume.
+   **Verified end to end 2026-08-03** — a real code was emailed through
+   Resend and signed a customer in from `/account/signup`. Remaining: watch
+   Resend's free tier (~3k/month) against real volume.
 3. Configure PayPal sandbox and begin Advanced Checkout onboarding; install
    `cloudflared` or `ngrok` when webhook testing starts.
 4. Fix customer order links that point at the leftover `/orders` admin
