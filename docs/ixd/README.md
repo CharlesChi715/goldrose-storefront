@@ -544,6 +544,172 @@ so this pass was drift-alignment plus the file's first real prototype map
   管理"). Keepsake: back button coming ("缺少返回键"). `/gift-guide`
   (1942:182) and the edited blog frame remain unmarked.
 
+## 08-02 delivery sync — developer findings
+
+Processed the file at version 2382879093671597823 (edited 2026-08-02 02:54).
+`me三级` is **Ready-for-dev again** (re-marked 08-01 12:17 after the picker
+work), and the marked sections gained large new content. Everything below was
+imported on `feat/figma-sync`.
+
+**Checkout became a two-step flow — the old frame was deleted.** The single
+`/checkout` frame (1523:421) no longer exists in the file; `shoppage三级` now
+carries `/checkout · details-entry` (2157:239) and `/checkout · saved-address ·
+payment confirmation` (2157:384), plus two 900-wide *documentation* frames
+(2159:254 Checkout Field, 2160:254 Payment Option) that spec the reusable
+components and get no routes. Rebuilt as one route with a `?step=payment`
+second step. Notable in the redesign: the brand is now a **"GOLDROSE" text
+node** (no ELDREVE image), and the Secure Pay Bar overflows the frame bottom —
+that plus the resolved "固定在底部" comment reads as *fixed to the viewport*,
+so the live bar is a fixed overlay hosting the PayPal SDK button (or the
+mock/skip CTA).
+
+**Checkout dev decisions, for the design team to confirm:**
+
+- **No country field in the redesign** — but shipping is zone-priced from the
+  country (OQ-2), so a `COUNTRY / REGION` field band (design's own field
+  language) sits under the Delivery Address card. Same idiom as the discount
+  band.
+- **The item card lost its quantity steppers and remove control.** Cart
+  management is real functionality, so a band of management rows (one per
+  cart line, with ± steppers and REMOVE) sits under the item card on the
+  details step. The payment step lists extra lines read-only.
+- **Discount entry** stays a dev band (the design deleted the card again; §8
+  keeps the feature) — now above the Order Summary on the payment step.
+- **Shipping-method prices NOT imported** (frame shows FREE / $14.99 /
+  $24.99): the picker remains cosmetic per the owner's standing decision —
+  per-method pricing has no backend, and printing prices that are never
+  charged would mislead. The summary's zone rate is the only charged figure.
+- **PHONE (Optional) is inert art**: `/api/checkout`'s shipping payload has no
+  phone field; collecting one that goes nowhere would be dishonest. Flag if a
+  phone number is actually wanted on orders.
+- **Card wells stay mock-branch-only** (PCI hazard rule unchanged); with
+  PayPal live the wells hold an explanatory note instead of inputs.
+- The `Saved Delivery Address` card's DEFAULT badge is design art — there is
+  no saved-address backend; the card mirrors what the details step collected
+  (or the PayPal/testing note in those branches).
+
+**Returns flow (me三级, 8 frames) imported** → `/account/returns` rebuilt as
+the two-tab START/STATUS design (2030:189/188, `?tab=status` deep link), plus
+`/account/returns/add-photos` (2030:186), `/account/returns/request-submitted`
+(2030:185 — **replaces the AI-007 coming-soon scaffold**),
+`/account/returns/approved` (2030:184), `/account/returns/refund-issued`
+(2030:182) and `/account/returns/request-not-approved` (2030:183). The reason
+picker (2047:194) is a bottom **sheet**, not a route, despite its
+route-carrying frame name — it is 538px tall, opened from two places (Start
+Return, and Change on add-photos), per the 小页面 overlay precedent; the chosen
+reason rides a query param into add-photos. Wiring notes: "Back to Orders" →
+`/account/orders` (the prototype pointed it at the returns start page — the
+label wins); "Track Status" → the status tab (the prototype's click→approved /
+drag→not-approved pair is a demo trick, not navigation); "Buy Again" → `/shop`
+(prototype-confirmed); "Contact Support" → `/care/chat`; "View Return Policy ›"
+→ the `/policies/returns-refunds-cancellations` scaffold; approved's "Track
+Package" stays inert (return-shipment tracking has no page). The whole flow is
+the design's mock data — there is no returns backend. The old
+`/account/returns` frame (1523:3826) and the full-page reason frame (2030:187)
+were moved out of every section (superseded archive copies); ditto
+RETURNS-REQUEST-SUBMITTED-PAGE 1593:114, which is now out-scoped by 2030:185
+claiming the same route.
+
+**Reminder edit modal re-imported at 430×589** (1599:245): the single date
+field became three **dropdown fields** (2052:202/207/212) with floating menus
+(2053:183/207/193 — Playfair options, dark `#493026` selected pill, scrolling
+list). The menus are live selection controls (visual only, nothing persists).
+The drawn day menu shows a 20–31 scroll window and the team's open comment
+asks whether dev can supply a scroll dropdown rather than the full drawn list
+("这个夫哥你那边能设置滚轮下拉框吗…") — **answered in code: yes**; days run
+1–31 and months Jan–Dec, years keep the drawn 2027→2020 range. ⚠️ Charles
+should reply in the Figma thread so design stops drawing every option. Still
+static by design: the lead-time **number** (its chevron frame 2024:372 is an
+empty stub — picker UI not delivered) and the **unit**, pinned as a fixed
+value by the 08-01 comment ("这个先设定为固定值，不能修改"). "Delete
+reminder" remains an inert caption (no backend, no designed target).
+
+**Timezone: the picker sheet was NOT imported.** The reminders page's row now
+reads `Pacific Time (PT)UTC-8` (imported verbatim — this closes AI-009), and
+the comment thread Charles accepted settles the behaviour: **Pacific only,
+automatic DST, no manual setting** ("只用一个太平洋时间" → "这个就冬夏时间自
+动切换吧，不用人为设置" → "是的 我就打算这么弄"). The GIFT-REMINDERS-TIME-ZONE
+sheet (2030:190) sits in the re-marked section but directly contradicts that
+accepted decision (it offers Central/Mountain/Alaska/Hawaii/Europe and a
+device-timezone option), so the accepted comment wins and the sheet stays
+unbuilt. ⚠️ Design should either remove the sheet or re-open the question.
+
+**Account cluster changes** (see the per-screen findings appended below):
+`/account/privacy` hub restructured (Security summary card removed — parked
+beside the frame as 1523:3905 — and a Policies & Legal card added);
+`/account/security` re-imported from 1526:111 (the **password inputs are gone
+at source** — masked value + Change-password button, resolving the standing
+live-password-hazard flag; the old frame 1523:1078 still sits in the section
+as a stale duplicate — please delete one); NEW `/account/policies-legal` hub
+(1523:1136 — rebuilt in place of the old privacy-policy accordion frame) whose
+7 policy pages are **not** Ready-for-dev → 7 coming-soon scaffolds under
+`/policies/*`; `/account/signup` re-imported without password fields (删掉密码
+executed — the design now matches the email-code auth decision, so the login
+page's "Create a shopping account ›" is finally wired to it; the form itself
+stays inert until customer-auth activation); dashboard tiles now
+My Orders / Wishlist / **Addresses** (Custom Archive deleted at source) plus an
+inert right-aligned "Address Management ›" row — its ADDRESS-BOOK section
+(2118:246) is still unmarked; the login page gained a "Policies & Legal · View
+all ›" row → `/account/policies-legal`.
+
+**Repo ↔ Figma reconciliation (routes with no marked frame):**
+
+- `/account/privacy-policy` — orphaned: its frame (1523:1136) was rebuilt into
+  the POLICIES-LEGAL hub, and the new designed privacy policy is the unmarked
+  `/policies/privacy` (2118:244). The old accordion screen still renders;
+  Charles decides whether it survives until the policy pages are marked.
+- `/orders/track?return=1` return sheet — its frame (1523:1375) was moved out
+  of every section; the built sheet stays (still the only designed entry into
+  the request-submitted page besides the new returns flow).
+- `/bag`, `/account/keepsake`, `/account/delete`, `/account/business*`,
+  `/care*`, `/story`, `/craft`, `/` — unchanged standing placeholders/imports;
+  their frames still exist (homepage/story redesigns pending, unmarked).
+- Unmarked new Figma content left untouched: the simplified homepage
+  (2024:378), MENU redesign (2345:271), new PDP (2333:280), new mepage
+  (2210:310, with a Policies row), OUR STORY long page (2274:274/275),
+  `/gift-guide` (1942:182), blog (1593:115), ADDRESS-BOOK (2118:246), the 7
+  policy pages (2118:*/2127:238), CHECKOUT · MOBILE STATES docs (2157:238).
+
+**Per-screen findings while transcribing, for the design team:**
+
+- **Membership is removed at source in both frames** — the dashboard's pink
+  member card and the login page's "Join GoldRose Gift Membership" module are
+  gone from 1523:2536 / 1523:2470; both were removed from the build (the
+  login's self-service card took the module's place, with the new Policies &
+  Legal row).
+- **The dashboard's "Address Management ›" text (2210:376) prototype-links to
+  the privacy hub (1523:3878)** — reads as a copy-paste slip; not adopted (the
+  row is inert until ADDRESS-BOOK 2118:246 is marked). Its "Account &
+  Privacy" title also carries stray trailing newlines.
+- **1526:111 embeds the toggle's raw COMPONENT_SET** (both variants render,
+  purple dashed set border and all) instead of an instance — built as a
+  single off-state toggle; please swap the set for an instance.
+- **Two frames draw the returns tab pill differently** (374×50 r25 @x28 on
+  the start frame vs 398×52 r26 @x16 on the status frame, underline y211 vs
+  y213) — implemented per frame, worth unifying.
+- 2030:189 embeds two identical Brand Navigation instances (drawn once); the
+  header instance sits at slightly different y-offsets per frame (−4…+2);
+  2030:182 (refund-issued) has no header at all — followed the render.
+- The status page's red chip really reads "✓ Request Not Approved" (a check
+  mark on the rejection chip, 2048:216) — copied verbatim; likely wants ⓧ.
+- The add-photos dropzone stroke renders dashed but the node carries no dash
+  property — built as 1px dashed; confirm the intended dash pattern.
+- Copy polish: the policies hub intro has doubled spaces and space-before-
+  comma ("Browse  our  shipping , returns ,"), kept verbatim; the login's
+  " View all  ›" value has a leading space (dropped — invisible in a
+  right-aligned box).
+- Missing/broken exports worked around: the ✉ glyph again SVG-exports as a
+  `.notdef` box (crop reused); the policies rows shipped one chevron export
+  (reused ×7); 2043:204's ⓧ export failed (its 30px twin reused at 0.8); the
+  delete-row chevron 1803:322 reused the session chevron's art.
+- The hub's Delete-account row is now **wired** to `/account/delete` (the
+  frame's own target) — that screen remains a deliberately inert placeholder
+  (owner decision on real deletion still pending).
+- Test-infrastructure note: the repo's home/shop pixel baselines were
+  regenerated this session for pre-existing sub-pixel AA drift (37 stray
+  pixels from a Chrome update — visible on an untouched tree too); the
+  product-detail baseline was untouched.
+
 ## 08-01 delivery sync — developer findings
 
 Re-polled the file (version 2382387929276592531, edited 2026-07-31 14:22 —

@@ -97,6 +97,54 @@ test("the reminders Edit control opens the edit sheet; Cancel closes it", async 
   );
 });
 
+test("the reminder sheet's date dropdowns select and close per the 08-02 design", async ({
+  page,
+}) => {
+  await page.goto("/account/reminders");
+  await page
+    .getByRole("button", { name: /^Edit / })
+    .first()
+    .click();
+  const sheet = page.getByRole("dialog", { name: "Edit reminder" });
+  await expect(sheet).toBeVisible();
+
+  // The three DATE fields open their dropdown menus (2052:202/207/212 →
+  // 2053:183/207/193); picking an option updates the Playfair value.
+  const yearField = sheet.getByRole("button", { name: "Year" });
+  await expect(yearField).toContainText("2025");
+  await yearField.click();
+  const yearMenu = sheet.getByRole("listbox", { name: "Year options" });
+  await expect(yearMenu).toBeVisible();
+  await yearMenu.getByRole("option", { name: "2026" }).click();
+  await expect(yearField).toContainText("2026");
+  await expect(sheet.getByRole("listbox")).toHaveCount(0);
+
+  // Only one menu opens at a time; Escape closes the menu first, the sheet
+  // second.
+  await sheet.getByRole("button", { name: "Month" }).click();
+  await sheet.getByRole("button", { name: "Day" }).click();
+  await expect(sheet.getByRole("listbox")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(sheet.getByRole("listbox")).toHaveCount(0);
+  await expect(sheet).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Edit reminder" })).toHaveCount(
+    0,
+  );
+
+  // Reopening resets to the frame's defaults (info-storage modal: nothing
+  // persists).
+  await page
+    .getByRole("button", { name: /^Edit / })
+    .first()
+    .click();
+  await expect(
+    page
+      .getByRole("dialog", { name: "Edit reminder" })
+      .getByRole("button", { name: "Year" }),
+  ).toContainText("2025");
+});
+
 test("the reminders notification toggles start Email on, SMS off", async ({
   page,
 }) => {
@@ -111,15 +159,18 @@ test("the reminders notification toggles start Email on, SMS off", async ({
   ).toHaveAttribute("aria-checked", "false");
 });
 
-test("the return sheet's Confirm Return lands on the request-submitted scaffold", async ({
+test("the return sheet's Confirm Return lands on the request-submitted page", async ({
   page,
 }) => {
   await page.goto("/orders/track?return=1");
-  // Prototype wiring 1523:1430 → 1593:114; the target frame is not
-  // Ready-for-dev yet, so the link resolves to the coming-soon scaffold.
+  // Prototype wiring 1523:1430 → the request-submitted route. Since the
+  // 08-02 sync that route is the real AFTER-SALES confirmation screen
+  // (2030:185) — the AI-007 coming-soon scaffold it replaced is retired.
   await page.getByRole("link", { name: "Confirm Return" }).click();
   await expect(page).toHaveURL(/\/account\/returns\/request-submitted$/);
-  await expect(page.getByText("Return request received")).toBeVisible();
+  await expect(
+    page.getByText("Request Submitted", { exact: true }),
+  ).toBeVisible();
 });
 
 test("the shop pagination walks pages and reorders the placeholder cards", async ({

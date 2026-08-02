@@ -4217,3 +4217,23 @@ Agent-inbox: detail pane formatting
 - SUMMARY.md updated: teardown is on `main`; the from-scratch rebuild
   continues (record front matter only). Scratch `scripts/features/cli.mjs`
   stays local/untracked until the rebuild is real.
+
+## 2026-08-02 — Figma sync: two-step checkout, returns flow, date pickers (feat/figma-sync)
+
+- Processed file version 2382879093671597823. `me三级` re-marked Ready-for-dev;
+  checkout redesigned as two steps (old frame deleted at source).
+- Rebuilt /checkout as the 2157:239/384 two-step flow (?step=payment), pay bar
+  fixed to viewport, PayPal/mock/skip branches preserved; CheckoutSkin.tsx
+  deleted; dev bands: country, cart rows, discount, gift note (AI-013).
+- Imported the returns flow (7 screens + reason sheet, all mock), replacing
+  the AI-007 scaffold and the old ReturnsScreen.
+- Reminder modal re-imported (430×589) with live Y/M/D dropdowns (AI-011);
+  timezone row → "Pacific Time (PT)UTC-8" (AI-009 closed); 2030:190 picker
+  sheet deliberately not built (AI-010).
+- Security 1526:111 (no password inputs), privacy hub restructure, policies
+  hub + 7 /policies/* scaffolds (AI-012), signup without passwords (now
+  linked), dashboard tiles/rows, login self-service card.
+- Verified: build, 63 unit + 91 e2e green, band-diffs 1.4–2.9% + modal 1.76%;
+  home/shop pixel baselines regenerated (pre-existing Chrome AA drift, 37px).
+- Hand-off: session file figma-sync-08-02-feat-figma-sync.md; closed AI-007,
+  AI-009; opened AI-010…AI-015; docs/ixd 08-02 section; SUMMARY refreshed.

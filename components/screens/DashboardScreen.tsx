@@ -18,13 +18,20 @@
  * designed path is now Account & Privacy → the hub's Session card →
  * /account/logout.
  *
+ * 08-02 drift import (shopping frame only): the quick-tile row is now THREE
+ * tiles (My Orders / Wishlist / Addresses — Custom Archive deleted at
+ * source), the service card grew to 209 tall with a right-aligned "Address
+ * Management ›" link row, and the pink member card is gone from the frame.
+ * The business variant keeps its 07-29 layout untouched.
+ *
  * Wired: order tracking, /account/orders, /account/reminders, /care,
  * /account/returns and /account/privacy (the 07-29 hub), the account-type
  * toggle, and BUY AGAIN → /shop (nearest honest destination, H-15
- * precedent). Wishlist / Custom Archive / Addresses / benefits /
- * business-side tiles render pixel-exact but stay inert until their targets
- * exist (route-table rule). Header wordmark: the shopping frame's image
- * reads "ELDREVE" (placeholder brand, DQ) — the owner's GoldRose art stays,
+ * precedent). Wishlist / Addresses / Address Management / business-side
+ * tiles render pixel-exact but stay inert until their targets exist
+ * (route-table rule; the ADDRESS-BOOK section 2118:246 is not
+ * Ready-for-dev). Header wordmark: the shopping frame's image reads
+ * "ELDREVE" (placeholder brand, DQ) — the owner's GoldRose art stays,
  * centred in the frame's wordmark box.
  */
 
@@ -63,6 +70,7 @@ const MOCK_ORDER: DashboardRecentOrder = {
 };
 
 type Tile = {
+  x: number;
   icon: string;
   ink: [number, number];
   title: string;
@@ -177,8 +185,8 @@ function Dashboard({
   const shopping = variant === "shopping";
   const backX = shopping ? 5.5 : 7;
   const logoX = shopping ? 136.5 : 143;
-  // 07-29: the shopping frame's member card moved down 6px; business kept 756.
-  const memberY = shopping ? 762 : 756;
+  // Business member card y (08-02: the shopping frame dropped its member card).
+  const memberY = 756;
   const name = displayName ?? (shopping ? "Jessica" : "David");
   const initials = name
     .split(/\s+/)
@@ -188,29 +196,28 @@ function Dashboard({
     .toUpperCase();
   const order = recentOrder === undefined ? MOCK_ORDER : recentOrder;
 
+  // Shopping: the 08-02 frame's three tiles at x16/167/318 (Custom Archive
+  // deleted at source). Business: the 07-29 four-tile layout, untouched.
   const tiles: Tile[] = shopping
     ? [
         {
-          icon: "916-141",
+          x: 16,
+          icon: "1523-2560",
           ink: [24, 24],
           title: "My Orders",
           text: "View all orders",
           href: "/account/orders",
         },
         {
-          icon: "916-145",
+          x: 167,
+          icon: "1523-2564",
           ink: [22, 22],
           title: "Wishlist",
           text: "8 saved gifts",
         },
         {
-          icon: "916-149",
-          ink: [24, 17],
-          title: "Custom Archive",
-          text: "Saved designs",
-        },
-        {
-          icon: "916-153",
+          x: 318,
+          icon: "1523-2572",
           ink: [19, 19],
           title: "Addresses",
           text: "Manage delivery",
@@ -218,24 +225,28 @@ function Dashboard({
       ]
     : [
         {
+          x: 16,
           icon: "916-141",
           ink: [24, 24],
           title: "Purchase Orders",
           text: "Approved orders",
         },
         {
+          x: 115.5,
           icon: "916-145",
           ink: [22, 22],
           title: "Purchase Requests",
           text: "Quotes & pricing",
         },
         {
+          x: 215,
           icon: "916-149",
           ink: [24, 17],
           title: "Sample Requests",
           text: "Samples & status",
         },
         {
+          x: 314.5,
           icon: "916-153",
           ink: [19, 19],
           title: "Business Team",
@@ -566,8 +577,8 @@ function Dashboard({
       )}
 
       {/* shortcut tiles */}
-      {tiles.map((tile, i) => {
-        const x = [16, 115.5, 215, 314.5][i];
+      {tiles.map((tile) => {
+        const x = tile.x;
         const body = (
           <>
             <Glyph src={tile.icon} x={0} y={16} w={94} h={28} ink={tile.ink} />
@@ -619,8 +630,9 @@ function Dashboard({
         );
       })}
 
-      {/* service rows */}
-      <div style={card(16, 578, 398, 166)} />
+      {/* service rows — the 08-02 shopping frame grows the card to 209 for
+          the Address Management row; business keeps the 07-29 166 */}
+      <div style={card(16, 578, 398, shopping ? 209 : 166)} />
       {rows.map((row, i) => {
         const y = [589, 630, 671, 712][i];
         const body = (
@@ -662,56 +674,73 @@ function Dashboard({
           </div>
         );
       })}
+      {shopping ? (
+        // 2210:373/396 — the 08-02 frame's extra separator + right-aligned
+        // "Address Management ›" row. INERT: its ADDRESS-BOOK target section
+        // (2118:246) is not Ready-for-dev, and the frame's own prototype
+        // link (→ 1523:3878, the privacy hub) looks like a copy-paste slip.
+        <>
+          <div style={{ ...abs(32, 741, 370, 1), background: SAND }} />
+          <div style={abs(254, 743, 139, 36)}>
+            <span
+              style={{
+                ...abs(10, 10, 119),
+                ...txt(11, 16, INK, "right"),
+              }}
+            >
+              Address Management&nbsp;&nbsp;›
+            </span>
+          </div>
+        </>
+      ) : null}
 
-      {/* member / security card */}
-      <div
-        style={{
-          ...abs(16, memberY, 398, 94),
-          background: shopping ? PINK : "#EBF5EC",
-          borderRadius: 14,
-        }}
-      />
-      <div
-        className={playfair.className}
-        style={{
-          ...abs(34, memberY + 24, 240),
-          ...txt(shopping ? 18 : 15, shopping ? 22 : 18, INK),
-          fontWeight: 600,
-        }}
-      >
-        {shopping ? "GoldRose Gift Member" : "Enterprise Account Protected"}
-      </div>
-      <div
-        style={{
-          ...abs(34, shopping ? 814 : 804, 250),
-          ...txt(shopping ? 12 : 10, shopping ? 16 : 14, INK),
-        }}
-      >
-        {shopping
-          ? "1,280 points · 2 available rewards"
-          : "Sensitive details are secured for your team."}
-      </div>
-      <div
-        style={{
-          ...abs(290, memberY + 25, 108, 42),
-          background: INK,
-          boxShadow: `inset 0 0 0 1px ${SAND}`,
-          borderRadius: 10,
-        }}
-      >
-        <span
-          style={{
-            position: "absolute",
-            left: 8,
-            top: 13,
-            width: 92,
-            ...txt(12, 16, CREAM, "center"),
-            fontWeight: 500,
-          }}
-        >
-          {shopping ? "VIEW BENEFITS" : "SECURITY"}
-        </span>
-      </div>
+      {/* member / security card — gone from the 08-02 shopping frame; the
+          business frame still has it */}
+      {shopping ? null : (
+        <>
+          <div
+            style={{
+              ...abs(16, memberY, 398, 94),
+              background: "#EBF5EC",
+              borderRadius: 14,
+            }}
+          />
+          <div
+            className={playfair.className}
+            style={{
+              ...abs(34, memberY + 24, 240),
+              ...txt(15, 18, INK),
+              fontWeight: 600,
+            }}
+          >
+            Enterprise Account Protected
+          </div>
+          <div style={{ ...abs(34, 804, 250), ...txt(10, 14, INK) }}>
+            Sensitive details are secured for your team.
+          </div>
+          <div
+            style={{
+              ...abs(290, memberY + 25, 108, 42),
+              background: INK,
+              boxShadow: `inset 0 0 0 1px ${SAND}`,
+              borderRadius: 10,
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                left: 8,
+                top: 13,
+                width: 92,
+                ...txt(12, 16, CREAM, "center"),
+                fontWeight: 500,
+              }}
+            >
+              SECURITY
+            </span>
+          </div>
+        </>
+      )}
     </ScaleFrame>
   );
 }

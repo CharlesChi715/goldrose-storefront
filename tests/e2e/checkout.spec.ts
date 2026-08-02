@@ -65,10 +65,9 @@ test("mock checkout: cart → pay → success → order recorded with note + mov
 
   await page.goto("/checkout");
   await expect(page.getByRole("heading", { name: "Checkout" })).toBeVisible();
-  await expect(page.getByText("Signature Rose")).toBeVisible();
-  // US zone: $5.95 shipping under the free threshold.
-  await expect(page.getByText("$5.95")).toBeVisible();
+  await expect(page.getByText("Signature Rose").first()).toBeVisible();
 
+  // Step 1 · Details (2026-08-02 two-step reflow): contact + address + note.
   await page.fill("#gift-note", "Happy anniversary, my love!");
   await page.fill("#email", "stage4-test@example.com");
   await page.fill("#ship-name", "Test Buyer");
@@ -76,11 +75,16 @@ test("mock checkout: cart → pay → success → order recorded with note + mov
   await page.fill("#ship-city", "Testville");
   await page.fill("#ship-state", "CA");
   await page.fill("#ship-zip", "90001");
+  await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
+  await page.waitForURL(/step=payment/);
+
+  // Step 2 · Payment: US zone $5.95 shipping in the live summary.
+  await expect(page.getByText("$5.95")).toBeVisible();
   await page.fill("#card-name", "Test Buyer");
   await page.fill("#card-number", "4242 4242 4242 4242");
   await page.fill("#card-expiry", "12/33");
   await page.fill("#card-cvc", "123");
-  await page.getByRole("button", { name: /^Pay \$/ }).click();
+  await page.getByRole("button", { name: /^PAY \$/ }).click();
 
   await page.waitForURL(/\/checkout\/success\?/);
   // Success page is now the C-2 "Order Confirmed" design.
@@ -136,13 +140,17 @@ test("non-US address gets its zone's shipping rate (Rest of world)", async ({
   );
 
   await page.goto("/checkout");
+  // Country lives on the details step (dev band — the redesign has no
+  // country field, but shipping stays zone-priced).
   await page.selectOption("#ship-country", "GB");
+  await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
+  await page.waitForURL(/step=payment/);
   // Rest-of-world placeholder rate: $19.95, no free threshold.
   await expect(page.getByText("$19.95")).toBeVisible();
   await expect(page.getByText("Shipping (Rest of world)")).toBeVisible();
 
   // Mock express (PayPal) completes without the card form.
-  await page.getByRole("button", { name: "PayPal" }).click();
+  await page.getByRole("button", { name: "Pay with PayPal" }).click();
   await page.waitForURL(/\/checkout\/success\?/);
 
   const orderName = (

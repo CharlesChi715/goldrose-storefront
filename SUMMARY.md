@@ -64,14 +64,21 @@ Charles first.
 - Built: storefront, admin, accounts, catalog, checkout/order flow,
   analytics, and the SEO/GEO baseline. PayPal Orders v2 wallet checkout
   works in sandbox. Supplied Figma screens are imported through the
-  2026-07-30 B-2 checkout reflow (1523:421; express module and discount card
-  deleted by design — discount entry kept as a flagged dev band, PayPal SDK
-  button relocated into the pay CTA) and the 2026-07-29 redesign batch — a file-wide restyle plus `/account/privacy`,
-  `/account/orders/details`, `/orders/track` (redesigned, with an unlinked
-  return sheet), `/story` and `/craft` (routes, placeholders, and design
-  conflicts: [`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ The delivery
-  stamped an "ELDREVE" placeholder wordmark on many frames — GoldRose was
-  substituted everywhere; DQ-34 asks the design team to confirm.
+  2026-08-02 sync (on `feat/figma-sync`): checkout is now the **two-step
+  redesign** (2157:239/384 — details entry → payment confirmation, pay bar
+  fixed to the viewport; the old single-page frame was deleted from the
+  file; country/discount/gift-note/cart-row controls kept as flagged dev
+  bands), the full **returns flow** is in (`/account/returns` rebuilt +
+  add-photos/request-submitted/approved/refund-issued/not-approved + reason
+  sheet — all mock data), the reminder edit modal gained live Y/M/D
+  **dropdown pickers**, `/account/security` lost its password inputs at
+  source, the privacy hub was restructured, and a new
+  `/account/policies-legal` hub links 7 `/policies/*` coming-soon scaffolds
+  (their frames are not Ready-for-dev). Earlier milestones: the 2026-07-29
+  file-wide restyle and the 07-30 B-2 reflow
+  ([`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ Deliveries stamp an
+  "ELDREVE" placeholder wordmark on many frames — GoldRose is substituted
+  everywhere; DQ-34 asks the design team to confirm.
 - A later batch (node ids 1593/1596/1599) delivered three more frames.
   **Imported:** the REMINDERS-EDIT-OPEN modal (1599:245) → a bottom sheet on
   `/account/reminders`, opened by Add reminder / each card's Edit; its "no
@@ -88,10 +95,14 @@ Charles first.
   features (cart→`/bag`, pay→keepsake, inert Save/submit) were not adopted
   (AI-008). The 08-01 sync: design un-marked `me三级` (reminders cluster pulled
   back for picker work — no re-imports from it until re-marked); the reminders
-  timezone is now Pacific-only, shown as `PST (UTC−8)` per a comment Charles
-  accepted (AI-009). Pending from design: the simplified homepage (second frame
-  2024:378 now in build — keep ignoring both homepage frames) and an unmarked
-  AFTER-SALES 13-screen section ([`docs/ixd/README.md`](docs/ixd/README.md)).
+  timezone is now Pacific-only, shown as `Pacific Time (PT)UTC-8` per the
+  design's updated frame (AI-009 closed 08-02). The 08-02 sync imported the
+  re-marked `me三级` section (returns flow, date pickers) and the checkout
+  redesign; the timezone-picker sheet was NOT built (contradicts the accepted
+  Pacific-only comment). Pending from design: the simplified homepage (second
+  frame 2024:378 — keep ignoring both homepage frames), the ADDRESS-BOOK
+  section, the 7 policy pages, MENU/PDP/mepage/story-long redesigns, and
+  `/gift-guide` ([`docs/ixd/README.md`](docs/ixd/README.md)).
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
   coverage is partial: only 3 of the home page's 17 bands carry a

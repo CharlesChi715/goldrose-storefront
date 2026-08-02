@@ -2,29 +2,28 @@
 /**
  * ROLE OF THIS FILE
  * /account/signup — pixel-exact implementation of "loginpage-Create a
- * shopping account" (1523:3315, 07-29 restyle). Geometry, colors, fonts and
- * copy verbatim from the Figma REST data; input icons are Figma's own SVG
- * exports (the ✉ is a crop of the frame render — it SVG-exports as a
- * .notdef box, C-2 precedent).
+ * shopping account", re-imported 2026-08-02 from 1523:3315: the password +
+ * confirm-password fields were removed at source, so the form now matches
+ * the email-code auth decision (Full name / email / verification code).
+ * Geometry, colors, fonts and copy verbatim from the Figma REST data; input
+ * icons are Figma's own SVG exports (the ✉ is a crop of the frame render —
+ * it SVG-exports as a .notdef box, C-2 precedent).
  *
  * ⚠️ Brand substitution: the frame's header wordmark is an image reading
- * "ELDREVE" — the placeholder brand this delivery stamps on several screens
- * (DQ raised). The live page keeps GoldRose in Playfair at the image's box,
- * the C-2 precedent.
+ * "ELDREVE" — the placeholder brand stamped on several screens (DQ-34). The
+ * live page keeps the owner's GoldRose art at the image's box.
  *
- * The whole form is a VISUAL PLACEHOLDER, deliberately built from styled
- * divs rather than real inputs: the design asks for password fields, but
- * live customer auth is the emailed sign-in link (code fallback) — a
- * password box that goes nowhere is the same hazard as B-2's dead card
- * fields, and a real <input type=password> would also invite password
- * managers to fill it. Until the design and the auth decision are
- * reconciled (flagged in docs/ixd/README.md), only "Sign in ›" is live and
- * goes to /account, where the real link-based flow already works.
+ * The form stays a VISUAL PLACEHOLDER of styled divs, inert until
+ * customer-auth activation (release queue #2) — live-looking inputs that go
+ * nowhere are the flagged hazard. Only "Sign in ›" is live and goes to
+ * /account, where the real link-based flow already works; the login page
+ * now links here in return.
  */
 
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
 import { ScaleFrame } from "@/components/chrome";
+import { GoldRoseWordmark } from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
@@ -35,9 +34,10 @@ const CREAM = "#FFF6EC";
 const SHEET = "#FFFEFB";
 const HINT = "#75665E";
 
-// 1561:115/114/112/113/111 — the five fields, frame order (the 07-29 frame
-// moves Verification code below the passwords): box y, icon export (ink =
-// SVG natural size; crop = the ✉ render-crop's measured box), hint text.
+// 1561:115/114/111 — the three fields, frame order (08-02: the two password
+// fields are gone at source; Verification code moved up to y548): box y,
+// icon export (ink = SVG natural size; crop = the ✉ render-crop's measured
+// box), hint text.
 const FIELDS: Array<{
   y: number;
   icon: string;
@@ -53,10 +53,8 @@ const FIELDS: Array<{
     crop: [50.5, 496.5, 21.5, 14.5],
     hint: "Enter your email address",
   },
-  { y: 548, icon: "1523-3333", ink: [21, 21], hint: "Create password" },
-  { y: 622, icon: "1523-3336", ink: [21, 21], hint: "Confirm password" },
   {
-    y: 696,
+    y: 548,
     icon: "1523-3328",
     ink: [22, 22],
     hint: "Verification code",
@@ -72,23 +70,15 @@ export function SignupScreen() {
       fontClass={notoSC.className}
       nav={false}
     >
-      {/* Brand Navigation (1523:3343) — ‹ back; GoldRose substituted for the
-          frame's "ELDREVE" wordmark image at its box (see the file header) */}
+      {/* Brand Navigation (1523:3343) — ‹ back; the owner's GoldRose art
+          substituted for the frame's "ELDREVE" wordmark image at its box
+          (see the file header) */}
       <BackButton
         fallback="/account"
         src="/veloria/screens/1523-3344.png"
         style={abs(0, 18, 40, 42)}
       />
-      <div
-        className={playfair.className}
-        style={{
-          ...abs(153, 13.5, 140, 51),
-          ...txt(24, 51, INK, "center"),
-          fontWeight: 600,
-        }}
-      >
-        GoldRose
-      </div>
+      <GoldRoseWordmark x={153} y={13.5} w={140} h={51} />
 
       <div
         className={playfair.className}

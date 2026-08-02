@@ -437,15 +437,20 @@ export function RemindersScreen() {
         Time zone
       </div>
       {/* Pacific-only per the team's comment Charles accepted 07-31 ("只用
-          一个太平洋时间"); the frame still says EST — the offset follows its
-          standard-time convention (EST=−5 ⇒ PST=−8) until design answers
-          "UTC 几".
-          AI-TAG(AI-009): AGENT-DECISION — PST (UTC−8) chosen; see
-          /agent-delivery/sessions/figma-sync-08-01-feat-figma-sync-0801.md. */}
+          一个太平洋时间"); the design settled the wording on 08-01 — the frame
+          now reads "Pacific Time (PT)UTC-8" and the row imports it verbatim
+          (AI-009 closed). DST auto-switches per the same thread; no manual
+          timezone setting — the 2030:190 picker sheet was deliberately not
+          built (see docs/ixd 08-02).
+          AI-TAG(AI-010): AGENT-DECISION — timezone picker sheet not built;
+          see /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md. */}
       <div
-        style={{ ...abs(272, 788.7, 114), ...txt(10.5, 12.6, INK, "right") }}
+        style={{
+          ...abs(272, 790.2, 114),
+          ...txt(10.5, 12.6, INK, "center"),
+        }}
       >
-        PST (UTC−8)&nbsp;&nbsp;›
+        Pacific Time (PT)UTC-8
       </div>
 
       {/* info note */}
