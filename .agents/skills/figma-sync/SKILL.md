@@ -3,7 +3,7 @@ name: figma-sync
 description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read ti he prototype, design-team frames."
 metadata:
   author: charles
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Process a Figma delivery
@@ -11,6 +11,21 @@ metadata:
 Use this to process a design delivery that lives in the shared **Figma file** —
 its frames, comments, prototype, and everything else the file exposes. Read the
 inputs in section 1, then act only on what Charles owns (sections 2–3).
+
+## 0. Branch setup — always work on `feat/figma-sync`
+
+All sync work happens on the permanent `feat/figma-sync` branch. First step,
+before reading anything:
+
+```bash
+git checkout feat/figma-sync
+git fetch origin && git merge main
+```
+
+⚠️ **This branch is TRUE-MERGE ONLY — never squash.** Unlike the rest of the
+repo (squash-merge PRs), `feat/figma-sync` is long-lived: its PRs into `main`
+must use **"Create a merge commit"** on GitHub. A single squash breaks the
+shared history and causes phantom conflicts on later syncs.
 
 ## 1. Read — everything the file exposes
 
