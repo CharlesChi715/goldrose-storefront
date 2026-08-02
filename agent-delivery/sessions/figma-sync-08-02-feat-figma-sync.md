@@ -5,32 +5,24 @@ flow + date pickers), checkout was redesigned as a two-step flow (the old
 frame was deleted from the file), and the account cluster changed at source.
 Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
 
-## AI-010 · `AGENT-DECISION` · timezone picker sheet deliberately not built
+## AI-011 · `OWNER-TODO` · reply to the design team's scroll-wheel question in Figma
 
-- **Where:** [`components/screens/RemindersScreen.tsx`](../../components/screens/RemindersScreen.tsx)
-  (timezone row), un-built frame GIFT-REMINDERS-TIME-ZONE 2030:190.
-- **What:** the re-marked `me三级` section contains a full timezone-picker
-  sheet, but the comment thread Charles accepted (07-31 → 08-01) settled
-  Pacific-only with automatic DST and **no manual setting** ("只用一个太平洋
-  时间" → "不用人为设置" → "是的 我就打算这么弄"). The sheet directly
-  contradicts that, so the accepted comment won: the row shows the frame's
-  literal `Pacific Time (PT)UTC-8` and no picker opens.
-- **Recommendation:** ask the design team to delete 2030:190 (or explicitly
-  re-open the timezone question). If they insist on the picker, this decision
-  reverses cleanly — the sheet is fully specced in the file.
-
-## AI-011 · `AGENT-DECISION` · date-dropdown ranges answered in code; reply pending in Figma
-
-- **Where:** [`components/screens/ReminderEditModal.tsx`](../../components/screens/ReminderEditModal.tsx).
-- **What:** the team's open comment on the month menu asks whether dev can
-  build a scrolling dropdown or whether they must draw every option
+- **Where:** [`components/screens/ReminderEditModal.tsx`](../../components/screens/ReminderEditModal.tsx);
+  Figma thread on node 2053:207 (comment id `1867810386`).
+- **What:** the team asked whether dev can build a scrolling dropdown or
+  whether they must draw every option
   ("这个夫哥你那边能设置滚轮下拉框吗，还是我们必须把所有数据列完给到你").
   Built as scrolling dropdowns with full ranges — days 1–31, months Jan–Dec,
   years verbatim from the drawn list (2027→2020). The lead-time number stays
   static (its chevron frame 2024:372 is an empty stub — picker not delivered)
   and the unit is pinned as a fixed value per the team's 08-01 comment.
-- **To do (Charles):** reply "可以，滚轮下拉框我们自己做" (or equivalent) in
-  the Figma thread on 2053:207 so the team stops drawing option lists.
+- **Charles (08-02):** "can u do that claude?" — **no.** `FIGMA_TOKEN` is
+  read-only (`file_comments:read`); posting needs `file_comments:write`, and
+  the API refuses with 403. Two ways forward: paste the reply yourself, or
+  issue a token with `file_comments:write` and an agent can post it.
+- **Reply text, ready to paste:** 可以，滚轮下拉框我们前端自己实现，不用把所
+  有选项都画出来 — 菜单画一个示意就行（几个选项 + 选中态）。年月日的完整范围
+  我们在代码里生成：日 1–31、月 Jan–Dec、年沿用你们画的 2020–2027。
 
 ## AI-012 · `PLACEHOLDER` · seven /policies/* routes are coming-soon scaffolds
 
@@ -43,47 +35,63 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   navigation works without importing un-final design.
 - **Resolution:** import each page when its frame is marked; the scaffold
   component then retires.
+- **Charles (08-02):** "yes just leave it untouched." Confirmed — the
+  scaffolds stay exactly as they are until the frames are marked.
+- **⚠️ When `/policies/privacy` (2118:244) is imported:** point
+  `/account/privacy-policy` at it with a redirect and retire the old
+  accordion screen — decided with Charles 08-02 under AI-014.
 
-## AI-013 · `AGENT-DECISION` · checkout two-step rebuild: dev bands + guard rails
+## AI-013 · `AGENT-DECISION` · the checkout rebuild adds four controls the new design left out
 
 - **Where:** [`app/checkout/CheckoutClient.tsx`](../../app/checkout/CheckoutClient.tsx).
-- **What:** the redesign (2157:239/384) omits controls the live checkout
-  needs, so they ride as dev bands in the design's field language: a
-  COUNTRY / REGION selector (shipping is zone-priced — OQ-2), cart-management
-  rows (the new item card has no steppers/remove), the discount-code band
-  (§8 feature), and the gift-message band (order Notes). Also: the frame's
-  shipping-method prices ($14.99/$24.99) were NOT imported (cosmetic picker
-  per the owner's standing decision), PHONE (Optional) is inert art (the
-  checkout payload has no phone), card wells stay mock-branch-only (PCI
-  hazard rule), and the Secure Pay Bar is a fixed bottom overlay (it
-  overflows its frame + the resolved "固定在底部" comment).
-- **Recommendation:** confirm the bands with the design team next delivery;
-  each maps 1:1 to a designed component they could adopt.
-
-## AI-014 · `OWNER-DECISION` · /account/privacy-policy is orphaned by the policies hub
-
-- **Where:** [`app/account/privacy-policy/page.tsx`](../../app/account/privacy-policy/page.tsx).
-- **What:** its frame (1523:1136) was rebuilt at source into the
-  POLICIES-LEGAL hub, and the designed privacy policy is now the unmarked
-  `/policies/privacy` (2118:244). The old accordion screen still renders but
-  no designed screen backs it, and once 2118:244 is marked there will be two
-  privacy policies.
-- **Options:** keep it until `/policies/privacy` is real, redirect it there,
-  or retire the route now. Recommendation: keep until the policy page
-  imports, then redirect.
+- **Plain version:** the design team's new checkout screens are missing four
+  things a working shop needs. Rather than drop the features or invent a new
+  look, each one was rebuilt **as a copy of a box the designers already drew
+  elsewhere on the page**, so it looks like it belongs:
+  1. **Country picker** — the new address card has City, State and ZIP but no
+     country, and shipping is priced by country (OQ-2). Without it we cannot
+     price an order.
+  2. **Quantity and Remove** — the new product card shows the item but lost
+     the +/− buttons and the remove link, so a customer could not change
+     their basket.
+  3. **Discount code** — deleted from the design again, but the order summary
+     still shows a Discount line and the admin can still create codes, so a
+     customer with a code would have nowhere to type it.
+  4. **Gift message** — never drawn, but it is what gets printed on the card
+     and it is stored on the order.
+- **Also decided (no design change needed):** the shipping options show no
+  prices — they are decoration until per-method rates exist, and printing
+  $14.99 next to something we never charge would mislead; the phone field is
+  a picture only, because the order has nowhere to store a phone number; the
+  card-number boxes appear only in test mode (a real card box that goes
+  nowhere is a security problem); the pay bar is stuck to the bottom of the
+  screen, following the design's own "固定在底部" note.
+- **Recommendation:** show the design team the four additions next delivery
+  and ask them to draw them properly, so we can delete our versions.
 
 ## AI-015 · `AGENT-DECISION` · returns-flow wiring where labels beat the prototype
 
 - **Where:** [`components/screens/returns/RequestSubmittedScreen.tsx`](../../components/screens/returns/RequestSubmittedScreen.tsx)
   (representative; details in docs/ixd 08-02).
-- **What:** three divergences from the raw prototype map, all in the user's
-  favor: "Back to Orders" → `/account/orders` (the prototype pointed it at
-  the returns start page); "Track Status" → the status tab (the prototype's
-  click→approved / drag→not-approved pair is a demo trick, not navigation);
-  approved's "Track Package" stays inert (return-shipment tracking has no
-  page — wiring it to `/orders/track` would show an unrelated outbound mock).
-- **Recommendation:** veto-check only; reverse any of the three by pointing
-  the link at the prototype target.
+- **What:** three places where the built links differ from the clickable
+  Figma prototype, each in the customer's favour:
+  1. **"Back to Orders"** → `/account/orders`. The prototype sent it back to
+     the returns start page, which contradicts its own label.
+  2. **"Track Status"** → the after-sales status tab. In Figma this one
+     button carries **two** triggers: a normal click opens "Return Approved",
+     and a *drag* opens "Request Not Approved". A drag trigger fires when you
+     press and pull on the element — designers use it to demo a second
+     outcome without drawing a second button. It is a presentation trick, not
+     a real interaction: in the shop, which of those two screens a customer
+     sees is decided by our review of their request, not by how they touch
+     the button. So the button goes to the status list, which shows whichever
+     outcome is true.
+  3. **"Track Package"** on the approved screen stays dead. It means the
+     parcel the customer ships *back*, and nothing tracks return shipments —
+     pointing it at `/orders/track` would show them an unrelated outbound
+     delivery.
+- **Charles (08-02):** asked what "drag" meant here — answered above; awaiting
+  a keep-or-reverse call. Reversing any of the three is a one-line change.
 
 ## Delivered this session
 
@@ -95,8 +103,10 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   `approved`, `refund-issued`, `request-not-approved` + shared reason sheet;
   old ReturnsScreen deleted.
 - Reminder edit modal re-imported at 430×589 with live Year/Month/Day
-  dropdown menus; reminders timezone row now `Pacific Time (PT)UTC-8`
-  (AI-009 closed).
+  dropdown menus; the reminders timezone row now computes its own
+  冬令时/夏令时 offset (`Pacific Time (PT)UTC-7` in summer, `…UTC-8` in
+  winter) from `lib/reminders/timezone.ts`, with unit tests at both solstices
+  and at the 2026 switch instants (AI-009 and AI-010 closed).
 - `/account/security` re-imported from 1526:111 (password inputs removed at
   source); privacy hub rebuilt (Security card out, Policies & Legal card in);
   new `/account/policies-legal` hub + 7 `/policies/*` scaffolds; signup

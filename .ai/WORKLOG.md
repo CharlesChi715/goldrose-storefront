@@ -4237,3 +4237,20 @@ Agent-inbox: detail pane formatting
   home/shop pixel baselines regenerated (pre-existing Chrome AA drift, 37px).
 - Hand-off: session file figma-sync-08-02-feat-figma-sync.md; closed AI-007,
   AI-009; opened AI-010…AI-015; docs/ixd 08-02 section; SUMMARY refreshed.
+
+## 2026-08-02 (later) — owner answers on the 08-02 sync
+
+- AI-010 ANSWERED+APPLIED: design un-marked the timezone sheet; timezone now
+  auto-switches 冬令时/夏令时 via lib/reminders/timezone.ts (America/Los_Angeles
+  offset, 4 unit tests incl. the 2026 switch instants). Closed.
+- AI-011: cannot post the Figma reply — FIGMA_TOKEN is read-only
+  (file_comments:read; POST 403). Re-tagged OWNER-TODO with the reply text
+  ready to paste.
+- AI-012 ANSWERED: leave the /policies/* scaffolds untouched. Stays open as
+  the placeholder tracker; carries the AI-014 redirect instruction.
+- AI-013: entry rewritten in plain language (four missing controls, why each
+  exists). Still open pending Charles's OK.
+- AI-014 ANSWERED+CLOSED: keep /account/privacy-policy until /policies/privacy
+  imports, then redirect; instruction recorded in AI-012 + docs/ixd 08-02.
+- AI-015: explained Figma's DRAG trigger (a second prototype outcome on the
+  same button — presentation trick, not app behaviour). Open pending his call.

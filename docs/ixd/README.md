@@ -624,15 +624,20 @@ empty stub — picker UI not delivered) and the **unit**, pinned as a fixed
 value by the 08-01 comment ("这个先设定为固定值，不能修改"). "Delete
 reminder" remains an inert caption (no backend, no designed target).
 
-**Timezone: the picker sheet was NOT imported.** The reminders page's row now
-reads `Pacific Time (PT)UTC-8` (imported verbatim — this closes AI-009), and
-the comment thread Charles accepted settles the behaviour: **Pacific only,
-automatic DST, no manual setting** ("只用一个太平洋时间" → "这个就冬夏时间自
-动切换吧，不用人为设置" → "是的 我就打算这么弄"). The GIFT-REMINDERS-TIME-ZONE
-sheet (2030:190) sits in the re-marked section but directly contradicts that
-accepted decision (it offers Central/Mountain/Alaska/Hawaii/Europe and a
-device-timezone option), so the accepted comment wins and the sheet stays
-unbuilt. ⚠️ Design should either remove the sheet or re-open the question.
+**Timezone: the picker sheet was NOT imported, and the offset now switches
+itself.** The comment thread Charles accepted settles the behaviour —
+**Pacific only, automatic DST, no manual setting** ("只用一个太平洋时间" →
+"这个就冬夏时间自动切换吧，不用人为设置" → "是的 我就打算这么弄") — and on
+2026-08-02 the design team **un-marked** GIFT-REMINDERS-TIME-ZONE (2030:190),
+confirming the sheet is out of scope. Charles's instruction that day: "just
+fix the timezone and autoset it 冬令时和夏令时 (for US customer)". Implemented
+in [`lib/reminders/timezone.ts`](../../lib/reminders/timezone.ts): the label
+derives its offset from the IANA zone `America/Los_Angeles`, so the row reads
+`Pacific Time (PT)UTC-7` during 夏令时 and `…UTC-8` during 冬令时 with no edit
+and no picker — future rule changes ride along with the platform's time-zone
+database. The frame still draws the winter label; that divergence is
+intentional. Closes AI-009 and AI-010. (Reminders have no backend, so this is
+the display of a scheduling rule, not a scheduler.)
 
 **Account cluster changes** (see the per-screen findings appended below):
 `/account/privacy` hub restructured (Security summary card removed — parked
@@ -656,8 +661,10 @@ all ›" row → `/account/policies-legal`.
 
 - `/account/privacy-policy` — orphaned: its frame (1523:1136) was rebuilt into
   the POLICIES-LEGAL hub, and the new designed privacy policy is the unmarked
-  `/policies/privacy` (2118:244). The old accordion screen still renders;
-  Charles decides whether it survives until the policy pages are marked.
+  `/policies/privacy` (2118:244). **Decided with Charles 2026-08-02:** keep the
+  old accordion screen until 2118:244 is marked and imported, then redirect
+  `/account/privacy-policy` there and retire the accordion — do the redirect in
+  the same change as that import (AI-014, closed).
 - `/orders/track?return=1` return sheet — its frame (1523:1375) was moved out
   of every section; the built sheet stays (still the only designed entry into
   the request-submitted page besides the new returns flow).

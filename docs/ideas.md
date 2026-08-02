@@ -70,11 +70,24 @@ is there any way to get how long time do user stay on a page or stay on a sectio
 
 ## TODO from me:
 
+播放量
+点赞
+评论
+
+
+工作台
+产品的替换
+bulk upload
+tiktok 数据分析
+
 company email
 domain
 
 
 privacy policy page should reachable
+
+
+
 
 
 CI/CD features

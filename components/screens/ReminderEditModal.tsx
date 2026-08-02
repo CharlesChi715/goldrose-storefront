@@ -467,10 +467,9 @@ export function ReminderEditModal({
 
           {/* date — three dropdown fields (2052:202/207/212); clicks must not
               bubble to the sheet's close-menus handler.
-              AI-TAG(AI-011): AGENT-DECISION — full day/month ranges supplied
-              in code; Charles should answer the team's scroll-wheel question
-              in the Figma thread. See
-              /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md. */}
+              AI-TAG(AI-011): OWNER-TODO — paste the prepared reply in the
+              team's Figma scroll-wheel thread (the repo token is read-only).
+              See /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md. */}
           <div style={{ ...abs(18, 168, 40), ...txt(11, 13.2, INK) }}>Date</div>
           <div onClick={(e) => e.stopPropagation()}>
             <DateDropdown
