@@ -1,9 +1,9 @@
 ---
 name: figma-sync
-description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read ti he prototype, design-team frames."
+description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read the prototype, design-team frames."
 metadata:
   author: charles
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Process a Figma delivery
@@ -29,9 +29,10 @@ shared history and causes phantom conflicts on later syncs.
 
 ## 1. Read — everything the file exposes
 
-Read via the Figma REST API with the `file_content:read` token. (Endpoint
-shapes and field names are in the Figma REST docs — look them up as needed;
-only the gotchas below are recorded here.)
+Read via the Figma REST API. Credentials live in `.env.local`: `FIGMA_TOKEN`
+(scope `file_content:read`) and `FIGMA_FILE_KEY` (the shared design file).
+(Endpoint shapes and field names are in the Figma REST docs — look them up as
+needed; only the gotchas below are recorded here.)
 
 **Re-poll for stability.** The team edits the file live; a frame can change
 mid-import. Re-fetch anything they touched recently before importing it.
@@ -53,8 +54,7 @@ mid-import. Re-fetch anything they touched recently before importing it.
    **not** the legacy `reactions` field.
 
 **Also read when present:** dev status (`READY_FOR_DEV` / `COMPLETED` — the
-build gate, section 3); file `lastModified`/`version` vs. your last snapshot
-to catch re-deliveries; section structure and component relationships; design
+build gate, section 3); section structure and component relationships; design
 tokens/variables (prefer named tokens over per-node hexes; may need an
 enterprise plan); version history for diffing against a prior delivery; raw
 image-fill sources when the render is not enough; Figma MCP extras
@@ -130,3 +130,11 @@ pages, which are the ones a Figma frame is expected to back.
 
 Band-diff the live render against the scale-2 frame render (font-AA envelope),
 and cover new interactions with a test.
+
+## 7. Finish — notify Charles and recommend the close-out
+
+The sync ends with a hand-back, not a merge: **notify Charles to confirm the
+updates**, and give him the recommended finishing steps —
+push → open a PR → **true-merge into `main`** ("Create a merge commit"; never
+squash this branch, see section 0) → confirm the merge landed. Do not open or
+merge the PR yourself unless Charles says so.
