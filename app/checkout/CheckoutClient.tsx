@@ -24,22 +24,27 @@
  * §10.4) both are replaced by a single Place-order CTA in the pay bar.
  *
  * DEV BANDS (design's field language, flagged to the design team):
- * - Country: the redesign's address card has CITY/STATE/ZIP but no country
- *   field, while shipping is priced from the country's zone (OQ-2) — a
- *   COUNTRY / REGION field band keeps the real selector.
  * - Discount code: the design deleted the code-entry card again, but §8 keeps
  *   the feature, so the band sits above the Order Summary on the payment step.
  * - Gift message: no field in the design; the note is the order's Notes card,
  *   so its band stays on the details step.
  *
- * NO BASKET CONTROLS AT CHECKOUT (owner decision, 2026-08-02): the redesign's
- * item card shows "Qty 1" as static text with only EDIT →, and the page keeps
- * it that way. Quantity and remove therefore exist nowhere in the live site
- * until /bag is wired to the real cart.
+ * NO BASKET CONTROLS AND NO COUNTRY FIELD (owner decisions, 2026-08-02):
+ * "keep the same with figma". The item card's "Qty 1" is static text with
+ * only EDIT →, and the address card ends at CITY / STATE / ZIP as drawn.
+ * Consequences, both filed with the agent inbox:
+ * - Quantity and remove exist nowhere in the live site until /bag is wired
+ *   to the real cart (AI-017).
+ * - Shipping is still zone-priced, but the zone now comes solely from
+ *   Vercel's geo-IP header (`x-vercel-ip-country`, "US" when absent) with no
+ *   way for the customer to correct a wrong guess (AI-018). The PayPal
+ *   branch is unaffected — PayPal collects the real address itself.
  *
  * AI-TAG(AI-017): AGENT-BLOCKED — no cart editing anywhere in the live site;
  * wire /bag to the real cart. See
  * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
+ * AI-TAG(AI-018): OWNER-DECISION — shipping zone comes from geo-IP alone; is
+ * the store US-only at launch? Same session file.
  *
  * Deliberately NOT imported: the shipping rows' mock prices ($14.99/$24.99) —
  * the picker is cosmetic by the owner's decision (per-method pricing has no
@@ -774,7 +779,10 @@ export function CheckoutClient({
   const { lines, rawLines, subtotal, hydrated, clear } = useCart(catalog);
 
   const [email, setEmail] = useState("");
-  const [country, setCountry] = useState(defaultCountry);
+  // Read-only since 08-02: the design draws no country field, so the shipping
+  // zone comes from the server's geo-IP default and nothing on the page can
+  // change it (AI-018).
+  const country = defaultCountry;
   const [note, setNote] = useState("");
   const [discountInput, setDiscountInput] = useState("");
   const [discount, setDiscount] = useState<{
@@ -1018,8 +1026,7 @@ export function CheckoutClient({
     const LINES_H = extraLines.length ? 8 + extraLines.length * 24 + 4 : 0;
     const T_CONTACT = 355 + LINES_H; // contact card top (design 355)
     const T_ADDRESS = 483 + LINES_H; // address card top (design 483)
-    const T_COUNTRY = T_ADDRESS + 314 + 8; // dev band: live country selector
-    const T_GIFT = T_COUNTRY + 60; // dev band: gift message + duties note
+    const T_GIFT = T_ADDRESS + 314 + 8; // dev band: gift message + duties note
     const T_ACTION = T_GIFT + 116; // entry action card (design 809)
     const canvasHeight = T_ACTION + 141 + 12 + 96;
 
@@ -1331,60 +1338,6 @@ export function CheckoutClient({
                 : "Test mode — no delivery address is collected."}
             </Txt>
           )}
-
-          {/* ---------- Band · country selector (live shipping zones) ---------- */}
-          {/* The redesign has no country field, but shipping is zone-priced
-              from the country (OQ-2) — dev band in the design's field
-              language. */}
-          <div
-            style={{
-              ...abs(16, T_COUNTRY, 398, 52),
-              background: CREAM,
-              boxShadow: HAIRLINE,
-              borderRadius: 6,
-            }}
-          />
-          <Txt
-            x={28}
-            y={T_COUNTRY + 8}
-            w={200}
-            size={10}
-            lh={12}
-            color={GOLD}
-            weight={500}
-          >
-            COUNTRY / REGION
-          </Txt>
-          <select
-            id="ship-country"
-            data-live-text
-            className={`${notoSC.className} b2-live`}
-            value={country}
-            onChange={(event) => setCountry(event.target.value)}
-            aria-label="Country / region"
-            autoComplete="country"
-            style={{
-              ...abs(28, T_COUNTRY + 26, 340),
-              ...VALUE,
-              cursor: "pointer",
-            }}
-          >
-            {countries.map((entry) => (
-              <option key={entry.code} value={entry.code}>
-                {entry.name}
-              </option>
-            ))}
-          </select>
-          <Txt
-            x={390}
-            y={T_COUNTRY + 26}
-            w={14}
-            size={11}
-            lh={15.6}
-            color={INK}
-          >
-            ⌄
-          </Txt>
 
           {/* ---------- Band · gift message + duties note ---------- */}
           <div

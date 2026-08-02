@@ -139,10 +139,11 @@ test("non-US address gets its zone's shipping rate (Rest of world)", async ({
     ] as const,
   );
 
+  // The design draws no country field (owner decision 08-02), so the shipping
+  // zone comes from Vercel's geo-IP header alone — which is exactly what this
+  // sets, exercising the real production path.
+  await page.setExtraHTTPHeaders({ "x-vercel-ip-country": "GB" });
   await page.goto("/checkout");
-  // Country lives on the details step (dev band — the redesign has no
-  // country field, but shipping stays zone-priced).
-  await page.selectOption("#ship-country", "GB");
   await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
   await page.waitForURL(/step=payment/);
   // Rest-of-world placeholder rate: $19.95, no free threshold.

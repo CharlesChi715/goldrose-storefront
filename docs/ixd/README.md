@@ -583,10 +583,13 @@ mock/skip CTA).
 
 **Checkout dev decisions, for the design team to confirm:**
 
-- **No country field in the redesign** — but shipping is zone-priced from the
-  country (OQ-2), so a `COUNTRY / REGION` field band (design's own field
-  language) sits under the Delivery Address card. Same idiom as the discount
-  band.
+- **No country field in the redesign — and none was added** (owner decision
+  2026-08-02: "remove the country/region as well"). A band was built first,
+  then deleted; the address card ends at CITY / STATE / ZIP as drawn.
+  ⚠️ Shipping stays zone-priced but the zone now comes from Vercel's geo-IP
+  header alone, so a wrong guess mis-prices shipping (US $5.95 vs
+  rest-of-world $19.95) with no way for the customer to correct it. Needs the
+  "are we US-only at launch?" answer — AI-018, and it bears on OQ-2.
 - **The item card lost its quantity steppers and remove control — and stays
   that way** (owner decision 2026-08-02: "remove that quantity selector, just
   keep the same with figma"). A management band was built first, then

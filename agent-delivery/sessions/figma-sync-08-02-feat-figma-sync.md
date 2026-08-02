@@ -63,9 +63,10 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   things a working shop needs. Rather than drop the features or invent a new
   look, each one was rebuilt **as a copy of a box the designers already drew
   elsewhere on the page**, so it looks like it belongs:
-  1. **Country picker** — the new address card (2157:284) has CITY, STATE and
-     ZIP CODE but no country, and shipping is priced by country (OQ-2).
-     Without it we cannot price an order.
+  1. ~~**Country picker**~~ — **withdrawn by Charles 08-02:** "remove the
+     country/region as well". The band is deleted; the address card ends at
+     CITY / STATE / ZIP as drawn. Shipping is still zone-priced, but the zone
+     now comes only from geo-IP. Consequence tracked as AI-018.
   2. ~~**Quantity and Remove**~~ — **withdrawn by Charles 08-02:** "remove
      that quantity selector, just keep the same with figma". The band is
      deleted; checkout matches the frame. Both steps still list any further
@@ -130,6 +131,32 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   mock is already AI-002; this matter is the sharper consequence of it.
 - **Interim risk:** low while the store is pre-launch with test traffic only;
   it must not ship to real customers unfixed.
+
+## AI-018 · `OWNER-DECISION` · shipping zone now comes from geo-IP with no way to correct it
+
+- **Where:** [`app/checkout/CheckoutClient.tsx`](../../app/checkout/CheckoutClient.tsx)
+  (country is read-only), [`app/checkout/page.tsx`](../../app/checkout/page.tsx)
+  (reads `x-vercel-ip-country`, falls back to `US`).
+- **What:** with the COUNTRY / REGION band removed per Charles's 08-02
+  instruction, nothing on the page can set the destination country. Shipping
+  is still priced per zone — the zone is just decided by Vercel's geo-IP
+  header alone. A wrong guess (VPN, travelling customer, missing header)
+  silently prices the wrong rate: US `$5.95` vs rest-of-world `$19.95`, so we
+  either undercharge and absorb the difference or overcharge the customer.
+  The PayPal branch is unaffected, since PayPal collects the real address.
+- **Why it is an owner decision, not a dev one:** it trades money for design
+  fidelity, and the size of the trade depends on a business fact only Charles
+  and the bosses know — whether the store ships outside the US at launch.
+- **Options:**
+  1. **US-only at launch** — then removing the field is entirely correct;
+     restrict `servedCountries` to US and the ambiguity disappears. This also
+     resolves the OQ-2 placeholder rate.
+  2. **Ask the design team for a country field** in the address card (they
+     drew CITY / STATE / ZIP; a country row is the natural fourth).
+  3. **Accept geo-IP** and absorb the occasional wrong rate as a cost of
+     doing business.
+- **Recommendation:** option 1 if the answer to "do we ship outside the US at
+  launch?" is no; otherwise option 2.
 
 ## Delivered this session
 

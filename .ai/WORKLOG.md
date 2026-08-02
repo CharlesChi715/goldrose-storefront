@@ -4285,3 +4285,8 @@ Agent-inbox: detail pane formatting
   quantity/remove band ("keep the same with figma") — deleted, extra cart
   lines still listed read-only on both steps; filed AI-017 because cart
   editing now exists nowhere in the live site until /bag is wired.
+- 08-02: owner also removed the COUNTRY / REGION band ("keep the same with
+  figma"). Country is now a read-only value from the server's geo-IP default;
+  the rest-of-world e2e drives x-vercel-ip-country instead of a select, which
+  exercises the real production path. Filed AI-018 (geo-IP mis-guess
+  mis-prices shipping; needs the "US-only at launch?" answer, bears on OQ-2).
