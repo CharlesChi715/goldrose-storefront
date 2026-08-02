@@ -203,7 +203,7 @@ export function VHeader({
       >
         <img
           src="/veloria/logo.png"
-          alt="GoldRose"
+          alt="ELDREVE"
           width={136}
           height={39}
           style={{ display: "block", width: 136, height: 39 }}
@@ -252,12 +252,12 @@ export function HomeHeader() {
       <MenuButton style={abs(6.5, 45.5, 40, 43)} />
       <Link
         href="/"
-        style={{ ...abs(145.5, 47, 136, 40), display: "block" }}
+        style={{ ...abs(147, 47, 136, 40), display: "block" }}
         aria-label="Home"
       >
         <img
-          src="/veloria/home/549-90.png"
-          alt="GoldRose"
+          src="/veloria/brand/eldreve-136x40.png"
+          alt="ELDREVE"
           width={136}
           height={40}
           style={{ display: "block", width: 136, height: 40 }}
@@ -308,8 +308,8 @@ export function ShopHeader() {
         aria-label="Home"
       >
         <img
-          src="/veloria/home/549-90.png"
-          alt="GoldRose"
+          src="/veloria/brand/eldreve-136x40.png"
+          alt="ELDREVE"
           width={136}
           height={40}
           style={{ display: "block", width: 136, height: 40 }}

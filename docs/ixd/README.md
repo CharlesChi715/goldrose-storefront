@@ -566,7 +566,18 @@ own project (auth cutover, passkey RP ID, Supabase and PayPal URLs), so
 **nothing was renamed in this sync** — but do not keep applying the
 substitution reflexively:
 
-- New imports should carry the frame's own wordmark, not a GoldRose swap.
+- **Done 2026-08-02 (brand-only sync):** the frames' ELDREVE wordmark
+  (imageRef `a8c8a259`) is now the live mark everywhere it sits centred at the
+  top — exported at its two drawn boxes (140×51 headers, 136×40 home/shop) to
+  `public/veloria/brand/`, replacing `/veloria/home/549-90.png`.
+  `GoldRoseWordmark` became `BrandWordmark`. The checkout header switched with
+  it: the team replaced its "GOLDROSE" text node with the same raster
+  (2460:377/381). Only the mark moved — the wider rename is still its own
+  project.
+- The mark is **centred on the 430 canvas**, not copied pixel-for-pixel:
+  several frames draw it a few px off (the dashboard's "Left Spacer · Buttons
+  Removed" box leaves it 10.5px left of centre) and the owner asked for it
+  centred, so every screen now puts it at x147 (136-wide) / x145 (140-wide).
 - The rename project retires `GoldRoseWordmark` and the substitution note in
   every screen comment; treat those comments as stale from 08-02 onward.
 - Note the file is itself inconsistent: the new checkout frames set the brand

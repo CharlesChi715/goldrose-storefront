@@ -308,20 +308,16 @@ function CheckoutHeader({ step, onBack }: { step: Step; onBack: () => void }) {
           style={{ ...abs(0, 0, 44, 44), display: "block" }}
         />
       </button>
-      <Txt
-        x={151}
-        y={24}
-        w={170}
-        size={18}
-        lh={24}
-        color={INK}
-        weight={500}
-        align="center"
-        ls={3.5}
-        serif
-      >
-        GOLDROSE
-      </Txt>
+      {/* Brand, centred at the top. The 08-02 delivery replaced this header's
+          "GOLDROSE" text node with the same ELDREVE wordmark raster the rest
+          of the file uses (2460:377/381, 140×51 at x145). */}
+      <img
+        src="/veloria/brand/eldreve-140x51.png"
+        alt="ELDREVE"
+        width={140}
+        height={51}
+        style={{ ...abs(145, 11, 140, 51), display: "block" }}
+      />
       {STEP_LABELS.map((label, i) => {
         const x = STEP_X[i];
         const done = i < current;

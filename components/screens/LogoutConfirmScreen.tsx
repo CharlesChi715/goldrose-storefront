@@ -29,7 +29,7 @@ import {
   INK,
   SAND,
   sCard,
-  GoldRoseWordmark,
+  BrandWordmark,
 } from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
@@ -95,7 +95,7 @@ export function LogoutConfirmScreen() {
       nav={false}
     >
       {/* 1523:1223/1225/1191 — brand band, image back arrow, title */}
-      <GoldRoseWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark x={145} y={0} w={140} h={51} />
       <BackButton
         fallback="/account"
         src="/veloria/screens/1523-1225.png"

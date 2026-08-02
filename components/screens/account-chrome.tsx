@@ -52,12 +52,21 @@ export function sCard(
 }
 
 /**
- * The 07-29 frames stamp an "ELDREVE" wordmark image into most headers — a
- * placeholder brand from the design team's template (DQ raised; the same
- * delivery's own hero eyebrow still says GOLDROSE). The live pages keep the
- * owner's GoldRose art, centred in whatever box the frame gave the image.
+ * The brand wordmark that sits centred at the top of every screen.
+ *
+ * Synced from Figma 2026-08-02: the frames' own **ELDREVE** wordmark
+ * (imageRef `a8c8a259`, drawn at 140×51 from x145 — dead centre of the 430
+ * canvas) is now the brand, so the GoldRose substitution the earlier syncs
+ * applied here is retired. `SUMMARY.md` § OQ-4 records the decision and
+ * `eldreve.com` is live; the wider GoldRose→ELDREVE rename (auth cutover,
+ * passkey RP ID, Supabase and PayPal URLs) is its own project, so only the
+ * mark itself moved.
+ *
+ * The asset is Figma's own scale-2 node render, which bakes in the fill's
+ * FILL crop — the same image sits in a 136×40 box on home/shop, exported
+ * separately rather than squeezed from one file.
  */
-export function GoldRoseWordmark({
+export function BrandWordmark({
   x,
   y,
   w,
@@ -70,12 +79,15 @@ export function GoldRoseWordmark({
 }) {
   return (
     <img
-      src="/veloria/home/549-90.png"
-      alt="GoldRose"
-      width={136}
-      height={40}
+      src="/veloria/brand/eldreve-140x51.png"
+      alt="ELDREVE"
+      width={140}
+      height={51}
       style={{
-        ...abs(x + (w - 136) / 2, y + (h - 40) / 2, 136, 40),
+        // Horizontally centred on the 430 canvas, not inside the passed box:
+        // several frames draw the mark a few px off-centre and the owner asked
+        // for it centred (08-02). Vertical placement still follows the frame.
+        ...abs((430 - 140) / 2, y + (h - 51) / 2, 140, 51),
         display: "block",
       }}
     />

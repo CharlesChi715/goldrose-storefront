@@ -32,7 +32,7 @@ import {
   SAND,
   sCard,
   SettingsToggle,
-  GoldRoseWordmark,
+  BrandWordmark,
 } from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
@@ -67,7 +67,7 @@ export function PrivacySecurityScreen() {
       {/* 1526:166/168 Brand Navigation — GoldRose art at the frame's wordmark
           box ("a 1" ships the ELDREVE placeholder, DQ-34) + the frame's
           pasted 返回 back art (same raster every me-screen uses) */}
-      <GoldRoseWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark x={145} y={0} w={140} h={51} />
       <BackButton
         fallback="/account/privacy"
         src="/veloria/screens/1523-1014.png"

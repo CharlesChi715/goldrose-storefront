@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
-import { GoldRoseWordmark } from "@/components/screens/account-chrome";
+import { BrandWordmark } from "@/components/screens/account-chrome";
 import { abs } from "@/lib/figma-layout";
 
 /** Page fill of every frame in the batch. */
@@ -127,7 +127,7 @@ export function ReturnsHeader({
         src="/veloria/screens/1523-3470.png"
         style={abs(15, 24.5 + dy, 40, 43)}
       />
-      <GoldRoseWordmark x={145} y={20.5 + dy} w={140} h={51} />
+      <BrandWordmark x={145} y={20.5 + dy} w={140} h={51} />
       <Link
         href="/checkout"
         aria-label="Cart"

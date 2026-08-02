@@ -23,7 +23,7 @@ import {
   INK,
   SHADOW,
   sCard,
-  GoldRoseWordmark,
+  BrandWordmark,
 } from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
@@ -59,7 +59,7 @@ export function KeepsakeShareScreen() {
       nav={false}
     >
       {/* 1523:1468/1469 brand strip — the frame's whole header; no back arrow */}
-      <GoldRoseWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark x={145} y={0} w={140} h={51} />
 
       <div
         className={playfair.className}

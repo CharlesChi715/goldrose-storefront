@@ -105,12 +105,12 @@ function WelcomeHero() {
           GoldRose. The real wordmark stays, centred in the new box. */}
       <Link
         href="/"
-        style={{ ...abs(152, 22, 136, 40), display: "block" }}
+        style={{ ...abs(147, 22, 136, 40), display: "block" }}
         aria-label="GoldRose home"
       >
         <img
-          src="/veloria/home/549-90.png"
-          alt="GoldRose"
+          src="/veloria/brand/eldreve-136x40.png"
+          alt="ELDREVE"
           style={{ display: "block", width: 136, height: 40 }}
         />
       </Link>

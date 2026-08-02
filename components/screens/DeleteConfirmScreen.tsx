@@ -27,7 +27,7 @@ import {
   CREAM,
   INK,
   sCard,
-  GoldRoseWordmark,
+  BrandWordmark,
 } from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
@@ -67,7 +67,7 @@ export function DeleteConfirmScreen() {
       nav={false}
     >
       {/* 1523:1263/1265/1227 — brand band, image back arrow, title */}
-      <GoldRoseWordmark x={148} y={0} w={140} h={51} />
+      <BrandWordmark x={148} y={0} w={140} h={51} />
       <BackButton
         fallback="/account"
         src="/veloria/screens/1523-1265.png"

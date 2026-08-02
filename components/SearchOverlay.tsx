@@ -232,11 +232,11 @@ export function SearchOverlay({
           {/* 1523:3309 is an "ELDREVE" wordmark image (placeholder brand, DQ) —
           the owner's GoldRose art stays, centred in the image's box. */}
           <img
-            src="/veloria/home/549-90.png"
-            alt="GoldRose"
+            src="/veloria/brand/eldreve-136x40.png"
+            alt="ELDREVE"
             width={136}
             height={40}
-            style={{ ...abs(158.5, 11, 136, 40), display: "block" }}
+            style={{ ...abs(147, 11, 136, 40), display: "block" }}
           />
 
           {/* 1523:3267 input capsule */}

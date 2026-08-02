@@ -30,7 +30,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
-import { GoldRoseWordmark } from "@/components/screens/account-chrome";
+import { BrandWordmark } from "@/components/screens/account-chrome";
 import { ScaleFrame } from "@/components/chrome";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
@@ -141,7 +141,7 @@ export function OrdersListScreen({
         src="/veloria/screens/1523-3470.png"
         style={abs(-1, 18, 40, 42)}
       />
-      <GoldRoseWordmark x={152} y={13.5} w={140} h={51} />
+      <BrandWordmark x={152} y={13.5} w={140} h={51} />
 
       {/* 1523:3425/3426 title + subtitle */}
       <div

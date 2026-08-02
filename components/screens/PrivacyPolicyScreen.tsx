@@ -20,7 +20,7 @@ import {
   SAND,
   sCard,
   SettingsHeader,
-  GoldRoseWordmark,
+  BrandWordmark,
 } from "@/components/screens/account-chrome";
 import { Glyph } from "@/components/screens/glyphs";
 import { abs, txt } from "@/lib/figma-layout";
@@ -100,7 +100,7 @@ export function PrivacyPolicyScreen() {
       nav={false}
     >
       {/* 1523:1187 Brand Navigation — the frame's own wordmark art */}
-      <GoldRoseWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark x={145} y={0} w={140} h={51} />
       <SettingsHeader title="Privacy Policy" />
 
       {/* hero card (1523:1138) */}

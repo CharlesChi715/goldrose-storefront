@@ -186,7 +186,11 @@ function Dashboard({
 }) {
   const shopping = variant === "shopping";
   const backX = shopping ? 5.5 : 7;
-  const logoX = shopping ? 136.5 : 143;
+  // The brand sits centred on the 430 canvas (owner, 08-02). Both frames draw
+  // it a few px off — the shopping header keeps a "Left Spacer · Buttons
+  // Removed" box that never re-centred after its buttons went — so the live
+  // mark is centred rather than copied: (430 − 136) / 2.
+  const logoX = 147;
   // Business member card y (08-02: the shopping frame dropped its member card).
   const memberY = 756;
   // Real visitors arrive as displayNameOf() in lib/account/data.ts: their
@@ -315,8 +319,8 @@ function Dashboard({
         aria-label="Home"
       >
         <img
-          src="/veloria/home/549-90.png"
-          alt="GoldRose"
+          src="/veloria/brand/eldreve-136x40.png"
+          alt="ELDREVE"
           width={136}
           height={40}
           style={{ display: "block", width: 136, height: 40 }}

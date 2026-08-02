@@ -23,7 +23,7 @@ import {
   SAND,
   sCard,
   SettingsHeader,
-  GoldRoseWordmark,
+  BrandWordmark,
 } from "@/components/screens/account-chrome";
 import { abs, txt } from "@/lib/figma-layout";
 import { inter, notoSC } from "@/lib/fonts";
@@ -42,7 +42,7 @@ export function PersonalInfoScreen() {
       nav={false}
     >
       {/* 1523:1012/1013 Brand Navigation — the wordmark at the frame's own box */}
-      <GoldRoseWordmark x={145} y={2} w={140} h={51} />
+      <BrandWordmark x={145} y={2} w={140} h={51} />
 
       <SettingsHeader title="Personal Information" />
       {/* 1523:1014 返回 — the frame's pasted back-arrow art (its own back-icon
