@@ -158,6 +158,32 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
 - **Recommendation:** option 1 if the answer to "do we ship outside the US at
   launch?" is no; otherwise option 2.
 
+## Pending from design · `/account/signup` becomes `/account` (owner, 2026-08-02)
+
+Charles will rename the signup frame in Figma to `/account`, because it is now
+designed as the single login **and** signup place: its copy changed to
+"Continue with your email" / "Enter your email to continue" with one CONTINUE
+button — email-first passwordless auth, the natural partner to the emailed-code
+decision. No action taken; it arrives as a renamed frame.
+
+Two things to settle before an importer can act on it:
+
+1. **Two frames would claim `/account`.** The old `1523:2470 · /account ·
+   signed out · loginpage` ("Welcome to GoldRose / Sign in and continue
+   shopping") still exists. One of the two must be retired or renamed, or the
+   route rule (one route, one frame) cannot resolve which is canonical.
+2. **The old frame carries live entry points the new one does not:** the Gift
+   Shopping / Business & Partnerships toggle, the benefits grid, the
+   self-service rows (Returns & After-Sales, Customer Care, Policies & Legal)
+   and "Already purchased? VIEW MY ORDER". If the combined screen replaces it,
+   design should say where those go — otherwise the rename silently removes
+   working navigation.
+
+**Repo change when it lands:** `/account` signed-out renders the combined
+screen; the live `signInWithOtp` flow moves onto it; `/account/signup` retires
+or redirects; the "Create a shopping account ›" link (wired 08-02) is deleted,
+since it would point at its own page.
+
 ## Delivered this session
 
 - Checkout rebuilt as the two-step redesign (2157:239/384) on one route with
