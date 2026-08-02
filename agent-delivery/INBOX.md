@@ -17,12 +17,13 @@ lives in the session file that raised it, under [`sessions/`](sessions). Read
 | `AI-011` | `OWNER-TODO`     | `OPEN` | Relay two prepared replies to the design team in Figma — the repo's read-only token cannot post them. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Reminder edit modal](../components/screens/ReminderEditModal.tsx) |
 | `AI-012` | `PLACEHOLDER`    | `OPEN` | Seven `/policies/*` routes are coming-soon scaffolds until their frames are Ready-for-dev. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Scaffold screen](../components/screens/PolicyComingSoon.tsx) |
 | `AI-013` | `AGENT-DECISION` | `OPEN` | The checkout rebuild adds four controls the new design left out (country, quantity/remove, discount, gift message). | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Checkout client](../app/checkout/CheckoutClient.tsx) |
+| `AI-016` | `AGENT-UNSURE`   | `OPEN` | `/products/[slug]` still renders the July frame (2501px); the Ready-for-dev PDP redesign (1523:3971, 1616px) was never imported. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [PDP route](../app/products/%5Bslug%5D/page.tsx) |
 
 ## Session files
 
 | Session file                                                             | Open | Delivered                                        |
 | ------------------------------------------------------------------------ | ---- | ------------------------------------------------ |
-| [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | 3    | 08-02 sync: two-step checkout, returns flow, date pickers, policies hub + scaffolds, security/signup/dashboard/login re-imports; auto 冬令时/夏令时 timezone. |
+| [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | 4    | 08-02 sync: two-step checkout, returns flow, date pickers, policies hub + scaffolds, security/signup/dashboard/login re-imports; auto 冬令时/夏令时 timezone. |
 | [figma-sync-08-01-feat-figma-sync-0801](sessions/figma-sync-08-01-feat-figma-sync-0801.md) | 1    | 08-01 sync: timezone → Pacific; me三级 pulled back by design. |
 | [figma-sync-07-31-feat-figma-sync-0731](sessions/figma-sync-07-31-feat-figma-sync-0731.md) | 2    | 07-31 Figma sync: reminders toggle states, returns scaffold, prototype-map review. |
 | [agent-delivery-restructure-07-31-feat-blog-journal-import](sessions/agent-delivery-restructure-07-31-feat-blog-journal-import.md) | 1    | Split the inbox into per-session markdown files. |
