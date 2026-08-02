@@ -4378,3 +4378,17 @@ Agent-inbox: detail pane formatting
 
 - On `test/integration`, replaced the hard-coded reminder lead-time value with a controlled numeric input defaulting to 7; the “days before” unit remains fixed.
 - Verified with `npm run typecheck`, component ESLint, and `git diff --check`.
+- 08-02 (brand-only sync): the frames' ELDREVE wordmark (imageRef a8c8a259)
+  is now the live mark — exported at both drawn boxes (140×51 headers,
+  136×40 home/shop) to public/veloria/brand/, replacing
+  /veloria/home/549-90.png; GoldRoseWordmark → BrandWordmark; the checkout
+  header's "GOLDROSE" text node swapped for the same raster (2460:377/381).
+  Centred on the 430 canvas rather than copied (frames disagree by up to
+  10.5px — the dashboard's "Left Spacer · Buttons Removed" box), verified
+  centre=215.0 on 9 routes. 91 e2e green, baselines regenerated.
+  ⚠️ Branch churn this session: the working directory moved
+  feat/figma-sync → fix/order-confirmed-email → test/integration under
+  concurrent sessions. Nothing lost — the five sync commits are in
+  feat/figma-sync; the nav commit (858f3ec) and this brand commit (bce603a)
+  sit on test/integration and want cherry-picking to feat/figma-sync if that
+  branch is meant to carry them.
