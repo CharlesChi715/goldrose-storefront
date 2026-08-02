@@ -12,23 +12,34 @@
  * icons are Figma's own SVG exports (the ✉ is a crop of the frame render —
  * it SVG-exports as a .notdef box, C-2 precedent).
  *
- * ⚠️ Brand substitution: the frame's header wordmark is an image reading
- * "ELDREVE" — the placeholder brand stamped on several screens (DQ-34). The
- * live page keeps the owner's GoldRose art at the image's box.
+ * ⚠️ Brand: the frame's header wordmark image reads "ELDREVE". Treated as a
+ * placeholder until DQ-34 was answered on 2026-08-03 — ELDREVE IS the brand,
+ * so the GoldRose substitution here is now wrong and retires with the rename
+ * project (SUMMARY.md § OQ-4).
  *
- * 08-02, being wired up: the EMAIL FIELD IS NOW LIVE — a real <input> drawn
- * inside the frame's own field box, with format validation that surfaces on
- * blur (red hairline + a message in the card's status slot). The code field,
- * Send code, the checkbox and CONTINUE are still styled divs; they get wired
- * in the send/verify step.
+ * 2026-08-03 — THE FORM IS LIVE. No longer a visual placeholder:
+ *   • email  — real <input>, format-validated on blur (red hairline + a
+ *     message in the card's status slot); typing retracts the verdict.
+ *   • Send code — signInWithOtp({shouldCreateUser:true}). Disabled without a
+ *     valid address and while a request is in flight, because each new code
+ *     invalidates the previous one and a double-tap would email two.
+ *   • code — real <input>, digits only, capped at 6 to match the project's
+ *     mailer_otp_length (deliberately NOT maxLength: the browser truncates
+ *     raw characters first, which would eat the digits out of a pasted
+ *     "code: 123456").
+ *   • consent — a real checkbox gating CONTINUE (owner rule). Only the plain
+ *     words carry the <label>; the policy links are plain anchors, or
+ *     tapping "Privacy Policy" would tick the box on the way out.
+ *   • CONTINUE — verifyOtp, then /account. Consent is the only thing that
+ *     disables it, so everything else is checked on click and answered in
+ *     the status slot: a tap always produces a reply.
  *
- * The rest of the form stays a VISUAL PLACEHOLDER of styled divs, inert until
- * customer-auth activation (release queue #2) — live-looking inputs that go
- * nowhere are the flagged hazard. The frame also deleted its "Already have
- * an account? Sign in ›" link, so the page's live ways back are the header
- * back arrow (→ /account) and the shared nav's Me tab; CONTINUE carries a
- * prototype NAVIGATE action with a null destination, so there is nothing to
- * wire it to.
+ * The same email also carries a one-tap sign-in link (→ /auth/confirm →
+ * /account), so the code is the different-device fallback, not the only way
+ * in. The frame deleted its "Already have an account? Sign in ›" link, so
+ * the page's other ways back are the header back arrow and the nav's Me tab.
+ * The frame's own prototype gives CONTINUE a NAVIGATE with a null
+ * destination; /account is our choice, matching the login screen (AI-020).
  *
  * AI-TAG(AI-019): AGENT-DECISION — the frame deleted the "Already have an
  * account? Sign in ›" link, so the build did too. See

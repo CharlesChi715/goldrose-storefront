@@ -58,12 +58,18 @@ Charles first.
 
 ### Current phase
 
-- Pre-launch testing on <https://goldrose-storefront.vercel.app>. No real
+- Pre-launch testing on <https://eldreve.com> (the vercel.app URL still
+  serves the same deployment). No real
   customers or public campaigns; all orders and analytics are test data, and
   uncertain public content remains visibly mocked.
 - Built: storefront, admin, accounts, catalog, checkout/order flow,
   analytics, and the SEO/GEO baseline. PayPal Orders v2 wallet checkout
-  works in sandbox. Supplied Figma screens are imported through the
+  works in sandbox. **Customer sign-in is live end to end (2026-08-03):**
+  `/account/signup` is no longer a visual placeholder — real email input +
+  validation, Send code (`signInWithOtp`), a live 6-digit code field,
+  consent gating CONTINUE, and `verifyOtp` → `/account`. The same emailed
+  message carries a one-tap sign-in link; `/account`'s own login screen
+  still works alongside it (AI-020 asks the design team which is canonical). Supplied Figma screens are imported through the
   2026-08-02 sync (on `feat/figma-sync`): checkout is now the **two-step
   redesign** (2157:239/384 — details entry → payment confirmation, pay bar
   fixed to the viewport; the old single-page frame was deleted from the
@@ -76,9 +82,11 @@ Charles first.
   `/account/policies-legal` hub links 7 `/policies/*` coming-soon scaffolds
   (their frames are not Ready-for-dev). Earlier milestones: the 2026-07-29
   file-wide restyle and the 07-30 B-2 reflow
-  ([`docs/ixd/README.md`](docs/ixd/README.md)). ⚠️ Deliveries stamp an
-  "ELDREVE" placeholder wordmark on many frames — GoldRose is substituted
-  everywhere; DQ-34 asks the design team to confirm.
+  ([`docs/ixd/README.md`](docs/ixd/README.md)). **DQ-34 answered 2026-08-03:**
+  the "ELDREVE" wordmark on those frames was never a placeholder — ELDREVE
+  is the brand. The design team was shipping it all along while the repo
+  substituted GoldRose art at the same box (~23 call sites); that
+  substitution is now wrong and retires with the rename project (OQ-4).
 - A later batch (node ids 1593/1596/1599) delivered three more frames.
   **Imported:** the REMINDERS-EDIT-OPEN modal (1599:245) → a bottom sheet on
   `/account/reminders`, opened by Add reminder / each card's Edit; its "no
@@ -191,9 +199,15 @@ Charles first.
 
 1. Complete owner activation and the
    [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
-2. Finish customer sign-in activation: apply the new email templates with
-   `node scripts/apply-auth-email-templates.mjs`, then configure
-   launch-ready SMTP (built-in Supabase email allows only ~2 mails/hour).
+2. ~~Customer sign-in activation~~ — **done 2026-08-03.** Custom SMTP is live
+   on Resend (`smtp.resend.com:465`, user `resend`, sender
+   `noreply@eldreve.com` / "Eldreve"), which is what unlocks template editing
+   at all: the free tier refuses it while the built-in sender is in use, so
+   the queue's old order (templates, *then* SMTP) was impossible. Templates
+   applied from `scripts/apply-auth-email-templates.mjs` and carry both a
+   `/auth/confirm?token_hash=…&next=/account` link and the 6-digit code;
+   `mailer_otp_length` 8 → 6 to match the UI; send cap 2 → 30/hour.
+   Remaining: watch Resend's free tier (~3k/month) against real volume.
 3. Configure PayPal sandbox and begin Advanced Checkout onboarding; install
    `cloudflared` or `ngrok` when webhook testing starts.
 4. Fix customer order links that point at the leftover `/orders` admin
@@ -221,12 +235,31 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
   `/shop` cards now show the real catalog photos, which are supplier
   composites with English text baked in — replace before launch. Only three
   products fill the eight-card grid, so cards repeat.
-- **OQ-4 — open (2026-07-30):** custom domain. RDAP check: every natural
-  `goldrose*.com` is taken; `goldrose.co` (and `.shop`/`.store`) are free.
-  Recommendation to bosses: register `goldrose.co` at Cloudflare Registrar
-  (boss-owned account), optionally buy the parked `goldrose.com` aftermarket.
-  ⚠️ Domain switch must plan around the passkey RP ID pinned to the vercel
-  domain, plus Supabase auth URLs and PayPal return URLs.
+- **OQ-4 — resolved 2026-08-03:** the brand is switching to **ELDREVE**
+  (per Charles; ties to DQ-34's ELDREVE wordmark), so `goldrose.co` is
+  superseded. **`eldreve.com` is registered and live.** Registered
+  2026-08-01 at Cloudflare Registrar on the boss-owned account (registrant
+  He Jinhua / Zhongshu Technology Worldwide Limited, HK; $10.46/yr
+  auto-renew). Wired 08-02/08-03: `eldreve.com` + `www` on the Vercel
+  project via grey-cloud CNAMEs, cert issued; Supabase Site URL/redirects
+  moved to eldreve.com; **passkey RP ID switched to `eldreve.com`** — old
+  vercel.app passkeys are dead by design, re-enrol on the new domain;
+  Cloudflare Email Routing catch-all → the company Gmail; Resend added for
+  outbound (DNS on `send.eldreve.com`). Records:
+  `~/Documents/Work/gold_rose/{eldreve-domain-registration,domain-setup}.md`.
+  ⚠️ Pending: **`NEXT_PUBLIC_SITE_URL=https://eldreve.com` is set in Vercel
+  but only applies on the next production deploy** — until then canonicals,
+  OG images and the sitemap still emit the vercel.app URL. Also pending:
+  billing → hua's PayPal, and
+  the GoldRose→ELDREVE rename project (~270 occurrences in ~110 files;
+  scoped but not started).
+  AI-TAG(AI-021): OWNER-DECISION — the rename needs its own branch and a
+  decision on how the name is written in prose (ELDREVE vs Eldreve). See
+  /agent-delivery/sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md. Resend carries outbound
+  mail with two keys (see `.env.example`): `RESEND_API_KEY` for our code,
+  `RESEND_SMTP_PASSWORD` for Supabase's custom SMTP. **Both are live as of
+  2026-08-03** — SMTP configured, auth templates applied and Eldreve-branded
+  (release queue #2).
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
 
 ## Repository structure

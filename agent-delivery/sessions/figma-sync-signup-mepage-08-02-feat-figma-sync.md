@@ -11,12 +11,15 @@ the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
 
 The redesigned frame (1523:3315) deletes the
 `Already have an account?  Sign in  ›` link at the bottom of the card, so the
-build deletes it too. That link was the page's **only live control** — the
-page is otherwise an inert visual placeholder until customer-auth activation.
+build deletes it too.
 
-What remains as a way back to the working sign-in flow on `/account`: the
-header back arrow (fallback `/account`) and the shared bottom nav's Me tab,
-which the same frame just added.
+*(Updated 08-03: at the time this was raised that link was the page's only
+live control. The page is now a working sign-in form, so the stakes are lower
+— but the missing link still means a returning customer has no signposted
+route to the `/account` login screen.)*
+
+What remains as a way back to `/account`: the header back arrow (fallback
+`/account`) and the shared bottom nav's Me tab, which the same frame added.
 
 **Recommendation:** accept it. The frame now reads "Continue with your email",
 i.e. one email box that serves both new and returning customers, so a separate
@@ -25,32 +28,63 @@ purpose. Say the word and I will put the link back as a deliberate deviation.
 
 ---
 
-## AI-020 · `AGENT-UNSURE` · the signup frame is no longer a signup page
+## AI-020 · `AGENT-UNSURE` · two working doors into the same sign-in
 
 **Where:** [Signup route](../../app/account/signup/page.tsx)
 
-Three things now disagree with each other:
+*(Narrowed 08-03 — the CONTINUE-destination half is settled; the duplication
+question is not.)*
 
-- The **frame content** is a unified email entry point: "Continue with your
-  email" / "Enter your email to continue" / CONTINUE, with no name field and
-  no password.
-- The **frame name** still says `loginpage-Create a shopping account`, and the
-  **route** is still `/account/signup` with the page title
-  "Create account — GoldRose".
-- The frame's **only prototype interaction** — CONTINUE (2436:377) — is a
-  `NAVIGATE` action with a **null destination**, so the design has not said
-  where continuing goes.
+The frame is a unified email entry point ("Continue with your email", no name
+or password field), but its **name** still says
+`loginpage-Create a shopping account` and the **route** is still
+`/account/signup`. Its only prototype interaction — CONTINUE (2436:377) — was
+a `NAVIGATE` with a **null destination**, so the design never said where
+continuing goes; we wired it to `verifyOtp` → `/account`, matching the login
+screen.
 
-Left exactly as-is: route unchanged, button inert, nothing renamed. I did not
-guess whether this page is meant to replace the `/account` sign-in screen or
-sit beside it.
+What remains open is the real problem: **`/account/signup` is now a fully
+working email sign-in, and so is the signed-out `/account` screen**
+(`ShoppingLogin`, frame 1523:2470). Two live doors into the same Supabase
+flow, with separate copy, separate validation and separate error strings to
+keep in sync.
 
-**Recommendation:** ask the design team two things — (1) where CONTINUE goes,
-and (2) whether this frame supersedes the signed-out `/account` login frame
-(1523:2470), which still has its own separate email + code form. If it does,
-`/account/signup` should be re-pointed or merged rather than kept as a second
-door into the same flow. Their answer decides whether the route gets renamed
-under the [route rule](../../docs/ixd/naming/figma-route-rule.md).
+**Recommendation:** ask the design team whether 1523:3315 supersedes
+1523:2470. If it does, retire `ShoppingLogin`'s form and let `/account` render
+this screen when signed out — one implementation, one set of copy. If it does
+not, we need to know what distinguishes them, because today nothing does.
+Their answer also decides whether the route gets renamed under the
+[route rule](../../docs/ixd/naming/figma-route-rule.md).
+
+---
+
+## AI-021 · `OWNER-DECISION` · the ELDREVE rename is now a defect backlog
+
+**Where:** [Repo summary](../../SUMMARY.md)
+
+DQ-34 is answered: **ELDREVE is the brand.** Every sync since 07-29 treated
+the design team's ELDREVE wordmark as a placeholder and painted GoldRose over
+it — so those ~23 substitutions are defects, not safeguards, and **~270
+GoldRose references across ~110 files** are now wrong.
+
+Three tiers, very different risk:
+
+1. **Mechanical** — copy, page titles, `alt` text, admin i18n (EN *and* 中文).
+   Low risk, but a careless `sed` will also rewrite
+   `goldrose-storefront.vercel.app` and break things.
+2. **Artwork** — this one gets *easier*: stop substituting and use the
+   frames' own ELDREVE art, which was always there.
+3. **Domain cutover** — mostly done already (Site URL, redirects, passkey RP
+   ID moved to `eldreve.com`; old vercel.app passkeys are dead by design and
+   need re-enrolment). Still pending: `NEXT_PUBLIC_SITE_URL` only takes
+   effect on the next production deploy, so canonicals, OG images and the
+   sitemap still emit the vercel.app URL.
+
+**Recommendation:** do tiers 1–2 on a dedicated `feat/eldreve-rename` branch,
+not folded into a design-import or feature branch — 110 files of rename mixed
+with behaviour changes is unreviewable and unrevertable. Confirm first how
+the name is written in prose: the wordmark is all-caps ELDREVE, but the email
+sender and templates currently say "Eldreve" (my choice, easily changed).
 
 ---
 
@@ -82,3 +116,28 @@ under the [route rule](../../docs/ixd/naming/figma-route-rule.md).
   scale-2 Figma renders; `tsc --noEmit` and ESLint are clean.
 - Details in [`docs/ixd/README.md`](../../docs/ixd/README.md) § "08-02 second
   sync (scoped) — signup + mepage".
+
+### 08-03 — customer sign-in activated (same branch)
+
+- **`/account/signup` is a working sign-in**, built in the owner's order:
+  email input + blur validation → Send code (`signInWithOtp`) → consent
+  checkbox gating CONTINUE → 6-digit code input → CONTINUE (`verifyOtp` →
+  `/account`). Terms / Privacy Policy link to the `/policies/*` scaffolds.
+- **Mail infrastructure, which had to land first.** The emailed link went to
+  the site root with nothing to exchange the token, and carried no code —
+  because `scripts/apply-auth-email-templates.mjs` had never run, and *could
+  not*: Supabase refuses template edits on the free tier while its built-in
+  sender is in use. Release-queue #2's order was therefore impossible.
+  Configured custom SMTP on Resend (`smtp.resend.com:465`, sender
+  `noreply@eldreve.com` / "Eldreve"), which unlocked templates and lifted the
+  cap from ~2 to 30 mails/hour; applied the templates, which now carry both a
+  `/auth/confirm?token_hash=…&next=/account` link and the 6-digit code.
+- **`mailer_otp_length` 8 → 6.** The project issued 8-digit codes while the
+  UI assumed 6, so pasted codes silently truncated and could never verify.
+- Added `RESEND_SMTP_PASSWORD` to `.env.example` (held by Supabase, never read
+  by our code) beside the existing `RESEND_API_KEY` (read by `lib/email.ts`).
+- **DQ-34 answered → AI-021 raised**; OQ-4's `goldrose.co` recommendation is
+  moot.
+- Every step verified against a running dev server with the Supabase calls
+  intercepted, so no real emails were sent and no auth users created during
+  development. `tsc` and ESLint clean.

@@ -24,8 +24,10 @@ verification:
   - **Transactional email only** (`lib/email.ts` via Resend REST: order
     confirmation, shipping confirmation, owner alert). No promo emails, no
     email list, no consent capture, no unsubscribe machinery.
-  - Every `/account` customer **already has an email**: sign-in is
-    Google/Apple OAuth first, passkeys are added from inside a signed-in
+  - Every `/account` customer **already has an email**: sign-in *is* an
+    email — an emailed one-tap link plus a 6-digit code
+    (`signInWithOtp`/`verifyOtp`, live 2026-08-03 on `/account` and
+    `/account/signup`), with passkeys added from inside a signed-in
     account (`app/account/page.tsx`); customers rows are email-keyed
     (`0002_customer_auth.sql`). So the boss's "register must need email" is
     already structurally true — worth pinning with a test, not building.
@@ -77,7 +79,7 @@ our email provider; Broadcasts gives hosted unsubscribe handling for free.
 | 3   | `/account`: consent toggle backed by a server action                                                                                                                                      |
 | 4   | `lib/marketing/resend-audience.ts`: server-side sync of consented contacts to a Resend Audience (JSDoc'd); Resend webhook or periodic sync-back for unsubscribes                          |
 | 5   | Admin: show consented-contact count (Settings or Customers header); campaigns themselves stay in the Resend dashboard for V1 — no in-admin campaign builder                               |
-| 6   | Deliverability prerequisite: verified sending domain (SPF/DKIM DNS records) so mail comes from `@goldrose` not `onboarding@resend.dev` — owner DNS task, goes on the activation checklist |
+| 6   | ~~Deliverability prerequisite: verified sending domain~~ — **done 2026-08-03**: `eldreve.com` is verified in Resend (DKIM + SPF on `send.eldreve.com`), and auth mail already sends from `noreply@eldreve.com`. Point `RESEND_FROM` at the same domain so order mail stops using `onboarding@resend.dev` |
 | 7   | Unit + e2e: consent capture, toggle, "customers always have email" pin                                                                                                                    |
 
 ## Blockers and dependencies

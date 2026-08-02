@@ -4311,3 +4311,70 @@ Agent-inbox: detail pane formatting
   tsc + ESLint clean, 16 account e2e tests pass.
 - Raised AI-019 (dropped Sign-in link) and AI-020 (signup frame is now a
   unified email page while its name/route/prototype disagree).
+
+## 2026-08-03 00:32 AEST
+
+- Domain cutover to eldreve.com, second half. Charles moved the Supabase
+  Site URL + redirect allow-list to https://eldreve.com and switched the
+  passkey Relying Party ID from goldrose-storefront.vercel.app to
+  `eldreve.com` (origins https://eldreve.com + www; display name ELDREVE).
+  Old vercel.app passkeys are invalidated by design — WebAuthn origins must
+  sit under the RP ID, so no dual-domain transition exists; test credentials
+  re-enrol on the new domain.
+- Verified live: both eldreve.com and www serve HTTP 200 with valid certs,
+  the vercel.app URL still serves the same deployment, receiving MX (3×
+  route*.mx.cloudflare.net) and the Resend sending lane on send.eldreve.com
+  (MX + DKIM) all resolve via 1.1.1.1.
+- CAUGHT: the deployed site still emitted `goldrose-storefront.vercel.app`
+  in canonicals, OG image URLs and the whole sitemap — layout.tsx's comment
+  assumed VERCEL_PROJECT_PRODUCTION_URL would flip automatically, but adding
+  eldreve.com as an extra domain left vercel.app as the production URL. Set
+  `NEXT_PUBLIC_SITE_URL=https://eldreve.com` (Production) in Vercel, which
+  siteBaseUrl() prefers over the Vercel var. NOT deployed from CLI (repo
+  workflow is main → GitHub/Vercel, and this branch is dirty) — the fix
+  lands on the next production deploy; verify canonicals afterwards.
+- Also: Cloudflare Email Routing enabled with a catch-all to the company
+  Gmail (first forwarded mail landed in Spam — Gmail filter "To: @eldreve.com
+  → never send to spam" is the fix), and Resend set up for outbound mail:
+  domain records on send.eldreve.com, two keys documented in .env.example
+  (RESEND_API_KEY for lib/email.ts, RESEND_SMTP_PASSWORD for Supabase's
+  custom SMTP, which also unlocks template editing and lifts the ~2/hour
+  cap), and apply-auth-email-templates.mjs rebranded GoldRose→Eldreve.
+- ICANN registrant-email verification completed; confirmed externally via
+  WHOIS (status ACTIVE, no clientHold — only the normal
+  clientTransferProhibited registrar lock and addperiod flags).
+- Updated SUMMARY (OQ-4 resolved, live URL) and README live link.
+
+## 2026-08-03 · customer sign-in went live (`feat/figma-sync`)
+
+- `/account/signup` stopped being a picture of a form. Built in the owner's
+  order: email input + blur validation → Send code (`signInWithOtp`) →
+  consent checkbox gating CONTINUE → 6-digit code input → CONTINUE
+  (`verifyOtp` → `/account`). Terms/Privacy link to the `/policies/*`
+  scaffolds.
+- Found the emailed link went to the site root with no code: the repo's
+  template script had never run, and could not — Supabase refuses template
+  edits on the free tier while its built-in sender is in use, so release
+  queue #2's order (templates then SMTP) was impossible.
+- Configured custom SMTP on Resend (`smtp.resend.com:465`, sender
+  `noreply@eldreve.com` / "Eldreve") against the verified `eldreve.com`
+  domain; applied the templates, which now carry both the
+  `/auth/confirm?token_hash=…&next=/account` link and the 6-digit code.
+  Send cap 2 → 30/hour.
+- `mailer_otp_length` 8 → 6: the project issued 8-digit codes while the UI
+  assumed 6, so pasted codes silently truncated and never verified.
+- Added `RESEND_SMTP_PASSWORD` to `.env.example`, beside `RESEND_API_KEY`.
+- **DQ-34 answered — ELDREVE is the brand.** Raised AI-021 for the ~270
+  GoldRose references; OQ-4's `goldrose.co` recommendation is moot.
+- All development verified with the Supabase calls intercepted, so no real
+  emails were sent and no auth users created while building.
+
+## 2026-08-03 — Preserve account-order status-chip aspect ratios
+
+- On `test/integration`, fixed `/account/orders` status-chip PNGs to use `object-fit: contain`, preventing the Processing artwork from stretching inside its Figma-sized frame.
+- Verified with `npm run typecheck` and `git diff --check`.
+
+## 2026-08-03 — Make reminder lead time editable
+
+- On `test/integration`, replaced the hard-coded reminder lead-time value with a controlled numeric input defaulting to 7; the “days before” unit remains fixed.
+- Verified with `npm run typecheck`, component ESLint, and `git diff --check`.

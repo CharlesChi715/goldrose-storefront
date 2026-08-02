@@ -555,13 +555,68 @@ so this pass was drift-alignment plus the file's first real prototype map
   管理"). Keepsake: back button coming ("缺少返回键"). `/gift-guide`
   (1942:182) and the edited blog frame remain unmarked.
 
-## ⚠️ DQ-34 inverts — the brand is becoming ELDREVE (noted 2026-08-02)
+## Customer sign-in went live on `/account/signup` (2026-08-03)
+
+The imported signup screen stopped being a picture of a form. Owner-directed,
+built in this order: email input + validation → Send code → consent checkbox →
+code input + CONTINUE.
+
+**What the screen does now.** Email is a real `<input>`, validated on blur
+(red hairline on the frame's own field box + a message in the card's empty
+status slot); typing retracts the verdict, so nobody is corrected mid-word.
+Send code calls `signInWithOtp({shouldCreateUser:true})` and is disabled
+without a valid address **and while a request is in flight** — each new code
+invalidates the previous one, so a double-tap would email two codes of which
+only the second works. The consent checkbox gates CONTINUE (owner rule);
+CONTINUE calls `verifyOtp` and routes to `/account`. Terms and Privacy Policy
+link to the `/policies/*` coming-soon scaffolds from the 08-02 sync.
+
+**Design deviations, all flagged.** The frame ships no disabled state for
+either button, so Send code borrows the frame's hint colour and CONTINUE dims
+to 45% opacity. The status slot at y546 is ours — the frame leaves the card
+empty between the code field (ends y534) and the checkbox (y772), and every
+message the flow needs (guidance, validation, sending, sent, verify errors)
+shares that one element so two can never render at once.
+
+**Findings worth keeping:**
+
+- **A `disabled` button cannot report that it was tapped** — the browser
+  swallows the event before React sees it. That is why the guidance sits on
+  screen *before* the tap rather than appearing in response to one.
+- **`maxLength` fights an input sanitiser.** The browser truncates raw
+  characters before the change handler runs, so `maxLength={6}` on a paste of
+  `code: 123456` left `code: ` and the digits were lost. Cap in the handler.
+- The project issued **8-digit** codes (`mailer_otp_length`) while the UI
+  assumed 6, so pasted codes silently truncated and could never verify.
+  Settled by moving Supabase to 6; the copy already said "6-digit".
+- Only the plain words of the consent line carry the `<label>`. A label
+  forwards every click to its checkbox, so wrapping the policy links would
+  tick the box on the way to the policy page.
+
+**Mail infrastructure that had to land first.** The emailed link used to go to
+the site root with nothing to exchange the token, and carried no code at all,
+because the repo's template script had never run — and *could* not: Supabase
+refuses template edits on the free tier while its built-in sender is in use.
+So the release queue's order (templates, then SMTP) was impossible. Custom
+SMTP now runs on Resend (`smtp.resend.com:465`, sender `noreply@eldreve.com`
+/ "Eldreve", against the verified `eldreve.com` domain), which unlocked the
+templates and lifted the send cap from ~2 to 30/hour. Both halves now ship in
+one email: a `/auth/confirm?token_hash=…&next=/account` link and the 6-digit
+code, the code being the different-device fallback.
+
+⚠️ `{{ .SiteURL }}` is `https://eldreve.com`, so the emailed **link** always
+points at production. Local testing must use the **code**, which `verifyOtp`
+checks against Supabase directly and therefore works from anywhere.
+
+## ✅ DQ-34 ANSWERED — ELDREVE is the brand (confirmed 2026-08-03)
 
 Every sync since 07-29 has treated the frames' **ELDREVE** wordmark as a
 placeholder and substituted the owner's GoldRose art at the same box
-(`GoldRoseWordmark`, ~23 call sites). `SUMMARY.md` § OQ-4 now records the
-opposite: **ELDREVE is the brand**, `eldreve.com` is registered and live, and
-the design team's wordmark was right all along. The rename is explicitly its
+(`GoldRoseWordmark`, ~23 call sites). Charles confirmed the opposite on
+2026-08-03, after registering and verifying `eldreve.com`: **ELDREVE is the
+brand** and the design team's wordmark was right all along — every one of
+those substitutions is a defect, not a safeguard. Nothing here was a
+placeholder; the repo was overpainting the real thing for a month. The rename is explicitly its
 own project (auth cutover, passkey RP ID, Supabase and PayPal URLs), so
 **nothing was renamed in this sync** — but do not keep applying the
 substitution reflexively:
@@ -613,9 +668,10 @@ email entry point and the built screen follows it verbatim:
   nav吧" comment, delivered. Canvas grew 932 → 974 and the screen now renders
   the shared fixed tab bar instead of `nav={false}`.
 - ⚠️ CONTINUE (2436:377) is the frame's only prototype interaction and it is a
-  `NAVIGATE` action with a **null destination** — nothing to wire it to, so
-  the button stays inert (the form was already an inert placeholder until
-  customer-auth activation).
+  `NAVIGATE` action with a **null destination** — the design never said where
+  continuing goes. Left inert at import; **wired 2026-08-03** to `verifyOtp`
+  → `/account`, matching the login screen's destination. Still worth the
+  design team confirming (AI-020).
 
 **The mepage settled back to four quick tiles.** 2210:310 reverses two of the
 morning frame's changes: **Custom Archive is back** (tiles are My Orders /
@@ -752,8 +808,9 @@ as a stale duplicate — please delete one); NEW `/account/policies-legal` hub
 7 policy pages are **not** Ready-for-dev → 7 coming-soon scaffolds under
 `/policies/*`; `/account/signup` re-imported without password fields (删掉密码
 executed — the design now matches the email-code auth decision, so the login
-page's "Create a shopping account ›" is finally wired to it; the form itself
-stays inert until customer-auth activation); dashboard tiles now
+page's "Create a shopping account ›" is finally wired to it; the form was
+inert at import and **went live 2026-08-03** — see the customer-auth section
+below); dashboard tiles now
 My Orders / Wishlist / **Addresses** (Custom Archive deleted at source) plus an
 inert right-aligned "Address Management ›" row — its ADDRESS-BOOK section
 (2118:246) is still unmarked; the login page gained a "Policies & Legal · View

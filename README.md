@@ -9,7 +9,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Direct-to-consumer storefront for a 24K gold-dipped rose gift line, with its
 own Shopify-clone admin and native checkout. No Shopify code remains.
 
-**Live:** <https://goldrose-storefront.vercel.app> · **Admin:** `/admin`
+**Live:** <https://eldreve.com> (also <https://goldrose-storefront.vercel.app>) · **Admin:** `/admin`
 
 > **Start here:** [SUMMARY.md](SUMMARY.md) is the short repository entrypoint
 > (high-level state, structure, and links to details).
