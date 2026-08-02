@@ -21,6 +21,7 @@ import { inter } from "@/lib/fonts";
 import NoCalcScale from "@/components/NoCalcScale";
 import { MenuButton } from "@/components/MenuButton";
 import { SearchButton } from "@/components/SearchButton";
+import { AccountTabArt } from "@/components/AccountTabArt";
 import { abs } from "@/lib/figma-layout";
 
 /* ---------- Inline SVG icons (Figma node renders, format=svg) ---------- */
@@ -347,41 +348,38 @@ type Tab = {
   label: string;
 };
 
-// Redesign nav art (2026-07-25): 2x renders of the frames' own tab images —
-// outline mascots, label baked in. Home and Shop ship active variants; the
-// account tab was renamed back to "Me" in the 07-27 frames, which ship both of
-// its states: outline (921:251, shop/PDP frames) and filled (939:174, the
-// ACCOUNT-INFO-*-DASHBOARD frames).
+// Nav art imported 2026-08-02 from the current frames' own tab renders
+// (public/veloria/nav/). THREE TABS: the design dropped 商务 / Wholesale —
+// every screen frame under a Ready-for-dev section draws Home / Shop /
+// account at x 18 / 179 / 340 (2024:276 login, 2024:284 dashboard, 2024:292
+// PDP, 1523:1646 shop, 2380:812 home, 2436:368 the new auth screen), and the
+// team's comment on the simplified homepage reads "企业这一块要删掉先不做机制".
+// The business pages stay reachable through the menu drawer's FOR BUSINESS
+// row → /business/partnerships → APPLY FOR WHOLESALE.
 //
-// THREE TABS since 2026-08-02. The design dropped 商务 / Wholesale: every
-// screen frame under a Ready-for-dev section draws Home / Shop / Me at x
-// 18 / 179 / 340 (2024:276 login, 2024:284 account, 2024:292 PDP, 1523:1646
-// shop, 2380:812 home), the team's comment on the simplified homepage says
-// "企业这一块要删掉先不做机制", and the loose 4-tab reference frames were
-// moved out of the marked sections. The business pages stay reachable through
-// the menu drawer's FOR BUSINESS row → /business/partnerships → APPLY FOR
-// WHOLESALE.
+// The account tab is a client island (AccountTabArt): these frames restore the
+// Login/Me session swap the 07-27 batch had dropped.
 const TABS: Tab[] = [
   {
     id: "Home",
     href: "/",
-    img: "763-123",
-    activeImg: "763-113",
+    img: "nav/home",
+    activeImg: "nav/home-active",
     label: "Home",
   },
   {
     id: "Shop",
     href: "/shop",
-    img: "763-115",
-    activeImg: "763-125",
+    img: "nav/shop",
+    activeImg: "nav/shop-active",
     label: "Shop",
   },
   {
     id: "Account",
     href: "/account",
-    img: "921-251",
-    activeImg: "939-174",
-    label: "Me",
+    img: "nav/login",
+    activeImg: "nav/login-active",
+    label: "Login",
   },
 ];
 
@@ -397,6 +395,10 @@ const TAB_ART_STYLE: React.CSSProperties = {
 };
 
 function TabContent({ tab, isActive }: { tab: Tab; isActive: boolean }) {
+  // The account tab's face depends on the session, so it renders itself.
+  if (tab.id === "Account") {
+    return <AccountTabArt isActive={isActive} />;
+  }
   return (
     <img
       src={tabArtSrc(isActive && tab.activeImg ? tab.activeImg : tab.img)}

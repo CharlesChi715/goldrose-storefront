@@ -12,10 +12,13 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("customer account (local mode)", () => {
-  test("the Me tab links to /account", async ({ page }) => {
+  test("the account tab reads Login when signed out and links to /account", async ({
+    page,
+  }) => {
     await page.goto("/");
-    // The 07-27 frames rename the account tab back to "Me" (art 921:251).
-    await page.getByRole("link", { name: "Me", exact: true }).click();
+    // The 08-02 frames restore the Login/Me session swap: signed out the tab
+    // reads "Login" (55ec9c1e / 71fa0136), signed in it reads "Me".
+    await page.getByRole("link", { name: "Login", exact: true }).click();
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByText("Sign in and continue shopping")).toBeVisible();
   });
