@@ -124,7 +124,18 @@ Figma comment on the homepage frame (1523:1655, pin at the A-6 button)
 directed it to `/story`; the placeholder button in `components/home/A6.tsx`
 is now a link there (geometry unchanged, A-11 CTA pattern).
 
-**Update 2026-07-29 — the bottom-nav Wholesale tab is now wired.** Its target
+**Superseded 2026-08-02 — the Wholesale tab is gone.** The design dropped
+商务 from the bar: every screen frame under a Ready-for-dev section draws
+Home / Shop / Me at x 18 / 179 / 340 (2024:276 login, 2024:284 account,
+2024:292 PDP, 1523:1646 shop, 2380:812 home), the team's comment on the
+simplified homepage reads "企业这一块要删掉先不做机制", and on 08-02 they
+deleted the loose 4-tab reference frame in me二级 and moved the other two out
+of their sections. The live bar is now three tabs. The business pages stay
+reachable through the menu drawer's FOR BUSINESS row → `/business/partnerships`
+→ APPLY FOR WHOLESALE, and `/business/wholesale` draws no active tab.
+The 07-29 note it replaces:
+
+**Update 2026-07-29 — the bottom-nav Wholesale tab was wired.** Its target
 page exists, so the "until its target page exists" condition above is spent:
 the tab opens `/business/wholesale` (DQ-13(a), answered by Charles). This
 covers both bottom-nav implementations — the shared `BottomNav`

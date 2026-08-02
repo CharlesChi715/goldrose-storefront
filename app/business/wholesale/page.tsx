@@ -23,7 +23,7 @@ export default function WholesalePage() {
       height={1954}
       background="#FFF6EC"
       fontClass={notoSC.className}
-      navActive="Wholesale"
+      navActive="none"
     >
       <WholesaleScreen />
     </ScaleFrame>

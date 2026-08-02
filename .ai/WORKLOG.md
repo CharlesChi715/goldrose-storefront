@@ -4217,3 +4217,8 @@ Agent-inbox: detail pane formatting
 - SUMMARY.md updated: teardown is on `main`; the from-scratch rebuild
   continues (record front matter only). Scratch `scripts/features/cli.mjs`
   stays local/untracked until the rebuild is real.
+- 08-02: bottom nav cut to 3 tabs (Home/Shop/Me at x 18/179/340) per the
+  design — 商务 dropped, /business/wholesale now navActive="none"; business
+  pages stay reachable via the menu drawer's FOR BUSINESS row. Band diff vs
+  frame 2024:284 = 1.15%. Home/shop/product-detail pixel baselines
+  regenerated (the nav is captured in full-page shots). 89 e2e green.
