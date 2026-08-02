@@ -562,6 +562,60 @@ substitution reflexively:
   as the **text** "GOLDROSE" (2163:254 / 2169:258) while the account frames
   use an ELDREVE raster. Worth settling with the design team in the same pass.
 
+## 08-02 second sync (scoped) — signup + mepage
+
+Charles scoped this pass to exactly two frames: `/account/signup · default ·
+mobile · loginpage-Create a shopping account` (1523:3315) and `/account ·
+signed in · mobile · mepage` (2210:310). Both sit under `me一级` (1523:3313),
+which is **Ready-for-dev**, so both were in scope — note this **supersedes the
+morning pass**, which had listed 2210:310 under "unmarked new Figma content
+left untouched": the old mepage frame 1523:2536 is gone from the file and
+2210:310 has taken its place inside the marked section. No other frame was
+read for import.
+
+**`/account/signup` stopped being a sign-up form.** The frame is now a unified
+email entry point and the built screen follows it verbatim:
+
+- Hero "Create a / shopping / account" → **"Continue / with your / email"**;
+  subcopy "Save favorites, track orders…" → "View your orders, track
+  deliveries, and manage your shopping details securely."
+- Card title "Create your shopping account" → **"Enter your email to
+  continue"**.
+- **The Full name field is deleted at source** — the card is down to email +
+  verification code, which moved up to y400 / y474.
+- Button "CREATE SHOPPING ACCOUNT" → **"CONTINUE"** (y810 → y829).
+- The **"Already have an account? Sign in ›"** link is gone from the frame, so
+  it is gone from the build. The page's live ways back are now the header back
+  arrow (→ `/account`) and the shared nav's Me tab.
+- **A bottom navigation band was added** (2436:368, y915) — Charles's "加一下
+  nav吧" comment, delivered. Canvas grew 932 → 974 and the screen now renders
+  the shared fixed tab bar instead of `nav={false}`.
+- ⚠️ CONTINUE (2436:377) is the frame's only prototype interaction and it is a
+  `NAVIGATE` action with a **null destination** — nothing to wire it to, so
+  the button stays inert (the form was already an inert placeholder until
+  customer-auth activation).
+
+**The mepage settled back to four quick tiles.** 2210:310 reverses two of the
+morning frame's changes: **Custom Archive is back** (tiles are My Orders /
+Wishlist / Custom Archive / Addresses on the business grid x16/115.5/215/314.5,
+not the three-tile x16/167/318 row), and the inert right-aligned **"Address
+Management ›" row and its separator are gone at source** — so both were
+removed from the build, and the ADDRESS-BOOK prototype slip noted below is
+moot for now. The service card stays 209 tall over its four rows; everything
+else in the frame matches what was already built. This also overtakes the
+standing team directive "删掉Custom Archive这个框的内容" — the design team put
+the tile back, so the directive is treated as withdrawn.
+
+**Greeting now names the real visitor (owner instruction, not the frame).**
+`displayNameOf()` in `lib/account/data.ts` used to fall back to the email's
+local part; it now falls back to the **full email address**, so a signed-in
+customer with no profile name is greeted "Hello, name@example.com" rather than
+"Hello, name". Accounts created by the email-code flow carry no name metadata,
+so this is the common case. The 240-wide greeting box already ellipsises, and
+the avatar takes the address's first letter.
+
+**Repo ↔ Figma:** no new drift — both routes exist and both frames are marked.
+
 ## 08-02 delivery sync — developer findings
 
 Processed the file at version 2382879093671597823 (edited 2026-08-02 02:54).

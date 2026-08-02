@@ -20,11 +20,14 @@ lives in the session file that raised it, under [`sessions/`](sessions). Read
 | `AI-016` | `AGENT-UNSURE`   | `OPEN` | `/products/[slug]` still renders the July frame (2501px); the Ready-for-dev PDP redesign (1523:3971, 1616px) was never imported. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [PDP route](../app/products/%5Bslug%5D/page.tsx) |
 | `AI-017` | `AGENT-BLOCKED`  | `OPEN` | Nothing in the live site can change cart quantity or remove a line — wire `/bag` to the real cart. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Checkout client](../app/checkout/CheckoutClient.tsx) |
 | `AI-018` | `OWNER-DECISION` | `OPEN` | Checkout has no country field, so the shipping zone comes from geo-IP alone and a wrong guess mis-prices shipping. | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | [Checkout client](../app/checkout/CheckoutClient.tsx) |
+| `AI-019` | `AGENT-DECISION` | `OPEN` | The redesigned signup frame deleted its "Already have an account? Sign in ›" link, so the build did too. | [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | [Signup screen](../components/screens/SignupScreen.tsx) |
+| `AI-020` | `AGENT-UNSURE`   | `OPEN` | The signup frame is now a unified "Continue with your email" page, but its name, route and CONTINUE destination disagree. | [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | [Signup route](../app/account/signup/page.tsx) |
 
 ## Session files
 
 | Session file                                                             | Open | Delivered                                        |
 | ------------------------------------------------------------------------ | ---- | ------------------------------------------------ |
+| [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | 2 | Scoped 08-02 sync: signup → "Continue with your email" + nav band, mepage back to four tiles, greeting falls back to the email address. |
 | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | 6    | 08-02 sync: two-step checkout, returns flow, date pickers, policies hub + scaffolds, security/signup/dashboard/login re-imports; auto 冬令时/夏令时 timezone. |
 | [figma-sync-08-01-feat-figma-sync-0801](sessions/figma-sync-08-01-feat-figma-sync-0801.md) | 1    | 08-01 sync: timezone → Pacific; me三级 pulled back by design. |
 | [figma-sync-07-31-feat-figma-sync-0731](sessions/figma-sync-07-31-feat-figma-sync-0731.md) | 2    | 07-31 Figma sync: reminders toggle states, returns scaffold, prototype-map review. |

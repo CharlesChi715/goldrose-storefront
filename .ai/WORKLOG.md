@@ -4290,3 +4290,19 @@ Agent-inbox: detail pane formatting
   the rest-of-world e2e drives x-vercel-ip-country instead of a select, which
   exercises the real production path. Filed AI-018 (geo-IP mis-guess
   mis-prices shipping; needs the "US-only at launch?" answer, bears on OQ-2).
+
+## 2026-08-02 · scoped Figma sync: signup + mepage (`feat/figma-sync`)
+
+- Synced only the two frames Charles named, both under Ready-for-dev `me一级`:
+  `/account/signup` (1523:3315) and `/account · signed in · mepage` (2210:310).
+- Signup: hero → "Continue with your email", Full name field gone at source,
+  card title → "Enter your email to continue", button → CONTINUE at y829,
+  "Sign in ›" link removed, bottom nav band added (canvas 932 → 974).
+- Mepage: Custom Archive tile restored (four tiles, business grid), the inert
+  "Address Management ›" row + separator removed at source.
+- Greeting: `displayNameOf()` now falls back to the full email address instead
+  of its local part (owner instruction).
+- Verified by screenshotting both live pages against the scale-2 Figma renders;
+  tsc + ESLint clean, 16 account e2e tests pass.
+- Raised AI-019 (dropped Sign-in link) and AI-020 (signup frame is now a
+  unified email page while its name/route/prototype disagree).

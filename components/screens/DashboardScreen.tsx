@@ -4,7 +4,7 @@
  * The two signed-in account dashboards from the 07-27 frames, one skeleton,
  * two variants:
  *
- *   "mepage" 1523:2536 (07-29) → /account (signed in)
+ *   "mepage" 2210:310 (08-02) → /account (signed in)
  *   ACCOUNT-INFO-BUSINESS-DASHBOARD 1523:885 (07-29) → /account/business/dashboard
  *
  * Geometry, colors, fonts and copy verbatim from the Figma REST data. With
@@ -18,16 +18,18 @@
  * designed path is now Account & Privacy → the hub's Session card →
  * /account/logout.
  *
- * 08-02 drift import (shopping frame only): the quick-tile row is now THREE
- * tiles (My Orders / Wishlist / Addresses — Custom Archive deleted at
- * source), the service card grew to 209 tall with a right-aligned "Address
- * Management ›" link row, and the pink member card is gone from the frame.
- * The business variant keeps its 07-29 layout untouched.
+ * 08-02 drift import (shopping frame only): the frame was re-cut as 2210:310
+ * and settled back to FOUR quick tiles (My Orders / Wishlist / Custom
+ * Archive / Addresses at x16/115.5/215/314.5 — the morning frame's
+ * three-tile row and its "Address Management ›" link row are both gone at
+ * source), the service card stays 209 tall over its four rows, and the pink
+ * member card is still absent. The business variant keeps its 07-29 layout
+ * untouched.
  *
  * Wired: order tracking, /account/orders, /account/reminders, /care,
  * /account/returns and /account/privacy (the 07-29 hub), the account-type
  * toggle, and BUY AGAIN → /shop (nearest honest destination, H-15
- * precedent). Wishlist / Addresses / Address Management / business-side
+ * precedent). Wishlist / Custom Archive / Addresses / business-side
  * tiles render pixel-exact but stay inert until their targets exist
  * (route-table rule; the ADDRESS-BOOK section 2118:246 is not
  * Ready-for-dev). Header wordmark: the shopping frame's image reads
@@ -187,6 +189,11 @@ function Dashboard({
   const logoX = shopping ? 136.5 : 143;
   // Business member card y (08-02: the shopping frame dropped its member card).
   const memberY = 756;
+  // Real visitors arrive as displayNameOf() in lib/account/data.ts: their
+  // profile name, or the email address when they have none (08-02 owner
+  // rule). Without props the frames' own mock names stand in. An email has
+  // no spaces, so the avatar takes its first letter; the 240-wide greeting
+  // box ellipsises anything longer than it.
   const name = displayName ?? (shopping ? "Jessica" : "David");
   const initials = name
     .split(/\s+/)
@@ -196,8 +203,9 @@ function Dashboard({
     .toUpperCase();
   const order = recentOrder === undefined ? MOCK_ORDER : recentOrder;
 
-  // Shopping: the 08-02 frame's three tiles at x16/167/318 (Custom Archive
-  // deleted at source). Business: the 07-29 four-tile layout, untouched.
+  // Shopping: four tiles at x16/115.5/215/314.5 — Custom Archive is back at
+  // source in 2210:310, and the row is on the business frame's grid again.
+  // Business: the 07-29 four-tile layout, untouched.
   const tiles: Tile[] = shopping
     ? [
         {
@@ -209,14 +217,21 @@ function Dashboard({
           href: "/account/orders",
         },
         {
-          x: 167,
+          x: 115.5,
           icon: "1523-2564",
           ink: [22, 22],
           title: "Wishlist",
           text: "8 saved gifts",
         },
         {
-          x: 318,
+          x: 215,
+          icon: "1523-2568",
+          ink: [24, 17],
+          title: "Custom Archive",
+          text: "Saved designs",
+        },
+        {
+          x: 314.5,
           icon: "1523-2572",
           ink: [19, 19],
           title: "Addresses",
@@ -630,8 +645,8 @@ function Dashboard({
         );
       })}
 
-      {/* service rows — the 08-02 shopping frame grows the card to 209 for
-          the Address Management row; business keeps the 07-29 166 */}
+      {/* service rows — 2210:349 keeps the shopping card 209 tall (its four
+          rows end at 728 with padding below); business keeps the 07-29 166 */}
       <div style={card(16, 578, 398, shopping ? 209 : 166)} />
       {rows.map((row, i) => {
         const y = [589, 630, 671, 712][i];
@@ -674,26 +689,6 @@ function Dashboard({
           </div>
         );
       })}
-      {shopping ? (
-        // 2210:373/396 — the 08-02 frame's extra separator + right-aligned
-        // "Address Management ›" row. INERT: its ADDRESS-BOOK target section
-        // (2118:246) is not Ready-for-dev, and the frame's own prototype
-        // link (→ 1523:3878, the privacy hub) looks like a copy-paste slip.
-        <>
-          <div style={{ ...abs(32, 741, 370, 1), background: SAND }} />
-          <div style={abs(254, 743, 139, 36)}>
-            <span
-              style={{
-                ...abs(10, 10, 119),
-                ...txt(11, 16, INK, "right"),
-              }}
-            >
-              Address Management&nbsp;&nbsp;›
-            </span>
-          </div>
-        </>
-      ) : null}
-
       {/* member / security card — gone from the 08-02 shopping frame; the
           business frame still has it */}
       {shopping ? null : (
