@@ -1,6 +1,6 @@
 ---
 name: figma-sync
-description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read the prototype, design-team frames."
+description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read ti he prototype, design-team frames."
 metadata:
   author: charles
   version: "1.1.0"
@@ -91,8 +91,9 @@ the "coming soon" state once it is marked Ready-for-dev.
 ## 4. Pending-from-design note
 
 For anything in a "does not act" bucket that describes a coming change, drop a
-one-line **"pending from design"** note in the session hand-off
-(`agent-delivery/sessions/`) so Charles has visibility — but change nothing.
+one-line **"pending from design"** note in the session hand-off — but change
+nothing. When filing the hand-off, invoke the `agent-delivery` skill and
+follow it — don't improvise the write-back.
 
 ## 5. Flag repo ↔ Figma inconsistencies
 
