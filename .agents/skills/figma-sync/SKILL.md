@@ -3,7 +3,7 @@ name: figma-sync
 description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read the prototype, design-team frames."
 metadata:
   author: charles
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Process a Figma delivery
@@ -14,51 +14,33 @@ inputs in section 1, then act only on what Charles owns (sections 2–3).
 
 ## 1. Read — everything the file exposes
 
-Read via the Figma REST API with the `file_content:read` token. Always read the
-core four; read the rest when the file has them.
+Read via the Figma REST API with the `file_content:read` token. (Endpoint
+shapes and field names are in the Figma REST docs — look them up as needed;
+only the gotchas below are recorded here.)
 
-**Core — these drive the build:**
+**Core — always read these four; they drive the build:**
 
-1. **Frames / node data** (`GET /v1/files/:key`, `/nodes`) — geometry (x/y/w/h),
-   text (`characters`), fonts (family, size, weight, line-height, letter-spacing,
-   align), fills (solid RGBA + image refs), strokes, effects, corner radius,
-   blend mode, opacity, layer names, node types. Import pixel-exact per the
-   established Figma import pipeline; transcribe interaction specs verbatim into
-   `docs/ixd/` with `⚠️ Developer note` for problems found (see
-   `docs/ixd/README.md`).
-2. **Rendered images** (`GET /v1/images/:key`) — any node as PNG/SVG at a scale.
-   This is the pixel source (photos, icons, glyphs) and the scale-2 band-diff
-   reference. Symbol glyphs that hit fallback fonts export as SVG; some (e.g. ✉)
-   return a `.notdef` box — crop those from the frame render instead.
-3. **Comments** (`GET /v1/files/:key/comments`) — threads, authors, anchors,
-   resolved status. Read them **impersonating Charles**: for each thread take his
-   standpoint and ask "what did I mean here?" (an "ok" is an _acceptance_, not a
-   new request). Apply the comment rule in section 2.
-4. **Prototype** — the interaction design (click wiring, transitions, flows).
-   Read `flowStartingPoints` and each node's `interactions[]` /
-   `transitionNodeID` (not `reactions`); it defines how the frames connect.
+1. **Frames / node data** — import pixel-exact per the established Figma
+   import pipeline; transcribe interaction specs verbatim into `docs/ixd/`
+   with `⚠️ Developer note` for problems found (see `docs/ixd/README.md`).
+2. **Rendered images** — the pixel source (photos, icons, glyphs) and the
+   scale-2 band-diff reference. Gotcha: symbol glyphs that hit fallback fonts
+   export as SVG; some (e.g. ✉) return a `.notdef` box — crop those from the
+   frame render instead.
+3. **Comments** — read them **impersonating Charles**: for each thread take his
+   standpoint and ask "what did I mean here?" (an "ok" is an _acceptance_, not
+   a new request). Apply the comment rule in section 2.
+4. **Prototype** — the click wiring, transitions, and flows connecting the
+   frames. Gotcha: read each node's `interactions[]` / `transitionNodeID`,
+   **not** the legacy `reactions` field.
 
-**Scope & change detection:**
-
-5. **Dev status** — `READY_FOR_DEV` / `COMPLETED` marks (the build gate; see
-   section 3).
-6. **File metadata** (`GET /v1/files/:key`) — `lastModified` and `version`.
-   Compare against your last snapshot to catch updates and re-deliveries, and
-   re-poll anything the team touched recently before importing it.
-7. **Structure** — sections and nesting (the sitemap / click-depth org) and
-   component/instance relationships.
-
-**Design system & history — when present:**
-
-8. **Design tokens** — local styles and variables (`variables/local`): the
-   palette, type scale, spacing, and modes (light/dark). Prefer named tokens
-   over hexes lifted per node. (Variables may need an enterprise plan/scope.)
-9. **Version history** (`/versions`) — named checkpoints, to diff against a prior
-   delivery.
-10. **Raw image-fill sources** — the original uploaded asset behind an image
-    fill, when the render is not enough.
-11. **Figma MCP (if connected in Dev Mode)** — code-connect maps
-    (component → code), motion/animation context, variable definitions, FigJam.
+**Also read when present:** dev status (`READY_FOR_DEV` / `COMPLETED` — the
+build gate, section 3); file `lastModified`/`version` vs. your last snapshot
+to catch re-deliveries; section structure and component relationships; design
+tokens/variables (prefer named tokens over per-node hexes; may need an
+enterprise plan); version history for diffing against a prior delivery; raw
+image-fill sources when the render is not enough; Figma MCP extras
+(code-connect, motion, FigJam) if connected in Dev Mode.
 
 ## 2. Comment rule — whose task is it?
 
@@ -83,8 +65,9 @@ frames that carry it.** A mark on a **section cascades**: every frame under a
 Ready-for-dev section counts as ready. (An explicit instruction from Charles to
 build something un-marked overrides this default.)
 
-**Reading it — REST only.** The Figma Plugin/MCP API cannot read dev status
-(`node.devStatus` throws). Use the REST API:
+**Reading it — REST only** (verified 2026-07; if the MCP gains dev-status
+support later, prefer it and update this note). The Figma Plugin/MCP API
+cannot read dev status (`node.devStatus` throws). Use the REST API:
 
 ```bash
 # only marked nodes carry the field; an empty result means "nothing marked",
