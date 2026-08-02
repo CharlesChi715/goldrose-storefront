@@ -24,10 +24,10 @@
  * open question asks dev to supply the full ranges, so days run 1–31 and
  * months Jan–Dec; years keep the drawn 2027→2020 list.
  *
- * Still static by design: the lead-time NUMBER (its chevron frame 2024:372 is
- * an empty stub — selection UI not delivered yet) and the UNIT, which the
- * team pinned as a fixed value ("这个先设定为固定值，不能修改", 08-01).
- * "Delete reminder" stays an inert caption (no backend, no designed target).
+ * The lead-time NUMBER is an editable numeric input (owner request,
+ * 2026-08-03); its UNIT remains fixed, as pinned by the team's 08-01 comment
+ * ("这个先设定为固定值，不能修改"). "Delete reminder" stays an inert
+ * caption (no backend, no designed target).
  *
  * The ✉ glyph SVG-exports as a `.notdef` box (C-2 precedent) so it reuses the
  * reminders page's frame-render crop; ▤ is the existing SVG text export.
@@ -362,6 +362,7 @@ export function ReminderEditModal({
   const [year, setYear] = useState("2025");
   const [month, setMonth] = useState("Aug");
   const [day, setDay] = useState("25");
+  const [leadTime, setLeadTime] = useState("7");
   const [openMenu, setOpenMenu] = useState<"year" | "month" | "day" | null>(
     null,
   );
@@ -392,6 +393,9 @@ export function ReminderEditModal({
     <>
       <style>{`
         .figv-reminderstage { position: fixed; bottom: 0; width: 430px; height: 932px; left: calc((100% - 430px) / 2); z-index: 40; }
+        .figv-reminderlead { appearance: textfield; }
+        .figv-reminderlead::-webkit-inner-spin-button,
+        .figv-reminderlead::-webkit-outer-spin-button { appearance: none; margin: 0; }
         @media (max-width: 480px) {
           .figv-reminderstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
         }
@@ -523,14 +527,32 @@ export function ReminderEditModal({
             />
           </div>
 
-          {/* lead time — number is static (its chevron frame is an empty stub
-              in the file: selection UI not delivered), unit pinned as a fixed
-              value by the team's 08-01 comment */}
-          <div style={{ ...abs(16, 288, 70), ...txt(11, 13.2, INK) }}>
+          {/* lead time — editable number; unit stays pinned to the fixed value
+              from the team's 08-01 comment */}
+          <label
+            htmlFor="reminder-lead-time"
+            style={{ ...abs(16, 288, 70), ...txt(11, 13.2, INK) }}
+          >
             Remind me
-          </div>
-          <div style={field(16, 310, 159)} />
-          <div style={{ ...abs(28, 322, 60), ...txt(12, 14.4, INK) }}>7</div>
+          </label>
+          <input
+            id="reminder-lead-time"
+            className="figv-reminderlead"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={1}
+            value={leadTime}
+            onChange={(event) => setLeadTime(event.target.value)}
+            style={{
+              ...field(16, 310, 159),
+              boxSizing: "border-box",
+              border: 0,
+              padding: "0 12px",
+              ...txt(12, 14.4, INK),
+              fontFamily: "inherit",
+            }}
+          />
           <div style={field(191, 310, 223)} />
           <div style={{ ...abs(203, 322, 120), ...txt(12, 14.4, INK) }}>
             days before

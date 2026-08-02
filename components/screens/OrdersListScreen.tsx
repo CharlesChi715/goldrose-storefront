@@ -294,7 +294,11 @@ export function OrdersListScreen({
                 alt={order.chip}
                 width={88}
                 height={32}
-                style={{ ...abs(6, 1, 88, 32), display: "block" }}
+                style={{
+                  ...abs(6, 1, 88, 32),
+                  objectFit: "contain",
+                  display: "block",
+                }}
               />
             </div>
             {order.primary.href ? (
