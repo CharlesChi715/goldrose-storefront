@@ -587,10 +587,15 @@ mock/skip CTA).
   country (OQ-2), so a `COUNTRY / REGION` field band (design's own field
   language) sits under the Delivery Address card. Same idiom as the discount
   band.
-- **The item card lost its quantity steppers and remove control.** Cart
-  management is real functionality, so a band of management rows (one per
-  cart line, with ± steppers and REMOVE) sits under the item card on the
-  details step. The payment step lists extra lines read-only.
+- **The item card lost its quantity steppers and remove control — and stays
+  that way** (owner decision 2026-08-02: "remove that quantity selector, just
+  keep the same with figma"). A management band was built first, then
+  deleted; checkout now matches the frame exactly for a one-line cart. Both
+  steps list any *further* cart lines read-only, because charging for an item
+  the page never shows would be dishonest. ⚠️ Consequence: quantity and
+  remove now exist **nowhere** in the live site — `addToCart` increments on
+  repeat clicks and `/bag` is still mock, so a customer at Qty 2 cannot get
+  back to 1. Wiring `/bag` to the live cart is the fix (AI-002, AI-017).
 - **Discount entry** stays a dev band (the design deleted the card again; §8
   keeps the feature) — now above the Order Summary on the payment step.
 - **Shipping-method prices NOT imported** (frame shows FREE / $14.99 /

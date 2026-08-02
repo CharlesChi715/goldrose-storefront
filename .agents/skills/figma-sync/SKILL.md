@@ -40,8 +40,7 @@ mid-import. Re-fetch anything they touched recently before importing it.
 **Core — always read these four; they drive the build:**
 
 1. **Frames / node data** — import pixel-exact per the established Figma
-   import pipeline; transcribe interaction specs verbatim into `docs/ixd/`
-   with `⚠️ Developer note` for problems found (see `docs/ixd/README.md`).
+   import pipeline.
 2. **Rendered images** — the pixel source (photos, icons, glyphs) and the
    scale-2 band-diff reference. Gotcha: symbol glyphs that hit fallback fonts
    export as SVG; some (e.g. ✉) return a `.notdef` box — crop those from the

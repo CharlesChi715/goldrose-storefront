@@ -24,9 +24,6 @@
  * §10.4) both are replaced by a single Place-order CTA in the pay bar.
  *
  * DEV BANDS (design's field language, flagged to the design team):
- * - Cart rows: the redesigned item card dropped the old quantity steppers and
- *   remove control, so cart management lives in a band of rows under the item
- *   card on the details step (every line, including the first).
  * - Country: the redesign's address card has CITY/STATE/ZIP but no country
  *   field, while shipping is priced from the country's zone (OQ-2) — a
  *   COUNTRY / REGION field band keeps the real selector.
@@ -34,6 +31,16 @@
  *   the feature, so the band sits above the Order Summary on the payment step.
  * - Gift message: no field in the design; the note is the order's Notes card,
  *   so its band stays on the details step.
+ *
+ * NO BASKET CONTROLS AT CHECKOUT (owner decision, 2026-08-02): the redesign's
+ * item card shows "Qty 1" as static text with only EDIT →, and the page keeps
+ * it that way. Quantity and remove therefore exist nowhere in the live site
+ * until /bag is wired to the real cart.
+ *
+ * AI-TAG(AI-017): AGENT-BLOCKED — no cart editing anywhere in the live site;
+ * wire /bag to the real cart. See
+ * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
+ *
  * Deliberately NOT imported: the shipping rows' mock prices ($14.99/$24.99) —
  * the picker is cosmetic by the owner's decision (per-method pricing has no
  * backend; the only charged figure is the summary's zone rate), so the rows
@@ -259,43 +266,6 @@ function LiveInput({
 /** A 1×1 transparent GIF: no product image must never show the design's rose. */
 const BLANK_PIXEL =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-
-/** The cart-rows band's quantity control, a 20×20 stepper box. */
-function StepperButton({
-  x,
-  y,
-  label,
-  onClick,
-  children,
-}: {
-  x: number;
-  y: number;
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={notoSC.className}
-      style={{
-        ...abs(x, y, 20, 20),
-        ...VALUE,
-        fontSize: 10,
-        lineHeight: "20px",
-        fontWeight: 500,
-        textAlign: "center",
-        boxShadow: HAIRLINE,
-        borderRadius: 6,
-        cursor: "pointer",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
 
 /* ---------- 01 · header + progress (shared by both steps) ---------- */
 
@@ -799,8 +769,9 @@ export function CheckoutClient({
   const searchParams = useSearchParams();
   const step: Step =
     searchParams.get("step") === "payment" ? "payment" : "details";
-  const { lines, rawLines, subtotal, hydrated, changeQuantity, remove, clear } =
-    useCart(catalog);
+  // No changeQuantity/remove here: the design draws no basket controls at
+  // checkout and the owner confirmed it stays that way (08-02).
+  const { lines, rawLines, subtotal, hydrated, clear } = useCart(catalog);
 
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState(defaultCountry);
@@ -1022,6 +993,8 @@ export function CheckoutClient({
   /** The mock-card branch: the only branch whose form is actually submitted. */
   const mockForm = !skipPayment && !paypalClientId;
   const first = lines[0] ?? null;
+  /** The item card shows line 1; any further lines are listed read-only. */
+  const extraLines = lines.slice(1);
   const countryName =
     countries.find((entry) => entry.code === country)?.name ?? country;
 
@@ -1037,9 +1010,12 @@ export function CheckoutClient({
 
   if (step === "details") {
     // Cart-management band: the redesigned item card has no steppers, so every
-    // line gets a management row under the item module (dev band).
-    const bandRows = lines.length;
-    const LINES_H = bandRows ? 12 + bandRows * 40 : 0;
+    // Owner decision 2026-08-02: no quantity/remove controls at checkout —
+    // keep the page as the design draws it. Extra cart lines still LIST
+    // read-only (charging for an item the page never shows would be the real
+    // bug), matching the payment step's treatment; a single-line cart — what
+    // the frame draws — renders nothing extra at all.
+    const LINES_H = extraLines.length ? 8 + extraLines.length * 24 + 4 : 0;
     const T_CONTACT = 355 + LINES_H; // contact card top (design 355)
     const T_ADDRESS = 483 + LINES_H; // address card top (design 483)
     const T_COUNTRY = T_ADDRESS + 314 + 8; // dev band: live country selector
@@ -1067,78 +1043,33 @@ export function CheckoutClient({
             }
           />
 
-          {/* ---------- Band · cart rows (quantity + remove, every line) ---------- */}
-          {lines.map((line, index) => {
-            const y = 353 + index * 40;
+          {/* ---------- Extra cart lines, read-only ---------- */}
+          {/* The frame draws exactly one item card and no quantity or remove
+              control; per the owner (08-02) the page keeps it that way. A cart
+              with more than one line still lists the rest, because charging
+              for an item the page never shows would be dishonest. Editing the
+              basket belongs to /bag once it is wired to the live cart. */}
+          {extraLines.map((line, index) => {
+            const y = 353 + index * 24;
             return (
               <div key={line.variantId}>
-                <div
-                  style={{
-                    ...abs(16, y, 398, 36),
-                    background: "#FFFFFF",
-                    boxShadow: HAIRLINE,
-                    borderRadius: 8,
-                    overflow: "hidden",
-                  }}
-                />
                 <Txt
                   x={28}
-                  y={y + 5}
-                  w={190}
-                  size={11}
-                  lh={13.2}
-                  color={INK}
-                  weight={500}
-                  live
-                >
-                  {line.product.short_name}
-                </Txt>
-                <Txt
-                  x={28}
-                  y={y + 20}
-                  w={190}
-                  size={8}
-                  lh={9.6}
-                  color={MUTED}
-                  live
-                >
-                  {`${line.variant.option_values.join(" · ")} · Qty ${line.quantity}`}
-                </Txt>
-                <StepperButton
-                  x={226}
-                  y={y + 8}
-                  label={`Decrease ${line.product.short_name} quantity`}
-                  onClick={() => changeQuantity(line.variantId, -1)}
-                >
-                  {"−"}
-                </StepperButton>
-                <Txt
-                  x={248}
-                  y={y + 12}
-                  w={18}
+                  y={y + 4}
+                  w={270}
                   size={10}
                   lh={12}
                   color={INK}
-                  weight={500}
-                  align="center"
                   live
                 >
-                  {String(line.quantity)}
+                  {`${line.product.short_name} · Qty ${line.quantity}`}
                 </Txt>
-                <StepperButton
-                  x={270}
-                  y={y + 8}
-                  label={`Increase ${line.product.short_name} quantity`}
-                  onClick={() => changeQuantity(line.variantId, 1)}
-                >
-                  +
-                </StepperButton>
                 <Txt
                   x={298}
-                  y={y + 11}
-                  w={56}
-                  size={11}
-                  lh={13.2}
+                  y={y + 4}
+                  w={104}
+                  size={10}
+                  lh={12}
                   color={GREEN}
                   weight={500}
                   align="right"
@@ -1146,24 +1077,6 @@ export function CheckoutClient({
                 >
                   {formatMoney(line.lineTotal)}
                 </Txt>
-                <button
-                  type="button"
-                  onClick={() => remove(line.variantId)}
-                  aria-label={`Remove ${line.product.short_name}`}
-                  className={notoSC.className}
-                  style={{
-                    ...abs(358, y + 12, 44),
-                    ...VALUE,
-                    fontSize: 9,
-                    lineHeight: "10.8px",
-                    fontWeight: 500,
-                    color: MUTED,
-                    textAlign: "right",
-                    cursor: "pointer",
-                  }}
-                >
-                  REMOVE
-                </button>
               </div>
             );
           })}
@@ -1601,7 +1514,6 @@ export function CheckoutClient({
   /* =========================== step 2 · payment =========================== */
 
   // Read-only extra cart lines (the item card shows the first line).
-  const extraLines = lines.slice(1);
   const EXTRA_H = extraLines.length ? 8 + extraLines.length * 24 + 4 : 0;
   const T_SAVED = 355 + EXTRA_H; // saved-address card (design 355, 398×230)
   const T_SHIP = 613 + EXTRA_H; // shipping card (design 613, 398×193)

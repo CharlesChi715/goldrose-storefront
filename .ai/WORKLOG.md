@@ -4278,3 +4278,10 @@ Agent-inbox: detail pane formatting
   and closed. Noted in docs/ixd: DQ-34 inverts — SUMMARY OQ-4 now says the
   brand becomes ELDREVE, so the GoldRose wordmark substitution must stop for
   new imports (rename itself is its own project).
+- 08-02 (later still): PDP ratings-summary block wired to the reviews drawer
+  (second prototype trigger, 1523:4109 — the star row was already wired);
+  filed AI-016 (PDP still renders the July 2:2 2501px frame while the
+  Ready-for-dev PDP is 1523:3971 at 1616px). Owner removed the checkout
+  quantity/remove band ("keep the same with figma") — deleted, extra cart
+  lines still listed read-only on both steps; filed AI-017 because cart
+  editing now exists nowhere in the live site until /bag is wired.

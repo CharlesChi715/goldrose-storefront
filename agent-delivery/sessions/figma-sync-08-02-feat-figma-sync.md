@@ -66,12 +66,11 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   1. **Country picker** — the new address card (2157:284) has CITY, STATE and
      ZIP CODE but no country, and shipping is priced by country (OQ-2).
      Without it we cannot price an order.
-  2. **Quantity and Remove** — the new item card (2157:263) holds only the
-     photo, title, "Sapphire blue · Qty 1", two detail lines, the price and
-     `EDIT →`. The card it replaced drove `onQtyUp` / `onQtyDown` /
-     `onRemove` (deleted `CheckoutSkin.tsx`, lines 361-364 and 477-513 in
-     commit `d68d928~1`), so without our band a customer could not change
-     quantity or remove a line anywhere in the flow.
+  2. ~~**Quantity and Remove**~~ — **withdrawn by Charles 08-02:** "remove
+     that quantity selector, just keep the same with figma". The band is
+     deleted; checkout matches the frame. Both steps still list any further
+     cart lines read-only (charging for an unshown item would be dishonest).
+     The consequence is tracked as AI-017.
   3. **Discount code** — deleted from the design again, yet the design's own
      Final Order Summary (2157:479) still prices a `Discount (15%) −$28.35`
      row (2157:484-486), and the admin really can create codes
@@ -112,6 +111,25 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
 - **Recommendation:** re-import `/products/[slug]` from 1523:3971 as its own
   focused pass, and settle with the design team which of 1523:3971 / 2333:280
   is canonical before spending the effort.
+
+## AI-017 · `AGENT-BLOCKED` · nothing in the live site can edit the cart
+
+- **Where:** [`app/checkout/CheckoutClient.tsx`](../../app/checkout/CheckoutClient.tsx)
+  (controls removed), [`app/bag/page.tsx`](../../app/bag/page.tsx) (the screen
+  that should own the job).
+- **What:** with the checkout band deleted per Charles's 08-02 instruction,
+  `changeQuantity` and `remove` are called from **nowhere** in the app. Two
+  facts make that reachable rather than theoretical: `addToCart` **increments**
+  on a repeat click, and the product page has no quantity picker or
+  add-confirmation — so a customer can land on Qty 2 by accident and has no
+  way back to 1, and a customer with two products cannot drop either. They
+  would be charged for it.
+- **Fix, in order:** wire `/bag` (the designed basket, B-1) to the live cart
+  with its own quantity and remove controls — it is the screen the design
+  intends for this — **then** nothing else is needed at checkout. `/bag` being
+  mock is already AI-002; this matter is the sharper consequence of it.
+- **Interim risk:** low while the store is pre-launch with test traffic only;
+  it must not ship to real customers unfixed.
 
 ## Delivered this session
 
