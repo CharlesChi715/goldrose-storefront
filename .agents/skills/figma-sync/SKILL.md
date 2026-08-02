@@ -3,7 +3,7 @@ name: figma-sync
 description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read ti he prototype, design-team frames."
 metadata:
   author: charles
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Process a Figma delivery
@@ -32,6 +32,9 @@ shared history and causes phantom conflicts on later syncs.
 Read via the Figma REST API with the `file_content:read` token. (Endpoint
 shapes and field names are in the Figma REST docs — look them up as needed;
 only the gotchas below are recorded here.)
+
+**Re-poll for stability.** The team edits the file live; a frame can change
+mid-import. Re-fetch anything they touched recently before importing it.
 
 **Core — always read these four; they drive the build:**
 
@@ -123,10 +126,7 @@ flagged: admin pages, API endpoints, and technical routes (e.g.
 `/checkout/cancel`, `/placeholder`). Focus the check on storefront / customer
 pages, which are the ones a Figma frame is expected to back.
 
-## 6. Before you act
+## 6. After each import — verify
 
-- **Re-poll for stability.** The team edits the file live; a frame can change
-  mid-import. Re-fetch anything they touched recently before importing it.
-- **Verify.** After importing a frame, band-diff the live render against the
-  scale-2 frame render (font-AA envelope), and cover new interactions with a
-  test.
+Band-diff the live render against the scale-2 frame render (font-AA envelope),
+and cover new interactions with a test.
