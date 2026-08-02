@@ -15,6 +15,7 @@ import { notoSC } from "@/lib/fonts";
 import { OrderConfirmedScreen } from "@/components/screens/OrderConfirmedScreen";
 import { formatMoney } from "@/lib/money";
 import { isPaymentMethodId, getPaymentMethod } from "@/lib/checkout/methods";
+import { getOrderConfirmationEmail } from "@/lib/orders/confirmation";
 
 export const metadata: Metadata = {
   title: "Order confirmed",
@@ -28,12 +29,17 @@ export default async function CheckoutSuccessPage({
 }: {
   searchParams: Promise<{
     order?: string;
+    oid?: string;
     method?: string;
     total?: string;
     mock?: string;
   }>;
 }) {
   const params = await searchParams;
+  // The confirmation address is read from the order row keyed by `oid`, so
+  // the URL can never dictate which address the screen claims to have
+  // emailed. Null (bad/absent id) leaves the frame's placeholder in place.
+  const email = await getOrderConfirmationEmail(params.oid);
   const isMock = params.mock === "1";
   // Unknown/absent method (e.g. the skip-payment flow's "none") stays null so
   // the screen names no method at all rather than a phantom one.
@@ -55,6 +61,7 @@ export default async function CheckoutSuccessPage({
     >
       <OrderConfirmedScreen
         orderName={params.order ?? ""}
+        email={email}
         total={hasTotal ? formatMoney(totalCents) : null}
         method={methodLabel}
         mock={isMock}

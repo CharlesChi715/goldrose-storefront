@@ -124,12 +124,16 @@ export function OrderConfirmedScreen({
   total,
   method,
   mock,
+  email = null,
   backFallback = "/",
 }: {
   orderName: string;
   total: string | null;
   method: string | null;
   mock: boolean;
+  /** The buyer's own address, read from the order row; null on the mock
+   * /account/orders/details twin, which keeps the frame's placeholder. */
+  email?: string | null;
   backFallback?: string;
 }) {
   // Live values fall back to the frame's own placeholder strings, so a visit
@@ -137,6 +141,9 @@ export function OrderConfirmedScreen({
   const orderNumber = orderName.trim() || "#VL20250821";
   const totalText = total?.trim() || "$129.00";
   const methodText = method?.trim() || "Visa •••• 2345";
+  // Real address when the order carries one; otherwise the frame's own
+  // placeholder, so a param-less visit still renders the design exactly.
+  const emailText = email?.trim() || "j***@gmail.com";
 
   return (
     <>
@@ -231,9 +238,14 @@ export function OrderConfirmedScreen({
             ...abs(71, 255, 322),
             ...txt(13, 15.6, INK),
             fontWeight: 500,
+            // Real addresses run longer than the frame's placeholder, and
+            // txt() is nowrap — clip inside the node box rather than spill
+            // out of the mint panel.
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
-          j***@gmail.com
+          {emailText}
         </div>
         <div style={{ ...abs(71, 275, 322), ...txt(10, 12, GREEN) }}>
           Did not receive it? RESEND EMAIL →

@@ -174,8 +174,11 @@ export async function POST(request: Request) {
       auth_user_id: await currentAuthUserId(),
     });
 
+    // `oid` is the success page's lookup key for the buyer's own email —
+    // the UUID, never the sequential order name (lib/orders/confirmation.ts).
     const params = new URLSearchParams({
       order: order.name,
+      oid: order.id,
       method: parsed.method,
       total: String(order.total_cents),
       mock: "1",
