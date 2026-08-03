@@ -392,7 +392,8 @@ export function ReminderEditModal({
   return createPortal(
     <>
       <style>{`
-        .figv-reminderstage { position: fixed; bottom: 0; width: 430px; height: 932px; left: calc((100% - 430px) / 2); z-index: 40; }
+        .figv-reminderstage { position: fixed; bottom: 0; width: 430px; height: 932px; left: calc((100% - 430px) / 2); z-index: 41; pointer-events: none; }
+        .figv-remindersheet { pointer-events: auto; }
         .figv-reminderlead { appearance: textfield; }
         .figv-reminderlead::-webkit-inner-spin-button,
         .figv-reminderlead::-webkit-outer-spin-button { appearance: none; margin: 0; }
@@ -400,24 +401,27 @@ export function ReminderEditModal({
           .figv-reminderstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
         }
       `}</style>
+      {/* The scrim lives outside the scaled 430×932 stage so it always covers
+          the complete viewport, including tall desktop/browser canvases. */}
+      <button
+        type="button"
+        aria-label="Close reminder dialog"
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 40,
+          background: "rgba(15,14,13,0.64)",
+          border: 0,
+          padding: 0,
+          cursor: "pointer",
+          display: "block",
+        }}
+      />
       <div className={`figv-reminderstage ${notoSC.className}`}>
-        {/* dim overlay — tapping it discards and closes */}
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-          style={{
-            ...abs(0, 0, 430, 932),
-            background: "rgba(15,14,13,0.64)",
-            border: 0,
-            padding: 0,
-            cursor: "pointer",
-            display: "block",
-          }}
-        />
-
         {/* the sheet (#FFFEFB, top corners 16) */}
         <div
+          className="figv-remindersheet"
           role="dialog"
           aria-modal="true"
           aria-label={mode === "add" ? "Add reminder" : "Edit reminder"}

@@ -134,11 +134,27 @@ export function MenuDrawer({
     <div className="figv-menufix">
       <style>{`
         .figv-menufix { position: fixed; inset: 0; z-index: 40; }
+        .figv-menuscrim { animation: figv-menu-scrim-in 220ms ease-out both; }
+        .figv-menupanel {
+          animation: figv-menu-panel-in 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          will-change: transform;
+        }
+        @keyframes figv-menu-scrim-in {
+          from { opacity: 0; }
+          to { opacity: 0.34; }
+        }
+        @keyframes figv-menu-panel-in {
+          from { transform: translate3d(-100%, 0, 0); }
+          to { transform: translate3d(0, 0, 0); }
+        }
         /* left calc, not margin:auto — auto margins pin an over-wide box to the
            left edge on narrow phones, drifting it right after the scale. */
         .figv-menustage { position: relative; width: 430px; height: 932px; left: calc((100% - 430px) / 2); }
         @supports (transform: scale(calc(100vw / 430px))) {
           .figv-menustage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: top center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .figv-menuscrim, .figv-menupanel { animation: none; }
         }
       `}</style>
 
@@ -146,6 +162,7 @@ export function MenuDrawer({
           opacity (both composed). Figma sizes it to the 430×932 frame; here it
           fills the viewport so the dim never stops short of the screen edge. */}
       <button
+        className="figv-menuscrim"
         type="button"
         aria-label="Close menu"
         onClick={onClose}
@@ -161,6 +178,7 @@ export function MenuDrawer({
       <div className="figv-menustage">
         {/* 1523:3225 Left Navigation Drawer — flush to the stage's left edge */}
         <div
+          className="figv-menupanel"
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
