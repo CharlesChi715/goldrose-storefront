@@ -23,11 +23,14 @@ lives in the session file that raised it, under [`sessions/`](sessions). Read
 | `AI-019` | `AGENT-DECISION` | `OPEN` | The redesigned signup frame deleted its "Already have an account? Sign in ›" link, so the build did too. | [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | [Signup screen](../components/screens/SignupScreen.tsx) |
 | `AI-020` | `AGENT-UNSURE`   | `OPEN` | `/account/signup` and the signed-out `/account` login screen are now two working doors into the same email sign-in — which is canonical? | [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | [Signup route](../app/account/signup/page.tsx) |
 | `AI-021` | `OWNER-DECISION` | `OPEN` | ELDREVE is the brand (DQ-34 answered), so ~270 GoldRose references across ~110 files are now wrong — the rename needs its own branch and plan. | [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | [Repo summary](../SUMMARY.md) |
+| `AI-022` | `OWNER-DECISION` | `OPEN` | The new Ready-for-dev homepage frame drops MORI and the concierge chatbox entirely — is the mascot chatbot retired? | [figma-sync-chatbot-08-03-feat-figma-sync](sessions/figma-sync-chatbot-08-03-feat-figma-sync.md) | [Concierge chatbox](../components/ConciergeChat.tsx) |
+| `AI-023` | `AGENT-UNSURE`   | `OPEN` | Checkout's "Need help? Ask Auri." card links to the support chat but is drawn on a hidden layer, so it was not built. | [figma-sync-chatbot-08-03-feat-figma-sync](sessions/figma-sync-chatbot-08-03-feat-figma-sync.md) | [Checkout client](../app/checkout/CheckoutClient.tsx) |
 
 ## Session files
 
 | Session file                                                             | Open | Delivered                                        |
 | ------------------------------------------------------------------------ | ---- | ------------------------------------------------ |
+| [figma-sync-chatbot-08-03-feat-figma-sync](sessions/figma-sync-chatbot-08-03-feat-figma-sync.md) | 2 | 08-03 chatbot sync: `/care/chat` re-verified against its re-authored frame (no import needed), stale node ids corrected, all five links into the chat traced. |
 | [figma-sync-signup-mepage-08-02-feat-figma-sync](sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md) | 3 | Scoped 08-02 sync (signup + mepage + greeting), then 08-03: customer sign-in went live end to end — real form, Resend SMTP, templates with code + link. |
 | [figma-sync-08-02-feat-figma-sync](sessions/figma-sync-08-02-feat-figma-sync.md) | 6    | 08-02 sync: two-step checkout, returns flow, date pickers, policies hub + scaffolds, security/signup/dashboard/login re-imports; auto 冬令时/夏令时 timezone. |
 | [figma-sync-08-01-feat-figma-sync-0801](sessions/figma-sync-08-01-feat-figma-sync-0801.md) | 1    | 08-01 sync: timezone → Pacific; me三级 pulled back by design. |

@@ -2286,7 +2286,12 @@ export function CheckoutClient({
             {formatMoney(total)}
           </Txt>
 
-          {/* ---------- FAQ accordions (2157:523/524/525) — inert art ---------- */}
+          {/* ---------- FAQ accordions (2157:523/524/525) — inert art ----------
+              AI-TAG(AI-023): AGENT-UNSURE — the details frame's parked, hidden
+              06 block carries an "Ask Auri" help card (2157:372) linking to
+              /care/chat; this visible block (2157:516) has no such card, so it
+              was not built. See
+              /agent-delivery/sessions/figma-sync-chatbot-08-03-feat-figma-sync.md. */}
           {[
             "Delivery & Returns",
             "Privacy & Security",

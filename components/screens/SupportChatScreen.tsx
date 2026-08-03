@@ -1,8 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * /care/chat — pixel-exact implementation of the 07-29
- * "mepage-my orders-Order Detail-customer service" frame (1523:1470).
+ * /care/chat — pixel-exact implementation of frame 1537:111
+ * "/care/chat · default · mobile · shoppage-Product Details-Checkout-Need
+ * help?" (Ready-for-dev under section shoppage三级). Built 07-29 from the
+ * since-replaced node 1523:1470; the design team re-authored the frame with
+ * formal SUPPORT-* component names (SUPPORT-SECURE-NOTICE,
+ * SUPPORT-ORDER-CONTEXT-CARD, SUPPORT-COMPOSER-BAR, …) but changed no
+ * geometry or copy — band-diffed clean against the scale-2 render on
+ * 2026-08-03. Those names are NOT mirrored as data-el here: the component
+ * naming rule (docs/ixd/naming/component-names.md) is still Draft.
  * Geometry, colors, fonts and copy verbatim from the Figma REST data;
  * ornamental glyphs are Figma's own SVG exports (the composer's ☺ is a
  * crop of the frame render — it exports as a .notdef box, the C-2 ✉

@@ -10,6 +10,11 @@
  *
  * Geometry preserved from the Figma frames (canvas coords): mascot 98×98 at
  * x=-3, 60px above the bar; bar 398×46 at x=16, sitting flush on the nav top.
+ *
+ * AI-TAG(AI-022): OWNER-DECISION — the new Ready-for-dev homepage frame
+ * (2380:370) contains no MORI and no concierge modules at all; confirm
+ * whether this chatbox is retired before importing it. See
+ * /agent-delivery/sessions/figma-sync-chatbot-08-03-feat-figma-sync.md.
  */
 
 import { useState } from "react";

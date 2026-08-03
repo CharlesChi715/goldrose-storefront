@@ -4445,3 +4445,39 @@ Agent-inbox: detail pane formatting
   shared skills are now single-source. Content was byte-identical beforehand
   and `.claude/` is gitignored, so nothing tracked changed. `supabase` and
   `supabase-postgres-best-practices` remain real duplicates.
+
+## 2026-08-03 — archived: figma-sync coverage-analysis mental model
+
+- Wrote `archive/figma-sync-coverage-analysis-mental-model.md` (EN + 中文): a
+  method for diagnosing why a figma-sync pass leaves updates un-imported —
+  coverage/fidelity split, deliberate-skip vs silent-drop split, an eight-stage
+  funnel, a hypothesis-signature table, three structural causes (no error
+  channel, model-driven enumeration, stateless passes), and a six-artifact prep
+  checklist. Method only; no analysis was run.
+- Key grounded finding recorded in it: four Figma file versions are logged in
+  prose in `docs/ixd/README.md` but have never been used as a `?version=` diff
+  base, and no `scripts/figma-*` exists, so enumeration is fully model-driven.
+- Parked in `archive/` on request. Per archive/README.md that means it is never
+  cited — noted in the Contents row that it should move to `docs/ixd/` if the
+  analysis is ever run.
+
+## 2026-08-03 — figma-sync: chatbot / support-chat surfaces
+
+- Re-polled the Figma file (modified 2026-08-02 13:24) and scoped a sync to
+  every chatbot surface: `/care/chat`, the concierge bands, and all five
+  prototype links that navigate to the chat frame.
+- `/care/chat` needed **no import**. Its frame was re-authored — the node ids
+  the code quoted (1230:120, 1523:1470) are gone; the live one is **1537:111**,
+  Ready-for-dev under section `shoppage三级`. Band-diffed the running page
+  against the scale-2 render at 8-design-px bands: no delta outside the font-AA
+  envelope except the Next.js dev badge over the composer. Only layer names
+  changed (the design team added the formal `SUPPORT-*` vocabulary).
+- Corrected the stale node ids in `app/care/chat/page.tsx` and
+  `components/screens/SupportChatScreen.tsx`, and recorded why `SUPPORT-*` was
+  not mirrored as `data-el`: `docs/ixd/naming/component-names.md` is still
+  Draft, so the rule is not signed off.
+- Two matters filed (AI-022, AI-023) in
+  `agent-delivery/sessions/figma-sync-chatbot-08-03-feat-figma-sync.md`: the new
+  Ready-for-dev homepage frame 2380:370 drops MORI and the concierge chatbox
+  entirely, and checkout's "Ask Auri" chat link lives on a hidden layer.
+- No behaviour changed. Typecheck clean; `/`, `/checkout`, `/care/chat` all 200.
