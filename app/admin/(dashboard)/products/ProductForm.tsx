@@ -44,6 +44,20 @@ import {
   uploadImagesAction,
 } from "./actions";
 
+/**
+ * Host shown in the Google preview under "Search engine listing". Env-driven
+ * for the same reason as `siteBaseUrl()` in lib/admin/settings.ts — it was
+ * hardcoded to the old vercel.app address and went stale the moment the site
+ * moved to eldreve.com (OQ-4, 2026-08-03). This is a client component, so only
+ * NEXT_PUBLIC_* is readable; the fallback is the live domain, not localhost,
+ * because an owner previewing SEO wants to see the real public URL.
+ */
+const SEO_PREVIEW_HOST = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://eldreve.com"
+)
+  .replace(/^https?:\/\//, "")
+  .replace(/\/+$/, "");
+
 export type FormImage = { path: string; url: string; alt: string };
 
 export type FormVariant = {
@@ -406,6 +420,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
               <BlockStack gap="400">
                 <TextField
                   label={t("form.title.label")}
+                  placeholder={t("form.title.ph")}
                   value={title}
                   onChange={setTitle}
                   autoComplete="off"
@@ -413,6 +428,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.shortName")}
+                  placeholder={t("form.shortName.ph")}
                   helpText={t("form.shortName.help")}
                   value={shortName}
                   onChange={setShortName}
@@ -421,6 +437,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.description.label")}
+                  placeholder={t("form.description.ph")}
                   value={description}
                   onChange={setDescription}
                   autoComplete="off"
@@ -428,6 +445,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.bestFor")}
+                  placeholder={t("form.bestFor.ph")}
                   helpText={t("form.bestFor.help")}
                   value={bestFor}
                   onChange={setBestFor}
@@ -435,6 +453,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.badge")}
+                  placeholder={t("form.badge.ph")}
                   helpText={t("form.badge.help")}
                   value={badge}
                   onChange={setBadge}
@@ -443,6 +462,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.details")}
+                  placeholder={t("form.details.ph")}
                   helpText={t("form.details.help")}
                   value={detailsText}
                   onChange={setDetailsText}
@@ -492,8 +512,8 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                         />
                         <TextField
                           label={t("form.media.alt")}
+                          placeholder={t("form.media.alt.ph")}
                           labelHidden
-                          placeholder={t("form.media.alt")}
                           value={image.alt}
                           onChange={(alt) =>
                             setImages((current) =>
@@ -553,6 +573,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
                   <TextField
                     label={t("form.price")}
+                    placeholder={t("form.price.ph")}
                     prefix="$"
                     value={base.price}
                     onChange={(price) =>
@@ -563,6 +584,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   />
                   <TextField
                     label={t("form.compareAt")}
+                    placeholder={t("form.compareAt.ph")}
                     prefix="$"
                     value={base.compareAt}
                     onChange={(compareAt) =>
@@ -581,6 +603,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 <InlineGrid columns={{ xs: 1, md: 3 }} gap="400">
                   <TextField
                     label={t("form.cost")}
+                    placeholder={t("form.cost.ph")}
                     prefix="$"
                     value={base.cost}
                     onChange={(cost) =>
@@ -617,6 +640,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
                   <TextField
                     label={t("form.sku")}
+                    placeholder={t("form.sku.ph")}
                     value={base.sku}
                     onChange={(sku) =>
                       setBase((current) => ({ ...current, sku }))
@@ -625,6 +649,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   />
                   <TextField
                     label={t("form.barcode")}
+                    placeholder={t("form.barcode.ph")}
                     value={base.barcode}
                     onChange={(barcode) =>
                       setBase((current) => ({ ...current, barcode }))
@@ -642,6 +667,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 {!hasOptions && base.trackQty ? (
                   <TextField
                     label={t("form.quantity")}
+                    placeholder={t("form.quantity.ph")}
                     type="number"
                     value={base.quantity}
                     onChange={(quantity) =>
@@ -675,6 +701,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   <>
                     <TextField
                       label={t("form.weight")}
+                      placeholder={t("form.weight.ph")}
                       type="number"
                       value={weightOz}
                       onChange={setWeightOz}
@@ -687,19 +714,19 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
                       <TextField
                         label={t("form.origin")}
+                        placeholder={t("form.origin.ph")}
                         value={origin}
                         onChange={(value) =>
                           setOrigin(value.toUpperCase().slice(0, 2))
                         }
                         autoComplete="off"
-                        placeholder="CN"
                       />
                       <TextField
                         label={t("form.hs")}
+                        placeholder={t("form.hs.ph")}
                         value={hs}
                         onChange={setHs}
                         autoComplete="off"
-                        placeholder="7117.19"
                       />
                     </InlineGrid>
                   </>
@@ -733,6 +760,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   <InlineGrid key={index} columns={{ xs: 1, md: 3 }} gap="300">
                     <TextField
                       label={t("form.option.name")}
+                      placeholder={t("form.option.name.ph")}
                       value={name}
                       onChange={(value) =>
                         setOptionNames((current) =>
@@ -745,6 +773,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     />
                     <TextField
                       label={t("form.option.values")}
+                      placeholder={t("form.option.values.ph")}
                       value={optionValues[index] ?? ""}
                       onChange={(value) =>
                         setOptionValues((current) =>
@@ -850,7 +879,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     </Text>
                     <Text as="p" variant="bodySm">
                       <span style={{ color: "#006621" }}>
-                        {`goldrose-storefront.vercel.app › products › ${handle || "…"}`}
+                        {`${SEO_PREVIEW_HOST} › products › ${handle || "…"}`}
                       </span>
                     </Text>
                     <Text as="p" tone="subdued" variant="bodySm">
@@ -860,6 +889,8 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 </Box>
                 <TextField
                   label={t("form.seo.pageTitle")}
+                  placeholder={t("form.seo.pageTitle.ph")}
+                  helpText={t("form.seo.pageTitle.help")}
                   value={seoTitle}
                   onChange={setSeoTitle}
                   autoComplete="off"
@@ -868,6 +899,8 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.seo.metaDescription")}
+                  placeholder={t("form.seo.metaDescription.ph")}
+                  helpText={t("form.seo.metaDescription.help")}
                   value={seoDescription}
                   onChange={setSeoDescription}
                   autoComplete="off"
@@ -877,6 +910,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 />
                 <TextField
                   label={t("form.seo.handle")}
+                  placeholder={t("form.seo.handle.ph")}
                   value={handle}
                   onChange={(value) =>
                     setHandle(
@@ -922,24 +956,28 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 </Text>
                 <TextField
                   label={t("form.productType")}
+                  placeholder={t("form.productType.ph")}
                   value={productType}
                   onChange={setProductType}
                   autoComplete="off"
                 />
                 <TextField
                   label={t("form.vendor")}
+                  placeholder={t("form.vendor.ph")}
                   value={vendor}
                   onChange={setVendor}
                   autoComplete="off"
                 />
                 <TextField
                   label={t("form.tags")}
+                  placeholder={t("form.tags.ph")}
                   value={tagsText}
                   onChange={setTagsText}
                   autoComplete="off"
                 />
                 <TextField
                   label={t("form.position")}
+                  placeholder={t("form.position.ph")}
                   helpText={t("form.position.help")}
                   type="number"
                   min={0}

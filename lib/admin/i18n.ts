@@ -235,6 +235,36 @@ const en = {
   "form.new.title": "Add product",
   "form.title.label": "Title",
   "form.description.label": "Description",
+  // Placeholders (§9.5) — examples only, never defaults. Values follow the
+  // repo's own conventions: handle fixtures from
+  // docs/ixd/naming/product-handles.md, SKUs from Database.md.
+  "form.title.ph": "24K Gold Dipped Eternal Rose",
+  "form.description.ph":
+    "What the product is, how it is made, and what makes it worth giving.",
+  "form.shortName.ph": "Signature Rose",
+  "form.bestFor.ph": "Anniversaries, birthdays and romantic gifting",
+  "form.badge.ph": "Best seller",
+  "form.details.ph": "Real rose base, Clear display stand, Gift-ready box",
+  "form.media.alt.ph": "A 24K gold-dipped rose in a glass dome",
+  "form.price.ph": "49.99",
+  "form.compareAt.ph": "89.99",
+  "form.cost.ph": "18.50",
+  "form.sku.ph": "GR-ROSE-RED",
+  "form.barcode.ph": "0712345678905",
+  "form.quantity.ph": "0",
+  "form.weight.ph": "12.5",
+  "form.origin.ph": "CN",
+  "form.hs.ph": "7117.19",
+  "form.option.name.ph": "Color",
+  "form.option.values.ph": "Red, Pink, Blue",
+  "form.seo.pageTitle.ph": "24K Gold Dipped Eternal Rose | ELDREVE",
+  "form.seo.metaDescription.ph":
+    "A real rose preserved and finished in 24K gold — a keepsake gift that lasts.",
+  "form.seo.handle.ph": "24k-gold-dipped-eternal-rose",
+  "form.productType.ph": "Gold Dipped Rose",
+  "form.vendor.ph": "GoldRose",
+  "form.tags.ph": "signature, anniversary, gift-ready",
+  "form.position.ph": "1",
   "form.shortName": "Short name",
   "form.shortName.help":
     "Shown on shop cards and as the product page title. Leave blank to use the first 40 characters of the title.",
@@ -279,7 +309,11 @@ const en = {
   "form.option.remove": "Remove option",
   "form.seo.title": "Search engine listing",
   "form.seo.pageTitle": "Page title",
+  "form.seo.pageTitle.help":
+    "The blue clickable headline in Google results. Google cuts it off past about 70 characters. Leave blank to use the product title.",
   "form.seo.metaDescription": "Meta description",
+  "form.seo.metaDescription.help":
+    "The grey summary under the headline in Google results. It doesn't affect ranking, but it decides whether people click. Leave blank to use the description.",
   "form.seo.handle": "URL handle",
   "form.seo.handleWarning":
     "Don't change the handle after launch — links and Google results point at it.",
@@ -841,6 +875,32 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.new.title": "添加产品",
   "form.title.label": "标题",
   "form.description.label": "描述",
+  "form.title.ph": "24K 镀金永生玫瑰",
+  "form.description.ph": "产品是什么、如何制作，以及它值得赠送的理由。",
+  "form.shortName.ph": "经典玫瑰",
+  "form.bestFor.ph": "周年纪念、生日与浪漫送礼",
+  "form.badge.ph": "热销",
+  "form.details.ph": "真实玫瑰花材, 透明展示底座, 礼盒包装",
+  "form.media.alt.ph": "玻璃罩中的 24K 镀金玫瑰",
+  "form.price.ph": "49.99",
+  "form.compareAt.ph": "89.99",
+  "form.cost.ph": "18.50",
+  "form.sku.ph": "GR-ROSE-RED",
+  "form.barcode.ph": "0712345678905",
+  "form.quantity.ph": "0",
+  "form.weight.ph": "12.5",
+  "form.origin.ph": "CN",
+  "form.hs.ph": "7117.19",
+  "form.option.name.ph": "颜色",
+  "form.option.values.ph": "红色, 粉色, 蓝色",
+  "form.seo.pageTitle.ph": "24K 镀金永生玫瑰 | ELDREVE",
+  "form.seo.metaDescription.ph":
+    "以真实玫瑰保鲜并镀上 24K 金——一份可以长久保存的礼物。",
+  "form.seo.handle.ph": "24k-gold-dipped-eternal-rose",
+  "form.productType.ph": "镀金玫瑰",
+  "form.vendor.ph": "GoldRose",
+  "form.tags.ph": "signature, anniversary, gift-ready",
+  "form.position.ph": "1",
   "form.shortName": "简称",
   "form.shortName.help":
     "显示在商店卡片和产品页标题上。留空则取标题的前 40 个字符。",
@@ -884,7 +944,11 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.option.remove": "移除选项",
   "form.seo.title": "搜索引擎详情",
   "form.seo.pageTitle": "页面标题",
+  "form.seo.pageTitle.help":
+    "Google 搜索结果中蓝色的可点击标题。超过约 70 个字符会被截断。留空则使用产品标题。",
   "form.seo.metaDescription": "元描述",
+  "form.seo.metaDescription.help":
+    "Google 搜索结果中标题下方的灰色摘要。不影响排名，但决定用户是否点击。留空则使用产品描述。",
   "form.seo.handle": "URL 句柄",
   "form.seo.handleWarning":
     "上线后请勿更改句柄 — 链接和 Google 搜索结果会指向它。",
