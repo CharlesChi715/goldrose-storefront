@@ -95,31 +95,4 @@ CI/CD features
 
 - meeting
 
-产品信息 sku 标题 定价。。。
-
-协作
-  todo
-  AC
-  DDL
-
-工作结果的传递
-
-team delivery
-
-jira golden rule
-
-figma不了解
-  覆盖之前工作
-
-工作流
-debug
-文档
-
-做东西 做 + 未来方案
-
-写代码
-  ai 协作 共享状态 精简 on-demand reading templates
-
-改bug 80%
-  想办法让流程完善减少bug 
-    CI
+product as variant | product get several variant

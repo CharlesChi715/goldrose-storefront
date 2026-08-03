@@ -51,6 +51,15 @@ resolved server-side — and because `productHandle()` is idempotent, a folder
 named by Title works just as well, so nobody uploading has to know what a handle
 is.
 
+**Images attach to a variant** (was OQ-1, decided 2026-08-04). The 120-SKU list
+is [124 colours of one rose](../supplier-color-charts.md), and the PDP design
+already paints colour swatches under a "View All 120 Colors ›" link with a
+full-screen picker behind it — currently cosmetic. So `product_images` gains a
+`variant_id` and the gallery follows the selected colour. The two alternatives
+were rejected: a shared gallery ships a control that lies (tap Gem Blue, see
+red), and one product per colour means 124 near-identical pages, contradicting a
+design that puts every colour on one page.
+
 ## Options considered
 
 | Option                                       | Why not / why                                                                      | Verdict        |
@@ -284,7 +293,7 @@ Vercel and is parsed there, because validating a row needs the database.
   matching CSV rows to files must carry a filename → key map out of the upload
   step.
 - **`product_images` has no `variant_id`** — colour variants share one gallery
-  today. See OQ-1.
+  today. Resolved: it gains a `variant_id` — see Decision.
 - **`inventory_on_hand` is not writable in practice.** The save path routes
   changes through `adjustInventory()` as logged movements; writing the column
   directly desynchronises stock from its ledger.
@@ -311,21 +320,6 @@ Vercel and is parsed there, because validating a row needs the database.
   live-wired regions need excluding or per-SKU baselines.
 
 ## Open questions
-
-### OQ-1 — do images attach to a product or to a variant?
-
-`product_images` has `product_id` only, so every colour of one rose shares a
-gallery. With a `RED PNK BLU PUR WHT GLD RNB` vocabulary, a customer selecting
-Blue is shown the red photographs.
-
-- **(a)** Accept the shared gallery — no work, wrong for a colour-led catalogue.
-- **(b)** One product per colour — no schema change, no colour switcher, 120
-  products instead of ~40.
-- **(c)** Add `variant_id` and wire the PDP gallery to the variant selector.
-
-Recommend **(c)**, decided *before* the supplier names several hundred files.
-Until it lands the importer should use product-level files and **warn about SKU
-folders it ignores**, not flatten seven heroes into one gallery.
 
 ### OQ-2 — does a partial file update or replace a product's variants?
 

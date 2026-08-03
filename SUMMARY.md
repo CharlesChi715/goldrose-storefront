@@ -245,8 +245,7 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
   composites with English text baked in — replace before launch. Only three
   products fill the eight-card grid, so cards repeat.
 - **OQ-4 — resolved 2026-08-03:** the brand is switching to **ELDREVE**
-  (per Charles; ties to DQ-34's ELDREVE wordmark), so `goldrose.co` is
-  superseded. **`eldreve.com` is registered and live.** Registered
+  (per Charles; ties to DQ-34's ELDREVE wordmark). **`eldreve.com` is registered and live.** Registered
   2026-08-01 at Cloudflare Registrar on the boss-owned account (registrant
   He Jinhua / Zhongshu Technology Worldwide Limited, HK; $10.46/yr
   auto-renew). Wired 08-02/08-03: `eldreve.com` + `www` on the Vercel
