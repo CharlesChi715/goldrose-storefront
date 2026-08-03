@@ -38,18 +38,20 @@ Not chosen yet (BACKLOG) — the shape below is the 2026-08-03 recommendation,
 pending sign-off and the open questions.
 
 Two inputs, both keyed on `handle` + `SKU` (the keys the admin and CSV already
-use): **a CSV for the words**, in the format `Export` already produces, and **a
-folder tree for the pictures**, uploaded straight to Supabase Storage. They
-travel separately because a spreadsheet can name a file but never carry one.
+use): **a spreadsheet for the words** — `.csv` or `.xlsx`, in the column format
+`Export` already produces — and **a folder tree for the pictures**, uploaded
+straight to Supabase Storage. They travel separately because a spreadsheet can
+name a file but never carry one.
 
 ## Options considered
 
-| Option                                       | Why not / why                                                                     | Verdict        |
+| Option                                       | Why not / why                                                                      | Verdict        |
 | -------------------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
-| Admin form only (built)                      | 120 SKUs one-by-one, and most fields aren't displayed yet                          | ❌ insufficient |
+| Admin form only (built)                      | 120 SKUs one-by-one, and most fields aren't displayed yet                          | insufficient.  |
 | **CSV round-tripping the export**            | No second spec to drift; Export *is* the template; re-importing an untouched file is a no-op — idempotency for free. Export's 11 columns must be widened first | ✅ **chosen**  |
 | A new CSV column spec                        | A second format to document and keep in step with the form; drift stays invisible until an import blanks a field | ❌             |
-| `.xlsx`                                      | Needs a parsing library; Excel and WPS export CSV anyway                           | ❌             |
+| `.csv` only                                  | No dependency — but the uploader must pick "CSV **UTF-8**" in Excel, and the plain option silently writes the local codepage, mangling Chinese | ❌             |
+| **Accept `.csv` and `.xlsx`**                | One dependency (SheetJS), converted to rows at the door so one parser serves both; removes the "Save as" step and the encoding trap entirely | ✅ **chosen**  |
 | Upload via a Vercel server action            | **Impossible** — Vercel caps a request body at ~4.5 MB, under one photo            | ❌             |
 | **Upload browser → Supabase Storage**        | No size ceiling, no Vercel bandwidth or function time                              | ✅ **chosen**  |
 | Service-role key in the browser              | Bypasses every RLS policy — release-gate violation                                 | ❌             |
@@ -57,14 +59,22 @@ travel separately because a spreadsheet can name a file but never carry one.
 
 ## File formats
 
-### The CSV
+### The spreadsheet — `.csv` or `.xlsx`
 
-**One row = one variant.** Every `products` column repeats on that product's
-rows; `Handle` binds the row to its parent, `SKU` identifies the row. Columns
-and their requirements: [Database.md § Table shapes](../Database.md).
+`.xlsx` is converted to rows on arrival, so everything downstream sees one
+shape. Two rules the converter needs: read **only the first sheet**, and reject
+a file whose cells evaluate to errors rather than importing `#REF!` as a product
+title.
 
-Images ride on **extra rows** carrying only `Handle` plus image columns — a row
-with a SKU is a variant row, a row without one is an image row.
+**One row = one variant.** Every `products` column repeats on each of that
+product's variant rows; `Handle` binds the row to its parent, `SKU` identifies
+the row itself. Column-by-column requirements live in
+[Database.md § Table shapes](../Database.md) — that is the authoritative list,
+not this file.
+
+Images ride on **extra rows** carrying only `Handle` plus the image columns
+(Shopify's convention). A row with a SKU is a variant row; a row without one is
+an image row.
 
 ```
 Handle,Title,...,SKU,Price,Image file,Image alt
@@ -118,6 +128,30 @@ Naming folders by title is viable if the server derives the handle with
 `productHandle()` — but it must then reject a folder whose name yields no valid
 handle, not skip it. `npm run handles` does the same derivation for a title
 list, and fails the batch on a collision.
+
+## Upload flow
+
+Vercel sees the folder **names**; it never sees the **bytes**.
+
+```
+1. browser reads the folder  → manifest of relative paths (text, a few KB)
+2. → Vercel   derive handles from folder names, check each exists, validate
+              SKU subfolders, mint one signed upload URL per file
+3. ← Vercel   the URLs, or an error naming the offending folder
+4. browser → Supabase Storage   the bytes, direct
+```
+
+Step 2 is where every judgement call lands, and it has to be on the server
+anyway — that is what holds the key that mints the URLs.
+
+The spreadsheet takes the opposite route: it is a few hundred KB, so it posts to
+Vercel and is parsed there, because validating a row needs the database.
+
+| What            | Goes to          | Why                                                    |
+| --------------- | ---------------- | ------------------------------------------------------ |
+| spreadsheet     | Vercel           | small; every row needs a database check                |
+| image manifest  | Vercel           | needs `productHandle()` and the database               |
+| image bytes     | Supabase Storage | far over the ~4.5 MB cap, and needs no validation      |
 
 ## Acceptance criteria
 
