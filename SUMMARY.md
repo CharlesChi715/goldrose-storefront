@@ -33,7 +33,6 @@ Open linked resources only when the task needs them.
 - **Admin:** products/inventory, orders, customers, discounts, content, files,
   analytics, team, security.
 - **Marketing:** SEO/GEO, analytics, campaign/UTM attribution.
-- **Journey:** discover → browse → select → checkout → confirmation/tracking/account.
 
 ## Current phase — reconciled 2026-08-04
 
