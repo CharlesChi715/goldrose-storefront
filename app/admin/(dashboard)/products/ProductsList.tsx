@@ -11,8 +11,11 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Badge,
+  Banner,
+  BlockStack,
   Card,
   IndexTable,
+  List,
   Modal,
   Page,
   Tabs,
@@ -21,7 +24,7 @@ import {
   Thumbnail,
   useIndexResourceState,
 } from "@shopify/polaris";
-import { ImageIcon } from "@shopify/polaris-icons";
+import { ImageIcon, ImportIcon } from "@shopify/polaris-icons";
 import { interpolate } from "@/lib/admin/i18n";
 import { useAdminT } from "../../PolarisShell";
 import { deleteProductsAction, setProductStatusAction } from "./actions";
@@ -52,6 +55,11 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Bulk import (§9.5) — UI only for now. The parse/validate/commit pipeline
+  // is still being specified with Charles, so nothing is wired: the modal
+  // states the scope and its primary action stays disabled. See
+  // docs/features/product-content-pipeline.md for the 120-SKU intake plan.
+  const [importOpen, setImportOpen] = useState(false);
 
   const tabs = [
     { id: "all", content: t("products.tabs.all") },
@@ -139,6 +147,11 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
       title={t("nav.products")}
       primaryAction={{ content: t("products.add"), url: "/admin/products/new" }}
       secondaryActions={[
+        {
+          content: t("products.import"),
+          icon: ImportIcon,
+          onAction: () => setImportOpen(true),
+        },
         { content: t("products.export"), url: "/api/admin/products/export" },
       ]}
     >
@@ -240,6 +253,43 @@ export function ProductsList({ items }: { items: ProductListItem[] }) {
       >
         <Modal.Section>
           <Text as="p">{t("products.delete.body")}</Text>
+        </Modal.Section>
+      </Modal>
+
+      {/* Placeholder — deliberately inert until the import format, the
+          update-vs-create rule and the failure handling are settled. */}
+      <Modal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        title={t("products.import.title")}
+        primaryAction={{
+          content: t("products.import.upload"),
+          disabled: true,
+          onAction: () => setImportOpen(false),
+        }}
+        secondaryActions={[
+          { content: t("common.cancel"), onAction: () => setImportOpen(false) },
+        ]}
+      >
+        <Modal.Section>
+          <BlockStack gap="300">
+            <Banner tone="info">{t("products.import.placeholder")}</Banner>
+            <Text as="p">{t("products.import.spec.intro")}</Text>
+            <Text as="h3" variant="headingSm">
+              {t("products.import.spec.heading")}
+            </Text>
+            <List type="bullet">
+              <List.Item>{t("products.import.rule.file")}</List.Item>
+              <List.Item>{t("products.import.rule.row")}</List.Item>
+              <List.Item>{t("products.import.rule.handleKey")}</List.Item>
+              <List.Item>{t("products.import.rule.handleFormat")}</List.Item>
+              <List.Item>{t("products.import.rule.sku")}</List.Item>
+              <List.Item>{t("products.import.rule.price")}</List.Item>
+              <List.Item>{t("products.import.rule.status")}</List.Item>
+              <List.Item>{t("products.import.rule.separators")}</List.Item>
+              <List.Item>{t("products.import.rule.preview")}</List.Item>
+            </List>
+          </BlockStack>
         </Modal.Section>
       </Modal>
     </Page>

@@ -179,6 +179,32 @@ const en = {
   // Products list (§9.5)
   "products.add": "Add product",
   "products.export": "Export",
+  "products.import": "Import",
+  "products.import.title": "Import products by CSV",
+  "products.import.upload": "Upload and preview",
+  "products.import.placeholder":
+    "Not connected yet — this is a placeholder while the format is agreed.",
+  "products.import.spec.intro":
+    "Proposed format: the file Export already produces. Click Export to download your current catalogue, edit it in Excel or WPS, then import it back — so there is no separate template to keep in sync.",
+  "products.import.spec.heading": "Rules for the imported file",
+  "products.import.rule.file":
+    "CSV saved as UTF-8. The first row is the header and must keep the 11 exported columns, in that order.",
+  "products.import.rule.row":
+    "One row per variant. Repeat Handle, Title, Status, Type, Vendor and Tags on every row of the same product.",
+  "products.import.rule.handleKey":
+    "Handle is the key: a handle already in the catalogue updates that product, anything else creates a new one. Re-importing the same file changes nothing.",
+  "products.import.rule.handleFormat":
+    "Handle format: lowercase a–z, 0–9 and single hyphens, up to 120 characters. Derived from the title, and frozen once the product is active or archived.",
+  "products.import.rule.sku":
+    "SKU: GR-TYPE-COLOR[-ATTRIBUTE], uppercase letters, digits and hyphens, 20 characters or fewer. Must be unique and must never start with a zero — Excel strips it.",
+  "products.import.rule.price":
+    "Price and Compare-at price: plain decimals with two places, no currency symbol or thousands separator. Leave Compare-at blank when there is none.",
+  "products.import.rule.status":
+    "Status is one of active, draft or archived, in lowercase. On hand is a whole number, zero or more.",
+  "products.import.rule.separators":
+    'Tags are separated by a semicolon; option values by a space-slash-space (" / ").',
+  "products.import.rule.preview":
+    "Every file is previewed before anything is written. A row that fails validation is reported by line number and the whole run is refused, so a bad file can never half-import.",
   "products.tabs.all": "All",
   "products.tabs.active": "Active",
   "products.tabs.draft": "Draft",
@@ -750,6 +776,31 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
 
   "products.add": "添加产品",
   "products.export": "导出",
+  "products.import": "导入",
+  "products.import.title": "通过 CSV 导入产品",
+  "products.import.upload": "上传并预览",
+  "products.import.placeholder": "尚未接入——格式确定前，此处仅为占位。",
+  "products.import.spec.intro":
+    "建议格式：直接使用「导出」生成的文件。点击导出下载当前产品目录，用 Excel 或 WPS 修改后再导入——无需另行维护模板。",
+  "products.import.spec.heading": "导入文件规范",
+  "products.import.rule.file":
+    "CSV 文件，以 UTF-8 保存。第一行为表头，必须保留导出的 11 列且顺序一致。",
+  "products.import.rule.row":
+    "每行一个变体。同一产品的每一行都要重复填写 Handle、标题、状态、类型、供应商和标签。",
+  "products.import.rule.handleKey":
+    "Handle 是主键：目录中已存在的 handle 会更新该产品，其余的新建。重复导入同一文件不会产生任何变化。",
+  "products.import.rule.handleFormat":
+    "Handle 格式：小写 a–z、0–9 和单个连字符，最长 120 字符。由标题推导，产品一旦为活跃或已存档即冻结。",
+  "products.import.rule.sku":
+    "SKU：GR-TYPE-COLOR[-ATTRIBUTE]，仅限大写字母、数字和连字符，不超过 20 字符。必须唯一，且不能以 0 开头——Excel 会去掉前导零。",
+  "products.import.rule.price":
+    "价格与原价：两位小数的纯数字，不带货币符号和千位分隔符。没有原价时留空。",
+  "products.import.rule.status":
+    "状态只能是 active、draft 或 archived（小写）。库存为大于等于 0 的整数。",
+  "products.import.rule.separators":
+    '标签用分号分隔；选项值用空格加斜杠加空格（" / "）分隔。',
+  "products.import.rule.preview":
+    "所有文件在写入前都会先预览。校验失败的行会按行号报出，并拒绝整次导入，因此坏文件不会只导入一半。",
   "products.tabs.all": "全部",
   "products.tabs.active": "活跃",
   "products.tabs.draft": "草稿",
