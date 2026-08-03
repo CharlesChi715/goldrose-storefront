@@ -45,3 +45,4 @@ cited.
 | File                                   | Archived   | Superseded by                                                                          |
 | -------------------------------------- | ---------- | -------------------------------------------------------------------------------------- |
 | `from-teammates-figma-naming-guide.md` | 2026-07-31 | `docs/ixd/naming/` — `figma-route-rule.md`, `component-names.md`, `product-handles.md` |
+| `figma-sync-coverage-analysis-mental-model.md` | 2026-08-03 | nothing — parked here by request, never live. A method for diagnosing why `figma-sync` under-imports (EN + 中文). If the analysis is ever run, move it to `docs/ixd/` so it can be cited. |
