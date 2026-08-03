@@ -249,9 +249,12 @@ and an EU read replica (`docs/features/backend/region-alignment.md`).
   Cloudflare Email Routing catch-all → the company Gmail; Resend added for
   outbound (DNS on `send.eldreve.com`). Records:
   `~/Documents/Work/gold_rose/{eldreve-domain-registration,domain-setup}.md`.
-  ⚠️ Pending: **`NEXT_PUBLIC_SITE_URL=https://eldreve.com` is set in Vercel
-  but only applies on the next production deploy** — until then canonicals,
-  OG images and the sitemap still emit the vercel.app URL. Also pending:
+  ✅ `NEXT_PUBLIC_SITE_URL=https://eldreve.com` is **live** — verified
+  2026-08-03 against the deployed site: canonical, `og:image` and the sitemap
+  all emit `eldreve.com`.
+  ⚠️ Still pending: **`RESEND_API_KEY` and `RESEND_FROM` are missing from
+  Vercel**, so production order/shipping mail is silently console-logged
+  rather than sent (`lib/email.ts` never throws by design). Also pending:
   billing → hua's PayPal, and
   the GoldRose→ELDREVE rename project (~270 occurrences in ~110 files;
   scoped but not started).
