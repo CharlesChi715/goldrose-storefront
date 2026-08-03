@@ -36,9 +36,9 @@ never accepted from the CSV.
 | 2   | `handle`            | —   | URL segment, unique — derived from title by `lib/admin/product-handle.ts`, frozen once non-draft |
 | 3   | `title`             | ✓   | name 1/3: full name — PDP heading + fallback for the other two (e.g. "GoldRose Signature 24K Gold Rose"); the only column with no default |
 | 4   | `short_name`        | ○   | name 2/3: short name — shop cards + browser tab |
-| 5   | `description`       | ○   | desc 1/2: full text on the PDP + fallback for search snippet |
-| 6   | `vendor`            | ○   | defaults 'GoldRose'                   |
-| 7   | `product_type`      | ○   |                                       |
+| 5   | `description`       | ✓ if active | desc 1/2: full text on the PDP + fallback for search snippet — also the `<meta description>`, `og:description` and JSON-LD `description`; unlike `short_name` it has no fallback, so blank means Google and every shared link get nothing |
+| 6   | `vendor`            | ○   | brand/maker (admin-only, 供应商) — defaults 'GoldRose'; ours until reselling others |
+| 7   | `product_type`      | ○   | category label, admin-only ("Gold Dipped Rose", "Gift Bundle") — searchable in the admin list; mirrors the SKU TYPE segment |
 | 8   | `tags`              | ○   | text[]                                |
 | 9   | `charge_tax`        | ○   | bool, defaults true                   |
 | 10  | `requires_shipping` | ○   | bool, defaults true                   |
@@ -72,6 +72,29 @@ never accepted from the CSV.
 | 11  | `inventory_on_hand`         | ○   | defaults 0; initial stock on import only — afterwards maintained via movement log, re-imports must not overwrite it |
 | 12  | `continue_selling_when_oos` | ○   | bool, defaults false                     |
 | 13  | `weight_oz`                 | ○   | numeric                                  |
+
+### `product_images` — 5 columns
+
+The third table the import touches. It holds no image data: `path` is a short
+key into the Supabase `product-images` bucket (`lib/files-url.ts`), and the
+bytes are uploaded separately — a CSV can only name a file, never carry one.
+
+| #   | Column       | Req         | Note                                                                              |
+| --- | ------------ | ----------- | --------------------------------------------------------------------------------- |
+| 1   | `id`         | —           | primary key                                                                       |
+| 2   | `product_id` | —           | FK → products.id, cascade delete — ⚠️ **no `variant_id`: images are product-level, so colour variants share one gallery** |
+| 3   | `path`       | —           | bucket key, returned by the upload step — the CSV names a file, the importer resolves it to this |
+| 4   | `alt`        | ○           | screen-reader text and an SEO signal; authored in the CSV, not derivable from the file |
+| 5   | `position`   | —           | display order; 0 = hero                                                           |
+
+**At least one image is ✓ for an active product.** `images[0]` is the shop and
+home card photo (`null` renders a card with no picture), the `og:image` for
+every shared link, and the first entry of the JSON-LD `image[]` — which Google
+treats as required for Product rich results. ⚠️ It is *not* the PDP hero: that
+is still hardcoded to `/veloria/detail-hero.png`
+(`app/products/[slug]/page.tsx`), and `images[0]` supplies only its alt text
+until the live-wiring in
+[features/product-content-pipeline.md](features/product-content-pipeline.md).
 
 ## SKU rules (2026-07-24)
 
