@@ -34,45 +34,37 @@ verification:
 
 ## Decision
 
-Not chosen yet (BACKLOG) — but the shape below was worked out on 2026-08-03 and
-is the recommendation on the table, pending owner sign-off and the two open
-questions.
+Not chosen yet (BACKLOG) — the shape below is the 2026-08-03 recommendation,
+pending sign-off and the open questions.
 
-**Two inputs, both keyed on `handle` + `SKU` — the same keys the admin and the
-CSV already use, so nothing new has to be learned or kept in sync:**
-
-1. **A CSV for the words**, in exactly the format `Export` already produces.
-2. **A folder tree for the pictures**, uploaded straight to Supabase Storage.
-
-Bytes and words travel separately because a spreadsheet can name a file but can
-never carry one.
+Two inputs, both keyed on `handle` + `SKU` (the keys the admin and CSV already
+use): **a CSV for the words**, in the format `Export` already produces, and **a
+folder tree for the pictures**, uploaded straight to Supabase Storage. They
+travel separately because a spreadsheet can name a file but never carry one.
 
 ## Options considered
 
-| Option                                          | Pros                                                                                     | Cons                                                                                       | Verdict                    |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
-| Admin form editing only (already built)         | Ships today; forms cover title/price/media/variants/SEO                                  | 120 SKUs one-by-one is slow; most fields aren't displayed on the storefront yet             | ❌ needed but insufficient |
-| **CSV round-tripping the existing export**      | No second spec to drift; Export *is* the template; re-import of an untouched file is a no-op, which is the idempotency criterion for free | Export's 11 columns are far short of the full record — must be widened first                | ✅ **chosen**              |
-| A new, purpose-designed CSV column spec         | Exactly the columns we want                                                              | A second format to document, translate and keep in step with the form; drift is invisible until an import silently blanks a field | ❌                         |
-| `.xlsx` instead of CSV                          | Native to what the team already edits                                                    | Needs a parsing library; Excel and WPS both export CSV anyway                               | ❌                         |
-| Images uploaded through a Vercel server action  | One code path, session already available                                                 | **Impossible** — Vercel caps a serverless request body at ~4.5 MB; a single photo can exceed it | ❌                         |
-| **Images uploaded browser → Supabase Storage**  | No size ceiling, no Vercel bandwidth or function time, one hop fewer                     | Needs signed upload URLs and a preview step; more moving parts                              | ✅ **chosen**              |
-| Ship the service-role key to the browser        | Trivially simple                                                                         | Bypasses every RLS policy on the database — a release-gate violation, never acceptable       | ❌                         |
-| Image URLs in a CSV column, downloaded server-side | No upload UI at all                                                                    | Product photos would live on the supplier's server indefinitely; `fileUrl()` would pass the foreign URL straight through | ❌                         |
+| Option                                       | Why not / why                                                                     | Verdict        |
+| -------------------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
+| Admin form only (built)                      | 120 SKUs one-by-one, and most fields aren't displayed yet                          | ❌ insufficient |
+| **CSV round-tripping the export**            | No second spec to drift; Export *is* the template; re-importing an untouched file is a no-op — idempotency for free. Export's 11 columns must be widened first | ✅ **chosen**  |
+| A new CSV column spec                        | A second format to document and keep in step with the form; drift stays invisible until an import blanks a field | ❌             |
+| `.xlsx`                                      | Needs a parsing library; Excel and WPS export CSV anyway                           | ❌             |
+| Upload via a Vercel server action            | **Impossible** — Vercel caps a request body at ~4.5 MB, under one photo            | ❌             |
+| **Upload browser → Supabase Storage**        | No size ceiling, no Vercel bandwidth or function time                              | ✅ **chosen**  |
+| Service-role key in the browser              | Bypasses every RLS policy — release-gate violation                                 | ❌             |
+| Image URLs downloaded server-side            | Photos would live on the supplier's server indefinitely                            | ❌             |
 
 ## File formats
 
 ### The CSV
 
-**One row = one variant.** Every `products` column repeats on each of that
-product's variant rows; `Handle` binds the row to its parent, `SKU` identifies
-the row itself. Column-by-column requirements live in
-[Database.md § Table shapes](../Database.md) — that is the authoritative list,
-not this file.
+**One row = one variant.** Every `products` column repeats on that product's
+rows; `Handle` binds the row to its parent, `SKU` identifies the row. Columns
+and their requirements: [Database.md § Table shapes](../Database.md).
 
-Images ride on **extra rows** carrying only `Handle` plus the image columns
-(Shopify's convention). A row with a SKU is a variant row; a row without one is
-an image row.
+Images ride on **extra rows** carrying only `Handle` plus image columns — a row
+with a SKU is a variant row, a row without one is an image row.
 
 ```
 Handle,Title,...,SKU,Price,Image file,Image alt
@@ -82,25 +74,23 @@ Handle,Title,...,SKU,Price,Image file,Image alt
 24k-gold-rose,,...,,,1.jpg,Gift box open
 ```
 
-`Image file` is **not** a database column. It is a lookup key: the importer
-resolves it to the `product_images.path` the upload produced, then discards it —
-exactly as `Handle` resolves to `product_id` and is discarded.
+`Image file` is **not** a database column — it is a lookup key the importer
+resolves to the `product_images.path` the upload produced, then discards, exactly
+as `Handle` resolves to `product_id`.
 
 ### The folder tree
 
-**Depth decides scope.** Files directly in the product folder belong to the
-whole product; files in a `<SKU>/` subfolder belong to that variant only. A
-single-variant product therefore needs no subfolder at all, which is the common
-case.
+**Depth decides scope.** Files directly in the product folder belong to the whole
+product; files in a `<SKU>/` subfolder belong to that variant. A single-variant
+product needs no subfolder — the common case.
 
 ```
 product-images/
-├── eternal-rose-in-glass-dome/      ← single variant: no SKU level needed
+├── eternal-rose-in-glass-dome/      ← single variant: no SKU level
 │   ├── hero.jpg
 │   └── 1.jpg
 └── 24k-gold-dipped-eternal-rose/
     ├── hero.jpg                      ← applies to every variant
-    ├── 1.jpg
     ├── GR-ROSE-RED/
     │   ├── hero.jpg                  ← this colour only
     │   └── 1.jpg
@@ -108,30 +98,26 @@ product-images/
         └── hero.jpg
 ```
 
-| Rule                   |                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| Product folder         | the `handle` — never the title (see below)                                          |
-| Variant folder         | the `SKU`; already uppercase A–Z, digits and hyphens by the SKU rule, so it is filesystem-safe |
-| Hero                   | `hero.*` — always position 0                                                        |
-| The rest               | `1.*`, `2.*`, `3.*` … read as **integers**, never sorted as text (`10` sorts before `2` as text) |
-| Banned in names        | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys         |
-| Extensions             | `.jpg .jpeg .png .webp .avif .gif .svg` are accepted; use `.jpg`/`.webp` for photos  |
-| A folder matching no handle | a **hard error**, never a silent skip — a typo is how a whole colour vanishes    |
+| Rule                        |                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| Product folder              | the `handle`, never the title                                                |
+| Variant folder              | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe              |
+| Hero                        | `hero.*`, always position 0                                                  |
+| The rest                    | `1.*`, `2.*` … read as **integers**; as text, `10` sorts before `2`           |
+| Banned in names             | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys  |
+| Extensions                  | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos        |
+| A folder matching no handle | **hard error**, never a silent skip — a typo is how a colour vanishes         |
 
-Folders are named by `handle` rather than by title for one decisive reason:
-**titles change and handles do not.** The handle rule freezes a handle once its
-product is non-draft precisely because URLs must survive marketing renames; a
-tree named after titles goes stale the first time a product is renamed, and then
-several hundred files point at nothing. Handle is also filesystem-safe by
-construction (`^[a-z0-9]+(-[a-z0-9]+)*$`) whereas a title may contain spaces,
-punctuation, or characters Windows forbids outright (`\ / : * ? " < > |`).
+Folders are named by `handle` because **titles change and handles do not**: the
+handle rule freezes a handle once its product is non-draft precisely so URLs
+survive renames, and a tree named after titles strands every file the first time
+marketing renames something. Handle is also filesystem-safe by construction,
+whereas a title may contain characters Windows forbids in a path (`\ / : * ? " < > |`).
 
-If the team would rather name folders by title anyway, the server can derive the
-handle from the folder name with `productHandle()` — but it must then reject a
-folder whose name cannot yield a valid handle, rather than skipping it.
-
-`npm run handles` derives handles from a title list for exactly this purpose,
-and fails the batch when two titles collide.
+Naming folders by title is viable if the server derives the handle with
+`productHandle()` — but it must then reject a folder whose name yields no valid
+handle, not skip it. `npm run handles` does the same derivation for a title
+list, and fails the batch on a collision.
 
 ## Acceptance criteria
 
@@ -168,36 +154,28 @@ and fails the batch when two titles collide.
 
 ## Tech details
 
-- **Vercel caps a serverless function's request body at ~4.5 MB.** This is what
-  forces direct-to-Storage uploads; it is not a preference. A folder of a few
-  hundred photos is orders of magnitude over the limit, and a single modern
-  phone photo can exceed it on its own.
-- **Signed upload URLs** are the way to let a browser write to Storage without
-  holding a credential: the server calls `createSignedUploadUrl(path)` with the
-  service key and returns a token; the browser calls
-  `uploadToSignedUrl(path, token, file)`. The capability is scoped to one path
-  and expires, so a leak costs one object rather than the database.
-- **Uploads are renamed on the way in.** `safeKey()` in `lib/admin/files.ts`
-  prefixes 8 random hex characters, so the stored key is never the filename that
-  was uploaded. Anything matching a CSV row to a file must therefore carry a
-  filename → key map out of the upload step; matching on the stored path will
-  not work.
-- **`product_images` has no `variant_id`.** Images are product-level, so colour
-  variants share one gallery today. See OQ-1.
-- **`inventory_on_hand` is not a writable column in practice.** The save path
-  keeps the existing value and routes changes through `adjustInventory()` as
-  logged movements. An importer that writes the column directly desynchronises
-  the stock number from its ledger.
-- **`saveProduct` deletes variants missing from its input.** Correct for a form,
-  where the screen always shows every variant; lethal for an import, where a
-  partial file would silently delete the variants it did not mention. See OQ-2.
-- **Postgres owns uniqueness, TypeScript owns derivation.** `products.handle
-  UNIQUE` and the partial `product_variants_sku_unique` index are the only
-  layers that can guarantee uniqueness under concurrent writes. Handle
-  *derivation* stays in `lib/admin/product-handle.ts` as the single
-  implementation — a Postgres rewrite would need to reproduce NFKD normalisation
-  exactly (`unaccent` does not), and two implementations that disagree produce a
-  handle that depends on which code path created the product.
+- **Vercel caps a serverless request body at ~4.5 MB.** This is what forces
+  direct-to-Storage uploads — a single modern phone photo can exceed it.
+- **Signed upload URLs** let a browser write to Storage without holding a
+  credential: the server calls `createSignedUploadUrl(path)` with the service
+  key, the browser calls `uploadToSignedUrl(path, token, file)`. Scoped to one
+  path and expiring, so a leak costs one object, not the database.
+- **Uploads are renamed on the way in.** `safeKey()` prefixes 8 random hex
+  characters, so the stored key is never the uploaded filename — anything
+  matching CSV rows to files must carry a filename → key map out of the upload
+  step.
+- **`product_images` has no `variant_id`** — colour variants share one gallery
+  today. See OQ-1.
+- **`inventory_on_hand` is not writable in practice.** The save path routes
+  changes through `adjustInventory()` as logged movements; writing the column
+  directly desynchronises stock from its ledger.
+- **`saveProduct` deletes variants missing from its input** — correct for a
+  form, lethal for a partial import. See OQ-2.
+- **Postgres owns uniqueness, TypeScript owns derivation.** The `UNIQUE`
+  constraints are the only layer that holds under concurrent writes; handle
+  derivation stays single-implementation, because a Postgres rewrite would have
+  to reproduce NFKD exactly (`unaccent` does not) and a disagreement makes the
+  handle depend on which code path created the product.
 
 ## Blockers and dependencies
 
@@ -218,43 +196,38 @@ and fails the batch when two titles collide.
 ### OQ-1 — do images attach to a product or to a variant?
 
 `product_images` has `product_id` only, so every colour of one rose shares a
-single gallery. With a SKU vocabulary of `RED PNK BLU PUR WHT GLD RNB`, a
-customer selecting Blue would be shown the red photographs.
+gallery. With a `RED PNK BLU PUR WHT GLD RNB` vocabulary, a customer selecting
+Blue is shown the red photographs.
 
 - **(a)** Accept the shared gallery — no work, wrong for a colour-led catalogue.
-- **(b)** One product per colour — no schema change, but no colour switcher on a
-  single page, and 120 products instead of ~40.
-- **(c)** Add `variant_id` to `product_images` and wire the PDP gallery to the
-  variant selector — a migration plus frontend work.
+- **(b)** One product per colour — no schema change, no colour switcher, 120
+  products instead of ~40.
+- **(c)** Add `variant_id` and wire the PDP gallery to the variant selector.
 
 Recommend **(c)**, decided *before* the supplier names several hundred files.
-Until it lands, the importer should use product-level files and **warn about
-SKU folders it is ignoring** rather than flattening seven heroes into one
-gallery.
+Until it lands the importer should use product-level files and **warn about SKU
+folders it ignores**, not flatten seven heroes into one gallery.
 
 ### OQ-2 — does a partial file update or replace a product's variants?
 
-- **(a)** A handle's rows must be complete; any partial set is rejected. Safe,
-  but a price-only edit means exporting and re-uploading everything.
-- **(b)** Rows present are updated, absent variants are left alone, and deletion
-  happens only in the admin form. Friendlier, but the file no longer describes
-  the whole product, and the importer cannot hand its rows to `saveProduct`
-  untouched — it must load current variants and merge.
+- **(a)** Reject any incomplete set — safe, but a price-only edit means
+  re-uploading everything.
+- **(b)** Update rows present, leave absent variants alone, delete only in the
+  form — but then the importer cannot hand rows to `saveProduct` untouched; it
+  must load current variants and merge.
 
-Recommend **(b)**: partial bulk edits are the entire point of a spreadsheet.
+Recommend **(b)**: partial bulk edits are the point of a spreadsheet.
 
 ### OQ-3 — batch or per-file signed upload URLs?
 
-- **(a)** Mint all URLs in one request — simple, but a slow uploader can outlive
-  the token expiry mid-run.
-- **(b)** One request per file — survives long uploads, at the cost of one extra
-  round trip per photo.
+**(a)** All URLs in one request — simple, but a slow upload can outlive the
+token. **(b)** One per file — survives long uploads, one extra round trip each.
 
 ### OQ-4 — does `cost_cents` belong in the export?
 
-Cost per item is commented **private** in the schema (§7.2, never in
-`catalog_products`). Including it makes bulk margin edits possible; it also
-means cost leaves the admin in a downloadable file.
+Cost is commented **private** (§7.2, never in `catalog_products`). Including it
+enables bulk margin edits; it also means cost leaves the admin in a downloadable
+file.
 
 ## Verification evidence
 
