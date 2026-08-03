@@ -11,7 +11,7 @@ const EMPTY: ProductFormInitial = {
   shortName: "",
   description: "",
   status: "draft",
-  vendor: "GoldRose",
+  vendor: "",
   productType: "",
   tags: [],
   bestFor: "",
