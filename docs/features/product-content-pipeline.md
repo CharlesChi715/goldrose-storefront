@@ -42,12 +42,14 @@ pending sign-off and the open questions.
 - **The spreadsheet holds the words** — `.csv` or `.xlsx`, 32 columns, one row
   per variant.
 - **The folder holds the pictures** — one subfolder per product, named by its
-  Title, uploaded straight to Supabase Storage.
+  `handle`, uploaded straight to Supabase Storage.
 
 They travel separately because a spreadsheet can name a file but never carry
 one, and neither names the other: the folder is the only source for images, the
-spreadsheet the only source for everything else. Both are matched on **Title →
-handle**, derived server-side, so nobody uploading has to know what a handle is.
+spreadsheet the only source for everything else. Both are joined on **handle**,
+resolved server-side — and because `productHandle()` is idempotent, a folder
+named by Title works just as well, so nobody uploading has to know what a handle
+is.
 
 ## Options considered
 
@@ -150,8 +152,21 @@ Handle,Title,Description,SKU,Price,Option1 name,Option1 value,Status
 ### The folder tree
 
 One upload: a spreadsheet and a folder. **Each product subfolder is named by
-the product's Title**, which the server converts to a handle with
-`productHandle()` — the supplier never has to know what a handle is.
+the product's `handle`** — and a folder named by Title is accepted too, because
+the importer runs `productHandle()` on every folder name unconditionally.
+
+That works without a mode flag or a guess, since the function is **idempotent**:
+a handle passed through it comes back unchanged, while a title converts.
+
+```
+productHandle("24K Gold Dipped Eternal Rose")  →  24k-gold-dipped-eternal-rose
+productHandle("24k-gold-dipped-eternal-rose")  →  24k-gold-dipped-eternal-rose
+```
+
+Handle is the name to prefer: filesystem-safe by construction, unique by
+constraint, and frozen once the product is non-draft, so the tree does not go
+stale when marketing renames something. `npm run handles` turns a title list
+into folder names, and `--folders` emits the `mkdir -p` lines directly.
 
 **Depth decides scope.** Files directly in the product folder belong to the
 whole product; files in a `<SKU>/` subfolder belong to that variant. A
@@ -162,10 +177,10 @@ single-variant product needs no subfolder — the common case.
 
 ```
 product-images/
-├── Eternal Rose in Glass Dome/                ← Title, single variant
+├── eternal-rose-in-glass-dome/                ← handle, single variant
 │   ├── hero-rose-in-glass-dome.jpg
 │   └── 1-gift-box-open.jpg
-└── 24K Gold Dipped Eternal Rose/
+└── 24k-gold-dipped-eternal-rose/
     ├── hero-gold-rose-on-marble.jpg           ← applies to every variant
     ├── GR-ROSE-RED/
     │   ├── hero-red-rose-in-glass-dome.jpg    ← this colour only
@@ -174,36 +189,27 @@ product-images/
         └── hero-blue-rose-in-glass-dome.jpg
 ```
 
-| Rule                     |                                                                             |
-| ------------------------ | --------------------------------------------------------------------------- |
-| Product folder           | the **Title**, converted server-side to the handle                          |
-| Variant folder           | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe            |
-| Order prefix             | `hero` = position 0, then `1`, `2`, … read as **integers**; as text, `10` sorts before `2` |
-| Alt slug                 | everything after the first `-`; optional, hyphen-separated                  |
-| Banned in file names     | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys |
-| Extensions               | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos       |
-| Folder matching no row   | **hard error** naming the folder — never a silent skip                      |
+| Rule                   |                                                                             |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Product folder         | the `handle`; a Title is accepted and converted                             |
+| Variant folder         | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe            |
+| Order prefix           | `hero` = position 0, then `1`, `2`, … read as **integers**; as text, `10` sorts before `2` |
+| Alt slug               | everything after the first `-`; optional, hyphen-separated                  |
+| Banned in file names   | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys |
+| Extensions             | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos       |
+| Folder matching no row | **hard error** naming the folder — never a silent skip                      |
 
 Alt text comes from the slug: `1-red-stem-detail` becomes "Red stem detail".
 That is all the alt a folder can carry — no commas, no proper-noun capitals, no
 Chinese — so alt is expected to be refined in the admin afterwards. The point is
 that a blank alt never ships.
 
-**Titles must be unique — and more than merely different.** Two products cannot
-share a folder name, and beyond that two *different* titles can still normalise
-to one handle ("Rose & Box Set" and "Rose, Box Set" both give `rose-box-set`),
-which Postgres rejects on `products.handle UNIQUE`. `npm run handles` checks a
-title list for exactly this before anyone names a folder.
-
-Titles are also not always legal folder names: Windows forbids `\ / : * ? " < > |`
-in a path, so a title containing one cannot be a folder at all. The importer must
-say so by name rather than skipping the folder — losing a product's photos
-silently is the failure that costs a day to notice.
-
-Naming folders by handle instead would sidestep both problems, since a handle is
-filesystem-safe by construction and frozen once a product is non-draft. It was
-rejected because it asks the supplier to learn a concept that exists only inside
-this system.
+**Two failures only titles can cause**, and both are reasons to prefer handles.
+Two *different* titles can normalise to one handle ("Rose & Box Set" and
+"Rose, Box Set" both give `rose-box-set`), which Postgres rejects on
+`products.handle UNIQUE`; and Windows forbids `\ / : * ? " < > |` in a path, so
+a title containing one cannot be a folder name at all. `npm run handles` reports
+collisions across a title list before anyone names a directory.
 
 ## Upload flow
 
