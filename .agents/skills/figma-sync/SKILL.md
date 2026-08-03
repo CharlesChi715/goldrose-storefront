@@ -3,7 +3,7 @@ name: figma-sync
 description: "Use when Charles asks you to process, parse, import, check, or apply a design-team delivery or update in Figma — new or changed frames, comments, or prototype. Defines what to read (frames + comments read AS Charles + prototype/interaction design) and which comments to act on (Charles's own to-dos and acceptances) versus leave alone (his directives to the team, and the team's teammate-to-teammate comments). Triggers: Figma delivery, design delivery, process/parse/import Figma, Figma update, read the comments, read the prototype, design-team frames."
 metadata:
   author: charles
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Process a Figma delivery
@@ -29,36 +29,26 @@ shared history and causes phantom conflicts on later syncs.
 
 ## 1. Read — everything the file exposes
 
-Read via the Figma REST API. Credentials live in `.env.local`: `FIGMA_TOKEN`
-(scope `file_content:read`) and `FIGMA_FILE_KEY` (the shared design file).
-(Endpoint shapes and field names are in the Figma REST docs — look them up as
-needed; only the gotchas below are recorded here.)
+Read via the Figma REST API — one payload already carries the frames, node
+geometry, prototype, comments, and dev status, so read it and work out for
+yourself what is in it. Credentials live in `.env.local`: `FIGMA_TOKEN`
+(scope `file_content:read`) and `FIGMA_FILE_KEY`. Only what you cannot infer
+from the payload is recorded here:
 
-**Re-poll for stability.** The team edits the file live; a frame can change
-mid-import. Re-fetch anything they touched recently before importing it.
-
-**Core — always read these four; they drive the build:**
-
-1. **Frames / node data** — geometry, fills, strokes, typography, hierarchy,
-   and the frame/layer names.
-2. **Rendered images** — the pixel source (photos, icons, glyphs) and the
-   scale-2 band-diff reference. Gotcha: symbol glyphs that hit fallback fonts
-   export as SVG; some (e.g. ✉) return a `.notdef` box — crop those from the
-   frame render instead.
-3. **Comments** — read them **impersonating Charles**: for each thread take his
-   standpoint and ask "what did I mean here?" (an "ok" is an _acceptance_, not
-   a new request). Apply the comment rule in section 2.
-4. **Prototype** — all the interactions: the click wiring, transitions, and flows connecting the
-   frames. Gotcha: read each node's `interactions[]` / `transitionNodeID`,
-   **not** the legacy `reactions` field.
-5. **dev status (`READY_FOR_DEV` / `COMPLETED`)** — the build gate, section 3.
-
-**Also read when present:** dev status (`READY_FOR_DEV` / `COMPLETED` — the
-build gate, section 3); section structure and component relationships; design
-tokens/variables (prefer named tokens over per-node hexes; may need an
-enterprise plan); version history for diffing against a prior delivery; raw
-image-fill sources when the render is not enough; Figma MCP extras
-(code-connect, motion, FigJam) if connected in Dev Mode.
+- **Re-poll for stability.** The team edits the file live; a frame can change
+  mid-import. Re-fetch anything they touched recently before importing it.
+- **Prototype lives in `interactions[]` / `transitionNodeID`**, not the legacy
+  `reactions` field, which reads back stale or empty.
+- **Dev status is REST-only**, and it is the build gate — see section 3.
+- **Comments carry ownership, not just text** — read them impersonating
+  Charles, then apply the rule in section 2.
+- **Prefer bound tokens over per-node hexes.** A fill's `boundVariables` names
+  the shared token; resolving token values may need an enterprise plan.
+- **Glyph export gotcha:** symbol glyphs that hit fallback fonts export as SVG,
+  and some (e.g. ✉) return a `.notdef` box — crop those from the frame render
+  instead.
+- **Renders** are both the pixel source and the scale-2 band-diff reference
+  (section 6).
 
 ## 2. Comment rule — whose task is it?
 

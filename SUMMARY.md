@@ -162,11 +162,18 @@ Charles first.
   (read-only, pinned project), next-devtools, and playwright MCP servers —
   all three still need one-time interactive approval, and Supabase needs
   `/mcp` OAuth. context7 and Trail of Bits supply-chain-risk-auditor plugins
-  are live (user scope); official Supabase skills sit in `.claude/skills/`
-  (Claude Code) and `.agents/skills/` (Codex — verified it loads them).
-  Codex mirror complete: supply-chain-risk-auditor skill in
-  `.agents/skills/`, and all four MCP servers in `~/.codex/config.toml`
-  (global) — Supabase OAuth already done on the Codex side.
+  are live (user scope). Skills live twice — `.claude/skills/` (Claude Code)
+  and `.agents/skills/` (Codex, verified it loads them). `.agents/` is the
+  source of truth: `figma-sync` and `agent-delivery` are **symlinked** from
+  `.claude/` into it, so one edit serves both agents. Still **real duplicate
+  directories** (identical as of 2026-08-03, but they drift silently if only
+  one side is edited — symlink them the same way when convenient):
+  `supabase` and `supabase-postgres-best-practices`.
+  `supply-chain-risk-auditor` exists only under `.agents/`. Note `.claude/` is
+  gitignored and git will not traverse the symlinks, so the tracked path for
+  any skill is always `.agents/…`. All four MCP servers are in
+  `~/.codex/config.toml` (global) — Supabase OAuth already done on the Codex
+  side.
 
 ## Runtime and safety
 

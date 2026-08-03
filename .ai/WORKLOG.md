@@ -4421,3 +4421,27 @@ Agent-inbox: detail pane formatting
 
 - On `test/integration`, added an eased slide-up entrance to the PDP Reviews drawer with reduced-motion support.
 - Verified with `npm run typecheck`, component ESLint, and `git diff --check`.
+
+## 2026-08-03 — figma-sync skill: trim section 1
+
+- Cut the "what data Figma exposes" enumeration from `figma-sync` section 1.
+  One `/v1/files/:key` payload already carries frames, geometry, prototype,
+  comments and dev status, so the agent can read what is there rather than be
+  told. Section 1 now records only the non-derivable parts: re-poll for live
+  edits, `interactions[]` not `reactions`, dev status is REST-only and is the
+  build gate, comment ownership, prefer `boundVariables` tokens, the `.notdef`
+  glyph gotcha, renders as band-diff reference.
+- Fixed a latent inconsistency: the old list said "always read these four" then
+  listed five, and repeated dev status in both the core and optional blocks.
+- Sections 0 and 2–7 untouched. Version 1.4.0 → 1.5.0.
+- Note: `.claude/skills/figma-sync` is a symlink to `.agents/skills/figma-sync`
+  — one file, no mirroring needed for THIS skill. The others are NOT shared:
+  `agent-delivery`, `supabase` and `supabase-postgres-best-practices` are real
+  duplicate directories on both sides (separate inodes, identical content as of
+  today) and drift silently if only one side is edited. SUMMARY.md's "Codex
+  mirror complete" wording was the source of that wrong assumption; corrected.
+- Follow-up (same day): converted `.claude/skills/agent-delivery` into a
+  symlink to `.agents/skills/agent-delivery` as well, so two of the four
+  shared skills are now single-source. Content was byte-identical beforehand
+  and `.claude/` is gitignored, so nothing tracked changed. `supabase` and
+  `supabase-postgres-best-practices` remain real duplicates.
