@@ -37,11 +37,17 @@ verification:
 Not chosen yet (BACKLOG) — the shape below is the 2026-08-03 recommendation,
 pending sign-off and the open questions.
 
-Two inputs, both keyed on `handle` + `SKU` (the keys the admin and CSV already
-use): **a spreadsheet for the words** — `.csv` or `.xlsx`, in the column format
-`Export` already produces — and **a folder tree for the pictures**, uploaded
-straight to Supabase Storage. They travel separately because a spreadsheet can
-name a file but never carry one.
+**One upload: a spreadsheet and a folder.**
+
+- **The spreadsheet holds the words** — `.csv` or `.xlsx`, 32 columns, one row
+  per variant.
+- **The folder holds the pictures** — one subfolder per product, named by its
+  Title, uploaded straight to Supabase Storage.
+
+They travel separately because a spreadsheet can name a file but never carry
+one, and neither names the other: the folder is the only source for images, the
+spreadsheet the only source for everything else. Both are matched on **Title →
+handle**, derived server-side, so nobody uploading has to know what a handle is.
 
 ## Options considered
 
@@ -69,56 +75,59 @@ product's variant rows; `Handle` binds the row to its parent, `SKU` identifies
 the row itself. Per-column database rules live in
 [Database.md § Table shapes](../Database.md) — that is the authoritative list.
 
-**34 columns, in this order.** Required first, so the columns that decide
+**32 columns, in this order.** Required first, so the columns that decide
 whether an import succeeds are visible without scrolling. ▪ repeats on every row
 of the product, ● varies per row.
 
 **A — required.** Without these the row is rejected or the product cannot go
 live.
 
-| #     | Column          | Scope     | Req                                   |
-| ----- | --------------- | --------- | ------------------------------------- |
-| 1     | Handle          | ▪         | blank ⇒ derive from Title (see below) |
-| 2     | Title           | ▪         | ✓                                     |
-| 3     | Description     | ▪         | ✓ if active                           |
-| 4     | SKU             | ●         | ✓ if active                           |
-| 5     | Price           | ●         | ✓                                     |
-| 6–8   | Option1–3 name  | ▪         | ✓ if variants differ                  |
-| 9–11  | Option1–3 value | ●         | ✓ if option names set                 |
-| 12    | Image file      | image row | lookup key                            |
+| #    | Column          | Scope | Req                                   |
+| ---- | --------------- | ----- | ------------------------------------- |
+| 1    | Handle          | ▪     | blank ⇒ derive from Title (see below) |
+| 2    | Title           | ▪     | ✓                                     |
+| 3    | Description     | ▪     | ✓ if active                           |
+| 4    | SKU             | ●     | ✓ if active                           |
+| 5    | Price           | ●     | ✓                                     |
+| 6–8  | Option1–3 name  | ▪     | ✓ if variants differ                  |
+| 9–11 | Option1–3 value | ●     | ✓ if option names set                 |
 
 **B — wanted.** Not enforced, but the storefront is visibly worse without them:
 these are what customers and Google actually read.
 
-| #  | Column           | Scope     | Req                   |
-| -- | ---------------- | --------- | --------------------- |
-| 13 | Status           | ▪         | ○ — defaults draft    |
-| 14 | Short name       | ▪         | ○ — falls back to Title |
-| 15 | Image alt        | image row | ○ — blank ⇒ from the filename slug |
-| 16 | Compare-at price | ●         | ○                     |
-| 17 | On hand          | ●         | ○ — first import only |
-| 18 | Badge            | ▪         | ○                     |
-| 19 | Best for         | ▪         | ○                     |
-| 20 | Details          | ▪         | ○ — `;` separated     |
-| 21 | SEO title        | ▪         | ○                     |
-| 22 | SEO description  | ▪         | ○                     |
-| 23 | Tags             | ▪         | ○ — `;` separated     |
-| 24 | Type             | ▪         | ○                     |
-| 25 | Vendor           | ▪         | ○                     |
+| #  | Column           | Scope | Req                     |
+| -- | ---------------- | ----- | ----------------------- |
+| 12 | Status           | ▪     | ○ — defaults draft      |
+| 13 | Short name       | ▪     | ○ — falls back to Title |
+| 14 | Compare-at price | ●     | ○                       |
+| 15 | On hand          | ●     | ○ — first import only   |
+| 16 | Badge            | ▪     | ○                       |
+| 17 | Best for         | ▪     | ○                       |
+| 18 | Details          | ▪     | ○ — `;` separated       |
+| 19 | SEO title        | ▪     | ○                       |
+| 20 | SEO description  | ▪     | ○                       |
+| 21 | Tags             | ▪     | ○ — `;` separated       |
+| 22 | Type             | ▪     | ○                       |
+| 23 | Vendor           | ▪     | ○                       |
 
 **C — the rest.** Defaults are fine; fill them when there is a reason to.
 
-| #  | Column                    | Scope | Req                 |
-| -- | ------------------------- | ----- | ------------------- |
-| 26 | Charge tax                | ▪     | ○ — defaults true   |
-| 27 | Requires shipping         | ▪     | ○ — defaults true   |
-| 28 | Country of origin         | ▪     | ○ — ISO-2           |
-| 29 | HS code                   | ▪     | ○                   |
-| 30 | Barcode                   | ●     | ○                   |
-| 31 | Cost                      | ●     | ○ — see OQ-4        |
-| 32 | Track quantity            | ●     | ○ — defaults true   |
-| 33 | Continue selling when OOS | ●     | ○ — defaults false  |
-| 34 | Weight (oz)               | ●     | ○                   |
+| #  | Column                    | Scope | Req                |
+| -- | ------------------------- | ----- | ------------------ |
+| 24 | Charge tax                | ▪     | ○ — defaults true  |
+| 25 | Requires shipping         | ▪     | ○ — defaults true  |
+| 26 | Country of origin         | ▪     | ○ — ISO-2          |
+| 27 | HS code                   | ▪     | ○                  |
+| 28 | Barcode                   | ●     | ○                  |
+| 29 | Cost                      | ●     | ○ — see OQ-4       |
+| 30 | Track quantity            | ●     | ○ — defaults true  |
+| 31 | Continue selling when OOS | ●     | ○ — defaults false |
+| 32 | Weight (oz)               | ●     | ○                  |
+
+**No image columns.** The folder tree is the only source for images — which
+product, which variant, what order, and the alt slug all come from the paths.
+Naming a file in both places would let the two disagree, and a typo would drop a
+photo silently.
 
 **Never columns:** `id`, `product_id`, `path`, `created_at`, `updated_at`, and
 both `position` columns — variant order is row order, product order is set in
@@ -131,74 +140,70 @@ product, whereas deriving from Title alone means any edited title produces a new
 handle and therefore a duplicate product rather than a rename. This mirrors
 `SaveProductInput`, where `handle: null` means derive on create.
 
-Images ride on **extra rows** carrying only `Handle` plus the image columns
-(Shopify's convention). A row with a SKU is a variant row; a row without one is
-an image row.
-
 ```
-Handle,Title,...,SKU,Price,Image file,Image alt
-24k-gold-rose,24K Gold Rose,...,GR-ROSE-RED,49.99,,
-24k-gold-rose,,...,GR-ROSE-BLU,49.99,,
-24k-gold-rose,,...,,,hero-red-rose-in-glass-dome.jpg,"Red rose, 24K gold dipped, in a glass dome"
-24k-gold-rose,,...,,,1-gift-box-open.jpg,
+Handle,Title,Description,SKU,Price,Option1 name,Option1 value,Status
+,24K Gold Dipped Eternal Rose,A real rose…,GR-ROSE-RED,49.99,Color,Red,active
+,24K Gold Dipped Eternal Rose,A real rose…,GR-ROSE-BLU,49.99,Color,Blue,active
+,Eternal Rose in Glass Dome,Preserved…,GR-BOX-WHT,64.99,,,draft
 ```
-
-`Image file` is **not** a database column — it is a lookup key the importer
-resolves to the `product_images.path` the upload produced, then discards, exactly
-as `Handle` resolves to `product_id`.
 
 ### The folder tree
 
-**Depth decides scope.** Files directly in the product folder belong to the whole
-product; files in a `<SKU>/` subfolder belong to that variant. A single-variant
-product needs no subfolder — the common case.
+One upload: a spreadsheet and a folder. **Each product subfolder is named by
+the product's Title**, which the server converts to a handle with
+`productHandle()` — the supplier never has to know what a handle is.
+
+**Depth decides scope.** Files directly in the product folder belong to the
+whole product; files in a `<SKU>/` subfolder belong to that variant. A
+single-variant product needs no subfolder — the common case.
 
 **File name = `<order>-<alt>.<ext>`.** The order prefix is `hero`, then `1`,
-`2`, … The rest of the name is an alt-text slug, and it is optional — `hero.jpg`
-and `1.jpg` are valid.
+`2`, … The rest is an alt-text slug and is optional; `hero.jpg` is valid.
 
 ```
 product-images/
-├── eternal-rose-in-glass-dome/           ← single variant: no SKU level
+├── Eternal Rose in Glass Dome/                ← Title, single variant
 │   ├── hero-rose-in-glass-dome.jpg
 │   └── 1-gift-box-open.jpg
-└── 24k-gold-dipped-eternal-rose/
-    ├── hero-gold-rose-on-marble.jpg       ← applies to every variant
+└── 24K Gold Dipped Eternal Rose/
+    ├── hero-gold-rose-on-marble.jpg           ← applies to every variant
     ├── GR-ROSE-RED/
-    │   ├── hero-red-rose-in-glass-dome.jpg   ← this colour only
+    │   ├── hero-red-rose-in-glass-dome.jpg    ← this colour only
     │   └── 1-red-stem-detail.jpg
     └── GR-ROSE-BLU/
         └── hero-blue-rose-in-glass-dome.jpg
 ```
 
-| Rule                        |                                                                             |
-| --------------------------- | --------------------------------------------------------------------------- |
-| Product folder              | the `handle`, never the title                                               |
-| Variant folder              | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe            |
-| Order prefix                | `hero` = position 0, then `1`, `2`, … read as **integers**; as text, `10` sorts before `2` |
-| Alt slug                    | everything after the first `-`; optional, hyphen-separated                  |
-| Banned in names             | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys |
-| Extensions                  | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos       |
-| A folder matching no handle | **hard error**, never a silent skip — a typo is how a colour vanishes        |
+| Rule                     |                                                                             |
+| ------------------------ | --------------------------------------------------------------------------- |
+| Product folder           | the **Title**, converted server-side to the handle                          |
+| Variant folder           | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe            |
+| Order prefix             | `hero` = position 0, then `1`, `2`, … read as **integers**; as text, `10` sorts before `2` |
+| Alt slug                 | everything after the first `-`; optional, hyphen-separated                  |
+| Banned in file names     | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys |
+| Extensions               | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos       |
+| Folder matching no row   | **hard error** naming the folder — never a silent skip                      |
 
-The slug is a **fallback for alt text, not its source**: when the spreadsheet's
-`Image alt` cell is blank, the importer turns `1-red-stem-detail` into
-"Red stem detail". The column still wins when filled, because alt is
-customer-facing copy that Google and screen readers read — a filename cannot
-hold a comma, a proper-noun capital, or Chinese (banned above), and the person
-naming files is rarely the right person to write English copy. This way a blank
-alt never ships, and good alt is still possible.
+Alt text comes from the slug: `1-red-stem-detail` becomes "Red stem detail".
+That is all the alt a folder can carry — no commas, no proper-noun capitals, no
+Chinese — so alt is expected to be refined in the admin afterwards. The point is
+that a blank alt never ships.
 
-Folders are named by `handle` because **titles change and handles do not**: the
-handle rule freezes a handle once its product is non-draft precisely so URLs
-survive renames, and a tree named after titles strands every file the first time
-marketing renames something. Handle is also filesystem-safe by construction,
-whereas a title may contain characters Windows forbids in a path (`\ / : * ? " < > |`).
+**Titles must be unique — and more than merely different.** Two products cannot
+share a folder name, and beyond that two *different* titles can still normalise
+to one handle ("Rose & Box Set" and "Rose, Box Set" both give `rose-box-set`),
+which Postgres rejects on `products.handle UNIQUE`. `npm run handles` checks a
+title list for exactly this before anyone names a folder.
 
-Naming folders by title is viable if the server derives the handle with
-`productHandle()` — but it must then reject a folder whose name yields no valid
-handle, not skip it. `npm run handles` does the same derivation for a title
-list, and fails the batch on a collision.
+Titles are also not always legal folder names: Windows forbids `\ / : * ? " < > |`
+in a path, so a title containing one cannot be a folder at all. The importer must
+say so by name rather than skipping the folder — losing a product's photos
+silently is the failure that costs a day to notice.
+
+Naming folders by handle instead would sidestep both problems, since a handle is
+filesystem-safe by construction and frozen once a product is non-draft. It was
+rejected because it asks the supplier to learn a concept that exists only inside
+this system.
 
 ## Upload flow
 
@@ -231,7 +236,10 @@ Vercel and is parsed there, because validating a row needs the database.
 - [ ] Importing a CSV + image folder creates/updates all 120 SKUs in one run.
 - [ ] Re-running an import upserts in place (idempotent — safe content passes).
 - [ ] Invalid rows are reported per-row; a failed row never partially writes.
-- [ ] A folder or image row naming an unknown handle fails the run loudly.
+- [ ] A folder matching no row in the spreadsheet fails the run loudly, naming
+      the folder.
+- [ ] Two titles that normalise to one handle are reported before anything is
+      written.
 - [ ] An import never deletes a variant that the file simply did not mention.
 - [ ] Stock arriving via import is written as an inventory movement, not as a
       raw column write, so the ledger stays complete.
