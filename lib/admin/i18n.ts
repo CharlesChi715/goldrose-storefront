@@ -277,6 +277,9 @@ const en = {
   "form.details.help": "Bullet points listed on the product page.",
   "form.media.title": "Media",
   "form.media.add": "Add images",
+  "form.media.hero": "Hero",
+  "form.media.help":
+    "Order matters. The first image is the hero — it appears on the shop and home cards and in link previews when the product is shared. Use ← and → to reorder.",
   "form.media.alt": "Alt text",
   "form.media.moveLeft": "Move left",
   "form.media.moveRight": "Move right",
@@ -912,6 +915,9 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.details.help": "在产品页上以要点形式列出。",
   "form.media.title": "媒体文件",
   "form.media.add": "添加图片",
+  "form.media.hero": "主图",
+  "form.media.help":
+    "顺序很重要。第一张为主图——用于商店和首页卡片，以及分享链接时的预览图。用 ← 和 → 调整顺序。",
   "form.media.alt": "替代文本",
   "form.media.moveLeft": "左移",
   "form.media.moveRight": "右移",

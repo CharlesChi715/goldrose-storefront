@@ -494,10 +494,25 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   hidden
                   onChange={(event) => handleUpload(event.target.files)}
                 />
+                {/* Order is the contract: saveProduct writes position from the
+                    array index, and the storefront reads images[0] for the
+                    shop/home card, og:image and the first JSON-LD image. Say so
+                    — nothing else on this screen reveals that the first slot is
+                    special. */}
+                <Text as="p" tone="subdued" variant="bodySm">
+                  {t("form.media.help")}
+                </Text>
                 {images.length > 0 ? (
                   <InlineGrid columns={{ xs: 2, md: 4 }} gap="300">
                     {images.map((image, index) => (
                       <BlockStack key={`${image.path}-${index}`} gap="150">
+                        <InlineStack align="start">
+                          <Badge tone={index === 0 ? "info" : undefined}>
+                            {index === 0
+                              ? t("form.media.hero")
+                              : String(index + 1)}
+                          </Badge>
+                        </InlineStack>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={image.url}
