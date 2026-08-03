@@ -94,7 +94,7 @@ these are what customers and Google actually read.
 | -- | ---------------- | --------- | --------------------- |
 | 13 | Status           | ▪         | ○ — defaults draft    |
 | 14 | Short name       | ▪         | ○ — falls back to Title |
-| 15 | Image alt        | image row | ○                     |
+| 15 | Image alt        | image row | ○ — blank ⇒ from the filename slug |
 | 16 | Compare-at price | ●         | ○                     |
 | 17 | On hand          | ●         | ○ — first import only |
 | 18 | Badge            | ▪         | ○                     |
@@ -139,8 +139,8 @@ an image row.
 Handle,Title,...,SKU,Price,Image file,Image alt
 24k-gold-rose,24K Gold Rose,...,GR-ROSE-RED,49.99,,
 24k-gold-rose,,...,GR-ROSE-BLU,49.99,,
-24k-gold-rose,,...,,,hero.jpg,Red rose in a glass dome
-24k-gold-rose,,...,,,1.jpg,Gift box open
+24k-gold-rose,,...,,,hero-red-rose-in-glass-dome.jpg,"Red rose, 24K gold dipped, in a glass dome"
+24k-gold-rose,,...,,,1-gift-box-open.jpg,
 ```
 
 `Image file` is **not** a database column — it is a lookup key the importer
@@ -153,29 +153,41 @@ as `Handle` resolves to `product_id`.
 product; files in a `<SKU>/` subfolder belong to that variant. A single-variant
 product needs no subfolder — the common case.
 
+**File name = `<order>-<alt>.<ext>`.** The order prefix is `hero`, then `1`,
+`2`, … The rest of the name is an alt-text slug, and it is optional — `hero.jpg`
+and `1.jpg` are valid.
+
 ```
 product-images/
-├── eternal-rose-in-glass-dome/      ← single variant: no SKU level
-│   ├── hero.jpg
-│   └── 1.jpg
+├── eternal-rose-in-glass-dome/           ← single variant: no SKU level
+│   ├── hero-rose-in-glass-dome.jpg
+│   └── 1-gift-box-open.jpg
 └── 24k-gold-dipped-eternal-rose/
-    ├── hero.jpg                      ← applies to every variant
+    ├── hero-gold-rose-on-marble.jpg       ← applies to every variant
     ├── GR-ROSE-RED/
-    │   ├── hero.jpg                  ← this colour only
-    │   └── 1.jpg
+    │   ├── hero-red-rose-in-glass-dome.jpg   ← this colour only
+    │   └── 1-red-stem-detail.jpg
     └── GR-ROSE-BLU/
-        └── hero.jpg
+        └── hero-blue-rose-in-glass-dome.jpg
 ```
 
-| Rule                        |                                                                              |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| Product folder              | the `handle`, never the title                                                |
-| Variant folder              | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe              |
-| Hero                        | `hero.*`, always position 0                                                  |
-| The rest                    | `1.*`, `2.*` … read as **integers**; as text, `10` sorts before `2`           |
-| Banned in names             | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys  |
-| Extensions                  | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos        |
-| A folder matching no handle | **hard error**, never a silent skip — a typo is how a colour vanishes         |
+| Rule                        |                                                                             |
+| --------------------------- | --------------------------------------------------------------------------- |
+| Product folder              | the `handle`, never the title                                               |
+| Variant folder              | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe            |
+| Order prefix                | `hero` = position 0, then `1`, `2`, … read as **integers**; as text, `10` sorts before `2` |
+| Alt slug                    | everything after the first `-`; optional, hyphen-separated                  |
+| Banned in names             | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys |
+| Extensions                  | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos       |
+| A folder matching no handle | **hard error**, never a silent skip — a typo is how a colour vanishes        |
+
+The slug is a **fallback for alt text, not its source**: when the spreadsheet's
+`Image alt` cell is blank, the importer turns `1-red-stem-detail` into
+"Red stem detail". The column still wins when filled, because alt is
+customer-facing copy that Google and screen readers read — a filename cannot
+hold a comma, a proper-noun capital, or Chinese (banned above), and the person
+naming files is rarely the right person to write English copy. This way a blank
+alt never ships, and good alt is still possible.
 
 Folders are named by `handle` because **titles change and handles do not**: the
 handle rule freezes a handle once its product is non-draft precisely so URLs
