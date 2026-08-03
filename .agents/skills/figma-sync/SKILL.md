@@ -51,6 +51,7 @@ mid-import. Re-fetch anything they touched recently before importing it.
 4. **Prototype** — all the interactions: the click wiring, transitions, and flows connecting the
    frames. Gotcha: read each node's `interactions[]` / `transitionNodeID`,
    **not** the legacy `reactions` field.
+5. **dev status (`READY_FOR_DEV` / `COMPLETED`)** — the build gate, section 3.
 
 **Also read when present:** dev status (`READY_FOR_DEV` / `COMPLETED` — the
 build gate, section 3); section structure and component relationships; design
