@@ -129,7 +129,7 @@ sender and templates currently say "Eldreve" (my choice, easily changed).
   not*: Supabase refuses template edits on the free tier while its built-in
   sender is in use. Release-queue #2's order was therefore impossible.
   Configured custom SMTP on Resend (`smtp.resend.com:465`, sender
-  `noreply@eldreve.com` / "Eldreve"), which unlocked templates and lifted the
+  `noreply@eldreve.com` / "ELDREVE"), which unlocked templates and lifted the
   cap from ~2 to 30 mails/hour; applied the templates, which now carry both a
   `/auth/confirm?token_hash=…&next=/account` link and the 6-digit code.
 - **`mailer_otp_length` 8 → 6.** The project issued 8-digit codes while the

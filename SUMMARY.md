@@ -201,7 +201,7 @@ Charles first.
    [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
 2. ~~Customer sign-in activation~~ — **done 2026-08-03.** Custom SMTP is live
    on Resend (`smtp.resend.com:465`, user `resend`, sender
-   `noreply@eldreve.com` / "Eldreve"), which is what unlocks template editing
+   `noreply@eldreve.com` / "ELDREVE"), which is what unlocks template editing
    at all: the free tier refuses it while the built-in sender is in use, so
    the queue's old order (templates, *then* SMTP) was impossible. Templates
    applied from `scripts/apply-auth-email-templates.mjs` and carry both a

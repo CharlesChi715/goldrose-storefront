@@ -4357,7 +4357,7 @@ Agent-inbox: detail pane formatting
   edits on the free tier while its built-in sender is in use, so release
   queue #2's order (templates then SMTP) was impossible.
 - Configured custom SMTP on Resend (`smtp.resend.com:465`, sender
-  `noreply@eldreve.com` / "Eldreve") against the verified `eldreve.com`
+  `noreply@eldreve.com` / "ELDREVE") against the verified `eldreve.com`
   domain; applied the templates, which now carry both the
   `/auth/confirm?token_hash=…&next=/account` link and the 6-digit code.
   Send cap 2 → 30/hour.
@@ -4406,3 +4406,13 @@ Agent-inbox: detail pane formatting
   ⚠️ Frame drift: home/shop draw "Login" outline while the PDP draws "Me"
   outline; dashboard draws "Me" filled. Followed the majority + the owner's
   rule. 91 e2e green, baselines regenerated.
+
+## 2026-08-03 — Smooth menu-drawer entrance
+
+- On `test/integration`, added an eased left-to-right entrance for the homepage menu drawer and a coordinated scrim fade, with `prefers-reduced-motion` support.
+- Verified with `npm run typecheck`, component ESLint, and `git diff --check`.
+
+## 2026-08-03 — Expand reminder-modal scrim to the viewport
+
+- On `test/integration`, moved the reminder dialog scrim outside the scaled Figma stage so the dim layer covers the full viewport while the sheet remains interactive above it.
+- Verified with `npm run typecheck`, component ESLint, and `git diff --check`.

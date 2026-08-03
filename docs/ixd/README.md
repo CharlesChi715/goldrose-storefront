@@ -599,7 +599,7 @@ because the repo's template script had never run — and *could* not: Supabase
 refuses template edits on the free tier while its built-in sender is in use.
 So the release queue's order (templates, then SMTP) was impossible. Custom
 SMTP now runs on Resend (`smtp.resend.com:465`, sender `noreply@eldreve.com`
-/ "Eldreve", against the verified `eldreve.com` domain), which unlocked the
+/ "ELDREVE", against the verified `eldreve.com` domain), which unlocked the
 templates and lifted the send cap from ~2 to 30/hour. Both halves now ship in
 one email: a `/auth/confirm?token_hash=…&next=/account` link and the 6-digit
 code, the code being the different-device fallback.
