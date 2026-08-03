@@ -175,6 +175,12 @@ export function AdminFrame({
             icon: OrderIcon,
             selected: selected("/admin/orders"),
             subNavigationItems: [
+              // Self-referencing first child (Shopify's own pattern). Polaris
+              // turns any parent that has sub-items into a pure disclosure
+              // toggle below 768px — it calls preventDefault() on the parent's
+              // own link — so without this row the parent page is unreachable
+              // on mobile. See Navigation/components/Item getClickHandler.
+              { url: "/admin/orders", label: t("nav.orders.all") },
               { url: "/admin/orders/drafts", label: t("nav.orders.drafts") },
               {
                 url: "/admin/orders/abandoned",
@@ -188,6 +194,7 @@ export function AdminFrame({
             icon: ProductIcon,
             selected: selected("/admin/products"),
             subNavigationItems: [
+              { url: "/admin/products", label: t("nav.products.all") },
               {
                 url: "/admin/products/inventory",
                 label: t("nav.products.inventory"),
@@ -206,6 +213,7 @@ export function AdminFrame({
             icon: ContentIcon,
             selected: selected("/admin/content"),
             subNavigationItems: [
+              { url: "/admin/content", label: t("nav.content.all") },
               { url: "/admin/content/files", label: t("nav.content.files") },
               { url: "/admin/content/ideas", label: t("nav.content.ideas") },
             ],
@@ -250,6 +258,7 @@ export function AdminFrame({
             icon: SettingsIcon,
             selected: selected("/admin/settings"),
             subNavigationItems: [
+              { url: "/admin/settings", label: t("nav.settings.general") },
               { url: "/admin/settings/team", label: t("nav.settings.team") },
               {
                 url: "/admin/settings/security",
