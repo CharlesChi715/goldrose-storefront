@@ -4501,3 +4501,27 @@ behaviour is unchanged.
 Verified Products end to end at 375px — navigates and dismisses the drawer.
 The other three render with correct labels but were not click-verified; the
 mechanism is identical.
+
+## 2026-08-04 — archived: homepage + shop IxD tables and their screenshots
+
+Interaction design is maintained in Figma now, so the 2026-07-25 parse outputs
+stopped being a source of truth. Moved `docs/ixd/homepage.md` (H-01…H-37),
+`docs/ixd/shop.md` (N-01…N-15) and `docs/ixd/assets/` (52 annotated
+screenshots) to `archive/ixd-home-shop/`, keeping the docs' relative
+`assets/H-nn.jpg` links intact by moving all three together.
+
+Held the archive folder's defining rule — nothing in it is referenced from
+anywhere. Removed every inbound path: `docs/ixd/README.md`'s Files list (now
+a "retired" note pointing at the still-live delivery folder instead),
+`tests/e2e/homepage.spec.ts`'s header comment (H-nn ids kept as bare ids),
+`batch.md`'s two links, the 37 screenshot embeds in that delivery's
+`homepage.zh.md` (our import plumbing, not delivered wording — logged in
+`batch.md`'s Edits section; the `.numbers` original still holds them), and
+`.prettierignore`'s `docs/ixd/assets/` line, which was redundant anyway since
+the unanchored `assets/` rule already matches at any depth.
+
+`docs/ixd/` now holds only `README.md` and `naming/`. The IxD findings and
+status legend stay in that README as the record of what the imports surfaced.
+One reference left alone on purpose: the 2026-07-27 order-detail delivery has
+a delivered Chinese sentence naming `docs/ixd/assets/` as a future destination
+— it is verbatim upstream wording and does not point into `archive/`.

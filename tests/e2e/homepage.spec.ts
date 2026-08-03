@@ -1,6 +1,7 @@
 /**
  * ROLE OF THIS FILE
- * Homepage interaction specs from the IxD table (docs/ixd/homepage.md). The
+ * Homepage interaction specs. The H-nn ids below come from the 2026-07-25 IxD
+ * table; the design is now maintained in Figma, not in a repo doc. The
  * pixel baselines in pixels.spec.ts already gate the homepage's appearance;
  * these cover behaviour the static import was missing.
  */
