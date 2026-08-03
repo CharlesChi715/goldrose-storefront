@@ -62,11 +62,16 @@ export type FormVariant = {
 export type ProductFormInitial = {
   id: string | null;
   title: string;
+  shortName: string;
   description: string;
   status: "active" | "draft" | "archived";
   vendor: string;
   productType: string;
   tags: string[];
+  bestFor: string;
+  badge: string;
+  details: string[];
+  position: string;
   handle: string;
   chargeTax: boolean;
   requiresShipping: boolean;
@@ -119,7 +124,12 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
 
   const isNew = initial.id === null;
   const [title, setTitle] = useState(initial.title);
+  const [shortName, setShortName] = useState(initial.shortName);
   const [description, setDescription] = useState(initial.description);
+  const [bestFor, setBestFor] = useState(initial.bestFor);
+  const [badge, setBadge] = useState(initial.badge);
+  const [detailsText, setDetailsText] = useState(initial.details.join(", "));
+  const [position, setPosition] = useState(initial.position);
   const [status, setStatus] = useState<string>(initial.status);
   const [vendor, setVendor] = useState(initial.vendor);
   const [productType, setProductType] = useState(initial.productType);
@@ -272,11 +282,16 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
     const payload = {
       id: initial.id,
       title: title.trim(),
+      short_name: shortName.trim(),
       description,
       status: status as "active" | "draft" | "archived",
       vendor: vendor.trim(),
       product_type: productType.trim(),
       tags: splitCsv(tagsText),
+      best_for: bestFor.trim(),
+      badge: badge.trim(),
+      details: splitCsv(detailsText),
+      position: position.trim() ? Number(position) : null,
       handle: handle.trim() || null,
       charge_tax: chargeTax,
       requires_shipping: requiresShipping,
@@ -397,11 +412,42 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   requiredIndicator
                 />
                 <TextField
+                  label={t("form.shortName")}
+                  helpText={t("form.shortName.help")}
+                  value={shortName}
+                  onChange={setShortName}
+                  autoComplete="off"
+                  maxLength={120}
+                />
+                <TextField
                   label={t("form.description.label")}
                   value={description}
                   onChange={setDescription}
                   autoComplete="off"
                   multiline={6}
+                />
+                <TextField
+                  label={t("form.bestFor")}
+                  helpText={t("form.bestFor.help")}
+                  value={bestFor}
+                  onChange={setBestFor}
+                  autoComplete="off"
+                />
+                <TextField
+                  label={t("form.badge")}
+                  helpText={t("form.badge.help")}
+                  value={badge}
+                  onChange={setBadge}
+                  autoComplete="off"
+                  maxLength={60}
+                />
+                <TextField
+                  label={t("form.details")}
+                  helpText={t("form.details.help")}
+                  value={detailsText}
+                  onChange={setDetailsText}
+                  autoComplete="off"
+                  multiline={3}
                 />
               </BlockStack>
             </Card>
@@ -890,6 +936,15 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   label={t("form.tags")}
                   value={tagsText}
                   onChange={setTagsText}
+                  autoComplete="off"
+                />
+                <TextField
+                  label={t("form.position")}
+                  helpText={t("form.position.help")}
+                  type="number"
+                  min={0}
+                  value={position}
+                  onChange={setPosition}
                   autoComplete="off"
                 />
               </BlockStack>

@@ -4501,3 +4501,30 @@ behaviour is unchanged.
 Verified Products end to end at 375px — navigates and dismisses the drawer.
 The other three render with correct labels but were not click-verified; the
 mechanism is identical.
+
+## 2026-08-03 21:02 AEST
+
+Made the five product fields that had no admin UI editable, so the product
+form and the planned CSV import can carry the same information.
+
+`short_name`, `best_for`, `badge`, `details[]` and `position` were all
+written by the seed and then frozen: `saveProduct` preserved whatever was
+already in the row (`existing?.best_for ?? ""` and friends), and no screen
+offered a field. `short_name` was the sharp one — it sets the PDP title and
+the shop card name, so there was live storefront copy nobody could change.
+`position` orders `/shop`. The `position={index}` hits in ProductsList and
+InventoryTable are Polaris IndexTable row props, not the DB column, so they
+were not a way in.
+
+Threaded through every layer: SaveProductInput, the zod schema in actions,
+ProductFormInitial, both pages that build it, and the save path now writes
+the inputs instead of preserving the old row. Blank short_name still falls
+back to the first 40 characters of the title, since shop cards and the PDP
+read it first and must never render empty. Blank position still appends.
+
+Verified against a real product — Short name "Signature Rose", Badge
+"Save 44%", Position 1 and the rest load into the form and round-trip.
+Labels in en + 中文.
+
+Remaining gap to a true bijection with the CSV: weight_oz is per-variant in
+the schema but the form applies one value to every variant.

@@ -150,11 +150,16 @@ function assertHandleAvailable(
 export type SaveProductInput = {
   id: string | null; // null = create
   title: string;
+  short_name: string;
   description: string;
   status: ProductStatus;
   vendor: string;
   product_type: string;
   tags: string[];
+  best_for: string;
+  badge: string;
+  details: string[];
+  position: number | null; // null = append (create) or keep (update)
   handle: string | null; // null = derive from title (create only)
   charge_tax: boolean;
   requires_shipping: boolean;
@@ -268,7 +273,9 @@ export async function saveProduct(
     id,
     handle,
     title: input.title,
-    short_name: existing?.short_name ?? input.title.slice(0, 40),
+    // Blank short_name still falls back to a trimmed title so shop cards and
+    // the PDP never render an empty name (they read short_name first).
+    short_name: input.short_name.trim() || input.title.slice(0, 40),
     description: input.description,
     vendor: input.vendor,
     product_type: input.product_type,
@@ -279,12 +286,12 @@ export async function saveProduct(
     hs_code: input.hs_code,
     seo_title: input.seo_title,
     seo_description: input.seo_description,
-    best_for: existing?.best_for ?? "",
-    badge: existing?.badge ?? "",
-    details: existing?.details ?? [],
+    best_for: input.best_for,
+    badge: input.badge,
+    details: input.details,
     option_names: input.option_names,
     status: input.status,
-    position: existing?.position ?? maxPosition + 1,
+    position: input.position ?? existing?.position ?? maxPosition + 1,
     created_at: existing?.created_at ?? now,
     updated_at: now,
   };

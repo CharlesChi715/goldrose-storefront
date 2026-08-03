@@ -38,11 +38,16 @@ const variantSchema = z.object({
 const saveProductSchema = z.object({
   id: z.string().trim().min(1).nullable(),
   title: z.string().trim().min(1).max(255),
+  short_name: z.string().trim().max(120),
   description: z.string().max(10_000),
   status: z.enum(["active", "draft", "archived"]),
   vendor: z.string().trim().max(255),
   product_type: z.string().trim().max(255),
   tags: z.array(z.string().trim().min(1).max(120)).max(50),
+  best_for: z.string().trim().max(255),
+  badge: z.string().trim().max(60),
+  details: z.array(z.string().trim().min(1).max(255)).max(20),
+  position: z.number().int().min(0).max(100_000).nullable(),
   handle: z
     .string()
     .trim()
