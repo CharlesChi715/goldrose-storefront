@@ -4528,3 +4528,61 @@ Labels in en + 中文.
 
 Remaining gap to a true bijection with the CSV: weight_oz is per-variant in
 the schema but the form applies one value to every variant.
+
+## 2026-08-04 — archived: homepage + shop IxD tables and their screenshots
+
+Interaction design is maintained in Figma now, so the 2026-07-25 parse outputs
+stopped being a source of truth. Moved `docs/ixd/homepage.md` (H-01…H-37),
+`docs/ixd/shop.md` (N-01…N-15) and `docs/ixd/assets/` (52 annotated
+screenshots) to `archive/ixd-home-shop/`, keeping the docs' relative
+`assets/H-nn.jpg` links intact by moving all three together.
+
+Held the archive folder's defining rule — nothing in it is referenced from
+anywhere. Removed every inbound path: `docs/ixd/README.md`'s Files list (now
+a "retired" note pointing at the still-live delivery folder instead),
+`tests/e2e/homepage.spec.ts`'s header comment (H-nn ids kept as bare ids),
+`batch.md`'s two links, the 37 screenshot embeds in that delivery's
+`homepage.zh.md` (our import plumbing, not delivered wording — logged in
+`batch.md`'s Edits section; the `.numbers` original still holds them), and
+`.prettierignore`'s `docs/ixd/assets/` line, which was redundant anyway since
+the unanchored `assets/` rule already matches at any depth.
+
+`docs/ixd/` now holds only `README.md` and `naming/`. The IxD findings and
+status legend stay in that README as the record of what the imports surfaced.
+One reference left alone on purpose: the 2026-07-27 order-detail delivery has
+a delivered Chinese sentence naming `docs/ixd/assets/` as a future destination
+— it is verbatim upstream wording and does not point into `archive/`.
+
+## 2026-08-04 — SUMMARY.md reconciled against the repo and trimmed
+
+Audited every factual claim in `SUMMARY.md` against the working tree, not just
+`HEAD`, and found six stale ones. The homepage claim was the costliest: the file
+still said "keep ignoring both homepage frames (2024:378)" while `app/page.tsx`
+had already imported the simplified frame `2380:370`, cutting the canvas
+8673 → 5193 and the band stack 11 → 7 (A-4/A-7/A-8/A-10 deleted at source).
+That silently falsified a second, unrelated claim two sections away — "3 of the
+home page's 17 bands carry a `data-el` tag" — a ratio measured against a page
+that later shrank. Both corrected, and the 08-03 three-tab nav (which SUMMARY
+never mentioned) added.
+
+The Resend warning was a same-fact-in-two-places failure: `291a93e` added
+`RESEND_API_KEY`/`RESEND_FROM` to Vercel Production and updated the sender-name
+line, but left the "⚠️ still missing from Vercel" paragraph untouched. Rewritten
+to record Production-only on purpose, previews keeping `lib/email.ts`'s
+console-log fallback.
+
+Also: migration `0006_orders_auth_user_id` was missing from the applied list —
+it is load-bearing, not incidental, because OTP sign-in has no verified email to
+match on, so without the stamped uid every signed-in customer saw an empty order
+list. Release-queue item 4 rewritten around that: no customer link points at the
+bare `/orders` redirect any more (they all use the real `/orders/track`), so the
+task is now just deleting `app/orders/page.tsx`; guest lookup stays unbuilt. The
+repository tree listed a `.codex/` that does not exist and omitted `.agents/` —
+the declared skills source of truth — plus `.github/`, `.env.example` and the
+root config files.
+
+Then trimmed on Charles's instruction: 2530 → 1764 words. The cut is almost
+entirely the per-frame Figma-sync narrative, which `docs/ixd/README.md` already
+owns; SUMMARY now states what landed and links there. Safety gates and release
+gates were left near-verbatim — they are rules, not history. Verified every
+relative link resolves and `prettier --check` passes.

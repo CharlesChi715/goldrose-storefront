@@ -26,7 +26,6 @@ team-deliveries/originals/
 public/
 assets/
 tests/e2e/__screenshots__/
-docs/ixd/assets/
 
 # Markdown is deliberately out of scope for now: SUMMARY.md and the docs tree
 # carry hand-aligned ASCII trees and tables that a reflow would scramble.

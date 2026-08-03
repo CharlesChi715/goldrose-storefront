@@ -2,13 +2,16 @@
 
 ## Files
 
-- [shop.md](shop.md) — 15 Shop page entries (N-01…N-15), still verbatim
-  Chinese (translation pending)
-- [homepage.md](homepage.md) — homepage entries (H-01…H-37), English working
-  copy; the ids cited across `components/home/` and `tests/e2e/homepage.spec.ts`
-  resolve here
-- `assets/` — 52 annotated screenshots (red box = the element for that entry);
-  filename = entry ID; JPEG-compressed from the originals
+Only the naming docs below live here now.
+
+**Retired 2026-08-04.** The homepage (`H-01…H-37`) and shop (`N-01…N-15`) IxD
+tables and their 52 annotated screenshots are gone from the docs tree — the
+interaction design is maintained in Figma now. The `H-nn`/`N-nn` ids stay
+readable as ids in `components/home/` and `tests/e2e/homepage.spec.ts`. The
+delivery they were parsed from is still live at
+[`team-deliveries/originals/2026-07-25-home-shop-mechanism/`](../../team-deliveries/originals/2026-07-25-home-shop-mechanism/batch.md)
+and remains the authority on wording. The findings further down this file are
+kept as the record of what those imports surfaced.
 
 **Naming.** An element-level convention doc (the `data-el` grammar and
 vocabulary) does not exist yet — Charles will author it; the `data-el`

@@ -1,9 +1,11 @@
 # 2026-07-25 · homepage + shop mechanism table (主页_shop页机制)
 
-Received from the design team 2026-07-25. Parsed into
-[`docs/ixd/shop.md`](../../../docs/ixd/shop.md) (N-01…N-15) and
-[`docs/ixd/homepage.md`](../../../docs/ixd/homepage.md) (H-01…H-37, cited across
-`components/home/` and `tests/e2e/homepage.spec.ts`).
+Received from the design team 2026-07-25. Parsed into `shop.md` (N-01…N-15) and
+`homepage.md` (H-01…H-37, cited across `components/home/` and
+`tests/e2e/homepage.spec.ts`). Both parse outputs, and the annotated
+screenshots they embedded, were **retired from the docs tree 2026-08-04** —
+interaction design is maintained in Figma now. This delivery folder remains the
+authority on wording.
 
 Came from the gitignored `temp/` on 2026-07-30.
 
@@ -17,8 +19,8 @@ Came from the gitignored `temp/` on 2026-07-30.
   - on disk now: `00ad0b9fc98712a5754f047b4d99a746eee56c8b18ea6e274df4b7ad1304efa3`
     (differs only by the link re-base recorded below)
 
-The English working copy `homepage.md` is a parse **output**, so it lives at
-`docs/ixd/homepage.md`, not here.
+The English working copy `homepage.md` is a parse **output**, so it never lived
+here (it sat in `docs/ixd/`, now archived).
 
 ## Edits since receipt
 
@@ -26,3 +28,9 @@ The English working copy `homepage.md` is a parse **output**, so it lives at
 `../../../docs/ixd/…`, and the README link) after the move out of `temp/`. The
 screenshot embeds are plumbing we added during import; no delivered word
 changed. The `.numbers` original is untouched.
+
+2026-08-04 — `homepage.zh.md`: those same 37 screenshot embeds **removed**. The
+screenshots they pointed at were retired with the parse outputs (interaction
+design now lives in Figma), and the target folder must not be linked from
+anywhere. Plumbing only; no delivered word changed. The `.numbers` original
+still holds the screenshots.
