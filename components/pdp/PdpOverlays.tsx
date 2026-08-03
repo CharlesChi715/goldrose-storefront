@@ -166,8 +166,19 @@ function OverlayStage({
       <style>{`
         .figv-pdpfix { position: fixed; inset: 0; z-index: 40; }
         .figv-pdpstage { position: absolute; bottom: 0; width: 430px; height: 932px; left: calc((100% - 430px) / 2); }
+        .figv-pdpsheet-slide-up {
+          animation: figv-pdpsheet-slide-up 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          will-change: transform;
+        }
+        @keyframes figv-pdpsheet-slide-up {
+          from { transform: translate3d(0, 100%, 0); }
+          to { transform: translate3d(0, 0, 0); }
+        }
         @supports (transform: scale(calc(100vw / 430px))) {
           .figv-pdpstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: bottom center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .figv-pdpsheet-slide-up { animation: none; }
         }
       `}</style>
       <button
@@ -232,7 +243,7 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
     <OverlayStage scrim="rgba(20,13,10,0.24)" onClose={onClose} label="Reviews">
       {/* 1523:4215 — sheet from y=120 of the 932 stage */}
       <div
-        className={notoSC.className}
+        className={`${notoSC.className} figv-pdpsheet-slide-up`}
         style={{
           ...abs(0, 120, 430, 812),
           background: REVIEW_BG,

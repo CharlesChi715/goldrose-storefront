@@ -4416,3 +4416,8 @@ Agent-inbox: detail pane formatting
 
 - On `test/integration`, moved the reminder dialog scrim outside the scaled Figma stage so the dim layer covers the full viewport while the sheet remains interactive above it.
 - Verified with `npm run typecheck`, component ESLint, and `git diff --check`.
+
+## 2026-08-03 — Animate the reviews sheet upward
+
+- On `test/integration`, added an eased slide-up entrance to the PDP Reviews drawer with reduced-motion support.
+- Verified with `npm run typecheck`, component ESLint, and `git diff --check`.
