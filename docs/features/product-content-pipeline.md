@@ -49,8 +49,6 @@ name a file but never carry one.
 | -------------------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
 | Admin form only (built)                      | 120 SKUs one-by-one, and most fields aren't displayed yet                          | insufficient.  |
 | **CSV round-tripping the export**            | No second spec to drift; Export *is* the template; re-importing an untouched file is a no-op — idempotency for free. Export's 11 columns must be widened first | ✅ **chosen**  |
-| A new CSV column spec                        | A second format to document and keep in step with the form; drift stays invisible until an import blanks a field | ❌             |
-| `.csv` only                                  | No dependency — but the uploader must pick "CSV **UTF-8**" in Excel, and the plain option silently writes the local codepage, mangling Chinese | ❌             |
 | **Accept `.csv` and `.xlsx`**                | One dependency (SheetJS), converted to rows at the door so one parser serves both; removes the "Save as" step and the encoding trap entirely | ✅ **chosen**  |
 | Upload via a Vercel server action            | **Impossible** — Vercel caps a request body at ~4.5 MB, under one photo            | ❌             |
 | **Upload browser → Supabase Storage**        | No size ceiling, no Vercel bandwidth or function time                              | ✅ **chosen**  |
@@ -68,9 +66,54 @@ title.
 
 **One row = one variant.** Every `products` column repeats on each of that
 product's variant rows; `Handle` binds the row to its parent, `SKU` identifies
-the row itself. Column-by-column requirements live in
-[Database.md § Table shapes](../Database.md) — that is the authoritative list,
-not this file.
+the row itself. Per-column database rules live in
+[Database.md § Table shapes](../Database.md) — that is the authoritative list.
+
+**34 columns.** ▪ repeats on every row of the product, ● varies per row.
+
+| #     | Column                     | Scope | Req                  |
+| ----- | -------------------------- | ----- | -------------------- |
+| 1     | Handle                     | ▪     | blank ⇒ derive from Title (see below) |
+| 2     | Title                      | ▪     | ✓                    |
+| 3     | Short name                 | ▪     | ○                    |
+| 4     | Description                | ▪     | ✓ if active          |
+| 5     | Status                     | ▪     | ○ — defaults draft   |
+| 6     | Type                       | ▪     | ○                    |
+| 7     | Vendor                     | ▪     | ○                    |
+| 8     | Tags                       | ▪     | ○ — `;` separated    |
+| 9     | Best for                   | ▪     | ○                    |
+| 10    | Badge                      | ▪     | ○                    |
+| 11    | Details                    | ▪     | ○ — `;` separated    |
+| 12    | SEO title                  | ▪     | ○                    |
+| 13    | SEO description            | ▪     | ○                    |
+| 14    | Charge tax                 | ▪     | ○ — defaults true    |
+| 15    | Requires shipping          | ▪     | ○ — defaults true    |
+| 16    | Country of origin          | ▪     | ○ — ISO-2            |
+| 17    | HS code                    | ▪     | ○                    |
+| 18–20 | Option1–3 name             | ▪     | ✓ if variants differ |
+| 21–23 | Option1–3 value            | ●     | ✓ if option names set |
+| 24    | SKU                        | ●     | ✓ if active          |
+| 25    | Barcode                    | ●     | ○                    |
+| 26    | Price                      | ●     | ✓                    |
+| 27    | Compare-at price           | ●     | ○                    |
+| 28    | Cost                       | ●     | ○ — see OQ-4         |
+| 29    | Track quantity             | ●     | ○ — defaults true    |
+| 30    | On hand                    | ●     | ○ — first import only |
+| 31    | Continue selling when OOS  | ●     | ○ — defaults false   |
+| 32    | Weight (oz)                | ●     | ○                    |
+| 33    | Image file                 | image row | lookup key       |
+| 34    | Image alt                  | image row | ○                |
+
+**Never columns:** `id`, `product_id`, `path`, `created_at`, `updated_at`, and
+both `position` columns — variant order is row order, product order is set in
+the admin, and the rest are generated.
+
+**Handle is optional but not derived-only.** Blank means "derive from Title",
+which is right when creating. It must still be *accepted*, because it is the
+match key: with Handle present you can change a Title and update the existing
+product, whereas deriving from Title alone means any edited title produces a new
+handle and therefore a duplicate product rather than a rename. This mirrors
+`SaveProductInput`, where `handle: null` means derive on create.
 
 Images ride on **extra rows** carrying only `Handle` plus the image columns
 (Shopify's convention). A row with a SKU is a variant row; a row without one is
