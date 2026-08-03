@@ -7,6 +7,10 @@
  * title, one-line note, back link — instead of an invented design. Each
  * route file names the frame that will replace it.
  *
+ * Since 2026-08-04 it also backs /blog, whose BLOG-JOURNAL-PAGE frame
+ * (1593:115) is likewise un-marked but is linked from the Ready-for-dev
+ * homepage footer — hence the overridable back link.
+ *
  * AI-TAG(AI-012): PLACEHOLDER — seven /policies/* routes are coming-soon
  * scaffolds until their frames are Ready-for-dev. See
  * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
@@ -19,9 +23,19 @@ import { notoSC, playfair } from "@/lib/fonts";
  * A quiet placeholder page for a policy document that is not designed yet.
  *
  * @param title - The policy's name, verbatim from the hub entry.
+ * @param backHref - Where the back link goes; defaults to the policies hub.
+ * @param backLabel - The back link's text; defaults to "Policies & Legal".
  * @returns The centred coming-soon page.
  */
-export function PolicyComingSoon({ title }: { title: string }) {
+export function PolicyComingSoon({
+  title,
+  backHref = "/account/policies-legal",
+  backLabel = "Policies & Legal",
+}: {
+  title: string;
+  backHref?: string;
+  backLabel?: string;
+}) {
   return (
     <main
       className={notoSC.className}
@@ -50,7 +64,7 @@ export function PolicyComingSoon({ title }: { title: string }) {
           This page is coming soon.
         </p>
         <Link
-          href="/account/policies-legal"
+          href={backHref}
           style={{
             display: "inline-block",
             marginTop: 28,
@@ -60,7 +74,7 @@ export function PolicyComingSoon({ title }: { title: string }) {
             textDecoration: "none",
           }}
         >
-          ‹&nbsp;&nbsp;Policies &amp; Legal
+          ‹&nbsp;&nbsp;{backLabel}
         </Link>
       </div>
     </main>

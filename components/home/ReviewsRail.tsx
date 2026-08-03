@@ -22,7 +22,7 @@ import { playfair, notoSC } from "@/lib/fonts";
 
 /* Review cards 1–3 (nodes 163:99, 193:150, 193:155) — identical structure, so
    only the photo, its crop and the quote differ. The design lays them out on a
-   134px pitch (x = 22 / 156 / 290) at y=4384, i.e. a horizontal rail, so they
+   134px pitch (x = 22 / 156 / 290) at y=2873, i.e. a horizontal rail, so they
    are drawn by the shared Carousel and these values are CELL coordinates
    (each card's own x/y subtracted). photoBox is the photo's rect relative to
    the clipping image frame. */
@@ -62,9 +62,9 @@ const REVIEWS: readonly Review[] = [
    design draws FOUR dots for three review cards, so only the first three are
    wired to a slide; the fourth stays the inert ellipse rendered by A-6. */
 const REVIEW_DOTS = [
-  { x: 184.5, y: 4522.5, size: 7 },
-  { x: 203, y: 4522.5, size: 7 },
-  { x: 221, y: 4522.5, size: 7 },
+  { x: 185.5, y: 3086.5, size: 7 },
+  { x: 204, y: 3086.5, size: 7 },
+  { x: 222, y: 3086.5, size: 7 },
 ];
 
 function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
@@ -159,7 +159,7 @@ export function ReviewsRail() {
        window runs from the first card to x=430 so the rail clips at the
        canvas edge exactly as the Figma frame does. */
     <Carousel
-      window={{ left: 22, top: 4384, width: 408, height: 124 }}
+      window={{ left: 22, top: 2873, width: 408, height: 124 }}
       count={REVIEWS.length}
       cellWidth={122}
       step={134}

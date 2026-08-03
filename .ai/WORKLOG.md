@@ -4586,3 +4586,32 @@ entirely the per-frame Figma-sync narrative, which `docs/ixd/README.md` already
 owns; SUMMARY now states what landed and links there. Safety gates and release
 gates were left near-verbatim — they are rules, not history. Verified every
 relative link resolves and `prettier --check` passes.
+
+## 2026-08-04 · figma-sync · simplified homepage + MENU (`feat/figma-sync`)
+
+Imported Figma frame `2380:370` ("/ · default · mobile · homepage"), the only
+homepage frame left inside the Ready-for-dev section `首页一级`, plus its
+overlay target `2345:271` (MENU) from the same section.
+
+- **Homepage 8673px → 5193px.** Modules A-4, A-7, A-8 and A-10 were deleted at
+  source; `components/home/A4|A7|A8|A10.tsx` deleted with them. A-1/A-2/A-3/
+  A-5/A-6/A-9/A-11 reflowed to the frame's own band offsets (32 / 764 / 1405 /
+  1868 / 2344 / 3133 / 4124). A-9 flipped from a dark section to cream. A-11
+  grew 714 → 1010 with a gift card, newsletter strip and footer link cloud.
+- **All 21 prototype links wired**, including eight footer links, four FAQ rows
+  → `/care/chat`, and the newsletter hand-off → `/account/signup`. `/blog`
+  added as a coming-soon scaffold (its frame is not Ready-for-dev).
+- **MENU redesigned**: the 07-29 dark 314px left drawer became a full-width
+  cream accordion sheet with computed layout (it collapses). Eight new icon
+  assets under `public/veloria/menu/`.
+- **Carousel IxD finished**: A-6's recipient cards became a real rail
+  (`RecipientRail.tsx`); A-5's and A-6's pagination dots are wired to their
+  rails; Best Sellers now carries the frame's two distinct cards with no dots.
+  All four rails share `Carousel.tsx`.
+- **Verified**: per-band diff against the scale-2 Figma renders is 0.99–2.89 %
+  (font-antialiasing envelope) and the MENU is 0.36 %; every band matches the
+  frame's pixel dimensions. 67/67 unit, 99/100 e2e (the one failure,
+  `admin-auth.spec.ts` EN/中文, confirmed pre-existing on a clean tree). 16 new
+  specs; `home-darwin.png` baseline regenerated.
+- Raised AI-024…AI-029; see
+  `agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md`.

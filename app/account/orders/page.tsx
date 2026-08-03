@@ -8,6 +8,11 @@
  * signed out / local mode falls back to the mock's three example orders
  * (visible-mock phase convention). This also supersedes the old customer
  * order links that pointed at the /orders admin redirect (release queue #4).
+ *
+ * AI-TAG(AI-029): OWNER-TODO — two Ready-for-dev frames this list should reach
+ * (/account/orders/delivered 2439:369, /account/orders/review 2439:370) have no
+ * route yet, so the second card's "View details" is a dead end. See
+ * /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md.
  */
 
 import { useEffect, useState } from "react";
