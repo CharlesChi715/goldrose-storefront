@@ -69,40 +69,56 @@ product's variant rows; `Handle` binds the row to its parent, `SKU` identifies
 the row itself. Per-column database rules live in
 [Database.md § Table shapes](../Database.md) — that is the authoritative list.
 
-**34 columns.** ▪ repeats on every row of the product, ● varies per row.
+**34 columns, in this order.** Required first, so the columns that decide
+whether an import succeeds are visible without scrolling. ▪ repeats on every row
+of the product, ● varies per row.
 
-| #     | Column                     | Scope | Req                  |
-| ----- | -------------------------- | ----- | -------------------- |
-| 1     | Handle                     | ▪     | blank ⇒ derive from Title (see below) |
-| 2     | Title                      | ▪     | ✓                    |
-| 3     | Short name                 | ▪     | ○                    |
-| 4     | Description                | ▪     | ✓ if active          |
-| 5     | Status                     | ▪     | ○ — defaults draft   |
-| 6     | Type                       | ▪     | ○                    |
-| 7     | Vendor                     | ▪     | ○                    |
-| 8     | Tags                       | ▪     | ○ — `;` separated    |
-| 9     | Best for                   | ▪     | ○                    |
-| 10    | Badge                      | ▪     | ○                    |
-| 11    | Details                    | ▪     | ○ — `;` separated    |
-| 12    | SEO title                  | ▪     | ○                    |
-| 13    | SEO description            | ▪     | ○                    |
-| 14    | Charge tax                 | ▪     | ○ — defaults true    |
-| 15    | Requires shipping          | ▪     | ○ — defaults true    |
-| 16    | Country of origin          | ▪     | ○ — ISO-2            |
-| 17    | HS code                    | ▪     | ○                    |
-| 18–20 | Option1–3 name             | ▪     | ✓ if variants differ |
-| 21–23 | Option1–3 value            | ●     | ✓ if option names set |
-| 24    | SKU                        | ●     | ✓ if active          |
-| 25    | Barcode                    | ●     | ○                    |
-| 26    | Price                      | ●     | ✓                    |
-| 27    | Compare-at price           | ●     | ○                    |
-| 28    | Cost                       | ●     | ○ — see OQ-4         |
-| 29    | Track quantity             | ●     | ○ — defaults true    |
-| 30    | On hand                    | ●     | ○ — first import only |
-| 31    | Continue selling when OOS  | ●     | ○ — defaults false   |
-| 32    | Weight (oz)                | ●     | ○                    |
-| 33    | Image file                 | image row | lookup key       |
-| 34    | Image alt                  | image row | ○                |
+**A — required.** Without these the row is rejected or the product cannot go
+live.
+
+| #     | Column          | Scope     | Req                                   |
+| ----- | --------------- | --------- | ------------------------------------- |
+| 1     | Handle          | ▪         | blank ⇒ derive from Title (see below) |
+| 2     | Title           | ▪         | ✓                                     |
+| 3     | Description     | ▪         | ✓ if active                           |
+| 4     | SKU             | ●         | ✓ if active                           |
+| 5     | Price           | ●         | ✓                                     |
+| 6–8   | Option1–3 name  | ▪         | ✓ if variants differ                  |
+| 9–11  | Option1–3 value | ●         | ✓ if option names set                 |
+| 12    | Image file      | image row | lookup key                            |
+
+**B — wanted.** Not enforced, but the storefront is visibly worse without them:
+these are what customers and Google actually read.
+
+| #  | Column           | Scope     | Req                   |
+| -- | ---------------- | --------- | --------------------- |
+| 13 | Status           | ▪         | ○ — defaults draft    |
+| 14 | Short name       | ▪         | ○ — falls back to Title |
+| 15 | Image alt        | image row | ○                     |
+| 16 | Compare-at price | ●         | ○                     |
+| 17 | On hand          | ●         | ○ — first import only |
+| 18 | Badge            | ▪         | ○                     |
+| 19 | Best for         | ▪         | ○                     |
+| 20 | Details          | ▪         | ○ — `;` separated     |
+| 21 | SEO title        | ▪         | ○                     |
+| 22 | SEO description  | ▪         | ○                     |
+| 23 | Tags             | ▪         | ○ — `;` separated     |
+| 24 | Type             | ▪         | ○                     |
+| 25 | Vendor           | ▪         | ○                     |
+
+**C — the rest.** Defaults are fine; fill them when there is a reason to.
+
+| #  | Column                    | Scope | Req                 |
+| -- | ------------------------- | ----- | ------------------- |
+| 26 | Charge tax                | ▪     | ○ — defaults true   |
+| 27 | Requires shipping         | ▪     | ○ — defaults true   |
+| 28 | Country of origin         | ▪     | ○ — ISO-2           |
+| 29 | HS code                   | ▪     | ○                   |
+| 30 | Barcode                   | ●     | ○                   |
+| 31 | Cost                      | ●     | ○ — see OQ-4        |
+| 32 | Track quantity            | ●     | ○ — defaults true   |
+| 33 | Continue selling when OOS | ●     | ○ — defaults false  |
+| 34 | Weight (oz)               | ●     | ○                   |
 
 **Never columns:** `id`, `product_id`, `path`, `created_at`, `updated_at`, and
 both `position` columns — variant order is row order, product order is set in
