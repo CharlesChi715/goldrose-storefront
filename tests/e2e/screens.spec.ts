@@ -2,7 +2,7 @@
  * ROLE OF THIS FILE
  * Smoke cover for the screens imported from the Figma B/C frames: bag (B-1),
  * business partnerships + wholesale application (B-3/B-4), guest order
- * tracking (C-1) and the homepage menu drawer (C-3). These pages are static
+ * tracking (C-1) and the menu overlay (2345:271). These pages are static
  * design imports, so the checks are deliberately shallow — they prove the
  * route renders, the wired links point where the route table says, and the
  * placeholder controls stay inert. Pixel fidelity is the pixel-diff net's job.
@@ -47,23 +47,79 @@ test("guest order tracking renders the C-1 timeline", async ({ page }) => {
   await expect(page.getByText("#VL20250821")).toBeVisible();
 });
 
-test("the header menu opens the drawer, navigates, and closes on Escape", async ({
+test("the header menu opens the sheet, navigates, and closes on Escape", async ({
   page,
 }) => {
   await page.goto("/");
   const menu = page.getByRole("button", { name: "Open menu" });
   await menu.click();
-  const drawer = page.getByRole("dialog", { name: "Menu" });
-  await expect(drawer).toBeVisible();
+  const sheet = page.getByRole("dialog", { name: "Menu" });
+  await expect(sheet).toBeVisible();
 
   await page.keyboard.press("Escape");
-  await expect(drawer).toBeHidden();
+  await expect(sheet).toBeHidden();
 
-  // Wired rows navigate and close the drawer behind them.
+  // Wired rows navigate and close the sheet behind them.
   await menu.click();
-  await drawer.getByRole("link", { name: "SHOP" }).click();
+  await sheet.getByRole("link", { name: "Shop", exact: true }).click();
   await expect(page).toHaveURL(/\/shop$/);
   await expect(page.getByRole("dialog", { name: "Menu" })).toHaveCount(0);
+});
+
+/*
+ * 2345:271 · the menu overlay redesigned in the 2026-08-04 sync: four
+ * accordion groups instead of seven flat rows. Contact and Legal & Policies
+ * are drawn expanded, so they start expanded and toggle.
+ */
+test("the menu's accordion groups collapse and expand", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const sheet = page.getByRole("dialog", { name: "Menu" });
+
+  const legal = sheet.getByRole("button", { name: "Legal & Policies" });
+  await expect(legal).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    sheet.getByRole("link", { name: "Privacy Policy" }),
+  ).toBeVisible();
+
+  await legal.click();
+  await expect(legal).toHaveAttribute("aria-expanded", "false");
+  await expect(sheet.getByRole("link", { name: "Privacy Policy" })).toHaveCount(
+    0,
+  );
+
+  // Collapsing one group leaves the other alone.
+  await expect(
+    sheet.getByRole("button", { name: "Contact", exact: true }),
+  ).toHaveAttribute("aria-expanded", "true");
+  await expect(sheet.getByRole("link", { name: "Our Craft" })).toBeVisible();
+});
+
+test("every menu policy row reaches its policy route", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const sheet = page.getByRole("dialog", { name: "Menu" });
+  // Seven policy rows plus Blog / Our Story / Our Craft under Contact.
+  for (const [label, href] of [
+    ["Blog", "/blog"],
+    ["Our Story", "/story"],
+    ["Our Craft", "/craft"],
+    [
+      "Returns, Refunds & Cancellations",
+      "/policies/returns-refunds-cancellations",
+    ],
+    ["Shipping & Delivery", "/policies/shipping-delivery"],
+    ["Limited Product Warranty & Care", "/policies/warranty-care"],
+    ["Terms of Service", "/policies/terms-of-service"],
+    ["Privacy Policy", "/policies/privacy"],
+    ["Email & SMS Terms", "/policies/email-sms-terms"],
+    ["Contact & Legal Notice", "/policies/contact-legal"],
+  ] as const) {
+    await expect(
+      sheet.getByRole("link", { name: label, exact: true }),
+      `menu row ${label}`,
+    ).toHaveAttribute("href", href);
+  }
 });
 
 test("the reminders Edit control opens the edit sheet; Cancel closes it", async ({
@@ -215,15 +271,15 @@ test("the homepage gift-path cards reach the shop and the on-page sections", asy
   page,
 }) => {
   await page.goto("/");
-  await expect(page.locator("#personalize")).toHaveCount(1);
-  // #craft stays as an anchor target, but the EXPLORE OUR CRAFT card now
-  // reaches the real /craft page (07-29 import); the story CTA reaches /story.
+  // #craft stays as an anchor target. #personalize is gone since 2026-08-04:
+  // frame 2380:370 deleted modules A-4/A-8, which carried that anchor.
   await expect(page.locator("#craft")).toHaveCount(1);
-  await expect(page.locator('a[href="#personalize"]')).toHaveCount(1);
-  await expect(page.locator('a[href="/craft"]')).toHaveCount(1);
-  // Two /story links since 07-30: A-11's READ OUR STORY plus A-6's Read
-  // Customer Stories (H-24, wired per the owner's Figma comment).
-  await expect(page.locator('a[href="/story"]')).toHaveCount(2);
+  await expect(page.locator("#personalize")).toHaveCount(0);
+  // Two /craft links: A-9's EXPLORE OUR CRAFT button and the footer link.
+  await expect(page.locator('a[href="/craft"]')).toHaveCount(2);
+  // Two /story links: A-11's READ OUR STORY plus the footer link. A-6's Read
+  // Customer Stories button is a third.
+  await expect(page.locator('a[href="/story"]')).toHaveCount(3);
   await expect(
     page.getByRole("link", { name: /Valentine/i }).first(),
   ).toBeVisible();

@@ -1,26 +1,24 @@
 # Homepage modules (A-1 … A-11)
 
-`app/page.tsx` stacks these eleven bands, in order, inside one `ScaleFrame`.
+`app/page.tsx` stacks these seven bands, in order, inside one `ScaleFrame`.
 
 The `A<n>` names are the **design team's** identifiers, not ours — they match
 the Figma frame, the entries in [`docs/ixd/`](../../docs/ixd/README.md), and the
 `implements H-09` style references used in commit messages. That shared
 vocabulary is worth more than self-describing filenames, so this table carries
-the meaning instead of a rename.
+the meaning instead of a rename. The gaps in the numbering are the design's
+own: A-4, A-7, A-8 and A-10 were **deleted at source** in the 2026-08-04
+simplified frame, and their files went with them.
 
-| File      | Figma node | What the band is                                                                                 |
-| --------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `A1.tsx`  | 138:57     | Hero and intro — eyebrow/title/subtitle, two pill CTAs, three benefit tiles, hero gift-box photo |
-| `A2.tsx`  | 138:58     | Featured Rose Gifts — "Best Sellers" row, product cards, carousel dots                           |
-| `A3.tsx`  | 138:59     | New Arrivals and Ready to Ship — hero + pendant pair, two rows, Real Rose Promise                |
-| `A4.tsx`  | 138:60     | Real Rose Story and MORI entry — three-step story strip, MORI gift-finder panel                  |
-| `A5.tsx`  | 138:61     | Shop by Occasion — occasion chips and an auto-sliding recipient rail                             |
-| `A6.tsx`  | 138:62     | Shop by Recipient and Reviews — recipient chips, gift cards, "Real Gifts, Real Moments"          |
-| `A7.tsx`  | 138:63     | MORI Gift Finder — illustration, criteria chips, "See MORI's Picks"                              |
-| `A8.tsx`  | 138:64     | Personalized Gold Rose Gifts — the `#personalize` anchor                                         |
-| `A9.tsx`  | 138:65     | Craft, Workshop and Patents — the `#craft` anchor                                                |
-| `A10.tsx` | 138:66     | Corporate Partnerships                                                                           |
-| `A11.tsx` | 138:67     | Story, FAQ and Final CTA                                                                         |
+| File      | Figma node | Band offset | What the band is                                                                        |
+| --------- | ---------- | ----------- | ----------------------------------------------------------------------------------------- |
+| `A1.tsx`  | 2380:374   | 32          | Hero and intro — gift-box photo + dots, eyebrow/title/subtitle, one pill CTA, two tiles |
+| `A2.tsx`  | 2380:399   | 764         | Featured Rose Gifts — "Best Sellers" row, product cards, carousel dots                  |
+| `A3.tsx`  | 2380:422   | 1405        | Ready to Ship — two product rows and the Real Rose Promise strip                        |
+| `A5.tsx`  | 2380:454   | 1868        | Shop by Occasion — occasion chips and an auto-sliding recipient rail                    |
+| `A6.tsx`  | 2380:523   | 2344        | Shop by Recipient and Reviews — recipient chips, gift cards, "Real Gifts, Real Moments" |
+| `A9.tsx`  | 2380:658   | 3133        | Craft, Workshop and Patents (cream since 08-04) — the `#craft` anchor                   |
+| `A11.tsx` | 2380:727   | 4124        | Story, FAQ, gift CTA, newsletter and the footer link cloud                              |
 
 ## Shared pieces in this folder
 

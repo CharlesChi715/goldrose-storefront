@@ -4,6 +4,22 @@
 
 Source: design team's `主页_shop页机制.numbers`, sheet 「主页机制」. Screenshots are the design team's annotated Figma prototype (iPhone 15 Pro Max); the red box marks the element each row refers to. Citation rules: see [README](README.md).
 
+> ⚠️ **Dev note (2026-08-04) — entries with no element left on the page.** The
+> simplified homepage frame `2380:370` deleted modules A-4, A-7, A-8 and A-10 at
+> source, so the rows below now describe elements that no longer exist:
+> **H-08** (hero secondary CTA), **H-11 / H-12 / H-13** (New Arrivals feature
+> card, carousel, view-all), **H-15 / H-16 / H-17** (the three MORI
+> guided-shopping path cards), **H-20 / H-23** (the two in-flow blog cards —
+> only a footer BLOG link survives), **H-25 / H-26 / H-27** (MORI gift
+> recommender), **H-28 / H-29 / H-30** (personalization four-step), **H-32**
+> (See How We Work), **H-33** (corporate partnership dual CTA), and
+> **H-36 / H-37** (footer CTA pair, replaced by the gift card + newsletter +
+> footer link cloud).
+>
+> Still live: **H-01…H-07, H-09, H-10, H-14, H-18, H-19, H-21, H-22, H-24,
+> H-31, H-34, H-35**. The table below is left verbatim because it is the design
+> team's own source — it is retranslated, not edited, when the source updates.
+
 ## Index
 
 | ID   | Module                                 | Element                                  | Target-page status                       |

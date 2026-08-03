@@ -1,11 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * A-1 · Homepage Hero and Intro — Figma node 138:57 of the VELORIA homepage
- * frame: cream hero panel with eyebrow / title / subtitle / body copy, two
- * pill CTAs, three benefit tiles, the hero gift-box photo window and its
- * static carousel dots. The header (549:87) is shared page chrome and is not
- * rebuilt here. All coordinates/colors are verbatim from the Figma REST data.
+ * A-1 · Homepage Hero and Intro — Figma node 2380:374 of the simplified
+ * homepage frame 2380:370: cream hero panel with the gift-box photo window
+ * and its carousel dots on top, then eyebrow / title / subtitle / body copy,
+ * one pill CTA and two benefit tiles. The header (2380:388) is shared page
+ * chrome (chrome.tsx `HomeHeader`) and is not rebuilt here. All
+ * coordinates/colors are verbatim from the Figma REST data.
+ *
+ * 2026-08-04 sync: the design dropped the secondary "CREATE A PERSONALIZED
+ * ROSE GIFT" CTA and the middle "Personalized Gift Options" tile, and widened
+ * the two survivors to fill the row (176 + 174 instead of 3 × 118). The band
+ * is 79px shorter as a result.
  */
 
 import Link from "next/link";
@@ -13,41 +19,38 @@ import { abs } from "@/lib/figma-layout";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { notoSC, playfair } from "@/lib/fonts";
 
-// Both CTA arrows (I155:53;145:55 / I155:56;145:58) share one glyph render.
+// The CTA arrow glyph (I2380:379;1523:389) as an exact render.
 const ARROW = "/veloria/home/465-156.svg";
 
-// Benefit tiles 155:59 / 155:62 / 155:65 — icon glyphs served as exact SVG
-// renders; x offsets are relative to each 118×62 tile.
+// Benefit tiles 2380:380 / 2380:383 — icon glyphs served as exact SVG
+// renders; x offsets are relative to each tile's own box.
 const TILES = [
   {
-    x: 26,
-    icon: { src: "/veloria/home/155-60.svg", x: 51, w: 16, alt: "✿" },
-    label: { x: 36, w: 46, lines: ["Made from", "Real Roses"] },
+    x: 32,
+    w: 176,
+    icon: { src: "/veloria/home/155-60.svg", x: 80, w: 16, alt: "✿" },
+    label: { x: 65, w: 46, lines: ["Made from", "Real Roses"] },
   },
   {
-    x: 156,
-    icon: { src: "/veloria/home/155-63.svg", x: 50.5, w: 17, alt: "✎" },
-    label: { x: 32, w: 54, lines: ["Personalized", "Gift Options"] },
-  },
-  {
-    x: 285,
-    icon: { src: "/veloria/home/155-66.svg", x: 51, w: 16, alt: "▣" },
-    label: { x: 37, w: 44, lines: ["Gift-Ready", "Packaging"] },
+    x: 224,
+    w: 174,
+    icon: { src: "/veloria/home/155-66.svg", x: 79, w: 16, alt: "▣" },
+    label: { x: 65, w: 44, lines: ["Gift-Ready", "Packaging"] },
   },
 ];
 
 export function A1() {
   return (
-    // 138:57 module frame — children below are positioned relative to it.
+    // 2380:374 module frame — children below are positioned relative to it.
     <div
       data-el="HOME-HERO-SECTION"
       style={{
-        ...abs(0, 32, 430, 811),
+        ...abs(0, 32, 430, 732),
         background: "#FFF6EC",
         overflow: "hidden",
       }}
     >
-      {/* 153:65 eyebrow — space runs kept via nbsp so HTML doesn't collapse them */}
+      {/* 2380:375 eyebrow — space runs kept via nbsp so HTML doesn't collapse them */}
       <div
         data-el="HOME-HERO-EYEBROW-TEXT"
         className={notoSC.className}
@@ -64,7 +67,7 @@ export function A1() {
         {"—   G O L D R O S E   —"}
       </div>
 
-      {/* 153:66 hero title */}
+      {/* 2380:376 hero title */}
       <div
         data-el="HOME-HERO-TITLE"
         className={playfair.className}
@@ -82,7 +85,7 @@ export function A1() {
         Made from Real Roses
       </div>
 
-      {/* 153:67 hero subtitle */}
+      {/* 2380:377 hero subtitle */}
       <div
         data-el="HOME-HERO-SUBTITLE"
         className={playfair.className}
@@ -99,7 +102,7 @@ export function A1() {
         Eternal Beauty, Endless Love
       </div>
 
-      {/* 153:68 hero body — wraps naturally inside its 306px box */}
+      {/* 2380:378 hero body — wraps naturally inside its 306px box */}
       <div
         data-el="HOME-HERO-BODY-TEXT"
         className={notoSC.className}
@@ -116,7 +119,7 @@ export function A1() {
         weddings and meaningful moments.
       </div>
 
-      {/* 155:53 CTA · Shop Gold-Dipped Roses */}
+      {/* 2380:379 CTA · Shop Gold-Dipped Roses */}
       <Link
         data-el="HOME-HERO-SHOP-BTN"
         href="/shop"
@@ -151,47 +154,14 @@ export function A1() {
         />
       </Link>
 
-      {/* 155:56 CTA · Create Personalized Rose Gift (placeholder, not clickable) */}
-      <div
-        data-el="HOME-HERO-PERSONALIZE-BTN"
-        style={{
-          ...abs(31, 654, 366, 44),
-          background: "#FFF6EC",
-          borderRadius: 10,
-          boxShadow: "inset 0 0 0 1px #E5D9C9",
-        }}
-      >
-        <div
-          data-el="HOME-HERO-PERSONALIZE-TEXT"
-          className={notoSC.className}
-          style={{
-            ...abs(48.5, 15, 242),
-            fontSize: 12,
-            lineHeight: "14.4px",
-            fontWeight: 500,
-            letterSpacing: 1.1,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          CREATE A PERSONALIZED ROSE GIFT
-        </div>
-        <img
-          src={ARROW}
-          alt="→"
-          width={15}
-          height={18}
-          style={{ ...abs(302.5, 13, 15, 18), display: "block" }}
-        />
-      </div>
-
-      {/* 155:59 / 155:62 / 155:65 benefit tiles (placeholders, not clickable) */}
+      {/* 2380:380 / 2380:383 benefit tiles (statements, not links — the design
+          gives them no prototype target) */}
       {TILES.map((t, i) => (
         <div
           key={t.x}
           data-el={`HOME-HERO-BENEFIT-CARD-${i + 1}`}
           style={{
-            ...abs(t.x, 710, 118, 62),
+            ...abs(t.x, 664, t.w, 62),
             background: "#FFF6EC",
             borderRadius: 10,
             boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -225,9 +195,9 @@ export function A1() {
         </div>
       ))}
 
-      {/* 153:63 hero photo window + 549:97 dots — interactive per H-03; the
-          source crop (153:64) bleeds 343px above the window and 1px past the
-          left edge, and the frame clips it. */}
+      {/* 2380:386 hero photo window + 2380:394 dots — interactive per H-03.
+          The window sits at the TOP of the band in this frame, directly under
+          the header, with the dots overlaid on its lower edge. */}
       <HeroCarousel />
     </div>
   );

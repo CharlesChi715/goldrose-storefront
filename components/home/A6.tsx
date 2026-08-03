@@ -1,14 +1,21 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Module A-6 "Shop by Recipient and Reviews" (Figma node 138:62) of the
- * VELORIA homepage frame: recipient filter chips, three recipient gift cards,
- * the "Just Because" note card, and the "Real Gifts, Real Moments" review
- * strip with carousel dots and the "Read Customer Stories" button. All
- * coordinates/colors are verbatim Figma REST data, homepage-frame absolute.
+ * Module A-6 "Shop by Recipient and Reviews" (Figma node 2380:523) of the
+ * simplified homepage frame: recipient filter chips, three recipient gift
+ * cards, and the "Real Gifts, Real Moments" review strip with carousel dots
+ * and the "Read Customer Stories" button. All coordinates/colors are verbatim
+ * Figma REST data, homepage-frame absolute.
+ *
+ * 2026-08-04 sync: the band moved 3762 → 2344 and lost three things at
+ * source — the "Clients" and "Employees" chips, and the full-width "Just
+ * Because" note card. The "more recipients" arrow node survives but is now an
+ * empty clipped frame (no vector child), so it draws nothing and is not
+ * rebuilt here.
  */
 
 import Link from "next/link";
+import { RecipientRail } from "@/components/home/RecipientRail";
 import { ReviewsRail } from "@/components/home/ReviewsRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
@@ -61,31 +68,13 @@ const CHIPS = [
     label: "Couples",
     color: "#3B2E2E",
   },
-  {
-    x: 289,
-    w: 48,
-    stroke: "#E5D6C2",
-    labelX: 298.5,
-    labelW: 29,
-    label: "Clients",
-    color: "#3B2E2E",
-  },
-  {
-    x: 342,
-    w: 62,
-    stroke: "#E5D6C2",
-    labelX: 350,
-    labelW: 46,
-    label: "Employees",
-    color: "#3B2E2E",
-  },
 ] as const;
 
 export function A6() {
   return (
     <>
       {/* Module background (138:62) */}
-      <div style={{ ...abs(0, 3762, 430, 844), background: "#FFF6EC" }} />
+      <div style={{ ...abs(0, 2344, 430, 789), background: "#FFF6EC" }} />
 
       {/* Header ornament · rose and lines (431:265) */}
       <img
@@ -93,14 +82,14 @@ export function A6() {
         alt=""
         width={142}
         height={34}
-        style={{ ...abs(144, 3762, 142, 34), display: "block" }}
+        style={{ ...abs(144, 2344, 142, 34), display: "block" }}
       />
 
       {/* Title + intro (163:82, 163:83) */}
       <div
         className={playfair.className}
         style={{
-          ...abs(24, 3793, 382),
+          ...abs(24, 2375, 382),
           fontSize: 30,
           lineHeight: "36px",
           fontWeight: 500,
@@ -114,7 +103,7 @@ export function A6() {
       <div
         className={goudy.className}
         style={{
-          ...abs(52, 3829, 326),
+          ...abs(52, 2411, 326),
           fontSize: 10,
           lineHeight: "15px",
           color: "#3B2F2F",
@@ -130,7 +119,7 @@ export function A6() {
         <div
           key={c.label}
           style={{
-            ...abs(c.x, 3853, c.w, 30),
+            ...abs(c.x, 2435, c.w, 30),
             background: "#FFF6EC",
             borderRadius: 999,
             boxShadow: `inset 0 0 0 1px ${c.stroke}`,
@@ -152,372 +141,47 @@ export function A6() {
         </div>
       ))}
 
-      {/* Arrow · more recipients (442:166) — decorative */}
-      <img
-        src="/veloria/home/442-166.svg"
-        alt=""
-        width={12}
-        height={18}
-        style={{ ...abs(414, 3859, 12, 18), display: "block" }}
+      {/* 2380:620 "Arrow · More Recipients" is an empty clipped frame in this
+          revision — the design stripped its vector child, so it draws nothing.
+          Not rebuilt; the rail's dots already signal there is more to see. */}
+
+      {/* 2380:526 / 2380:540 / 2380:554 · recipient cards — a swipeable rail
+          since 2026-08-04 (H-22), on the same shared Carousel as A-5's
+          structurally identical rail. */}
+      <RecipientRail />
+
+      {/* 2380:601 · dots 4 and 5 — the design draws five for three cards, so
+          these two stay inert; RecipientRail wires the first three. */}
+      <div
+        style={{
+          ...abs(231, 2758.5, 7, 7),
+          background: "#E0CCB2",
+          borderRadius: 9999,
+        }}
+      />
+      <div
+        style={{
+          ...abs(249, 2758.5, 7, 7),
+          background: "#E0CCB2",
+          borderRadius: 9999,
+        }}
       />
 
-      {/* Recipient card 1 · Gifts for Wife (163:84) */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(15, 3897, 176, 257),
-          display: "block",
-          background: "#FFFBF6",
-          borderRadius: 10,
-          boxShadow: "inset 0 0 0 1px #E5D1B8",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            ...abs(0, 0, 176, 156),
-            background: "#F3C6D1",
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          {/* Bleed crop: the shared photo extends far outside the 176×156 window */}
-          <img
-            src="/veloria/home/163-86.png"
-            alt="Gold-dipped rose gift"
-            width={546.1}
-            height={911.9}
-            style={{
-              ...abs(-25.4, -210.82, 546.1, 911.9),
-              display: "block",
-              objectFit: "cover",
-              maxWidth: "none",
-            }}
-          />
-        </div>
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 166, 152),
-            fontSize: 16,
-            lineHeight: "18px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Gifts for Wife
-        </div>
-        <div
-          className={goudy.className}
-          style={{
-            ...abs(27, 193, 122),
-            fontSize: 8,
-            lineHeight: "12px",
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          For the one who means everything.
-        </div>
-        <img
-          src="/veloria/home/436-283.svg"
-          alt=""
-          width={53.534}
-          height={12.818}
-          style={{ ...abs(61.2329, 214, 53.534, 12.818), display: "block" }}
-        />
-        <img
-          src="/veloria/home/191-154.svg"
-          alt="SHOP WIFE GIFTS →"
-          width={152}
-          height={13}
-          style={{
-            ...abs(12, 235.82, 152, 13),
-            display: "block",
-            objectFit: "none",
-            objectPosition: "center center",
-          }}
-        />
-      </Link>
+      {/* The full-width "Just Because" note card (192:150) was deleted at
+          source in this revision — the reviews strip now follows the dots. */}
 
-      {/* Recipient card 2 · Thoughtful Gifts She’ll Love (163:89) */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(201, 3897, 176, 257),
-          display: "block",
-          background: "#FFFBF6",
-          borderRadius: 10,
-          boxShadow: "inset 0 0 0 1px #E5D1B8",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            ...abs(0, 0, 176, 156),
-            background: "#F3C6D1",
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/veloria/home/163-86.png"
-            alt="Gold-dipped rose gift"
-            width={546.1}
-            height={911.9}
-            style={{
-              ...abs(-241.3, -210.82, 546.1, 911.9),
-              display: "block",
-              objectFit: "cover",
-              maxWidth: "none",
-            }}
-          />
-        </div>
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 161, 152),
-            fontSize: 16,
-            lineHeight: "18px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {"Thoughtful Gifts\nShe’ll Love"}
-        </div>
-        <div
-          className={goudy.className}
-          style={{
-            ...abs(12, 202, 152),
-            fontSize: 8,
-            lineHeight: "12px",
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Romantic gifts to make her feel cherished.
-        </div>
-        <img
-          src="/veloria/home/436-283.svg"
-          alt=""
-          width={53.534}
-          height={12.818}
-          style={{ ...abs(61.233, 219, 53.534, 12.818), display: "block" }}
-        />
-        <img
-          src="/veloria/home/191-154.svg"
-          alt="SHOP WIFE GIFTS →"
-          width={152}
-          height={13}
-          style={{
-            ...abs(12, 236.82, 152, 13),
-            display: "block",
-            objectFit: "none",
-            objectPosition: "center center",
-          }}
-        />
-      </Link>
-
-      {/* Recipient card 3 · Anniversary Gifts for Wife (163:94) — extends past
-          x=430; the 430-wide stage clips it exactly as the Figma frame does */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(387, 3897, 176, 257),
-          display: "block",
-          background: "#FFFBF6",
-          borderRadius: 10,
-          boxShadow: "inset 0 0 0 1px #E5D1B8",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            ...abs(0, 0, 176, 156),
-            background: "#F3C6D1",
-            borderRadius: 10,
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src="/veloria/home/163-86.png"
-            alt="Gold-dipped rose gift"
-            width={546.1}
-            height={911.9}
-            style={{
-              ...abs(-457.2, -210.82, 546.1, 911.9),
-              display: "block",
-              objectFit: "cover",
-              maxWidth: "none",
-            }}
-          />
-        </div>
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 166, 152),
-            fontSize: 16,
-            lineHeight: "18px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {"Anniversary Gifts\nfor Wife"}
-        </div>
-        {/* Two-line natural wrap inside 148px (node is 24px tall at 12px lines) */}
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(14, 207, 148),
-            fontSize: 9,
-            lineHeight: "12px",
-            fontWeight: 400,
-            color: "#3B2F2F",
-            textAlign: "center",
-          }}
-        >
-          Celebrate your love with a timeless gift.
-        </div>
-        <img
-          src="/veloria/home/436-283.svg"
-          alt=""
-          width={53.534}
-          height={12.818}
-          style={{ ...abs(61.233, 236, 53.534, 12.818), display: "block" }}
-        />
-        <img
-          src="/veloria/home/191-154.svg"
-          alt="SHOP WIFE GIFTS →"
-          width={152}
-          height={13}
-          style={{
-            ...abs(12, 261, 152, 13),
-            display: "block",
-            objectFit: "none",
-            objectPosition: "center center",
-          }}
-        />
-      </Link>
-
-      {/* Recipient carousel dots · five (440:149) */}
-      <div style={{ ...abs(176, 4176, 80, 8), overflow: "hidden" }}>
-        <div
-          style={{
-            ...abs(0.5, 0.5, 7, 7),
-            background: "#C46E29",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(19, 0.5, 7, 7),
-            background: "#E0CCB2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(37, 0.5, 7, 7),
-            background: "#E0CCB2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(55, 0.5, 7, 7),
-            background: "#E0CCB2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(73, 0.5, 7, 7),
-            background: "#E0CCB2",
-            borderRadius: 9999,
-          }}
-        />
-      </div>
-
-      {/* Just Because · recipient category card (192:150) */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(19, 4217, 394, 67),
-          display: "block",
-          background: "#FFFBF6",
-          borderRadius: 11,
-          boxShadow: "inset 0 0 0 1px #E5C9A8",
-          overflow: "hidden",
-        }}
-      >
-        {/* 192:151 "✦" note icon is HIDDEN in the design — not rendered */}
-        <img
-          src="/veloria/home/436-350.svg"
-          alt=""
-          width={32}
-          height={32}
-          style={{ ...abs(20, 16, 32, 32), display: "block" }}
-        />
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(71, 16, 250),
-            fontSize: 15,
-            lineHeight: "18px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Just Because
-        </div>
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(71, 36, 280),
-            fontSize: 9,
-            lineHeight: "14px",
-            fontWeight: 400,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Because meaningful moments don’t need a reason.
-        </div>
-        <img
-          src="/veloria/home/192-154.svg"
-          alt="›"
-          width={12}
-          height={43}
-          style={{
-            ...abs(370, 6, 12, 43),
-            display: "block",
-            objectFit: "none",
-            objectPosition: "left center",
-          }}
-        />
-      </Link>
-
-      {/* Reviews ornament + heading + subtitle (441:149, 163:104, 441:156) */}
+      {/* Reviews ornament + heading + subtitle (2380:607, 2380:576, 2380:614) */}
       <img
         src="/veloria/home/436-337.svg"
         alt=""
         width={58.149}
         height={13.923}
-        style={{ ...abs(187.926, 4306, 58.149, 13.923), display: "block" }}
+        style={{ ...abs(187.926, 2795, 58.149, 13.923), display: "block" }}
       />
       <div
         className={playfair.className}
         style={{
-          ...abs(26, 4327, 382),
+          ...abs(26, 2816, 382),
           fontSize: 21,
           lineHeight: "27px",
           fontWeight: 500,
@@ -531,7 +195,7 @@ export function A6() {
       <div
         className={goudy.className}
         style={{
-          ...abs(50, 4354, 330),
+          ...abs(50, 2843, 330),
           fontSize: 9,
           lineHeight: "13px",
           color: "#3B2E2E",
@@ -548,7 +212,7 @@ export function A6() {
           so it stays static art rather than pointing at a missing slide. */}
       <div
         style={{
-          ...abs(239, 4522.5, 7, 7),
+          ...abs(240, 3086.5, 7, 7),
           background: "#E0CCB2",
           borderRadius: 9999,
         }}
@@ -560,7 +224,7 @@ export function A6() {
         href="/story"
         aria-label="Read customer stories"
         style={{
-          ...abs(92, 4553, 246, 33),
+          ...abs(91, 3031, 246, 33),
           background: "#2E1C12",
           borderRadius: 7,
           display: "block",

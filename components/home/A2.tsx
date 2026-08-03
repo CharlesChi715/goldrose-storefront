@@ -1,10 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Module A-2 · "Featured Rose Gifts" (Figma node 138:58) of the redesigned
+ * Module A-2 · "Featured Rose Gifts" (Figma node 2380:399) of the simplified
  * GoldRose homepage: section heading + ornament, "Best Sellers" row, two
- * product cards, and carousel dots. Coordinates/colors/fonts are verbatim
+ * product cards. Coordinates/colors/fonts are verbatim
  * from the Figma REST API data; product cards and "View all" link to /shop.
+ *
+ * 2026-08-04 sync: the band moved 843 → 764 as the page re-stacked around
+ * the deleted modules. Its own layout is unchanged except that the design
+ * deleted the four carousel dots under the rail — see BestSellersRail.tsx.
  */
 
 import Link from "next/link";
@@ -14,11 +18,11 @@ import { BestSellersRail } from "@/components/home/BestSellersRail";
 
 export function A2() {
   return (
-    // 138:58 module frame — children positioned relative to (0, 843)
+    // 2380:399 module frame — children positioned relative to (0, 764)
     <div
       data-el="HOME-FEATURED-SECTION"
       style={{
-        ...abs(0, 843, 430, 641),
+        ...abs(0, 764, 430, 641),
         background: "#FFF6EC",
         overflow: "hidden",
       }}
@@ -107,10 +111,9 @@ export function A2() {
         />
       </Link>
 
-      {/* Best Sellers rail (H-09): card 376:176 + photo frame 157:76 + dots
-          377:190, now a slow one-card-at-a-time carousel. The design's second
-          card (376:183) is superseded by the rail's mocked copies — see
-          BestSellersRail.tsx. */}
+      {/* Best Sellers rail (H-09): cards 2380:406 + 2380:415 as a slow
+          one-card-at-a-time carousel. No dots in this revision — the peeking
+          second card is the affordance. See BestSellersRail.tsx. */}
       <BestSellersRail />
     </div>
   );

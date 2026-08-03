@@ -1,19 +1,26 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Module A-9 · "Craft, Workshop and Patents" of the new GoldRose homepage
- * (Figma node 138:65 — 430×1011 dark section at y=6141): craft steps 01–04
- * with photo crops, the EXPLORE OUR CRAFT button, and the corrected lower
- * block (482:117) holding the workshop gallery, the Patents & Certificates
- * panel and the SEE HOW WE WORK button. Values verbatim from the Figma data.
+ * Module A-9 · "Craft, Workshop and Patents" of the simplified GoldRose
+ * homepage (Figma node 2380:658 — 430×991 CREAM section at y=3133): craft
+ * steps 01–04 with photo crops, the EXPLORE OUR CRAFT button, and the lower
+ * block (2380:684) holding the workshop gallery and the Patents &
+ * Certificates panel. Values verbatim from the Figma data.
+ *
+ * 2026-08-04 sync: the band flipped from a dark #3B2F2F section to cream, so
+ * every body colour inverted to INK; the certificates panel lost its intro
+ * column, footer divider and benefits row (the four certificates now span the
+ * full 422px panel); and the "SEE HOW WE WORK" button was deleted at source.
  */
 
+import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 
 const GOLD = "#D4AF37";
 const CREAM = "#FFF6EC";
-const CHAMPAGNE = "#F6E2A0";
+// Body colour on the cream band (was CREAM/CHAMPAGNE on the old dark band).
+const INK = "#3B2F2F";
 
 // Craft steps 01–04 (165:140…165:159). Step 1's title is vertically centered
 // in its 30px box (the others are top-aligned and wrap to two lines).
@@ -64,12 +71,12 @@ const CRAFT_PHOTOS = [
   "/veloria/home/165-151.png",
 ];
 
-// Six workshop gallery crops (482:128…482:139), coords relative to the lower
-// frame (0,6579); each shows an offset window into the same 430×913 source.
+// Six workshop gallery crops (2380:692…2380:702), coords relative to the lower
+// frame (0,3571); each shows an offset window into the same 430×913 source.
 const WORKSHOP_CROPS = [
   {
     x: 12,
-    y: 84,
+    y: 105,
     w: 150,
     h: 105,
     imgX: -11,
@@ -78,7 +85,7 @@ const WORKSHOP_CROPS = [
   },
   {
     x: 166,
-    y: 84,
+    y: 105,
     w: 120,
     h: 105,
     imgX: -164,
@@ -87,7 +94,7 @@ const WORKSHOP_CROPS = [
   },
   {
     x: 290,
-    y: 84,
+    y: 105,
     w: 130,
     h: 105,
     imgX: -289,
@@ -96,7 +103,7 @@ const WORKSHOP_CROPS = [
   },
   {
     x: 12,
-    y: 196,
+    y: 217,
     w: 110,
     h: 106,
     imgX: -11,
@@ -105,7 +112,7 @@ const WORKSHOP_CROPS = [
   },
   {
     x: 126,
-    y: 196,
+    y: 217,
     w: 129,
     h: 106,
     imgX: -125,
@@ -114,7 +121,7 @@ const WORKSHOP_CROPS = [
   },
   {
     x: 259,
-    y: 196,
+    y: 217,
     w: 161,
     h: 106,
     imgX: -263,
@@ -123,46 +130,23 @@ const WORKSHOP_CROPS = [
   },
 ];
 
-// Certificate columns (483:125…483:144), x relative to the 303×119 strip.
+// Certificate columns (2380:707…2380:726), x relative to the 422×116 strip.
 const CERTIFICATES = [
   { x: 0, imgX: -120, title: "US Patent", num: "US 11,324,751 B2" },
-  { x: 76, imgX: -194, title: "European Patent", num: "EP 3 982 104 B1" },
-  { x: 152, imgX: -268, title: "China Patent", num: "ZL 2021 2 1234567.8" },
-  { x: 228, imgX: -341, title: "ISO 9001:2015", num: "Quality Certified" },
-];
-
-// Certification benefits row (484:115…484:135), x relative to the 406×44 strip.
-const BENEFITS = [
-  {
-    x: 0,
-    icon: "/veloria/home/484-116.svg",
-    label: "Patented Preservation\nTechnology",
-  },
-  {
-    x: 102,
-    icon: "/veloria/home/484-121.svg",
-    label: "International Patent\nProtection",
-  },
-  {
-    x: 204,
-    icon: "/veloria/home/484-127.svg",
-    label: "Certified Quality\nManagement",
-  },
-  {
-    x: 306,
-    icon: "/veloria/home/484-132.svg",
-    label: "Trusted Worldwide\nProtection",
-  },
+  { x: 116, imgX: -194, title: "European Patent", num: "EP 3 982 104 B1" },
+  { x: 232, imgX: -268, title: "China Patent", num: "ZL 2021 2 1234567.8" },
+  { x: 348, imgX: -341, title: "ISO 9001:2015", num: "Quality Certified" },
 ];
 
 export function A9() {
   return (
-    // id="craft" — scroll target for the A-4 "EXPLORE OUR CRAFT" card (H-17).
+    // id="craft" — in-page anchor kept for deep links; the A-4 card that used
+    // to target it was deleted at source in the 2026-08-04 sync.
     <div
       id="craft"
       style={{
-        ...abs(0, 6141, 430, 1011),
-        background: "#3B2F2F",
+        ...abs(0, 3133, 430, 991),
+        background: CREAM,
         overflow: "hidden",
       }}
     >
@@ -189,7 +173,7 @@ export function A9() {
           ...abs(24, 44, 382),
           fontSize: 31,
           lineHeight: "30px",
-          color: CHAMPAGNE,
+          color: INK,
           fontWeight: 500,
           textAlign: "center",
         }}
@@ -206,7 +190,7 @@ export function A9() {
           ...abs(50, 118, 330),
           fontSize: 11,
           lineHeight: "17px",
-          color: CREAM,
+          color: INK,
           textAlign: "center",
         }}
       >
@@ -276,7 +260,7 @@ export function A9() {
             ...abs(s.x, 294, s.titleW, s.centerTitle ? 30 : undefined),
             fontSize: 13,
             lineHeight: "17.33px",
-            color: CREAM,
+            color: INK,
             fontWeight: 500,
             textAlign: "center",
             ...(s.centerTitle
@@ -301,7 +285,7 @@ export function A9() {
             ...abs(s.x + 4, 326, 82, 42),
             fontSize: 8,
             lineHeight: "12px",
-            color: CREAM,
+            color: INK,
             textAlign: "center",
             display: "flex",
             alignItems: "center",
@@ -312,21 +296,28 @@ export function A9() {
         </div>
       ))}
 
-      {/* 165:180 · EXPLORE OUR CRAFT — non-clickable placeholder, served as
-          Figma's own render (button chrome + label baked into one SVG). */}
-      <img
-        src="/veloria/home/165-180.svg"
-        alt="EXPLORE OUR CRAFT →"
-        width={246}
-        height={38}
-        style={{ ...abs(93, 400, 246, 38), display: "block" }}
-      />
+      {/* 2380:682 · EXPLORE OUR CRAFT — live since 2026-08-04: the frame's own
+          prototype wires ON_CLICK → 1573:107 (/craft). Button chrome + label
+          stay Figma's baked render; the Link only adds the hit area. */}
+      <Link
+        href="/craft"
+        aria-label="Explore our craft"
+        style={{ ...abs(93, 380, 246, 38), display: "block" }}
+      >
+        <img
+          src="/veloria/home/165-180.svg"
+          alt="EXPLORE OUR CRAFT →"
+          width={246}
+          height={38}
+          style={{ ...abs(0, 0, 246, 38), display: "block" }}
+        />
+      </Link>
 
-      {/* 482:117 · corrected lower block — workshop gallery + certifications */}
+      {/* 2380:684 · lower block — workshop gallery + certifications */}
       <div
         style={{
-          ...abs(0, 438, 430, 573),
-          background: "#3B2F2F",
+          ...abs(0, 438, 430, 565),
+          background: CREAM,
           overflow: "hidden",
         }}
       >
@@ -343,10 +334,10 @@ export function A9() {
         <div
           className={playfair.className}
           style={{
-            ...abs(20, 23, 390),
+            ...abs(20, 30, 390),
             fontSize: 25,
             lineHeight: "28px",
-            color: CHAMPAGNE,
+            color: INK,
             fontWeight: 500,
             textAlign: "center",
             whiteSpace: "nowrap",
@@ -359,10 +350,10 @@ export function A9() {
         <div
           className={goudy.className}
           style={{
-            ...abs(50, 54, 330),
+            ...abs(50, 68, 330),
             fontSize: 9,
             lineHeight: "10px",
-            color: CREAM,
+            color: INK,
             textAlign: "center",
           }}
         >
@@ -407,59 +398,42 @@ export function A9() {
           </div>
         ))}
 
-        {/* 482:125 · Patents & Certificates bordered panel */}
+        {/* 2380:704 · "— VERIFIED QUALITY —" heading above the panel */}
+        <div
+          className={playfair.className}
+          style={{
+            ...abs(97, 345, 240, 44),
+            fontSize: 20,
+            lineHeight: "26.7px",
+            color: INK,
+            fontWeight: 500,
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {"—  VERIFIED QUALITY  —"}
+        </div>
+
+        {/* 2380:705 · Patents & Certificates bordered panel. The design
+            stripped its intro column, footer divider and benefits row in this
+            revision, so the four certificates now span the full width. */}
         <div
           style={{
-            ...abs(5, 324, 422, 181),
+            ...abs(5, 400, 422, 126),
             borderRadius: 5,
             overflow: "hidden",
             boxShadow: "inset 0 0 0 1px rgba(212, 175, 55, 0.75)",
           }}
         >
-          {/* 483:115 · certification intro */}
-          <div style={{ ...abs(8, 7, 99, 118), overflow: "hidden" }}>
-            <img
-              src="/veloria/home/483-116.svg"
-              alt=""
-              width={24}
-              height={24}
-              style={{ ...abs(4, 1, 24, 24), display: "block" }}
-            />
-            <div
-              className={playfair.className}
-              style={{
-                ...abs(2, 42, 97),
-                fontSize: 8.5,
-                lineHeight: "11px",
-                color: CHAMPAGNE,
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Patents & Certificates
-            </div>
-            <div
-              className={goudy.className}
-              style={{
-                ...abs(2, 60, 96),
-                fontSize: 6.2,
-                lineHeight: "8px",
-                color: "rgba(255, 246, 236, 0.9)",
-                whiteSpace: "pre-line",
-              }}
-            >
-              {
-                "Our craftsmanship and preservation\ntechniques are protected by\ninternational patents and certified\nfor quality and authenticity."
-              }
-            </div>
-          </div>
-
-          {/* 483:122 · four certificates */}
-          <div style={{ ...abs(111, 7, 303, 119), overflow: "hidden" }}>
+          {/* 2380:706 · four certificates */}
+          <div style={{ ...abs(0, 10, 422, 116), overflow: "hidden" }}>
             {CERTIFICATES.map((c) => (
               <div
                 key={c.title}
-                style={{ ...abs(c.x, 0, 69, 119), overflow: "hidden" }}
+                style={{ ...abs(c.x, 0, 69, 116), overflow: "hidden" }}
               >
                 <div
                   style={{
@@ -496,7 +470,7 @@ export function A9() {
                     ...abs(0, 92, 69),
                     fontSize: 6.5,
                     lineHeight: "8px",
-                    color: CREAM,
+                    color: INK,
                     fontWeight: 500,
                     textAlign: "center",
                     whiteSpace: "nowrap",
@@ -510,7 +484,7 @@ export function A9() {
                     ...abs(0, 104, 69),
                     fontSize: 5,
                     lineHeight: "6px",
-                    color: "rgba(255, 246, 236, 0.82)",
+                    color: INK,
                     fontWeight: 400,
                     textAlign: "center",
                     whiteSpace: "nowrap",
@@ -521,59 +495,7 @@ export function A9() {
               </div>
             ))}
           </div>
-
-          {/* 483:123 · footer divider — zero-height line, 1px CENTER stroke,
-              so the rendered strip sits 0.5px above the node's y */}
-          <img
-            src="/veloria/home/483-123.svg"
-            alt=""
-            width={406}
-            height={1}
-            style={{ ...abs(8, 128.5, 406, 1), display: "block" }}
-          />
-
-          {/* 483:124 · certification benefits */}
-          <div style={{ ...abs(8, 133, 406, 44), overflow: "hidden" }}>
-            {BENEFITS.map((b) => (
-              <div
-                key={b.label}
-                style={{ ...abs(b.x, 0, 96, 44), overflow: "hidden" }}
-              >
-                {/* 484:116/121/127/132 · per-benefit icons */}
-                <img
-                  src={b.icon}
-                  alt=""
-                  width={22}
-                  height={22}
-                  style={{ ...abs(0, 7, 22, 22), display: "block" }}
-                />
-                <div
-                  className={notoSC.className}
-                  style={{
-                    ...abs(26, 7, 70),
-                    fontSize: 5.6,
-                    lineHeight: "8px",
-                    color: "rgba(255, 246, 236, 0.78)",
-                    fontWeight: 400,
-                    whiteSpace: "pre-line",
-                  }}
-                >
-                  {b.label}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
-
-        {/* 482:126 · SEE HOW WE WORK — non-clickable placeholder, served as
-            Figma's own render */}
-        <img
-          src="/veloria/home/482-126.svg"
-          alt="SEE HOW WE WORK →"
-          width={240}
-          height={32}
-          style={{ ...abs(97, 527, 240, 32), display: "block" }}
-        />
       </div>
     </div>
   );

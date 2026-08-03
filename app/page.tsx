@@ -1,14 +1,18 @@
 /**
  * ROLE OF THIS FILE
- * The homepage (`/`) — a pixel-exact implementation of the redesigned
- * "Homepage · Layered Editable" frame (nodes 138:55/138:56, modules
- * A-1…A-11) from the VELORIA Figma file. Every coordinate, size, color, and
- * font value comes verbatim from the Figma REST API data; each A-module
- * lives in components/home/. The 430-wide canvas scales to the viewport
- * (ScaleFrame); photo assets in /public/veloria/home are exact 2× node
- * renders. It also carries the store's Schema.org structured data and the
- * admin-editable promo slogan. Route wiring follows docs/ixd/ — unconfirmed
- * targets stay pixel-exact but non-clickable.
+ * The homepage (`/`) — a pixel-exact implementation of the SIMPLIFIED
+ * homepage frame `2380:370` ("/ · default · mobile · homepage") from the
+ * Ready-for-dev section 首页一级, imported 2026-08-04. Every coordinate,
+ * size, color and font value comes verbatim from the Figma REST API data;
+ * each surviving A-module lives in components/home/. The 430-wide canvas
+ * scales to the viewport (ScaleFrame); photo assets in /public/veloria/home
+ * are exact 2× node renders. It also carries the store's Schema.org
+ * structured data and the admin-editable promo slogan.
+ *
+ * The 2026-08-04 sync cut the page from 8673px to 5193px: the design deleted
+ * modules A-4 (Real Rose Story + MORI entry), A-7 (MORI Gift Finder), A-8
+ * (Personalization) and A-10 (Corporate Partnerships) at source, and
+ * re-stacked what remained. Band offsets below are the frame's own.
  */
 
 import type { Metadata } from "next";
@@ -17,13 +21,9 @@ import { playfair } from "@/lib/fonts";
 import { A1 } from "@/components/home/A1";
 import { A2 } from "@/components/home/A2";
 import { A3 } from "@/components/home/A3";
-import { A4 } from "@/components/home/A4";
 import { A5 } from "@/components/home/A5";
 import { A6 } from "@/components/home/A6";
-import { A7 } from "@/components/home/A7";
-import { A8 } from "@/components/home/A8";
 import { A9 } from "@/components/home/A9";
-import { A10 } from "@/components/home/A10";
 import { A11 } from "@/components/home/A11";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
@@ -111,8 +111,10 @@ export default async function HomePage() {
   ];
 
   return (
+    // 2380:370 is 5193 tall: A-11 ends at 5134 and the bottom nav fills the
+    // last 59px (it renders as a fixed overlay, outside this stage).
     <ScaleFrame
-      height={8673}
+      height={5193}
       background="#FFF6EC"
       fontClass={playfair.className}
       navActive="Home"
@@ -126,16 +128,14 @@ export default async function HomePage() {
         isDefault={promo.isDefault}
         variant="brown"
       />
+      {/* Band offsets are 2380:370's own: A-1 @32, A-2 @764, A-3 @1405,
+          A-5 @1868, A-6 @2344, A-9 @3133, A-11 @4124. */}
       <A1 />
       <A2 />
       <A3 />
-      <A4 />
       <A5 />
       <A6 />
-      <A7 />
-      <A8 />
       <A9 />
-      <A10 />
       <A11 />
       {/* Header last: A-1's opaque module background covers y32-98, and the
           header (chrome, not part of any module) must paint above it. */}

@@ -1,12 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Module A-5 · "Shop by Occasion" of the VELORIA homepage frame (Figma node
- * 138:61, [0,3204 430×558]): ornamented title, occasion filter chips (each →
- * /shop), an auto-sliding horizontal rail of recipient cards (each → /shop),
- * carousel dots, and the "Just Because" note card. All coordinates, colors
- * and type values are verbatim from the Figma REST data; rail items past
- * x=430 are intentionally clipped by the module frame.
+ * Module A-5 · "Shop by Occasion" of the simplified homepage frame (Figma
+ * node 2380:454, [0,1868 430×476]): ornamented title, occasion filter chips
+ * (each → /shop), an auto-sliding horizontal rail of recipient cards (each →
+ * /shop), and carousel dots. All coordinates, colors and type values are
+ * verbatim from the Figma REST data; rail items past x=430 are intentionally
+ * clipped by the module frame.
+ *
+ * 2026-08-04 sync: the band gained a "—   ♡   —" eyebrow, swapped its 4th/5th
+ * chips (Wedding/Graduation → Christmas/Anniversary), dropped the 6th chip and
+ * the "Just Because" note card, and lost 82px of height. Two nodes that DO
+ * exist in the frame are deliberately not built: "A5 Prompt" (2380:464) and
+ * "Button · Explore Occasion Gifts" (2380:478) sit at y=511/547 inside a
+ * 476-tall clipping frame, so the design itself renders neither.
  */
 
 import Link from "next/link";
@@ -19,12 +26,12 @@ export function A5() {
     // 138:61 — module frame; clips the over-wide chip + card rails.
     <div
       style={{
-        ...abs(0, 3204, 430, 558),
+        ...abs(0, 1868, 430, 476),
         background: "#FFF6EC",
         overflow: "hidden",
       }}
     >
-      {/* 424:150 · header ornament (rose + lines) */}
+      {/* 2380:479 · header ornament (rose + lines) */}
       <img
         src="/veloria/home/424-150.svg"
         alt=""
@@ -33,7 +40,23 @@ export function A5() {
         style={{ ...abs(144, 0, 142, 34), display: "block" }}
       />
 
-      {/* 162:83 · title */}
+      {/* 2380:455 · "—   ♡   —" eyebrow, new in this revision. The ♡ falls back
+          to a system font in the browser, so it is served as Figma's own render
+          rather than live text. */}
+      <img
+        src="/veloria/home/2380-455.svg"
+        alt="— ♡ —"
+        width={160}
+        height={20}
+        style={{
+          ...abs(135, 20, 160, 20),
+          display: "block",
+          objectFit: "none",
+          objectPosition: "center center",
+        }}
+      />
+
+      {/* 2380:456 · title */}
       <div
         className={playfair.className}
         style={{
@@ -153,11 +176,15 @@ export function A5() {
           Birthday
         </div>
       </Link>
-      {/* 162:107 · Wedding */}
+      {/* 2380:474 · Christmas. The Figma label reads "Chritsmas" — a source
+          typo, corrected here rather than shipped to customers.
+          AI-TAG(AI-024): OWNER-TODO — ask the design team to fix the label on
+          node 2380:474. See
+          /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md. */}
       <Link
         href="/shop"
         style={{
-          ...abs(301, 91, 70, 30),
+          ...abs(301, 91, 82, 30),
           display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -168,7 +195,7 @@ export function A5() {
         <div
           className={notoSC.className}
           style={{
-            ...abs(16, 9.5, 38),
+            ...abs(19.5, 9.5, 43),
             fontSize: 9,
             lineHeight: "10.8px",
             color: "#3B2F2F",
@@ -176,39 +203,15 @@ export function A5() {
             whiteSpace: "nowrap",
           }}
         >
-          Wedding
+          Christmas
         </div>
       </Link>
-      {/* 162:109 · Graduation (clipped at the module's right edge) */}
+      {/* 2380:475 · Anniversary (clipped at the module's right edge) */}
       <Link
         href="/shop"
         style={{
-          ...abs(376, 91, 82, 30),
+          ...abs(388, 91, 86, 30),
           display: "block",
-          background: "#FFF6EC",
-          boxShadow: "inset 0 0 0 1px #E5D9C9",
-          borderRadius: 999,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(17, 9.5, 48),
-            fontSize: 9,
-            lineHeight: "10.8px",
-            color: "#3B2F2F",
-            fontWeight: 400,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Graduation
-        </div>
-      </Link>
-      {/* 162:111 · Anniversary (fully off-canvas in the rail) */}
-      <div
-        style={{
-          ...abs(463, 91, 86, 30),
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
           borderRadius: 999,
@@ -228,14 +231,14 @@ export function A5() {
         >
           Anniversary
         </div>
-      </div>
+      </Link>
       {/* 425:155 · more-occasions arrow (off-canvas) */}
       <img
         src="/veloria/home/425-155.svg"
         alt=""
         width={12}
         height={18}
-        style={{ ...abs(554, 97, 12, 18), display: "block" }}
+        style={{ ...abs(479, 97, 12, 18), display: "block" }}
       />
 
       {/* 162:95 · Occasion Card · Valentine's Day (off-canvas rail item) */}
@@ -314,121 +317,21 @@ export function A5() {
 
       <OccasionRail />
 
-      {/* 429:149 · carousel dots */}
-      <div style={{ ...abs(145, 424, 135, 10), overflow: "hidden" }}>
+      {/* 2380:486 · dots 4–7 — the design draws seven for three cards, so
+          these four stay inert; OccasionRail wires the first three. Positioned
+          individually rather than inside the design's 135×10 wrapper: that
+          wrapper spans the whole strip and would sit over the wired dots,
+          swallowing their clicks. */}
+      {[209, 230, 251, 272].map((x) => (
         <div
+          key={x}
           style={{
-            ...abs(0.5, 1, 8, 8),
-            background: "#B27A38",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(22, 1, 8, 8),
+            ...abs(x, 425, 8, 8),
             background: "#E5D1B2",
             borderRadius: 9999,
           }}
         />
-        <div
-          style={{
-            ...abs(43, 1, 8, 8),
-            background: "#E5D1B2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(64, 1, 8, 8),
-            background: "#E5D1B2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(85, 1, 8, 8),
-            background: "#E5D1B2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(106, 1, 8, 8),
-            background: "#E5D1B2",
-            borderRadius: 9999,
-          }}
-        />
-        <div
-          style={{
-            ...abs(127, 1, 8, 8),
-            background: "#E5D1B2",
-            borderRadius: 9999,
-          }}
-        />
-      </div>
-
-      {/* 436:345 · Just Because · Recipient note card */}
-      <Link
-        href="/shop"
-        style={{
-          ...abs(20, 471, 394, 67),
-          display: "block",
-          background: "#FFFBF6",
-          boxShadow: "inset 0 0 0 1px #E5C9A8",
-          borderRadius: 11,
-          overflow: "hidden",
-        }}
-      >
-        {/* 436:350 · gift icon */}
-        <img
-          src="/veloria/home/436-350.svg"
-          alt=""
-          width={32}
-          height={32}
-          style={{ ...abs(20, 16, 32, 32), display: "block" }}
-        />
-        {/* 436:347 · title */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(71, 16, 250),
-            fontSize: 15,
-            lineHeight: "18px",
-            color: "#3B2F2F",
-            fontWeight: 500,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Just Because
-        </div>
-        {/* 436:348 · copy */}
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(71, 36, 280),
-            fontSize: 9,
-            lineHeight: "14px",
-            color: "#3B2F2F",
-            fontWeight: 400,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Because meaningful moments don&apos;t need a reason.
-        </div>
-        {/* 436:349 · chevron (glyph strip) */}
-        <img
-          src="/veloria/home/192-154.svg"
-          alt="›"
-          width={12}
-          height={43}
-          style={{
-            ...abs(370, 6, 12, 43),
-            display: "block",
-            objectFit: "none",
-            objectPosition: "left center",
-          }}
-        />
-      </Link>
+      ))}
     </div>
   );
 }

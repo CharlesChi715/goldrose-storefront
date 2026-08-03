@@ -114,15 +114,26 @@ Charles first.
   dashboard re-imported from its new frame id 2210:310 (Custom Archive tile
   back → four tiles; the inert "Address Management ›" row gone at source). The
   same pass made the dashboard greeting fall back to the visitor's **full
-  email address** when they have no profile name. Pending from design: the
-  simplified homepage (second frame 2024:378 — keep ignoring both homepage
-  frames), the ADDRESS-BOOK section, the 7 policy pages, MENU/PDP/story-long
-  redesigns, and `/gift-guide` ([`docs/ixd/README.md`](docs/ixd/README.md)).
+  email address** when they have no profile name. The **08-04 sync imported
+  the simplified homepage** (`2380:370`, now the only frame in the
+  Ready-for-dev `首页一级` section — the two older homepage frames were moved
+  out of it): the page went **8673px → 5193px**, modules **A-4/A-7/A-8/A-10
+  were deleted at source** (files deleted with them), A-9 flipped dark → cream,
+  all 21 prototype links are wired, and `/blog` is a new coming-soon scaffold.
+  The same pass imported the redesigned **MENU** (`2345:271`) — a full-width
+  cream accordion sheet replacing the 07-29 dark left drawer — and finished the
+  carousel IxD so all four rails share `Carousel.tsx` with live dots
+  (AI-024…AI-029). Pending from design: the ADDRESS-BOOK section, the 7 policy
+  pages, PDP/story-long redesigns, `/gift-guide`, and two Ready-for-dev order
+  frames with no route yet (`/account/orders/delivered`,
+  `/account/orders/review` — AI-029)
+  ([`docs/ixd/README.md`](docs/ixd/README.md)).
 - Page/section dwell tracking is **merged to `main`** (PR #11, `88831c4`) with
   its hosted schema live (`0005`), so it deploys with production. Section
-  coverage is partial: only 3 of the home page's 17 bands carry a
-  `data-el="…-SECTION"` tag; tagging the rest waits on a signed-off section
-  vocabulary ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
+  coverage is partial: after the 08-04 reflow only 4 of the home page's bands
+  carry a `data-el="…-SECTION"` tag (hero, featured, promise, story); tagging
+  the rest waits on a signed-off section vocabulary
+  ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
 - The product-handle rule ([`product-handles.md`](docs/ixd/naming/product-handles.md),
   v2.1) is **Adopted and enforced in code** (2026-07-30): `lib/admin/product-handle.ts`
   derives handles, collisions throw (no `-2`), non-draft handles are frozen, and a
