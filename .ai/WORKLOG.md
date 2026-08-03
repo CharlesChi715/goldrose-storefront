@@ -4481,3 +4481,23 @@ Agent-inbox: detail pane formatting
   Ready-for-dev homepage frame 2380:370 drops MORI and the concierge chatbox
   entirely, and checkout's "Ask Auri" chat link lives on a hidden layer.
 - No behaviour changed. Typecheck clean; `/`, `/checkout`, `/care/chat` all 200.
+
+## 2026-08-03 18:39 AEST
+
+Fixed the admin left nav being a dead end on mobile. Below Polaris's
+`navigationBarCollapsed` breakpoint (767.95px), `Navigation/components/Item`
+`getClickHandler` calls `preventDefault()` on any item that carries
+`subNavigationItems` and only toggles the disclosure — so the parent stops
+being a link. Orders, Products, Content and Settings had no sub-item pointing
+at themselves, which left four top-level admin pages unreachable on any
+phone-width screen. Reproduced at 375px (click Products → URL unchanged,
+submenu collapsed) and confirmed the same click navigates at 1280px.
+
+Fix follows Shopify's own admin pattern: a self-referencing first sub-item
+("All products", "All orders", "All content", "General"), added in both
+languages. No Polaris internals overridden, and the mobile disclosure
+behaviour is unchanged.
+
+Verified Products end to end at 375px — navigates and dismisses the drawer.
+The other three render with correct labels but were not click-verified; the
+mechanism is identical.
