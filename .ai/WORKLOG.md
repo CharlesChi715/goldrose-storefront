@@ -4763,3 +4763,10 @@ Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
   display-width padding (CJK = 2 cols), `─…▶` arrow stretch, negative shifts,
   built-in re-measure. SKILL.md now delegates to it. Verified on a fixture
   incl. a shift round-trip. Not repo code — logged for history only.
+
+## 2026-08-04 — Ready-for-dev PDP frame sync
+
+- Compared the two browser annotations against their complete Figma frames.
+- Confirmed `/account` already matches frame `2210:310` structurally.
+- Imported PDP frame `1523:3971` (430×1616), including section order, ELDREVE chrome, warm palette, overlay hit areas, and live checkout actions.
+- Verified TypeScript, targeted ESLint, reviews drawer behavior, and 2× band diffs; closed AI-016 through the agent inbox workflow.

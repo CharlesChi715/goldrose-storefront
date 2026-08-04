@@ -180,15 +180,23 @@ export function VHeader({
   backHref,
   right,
   wishlistSlug,
+  brand = "goldrose",
 }: {
   backHref: string;
   right: "search" | "heart";
   /** Product handle for the heart's wishlist toggle (right="heart" only). */
   wishlistSlug?: string;
+  /** Ready-for-dev redesigns use the ELDREVE wordmark. */
+  brand?: "goldrose" | "eldreve";
 }) {
   return (
     <>
-      <div style={{ ...abs(0, 32, 430, 62), background: "#FCF8F4" }} />
+      <div
+        style={{
+          ...abs(0, 32, 430, 62),
+          background: brand === "eldreve" ? "#FFF6EC" : "#FCF8F4",
+        }}
+      />
       {/* Owner-supplied top-nav art (public/top-nav/*), cropped to content;
           each box is centred on the old 24×24 Figma icon position. */}
       <img
@@ -203,8 +211,12 @@ export function VHeader({
         aria-label="Home"
       >
         <img
-          src="/veloria/logo.png"
-          alt="ELDREVE"
+          src={
+            brand === "eldreve"
+              ? "/veloria/brand/eldreve-136x40.png"
+              : "/veloria/logo.png"
+          }
+          alt={brand === "eldreve" ? "ELDREVE" : "GoldRose"}
           width={136}
           height={39}
           style={{ display: "block", width: 136, height: 39 }}
