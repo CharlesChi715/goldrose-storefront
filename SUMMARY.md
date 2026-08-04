@@ -44,8 +44,12 @@ Open linked resources only when the task needs them.
 - **Customer sign-in is live end to end (2026-08-03).** `/account/signup` does
   real email validation → `signInWithOtp` → 6-digit code → consent-gated
   CONTINUE → `verifyOtp` → `/account`. The same email carries a one-tap link.
-  `/account`'s own login screen still works alongside it — AI-020 asks the
-  design team which is canonical.
+- **AI-020 answered 2026-08-04 (owner): `/account/signup` is the ONLY login
+  page.** `/account` is signed-in only and redirects there otherwise; the
+  second login screen (`ShoppingLogin`, frame 74:53) is deleted. It carried the
+  Gift Shopping ⇄ Business tabs, so `/account/business` now has **no
+  signed-out entry** — the 08-04 MENU also dropped its FOR BUSINESS row. Needs
+  a design ruling; the route still works directly.
 - **Figma imports** are current through 2026-08-04 on `feat/figma-sync`; the
   per-frame history, prototype-link decisions and unadopted frames live in
   [`docs/ixd/README.md`](docs/ixd/README.md). Landed so far: the two-step
@@ -59,8 +63,7 @@ Open linked resources only when the task needs them.
   and shop IxD tables retired to `archive/ixd-home-shop/` — interaction design
   is maintained in Figma now.
 - **Three-tab bottom nav** replaced the four-tab bar (2026-08-03): 商务/Wholesale
-  removed per the design team; Login/Me session swap restored. Business pages
-  stay reachable via the menu drawer's FOR BUSINESS row.
+  removed per the design team; Login/Me session swap restored.
 - **DQ-34 answered 2026-08-03:** the ELDREVE wordmark was never a placeholder —
   it is the brand. The repo's GoldRose substitution (~23 call sites) is now
   wrong and retires with the rename (OQ-4).

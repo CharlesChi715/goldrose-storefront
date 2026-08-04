@@ -2,11 +2,17 @@
 
 /**
  * ROLE OF THIS FILE
- * Client half of /account (owner request 2026-07-23). It picks one of two
- * screens: signed out renders the pixel-exact VELORIA sign-in frame
- * (ShoppingLogin, 74:53); signed in renders the pixel-exact
+ * Client half of /account (owner request 2026-07-23). /account is the
+ * SIGNED-IN page and nothing else: it renders the pixel-exact
  * ACCOUNT-INFO-SHOPPING-DASHBOARD (914:112, imported 2026-07-27) fed with
  * the visitor's real name and latest order.
+ *
+ * AI-020 answered 2026-08-04 (owner): /account/signup is the ONE login page.
+ * A visitor who is not signed in is redirected there rather than being shown
+ * a login screen at this URL. The old second login screen (ShoppingLogin,
+ * VELORIA frame 74:53) is deleted — it predated the live signup flow and was
+ * never repointed when that went live on 08-03, which is why two login
+ * screens ran in parallel for a week.
  *
  * Sign-in is an emailed link that lands on /auth/confirm (owner request
  * 2026-07-27), with the mail's 6-digit code as in-place fallback; the owner
@@ -17,6 +23,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabaseBrowserAuthClient } from "@/lib/supabase/browser-auth";
 import { formatMoney } from "@/lib/money";
 import { carrierLabel } from "@/lib/shipping/carriers";
@@ -24,7 +31,6 @@ import {
   AccountDashboardScreen,
   type DashboardRecentOrder,
 } from "@/components/screens/DashboardScreen";
-import { ShoppingLogin } from "@/components/login/ShoppingLogin";
 import { accountOverviewAction } from "./actions";
 import type { AccountOrder, AccountOverview } from "@/lib/account/data.ts";
 
@@ -89,11 +95,23 @@ function toRecentOrder(orders: AccountOrder[]): DashboardRecentOrder | null {
 
 export function AccountClient() {
   const supabase = useMemo(() => supabaseBrowserAuthClient(), []);
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>(
     supabase ? "loading" : "unavailable",
   );
   const [overview, setOverview] = useState<AccountOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Captured at mount, before the effect below strips the flag off the URL —
+  // and independently of Supabase, because in local mode that effect returns
+  // early and the flag would otherwise be lost. A lazy initializer, not an
+  // effect: it must be known before the redirect fires, and it never changes.
+  // The SSR pass has no window and answers false, which is safe — the first
+  // render draws the holding screen either way, so the markup still matches.
+  const [arrivedWithAuthError] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("auth_error") === "1",
+  );
 
   async function loadAccount(): Promise<void> {
     const data = await accountOverviewAction();
@@ -154,10 +172,28 @@ export function AccountClient() {
     };
   }, [supabase]);
 
-  // Signed out (and local mode, which has no auth server) is the design's own
-  // screen; it brings its own bottom nav via ScaleFrame.
-  if (phase === "signedOut" || phase === "unavailable") {
-    return <ShoppingLogin />;
+  // Not signed in — including local mode, where there is no auth server, so
+  // being signed in is impossible. The login page is /account/signup and only
+  // /account/signup (AI-020), so leave rather than render a second one here.
+  // `replace`, not `push`: with `push`, Back would land on this URL and bounce
+  // the visitor straight forward again, trapping them.
+  const signedOut = phase === "signedOut" || phase === "unavailable";
+
+  useEffect(() => {
+    if (!signedOut) {
+      return;
+    }
+    // A failed/expired sign-in link is the visitor's own error to see, so it
+    // travels to the page that can act on it instead of dying in this redirect.
+    router.replace(
+      arrivedWithAuthError ? "/account/signup?auth_error=1" : "/account/signup",
+    );
+  }, [signedOut, arrivedWithAuthError, router]);
+
+  if (signedOut) {
+    // The redirect above is already in flight; hold the same cream screen the
+    // loading phase uses rather than flashing content nobody has time to read.
+    return <SessionHolding label="Taking you to sign in…" />;
   }
 
   if (phase === "signedIn" && overview) {
@@ -192,13 +228,23 @@ export function AccountClient() {
     );
   }
 
-  // phase === "loading" — a quiet cream holding state before either screen.
+  // phase === "loading" — a quiet cream holding state before the dashboard.
+  return <SessionHolding label="Checking your session…" />;
+}
+
+/**
+ * The cream holding screen shown while the session is still unknown, and
+ * again while the redirect to /account/signup is in flight. Both moments are
+ * the same thing to the visitor — "wait, we are working out where you go" —
+ * so they share one screen and never flash different content at each other.
+ */
+function SessionHolding({ label }: { label: string }) {
   return (
     <main
       className="min-h-screen bg-[#FFF6EC] text-[#3B2F2F]"
       style={{ display: "grid", placeItems: "center" }}
     >
-      <p style={{ fontSize: 14 }}>Checking your session…</p>
+      <p style={{ fontSize: 14 }}>{label}</p>
     </main>
   );
 }
