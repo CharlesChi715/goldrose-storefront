@@ -4700,3 +4700,66 @@ Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
 - Also fixed `.claude/launch.json`: added an attach-only `goldrose-attach`
   entry so the preview binds to an already-running `next dev` instead of failing
   on Next 16's per-directory lock.
+
+## 2026-08-04 — TikTok analytics: capability matrix corrected against the portal
+
+- Charles surfaced the scope picker inside the portal's Create-New-App dialog,
+  which lists the `TikTok Accounts` group's endpoints verbatim. Checked it
+  against the matrix written earlier the same day; **three rows were wrong, all
+  pessimistic**: trending search (`/discovery/trending/search/`), hashtag
+  suggestion and account benchmarking (`/business/benchmark/`) DO have
+  endpoints, and photo/carousel publishing exists (`/business/photo/publish/`).
+  The earlier assertion that "Discovery is TikTok's own product and will not
+  open up" was false. Also added `/business/comment/pin/`.
+- Suite-only now reduces to LIVE, DMs and follower age/gender.
+- Recorded the lesson in the doc: third-party guides and search results
+  under-report a platform's surface; the vendor's own permission picker is the
+  only complete inventory.
+- Added a **Scopes to request** section — Account User, Get Account Media,
+  Account Comment only. `Account Post Content` deliberately excluded: it is
+  write access that publishes to the live account, and the portal defaults to
+  every sub-group ticked.
+- Plan gained stage 1b (the `/api/tiktok/callback` route) and the decided app
+  identity: name `ELDREVE Storefront Analytics`, redirect
+  `https://eldreve.com/api/tiktok/callback`.
+- Account-side records (registration emails, legal entity, agreements signed)
+  went to `~/Documents/Work/gold_rose/domain-setup.md` — the repo doc links to
+  it rather than duplicating.
+
+## 2026-08-04 — TikTok analytics: re-sourced the matrix, endpoint per row
+
+- Re-checked every claim for a first-party source and added the endpoint (or
+  field name) to every row of the capability matrix, per Charles's request.
+- Authority now stated per claim type in the doc: endpoint paths come from the
+  portal's scope picker (highest — it is what gets granted); the
+  `/business/video/list/` field names from TikTok's own doc text; Ads API paths
+  from TikTok's official SDK.
+- **Negative finding, verified twice** (raw README fetch, then the whole repo
+  via indexed docs): `tiktok/tiktok-business-api-sdk` contains NO `/business/*`
+  endpoints — it is the Marketing/Ads SDK only. Useful for `/oauth2/access_token/`
+  and nothing else here. TikTok's own doc pages are client-rendered and cannot
+  be fetched programmatically, which is why the picker is the source of record.
+- **Downgraded several marks to ❔** once it was clear they traced to
+  third-party guides rather than TikTok — notably the whole account-level
+  audience block (follower gender/age/active-hours/territories). `/business/get/`'s
+  field list was never verified from a first-party source. Logged an explicit
+  open verification task: first sandbox call should be `/business/get/` with
+  every plausible field, to settle those rows in one shot.
+- Added new confirmed rows: `reach`, `/business/video/settings/`,
+  `/business/publish/location/`, `/business/post/authorize/*` (Spark Ads),
+  `/business/comment/create/`. Noted `video_views` combines organic AND paid.
+- Added a second inventory table for the **Ad Account Management** scope group
+  (27 endpoints Charles pasted), with what each does and a use-to-us column —
+  all ❌. It administers a Business Center (agency console): we have one
+  account, no ad spend, no agency structure. 13 of the 27 are writes, several
+  destructive or financial, which is the concrete argument for least privilege.
+- Fixed the stale "cannot reach Discovery" line left in Options considered.
+
+## 2026-08-04 — /align skill speed rebuild (global tooling)
+
+- Replaced the per-run pattern (model authors ad-hoc Python, hand-pads table
+  cells) with a pre-built `align.py` in `~/.claude/skills/align/` (mirrored to
+  `~/.codex/skills/align/`): `table` / `measure` / `shift` subcommands,
+  display-width padding (CJK = 2 cols), `─…▶` arrow stretch, negative shifts,
+  built-in re-measure. SKILL.md now delegates to it. Verified on a fixture
+  incl. a shift round-trip. Not repo code — logged for history only.
