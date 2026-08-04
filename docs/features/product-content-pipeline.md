@@ -103,6 +103,11 @@ live.
 | 6–8  | Option1–3 name  | ▪     | ✓ if variants differ                  | `products.option_names` — *what* varies (`Color`)                 |
 | 9–11 | Option1–3 value | ●     | ✓ if option names set                 | `product_variants.option_values` — *this row's* value (`Red`)     |
 
+Both `Description` and `SKU` are required **unconditionally** — a draft row
+without them is rejected. This is stricter than the schema, which permits a
+blank `sku` (`unique` only where non-blank), so the importer and the admin
+form enforce it, not Postgres.
+
 **B — wanted.** Not enforced, but the storefront is visibly worse without them:
 these are what customers and Google actually read.
 
@@ -133,7 +138,7 @@ these are what customers and Google actually read.
 | 29 | Cost                      | ●     | ○ — see OQ-4       | `product_variants.cost_cents` — what *we* pay; private    |
 | 30 | Track quantity            | ●     | ○ — defaults true  | `product_variants.track_quantity`                         |
 | 31 | Continue selling when OOS | ●     | ○ — defaults false | `…continue_selling_when_oos` — take orders at zero stock  |
-| 32 | Weight (oz)               | ●     | ○                  | `product_variants.weight_oz` — feeds the shipping rate    |
+| 32 | Weight (oz)               | ▪     | ○ — product-level  | `product_variants.weight_oz` — feeds the shipping rate    |
 
 **No image columns.** The folder tree is the only source for images — which
 product, which variant, what order, and the alt slug all come from the paths.
@@ -294,6 +299,11 @@ Vercel and is parsed there, because validating a row needs the database.
   step.
 - **`product_images` has no `variant_id`** — colour variants share one gallery
   today. Resolved: it gains a `variant_id` — see Decision.
+- **`weight_oz` is a `product_variants` column but a product-level field.** The
+  admin form holds one value (`ProductForm` `weightOz`) and `saveProduct` writes
+  it to every variant row; the importer must do the same. A per-variant weight
+  is therefore not expressible, and any that existed would be flattened the next
+  time the product was saved in the admin.
 - **`inventory_on_hand` is not writable in practice.** The save path routes
   changes through `adjustInventory()` as logged movements; writing the column
   directly desynchronises stock from its ledger.

@@ -235,6 +235,10 @@ const en = {
   "form.new.title": "Add product",
   "form.title.label": "Title",
   "form.description.label": "Description",
+  // Import requirements (docs/features/product-content-pipeline.md § columns).
+  // Tier A columns carry requiredIndicator; these spell out the ones whose rule
+  // an asterisk alone cannot state.
+  "form.description.help": "Required on every product, drafts included.",
   // Placeholders (§9.5) — examples only, never defaults. Values follow the
   // repo's own conventions: handle fixtures from
   // docs/ixd/naming/product-handles.md, SKUs from Database.md.
@@ -294,6 +298,8 @@ const en = {
   "form.margin": "Margin",
   "form.inventory.title": "Inventory",
   "form.sku": "SKU (Stock Keeping Unit)",
+  "form.sku.help":
+    "Required on every variant, drafts included. Bulk imports match rows on handle + SKU.",
   "form.barcode": "Barcode (ISBN, UPC, GTIN, etc.)",
   "form.trackQty": "Track quantity",
   "form.quantity": "Quantity",
@@ -301,6 +307,7 @@ const en = {
   "form.shipping.title": "Shipping",
   "form.physical": "This is a physical product",
   "form.weight": "Weight (oz)",
+  "form.weight.help": "One weight for the whole product — saved to every variant.",
   "form.customs.title": "Customs information",
   "form.origin": "Country/Region of origin (ISO code)",
   "form.hs": "Harmonized System (HS) code",
@@ -878,6 +885,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.new.title": "添加产品",
   "form.title.label": "标题",
   "form.description.label": "描述",
+  "form.description.help": "每个产品均必填，草稿也不例外。",
   "form.title.ph": "例如：24K 镀金永生玫瑰",
   "form.description.ph": "产品是什么、如何制作，以及它值得赠送的理由。",
   "form.shortName.ph": "例如：经典玫瑰",
@@ -932,6 +940,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.margin": "利润率",
   "form.inventory.title": "库存",
   "form.sku": "SKU（库存单位）",
+  "form.sku.help": "每个变体均必填，草稿也不例外。批量导入按「handle + SKU」匹配行。",
   "form.barcode": "条形码（ISBN、UPC、GTIN 等）",
   "form.trackQty": "跟踪数量",
   "form.quantity": "数量",
@@ -939,6 +948,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.shipping.title": "发货",
   "form.physical": "这是一件实体产品",
   "form.weight": "重量（盎司）",
+  "form.weight.help": "整个产品共用一个重量，保存时写入所有变体。",
   "form.customs.title": "海关信息",
   "form.origin": "原产国/地区（ISO 代码）",
   "form.hs": "协调制度 (HS) 代码",

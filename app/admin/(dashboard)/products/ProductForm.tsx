@@ -438,10 +438,12 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                 <TextField
                   label={t("form.description.label")}
                   placeholder={t("form.description.ph")}
+                  helpText={t("form.description.help")}
                   value={description}
                   onChange={setDescription}
                   autoComplete="off"
                   multiline={6}
+                  requiredIndicator
                 />
                 <TextField
                   label={t("form.bestFor")}
@@ -596,6 +598,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     }
                     autoComplete="off"
                     inputMode="decimal"
+                    requiredIndicator
                   />
                   <TextField
                     label={t("form.compareAt")}
@@ -656,11 +659,13 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   <TextField
                     label={t("form.sku")}
                     placeholder={t("form.sku.ph")}
+                    helpText={t("form.sku.help")}
                     value={base.sku}
                     onChange={(sku) =>
                       setBase((current) => ({ ...current, sku }))
                     }
                     autoComplete="off"
+                    requiredIndicator
                   />
                   <TextField
                     label={t("form.barcode")}
@@ -717,6 +722,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                     <TextField
                       label={t("form.weight")}
                       placeholder={t("form.weight.ph")}
+                      helpText={t("form.weight.help")}
                       type="number"
                       value={weightOz}
                       onChange={setWeightOz}
