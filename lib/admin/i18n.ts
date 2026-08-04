@@ -307,7 +307,8 @@ const en = {
   "form.shipping.title": "Shipping",
   "form.physical": "This is a physical product",
   "form.weight": "Weight (oz)",
-  "form.weight.help": "One weight for the whole product — saved to every variant.",
+  "form.weight.help":
+    "One weight for the whole product — saved to every variant.",
   "form.customs.title": "Customs information",
   "form.origin": "Country/Region of origin (ISO code)",
   "form.hs": "Harmonized System (HS) code",
@@ -940,7 +941,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.margin": "利润率",
   "form.inventory.title": "库存",
   "form.sku": "SKU（库存单位）",
-  "form.sku.help": "每个变体均必填，草稿也不例外。批量导入按「handle + SKU」匹配行。",
+  "form.sku.help":
+    "每个变体均必填，草稿也不例外。批量导入按「handle + SKU」匹配行。",
   "form.barcode": "条形码（ISBN、UPC、GTIN 等）",
   "form.trackQty": "跟踪数量",
   "form.quantity": "数量",
