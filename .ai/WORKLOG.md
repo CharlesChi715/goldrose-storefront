@@ -4653,3 +4653,24 @@ storefront's only login page, and `/account` is the signed-in page only.
   one pre-existing `admin-auth` EN/中文 failure. Rewrote 4 tests in
   `account.spec.ts` for the redirect (incl. a new dead-link case) and removed
   the account-type-tabs test in `screens.spec.ts`.
+
+## 2026-08-04 — Admin: indicate bulk-import requirements on the product form
+
+Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
+
+- `/admin/products/new` now shows the import requirements from
+  `docs/features/product-content-pipeline.md`: `requiredIndicator` on
+  Description, Price and SKU (Title already had one), plus `helpText` for the
+  rules an asterisk cannot state. EN + 中文 both added to `lib/admin/i18n.ts`.
+- Two rulings from Charles recorded in the pipeline doc: SKU and Description are
+  required always (drafts included), and Weight is product-level — the column is
+  on `product_variants`, but the form holds one value that `saveProduct` writes
+  to every variant row.
+- Verified in a local-mode production build on :3210, both languages, clean
+  console. Typecheck clean before and after the rebase.
+- NOT merged: `main` is checked out in the primary worktree with uncommitted
+  edits to the same doc (32 → 33 columns, new column 14 "Short description").
+  Waiting for that session to commit, then rebase and fast-forward.
+- Open: tier B ("wanted") columns are still not indicated on the form.
+  `docs/Database.md` still says `sku`/`description` are "✓ if active", now
+  contradicting the rulings — untouched per the edit-on-request-only rule.
