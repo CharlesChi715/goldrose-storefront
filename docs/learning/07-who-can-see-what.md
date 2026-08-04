@@ -432,15 +432,18 @@ Three things to take from it:
 
 ### Step 9 — The customer side, and one conservative decision
 
-Storefront sign-in is an emailed sign-in link, verified server-side by `/auth/confirm`, with the same mail's one-time code as fallback ([ShoppingLogin.tsx](../../components/login/ShoppingLogin.tsx)) and `shouldCreateUser: true`, so signing in and signing up are one operation.
+Storefront sign-in is a 6-digit emailed code, entered on `/account/signup` and verified with `verifyOtp` ([SignupScreen.tsx](../../components/screens/SignupScreen.tsx)); the same mail also carries a one-tap link that `/auth/confirm` verifies server-side. `shouldCreateUser: true` means signing in and signing up are one operation.
 
 ```tsx
-// components/login/ShoppingLogin.tsx:430-433
+// components/screens/SignupScreen.tsx:165-169
     const { error: sendError } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
+      email: address,
+      // This is the sign-up door, so an unknown address is the normal case.
       options: { shouldCreateUser: true },
     });
 ```
+
+> Updated 2026-08-04 (AI-020): `/account/signup` is now the **only** login page — the second login screen this trace originally quoted (`ShoppingLogin`, VELORIA frame 74:53) is deleted, and `/account` redirects there when signed out.
 
 The interesting rule is in [lib/account/data.ts:9-14](../../lib/account/data.ts#L9-L14) — when is it safe to show someone the orders attached to their email address?
 

@@ -105,6 +105,10 @@ test("EN/中文 toggle switches every label and persists across pages and reload
   await page.getByText("owner@goldrose.local").click();
   await page.getByRole("menuitem", { name: "English" }).click();
   await expect(
-    page.getByRole("navigation").getByRole("link", { name: "Orders" }),
+    // `exact` matters: the expanded Orders submenu also contains "All orders",
+    // and a substring match on two links trips Playwright's strict mode.
+    page
+      .getByRole("navigation")
+      .getByRole("link", { name: "Orders", exact: true }),
   ).toBeVisible();
 });

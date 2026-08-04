@@ -5,13 +5,11 @@
  * unified visual language (the design team's file-wide consistency pass):
  * white cards on the cream page, 1px sand inside-stroke, one uniform drop
  * shadow, ink Save buttons, and the ink/gold pill toggle. The 07-28 batch's
- * five-tab glyph nav band is gone from every account frame in this delivery
- * (AccountNavBand stays exported only until each screen's rework lands).
+ * five-tab glyph nav band is gone from every account frame in this delivery.
  * Geometry verbatim from the Figma REST data; icons are Figma's own SVG
  * exports.
  */
 
-import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
 import { abs, txt } from "@/lib/figma-layout";
 import { playfair } from "@/lib/fonts";
@@ -19,8 +17,6 @@ import { playfair } from "@/lib/fonts";
 export const INK = "#3B2F2F";
 export const SAND = "#E5D9C9";
 export const GOLD = "#D4AF37";
-/** Outline-icon gold of the 07-29 icon set. */
-export const ICON_GOLD = "#C18A0B";
 export const CREAM = "#FFF6EC";
 export const PINK = "#F3C6D1";
 /** The one shadow every card in the batch uses (unchanged 07-28 → 07-29). */
@@ -117,63 +113,6 @@ export function SettingsHeader({ title }: { title: string }) {
       >
         {title}
       </div>
-    </>
-  );
-}
-
-// 1231:169…189 — the frames' own five-tab glyph nav band ("Me" active).
-const NAV = [
-  { icon: "1231-171", label: "Home", href: "/" },
-  { icon: "1231-175", label: "Shop", href: "/shop" },
-  { icon: "1231-179", label: "Rose Deals" }, // no route yet — inert (CARE precedent)
-  { icon: "1231-183", label: "Wholesale", href: "/business/wholesale" },
-  { icon: "1231-187", label: "Me", href: "/account", active: true },
-];
-
-/** The account frames' bottom nav band (0,860 430×72). */
-export function AccountNavBand() {
-  return (
-    <>
-      <div style={{ ...abs(0, 860, 430, 72), background: CREAM }} />
-      {NAV.map((item, i) => {
-        const x = [4, 90, 176, 262, 348][i];
-        const body = (
-          <>
-            <img
-              src={`/veloria/screens/${item.icon}.svg`}
-              alt=""
-              width={22}
-              height={22}
-              style={{ ...abs(28, 4, 22, 22), display: "block" }}
-            />
-            <span
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 32,
-                width: 78,
-                ...txt(10, 16, item.active ? GOLD : INK, "center"),
-                display: "block",
-              }}
-            >
-              {item.label}
-            </span>
-          </>
-        );
-        return item.href ? (
-          <Link
-            key={item.label}
-            href={item.href}
-            style={{ ...abs(x, 866, 78, 60), display: "block" }}
-          >
-            {body}
-          </Link>
-        ) : (
-          <div key={item.label} style={abs(x, 866, 78, 60)}>
-            {body}
-          </div>
-        );
-      })}
     </>
   );
 }

@@ -7,8 +7,8 @@ rollout: test-deployment
 priority: p2
 owner: charles
 target: v1-launch
-qualifier: "3/17 home sections tagged; vocabulary sign-off pending"
-statusChangedAt: 2026-07-28
+qualifier: "4/7 home sections tagged; vocabulary sign-off pending"
+statusChangedAt: 2026-08-04
 
 dependsOn: []
 blockedBy: []
@@ -30,9 +30,10 @@ verification:
 - Today the beacon (`components/Beacon.tsx` → `POST /api/beacon` → `page_views`)
   records **arrivals only**. We know a page was opened; we cannot tell a
   two-second bounce from a two-minute read.
-- The homepage is ~15 stacked bands (A-1 … A-11). Nobody knows which ones earn
-  attention and which are scrolled past — so nobody can say what to cut, move up,
-  or spend photography money on.
+- The homepage is 7 stacked bands (A-1, A-2, A-3, A-5, A-6, A-9, A-11 — the
+  2026-08-04 simplified-homepage import cut it from 11 and deleted A-4/A-7/A-8/A-10
+  at source). Nobody knows which ones earn attention and which are scrolled past —
+  so nobody can say what to cut, move up, or spend photography money on.
 
 ## Decision
 
@@ -140,7 +141,7 @@ Staged so stage 1 ships without waiting on design-team decisions.
 | #   | Stage          | Work                                                                                                                                  | Depends on                                                 |
 | --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | 1   | Page dwell     | migration `0005`; `viewId` on arrival; active-time + scroll clock in `Beacon.tsx`; `POST /api/beacon/engagement`; "Time on page" card | nothing                                                    |
-| 2   | Section timing | `IntersectionObserver` over `[data-el$="-SECTION"]`; `sections` jsonb; Section attention card                                         | `data-el` tagging of A-4…A-11, `/shop`, `/products/[slug]` |
+| 2   | Section timing | `IntersectionObserver` over `[data-el$="-SECTION"]`; `sections` jsonb; Section attention card                                         | `data-el` tagging of A-5, A-6, A-9, `/shop`, `/products/[slug]` |
 | 3   | Drop-off       | last-section-reached ranking                                                                                                          | stage 2                                                    |
 
 Tests: a unit test pinning the clock rules (hidden = 0, idle cut, sum invariant),
@@ -148,11 +149,11 @@ and an e2e run asserting a timed visit surfaces on the admin card.
 
 ## Blockers and dependencies
 
-Stage 2 is blocked on element naming, not on code. Only A-1, A-2, A-3 carry
-`data-el` today; A-4 … A-11, `/shop` and `/products/[slug]` are untagged, and the
-SECTION vocabulary those bands need (`STORY`, `CRAFT`, `OCCASION`, …) is not
-yet defined and signed off. Tagging before a vocabulary exists means renaming
-across ~8 files later.
+Stage 2 is blocked on element naming, not on code. A-1, A-2, A-3 and A-11 carry
+`data-el` today (`HOME-HERO/FEATURED/PROMISE/STORY-SECTION`); A-5, A-6, A-9,
+`/shop` and `/products/[slug]` are untagged, and the SECTION vocabulary those
+bands need (`CRAFT`, `OCCASION`, …) is not yet defined and signed off. Tagging
+before a vocabulary exists means renaming across several files later.
 
 No feature-record id exists for element naming, so `dependsOn` stays empty and
 the dependency is recorded here in prose.

@@ -12,7 +12,6 @@ import {
   Cormorant_Garamond,
   Noto_Sans_SC,
   Playfair_Display,
-  Playfair_Display_SC,
   Sorts_Mill_Goudy,
 } from "next/font/google";
 
@@ -51,12 +50,6 @@ export const notoSC = Noto_Sans_SC({
 export const playfair = Playfair_Display({
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
-  subsets: ["latin"],
-});
-
-/** Playfair Display SC 400 — small-caps accent (single A-4 label). */
-export const playfairSC = Playfair_Display_SC({
-  weight: "400",
   subsets: ["latin"],
 });
 

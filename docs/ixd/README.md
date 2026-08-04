@@ -21,8 +21,6 @@ attributes themselves are in code. Current naming docs:
   chapter**: an UPPERCASE section per top-level route segment, and a frame named
   for its exact route followed by `·`-separated design metadata (screen,
   viewport, state). Replaced the deleted `frame-names.md` on 2026-07-30.
-  ⚠️ Unlike the other naming docs it carries no status/version header, so it is
-  not yet clear whether it is Proposed or Adopted
 - [naming/product-handles.md](naming/product-handles.md) — the deterministic
   algorithm deriving a product's `/products/<handle>` URL segment from its
   title, so any person or model produces the identical string

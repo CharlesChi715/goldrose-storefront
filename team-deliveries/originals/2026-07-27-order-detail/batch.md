@@ -1,8 +1,10 @@
 # 2026-07-27 · order-detail mechanism table (frontend-function-draft)
 
-Received from the design team 2026-07-27. Parsed into
-[`docs/ixd/order-detail.md`](../../../docs/ixd/order-detail.md)
-(ORDER-DETAIL-… entries).
+Received from the design team 2026-07-27. Parsed into `docs/ixd/order-detail.md`
+(ORDER-DETAIL-… entries). That file has since been retired along with the other
+hand-maintained IxD tables — interaction design is maintained in Figma now, see
+[`docs/ixd/README.md`](../../../docs/ixd/README.md). The retired table is in git
+history.
 
 Came from the gitignored `temp/` on 2026-07-30.
 
