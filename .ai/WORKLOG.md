@@ -4674,3 +4674,29 @@ Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
 - Open: tier B ("wanted") columns are still not indicated on the form.
   `docs/Database.md` still says `sku`/`description` are "✓ if active", now
   contradicting the rulings — untouched per the edit-on-request-only rule.
+
+## 2026-08-04 — TikTok analytics: API vs Business Suite capability survey
+
+- Question from Charles: could TikTok Business Suite be rebuilt against TikTok's
+  API? Surveyed the platform and recorded the answer as a BACKLOG feature record,
+  `docs/features/tiktok-analytics.md` (graduates `docs/ideas.md` line 81,
+  "tiktok 数据分析").
+- Core finding: the API can never exceed the dashboard — TikTok states that a
+  metric absent from TikTok Analytics is absent from the API too. The reason to
+  build is the one thing Business Suite structurally cannot do: join TikTok
+  metrics to eldreve.com sessions and orders.
+- Full ~50-row capability matrix (API vs Business Suite, union of both) lives in
+  the record's *Tech details*, with sources. Notable gaps: follower age/gender
+  are dashboard-only; Discovery (trends, benchmarks, Creator Marketplace) will
+  never be exposed; bulk comment auto-moderation is API-only.
+- Platform decay rules make timing matter: post data stops updating after 365
+  days, and insight fields drop off videos idle >7 days — so uncollected history
+  is unrecoverable. Recommended a collector-first, dashboard-later split (OQ-1).
+- OQ-2 raised for the owner: Business account (required for the API, ads, Shop)
+  costs access to trending sounds; Creator account keeps them. Marketing
+  trade-off, not a technical one.
+- Join key needs no code change — `components/Beacon.tsx` already captures
+  `utm_content`, freed for creative ids by the earlier `utm_acc` decision.
+- Also fixed `.claude/launch.json`: added an attach-only `goldrose-attach`
+  entry so the preview binds to an already-running `next dev` instead of failing
+  on Next 16's per-directory lock.
