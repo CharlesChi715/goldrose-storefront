@@ -56,8 +56,9 @@ Open linked resources only when the task needs them.
   checkout redesign, the full returns flow, reminder date pickers and edit
   sheet, the restructured privacy hub, `/account/policies-legal` → 7
   `/policies/*` coming-soon scaffolds, the unified signup page, and the
-  four-tile `/account` dashboard. The PDP now matches Ready-for-dev frame
-  `1523:3971` (430×1616); its live catalog data and cart actions remain wired.
+  three-tile `/account` dashboard (frame `1523:2536`). The PDP now matches
+  Ready-for-dev frame `1523:3971` (430×1616); its live catalog data and cart
+  actions remain wired.
 - **Simplified homepage imported 2026-08-04** (frame `2380:370`, section
   首页一级), replacing the earlier "ignore the homepage frames" hold. Canvas
   8673 → 5193; bands 11 → 7 (A-4/A-7/A-8/A-10 deleted at source). The homepage

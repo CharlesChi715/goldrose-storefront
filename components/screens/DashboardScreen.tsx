@@ -4,7 +4,7 @@
  * The two signed-in account dashboards from the 07-27 frames, one skeleton,
  * two variants:
  *
- *   "mepage" 2210:310 (08-02) → /account (signed in)
+ *   "mepage" 1523:2536 (Ready for dev) → /account (signed in)
  *   ACCOUNT-INFO-BUSINESS-DASHBOARD 1523:885 (07-29) → /account/business/dashboard
  *
  * Geometry, colors, fonts and copy verbatim from the Figma REST data. With
@@ -18,23 +18,15 @@
  * designed path is now Account & Privacy → the hub's Session card →
  * /account/logout.
  *
- * 08-02 drift import (shopping frame only): the frame was re-cut as 2210:310
- * and settled back to FOUR quick tiles (My Orders / Wishlist / Custom
- * Archive / Addresses at x16/115.5/215/314.5 — the morning frame's
- * three-tile row and its "Address Management ›" link row are both gone at
- * source), the service card stays 209 tall over its four rows, and the pink
- * member card is still absent. The business variant keeps its 07-29 layout
- * untouched.
+ * Ready-for-dev 1523:2536 is the canonical shopping frame: no account-type
+ * toggle, three quick tiles (My Orders / Gift Reminders / Addresses), and a
+ * 165px service card ending with Manage Addresses. The business variant keeps
+ * its separate 07-29 layout untouched.
  *
- * Wired: order tracking, /account/orders, /account/reminders, /care,
- * /account/returns and /account/privacy (the 07-29 hub), the account-type
- * toggle, and BUY AGAIN → /shop (nearest honest destination, H-15
- * precedent). Wishlist / Custom Archive / Addresses / business-side
- * tiles render pixel-exact but stay inert until their targets exist
- * (route-table rule; the ADDRESS-BOOK section 2118:246 is not
- * Ready-for-dev). Header wordmark: the shopping frame's image reads
- * "ELDREVE" (placeholder brand, DQ) — the owner's GoldRose art stays,
- * centred in the frame's wordmark box.
+ * Wired: order tracking, order list/details, gift reminders, customer care,
+ * and Account & Privacy. Addresses and business-side tiles remain inert until
+ * their destinations are Ready-for-dev. The shopping frame uses the ELDREVE
+ * wordmark while keeping live customer/order data in the designated boxes.
  */
 
 import Link from "next/link";
@@ -78,6 +70,9 @@ type Tile = {
   title: string;
   text: string;
   href?: string;
+  titleX?: number;
+  titleW?: number;
+  figmaNode?: string;
 };
 type Row = { title: string; value: string; href?: string };
 
@@ -98,15 +93,17 @@ function card(
 
 function DarkButton({
   x,
+  y = 392,
   label,
   href,
 }: {
   x: number;
+  y?: number;
   label: string;
   href?: string;
 }) {
   const style: React.CSSProperties = {
-    ...abs(x, 392, 176, 32),
+    ...abs(x, y, 176, 32),
     background: INK,
     boxShadow: `inset 0 0 0 1px ${SAND}`,
     borderRadius: 10,
@@ -137,15 +134,17 @@ function DarkButton({
 
 function LightButton({
   x,
+  y = 392,
   label,
   href,
 }: {
   x: number;
+  y?: number;
   label: string;
   href?: string;
 }) {
   const style: React.CSSProperties = {
-    ...abs(x, 392, 176, 32),
+    ...abs(x, y, 176, 32),
     background: CARD,
     boxShadow: `inset 0 0 0 1px ${SAND}`,
     borderRadius: 10,
@@ -206,10 +205,12 @@ function Dashboard({
     .slice(0, 2)
     .toUpperCase();
   const order = recentOrder === undefined ? MOCK_ORDER : recentOrder;
+  const recentY = shopping ? 161 : 218;
+  const shortcutY = shopping ? 388 : 448;
+  const serviceY = shopping ? 515 : 578;
 
-  // Shopping: four tiles at x16/115.5/215/314.5 — Custom Archive is back at
-  // source in 2210:310, and the row is on the business frame's grid again.
-  // Business: the 07-29 four-tile layout, untouched.
+  // Shopping: the Ready-for-dev frame has three evenly spaced tiles.
+  // Business: the 07-29 four-tile layout remains untouched.
   const tiles: Tile[] = shopping
     ? [
         {
@@ -219,27 +220,26 @@ function Dashboard({
           title: "My Orders",
           text: "View all orders",
           href: "/account/orders",
+          figmaNode: "1523:2559",
         },
         {
-          x: 115.5,
+          x: 167,
           icon: "1523-2564",
           ink: [22, 22],
-          title: "Wishlist",
-          text: "8 saved gifts",
+          title: "Gift Reminders",
+          text: "3 upcoming",
+          href: "/account/reminders",
+          titleX: 0,
+          titleW: 94,
+          figmaNode: "1523:2563",
         },
         {
-          x: 215,
-          icon: "1523-2568",
-          ink: [24, 17],
-          title: "Custom Archive",
-          text: "Saved designs",
-        },
-        {
-          x: 314.5,
+          x: 318,
           icon: "1523-2572",
           ink: [19, 19],
           title: "Addresses",
           text: "Manage delivery",
+          figmaNode: "1523:2571",
         },
       ]
     : [
@@ -281,15 +281,18 @@ function Dashboard({
           href: "/account/reminders",
         },
         {
-          title: "Returns & After-Sales",
-          value: "Self-service  ›",
-          href: "/account/returns",
+          title: "Customer Care",
+          value: "Online now  ›",
+          href: "/care",
         },
-        { title: "Customer Care", value: "Online now  ›", href: "/care" },
         {
           title: "Account & Privacy",
           value: "Personal settings  ›",
           href: "/account/privacy",
+        },
+        {
+          title: "Manage Addresses",
+          value: "Address Management  ›",
         },
       ]
     : [
@@ -327,8 +330,12 @@ function Dashboard({
         />
       </Link>
 
-      {/* profile card */}
-      <div style={card(16, 82, 398, 70)} />
+      {/* Ready frame 1523:2536 · ACCOUNT-INFO-PROFILE-CARD */}
+      <div
+        data-el="ACCOUNT-INFO-PROFILE-CARD"
+        data-figma-node="1523:2537"
+        style={card(16, 82, 398, 70)}
+      />
       <div
         style={{ ...abs(28, 93, 48, 48), background: PINK, borderRadius: 24 }}
       />
@@ -360,53 +367,27 @@ function Dashboard({
           : "Manage procurement and partnerships"}
       </div>
 
-      {/* account-type toggle */}
-      <div
-        style={{
-          ...abs(16, 164, 398, 42),
-          background: CARD,
-          boxShadow: `inset 0 0 0 1px ${SAND}`,
-          borderRadius: 10,
-        }}
-      />
-      <div
-        style={{
-          ...abs(shopping ? 16 : 215, 164, 199, 42),
-          background: PINK,
-          borderRadius: 10,
-        }}
-      />
-      {shopping ? (
+      {/* Browser annotation (2026-08-04): “Business & Partnerships — match
+          from Figma.” Scope: the shopping account dashboard. Ready-for-dev
+          frame 1523:2536 removes this toggle entirely; it remains below only
+          for the separate business-dashboard variant. */}
+      {!shopping ? (
         <>
           <div
             style={{
-              ...abs(24, 176, 183),
-              ...txt(12, 16, INK, "center"),
-              fontWeight: 500,
+              ...abs(16, 164, 398, 42),
+              background: CARD,
+              boxShadow: `inset 0 0 0 1px ${SAND}`,
+              borderRadius: 10,
             }}
-          >
-            Gift Shopping
-          </div>
-          <Link
-            href="/account/business"
-            style={{ ...abs(215, 164, 199, 42), display: "block" }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                left: 8,
-                top: 12,
-                width: 183,
-                ...txt(12, 16, INK, "center"),
-                fontWeight: 500,
-              }}
-            >
-              Business &amp; Partnerships
-            </span>
-          </Link>
-        </>
-      ) : (
-        <>
+          />
+          <div
+            style={{
+              ...abs(215, 164, 199, 42),
+              background: PINK,
+              borderRadius: 10,
+            }}
+          />
           <Link
             href="/account"
             style={{ ...abs(16, 164, 199, 42), display: "block" }}
@@ -434,14 +415,18 @@ function Dashboard({
             Business &amp; Partnerships
           </div>
         </>
-      )}
+      ) : null}
 
       {/* recent order / recent purchase request */}
-      <div style={card(16, 218, 398, 218)} />
+      <div
+        data-el={shopping ? "ACCOUNT-ORDER-RECENT-CARD" : undefined}
+        data-figma-node={shopping ? "1523:2546" : undefined}
+        style={card(16, recentY, 398, 218)}
+      />
       <div
         className={playfair.className}
         style={{
-          ...abs(30, 230, 260),
+          ...abs(30, recentY + 12, 260),
           ...txt(shopping ? 18 : 15, shopping ? 22 : 18, INK),
           fontWeight: 600,
         }}
@@ -451,7 +436,7 @@ function Dashboard({
       {shopping ? (
         <Link
           href="/account/orders"
-          style={{ ...abs(316, 233, 84, 15), display: "block" }}
+          style={{ ...abs(316, recentY + 15, 84, 15), display: "block" }}
         >
           <span
             style={{
@@ -466,7 +451,7 @@ function Dashboard({
       ) : (
         <div
           style={{
-            ...abs(316, 233, 84),
+            ...abs(316, recentY + 15, 84),
             ...txt(12, 15, INK, "right"),
             fontWeight: 500,
           }}
@@ -484,7 +469,7 @@ function Dashboard({
               width={122}
               height={118}
               style={{
-                ...abs(30, 266, 122, 118),
+                ...abs(30, recentY + 48, 122, 118),
                 borderRadius: 12,
                 objectFit: "cover",
                 display: "block",
@@ -492,7 +477,7 @@ function Dashboard({
             />
             <div
               style={{
-                ...abs(166, 266, 230, 36),
+                ...abs(166, recentY + 48, 230, 36),
                 ...txt(14, 18, INK),
                 fontWeight: 700,
                 whiteSpace: "normal",
@@ -504,7 +489,7 @@ function Dashboard({
             </div>
             <div
               style={{
-                ...abs(166, 306, 230),
+                ...abs(166, recentY + 88, 230),
                 ...txt(13, 16, INK),
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -515,7 +500,7 @@ function Dashboard({
             </div>
             <div
               style={{
-                ...abs(166, 328, 230),
+                ...abs(166, recentY + 110, 230),
                 ...txt(13, 16, GOLD),
                 fontWeight: 500,
                 overflow: "hidden",
@@ -527,7 +512,7 @@ function Dashboard({
             </div>
             <div
               style={{
-                ...abs(166, 354, 150),
+                ...abs(166, recentY + 136, 150),
                 ...txt(20, 22, INK),
                 fontWeight: 700,
               }}
@@ -535,8 +520,18 @@ function Dashboard({
             >
               {order.price}
             </div>
-            <DarkButton x={30} label="TRACK ORDER" href="/orders/track" />
-            <LightButton x={220} label="BUY AGAIN" href="/shop" />
+            <DarkButton
+              x={30}
+              y={recentY + 174}
+              label="TRACK ORDER"
+              href="/orders/track"
+            />
+            <LightButton
+              x={220}
+              y={recentY + 174}
+              label="VIEW DETAILS"
+              href="/account/orders/details"
+            />
           </>
         ) : (
           // Real visitor, no orders yet — the design has no empty state, so
@@ -544,37 +539,47 @@ function Dashboard({
           <>
             <div
               style={{
-                ...abs(30, 286, 340),
+                ...abs(30, recentY + 68, 340),
                 ...txt(14, 18, INK),
                 fontWeight: 700,
               }}
             >
               No orders yet.
             </div>
-            <div style={{ ...abs(30, 312, 340), ...txt(13, 16, INK) }}>
+            <div style={{ ...abs(30, recentY + 94, 340), ...txt(13, 16, INK) }}>
               Your first gold rose is waiting in the shop.
             </div>
-            <DarkButton x={30} label="BROWSE GIFTS" href="/shop" />
-            <LightButton x={220} label="TRACK ORDER" href="/orders/track" />
+            <DarkButton
+              x={30}
+              y={recentY + 174}
+              label="BROWSE GIFTS"
+              href="/shop"
+            />
+            <LightButton
+              x={220}
+              y={recentY + 174}
+              label="TRACK ORDER"
+              href="/orders/track"
+            />
           </>
         )
       ) : (
         <>
           <div
             style={{
-              ...abs(30, 266, 260, 21),
+              ...abs(30, recentY + 48, 260, 21),
               ...txt(17, 21, INK),
               fontWeight: 700,
             }}
           >
             RFQ #GRB-20260821
           </div>
-          <div style={{ ...abs(30, 300, 330), ...txt(13, 16, INK) }}>
+          <div style={{ ...abs(30, recentY + 82, 330), ...txt(13, 16, INK) }}>
             Corporate Gift Customization&nbsp; ·&nbsp; 500 units
           </div>
           <div
             style={{
-              ...abs(30, 326, 330),
+              ...abs(30, recentY + 108, 330),
               ...txt(13, 16, GOLD),
               fontWeight: 500,
             }}
@@ -583,15 +588,20 @@ function Dashboard({
           </div>
           <div
             style={{
-              ...abs(30, 354, 350),
+              ...abs(30, recentY + 136, 350),
               ...txt(12, 16, INK),
               fontWeight: 700,
             }}
           >
             Contact: David Zhang&nbsp; ·&nbsp; Business Manager
           </div>
-          <DarkButton x={30} label="VIEW PROGRESS" />
-          <LightButton x={220} label="NEW REQUEST" href="/business/wholesale" />
+          <DarkButton x={30} y={recentY + 174} label="VIEW PROGRESS" />
+          <LightButton
+            x={220}
+            y={recentY + 174}
+            label="NEW REQUEST"
+            href="/business/wholesale"
+          />
         </>
       )}
 
@@ -604,9 +614,9 @@ function Dashboard({
             <span
               style={{
                 position: "absolute",
-                left: 8,
+                left: tile.titleX ?? 8,
                 top: 52,
-                width: 78,
+                width: tile.titleW ?? 78,
                 ...txt(11, 14, INK, "center"),
                 fontWeight: 700,
                 whiteSpace: "normal",
@@ -631,8 +641,10 @@ function Dashboard({
           <Link
             key={tile.title}
             href={tile.href}
+            data-el={shopping ? "ACCOUNT-ACTION-SHORTCUT" : undefined}
+            data-figma-node={shopping ? tile.figmaNode : undefined}
             style={{
-              ...card(x, 448, 94, 118),
+              ...card(x, shortcutY, 94, 118),
               borderRadius: 12,
               display: "block",
             }}
@@ -642,18 +654,25 @@ function Dashboard({
         ) : (
           <div
             key={tile.title}
-            style={{ ...card(x, 448, 94, 118), borderRadius: 12 }}
+            data-el={shopping ? "ACCOUNT-ACTION-SHORTCUT" : undefined}
+            data-figma-node={shopping ? tile.figmaNode : undefined}
+            style={{ ...card(x, shortcutY, 94, 118), borderRadius: 12 }}
           >
             {body}
           </div>
         );
       })}
 
-      {/* service rows — 2210:349 keeps the shopping card 209 tall (its four
-          rows end at 728 with padding below); business keeps the 07-29 166 */}
-      <div style={card(16, 578, 398, shopping ? 209 : 166)} />
+      {/* service rows — Ready-for-dev shopping uses a 165px card; business
+          keeps the separate 07-29 geometry. */}
+      <div
+        data-el={shopping ? "ACCOUNT-INFO-SERVICE-CARD" : undefined}
+        data-figma-node={shopping ? "1523:2575" : undefined}
+        style={card(16, serviceY, 398, shopping ? 165 : 166)}
+      />
       {rows.map((row, i) => {
-        const y = [589, 630, 671, 712][i];
+        const y = shopping ? [526, 568, 609, 644][i] : [589, 630, 671, 712][i];
+        const separators = shopping ? [555, 597, 638] : [618, 659, 700];
         const body = (
           <>
             <span
@@ -685,7 +704,7 @@ function Dashboard({
             {i < 3 ? (
               <div
                 style={{
-                  ...abs(30, [618, 659, 700][i], 370, 1),
+                  ...abs(30, separators[i], 370, 1),
                   background: SAND,
                 }}
               />

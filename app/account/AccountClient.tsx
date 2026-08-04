@@ -4,8 +4,8 @@
  * ROLE OF THIS FILE
  * Client half of /account (owner request 2026-07-23). /account is the
  * SIGNED-IN page and nothing else: it renders the pixel-exact
- * ACCOUNT-INFO-SHOPPING-DASHBOARD (914:112, imported 2026-07-27) fed with
- * the visitor's real name and latest order.
+ * Ready-for-dev dashboard (1523:2536) fed with the visitor's real name and
+ * latest order.
  *
  * AI-020 answered 2026-08-04 (owner): /account/signup is the ONE login page.
  * A visitor who is not signed in is redirected there rather than being shown

@@ -4770,3 +4770,11 @@ Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
 - Confirmed `/account` already matches frame `2210:310` structurally.
 - Imported PDP frame `1523:3971` (430×1616), including section order, ELDREVE chrome, warm palette, overlay hit areas, and live checkout actions.
 - Verified TypeScript, targeted ESLint, reviews drawer behavior, and 2× band diffs; closed AI-016 through the agent inbox workflow.
+
+## 2026-08-04 — Correct Ready-for-dev account frame
+
+- Re-checked Figma dev-status ancestry and found standalone frame `2210:310` was not Ready-for-dev.
+- Rebuilt `/account` against canonical frame `1523:2536` under Ready-for-dev section `me一级`.
+- Removed the account-type toggle, restored the three-tile shortcuts and address-management row, repositioned the order/service cards, and wired View Details.
+- Verified TypeScript, targeted ESLint, live interactions, and a scale-2 band diff; dynamic order content was treated as an intentional masked region.
+- Added durable browser-annotation context plus `data-el` / `data-figma-node` markers for the profile, recent-order, shortcut, and service-card areas.
