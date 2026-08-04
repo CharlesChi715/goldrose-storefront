@@ -194,6 +194,7 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
   AI-TAG(AI-021): OWNER-DECISION — the rename needs its own branch and a ruling
   on prose casing (ELDREVE vs Eldreve).
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
+- Path `~/Documents/Work/gold_rose` for company or additional info. 
 
 ## Repository structure
 

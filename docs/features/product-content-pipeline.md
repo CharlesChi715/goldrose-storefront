@@ -62,15 +62,15 @@ design that puts every colour on one page.
 
 ## Options considered
 
-| Option                                       | Why not / why                                                                      | Verdict        |
-| -------------------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
-| Admin form only (built)                      | 120 SKUs one-by-one, and most fields aren't displayed yet                          | insufficient.  |
-| **CSV round-tripping the export**            | No second spec to drift; Export *is* the template; re-importing an untouched file is a no-op — idempotency for free. Export's 11 columns must be widened first | ✅ **chosen**  |
-| **Accept `.csv` and `.xlsx`**                | One dependency (SheetJS), converted to rows at the door so one parser serves both; removes the "Save as" step and the encoding trap entirely | ✅ **chosen**  |
-| Upload via a Vercel server action            | **Impossible** — Vercel caps a request body at ~4.5 MB, under one photo            | ❌             |
-| **Upload browser → Supabase Storage**        | No size ceiling, no Vercel bandwidth or function time                              | ✅ **chosen**  |
-| Service-role key in the browser              | Bypasses every RLS policy — release-gate violation                                 | ❌             |
-| Image URLs downloaded server-side            | Photos would live on the supplier's server indefinitely                            | ❌             |
+| Option                                | Why not / why                                                                                                                                                  | Verdict       |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| Admin form only (built)               | 120 SKUs one-by-one, and most fields aren't displayed yet                                                                                                      | insufficient. |
+| **CSV round-tripping the export**     | No second spec to drift; Export *is* the template; re-importing an untouched file is a no-op — idempotency for free. Export's 11 columns must be widened first | ✅ **chosen** |
+| **Accept `.csv` and `.xlsx`**         | One dependency (SheetJS), converted to rows at the door so one parser serves both; removes the "Save as" step and the encoding trap entirely                   | ✅ **chosen** |
+| Upload via a Vercel server action     | **Impossible** — Vercel caps a request body at ~4.5 MB, under one photo                                                                                        | ❌            |
+| **Upload browser → Supabase Storage** | No size ceiling, no Vercel bandwidth or function time                                                                                                          | ✅ **chosen** |
+| Service-role key in the browser       | Bypasses every RLS policy — release-gate violation                                                                                                             | ❌            |
+| Image URLs downloaded server-side     | Photos would live on the supplier's server indefinitely                                                                                                        | ❌            |
 
 ## File formats
 
@@ -203,15 +203,15 @@ product-images/
         └── hero-blue-rose-in-glass-dome.jpg
 ```
 
-| Rule                   |                                                                             |
-| ---------------------- | --------------------------------------------------------------------------- |
-| Product folder         | the `handle`; a Title is accepted and converted                             |
-| Variant folder         | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe            |
+| Rule                   |                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| Product folder         | the `handle`; a Title is accepted and converted                                            |
+| Variant folder         | the `SKU` — already uppercase/digits/hyphens, so filesystem-safe                           |
 | Order prefix           | `hero` = position 0, then `1`, `2`, … read as **integers**; as text, `10` sorts before `2` |
-| Alt slug               | everything after the first `-`; optional, hyphen-separated                  |
-| Banned in file names   | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys |
-| Extensions             | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos       |
-| Folder matching no row | **hard error** naming the folder — never a silent skip                      |
+| Alt slug               | everything after the first `-`; optional, hyphen-separated                                 |
+| Banned in file names   | spaces, Chinese characters, `#`, `?`, `%` — they break URLs and storage keys               |
+| Extensions             | `.jpg .jpeg .png .webp .avif .gif .svg`; use `.jpg`/`.webp` for photos                     |
+| Folder matching no row | **hard error** naming the folder — never a silent skip                                     |
 
 Alt text comes from the slug: `1-red-stem-detail` becomes "Red stem detail".
 That is all the alt a folder can carry — no commas, no proper-noun capitals, no
@@ -243,11 +243,11 @@ anyway — that is what holds the key that mints the URLs.
 The spreadsheet takes the opposite route: it is a few hundred KB, so it posts to
 Vercel and is parsed there, because validating a row needs the database.
 
-| What            | Goes to          | Why                                                    |
-| --------------- | ---------------- | ------------------------------------------------------ |
-| spreadsheet     | Vercel           | small; every row needs a database check                |
-| image manifest  | Vercel           | needs `productHandle()` and the database               |
-| image bytes     | Supabase Storage | far over the ~4.5 MB cap, and needs no validation      |
+| What           | Goes to          | Why                                               |
+| -------------- | ---------------- | ------------------------------------------------- |
+| spreadsheet    | Vercel           | small; every row needs a database check           |
+| image manifest | Vercel           | needs `productHandle()` and the database          |
+| image bytes    | Supabase Storage | far over the ~4.5 MB cap, and needs no validation |
 
 ## Acceptance criteria
 
