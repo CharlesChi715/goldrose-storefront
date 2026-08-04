@@ -16,14 +16,27 @@
  * /agent-delivery/sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md.
  */
 
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { SignupScreen } from "@/components/screens/SignupScreen";
 
 export const metadata: Metadata = {
-  title: "Create account — GoldRose",
+  // AI-020 (answered 2026-08-04): this is the storefront's one login page, not
+  // just the create-account step, so the title says what the page does. The
+  // route name still says "signup" — renaming it is a redirect exercise best
+  // done with the ELDREVE rename (AI-021), not smuggled in here.
+  title: "Sign in — GoldRose",
   robots: { index: false },
 };
 
 export default function SignupPage() {
-  return <SignupScreen />;
+  // The screen reads ?auth_error=1 via useSearchParams, which opts a client
+  // component out of static prerendering unless it sits under Suspense. The
+  // fallback is deliberately blank: the screen mounts immediately, so anything
+  // drawn here would be a flash, not a loading state.
+  return (
+    <Suspense fallback={null}>
+      <SignupScreen />
+    </Suspense>
+  );
 }

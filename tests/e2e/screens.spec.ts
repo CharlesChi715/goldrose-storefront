@@ -256,16 +256,11 @@ test("the shop pagination walks pages and reorders the placeholder cards", async
   await expect(page.getByRole("link", { name: "Next page" })).toHaveCount(0);
 });
 
-test("the account type tabs are links between the two imported frames", async ({
-  page,
-}) => {
-  await page.goto("/account");
-  await page.getByRole("link", { name: "Business & Partnerships" }).click();
-  await expect(page).toHaveURL(/\/account\/business$/);
-  // And back — the fade itself is motion-gated, so only the routing is asserted.
-  await page.getByRole("link", { name: "Gift Shopping" }).click();
-  await expect(page).toHaveURL(/\/account$/);
-});
+// The Gift Shopping ⇄ Business & Partnerships tabs lived on the second login
+// screen, deleted 2026-08-04 when /account/signup became the only login page
+// (AI-020). /account/business still exists and is covered by account.spec.ts;
+// it has no signed-out entry point until the design team restores one — the
+// 08-04 MENU redesign dropped the drawer's FOR BUSINESS row (DQ raised).
 
 test("the homepage gift-path cards reach the shop and the on-page sections", async ({
   page,

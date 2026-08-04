@@ -4615,3 +4615,41 @@ overlay target `2345:271` (MENU) from the same section.
   specs; `home-darwin.png` baseline regenerated.
 - Raised AI-024…AI-029; see
   `agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md`.
+
+## 2026-08-04 — AI-020 answered: one login page
+
+Branch `feat/canonical-login`. The owner's ruling: `/account/signup` is the
+storefront's only login page, and `/account` is the signed-in page only.
+
+- **Root cause of the "my simple login page came back" report.** Nothing was
+  ever reverted. `AccountClient.tsx` conditionally rendered a *second* login
+  screen (`ShoppingLogin`, VELORIA frame 74:53) whenever the visitor was signed
+  out. That line was written 07-25, when it was the only login screen; when the
+  live signup flow shipped 08-03 nobody repointed it, so two login screens ran
+  in parallel. The 08-04 MENU redesign then added a **My Account → /account**
+  row that the old drawer never had, making the old screen newly visible and
+  reading as a regression. Verified against git: the Account tab's `href` has
+  been `/account` at all 11 commits that ever touched `chrome.tsx`, no
+  `/account`→signup redirect ever existed, and `ShoppingLogin` was never
+  deleted on any branch, reflog entry or dangling object.
+- **Signed out now redirects** to `/account/signup` (`router.replace`, so Back
+  does not bounce). Local mode (`unavailable`) redirects too — with no auth
+  server, being signed in is impossible.
+- **`?auth_error=1` survives the hop.** Captured at mount by a lazy state
+  initializer, before the existing effect strips it off the URL and
+  independently of Supabase, then re-read on the signup page from
+  `useSearchParams` and shown in the frame's own status slot. Typing an address
+  retracts it. `/account/signup` gained a `Suspense` boundary so it stays
+  statically prerendered (confirmed `○` in the build output).
+- **Deleted** `components/login/ShoppingLogin.tsx` (701 lines). Its only
+  consumer was that one line. `components/login/tokens.tsx` stays —
+  `BusinessLogin` imports it.
+- **Known gap:** `ShoppingLogin` carried the Gift Shopping ⇄ Business tabs, the
+  last signed-out route to `/account/business`, and the 08-04 MENU dropped the
+  drawer's FOR BUSINESS row. The route still works directly; restoring an entry
+  point is a design decision, not an invented one. The stale SUMMARY line
+  claiming the drawer still reaches it was removed.
+- **Verified**: `tsc` clean, eslint clean, 67/67 unit, 100 e2e passed with the
+  one pre-existing `admin-auth` EN/中文 failure. Rewrote 4 tests in
+  `account.spec.ts` for the redirect (incl. a new dead-link case) and removed
+  the account-type-tabs test in `screens.spec.ts`.

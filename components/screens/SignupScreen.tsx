@@ -50,7 +50,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BackButton } from "@/components/BackButton";
 import { ScaleFrame } from "@/components/chrome";
 import { BrandWordmark } from "@/components/screens/account-chrome";
@@ -129,6 +129,19 @@ export function SignupScreen() {
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [agreed, setAgreed] = useState(false);
+
+  // /account bounces here when nobody is signed in (AI-020). If that visit
+  // followed a dead sign-in link it carries ?auth_error=1, and the reason has
+  // to survive the redirect — otherwise the page just reappears with no
+  // explanation, which reads as the link having done nothing at all.
+  //
+  // Derived from the URL rather than copied into state by an effect: state
+  // seeded from props/URL has to be kept in sync forever after, and setting it
+  // in an effect costs a second render before the message appears.
+  const searchParams = useSearchParams();
+  const [linkErrorDismissed, setLinkErrorDismissed] = useState(false);
+  const linkExpired =
+    searchParams.get("auth_error") === "1" && !linkErrorDismissed;
   const emailValid = EMAIL_RE.test(email.trim());
   const emailError = touched && email.trim() !== "" && !emailValid;
   // The button needs a valid address AND no request already in the air —
@@ -231,23 +244,28 @@ export function SignupScreen() {
   // someone who has typed a half-finished address and not yet blurred.
   const status = error
     ? { text: error, tone: DANGER }
-    : emailError
+    : linkExpired
       ? {
-          text: "Enter a valid email address, like name@example.com.",
+          text: "That sign-in link has expired or was already used. Enter your email to get a new one.",
           tone: DANGER,
         }
-      : phase === "sending"
-        ? { text: "Sending your code…", tone: HINT }
-        : phase === "verifying"
-          ? { text: "Signing you in…", tone: HINT }
-          : phase === "sent"
-            ? {
-                text: `We emailed ${sentTo} a 6-digit code and a sign-in link — use either.`,
-                tone: INK,
-              }
-            : !emailValid
-              ? { text: "We’ll email you a 6-digit code.", tone: HINT }
-              : null;
+      : emailError
+        ? {
+            text: "Enter a valid email address, like name@example.com.",
+            tone: DANGER,
+          }
+        : phase === "sending"
+          ? { text: "Sending your code…", tone: HINT }
+          : phase === "verifying"
+            ? { text: "Signing you in…", tone: HINT }
+            : phase === "sent"
+              ? {
+                  text: `We emailed ${sentTo} a 6-digit code and a sign-in link — use either.`,
+                  tone: INK,
+                }
+              : !emailValid
+                ? { text: "We’ll email you a 6-digit code.", tone: HINT }
+                : null;
 
   return (
     // Canvas 974 = the frame's nav band top (915) + 59.
@@ -368,8 +386,8 @@ export function SignupScreen() {
           {field.name === "email" ? (
             // Live control — a real input drawn inside the frame's own field
             // box: transparent, borderless, same type ramp as the hint it
-            // replaces, so the box stays pixel-exact (ShoppingLogin
-            // precedent). The hint becomes the placeholder.
+            // replaces, so the box stays pixel-exact. The hint becomes the
+            // placeholder.
             <input
               id="signup-email"
               name="email"
@@ -382,6 +400,9 @@ export function SignupScreen() {
                 // Typing clears the verdict: nobody wants to be corrected
                 // mid-word. Blur asks for it again.
                 setTouched(false);
+                // Acting on the dead-link message answers it — keeping it up
+                // while they type the address that fixes it is just nagging.
+                setLinkErrorDismissed(true);
                 // …and it retracts the last send. "We emailed a code to
                 // old@address" must not sit there while a new one is typed.
                 setError(null);
