@@ -93,47 +93,47 @@ of the product, ● varies per row.
 **A — required.** Without these the row is rejected or the product cannot go
 live.
 
-| #    | Column          | Scope | Req                                   |
-| ---- | --------------- | ----- | ------------------------------------- |
-| 1    | Handle          | ▪     | blank ⇒ derive from Title (see below) |
-| 2    | Title           | ▪     | ✓                                     |
-| 3    | Description     | ▪     | ✓ if active                           |
-| 4    | SKU             | ●     | ✓ if active                           |
-| 5    | Price           | ●     | ✓                                     |
-| 6–8  | Option1–3 name  | ▪     | ✓ if variants differ                  |
-| 9–11 | Option1–3 value | ●     | ✓ if option names set                 |
+| #    | Column          | Scope | Req                                   | What it is                                                        |
+| ---- | --------------- | ----- | ------------------------------------- | ----------------------------------------------------------------- |
+| 1    | Handle          | ▪     | blank ⇒ derive from Title (see below) | `products.handle` — URL segment + image folder name               |
+| 2    | Title           | ▪     | ✓                                     | `products.title` — full name, the PDP heading                     |
+| 3    | Description     | ▪     | ✓                                     | `products.description` — PDP body, and what Google reads          |
+| 4    | SKU             | ●     | ✓                                     | `product_variants.sku` — the row's identity + its image subfolder |
+| 5    | Price           | ●     | ✓                                     | `product_variants.price_cents` — in dollars (`49.99`)             |
+| 6–8  | Option1–3 name  | ▪     | ✓ if variants differ                  | `products.option_names` — *what* varies (`Color`)                 |
+| 9–11 | Option1–3 value | ●     | ✓ if option names set                 | `product_variants.option_values` — *this row's* value (`Red`)     |
 
 **B — wanted.** Not enforced, but the storefront is visibly worse without them:
 these are what customers and Google actually read.
 
-| #  | Column           | Scope | Req                     |
-| -- | ---------------- | ----- | ----------------------- |
-| 12 | Status           | ▪     | ○ — defaults draft      |
-| 13 | Short name       | ▪     | ○ — falls back to Title |
-| 14 | Compare-at price | ●     | ○                       |
-| 15 | On hand          | ●     | ○ — first import only   |
-| 16 | Badge            | ▪     | ○                       |
-| 17 | Best for         | ▪     | ○                       |
-| 18 | Details          | ▪     | ○ — `;` separated       |
-| 19 | SEO title        | ▪     | ○                       |
-| 20 | SEO description  | ▪     | ○                       |
-| 21 | Tags             | ▪     | ○ — `;` separated       |
-| 22 | Type             | ▪     | ○                       |
-| 23 | Vendor           | ▪     | ○                       |
+| #  | Column           | Scope | Req                     | What it is                                                         |
+| -- | ---------------- | ----- | ----------------------- | ------------------------------------------------------------------ |
+| 12 | Status           | ▪     | ○ — defaults draft      | `products.status` — draft is invisible on the storefront           |
+| 13 | Short name       | ▪     | ○ — falls back to Title | `products.short_name` — shop cards + browser tab                   |
+| 14 | Compare-at price | ●     | ○                       | `…compare_at_price_cents` — the struck-through "was" price         |
+| 15 | On hand          | ●     | ○ — first import only   | `…inventory_on_hand` — opening stock; re-imports must not touch it |
+| 16 | Badge            | ▪     | ○                       | `products.badge` — card label ("Save 44%") — ⚠️ dormant            |
+| 17 | Best for         | ▪     | ○                       | `products.best_for` — occasion blurb — ⚠️ dormant                  |
+| 18 | Details          | ▪     | ○ — `;` separated       | `products.details` — the PDP bullet list                           |
+| 19 | SEO title        | ▪     | ○                       | `products.seo_title` — Google heading — ⚠️ not read yet            |
+| 20 | SEO description  | ▪     | ○                       | `products.seo_description` — Google snippet — ⚠️ not read yet      |
+| 21 | Tags             | ▪     | ○ — `;` separated       | `products.tags` — admin search labels; customers never see them    |
+| 22 | Type             | ▪     | ○                       | `products.product_type` — admin category ("Gold Dipped Rose")      |
+| 23 | Vendor           | ▪     | ○                       | `products.vendor` — brand/maker, admin-only                        |
 
 **C — the rest.** Defaults are fine; fill them when there is a reason to.
 
-| #  | Column                    | Scope | Req                |
-| -- | ------------------------- | ----- | ------------------ |
-| 24 | Charge tax                | ▪     | ○ — defaults true  |
-| 25 | Requires shipping         | ▪     | ○ — defaults true  |
-| 26 | Country of origin         | ▪     | ○ — ISO-2          |
-| 27 | HS code                   | ▪     | ○                  |
-| 28 | Barcode                   | ●     | ○                  |
-| 29 | Cost                      | ●     | ○ — see OQ-4       |
-| 30 | Track quantity            | ●     | ○ — defaults true  |
-| 31 | Continue selling when OOS | ●     | ○ — defaults false |
-| 32 | Weight (oz)               | ●     | ○                  |
+| #  | Column                    | Scope | Req                | What it is                                                |
+| -- | ------------------------- | ----- | ------------------ | --------------------------------------------------------- |
+| 24 | Charge tax                | ▪     | ○ — defaults true  | `products.charge_tax`                                     |
+| 25 | Requires shipping         | ▪     | ○ — defaults true  | `products.requires_shipping` — clear only for a gift card |
+| 26 | Country of origin         | ▪     | ○ — ISO-2          | `products.country_of_origin` — customs (`CN`)             |
+| 27 | HS code                   | ▪     | ○                  | `products.hs_code` — customs tariff code                  |
+| 28 | Barcode                   | ●     | ○                  | `product_variants.barcode` — UPC/EAN, if printed          |
+| 29 | Cost                      | ●     | ○ — see OQ-4       | `product_variants.cost_cents` — what *we* pay; private    |
+| 30 | Track quantity            | ●     | ○ — defaults true  | `product_variants.track_quantity`                         |
+| 31 | Continue selling when OOS | ●     | ○ — defaults false | `…continue_selling_when_oos` — take orders at zero stock  |
+| 32 | Weight (oz)               | ●     | ○                  | `product_variants.weight_oz` — feeds the shipping rate    |
 
 **No image columns.** The folder tree is the only source for images — which
 product, which variant, what order, and the alt slug all come from the paths.
