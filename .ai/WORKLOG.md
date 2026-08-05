@@ -4818,3 +4818,33 @@ pre-existing warnings), 67/67 unit, **101/101 e2e**, build clean, Prettier clean
 Deliberately NOT done: the GoldRose→ELDREVE rename (AI-021 — owner ruling
 pending on prose casing) and the 4-tab Wholesale band still drawn by
 `PartnershipsScreen.tsx` (a design call, not a cleanup).
+
+## 2026-08-04 — Stale-asset sweep: GoldRose wordmark retired from the header
+
+- Spotted while building a 512×512 app logo for the TikTok app registration:
+  the repo's `public/veloria/logo.png` is the **GoldRose** wordmark, and
+  `components/chrome.tsx:206` was serving it under `alt="ELDREVE"` on /shop and
+  every page using that header variant. The other two headers in the same file
+  already used `eldreve-136x40.png`; pointed the third at it too. A live brand
+  bug, not merely an unused file — and fixing it is what made the asset
+  archivable.
+- Archived to `assets/archive/` (mirroring the original path, per the existing
+  convention): `public/veloria/logo.png`, `public/home/logo.png`.
+  `public/home/` is now empty; the rest had been archived previously.
+- Verified: `tsc --noEmit` clean; 5 routes (/, /shop, product, /checkout,
+  /account) render 78 image references, none pointing at archived paths, none
+  returning other than 200.
+- **Audit method worth reusing.** A filename-only grep reported 1276 assets as
+  unreferenced; spotting the runtime template `` `/veloria/${card.img}.png` ``
+  and re-matching on filename *stems* cut that to 1043. Static grep cannot see
+  dynamically built paths, so any dead-asset sweep must search for path-building
+  templates first and match the loosest plausible token. The naive list would
+  have deleted 233 live images.
+- **Not swept, deliberately:** 900 files under `public/veloria/screens` are
+  Figma frame exports the design work still refers to; `veloria/home` (106) is
+  mixed, since bands went 11→7 with A-4/A-7/A-8/A-10 deleted at source;
+  `veloria/login` (9) is the strongest remaining stale candidate because the
+  `ShoppingLogin` screen was deleted (AI-020). Unreferenced ≠ stale — the rest
+  needs a design-team call.
+- Note: VELORIA is the design team's **Figma file name**, not a brand name, so
+  `public/veloria/` needs no rename in the GoldRose→ELDREVE project.
