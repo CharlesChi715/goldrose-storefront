@@ -50,9 +50,13 @@ Open linked resources only when the task needs them.
   Gift Shopping ⇄ Business tabs, so `/account/business` now has **no
   signed-out entry** — the 08-04 MENU also dropped its FOR BUSINESS row. Needs
   a design ruling; the route still works directly.
-- **Figma imports** are current through 2026-08-04 on `feat/figma-sync`; the
-  per-frame history, prototype-link decisions and unadopted frames live in
-  [`docs/ixd/README.md`](docs/ixd/README.md). Landed so far: the two-step
+- **Figma imports** are current through 2026-08-05 on `feat/figma-sync`; the
+  per-frame history and prototype-link decisions live in the per-session
+  write-backs under [`agent-delivery/sessions/`](agent-delivery/README.md)
+  (`docs/ixd/` is now only the naming rules). The 08-05 sync found **no changed
+  frames** and instead built the Ready-for-dev leftovers
+  `/account/orders/delivered` (`2439:369`) and `/account/orders/review`
+  (`2439:370`), closing AI-029's dead "View details". Landed so far: the two-step
   checkout redesign, the full returns flow, reminder date pickers and edit
   sheet, the restructured privacy hub, `/account/policies-legal` → 7
   `/policies/*` coming-soon scaffolds, the unified signup page, and the
@@ -251,7 +255,7 @@ Config at the root: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
 | Agent instructions and open messages (`npm run agent-inbox`)     | [`agent-delivery/`](agent-delivery/README.md)                                                        |
 | Feature status and roadmap (generator rebuild in progress)       | [`docs/features/README.md`](docs/features/README.md)                                                 |
 | Authoritative admin/product requirements (`§` references)        | [`docs/admin-design.md`](docs/admin-design.md)                                                       |
-| Figma imports, route decisions, interactions, design issues      | [`docs/ixd/README.md`](docs/ixd/README.md)                                                           |
+| Figma imports, route decisions, interactions, design issues      | [`agent-delivery/sessions/`](agent-delivery/README.md) (per sync); [`docs/ixd/README.md`](docs/ixd/README.md) keeps the findings record |
 | Naming rules — Figma sections/frames, `data-el`, product handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md)                                            |
 | Where raw deliveries land, and how to parse one                  | [`team-deliveries/README.md`](team-deliveries/README.md)                                             |
 | Database decisions and SKU rules                                 | [`docs/Database.md`](docs/Database.md)                                                               |
