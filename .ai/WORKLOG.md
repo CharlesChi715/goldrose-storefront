@@ -4952,3 +4952,19 @@ duplication (correct per AI-014, not stale).
 
 Typecheck clean; the two `no-unused-vars` warnings in this file (`x`, `w` in
 `BrandWordmark`) still predate the change.
+
+## 2026-08-05 16:25 AEST
+
+**figma-sync skill v2.0.0 — deterministic read pipeline.** Added
+`scripts/figma/{lib,digest,cli}.mjs` and `figma:*` npm scripts. The skill's
+"read everything the file exposes" prose is replaced by fixed commands: `pull`
+caches the file (version-checked via `?depth=1`, ~6s cold / ~1s warm) and
+rebuilds five digests of 10–40KB each — frames, ready-for-dev (section cascade
+resolved), prototype edges + scaffold targets, attributed comment threads —
+so no agent reads the 22MB `file.json`. `changes` diffs top-level frame
+hashes against a `baseline` snapshot, making each sync proportional to the
+delivery; `routes` automates the repo↔Figma drift check; `node <id>` and
+`render <id>` pull one frame's subtree or PNG on demand. Judgement rules
+(comment ownership, pending-from-design, hand-off) stay in SKILL.md; the
+comment digest emits a `hint`, never a verdict. Baseline set at the current
+file version (everything through 2026-08-04 is imported).
