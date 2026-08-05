@@ -56,7 +56,9 @@ Open linked resources only when the task needs them.
   checkout redesign, the full returns flow, reminder date pickers and edit
   sheet, the restructured privacy hub, `/account/policies-legal` → 7
   `/policies/*` coming-soon scaffolds, the unified signup page, and the
-  four-tile `/account` dashboard.
+  three-tile `/account` dashboard (frame `1523:2536`). The PDP now matches
+  Ready-for-dev frame `1523:3971` (430×1616); its live catalog data and cart
+  actions remain wired.
 - **Simplified homepage imported 2026-08-04** (frame `2380:370`, section
   首页一级), replacing the earlier "ignore the homepage frames" hold. Canvas
   8673 → 5193; bands 11 → 7 (A-4/A-7/A-8/A-10 deleted at source). The homepage
@@ -68,7 +70,7 @@ Open linked resources only when the task needs them.
   it is the brand. The repo's GoldRose substitution is retired: the rename
   landed 2026-08-05 (see OQ-4 / AI-021).
 - **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
-  MENU/PDP/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
+  MENU/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);

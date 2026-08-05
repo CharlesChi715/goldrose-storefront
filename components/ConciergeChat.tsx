@@ -269,6 +269,7 @@ export function ConciergeChat({
   navClearance = 59,
   mascotOnTop = true,
   variant = "green",
+  showMascot = true,
 }: {
   /** Height of the fixed bottom nav (+gap) this floats above. */
   navClearance?: number;
@@ -276,12 +277,14 @@ export function ConciergeChat({
   mascotOnTop?: boolean;
   /** "green" = original palette; "brown" = the 2026-07-25 redesign palette. */
   variant?: "green" | "brown";
+  /** Some Ready-for-dev frames use the chat bar without the mascot sticker. */
+  showMascot?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const brown = variant === "brown";
   const stageH = CHAT_H + navClearance;
 
-  const mascot = (
+  const mascot = showMascot ? (
     // Clipped 3px on the left, exactly as the canvas clipped it in the design.
     <div
       key="mascot"
@@ -306,7 +309,7 @@ export function ConciergeChat({
         }}
       />
     </div>
-  );
+  ) : null;
 
   const bar = (
     <button

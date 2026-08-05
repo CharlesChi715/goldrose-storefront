@@ -4849,6 +4849,21 @@ pending on prose casing) and the 4-tab Wholesale band still drawn by
 - Note: VELORIA is the design team's **Figma file name**, not a brand name, so
   `public/veloria/` needs no rename in the GoldRose→ELDREVE project.
 
+## 2026-08-04 — Ready-for-dev PDP frame sync
+
+- Compared the two browser annotations against their complete Figma frames.
+- Confirmed `/account` already matches frame `2210:310` structurally.
+- Imported PDP frame `1523:3971` (430×1616), including section order, ELDREVE chrome, warm palette, overlay hit areas, and live checkout actions.
+- Verified TypeScript, targeted ESLint, reviews drawer behavior, and 2× band diffs; closed AI-016 through the agent inbox workflow.
+
+## 2026-08-04 — Correct Ready-for-dev account frame
+
+- Re-checked Figma dev-status ancestry and found standalone frame `2210:310` was not Ready-for-dev.
+- Rebuilt `/account` against canonical frame `1523:2536` under Ready-for-dev section `me一级`.
+- Removed the account-type toggle, restored the three-tile shortcuts and address-management row, repositioned the order/service cards, and wired View Details.
+- Verified TypeScript, targeted ESLint, live interactions, and a scale-2 band diff; dynamic order content was treated as an intentional masked region.
+- Added durable browser-annotation context plus `data-el` / `data-figma-node` markers for the profile, recent-order, shortcut, and service-card areas.
+
 ## 2026-08-05 — ELDREVE rename (AI-021) on `feat/eldreve-rename`
 
 Charles renamed the design team's Figma file Veloria → ELDREVE and asked for
