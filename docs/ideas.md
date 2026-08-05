@@ -74,6 +74,12 @@ is there any way to get how long time do user stay on a page or stay on a sectio
 点赞
 评论
 
+reviews
+payment, 
+order
+return
+
+
 
 工作台
 产品的替换

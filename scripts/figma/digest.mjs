@@ -221,6 +221,144 @@ export function comments(raw, me, { nodes }) {
   );
 }
 
+const VECTORISH = new Set([
+  "VECTOR",
+  "BOOLEAN_OPERATION",
+  "STAR",
+  "ELLIPSE",
+  "LINE",
+  "REGULAR_POLYGON",
+]);
+
+const hasImageFill = (node) =>
+  (node.fills ?? []).some((f) => f.type === "IMAGE" && f.visible !== false);
+
+/** A subtree with no text and no image fill can be flattened into one SVG. */
+function pureVector(node) {
+  if (node.type === "TEXT" || hasImageFill(node)) return false;
+  if (VECTORISH.has(node.type)) return true;
+  const children = node.children ?? [];
+  return children.length > 0 && children.every(pureVector);
+}
+
+/**
+ * The nodes worth exporting as files from a frame.
+ *
+ * Exports the **outermost** node that qualifies and does not descend into it,
+ * so a five-path icon comes out as one SVG rather than five fragments. Three
+ * things qualify, in priority order: an explicit export setting from the
+ * designer, a subtree that is entirely vector (an icon), and a node painted
+ * with an image fill (a photo).
+ *
+ * Frames and groups that mix text with art fall through to their children —
+ * that is how a whole screen avoids being exported as a single blob.
+ */
+export function exportableNodes(root) {
+  const out = [];
+  const visit = (node, depth) => {
+    if (depth > 0) {
+      if (node.exportSettings?.length) {
+        const setting = node.exportSettings[0];
+        out.push({
+          id: node.id,
+          name: node.name,
+          format: (setting.format ?? "SVG").toLowerCase(),
+          scale: setting.constraint?.value ?? 2,
+          why: "exportSettings",
+        });
+        return;
+      }
+      if (pureVector(node)) {
+        out.push({
+          id: node.id,
+          name: node.name,
+          format: "svg",
+          scale: 1,
+          why: "vector",
+        });
+        return;
+      }
+      if (hasImageFill(node)) {
+        out.push({
+          id: node.id,
+          name: node.name,
+          format: "png",
+          scale: 2,
+          why: "image-fill",
+        });
+        return;
+      }
+    }
+    for (const child of node.children ?? []) visit(child, depth + 1);
+  };
+  visit(root, 0);
+  // Asked for a single icon rather than a screen: the root never qualifies
+  // itself (or a whole frame would export as one blob), so allow it when the
+  // scan came back empty.
+  if (!out.length && (pureVector(root) || hasImageFill(root))) {
+    out.push({
+      id: root.id,
+      name: root.name,
+      format: pureVector(root) ? "svg" : "png",
+      scale: pureVector(root) ? 1 : 2,
+      why: "root",
+    });
+  }
+  return out;
+}
+
+/**
+ * A frame as an indented layout listing — name, geometry, text, fill.
+ *
+ * The raw subtree of one screen is ~500KB of style tables, render bounds and
+ * constraint objects that a Tailwind rewrite never consults. This is the same
+ * frame in a form a reader can hold: position and size relative to the frame,
+ * the copy, and the colour.
+ */
+export function outline(root) {
+  const originX = root.absoluteBoundingBox?.x ?? 0;
+  const originY = root.absoluteBoundingBox?.y ?? 0;
+  const lines = [];
+
+  const paint = (node) => {
+    const fill = (node.fills ?? []).find(
+      (f) => f.visible !== false && f.type === "SOLID",
+    );
+    if (!fill) return hasImageFill(node) ? " image" : "";
+    const { r, g, b } = fill.color;
+    const hex = [r, g, b]
+      .map((c) =>
+        Math.round(c * 255)
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("");
+    const alpha =
+      fill.opacity !== undefined && fill.opacity < 1 ? ` @${fill.opacity}` : "";
+    return ` #${hex}${alpha}`;
+  };
+
+  const visit = (node, depth) => {
+    const box = node.absoluteBoundingBox;
+    const geometry = box
+      ? ` ${Math.round(box.x - originX)},${Math.round(box.y - originY)} ` +
+        `${Math.round(box.width)}×${Math.round(box.height)}`
+      : "";
+    const text =
+      node.type === "TEXT" ? `  "${node.characters.replace(/\n/g, "⏎")}"` : "";
+    const font =
+      node.type === "TEXT" && node.style
+        ? ` ${node.style.fontFamily} ${Math.round(node.style.fontSize)}/${Math.round(node.style.lineHeightPx ?? 0)}`
+        : "";
+    lines.push(
+      `${"  ".repeat(depth)}${node.type} ${node.name}${geometry}${paint(node)}${font}${text}`,
+    );
+    for (const child of node.children ?? []) visit(child, depth + 1);
+  };
+  visit(root, 0);
+  return lines;
+}
+
 /** Added / removed / modified top-level frames between two hash snapshots. */
 export function diffFrames(previous, current) {
   const before = new Map((previous ?? []).map((f) => [f.id, f]));

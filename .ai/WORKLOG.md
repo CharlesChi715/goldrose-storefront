@@ -4968,3 +4968,101 @@ delivery; `routes` automates the repo↔Figma drift check; `node <id>` and
 (comment ownership, pending-from-design, hand-off) stay in SKILL.md; the
 comment digest emits a `hint`, never a verdict. Baseline set at the current
 file version (everything through 2026-08-04 is imported).
+
+## 2026-08-05 — Figma sync: the two me二·级 order frames
+
+- Ran the read pipeline (file version `2383842832809713066`). **No changed
+  frames**: the baseline had been set 22 minutes earlier by the session that
+  committed `scripts/figma/` without importing anything, so the delta gate was
+  empty by construction. Real scope was the Ready-for-dev backlog.
+- Imported `/account/orders/delivered` (2439:369, 430×1316) and
+  `/account/orders/review` (2439:370, 430×932), pixel-exact from the REST data.
+  Verified by band-diff against scale-2 frame renders.
+- Re-pointed the orders list: VIEW DETAILS on a **delivered** order now reaches
+  the delivered view, honouring prototype edge 1523:3455 → 2439:369. This was
+  AI-029's dead end; AI-029 is closed and archived.
+- Exported 17 assets to `public/eldreve/screens/` (15 icon SVGs, 2 photos,
+  1 back arrow).
+- Added `tests/e2e/order-delivered-review.spec.ts` — 4 tests, all passing.
+- Filed AI-030 (invented selected states for the review chips/stars) and
+  AI-031 (PUBLISH REVIEW inert — no reviews backend, no submitted frame).
+- Drift triage: `/account/returns/select-reason` and `/products/[slug]` are
+  false positives (a sheet, and a dynamic segment). Nothing deleted.
+- Pre-existing, not mine: `pixels.spec.ts` › product-detail fails on this
+  branch with my work stashed.
+- `npm run figma:baseline` re-set so the next `changes` is meaningful.
+
+## 2026-08-05 21:56 AEST
+
+**figma-sync pipeline v2.1 — gaps found by analysing the 08-05 orders sync.**
+That sync reported "no changed frames" yet still had work: two Ready-for-dev
+frames (`2439:369`, `2439:370`) had been ready and unbuilt for days, and a
+hash diff can never see them. Added:
+
+- `figma:unbuilt` — Ready-for-dev frames with no `page.tsx` at their route;
+  the standing backlog `changes` is blind to. Now a section in `figma:brief`.
+  Verified against the pre-import tree: it lists exactly the two frames that
+  session had to rediscover by hand.
+- `baseline` records the git sha it was stamped at and re-runs `unbuilt`,
+  warning when the "everything here is built" claim is false — the tooling
+  install stamped a false baseline, which is what hid those frames.
+- `scripts/figma/drift-allowlist.json` — deliberate mismatches with reasons,
+  so settled decisions (`/account/returns/select-reason` is the
+  `ReturnReasonSheet`, not a route) stop resurfacing every sync.
+- **Route-walk bug fixed:** `[param]` directories were treated as pathless
+  like `(groups)`, so `app/products/[slug]/page.tsx` mapped to `/products` —
+  one bug producing two false drift entries. Drift is now 4 + 2, was 7 + 6.
+- `figma:brief` (one call replacing five) and per-phase timings on every
+  command via `stopwatch()`. Measured: a warm `pull` is 2.29s, of which
+  2.17s is two sequential network round-trips — the next thing worth fixing.
+
+## 2026-08-05 22:30 AEST
+
+**figma-sync v2.2 — the import half.** Profiling the *workflow* (not the code)
+showed the pipeline optimised reading design while the real bulk of a sync was
+asset extraction: `public/eldreve/screens/` holds 1,230 node-id-named files and
+the 08-05 import hand-cut 17 of them, with no tooling and no documented step.
+
+- `cli.mjs assets <frame-id...>` — walks the subtree for exportable nodes
+  (designer `exportSettings`, pure-vector subtrees → SVG, image fills → PNG@2x),
+  exports the **outermost** qualifying node so a five-path icon is one file,
+  batches one request per format, downloads in parallel, and never overwrites an
+  existing file without `--force`. `--list` previews. Validated against
+  `2439:370`: 7 of its 13 detections are byte-for-byte the filenames the human
+  session created by hand; the other 6 are over-eager (four identical stars),
+  which is why `--list` is the documented first step.
+- `node <id> --outline` — one indented line per layer (position, size, hex,
+  font, copy). Measured 5,099 bytes versus 530,638 for the raw subtree: ~100×
+  less for the step that used to dominate an import's token cost.
+
+Both are in SKILL.md's import section. Test export ran for real (valid SVG/PNG
+written), then the six new files were removed — nothing left in the tree.
+
+## 2026-08-05 (2) — Figma sync: the date menus become 滚轮 wheels
+
+- Read pipeline: file version unchanged, **no frame changes**, `unbuilt` now 0.
+  The delivery was a comment — threads 72 → 73.
+- The new comment is Charles's reply in the design team's scroll-wheel thread
+  (2053:207): **"我试试"**. Confirmed in session ("do it in frontend"), so under
+  the sync skill's ownership rule this was the agent's work.
+- The 08-02 note had recorded this as "already built" by reading 滚轮下拉框 as
+  "a dropdown that scrolls". The lists did scroll and their options were already
+  generated in code (answering the team's second question), but a 滚轮 is the
+  iOS wheel: spin it, and the row under a fixed indicator is the value. Built
+  that in `ReminderEditModal.tsx` — scroll-snap rows, fixed centre pill, value
+  taken on settle (90ms debounce), wheel stays open. A tap still takes the value
+  and closes, so the 08-02 behaviour and its test are unchanged.
+- Opening centres the current value; the half-window padding makes "row i is
+  centred" exactly `scrollTop === i × pitch`, verified in test (Aug → 203).
+- Added a wheel test to `tests/e2e/screens.spec.ts`; all 14 pass.
+- Filed AI-032 (the wheel pins the drawn pill to the menu centre — the frames
+  draw it at the selection's list position) with a prepared Figma reply.
+  Narrowed AI-011 to its one remaining unposted reply.
+- Baseline deliberately NOT re-stamped: no frames moved, so the existing one is
+  still correct.
+- Follow-up (same day, "can u make that drop down smoothier?"): gave the wheel
+  depth — per-row fade + scale by distance from the centre band, the arriving
+  row taking the pill's cream text immediately instead of on settle, a masked
+  strip so rows dissolve at the rim, and a 150ms open ease with a
+  reduced-motion opt-out. Per-row work is painted to the DOM in one rAF per
+  frame, not through React state. Depth is now pinned by test.

@@ -8,8 +8,10 @@
 //   npm run figma:proto       prototype edges + the scaffold list
 //   npm run figma:comments    comment threads, attributed
 //   npm run figma:routes      repo routes ↔ Figma frames drift check
+//   npm run figma:unbuilt     Ready-for-dev frames with no route yet
 //   node scripts/figma/cli.mjs inbound <id...>   what links TO these frames
-//   node scripts/figma/cli.mjs node <id...> [--text]
+//   node scripts/figma/cli.mjs node <id...> [--outline|--text]
+//   node scripts/figma/cli.mjs assets <frame-id...> [--list|--force]
 //   node scripts/figma/cli.mjs render <id...> [--scale 2]
 //   node scripts/figma/cli.mjs baseline          mark the current state imported
 //
@@ -18,7 +20,14 @@
 // file.json, which is megabytes of node geometry.
 
 import { parseArgs } from "node:util";
-import { writeFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import {
+  writeFileSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+  existsSync,
+} from "node:fs";
+import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import {
   api,
@@ -41,7 +50,9 @@ import {
 import {
   comments as buildComments,
   diffFrames,
+  exportableNodes,
   indexDocument,
+  outline,
   prototype,
   readyFrames,
 } from "./digest.mjs";
@@ -53,6 +64,8 @@ const { values: flags, positionals } = parseArgs({
     text: { type: "boolean", default: false },
     json: { type: "boolean", default: false },
     unresolved: { type: "boolean", default: false },
+    outline: { type: "boolean", default: false },
+    list: { type: "boolean", default: false },
     scale: { type: "string", default: "2" },
   },
 });
@@ -62,17 +75,27 @@ const { values: flags, positionals } = parseArgs({
 // Reads: "/admin" or "/api" or "/placeholder" or "/auth", then "/" or end.
 const IGNORED_ROUTE = /^\/(admin|api)(\/|$)|^\/(placeholder|auth)(\/|$)/;
 
+// Where imported art lands, and how a component references it. Assets are
+// named for their node id — the convention the 1,200 existing files follow.
+const ASSET_URL = "/eldreve/screens";
+const ASSETS = join(ROOT, "public", "eldreve", "screens");
+
+// Deliberate design↔repo mismatches, with reasons; see allowlist().
+const ALLOWLIST = join(ROOT, "scripts", "figma", "drift-allowlist.json");
+
 // First positional is the command ("pull" when absent); the rest go to it.
 const [command = "pull", ...args] = positionals;
 const commands = {
   pull,
   brief,
+  unbuilt,
   ready,
   frames,
   changes,
   proto,
   comments,
   node: nodeDump,
+  assets,
   render,
   routes,
   inbound,
@@ -293,6 +316,9 @@ function brief(_args, clock) {
   }
 
   clock.mark("scaffold");
+  console.log("\n── READY BUT NOT BUILT ──────────────────");
+  unbuilt();
+  clock.mark("unbuilt");
   console.log("\n── DRIFT ────────────────────────────────");
   routes();
   clock.mark("drift");
@@ -363,6 +389,12 @@ function nodeDump(ids) {
     const texts = [];
     for (const node of found.values()) collectText(node, texts);
     return print(texts);
+  }
+  if (flags.outline) {
+    for (const node of found.values()) {
+      console.log(outline(node).join("\n"));
+    }
+    return;
   }
   mkdirSync(NODES, { recursive: true });
   for (const [id, node] of found) {
@@ -443,6 +475,106 @@ async function render(ids) {
   }
 }
 
+// ---------------------------------------------------------------- assets
+
+/**
+ * Export a frame's icons and photos straight into `public/eldreve/screens/`.
+ *
+ * This was the biggest manual cost in a sync: the 08-05 import alone hand-cut
+ * 17 files, and the directory holds over a thousand. Nothing about it needs
+ * judgement — the node id IS the filename by existing convention — so it is
+ * two batched API calls (one per format) and a write loop.
+ *
+ * Existing files are left alone unless `--force`: an asset already committed
+ * may have been hand-corrected, and silently overwriting it would undo that.
+ */
+async function assets(ids, clock) {
+  if (!ids.length) fail("usage: assets <frame-id...> [--list] [--force]");
+  const file = requireCache();
+  const found = new Map();
+  collect(file.document, new Set(ids), found);
+  if (!found.size) fail("none of those ids are in the cache — re-run pull?");
+
+  const wanted = [];
+  for (const node of found.values()) wanted.push(...exportableNodes(node));
+  clock.mark("scan");
+  console.log(`${wanted.length} exportable node(s) in ${found.size} frame(s).`);
+
+  mkdirSync(ASSETS, { recursive: true });
+  const jobs = wanted
+    .map((asset) => ({
+      ...asset,
+      file: join(ASSETS, `${assetFilename(asset)}`),
+    }))
+    .filter((job) => {
+      const exists = existsSync(job.file);
+      if (exists && !flags.force)
+        console.log(`  skip (exists) ${rel(job.file)}`);
+      return !exists || flags.force;
+    });
+
+  if (flags.list) {
+    for (const job of jobs) {
+      console.log(
+        `  ${job.id.padEnd(12)} ${job.format} ${job.why}  ${job.name}`,
+      );
+    }
+    return;
+  }
+  if (!jobs.length) return console.log("nothing new to export.");
+
+  const { token, key } = credentials();
+  // One request per (format, scale) group — the images endpoint takes many ids.
+  const groups = new Map();
+  for (const job of jobs) {
+    const bucket = `${job.format}@${job.scale}`;
+    if (!groups.has(bucket)) groups.set(bucket, []);
+    groups.get(bucket).push(job);
+  }
+  const urls = new Map();
+  await Promise.all(
+    [...groups].map(async ([bucket, group]) => {
+      const [format, scale] = bucket.split("@");
+      const query = new URLSearchParams({
+        ids: group.map((j) => j.id).join(","),
+        format,
+        scale,
+      });
+      const { images, err } = await api(`/images/${key}?${query}`, { token });
+      if (err) fail(`export failed for ${bucket}: ${err}`);
+      for (const [id, url] of Object.entries(images ?? {})) urls.set(id, url);
+    }),
+  );
+  clock.mark("export");
+
+  // Downloads are independent; run them together rather than one at a time.
+  const written = await Promise.all(
+    jobs.map(async (job) => {
+      const url = urls.get(job.id);
+      if (!url) {
+        console.log(`  ${job.id}: no render returned`);
+        return null;
+      }
+      const res = await fetch(url);
+      writeFileSync(job.file, Buffer.from(await res.arrayBuffer()));
+      return job;
+    }),
+  );
+  clock.mark("download");
+  for (const job of written.filter(Boolean)) {
+    console.log(`  ${job.id.padEnd(12)} → ${rel(job.file)}  (${job.why})`);
+  }
+  console.log(
+    `\n${written.filter(Boolean).length} file(s) written. Reference them as ` +
+      `\`${ASSET_URL}/<name>\`.`,
+  );
+}
+
+/** `2439:369` → `2439-369.svg`, matching the 1,200 files already there. */
+function assetFilename(asset) {
+  return `${asset.id.replace(/[^\w-]/g, "-")}.${asset.format}`;
+}
+
 // ---------------------------------------------------------------- routes
 
 /**
@@ -454,69 +586,163 @@ async function render(ids) {
  * a frame is named for its exact route, optionally followed by `·` metadata.
  */
 function routes() {
-  const appDir = join(ROOT, "app");
-  const repoRoutes = new Set();
-  const walk = (dir, segments) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const path = join(dir, entry.name);
-      if (entry.isDirectory()) {
-        // Route groups `(x)` and parallel/intercepting segments add no path.
-        // Reads: directory name starting with "(", "[" or "@".
-        const seg = /^[([@]/.test(entry.name) ? null : entry.name;
-        walk(path, seg ? [...segments, seg] : segments);
-      } else if (/^page\.(tsx|ts|jsx|js)$/.test(entry.name)) {
-        repoRoutes.add("/" + segments.join("/"));
-      }
-    }
-  };
-  walk(appDir, []);
-
-  const frameRoutes = new Map();
-  for (const f of load("frames").frames) {
-    const route = f.name.split("·")[0].trim();
-    if (route.startsWith("/"))
-      // Drop a trailing "/"; if that leaves "" (the root), it is "/" again.
-      frameRoutes.set(route.replace(/\/$/, "") || "/", f);
-  }
+  const repoRoutes = repoRouteSet();
+  const frameRoutes = frameRouteMap();
+  const allow = allowlist();
 
   const missingDesign = [...repoRoutes]
-    .filter((r) => !IGNORED_ROUTE.test(r) && !frameRoutes.has(r))
+    .filter(
+      (r) =>
+        !IGNORED_ROUTE.test(r) && !frameRoutes.has(r) && !allow.routes.has(r),
+    )
     .sort();
   const missingRoute = [...frameRoutes.keys()]
-    .filter((r) => !repoRoutes.has(r))
+    .filter((r) => !repoRoutes.has(r) && !allow.frames.has(r))
     .sort();
 
   if (flags.json) return print({ missingDesign, missingRoute });
   console.log(`Repo routes with no Figma frame (${missingDesign.length}):`);
   for (const r of missingDesign) console.log(`  ${r}`);
   console.log(`\nFigma frames with no repo route (${missingRoute.length}):`);
-  for (const r of missingRoute)
-    console.log(`  ${r}  ← ${frameRoutes.get(r).name}`);
+  for (const r of missingRoute) {
+    const f = frameRoutes.get(r);
+    console.log(`  ${(f.ready ?? "—").padEnd(14)} ${r}  ← ${f.name}`);
+  }
+  if (allow.count) {
+    console.log(`\n${allow.count} known non-drift entr(ies) suppressed — see`);
+    console.log(`  ${rel(ALLOWLIST)}`);
+  }
+}
+
+/**
+ * Ready for dev, but no `page.tsx` at its route.
+ *
+ * `changes` answers "what moved since last time" and is blind by construction
+ * to a frame that was already ready and already unbuilt — the 08-05 sync had
+ * to rediscover two of those by hand. This is the standing set-difference that
+ * catches them: design says build it, the repo has no route.
+ */
+function unbuilt() {
+  const repoRoutes = repoRouteSet();
+  const allow = allowlist();
+  const missing = load("ready")
+    .map((f) => ({ ...f, route: f.name.split("·")[0].trim() }))
+    .filter(
+      (f) =>
+        f.route.startsWith("/") &&
+        !repoRoutes.has(f.route.replace(/\/$/, "") || "/") &&
+        !allow.frames.has(f.route),
+    );
+  if (flags.json) return print(missing);
   console.log(
-    "\nDynamic segments ([id]) never match a literal frame name — check those by hand.",
+    `${missing.length} Ready-for-dev frame(s) with no route in the repo:`,
   );
+  for (const f of missing) {
+    console.log(`  ${f.id.padEnd(12)} ${f.route}   ← ${f.name}`);
+  }
+  return missing;
 }
 
 /**
  * Freeze the current frame hashes as "imported", so `changes` means something.
  *
- * Nothing else is stored: a "coming soon" target becoming buildable shows up
- * on its own as an added-or-modified frame here, and `changes` prints the
- * inbound link that says which placeholder it replaces.
+ * The commit it was stamped at is recorded too. A baseline set by a commit
+ * that touched no product code is a lie — it says "everything here is built"
+ * when nothing was — and that is exactly what happened when this tooling was
+ * installed, hiding two ready frames from the next sync. Recording the sha
+ * makes the claim auditable instead of implicit.
  */
 function baseline() {
   const { frames: current, version } = load("frames");
   writeJson(digestPath("baseline"), {
     version,
     markedAt: new Date().toISOString(),
+    commit: gitHead(),
     frames: current,
   });
   console.log(
     `baseline set: ${current.length} frame(s) at version ${version}.`,
   );
+  const left = unbuilt();
+  if (left.length) {
+    console.log(
+      "\n⚠ Those are still unbuilt — only run `baseline` when an import has\n" +
+        "  actually landed, or the next `changes` will look empty.",
+    );
+  }
 }
 
 // ---------------------------------------------------------------- helpers
+
+/**
+ * Every route the repo serves, from `app/**‍/page.tsx`.
+ *
+ * Only `(groups)` and `@slots` are pathless. A `[param]` directory IS a path
+ * segment — treating it as pathless (the first version of this) mapped
+ * `app/products/[slug]/page.tsx` to `/products`, which then reported both
+ * `/products` and `/products/[slug]` as drift. Two false positives, one bug.
+ */
+function repoRouteSet() {
+  const routes = new Set();
+  const walk = (dir, segments) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        const pathless = /^[(@]/.test(entry.name);
+        walk(path, pathless ? segments : [...segments, entry.name]);
+      } else if (/^page\.(tsx|ts|jsx|js)$/.test(entry.name)) {
+        routes.add("/" + segments.join("/"));
+      }
+    }
+  };
+  walk(join(ROOT, "app"), []);
+  return routes;
+}
+
+/**
+ * Frame route → frame, per the naming rule
+ * (docs/ixd/naming/figma-route-rule.md): a frame is named for its exact route,
+ * optionally followed by `·`-separated design metadata.
+ */
+function frameRouteMap() {
+  const map = new Map();
+  for (const f of load("frames").frames) {
+    const route = f.name.split("·")[0].trim();
+    // Drop a trailing "/"; if that leaves "" (the root), it is "/" again.
+    if (route.startsWith("/")) map.set(route.replace(/\/$/, "") || "/", f);
+  }
+  return map;
+}
+
+/**
+ * Deliberate mismatches, so a settled decision is not re-litigated every sync.
+ *
+ * Each entry needs a reason: the point is that the next reader can tell a
+ * decision from an oversight.
+ */
+function allowlist() {
+  const raw = readJson(ALLOWLIST, {
+    framesWithoutRoute: [],
+    routesWithoutFrame: [],
+  });
+  return {
+    frames: new Set(raw.framesWithoutRoute.map((e) => e.route)),
+    routes: new Set(raw.routesWithoutFrame.map((e) => e.route)),
+    count: raw.framesWithoutRoute.length + raw.routesWithoutFrame.length,
+  };
+}
+
+/** Short sha of HEAD, or null outside a git checkout. */
+function gitHead() {
+  try {
+    return execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+      cwd: ROOT,
+      encoding: "utf8",
+    }).trim();
+  } catch {
+    return null;
+  }
+}
 
 function load(name) {
   const data = readJson(digestPath(name));

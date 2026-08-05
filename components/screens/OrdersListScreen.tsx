@@ -23,8 +23,9 @@
  *
  * Buttons: TRACK ORDER / VIEW STATUS → /orders/track (exists); BUY AGAIN →
  * /shop (nearest honest destination, H-15 precedent); VIEW DETAILS →
- * /account/orders/details (the static order-detail view landing with this
- * batch).
+ * /account/orders/delivered for a delivered order (2439:369, imported
+ * 2026-08-05 — the frame's own prototype edge), else /account/orders/details
+ * (the generic static order-detail view).
  */
 
 import { useState } from "react";
@@ -346,10 +347,15 @@ export function OrdersListScreen({
                 </span>
               </div>
             )}
-            {/* VIEW DETAILS → the static order-detail view (landing with this
-                batch; href wired ahead of the route per assignment). */}
+            {/* VIEW DETAILS → the delivered view for a delivered order
+                (2439:369, the frame's own prototype edge from 1523:3455),
+                otherwise the generic static order-detail view. */}
             <Link
-              href="/account/orders/details"
+              href={
+                order.chip === "delivered"
+                  ? "/account/orders/delivered"
+                  : "/account/orders/details"
+              }
               style={{
                 ...abs(214, y + 148, 178, 38),
                 background: SHEET,

@@ -1,0 +1,19 @@
+{
+  "_": "Deliberate design↔repo mismatches. figma:routes and figma:unbuilt skip these, so a settled decision is not re-examined every sync. Every entry needs a reason and a date.",
+  "framesWithoutRoute": [
+    {
+      "route": "/account/returns/select-reason",
+      "why": "Built as the ReturnReasonSheet bottom sheet, not a route — deliberate 2026-08-02 decision recorded in that component's header."
+    }
+  ],
+  "routesWithoutFrame": [
+    {
+      "route": "/checkout/success",
+      "why": "Order confirmation; technical outcome route the design never framed."
+    },
+    {
+      "route": "/checkout/cancel",
+      "why": "PayPal cancel return path; technical, no design."
+    }
+  ]
+}
