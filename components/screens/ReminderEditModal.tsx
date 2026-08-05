@@ -18,11 +18,25 @@
  * The 08-01/08-02 delivery resolved the date-field question: the single date
  * row became three dropdown fields (2052:202/207/212) whose menus are the
  * DATE-FIELD-*-DROPDOWN-MENU frames (2053:183/207/193) — Playfair options,
- * dark #493026 selected pill, scrolling list. They are live selection
- * controls here (visual only; the chosen date goes nowhere without a
- * backend). The drawn day menu shows the 20–31 scroll window and the team's
- * open question asks dev to supply the full ranges, so days run 1–31 and
- * months Jan–Dec; years keep the drawn 2027→2020 list.
+ * dark #493026 selected pill. They are live selection controls here (visual
+ * only; the chosen date goes nowhere without a backend). The option lists are
+ * generated, not drawn, which is what the team's question was really about:
+ * days 1–31, months Jan–Dec, years verbatim from the drawn 2027→2020 list.
+ *
+ * **2026-08-05 — the menus are now 滚轮 wheels.** The team asked on 2053:207
+ * whether dev could build a scroll-wheel; Charles answered "我试试". They were
+ * plain tap-to-pick lists until then. Spinning a wheel sets the value as it
+ * settles and leaves the wheel open; a tap on a row still takes it and closes.
+ * See DateDropdown for the one visual departure this forces on the frame.
+ *
+ * The wheel is then given depth (Charles, same day: "make it smoother"): rows
+ * fade and shrink with distance from the centre band, the arriving row takes
+ * the pill's cream text immediately rather than on settle, the strip is masked
+ * so rows dissolve at the rim instead of being sliced by the menu edge, and
+ * the menu eases open. The per-row part is painted straight to the DOM in one
+ * rAF per frame — see `paint()` — because a spin fires scroll events every
+ * frame and re-rendering 31 rows that often is what makes a picker feel
+ * sticky. The rest is `WHEEL_CSS`, including a reduced-motion opt-out.
  *
  * The lead-time NUMBER is an editable numeric input (owner request,
  * 2026-08-03); its UNIT remains fixed, as pinned by the team's 08-01 comment
@@ -60,6 +74,27 @@ const MENU_SHADOW = "0 6px 14px rgba(36,26,18,0.14)";
 const PILL = "#493026";
 const PILL_TEXT = "#FFF9F2";
 const OPTION_INK = "#2A211D";
+
+/**
+ * The wheel's polish, kept in CSS because none of it is per-row state: the
+ * menu eases open instead of appearing; the option strip is masked so rows
+ * dissolve at the rim rather than being sliced by the menu edge; and the
+ * scrollbar is hidden so the wheel reads as a physical drum. The row-by-row
+ * fade and scale are painted in JS (see DateDropdown.paint) because they
+ * depend on live scroll position.
+ */
+const WHEEL_CSS = `
+.figw-menu { animation: figw-open 150ms cubic-bezier(0.22, 0.61, 0.36, 1) both; transform-origin: top center; }
+@keyframes figw-open { from { opacity: 0; transform: translateY(-6px) scaleY(0.96); } to { opacity: 1; transform: none; } }
+.figw-wheel::-webkit-scrollbar { width: 0; height: 0; }
+.figw-wheel {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+@media (prefers-reduced-motion: reduce) { .figw-menu { animation: none; } }
+`;
 
 const STAGE_H = 932;
 const SHEET_H = 589;
@@ -174,10 +209,20 @@ function field(x: number, y: number, w: number): React.CSSProperties {
 }
 
 /**
- * One Date dropdown field (126×77) plus its floating menu. The pill/label
- * geometry is the 2052/2053 frames' own: label at +14,+14, Playfair value at
- * +14,+43, chevron export at +96,+36; menu below the field, 126 wide,
- * options at x16 on the drawn pitch, selected pill 116 wide at x5, r7.
+ * One Date dropdown field (126×77) plus its floating wheel menu. The
+ * pill/label geometry is the 2052/2053 frames' own: label at +14,+14,
+ * Playfair value at +14,+43, chevron export at +96,+36; menu below the field,
+ * 126 wide, options at x16 on the drawn pitch, selected pill 116 wide at x5,
+ * r7.
+ *
+ * The menu is a **滚轮 (scroll wheel)**, not a plain list — the design team
+ * asked for one on 2053:207 and Charles answered "我试试" (2026-08-05). The
+ * drawn pill therefore becomes a *fixed centre band*: rows scroll under it and
+ * whichever row settles beneath it is the value. That is the one deliberate
+ * departure from the frame, which draws the pill at the selection's list
+ * position (Aug at y211 of a 273 window) because a static list has no other
+ * place to put it. Everything else — pitch, pill size, colours, Playfair
+ * options — is verbatim.
  */
 function DateDropdown({
   x,
@@ -187,6 +232,7 @@ function DateDropdown({
   open,
   onToggle,
   onPick,
+  onSpin,
   pitch,
   pillH,
   menuMaxH,
@@ -197,7 +243,10 @@ function DateDropdown({
   value: string;
   open: boolean;
   onToggle: () => void;
+  /** A decisive tap on a row: takes the value and closes the wheel. */
   onPick: (v: string) => void;
+  /** The wheel settling on a row: takes the value and stays open. */
+  onSpin: (v: string) => void;
   /** Row pitch of the drawn menu: 38 for the year list, 29 for month/day. */
   pitch: number;
   pillH: number;
@@ -205,17 +254,88 @@ function DateDropdown({
 }) {
   const Y = 193;
   const listRef = useRef<HTMLDivElement | null>(null);
+  const rowsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const settleTimer = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+  // Half a wheel of empty space top and bottom, so the first and last rows can
+  // still reach the centre band. With this padding, "row i is centred" is
+  // exactly scrollTop === i * pitch, which is why the maths below is trivial.
+  const pad = (menuMaxH - pitch) / 2;
 
-  // Scroll the selected option into view when the menu opens.
+  /**
+   * Paint the wheel's depth: every row fades and shrinks with its distance
+   * from the centre band, and the row arriving under the band takes the pill's
+   * cream text the moment it gets there rather than when the spin settles.
+   *
+   * Written straight to the DOM, not through state. A spin fires scroll events
+   * every frame, and re-rendering up to 31 rows that often is exactly what
+   * makes a picker feel sticky.
+   */
+  const paint = () => {
+    const el = listRef.current;
+    if (!el) return;
+    const centre = el.scrollTop / pitch;
+    rowsRef.current.forEach((row, i) => {
+      const face = row?.firstElementChild as HTMLElement | undefined;
+      if (!face) return;
+      const d = Math.abs(i - centre);
+      face.style.opacity = String(Math.max(1 - d * 0.26, 0.32));
+      face.style.transform = `scale(${Math.max(1 - d * 0.05, 0.86)})`;
+      face.style.color = d < 0.5 ? PILL_TEXT : OPTION_INK;
+    });
+  };
+
+  // One paint per frame at most, however many scroll events arrive.
+  const schedulePaint = () => {
+    if (frameRef.current !== null) return;
+    frameRef.current = window.requestAnimationFrame(() => {
+      frameRef.current = null;
+      paint();
+    });
+  };
+
+  // Centre the current value once per opening. Guarded by a ref rather than
+  // narrowed deps: `value` changes as the wheel spins, and re-running this on
+  // every change would yank the wheel back out from under the user's finger.
+  const centred = useRef(false);
   useEffect(() => {
-    if (!open || !listRef.current) return;
-    const idx = options.indexOf(value);
-    if (idx < 0) return;
-    const target = 12 + idx * pitch - (menuMaxH - pitch) / 2;
-    listRef.current.scrollTop = Math.max(0, target);
-  }, [open, options, value, pitch, menuMaxH]);
+    if (!open) {
+      centred.current = false;
+      return;
+    }
+    if (centred.current || !listRef.current) return;
+    centred.current = true;
+    listRef.current.scrollTop = Math.max(0, options.indexOf(value)) * pitch;
+    paint(); // so the wheel opens already shaded, not flat
+  });
 
-  const contentH = 12 * 2 + options.length * pitch - (pitch - pillH);
+  // Drop a pending settle or paint if the wheel unmounts mid-spin.
+  useEffect(
+    () => () => {
+      if (settleTimer.current !== null)
+        window.clearTimeout(settleTimer.current);
+      if (frameRef.current !== null)
+        window.cancelAnimationFrame(frameRef.current);
+    },
+    [],
+  );
+
+  /**
+   * The wheel's contract: once scrolling stops, whatever row sits under the
+   * centre band is the value. Debounced rather than run per scroll event —
+   * momentum scrolling fires dozens of them, and only the resting place counts.
+   */
+  const handleScroll = () => {
+    const el = listRef.current;
+    if (!el) return;
+    schedulePaint();
+    if (settleTimer.current !== null) window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => {
+      const i = Math.round(el.scrollTop / pitch);
+      const next = options[Math.min(Math.max(i, 0), options.length - 1)];
+      if (next && next !== value) onSpin(next);
+    }, 90);
+  };
   return (
     <>
       <button
@@ -274,30 +394,71 @@ function DateDropdown({
       </button>
       {open ? (
         <div
-          ref={listRef}
-          role="listbox"
-          aria-label={`${label} options`}
+          className="figw-menu"
           style={{
-            ...abs(x, Y + 77 + 6, 126, Math.min(contentH, menuMaxH)),
+            ...abs(x, Y + 77 + 6, 126, menuMaxH),
             background: FIELD_BG,
             boxShadow: `inset 0 0 0 1px ${MENU_STROKE}, ${MENU_SHADOW}`,
             borderRadius: 12,
-            overflowY: contentH > menuMaxH ? "auto" : "hidden",
+            overflow: "hidden",
             zIndex: 5,
           }}
         >
-          <div style={{ position: "relative", height: contentH }}>
+          <style>{WHEEL_CSS}</style>
+          {/* The drawn selected pill, now fixed at the centre — the wheel's
+              selection indicator. Rows pass beneath it. */}
+          <span
+            style={{
+              ...abs(5, (menuMaxH - pillH) / 2, 116, pillH),
+              background: PILL,
+              borderRadius: 7,
+              display: "block",
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            ref={listRef}
+            role="listbox"
+            aria-label={`${label} options`}
+            onScroll={handleScroll}
+            className="figw-wheel"
+            style={{
+              position: "absolute",
+              inset: 0,
+              overflowY: "auto",
+              scrollSnapType: "y mandatory",
+              paddingTop: pad,
+              paddingBottom: pad,
+              boxSizing: "border-box",
+              // Firefox; the WebKit track is hidden in WHEEL_CSS.
+              scrollbarWidth: "none",
+            }}
+          >
             {options.map((opt, i) => {
               const selected = opt === value;
               return (
                 <button
                   key={opt}
+                  ref={(n) => {
+                    rowsRef.current[i] = n;
+                  }}
                   type="button"
                   role="option"
                   aria-selected={selected}
-                  onClick={() => onPick(opt)}
+                  // A tap is decisive: centre that row, take it, close.
+                  onClick={() => {
+                    listRef.current?.scrollTo({
+                      top: i * pitch,
+                      behavior: "smooth",
+                    });
+                    onPick(opt);
+                  }}
                   style={{
-                    ...abs(0, 12 + i * pitch - 4, 126, pillH + 8),
+                    display: "block",
+                    position: "relative",
+                    width: 126,
+                    height: pitch,
+                    scrollSnapAlign: "center",
                     background: "transparent",
                     border: 0,
                     padding: 0,
@@ -305,25 +466,24 @@ function DateDropdown({
                     textAlign: "left",
                   }}
                 >
-                  {selected ? (
-                    <span
-                      style={{
-                        ...abs(5, 0, 116, pillH),
-                        background: PILL,
-                        borderRadius: 7,
-                        display: "block",
-                      }}
-                    />
-                  ) : null}
                   <span
                     className={playfair.className}
                     style={{
                       position: "absolute",
                       left: 16,
-                      top: 4,
-                      ...txt(16, 21.3, selected ? PILL_TEXT : OPTION_INK),
+                      top: 0,
+                      fontSize: 16,
+                      // Centres the 16px face inside the row, so the row that
+                      // lands on the centre band sits inside the pill.
+                      lineHeight: `${pitch}px`,
+                      color: selected ? PILL_TEXT : OPTION_INK,
                       fontWeight: 500,
+                      whiteSpace: "nowrap",
                       display: "block",
+                      // paint() overwrites these every frame during a spin;
+                      // these are the resting values it settles back to.
+                      transformOrigin: "left center",
+                      willChange: "opacity, transform",
                     }}
                   >
                     {opt}
@@ -475,9 +635,13 @@ export function ReminderEditModal({
 
           {/* date — three dropdown fields (2052:202/207/212); clicks must not
               bubble to the sheet's close-menus handler.
-              AI-TAG(AI-011): OWNER-TODO — paste the prepared reply in the
-              team's Figma scroll-wheel thread (the repo token is read-only).
-              See /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md. */}
+              AI-TAG(AI-011): OWNER-TODO — the scroll-wheel reply is posted and
+              built; only the AI-015 data-dependent-destination reply is still
+              unposted (the repo token is read-only).
+              See /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
+              AI-TAG(AI-032): AGENT-DECISION — the wheel fixes the drawn pill at
+              the menu's centre, which frames 2053:183/207/193 do not show.
+              See /agent-delivery/sessions/figma-sync-wheel-08-05-feat-figma-sync.md. */}
           <div style={{ ...abs(18, 168, 40), ...txt(11, 13.2, INK) }}>Date</div>
           <div onClick={(e) => e.stopPropagation()}>
             <DateDropdown
@@ -493,6 +657,7 @@ export function ReminderEditModal({
                 setYear(v);
                 setOpenMenu(null);
               }}
+              onSpin={setYear}
               pitch={38}
               pillH={34}
               menuMaxH={273}
@@ -510,6 +675,7 @@ export function ReminderEditModal({
                 setMonth(v);
                 setOpenMenu(null);
               }}
+              onSpin={setMonth}
               pitch={29}
               pillH={25}
               menuMaxH={273}
@@ -525,6 +691,7 @@ export function ReminderEditModal({
                 setDay(v);
                 setOpenMenu(null);
               }}
+              onSpin={setDay}
               pitch={29}
               pillH={25}
               menuMaxH={277}

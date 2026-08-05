@@ -201,6 +201,56 @@ test("the reminder sheet's date dropdowns select and close per the 08-02 design"
   ).toContainText("2025");
 });
 
+test("the date menus are 滚轮 wheels: spinning sets the value and stays open", async ({
+  page,
+}) => {
+  // The design team asked on 2053:207 whether dev could build a scroll-wheel
+  // dropdown; Charles answered "我试试" (2026-08-05) and this is it. The
+  // contract: the row resting under the fixed centre pill is the value.
+  await page.goto("/account/reminders");
+  await page
+    .getByRole("button", { name: /^Edit / })
+    .first()
+    .click();
+  const sheet = page.getByRole("dialog", { name: "Edit reminder" });
+  const monthField = sheet.getByRole("button", { name: "Month" });
+  await monthField.click();
+  const wheel = sheet.getByRole("listbox", { name: "Month options" });
+
+  // Opening centres the current value: Aug is index 7 at the 29px month pitch.
+  await expect(wheel).toBeVisible();
+  expect(await wheel.evaluate((el) => el.scrollTop)).toBe(7 * 29);
+
+  // Spinning two rows down settles on Oct — and the wheel stays open, unlike a
+  // tap, which is the decisive gesture that closes it.
+  await wheel.evaluate((el) => {
+    el.scrollTop += 29 * 2;
+    el.dispatchEvent(new Event("scroll", { bubbles: true }));
+  });
+  await expect(monthField).toContainText("Oct");
+  await expect(wheel).toBeVisible();
+
+  // Days and years are generated in code, not drawn — the other half of the
+  // team's question. 31 days, and the wheel can reach the last one.
+  await sheet.getByRole("button", { name: "Day" }).click();
+  const days = sheet.getByRole("listbox", { name: "Day options" });
+  await expect(days.getByRole("option")).toHaveCount(31);
+
+  // The wheel has depth: rows fade and shrink away from the centre band, so
+  // it reads as a drum rather than a flat list. Painted per frame in JS.
+  const depth = await days.evaluate((el) =>
+    Array.from(el.querySelectorAll("button")).map((b) => {
+      const face = b.firstElementChild as HTMLElement;
+      return Number(face.style.opacity);
+    }),
+  );
+  const centre = depth.indexOf(1); // the row under the pill (day 25)
+  expect(centre).toBeGreaterThan(0);
+  expect(depth[centre - 1]).toBeLessThan(1);
+  expect(depth[centre - 2]).toBeLessThan(depth[centre - 1]);
+  expect(depth[centre + 1]).toBeCloseTo(depth[centre - 1], 5);
+});
+
 test("the reminders notification toggles start Email on, SMS off", async ({
   page,
 }) => {

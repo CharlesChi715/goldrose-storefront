@@ -7,6 +7,16 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
 
 ## AI-011 · `OWNER-TODO` · reply to the design team's scroll-wheel question in Figma
 
+> **PARTLY ANSWERED 2026-08-05.** Charles posted in the scroll-wheel thread
+> himself — **"我试试"** — rather than the prepared Reply 1, and confirmed to
+> the agent: "yes do it, 我试试 part, do it in frontend." **Reply 1 is
+> therefore closed, and the wheel is built** (2026-08-05 sync): the three date
+> menus are real 滚轮 wheels, not the scrolling lists the 08-02 note called
+> them. See AI-032 for the one visual consequence.
+>
+> **Still open: Reply 2 only** — the data-dependent-destination answer for the
+> AI-015 thread is still unposted. Nothing else here is outstanding.
+
 - **Where:** [`components/screens/ReminderEditModal.tsx`](../../components/screens/ReminderEditModal.tsx);
   Figma thread on node 2053:207 (comment id `1867810386`).
 - **What:** the team asked whether dev can build a scrolling dropdown or
