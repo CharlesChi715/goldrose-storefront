@@ -35,7 +35,7 @@ export function ForgotForm() {
         <BlockStack gap="400">
           <BlockStack gap="100" inlineAlign="center">
             <Text as="h1" variant="headingLg">
-              GoldRose
+              ELDREVE
             </Text>
             <Text as="p" tone="subdued">
               {t("login.forgot.title")}

@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { PersonalInfoScreen } from "@/components/screens/PersonalInfoScreen";
 
 export const metadata: Metadata = {
-  title: "Personal information — GoldRose",
+  title: "Personal information — ELDREVE",
   robots: { index: false },
 };
 

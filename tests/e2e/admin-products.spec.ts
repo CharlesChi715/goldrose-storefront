@@ -27,10 +27,10 @@ test("products list shows seeded products with inventory summaries", async ({
   await adminLogin(page);
   await page.goto("/admin/products");
   await expect(
-    page.getByText("GoldRose Signature 24K Gold Rose"),
+    page.getByText("ELDREVE Signature 24K Gold Rose"),
   ).toBeVisible();
-  await expect(page.getByText("GoldRose Boxed Keepsake Rose")).toBeVisible();
-  await expect(page.getByText("GoldRose Premium Gift Bundle")).toBeVisible();
+  await expect(page.getByText("ELDREVE Boxed Keepsake Rose")).toBeVisible();
+  await expect(page.getByText("ELDREVE Premium Gift Bundle")).toBeVisible();
   await expect(
     page.getByText(/\d+ in stock for 3 variants/).first(),
   ).toBeVisible();

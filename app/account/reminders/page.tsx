@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { RemindersScreen } from "@/components/screens/RemindersScreen";
 
 export const metadata: Metadata = {
-  title: "Gift reminders — GoldRose",
+  title: "Gift reminders — ELDREVE",
   robots: { index: false },
 };
 

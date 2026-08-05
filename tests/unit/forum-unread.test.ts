@@ -15,8 +15,8 @@ const T3 = "2026-07-23T12:00:00Z";
 
 test("a thread never read counts every post by others", () => {
   const posts = [
-    { at: T1, by: "GoldRose Team" },
-    { at: T2, by: "GoldRose Team" },
+    { at: T1, by: "ELDREVE Team" },
+    { at: T2, by: "ELDREVE Team" },
   ];
   assert.equal(unreadInThread(posts, undefined, "owner"), 2);
 });

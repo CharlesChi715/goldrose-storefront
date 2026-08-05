@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { ReturnsStartScreen } from "@/components/screens/returns/ReturnsStartScreen";
 
 export const metadata: Metadata = {
-  title: "Returns & after-sales — GoldRose",
+  title: "Returns & after-sales — ELDREVE",
   robots: { index: false },
 };
 

@@ -119,7 +119,7 @@ test("care's Chat with us reaches the support chat mock", async ({ page }) => {
   await page.getByRole("link", { name: "Chat with us" }).click();
   await expect(page).toHaveURL(/\/care\/chat$/);
   await expect(
-    page.getByText("GoldRose Support", { exact: true }).first(),
+    page.getByText("ELDREVE Support", { exact: true }).first(),
   ).toBeVisible();
   // The composer is a styled div, not a live input (no chat backend).
   await expect(page.locator("input, textarea")).toHaveCount(0);

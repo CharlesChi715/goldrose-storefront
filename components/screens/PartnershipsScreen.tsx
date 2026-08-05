@@ -3,7 +3,7 @@
  * ROLE OF THIS FILE
  * B-3 "Business Partnerships" — pixel-exact import of VELORIA frame 1523:567
  * (07-29 restyle, 430×1907): brand hero, 120+ colorway swatches, the partner
- * grid, four "Why GoldRose" advantage cards, the 4-step process with two CTAs
+ * grid, four "Why ELDREVE" advantage cards, the 4-step process with two CTAs
  * and — new in the 07-29 frames — the mascot bottom-nav band drawn in-frame.
  * Only "APPLY FOR WHOLESALE" (1523:661), the header back button and the nav
  * tabs are wired; "CONTACT BUSINESS TEAM" (1523:662) is a non-clickable
@@ -248,7 +248,7 @@ export function PartnershipsScreen() {
           />
           <img
             src="/veloria/screens/1523-572.png"
-            alt="GoldRose"
+            alt="ELDREVE"
             width={140}
             height={51}
             style={{
@@ -300,7 +300,7 @@ export function PartnershipsScreen() {
             10px above the node (y 208 → 198); section 01 clips the tail. */}
         <img
           src="/veloria/screens/1523-575.png"
-          alt="Pink velvet GoldRose gift box beside a gold-dipped rose"
+          alt="Pink velvet ELDREVE gift box beside a gold-dipped rose"
           width={430}
           height={270}
           style={{ ...abs(0, 198, 430, 270), display: "block" }}
@@ -492,7 +492,7 @@ export function PartnershipsScreen() {
         ))}
       </div>
 
-      {/* ---------- 1523:619 · 04 / Why GoldRose ---------- */}
+      {/* ---------- 1523:619 · 04 / Why ELDREVE ---------- */}
       <div
         style={{
           ...abs(0, 948, 430, 560),
@@ -512,7 +512,7 @@ export function PartnershipsScreen() {
             whiteSpace: "nowrap",
           }}
         >
-          Why GoldRose
+          Why ELDREVE
         </div>
 
         <Advantage
@@ -542,7 +542,7 @@ export function PartnershipsScreen() {
           background="rgba(247, 218, 225, 0.66)"
           img={{
             src: "1523-632",
-            alt: "Pink velvet GoldRose gift box with a gold rose",
+            alt: "Pink velvet ELDREVE gift box with a gold rose",
           }}
           imgSide="left"
           title="Premium Presentation"

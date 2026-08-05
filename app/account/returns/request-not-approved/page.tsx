@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import { ReturnNotApprovedScreen } from "@/components/screens/returns/ReturnNotApprovedScreen";
 
 export const metadata: Metadata = {
-  title: "Request not approved — GoldRose",
+  title: "Request not approved — ELDREVE",
   robots: { index: false },
 };
 

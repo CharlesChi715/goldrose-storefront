@@ -147,13 +147,13 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   await page.goto("/admin/content");
   await page
     .getByLabel("Top banner slogan")
-    .fill("FREE SHIPPING OVER $75 · GOLDROSE");
+    .fill("FREE SHIPPING OVER $75 · ELDREVE");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Content saved").first()).toBeVisible();
 
   await page.goto("/shop");
   await expect(
-    page.getByText("FREE SHIPPING OVER $75 · GOLDROSE"),
+    page.getByText("FREE SHIPPING OVER $75 · ELDREVE"),
   ).toBeVisible();
   await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toHaveCount(
     0,
@@ -178,8 +178,8 @@ test("sitemap, llms.txt and Product JSON-LD come from the database", async ({
   expect(sitemap).toContain("/products/premium-gold-rose-gift-bundle");
 
   const llms = await (await request.get("/llms.txt")).text();
-  expect(llms).toContain("# GoldRose");
-  expect(llms).toContain("GoldRose Signature 24K Gold Rose");
+  expect(llms).toContain("# ELDREVE");
+  expect(llms).toContain("ELDREVE Signature 24K Gold Rose");
   expect(llms).toContain("$49.99 USD");
   expect(llms).toContain("United States");
 
@@ -233,7 +233,7 @@ test("homepage search listing is editable in Settings, then reverts", async ({
   await openSettings(page);
   await page
     .getByLabel("Homepage title")
-    .fill("GoldRose — Eternal 24K Gold Roses");
+    .fill("ELDREVE — Eternal 24K Gold Roses");
   await page
     .getByRole("heading", { name: "Search engine & AI" })
     .locator("..")
@@ -242,11 +242,11 @@ test("homepage search listing is editable in Settings, then reverts", async ({
   await expect(page.getByText("Settings saved").first()).toBeVisible();
 
   const home = await (await request.get("/")).text();
-  expect(home).toContain("<title>GoldRose — Eternal 24K Gold Roses</title>");
+  expect(home).toContain("<title>ELDREVE — Eternal 24K Gold Roses</title>");
 
   await page
     .getByLabel("Homepage title")
-    .fill("GoldRose — 24K Gold Dipped Roses");
+    .fill("ELDREVE — 24K Gold Dipped Roses");
   await page
     .getByRole("heading", { name: "Search engine & AI" })
     .locator("..")
@@ -254,5 +254,5 @@ test("homepage search listing is editable in Settings, then reverts", async ({
     .click();
   await expect(page.getByText("Settings saved").first()).toBeVisible();
   const reverted = await (await request.get("/")).text();
-  expect(reverted).toContain("<title>GoldRose — 24K Gold Dipped Roses</title>");
+  expect(reverted).toContain("<title>ELDREVE — 24K Gold Dipped Roses</title>");
 });

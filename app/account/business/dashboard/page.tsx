@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import { BusinessDashboardScreen } from "@/components/screens/DashboardScreen";
 
 export const metadata: Metadata = {
-  title: "Business dashboard — GoldRose",
+  title: "Business dashboard — ELDREVE",
   robots: { index: false },
 };
 

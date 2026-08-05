@@ -318,7 +318,7 @@ export function MenuDrawer({
               textAlign: "center",
             }}
           >
-            Explore the world of GoldRose.
+            Explore the world of ELDREVE.
           </div>
 
           {rows.map((row) => {

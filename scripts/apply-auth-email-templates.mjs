@@ -39,17 +39,17 @@ const codeFallback =
 
 const patch = {
   // Existing customers asking to sign in.
-  mailer_subjects_magic_link: "Sign in to Eldreve",
+  mailer_subjects_magic_link: "Sign in to ELDREVE",
   mailer_templates_magic_link_content:
-    "<h2>Sign in to Eldreve</h2>\n\n" +
+    "<h2>Sign in to ELDREVE</h2>\n\n" +
     "<p>Tap the button below and you’re in — the link works once and expires in about an hour.</p>\n" +
-    `<p><a href="${confirmLink}">Sign in to Eldreve</a></p>\n` +
+    `<p><a href="${confirmLink}">Sign in to ELDREVE</a></p>\n` +
     codeFallback,
   // First-time addresses (signInWithOtp with shouldCreateUser sends the
   // confirmation template instead of the magic-link one).
-  mailer_subjects_confirmation: "Welcome to Eldreve — confirm your email",
+  mailer_subjects_confirmation: "Welcome to ELDREVE — confirm your email",
   mailer_templates_confirmation_content:
-    "<h2>Welcome to Eldreve</h2>\n\n" +
+    "<h2>Welcome to ELDREVE</h2>\n\n" +
     "<p>Tap the button below to confirm your email and sign in — the link works once and expires in about an hour.</p>\n" +
     `<p><a href="${confirmLink}">Confirm and sign in</a></p>\n` +
     codeFallback,

@@ -55,7 +55,7 @@ function ProcurementHero() {
     <>
       <img
         src={`${A}/77-56.png`}
-        alt="GoldRose gift boxes for business orders"
+        alt="ELDREVE gift boxes for business orders"
         style={{
           ...abs(220, 68, 210, 242),
           display: "block",
@@ -92,7 +92,7 @@ function ProcurementHero() {
       <Link
         href="/"
         style={{ ...abs(147, 24, 136, 40), display: "block" }}
-        aria-label="GoldRose home"
+        aria-label="ELDREVE home"
       >
         <img
           src="/veloria/brand/eldreve-136x40.png"

@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 import { SupportChatScreen } from "@/components/screens/SupportChatScreen";
 
 export const metadata: Metadata = {
-  title: "Support chat — GoldRose",
+  title: "Support chat — ELDREVE",
   robots: { index: false },
 };
 

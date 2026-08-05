@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { PrivacyHubScreen } from "@/components/screens/PrivacyHubScreen";
 
 export const metadata: Metadata = {
-  title: "Account & privacy — GoldRose",
+  title: "Account & privacy — ELDREVE",
   robots: { index: false },
 };
 

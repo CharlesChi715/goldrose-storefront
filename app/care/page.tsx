@@ -10,9 +10,9 @@ import type { Metadata } from "next";
 import { CareScreen, type CareTab } from "@/components/screens/CareScreen";
 
 export const metadata: Metadata = {
-  title: "Customer care — GoldRose",
+  title: "Customer care — ELDREVE",
   description:
-    "GoldRose customer care: order help, promotions, returns and after-sales.",
+    "ELDREVE customer care: order help, promotions, returns and after-sales.",
 };
 
 const TAB_KEYS: CareTab[] = [

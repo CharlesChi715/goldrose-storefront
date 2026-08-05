@@ -56,7 +56,7 @@ export default async function HomePage() {
   // Schema.org structured data from the LIVE catalog (§8.1): Organization +
   // WebSite + the store's offers, with price/availability from real stock.
   let catalog: Awaited<ReturnType<typeof getCatalog>> = [];
-  let storeName = "GoldRose";
+  let storeName = "ELDREVE";
   let promo = { text: "", isDefault: true };
   try {
     catalog = await getCatalog();

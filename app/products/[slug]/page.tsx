@@ -160,7 +160,7 @@ export default async function ProductDetailPage({
       name: product.title,
       description: product.description,
       sku: defaultVariant?.sku,
-      brand: { "@type": "Brand", name: "GoldRose" },
+      brand: { "@type": "Brand", name: "ELDREVE" },
       image: product.images.map((image) => fileUrl(image.path)),
       url: `${base}/products/${product.handle}`,
       offers: {

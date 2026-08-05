@@ -15,9 +15,9 @@
  * triggers it and the file carries no prototype links, so the state ships
  * unlinked (DQ raised for the trigger).
  *
- * ⚠️ Brand substitution: the frame's header wordmark image reads "ELDREVE"
- * (placeholder brand, DQ) — the live page keeps GoldRose in the flow's
- * Playfair treatment at the image's box.
+ * Brand: the frame's header wordmark image reads "ELDREVE" — the brand
+ * itself (DQ-34). The live page sets it as text in the flow's Playfair
+ * treatment at the image's box.
  */
 
 import Link from "next/link";
@@ -161,7 +161,7 @@ export function TrackOrderScreen({
         src={`${A}/1541-258.png`}
         style={abs(16, 8, 40, 42)}
       />
-      {/* Wordmark box (134,1.6 152×54.8) — GoldRose for the frame's
+      {/* Wordmark box (134,1.6 152×54.8) — ELDREVE for the frame's
           "ELDREVE" placeholder image, in the flow's Playfair treatment. */}
       <div
         className={playfair.className}
@@ -171,7 +171,7 @@ export function TrackOrderScreen({
           fontWeight: 600,
         }}
       >
-        GoldRose
+        ELDREVE
       </div>
       <h1
         className={playfair.className}

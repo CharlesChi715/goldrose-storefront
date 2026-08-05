@@ -20,7 +20,7 @@ import { BagScreen } from "@/components/screens/BagScreen";
 
 export const metadata: Metadata = {
   title: "Shopping bag",
-  description: "Review your GoldRose gifts before checkout.",
+  description: "Review your ELDREVE gifts before checkout.",
   alternates: { canonical: "/bag" },
 };
 

@@ -41,7 +41,7 @@ export default async function PackingSlipPage({
         }}
       >
         <div>
-          <h1 style={{ margin: 0, fontSize: 22 }}>GoldRose</h1>
+          <h1 style={{ margin: 0, fontSize: 22 }}>ELDREVE</h1>
           <p style={{ margin: "4px 0 0", color: "#555" }}>Packing slip</p>
         </div>
         <div style={{ textAlign: "right" }}>

@@ -55,7 +55,7 @@ const en = {
 
   // Login
   "login.title": "Log in",
-  "login.subtitle": "Continue to GoldRose admin",
+  "login.subtitle": "Continue to ELDREVE admin",
   "login.email": "Email",
   "login.password": "Password",
   "login.nickname": "Nickname",
@@ -172,7 +172,7 @@ const en = {
   "common.cancel": "Cancel",
   "common.save": "Save",
   "common.comingSoon": "This screen ships in a later stage of the build.",
-  "home.welcome.title": "Welcome to your GoldRose admin",
+  "home.welcome.title": "Welcome to your ELDREVE admin",
   "home.welcome.body":
     "Your store's products, orders, customers, and settings will all be managed from here.",
 
@@ -623,7 +623,7 @@ const en = {
     "Placeholder rate — confirm real rates before launch (OQ-2).",
   "settings.markets.title": "Markets",
   "settings.markets.note":
-    "GoldRose sells and ships to the countries covered by the shipping zones below. All markets are priced in USD in V1 — the buyer's bank converts.",
+    "ELDREVE sells and ships to the countries covered by the shipping zones below. All markets are priced in USD in V1 — the buyer's bank converts.",
   "settings.taxes.title": "Taxes and duties",
   "settings.taxes.rate": "Tax rate (%)",
   "settings.taxes.note":
@@ -723,7 +723,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "banner.live": "正式收款已开启 — 结账将转移真实资金。",
 
   "login.title": "登录",
-  "login.subtitle": "继续访问 GoldRose 后台",
+  "login.subtitle": "继续访问 ELDREVE 后台",
   "login.email": "邮箱",
   "login.password": "密码",
   "login.nickname": "昵称",
@@ -828,7 +828,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "common.cancel": "取消",
   "common.save": "保存",
   "common.comingSoon": "此页面将在构建的后续阶段上线。",
-  "home.welcome.title": "欢迎使用 GoldRose 后台",
+  "home.welcome.title": "欢迎使用 ELDREVE 后台",
   "home.welcome.body": "商店的产品、订单、客户和设置都将在这里统一管理。",
 
   "products.add": "添加产品",
@@ -1247,7 +1247,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
     "占位运费 — 上线前请确认真实运费（OQ-2）。",
   "settings.markets.title": "市场",
   "settings.markets.note":
-    "GoldRose 销售并配送至下方运费区域覆盖的国家/地区。V1 所有市场均以美元定价 — 由买家银行进行货币转换。",
+    "ELDREVE 销售并配送至下方运费区域覆盖的国家/地区。V1 所有市场均以美元定价 — 由买家银行进行货币转换。",
   "settings.taxes.title": "税费和关税",
   "settings.taxes.rate": "税率（%）",
   "settings.taxes.note": "测试期间为 0。进口关税由买家承担 — 结账时已注明。",

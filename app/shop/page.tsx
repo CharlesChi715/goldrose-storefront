@@ -53,7 +53,7 @@ export async function generateMetadata({
   const noindex = paged || Boolean(params.q?.trim());
   return {
     title: paged ? `Shop · page ${requested}` : "Shop",
-    description: "Shop the GoldRose 24K gold dipped rose collection.",
+    description: "Shop the ELDREVE 24K gold dipped rose collection.",
     alternates: { canonical: "/shop" },
     ...(noindex ? { robots: { index: false, follow: true } } : {}),
   };

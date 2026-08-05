@@ -85,7 +85,7 @@ export function A5() {
           whiteSpace: "nowrap",
         }}
       >
-        Find a GoldRose for every meaningful moment.
+        Find a ELDREVE for every meaningful moment.
       </div>
 
       {/*

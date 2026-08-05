@@ -17,12 +17,11 @@
  * renders it. (The frame is 2px shorter than its own content: the inner
  * 1523:3060 runs to 1728, so the source crops its nav band's last 2px.)
  *
- * ⚠️ Brand substitution: the frame's header wordmark is an image reading
- * "ELDREVE" (the delivery's placeholder brand, DQ raised) — per the
- * OrderConfirmedScreen precedent the live page keeps GoldRose in Playfair
- * at the image's box. The image still overhangs the nav frame's top (6.4px
- * now, was 4.5px) — the text substitution centres in the same box, so the
- * clip no longer crops any ink.
+ * Brand: the frame's header wordmark is an image reading "ELDREVE" — the
+ * brand itself (DQ-34). Per the OrderConfirmedScreen precedent the live page
+ * sets it as Playfair text at the image's box. The image still overhangs the
+ * nav frame's top (6.4px now, was 4.5px) — the text render centres in the
+ * same box, so the clip no longer crops any ink.
  */
 
 import { Fragment } from "react";
@@ -167,7 +166,7 @@ export function BagScreen() {
           src={`${A}/1523-3063.png`}
           style={abs(0, 0, 40, 42)}
         />
-        {/* 1523:3064 wordmark box (nav-rel 122,−6.4 152×54.8): GoldRose for
+        {/* 1523:3064 wordmark box (nav-rel 122,−6.4 152×54.8): ELDREVE for
             the frame's "ELDREVE" placeholder image — see the file header. */}
         <div
           className={playfair.className}
@@ -181,7 +180,7 @@ export function BagScreen() {
             whiteSpace: "nowrap",
           }}
         >
-          GoldRose
+          ELDREVE
         </div>
       </div>
 

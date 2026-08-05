@@ -24,7 +24,7 @@ test("shop cards and product page show live catalog values", async ({
     waitUntil: "networkidle",
   });
   await expect(
-    page.getByText("GoldRose Signature 24K Gold Rose").first(),
+    page.getByText("ELDREVE Signature 24K Gold Rose").first(),
   ).toBeVisible();
   await expect(page.getByText("BUY NOW · $49.99")).toBeVisible();
 });
@@ -36,7 +36,7 @@ test("long names ellipsize without layout shift (masked diff still gates)", asyn
   await adminLogin(page);
 
   const LONG_TITLE =
-    "GoldRose Signature 24K Gold Rose — Extraordinarily Long Anniversary Edition Title That Cannot Possibly Fit";
+    "ELDREVE Signature 24K Gold Rose — Extraordinarily Long Anniversary Edition Title That Cannot Possibly Fit";
   async function setTitle(title: string) {
     await page.goto("/admin/products/signature-gold-rose");
     await page.getByRole("textbox", { name: /^Title\*?$/ }).fill(title);
@@ -53,7 +53,7 @@ test("long names ellipsize without layout shift (masked diff still gates)", asyn
     // The long title renders (ellipsized) and the page still matches the
     // masked baseline — i.e. zero layout shift outside the designated boxes.
     await expect(
-      page.getByText(/GoldRose Signature 24K Gold Rose — Extra/).first(),
+      page.getByText(/ELDREVE Signature 24K Gold Rose — Extra/).first(),
     ).toBeVisible();
     await page.evaluate(async () => {
       await document.fonts.ready;
@@ -71,7 +71,7 @@ test("long names ellipsize without layout shift (masked diff still gates)", asyn
     });
   } finally {
     await page.setViewportSize(ADMIN_VIEWPORT);
-    await setTitle("GoldRose Signature 24K Gold Rose");
+    await setTitle("ELDREVE Signature 24K Gold Rose");
   }
 });
 

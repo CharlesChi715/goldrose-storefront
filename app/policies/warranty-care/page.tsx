@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { PolicyComingSoon } from "@/components/screens/PolicyComingSoon";
 
 export const metadata: Metadata = {
-  title: "Limited product warranty & care — GoldRose",
+  title: "Limited product warranty & care — ELDREVE",
   robots: { index: false },
 };
 

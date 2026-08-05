@@ -17,7 +17,7 @@ import { PartnershipsScreen } from "@/components/screens/PartnershipsScreen";
 export const metadata: Metadata = {
   title: "Corporate partnerships",
   description:
-    "GoldRose gifting partnerships for retailers, corporate buyers and events.",
+    "ELDREVE gifting partnerships for retailers, corporate buyers and events.",
   alternates: { canonical: "/business/partnerships" },
 };
 

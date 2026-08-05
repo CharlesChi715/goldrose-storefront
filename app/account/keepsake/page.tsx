@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { KeepsakeShareScreen } from "@/components/screens/KeepsakeShareScreen";
 
 export const metadata: Metadata = {
-  title: "Share your keepsake card — GoldRose",
+  title: "Share your keepsake card — ELDREVE",
   robots: { index: false },
 };
 

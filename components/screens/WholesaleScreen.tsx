@@ -272,7 +272,7 @@ export function WholesaleScreen() {
           />
           <img
             src={`${A}/1523-677.png`}
-            alt="GoldRose"
+            alt="ELDREVE"
             width={140}
             height={51}
             style={{
@@ -322,7 +322,7 @@ export function WholesaleScreen() {
         {/* 1523:680 hero image */}
         <img
           src={`${A}/1523-680.png`}
-          alt="Pink velvet GoldRose gift box beside a gold-dipped rose"
+          alt="Pink velvet ELDREVE gift box beside a gold-dipped rose"
           width={398}
           height={230}
           style={{
@@ -584,7 +584,7 @@ export function WholesaleScreen() {
             textAlign: "center",
           }}
         >
-          {`♢${NB} By submitting, you agree that the GoldRose business team may contact you about this inquiry.`}
+          {`♢${NB} By submitting, you agree that the ELDREVE business team may contact you about this inquiry.`}
         </div>
 
         {/* 1523:762 CTA · Submit Wholesale Application — non-submitting
@@ -676,7 +676,7 @@ export function WholesaleScreen() {
             whiteSpace: "nowrap",
           }}
         >
-          GoldRose business specialists typically respond within 1–2 business
+          ELDREVE business specialists typically respond within 1–2 business
           days.
         </div>
       </div>

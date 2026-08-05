@@ -1,5 +1,5 @@
 -- ============================================================================
--- GoldRose admin schema — design doc §7 (docs/admin-design.md)
+-- ELDREVE admin schema — design doc §7 (docs/admin-design.md)
 --
 -- Source of truth for the hosted Supabase project. Run this file first in the
 -- Supabase SQL editor (or `supabase db push`), then seed with `npm run seed`
@@ -22,7 +22,7 @@ create table products (
   title text not null,
   short_name text not null default '',
   description text not null default '',
-  vendor text not null default 'GoldRose',
+  vendor text not null default 'ELDREVE',
   product_type text not null default '',
   tags text[] not null default '{}',
   charge_tax boolean not null default true,

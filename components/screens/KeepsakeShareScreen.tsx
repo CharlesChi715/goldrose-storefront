@@ -73,7 +73,7 @@ export function KeepsakeShareScreen() {
         Share Your Keepsake Card
       </div>
       <div style={{ ...abs(32, 96, 366), ...txt(10, 20, INK, "center") }}>
-        Create and share a card celebrating your GoldRose.
+        Create and share a card celebrating your ELDREVE.
       </div>
 
       {/* the keepsake card — cream, gold border, gold inner ring */}
@@ -90,8 +90,8 @@ export function KeepsakeShareScreen() {
           borderRadius: 10,
         }}
       />
-      {/* 1523:1453 draws an "ELDREVE" monogram (placeholder brand, DQ) —
-          the 07-28 rose emblem stays, centred in the monogram's box. */}
+      {/* 1523:1453 draws an "ELDREVE" monogram — the 07-28 rose emblem
+          stays, centred in the monogram's box. */}
       <img
         src="/veloria/screens/1245-118.svg"
         alt=""
@@ -110,7 +110,7 @@ export function KeepsakeShareScreen() {
         The 4th recipient
       </div>
       <div style={{ ...abs(56, 244, 318), ...txt(9, 16, GOLD, "center") }}>
-        in San Francisco to receive a GoldRose gift
+        in San Francisco to receive a ELDREVE gift
       </div>
       <img
         src="/veloria/screens/1523-1439.png"

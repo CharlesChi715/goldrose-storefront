@@ -12,10 +12,9 @@
  * icons are Figma's own SVG exports (the ✉ is a crop of the frame render —
  * it SVG-exports as a .notdef box, C-2 precedent).
  *
- * ⚠️ Brand: the frame's header wordmark image reads "ELDREVE". Treated as a
- * placeholder until DQ-34 was answered on 2026-08-03 — ELDREVE IS the brand,
- * so the GoldRose substitution here is now wrong and retires with the rename
- * project (SUMMARY.md § OQ-4).
+ * Brand: the frame's header wordmark image reads "ELDREVE" — the brand
+ * itself (DQ-34, answered 2026-08-03). The earlier GoldRose substitution was
+ * retired by the rename project (SUMMARY.md § OQ-4).
  *
  * 2026-08-03 — THE FORM IS LIVE. No longer a visual placeholder:
  *   • email  — real <input>, format-validated on blur (red hairline + a
@@ -294,9 +293,8 @@ export function SignupScreen() {
         }
       `}</style>
 
-      {/* Brand Navigation (1523:3343) — ‹ back; the owner's GoldRose art
-          substituted for the frame's "ELDREVE" wordmark image at its box
-          (see the file header) */}
+      {/* Brand Navigation (1523:3343) — ‹ back; the frame's ELDREVE wordmark
+          image at its box (see the file header) */}
       <BackButton
         fallback="/account"
         src="/veloria/screens/1523-3344.png"

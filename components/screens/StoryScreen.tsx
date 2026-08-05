@@ -8,8 +8,7 @@
  * cards ship as the design's own #EDE0D1 placeholder blocks (no imagery
  * drawn at the pinned snapshot); the team dropped real photos in the same
  * day, so the hero and both memory cards now carry their photography.
- * Header brand is the design's own "GoldRose" Playfair text — no wordmark
- * substitution needed on this frame.
+ * Header brand is the design's own "ELDREVE" Playfair text.
  *
  * Wiring: SHOP THE COLLECTION → /shop, EXPLORE OUR CRAFT → /craft (both
  * CTAs are instances from the delivery's new component board). The bottom
@@ -73,7 +72,7 @@ function Glyph({
 export function StoryScreen() {
   return (
     <>
-      {/* 1573:108 · header — ‹ back, GoldRose brand line, title, ornament */}
+      {/* 1573:108 · header — ‹ back, ELDREVE brand line, title, ornament */}
       <BackButton
         fallback="/"
         src={`${A}/1573-109.svg`}
@@ -87,7 +86,7 @@ export function StoryScreen() {
           fontWeight: 500,
         }}
       >
-        GoldRose
+        ELDREVE
       </div>
       <div
         className={playfair.className}

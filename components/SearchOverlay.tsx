@@ -226,11 +226,8 @@ export function SearchOverlay({
               style={{ display: "block", width: 40, height: 43 }}
             />
           </button>
-          {/* 1523:3309 brand wordmark image — the design's "ELDREVE" placeholder
-          brand, shipped pixel-exact (flagged to design; the dialog keeps its
-          "Search" aria-label). */}
-          {/* 1523:3309 is an "ELDREVE" wordmark image (placeholder brand, DQ) —
-          the owner's GoldRose art stays, centred in the image's box. */}
+          {/* 1523:3309 brand wordmark image — the ELDREVE mark, shipped
+          pixel-exact (the dialog keeps its "Search" aria-label). */}
           <img
             src="/veloria/brand/eldreve-136x40.png"
             alt="ELDREVE"

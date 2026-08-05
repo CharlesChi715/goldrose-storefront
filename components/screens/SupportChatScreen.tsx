@@ -122,7 +122,7 @@ export function SupportChatScreen() {
         className={playfair.className}
         style={{ ...abs(80, 17, 270), ...txt(22, 28, INK), fontWeight: 500 }}
       >
-        GoldRose Support
+        ELDREVE Support
       </div>
       <div
         style={{ ...abs(80, 54, 8, 8), background: "#2EB24F", borderRadius: 4 }}
@@ -231,7 +231,7 @@ export function SupportChatScreen() {
             <div
               style={{ ...abs(54, bubble.senderY, 150), ...txt(8, 16, GOLD) }}
             >
-              GoldRose Support
+              ELDREVE Support
             </div>
             {/* 1523:1495/1505/1515 — identical avatar exports, one file serves all */}
             <img

@@ -20,7 +20,7 @@ type NotificationToggles = {
 /**
  * Read the notification toggles, store name, and owner contact email from
  * the settings table, defaulting every toggle to on and the store name to
- * "GoldRose" when unset.
+ * "ELDREVE" when unset.
  *
  * @returns The toggles plus storeName and ownerEmail.
  */
@@ -40,7 +40,7 @@ async function getEmailSettings(): Promise<{
       shipping_confirmation: notifications?.shipping_confirmation ?? true,
       new_order_alert: notifications?.new_order_alert ?? true,
     },
-    storeName: store?.name ?? "GoldRose",
+    storeName: store?.name ?? "ELDREVE",
     ownerEmail: store?.contact_email ?? "",
   };
 }
@@ -78,7 +78,7 @@ async function deliver(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM ?? "GoldRose <onboarding@resend.dev>",
+        from: process.env.RESEND_FROM ?? "ELDREVE <onboarding@resend.dev>",
         to: [to],
         subject,
         text,

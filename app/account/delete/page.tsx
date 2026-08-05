@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { DeleteConfirmScreen } from "@/components/screens/DeleteConfirmScreen";
 
 export const metadata: Metadata = {
-  title: "Delete account — GoldRose",
+  title: "Delete account — ELDREVE",
   robots: { index: false },
 };
 

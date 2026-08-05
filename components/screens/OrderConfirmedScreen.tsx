@@ -17,11 +17,10 @@
  * SHARE GIFT TRACKING LINK stays static until the secure-token share
  * backend exists (ORDER-DETAIL-SHARE-TRACKING).
  *
- * ⚠️ Brand substitution: the frame's header wordmark is an image reading
- * "ELDREVE" — a placeholder brand this delivery stamps on several screens
- * (DQ raised; VELORIA → ELDREVE is the file's third brand string). The live
- * page keeps GoldRose in the frame's own Playfair treatment at the image's
- * box. Everything else ships verbatim, mock strings included.
+ * Brand: the frame's header wordmark is an image reading "ELDREVE" — the
+ * brand itself (DQ-34). The live page sets it as text in the frame's own
+ * Playfair treatment at the image's box, rather than shipping the raster.
+ * Everything else ships verbatim, mock strings included.
  */
 
 import Link from "next/link";
@@ -164,8 +163,8 @@ export function OrderConfirmedScreen({
           src={`${A}/1541-366.png`}
           style={abs(16, 8, 40, 42)}
         />
-        {/* Wordmark box (147,3.5 140×51): GoldRose substituted for the
-            frame's "ELDREVE" placeholder image — see the file header. */}
+        {/* Wordmark box (147,3.5 140×51): the frame's ELDREVE wordmark image
+            set as Playfair text — see the file header. */}
         <div
           className={playfair.className}
           style={{
@@ -174,7 +173,7 @@ export function OrderConfirmedScreen({
             fontWeight: 600,
           }}
         >
-          GoldRose
+          ELDREVE
         </div>
 
         {/* Success Check — 64×64 ring (2px inside stroke) + the ✓ export. */}

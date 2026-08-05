@@ -17,7 +17,7 @@ import { TrackOrderScreen } from "@/components/screens/TrackOrderScreen";
 
 export const metadata: Metadata = {
   title: "Track your order",
-  description: "Follow your GoldRose gift from our workshop to the door.",
+  description: "Follow your ELDREVE gift from our workshop to the door.",
   alternates: { canonical: "/orders/track" },
 };
 

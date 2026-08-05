@@ -12,9 +12,9 @@ import { notoSC } from "@/lib/fonts";
 import { StoryScreen } from "@/components/screens/StoryScreen";
 
 export const metadata: Metadata = {
-  title: "Our story — GoldRose",
+  title: "Our story — ELDREVE",
   description:
-    "Why GoldRose preserves real roses in 24K gold: meaning, sincerity, memory.",
+    "Why ELDREVE preserves real roses in 24K gold: meaning, sincerity, memory.",
   alternates: { canonical: "/story" },
 };
 

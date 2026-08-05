@@ -19,7 +19,7 @@ export default function CheckoutCancelPage() {
     <main className="grid min-h-screen place-items-center bg-[#f4ede1] px-6 py-16 text-[#211a0e]">
       <div className="w-full max-w-xl rounded-md border border-[#d9c48a] bg-[#fbf6ec] p-10 text-center shadow-[0_22px_60px_rgba(33,26,14,0.10)]">
         <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#9a7826]">
-          GoldRose
+          ELDREVE
         </p>
         <h1 className="font-serif text-4xl font-medium leading-tight text-[#211a0e]">
           Checkout canceled.

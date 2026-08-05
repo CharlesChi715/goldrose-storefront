@@ -77,7 +77,7 @@ import { getVisitorId } from "@/components/Beacon";
 import type { PaymentMethodId } from "@/lib/checkout/types";
 import type { CatalogProduct } from "@/lib/supabase/types.ts";
 
-const brandName = "GoldRose";
+const brandName = "ELDREVE";
 const A = "/veloria/screens";
 
 /** What /api/checkout accepts — "none" is the skip-payment testing flow. */
@@ -278,8 +278,7 @@ const STEP_X = [16, 118, 220, 322];
 const STEP_LABELS = ["Bag", "Details", "Payment", "Delivery"];
 
 /**
- * Header band (0…143): back raster, the frame's own "GOLDROSE" text wordmark
- * (this redesign sets the brand as text — no ELDREVE image here), and the
+ * Header band (0…143): back raster, the ELDREVE wordmark raster, and the
  * four-step progress row. Step states verbatim from the frames: done = amber
  * fill + white ✓, current = cream + gold ring + gold label, upcoming = cream
  * + sand ring, and Delivery always draws white + amber ring (both frames).
@@ -309,8 +308,8 @@ function CheckoutHeader({ step, onBack }: { step: Step; onBack: () => void }) {
         />
       </button>
       {/* Brand, centred at the top. The 08-02 delivery replaced this header's
-          "GOLDROSE" text node with the same ELDREVE wordmark raster the rest
-          of the file uses (2460:377/381, 140×51 at x145). */}
+          text node with the same ELDREVE wordmark raster the rest of the
+          file uses (2460:377/381, 140×51 at x145). */}
       <img
         src="/veloria/brand/eldreve-140x51.png"
         alt="ELDREVE"

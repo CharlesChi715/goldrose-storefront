@@ -52,7 +52,7 @@ ${products}
 - Contact: ${settings.store.contact_email}
 `;
   } catch {
-    body = `# GoldRose\n\nGift-ready 24K gold dipped rose keepsakes.\n\n- Shop: ${base}/shop\n`;
+    body = `# ELDREVE\n\nGift-ready 24K gold dipped rose keepsakes.\n\n- Shop: ${base}/shop\n`;
   }
 
   return new Response(body, {

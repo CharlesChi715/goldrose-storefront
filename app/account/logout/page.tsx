@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { LogoutConfirmScreen } from "@/components/screens/LogoutConfirmScreen";
 
 export const metadata: Metadata = {
-  title: "Log out — GoldRose",
+  title: "Log out — ELDREVE",
   robots: { index: false },
 };
 

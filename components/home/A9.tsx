@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Module A-9 · "Craft, Workshop and Patents" of the simplified GoldRose
+ * Module A-9 · "Craft, Workshop and Patents" of the simplified ELDREVE
  * homepage (Figma node 2380:658 — 430×991 CREAM section at y=3133): craft
  * steps 01–04 with photo crops, the EXPLORE OUR CRAFT button, and the lower
  * block (2380:684) holding the workshop gallery and the Patents &
@@ -81,7 +81,7 @@ const WORKSHOP_CROPS = [
     h: 105,
     imgX: -11,
     imgY: -449,
-    alt: "Careful preparation in the GoldRose workshop",
+    alt: "Careful preparation in the ELDREVE workshop",
   },
   {
     x: 166,
@@ -343,7 +343,7 @@ export function A9() {
             whiteSpace: "nowrap",
           }}
         >
-          Inside the GoldRose Workshop
+          Inside the ELDREVE Workshop
         </div>
 
         {/* 482:123 · workshop copy */}

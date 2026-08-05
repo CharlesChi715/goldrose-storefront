@@ -15,7 +15,7 @@ import { BottomNav } from "@/components/chrome";
 import { inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Placeholder — GoldRose",
+  title: "Placeholder — ELDREVE",
   robots: { index: false },
 };
 

@@ -14,7 +14,7 @@ import { notoSC } from "@/lib/fonts";
 import { OrderConfirmedScreen } from "@/components/screens/OrderConfirmedScreen";
 
 export const metadata: Metadata = {
-  title: "Order details — GoldRose",
+  title: "Order details — ELDREVE",
   robots: { index: false },
 };
 

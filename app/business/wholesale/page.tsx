@@ -13,7 +13,7 @@ import { WholesaleScreen } from "@/components/screens/WholesaleScreen";
 
 export const metadata: Metadata = {
   title: "Wholesale application",
-  description: "Apply for GoldRose wholesale pricing and trade terms.",
+  description: "Apply for ELDREVE wholesale pricing and trade terms.",
   alternates: { canonical: "/business/wholesale" },
 };
 

@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { PreferencesScreen } from "@/components/screens/PreferencesScreen";
 
 export const metadata: Metadata = {
-  title: "Preferences — GoldRose",
+  title: "Preferences — ELDREVE",
   robots: { index: false },
 };
 

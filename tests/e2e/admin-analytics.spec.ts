@@ -181,7 +181,7 @@ test("⌘K finds an order by number, a product by SKU, a customer by email", asy
   // Product by SKU.
   await searchBox.fill("GR-SIG-001-1");
   await expect(
-    modal.getByText("GoldRose Signature 24K Gold Rose"),
+    modal.getByText("ELDREVE Signature 24K Gold Rose"),
   ).toBeVisible();
 
   // Customer by email → navigate to the profile.

@@ -282,7 +282,7 @@ export function AdminFrame({
         },
       ]}
       name={email}
-      detail="GoldRose"
+      detail="ELDREVE"
       initials={(email[0] ?? "G").toUpperCase()}
       open={userMenuOpen}
       onToggle={() => setUserMenuOpen((open) => !open)}

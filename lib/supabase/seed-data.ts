@@ -41,11 +41,11 @@ const SEED_PRODUCTS: SeedProduct[] = [
     product: {
       id: "signature-gold-rose",
       handle: "signature-24k-gold-rose",
-      title: "GoldRose Signature 24K Gold Rose",
+      title: "ELDREVE Signature 24K Gold Rose",
       short_name: "Signature Rose",
       description:
         "A genuine rose preserved with a luminous 24K gold dipped finish and clear display stand.",
-      vendor: "GoldRose",
+      vendor: "ELDREVE",
       product_type: "Gold Dipped Rose",
       tags: ["signature", "anniversary", "valentines-day", "gift-ready"],
       charge_tax: true,
@@ -122,11 +122,11 @@ const SEED_PRODUCTS: SeedProduct[] = [
     product: {
       id: "boxed-keepsake-rose",
       handle: "boxed-keepsake-gold-rose",
-      title: "GoldRose Boxed Keepsake Rose",
+      title: "ELDREVE Boxed Keepsake Rose",
       short_name: "Boxed Keepsake",
       description:
         "The rose plus presentation packaging for a more finished gift moment.",
-      vendor: "GoldRose",
+      vendor: "ELDREVE",
       product_type: "Gold Dipped Rose",
       tags: ["boxed", "mothers-day", "valentines-day", "keepsake"],
       charge_tax: true,
@@ -203,11 +203,11 @@ const SEED_PRODUCTS: SeedProduct[] = [
     product: {
       id: "premium-gift-bundle",
       handle: "premium-gold-rose-gift-bundle",
-      title: "GoldRose Premium Gift Bundle",
+      title: "ELDREVE Premium Gift Bundle",
       short_name: "Premium Bundle",
       description:
         "A higher-value bundle focused on material detail, presentation, and a stronger reveal.",
-      vendor: "GoldRose",
+      vendor: "ELDREVE",
       product_type: "Gift Bundle",
       tags: ["bundle", "premium", "gift-ready", "high-aov"],
       charge_tax: true,
@@ -312,7 +312,7 @@ export type SettingsShape = {
 
 export const SEED_SETTINGS: SettingsShape = {
   store: {
-    name: "GoldRose",
+    name: "ELDREVE",
     contact_email: "support@goldrose.example",
     order_number_prefix: "#",
   },
@@ -346,7 +346,7 @@ export const SEED_SETTINGS: SettingsShape = {
     new_order_alert: true,
   },
   search_engine: {
-    home_title: "GoldRose — 24K Gold Dipped Roses",
+    home_title: "ELDREVE — 24K Gold Dipped Roses",
     home_description:
       "Real roses preserved in 24K gold. Timeless anniversary, Valentine's Day, and milestone gifts, shipped internationally.",
     social_image: "/products/gold-rose-stand.jpg",
@@ -825,7 +825,7 @@ function buildDemoRows(
         V_SIG,
         "signature-gold-rose",
         "GR-SIG-001-1",
-        "GoldRose Signature 24K Gold Rose",
+        "ELDREVE Signature 24K Gold Rose",
         "Gift box included",
         1,
         4999,
@@ -836,7 +836,7 @@ function buildDemoRows(
         V_BOX,
         "boxed-keepsake-rose",
         "GR-BOX-002-1",
-        "GoldRose Boxed Keepsake Rose",
+        "ELDREVE Boxed Keepsake Rose",
         "Valentine card",
         1,
         6499,
@@ -847,7 +847,7 @@ function buildDemoRows(
         V_BND,
         "premium-gift-bundle",
         "GR-BND-003-1",
-        "GoldRose Premium Gift Bundle",
+        "ELDREVE Premium Gift Bundle",
         "Gift message",
         1,
         7999,
@@ -858,7 +858,7 @@ function buildDemoRows(
         V_BOX,
         "boxed-keepsake-rose",
         "GR-BOX-002-1",
-        "GoldRose Boxed Keepsake Rose",
+        "ELDREVE Boxed Keepsake Rose",
         "Valentine card",
         2,
         6499,
@@ -869,7 +869,7 @@ function buildDemoRows(
         V_SIG,
         "signature-gold-rose",
         "GR-SIG-001-1",
-        "GoldRose Signature 24K Gold Rose",
+        "ELDREVE Signature 24K Gold Rose",
         "Gift box included",
         1,
         4999,
@@ -880,7 +880,7 @@ function buildDemoRows(
         V_BND,
         "premium-gift-bundle",
         "GR-BND-003-1",
-        "GoldRose Premium Gift Bundle",
+        "ELDREVE Premium Gift Bundle",
         "Gift message",
         1,
         7999,
@@ -996,14 +996,14 @@ function buildDemoRows(
       {
         id: demoId("a01"),
         title:
-          "📢 Welcome to the GoldRose testing forum · 欢迎来到 GoldRose 测试论坛",
-        nickname: "GoldRose Team",
+          "📢 Welcome to the ELDREVE testing forum · 欢迎来到 ELDREVE 测试论坛",
+        nickname: "ELDREVE Team",
         created_at: ago(48),
       },
       {
         id: demoId("a02"),
         title: "📢 What to test — and what to expect · 测试内容与注意事项",
-        nickname: "GoldRose Team",
+        nickname: "ELDREVE Team",
         created_at: ago(47),
       },
     ],
@@ -1011,16 +1011,16 @@ function buildDemoRows(
       {
         id: demoId("b01"),
         thread_id: demoId("a01"),
-        nickname: "GoldRose Team",
+        nickname: "ELDREVE Team",
         body: [
-          "Welcome! This forum is for everyone helping test the GoldRose store.",
+          "Welcome! This forum is for everyone helping test the ELDREVE store.",
           "",
           "How it works:",
           "• Sign up from the login page (Request access) with a nickname, email, and password — the owner approves new accounts.",
           "• Your nickname is bound to your account and is automatically your name here.",
           "• Start a discussion for anything: bugs, questions, ideas, opinions. Everyone can read and reply.",
           "",
-          "欢迎！这里是 GoldRose 测试论坛，供所有参与测试的伙伴使用。",
+          "欢迎！这里是 ELDREVE 测试论坛，供所有参与测试的伙伴使用。",
           "",
           "使用方法：",
           "• 在登录页点击「申请访问」，用昵称、邮箱和密码注册——新账号由店主批准。",
@@ -1033,7 +1033,7 @@ function buildDemoRows(
       {
         id: demoId("b02"),
         thread_id: demoId("a02"),
-        nickname: "GoldRose Team",
+        nickname: "ELDREVE Team",
         body: [
           "A few things to know while we test:",
           "",

@@ -41,7 +41,7 @@ import { notoSC, playfair } from "@/lib/fonts";
 // 1526:146…153 — the current-session label/value rows.
 const SESSION_ROWS: Array<[string, string, boolean?]> = [
   ["Device", "iPhone 15 Pro"],
-  ["Browser / App", "GoldRose App"],
+  ["Browser / App", "ELDREVE App"],
   ["Location", "Tokyo, JP"],
   ["Status", "Active now", true],
 ];
@@ -64,9 +64,9 @@ export function PrivacySecurityScreen() {
       fontClass={notoSC.className}
       nav={false}
     >
-      {/* 1526:166/168 Brand Navigation — GoldRose art at the frame's wordmark
-          box ("a 1" ships the ELDREVE placeholder, DQ-34) + the frame's
-          pasted 返回 back art (same raster every me-screen uses) */}
+      {/* 1526:166/168 Brand Navigation — ELDREVE art at the frame's wordmark
+          box (the frame's own mark, DQ-34) + the frame's pasted 返回 back art
+          (same raster every me-screen uses) */}
       <BrandWordmark x={145} y={0} w={140} h={51} />
       <BackButton
         fallback="/account/privacy"

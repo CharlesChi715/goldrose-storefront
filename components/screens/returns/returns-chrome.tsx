@@ -103,9 +103,8 @@ export function LineGlyph({
  * The frames' Brand Navigation band. Component-internal geometry: back
  * 40×43 @ (15,24.5), wordmark 140×51 @ (145,20.5), cart 40×43 @ (375,24.5);
  * each frame embeds the instance a few px off 0 (−4…+2), passed as dy.
- * The frames' wordmark image reads "ELDREVE" — the design template's
- * placeholder brand — so the live pages keep the GoldRose art (DQ-34
- * precedent). The back arrow reuses the 07-29 返回 raster 1523-3470 (the
+ * The frames' wordmark image reads "ELDREVE" — the brand itself (DQ-34) —
+ * so the live pages ship that art unchanged. The back arrow reuses the 07-29 返回 raster 1523-3470 (the
  * same source bitmap, hash 147fbe10, as this batch's header art); the cart
  * art links to /checkout, which is the live cart (shared cart convention).
  *

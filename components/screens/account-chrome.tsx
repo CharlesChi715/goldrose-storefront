@@ -56,11 +56,9 @@ export function sCard(
  *
  * Synced from Figma 2026-08-02: the frames' own **ELDREVE** wordmark
  * (imageRef `a8c8a259`, drawn at 140×51 from x145 — dead centre of the 430
- * canvas) is now the brand, so the GoldRose substitution the earlier syncs
+ * canvas) is the brand, so the GoldRose substitution the earlier syncs
  * applied here is retired. `SUMMARY.md` § OQ-4 records the decision and
- * `eldreve.com` is live; the wider GoldRose→ELDREVE rename (auth cutover,
- * passkey RP ID, Supabase and PayPal URLs) is its own project, so only the
- * mark itself moved.
+ * `eldreve.com` is live.
  *
  * The asset is Figma's own scale-2 node render, which bakes in the fill's
  * FILL crop — the same image sits in a 136×40 box on home/shop, exported

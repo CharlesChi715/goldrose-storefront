@@ -8,7 +8,7 @@
  * H-17/H-31 cards and the menu drawer's OUR CRAFT row have pointed at since
  * 07-25. Unlike its STORY sibling, this page ships real photography
  * (workshop hero + three process shots). Header brand is the design's own
- * "GoldRose" Playfair text.
+ * "ELDREVE" Playfair text.
  *
  * Wiring: header cart → /checkout (the live cart), SHOP THE COLLECTION →
  * /shop, READ OUR STORY → /story. The frame draws a five-tab glyph TEXT nav
@@ -105,7 +105,7 @@ const STEPS = [
 export function CraftScreen() {
   return (
     <>
-      {/* 1573:113 · header — ‹ back, GoldRose brand line, title, ornament, cart */}
+      {/* 1573:113 · header — ‹ back, ELDREVE brand line, title, ornament, cart */}
       <BackButton
         fallback="/"
         src={`${A}/1573-114.svg`}
@@ -119,7 +119,7 @@ export function CraftScreen() {
           fontWeight: 500,
         }}
       >
-        GoldRose
+        ELDREVE
       </div>
       <Link
         href="/checkout"

@@ -430,7 +430,7 @@ export function CareScreen({
         }}
       >
         {
-          "We appreciate your trust in GoldRose.\nYour satisfaction means everything to us."
+          "We appreciate your trust in ELDREVE.\nYour satisfaction means everything to us."
         }
       </div>
     </ScaleFrame>

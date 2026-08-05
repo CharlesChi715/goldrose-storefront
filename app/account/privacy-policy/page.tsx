@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { PrivacyPolicyScreen } from "@/components/screens/PrivacyPolicyScreen";
 
 export const metadata: Metadata = {
-  title: "Privacy policy — GoldRose",
+  title: "Privacy policy — ELDREVE",
   robots: { index: false },
 };
 

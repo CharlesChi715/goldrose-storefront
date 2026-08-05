@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { RequestSubmittedScreen } from "@/components/screens/returns/RequestSubmittedScreen";
 
 export const metadata: Metadata = {
-  title: "Request submitted — GoldRose",
+  title: "Request submitted — ELDREVE",
   robots: { index: false },
 };
 

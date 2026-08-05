@@ -56,7 +56,7 @@ test("start a discussion, reply, edit, see it in the list, then delete it", asyn
 
   // The seeded announcement threads greet testers.
   await expect(
-    page.getByText("📢 Welcome to the GoldRose testing forum"),
+    page.getByText("📢 Welcome to the ELDREVE testing forum"),
   ).toBeVisible();
   await expect(
     page.getByText("📢 What to test — and what to expect"),
@@ -113,7 +113,7 @@ test("unread badges count new messages and clear after reading", async ({
   await logIn(page);
 
   // Fresh browser context = nothing read yet on this device, so the seeded
-  // announcement threads (posted by "GoldRose Team") are unread: the Forum
+  // announcement threads (posted by "ELDREVE Team") are unread: the Forum
   // nav item carries a count badge.
   const forumNavLink = page
     .getByRole("navigation")
@@ -130,7 +130,7 @@ test("unread badges count new messages and clear after reading", async ({
 
   // Read every thread: opening a thread marks it read on this device.
   const threadTitles = [
-    "📢 Welcome to the GoldRose testing forum",
+    "📢 Welcome to the ELDREVE testing forum",
     "📢 What to test — and what to expect",
   ];
   for (const title of threadTitles) {

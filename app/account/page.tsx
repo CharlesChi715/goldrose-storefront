@@ -15,7 +15,7 @@ import type { Metadata } from "next";
 import { AccountClient } from "./AccountClient";
 
 export const metadata: Metadata = {
-  title: "My account — GoldRose",
+  title: "My account — ELDREVE",
   robots: { index: false },
 };
 

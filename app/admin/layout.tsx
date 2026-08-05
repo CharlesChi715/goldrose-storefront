@@ -12,7 +12,7 @@ import { getAdminLang } from "@/lib/admin/lang";
 import { PolarisShell } from "./PolarisShell";
 
 export const metadata: Metadata = {
-  title: { default: "GoldRose admin", template: "%s · GoldRose admin" },
+  title: { default: "ELDREVE admin", template: "%s · ELDREVE admin" },
   robots: { index: false, follow: false },
 };
 

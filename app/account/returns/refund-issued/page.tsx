@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { RefundIssuedScreen } from "@/components/screens/returns/RefundIssuedScreen";
 
 export const metadata: Metadata = {
-  title: "Refund issued — GoldRose",
+  title: "Refund issued — ELDREVE",
   robots: { index: false },
 };
 

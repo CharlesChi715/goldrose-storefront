@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   // just the create-account step, so the title says what the page does. The
   // route name still says "signup" — renaming it is a redirect exercise best
   // done with the ELDREVE rename (AI-021), not smuggled in here.
-  title: "Sign in — GoldRose",
+  title: "Sign in — ELDREVE",
   robots: { index: false },
 };
 

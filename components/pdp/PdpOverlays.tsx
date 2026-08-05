@@ -870,7 +870,7 @@ function UnboxingGallery({ onClose }: { onClose: () => void }) {
           Unboxing Highlights
         </div>
         <div style={{ ...abs(24, 74.8, 260), ...txt(12, 14.4, GREY) }}>
-          32K+ real GoldRose moments
+          32K+ real ELDREVE moments
         </div>
         {/* Share (1523:4373) — inert placeholder; sharing needs the
             secure-link backend (ORDER-DETAIL-SHARE-TRACKING has the same

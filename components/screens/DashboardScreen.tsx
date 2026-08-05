@@ -33,8 +33,8 @@
  * tiles render pixel-exact but stay inert until their targets exist
  * (route-table rule; the ADDRESS-BOOK section 2118:246 is not
  * Ready-for-dev). Header wordmark: the shopping frame's image reads
- * "ELDREVE" (placeholder brand, DQ) — the owner's GoldRose art stays,
- * centred in the frame's wordmark box.
+ * "ELDREVE" — the brand itself (DQ-34) — centred in the frame's
+ * wordmark box.
  */
 
 import Link from "next/link";
@@ -356,7 +356,7 @@ function Dashboard({
       </div>
       <div style={{ ...abs(90, 120, 240), ...txt(13, 16, INK) }}>
         {shopping
-          ? "Welcome back to GoldRose"
+          ? "Welcome back to ELDREVE"
           : "Manage procurement and partnerships"}
       </div>
 

@@ -72,6 +72,6 @@ test("only open checkouts older than 1 hour are abandoned", async () => {
   assert.ok(!ids.includes("old-completed"));
   const oldOpen = abandoned.find((entry) => entry.checkout.id === "old-open")!;
   assert.equal(oldOpen.itemCount, 2);
-  assert.match(oldOpen.itemsLabel, /2 × GoldRose Signature 24K Gold Rose/);
+  assert.match(oldOpen.itemsLabel, /2 × ELDREVE Signature 24K Gold Rose/);
   assert.ok(oldOpen.ageHours >= 2);
 });

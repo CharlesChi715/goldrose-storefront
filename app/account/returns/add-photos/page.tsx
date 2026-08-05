@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import { AddPhotosScreen } from "@/components/screens/returns/AddPhotosScreen";
 
 export const metadata: Metadata = {
-  title: "Add photos & details — GoldRose",
+  title: "Add photos & details — ELDREVE",
   robots: { index: false },
 };
 

@@ -15,7 +15,7 @@ import type { Metadata } from "next";
 import { PolicyComingSoon } from "@/components/screens/PolicyComingSoon";
 
 export const metadata: Metadata = {
-  title: "Journal — GoldRose",
+  title: "Journal — ELDREVE",
   robots: { index: false },
 };
 

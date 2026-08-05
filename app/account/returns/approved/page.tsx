@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { ReturnApprovedScreen } from "@/components/screens/returns/ReturnApprovedScreen";
 
 export const metadata: Metadata = {
-  title: "Return approved — GoldRose",
+  title: "Return approved — ELDREVE",
   robots: { index: false },
 };
 

@@ -69,7 +69,7 @@ function ChatPanel({
           Gifting Concierge
         </div>
         <div style={{ ...abs(56, 26), ...txt(10, 12, "#D9E3DE") }}>
-          GoldRose · usually replies fast
+          ELDREVE · usually replies fast
         </div>
         <button
           type="button"
@@ -153,7 +153,7 @@ function IdeaForm() {
         >
           <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
             <strong>Thank you!</strong> Your idea is on its way to us — it truly
-            helps us shape GoldRose. 🌹
+            helps us shape ELDREVE. 🌹
           </div>
         </div>
       </div>
@@ -173,7 +173,7 @@ function IdeaForm() {
         <div style={{ ...txt(12.5, 18, "#263530"), whiteSpace: "normal" }}>
           Hi! Live chat is <strong>coming soon</strong> — meanwhile, we&apos;d
           love your
-          <strong> ideas and feedback</strong>. What would make GoldRose better?
+          <strong> ideas and feedback</strong>. What would make ELDREVE better?
         </div>
       </div>
       <textarea

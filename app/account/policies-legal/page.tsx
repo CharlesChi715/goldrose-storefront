@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { PoliciesLegalScreen } from "@/components/screens/PoliciesLegalScreen";
 
 export const metadata: Metadata = {
-  title: "Policies & legal — GoldRose",
+  title: "Policies & legal — ELDREVE",
   robots: { index: false },
 };
 

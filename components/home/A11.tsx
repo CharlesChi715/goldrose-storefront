@@ -32,7 +32,7 @@ const GLOW =
    concierge chat (1537:111 → /care/chat), which is where an unanswered
    question actually gets answered. */
 const FAQ_ROWS = [
-  { y: 85, q: "Are GoldRose gifts made from real roses?" },
+  { y: 85, q: "Are ELDREVE gifts made from real roses?" },
   { y: 124, q: "Can I personalize a gift?" },
   { y: 163, q: "How are gifts protected during shipping?" },
   { y: 202, q: "Do you accept corporate and bulk orders?" },
@@ -98,7 +98,7 @@ export function A11() {
         {/* 2380:768 story photo */}
         <img
           src="/veloria/home/508-90.png"
-          alt="Gold-preserved rose with GoldRose gift packaging"
+          alt="Gold-preserved rose with ELDREVE gift packaging"
           width={204}
           height={259}
           style={{ ...abs(226, 0, 204, 259), display: "block" }}
@@ -129,7 +129,7 @@ export function A11() {
           }}
         >
           {
-            "At GoldRose, we believe the most meaningful\ngifts are more than beautiful — they’re personal.\nEach real rose is carefully preserved in 24K gold,\ncapturing not just a flower, but a memory,\na milestone, a feeling.\n\nWe don’t just preserve roses.\nWe preserve what matters."
+            "At ELDREVE, we believe the most meaningful\ngifts are more than beautiful — they’re personal.\nEach real rose is carefully preserved in 24K gold,\ncapturing not just a flower, but a memory,\na milestone, a feeling.\n\nWe don’t just preserve roses.\nWe preserve what matters."
           }
         </div>
         <div
@@ -393,7 +393,7 @@ export function A11() {
         <Link
           data-el="HOME-NEWSLETTER-JOIN-BTN"
           href="/account/signup"
-          aria-label="Join the GoldRose mailing list"
+          aria-label="Join the ELDREVE mailing list"
           style={{ ...abs(200, 27.5, 184, 42), display: "block" }}
         >
           <div

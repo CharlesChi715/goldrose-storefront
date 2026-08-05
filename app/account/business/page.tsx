@@ -12,9 +12,9 @@ import type { Metadata } from "next";
 import { BusinessLogin } from "@/components/login/BusinessLogin";
 
 export const metadata: Metadata = {
-  title: "Business & Partnerships — GoldRose",
+  title: "Business & Partnerships — ELDREVE",
   description:
-    "Bulk orders, corporate gifting, wedding events and wholesale partnerships with GoldRose.",
+    "Bulk orders, corporate gifting, wedding events and wholesale partnerships with ELDREVE.",
 };
 
 export default function BusinessAccountPage() {

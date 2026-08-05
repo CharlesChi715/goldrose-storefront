@@ -2,7 +2,7 @@
 /**
  * ROLE OF THIS FILE
  * Module A-2 · "Featured Rose Gifts" (Figma node 2380:399) of the simplified
- * GoldRose homepage: section heading + ornament, "Best Sellers" row, two
+ * ELDREVE homepage: section heading + ornament, "Best Sellers" row, two
  * product cards. Coordinates/colors/fonts are verbatim
  * from the Figma REST API data; product cards and "View all" link to /shop.
  *

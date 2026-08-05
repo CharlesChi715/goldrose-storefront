@@ -1,7 +1,7 @@
 /**
  * Validate the Supabase environment before a production build starts.
  *
- * GoldRose deliberately supports a no-Supabase local/test mode, so all three
+ * ELDREVE deliberately supports a no-Supabase local/test mode, so all three
  * variables may be absent outside Vercel production. A partial configuration
  * is always an error, and Vercel production requires the complete set.
  */

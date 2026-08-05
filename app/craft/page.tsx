@@ -13,9 +13,9 @@ import { notoSC } from "@/lib/fonts";
 import { CraftScreen } from "@/components/screens/CraftScreen";
 
 export const metadata: Metadata = {
-  title: "Our craft — GoldRose",
+  title: "Our craft — ELDREVE",
   description:
-    "How GoldRose preserves real roses in 24K gold: selected, preserved, hand-finished.",
+    "How ELDREVE preserves real roses in 24K gold: selected, preserved, hand-finished.",
   alternates: { canonical: "/craft" },
 };
 
