@@ -96,9 +96,11 @@ export function BrandWordmark({
 export function SettingsHeader({ title }: { title: string }) {
   return (
     <>
+      {/* 1523-955.svg was never exported, so the arrow was a broken image on
+          every settings screen; use the shared top-nav arrow instead. */}
       <BackButton
         fallback="/account"
-        src="/eldreve/screens/1523-955.svg"
+        src="/top-nav/back.png"
         style={abs(36, 53, 24, 24)}
       />
       <div

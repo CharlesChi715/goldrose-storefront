@@ -13,9 +13,9 @@ delivery they were parsed from is still live at
 and remains the authority on wording. The findings further down this file are
 kept as the record of what those imports surfaced.
 
-**Naming.** An element-level convention doc (the `data-el` grammar and
-vocabulary) does not exist yet — Charles will author it; the `data-el`
-attributes themselves are in code. Current naming docs:
+**Naming.** The component-level doc below exists but is still a **draft** — its
+`data-el` grammar and vocabulary are not written yet; Charles will author them.
+The `data-el` attributes themselves are in code. Current naming docs:
 
 - [naming/figma-route-rule.md](naming/figma-route-rule.md) — the **page-level
   chapter**: an UPPERCASE section per top-level route segment, and a frame named

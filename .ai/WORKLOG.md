@@ -4903,3 +4903,37 @@ warnings (unused `x`/`w` in `BrandWordmark`) predate the branch.
 `goldrose-storefront` (a rename with remote/Vercel consequences, deliberately
 out of scope), and `account-chrome.tsx` references `1523-955.svg`, which has
 never existed under either name.
+
+## 2026-08-05 — Repo-wide consistency audit: docs vs code, stale content
+
+Swept the repo for contradictions rather than git conflicts: every backticked
+`app|lib|components|scripts|supabase|public/...` path, every `npm run` command
+and every `process.env.*` name cited in `docs/`, `README.md` and `SUMMARY.md`
+was tested against the actual tree.
+
+**Verified accurate** (no change needed): migration set `0001–0003/0005/0006`
+with `0004` absent; Shopify removal; the `CHECKOUT_SKIP_PAYMENT` +
+`PAYPAL_ENV=live` build gate in `scripts/validate-env.mjs`; `.env.example`
+completeness; the 7 `/policies/*` scaffolds; 7 home bands with 4 `data-el`
+tags; the ELDREVE rename's kept identifiers; and the `/account/privacy-policy`
+duplication (correct per AI-014, not stale).
+
+**Fixed three things:**
+
+- `agent-delivery/INBOX.md` — the Session-files table claimed 2 open matters
+  for `figma-sync-signup-mepage-08-02`; it raised AI-019 and AI-021, and
+  AI-021 is archived, so the count is 1. Note that `agent-inbox:check` passes
+  either way — `scripts/agent-inbox.mjs` never parses that column, so it
+  cannot catch this class of drift.
+- `docs/ixd/README.md` — said the `data-el` convention doc "does not exist
+  yet" while listing `naming/component-names.md` four lines below. The file
+  exists as a draft with its vocabulary unwritten; reworded to say that.
+- `components/screens/account-chrome.tsx` — `SettingsHeader` pointed
+  `BackButton` at `/eldreve/screens/1523-955.svg`, which was never exported
+  under either the veloria or eldreve namespace, so the back arrow was a
+  broken image on every `/account/*` settings screen. Now uses the shared
+  `/top-nav/back.png` (Charles's call). This closes the item left open at the
+  end of the 08-05 rename entry above.
+
+Typecheck clean; the two `no-unused-vars` warnings in this file (`x`, `w` in
+`BrandWordmark`) still predate the change.
