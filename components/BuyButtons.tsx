@@ -3,10 +3,14 @@
 /**
  * ROLE OF THIS FILE
  * The product page's ADD TO CART / BUY NOW buttons, pixel-identical to the
- * previously-inert design divs but wired to the v2 cart (§8): both add the
- * product's default variant and continue to /checkout (the storefront has
- * no separate cart page — checkout's summary IS the cart). With no variant
- * available (product missing from the catalog) the buttons stay inert.
+ * previously-inert design divs but wired to the v2 cart (§8). Both add the
+ * product's default variant; they differ in where they go next, per the
+ * Figma prototype on section shop二级 (READY_FOR_DEV):
+ *   - ADD TO CART (1523:4085) -> 1523:3059 "/bag"      — keep shopping
+ *   - BUY NOW    (1523:4087) -> 2157:239  "/checkout"  — express lane
+ * /bag is not itself Ready-for-dev, so it stays a placeholder screen until
+ * the design team marks it. With no variant available (product missing from
+ * the catalog) the buttons stay inert.
  */
 
 import { useRouter } from "next/navigation";
@@ -23,13 +27,16 @@ export function BuyButtons({
 }) {
   const router = useRouter();
 
-  function buy() {
+  function add(destination: string) {
     if (!variantId) {
       return;
     }
     addToCart(variantId, 1);
-    router.push("/checkout");
+    router.push(destination);
   }
+
+  const addToBag = () => add("/bag");
+  const buyNow = () => add("/checkout");
 
   return (
     <>
@@ -37,10 +44,10 @@ export function BuyButtons({
         role="button"
         tabIndex={0}
         aria-label="Add to cart"
-        onClick={buy}
+        onClick={addToBag}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
-            buy();
+            addToBag();
           }
         }}
         style={{
@@ -65,10 +72,10 @@ export function BuyButtons({
         role="button"
         tabIndex={0}
         aria-label="Buy now"
-        onClick={buy}
+        onClick={buyNow}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
-            buy();
+            buyNow();
           }
         }}
         style={{
