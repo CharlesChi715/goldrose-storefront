@@ -1,6 +1,6 @@
 # How AI Search Finds and Recommends Products
 
-**GoldRose research report — verified 23 July 2026**
+**ELDREVE research report — verified 23 July 2026**
 
 AI shopping changes quickly. This report separates confirmed platform documentation from emerging research and inference. It is a broad, source-led review, not a claim that every proprietary ranking factor is known.
 
@@ -20,7 +20,7 @@ AI systems do not use one universal “AI ranking.” They usually:
 7. generate an answer or product cards; then separately choose which merchant offer to show;
 8. hand the shopper to the merchant or an agentic checkout.
 
-For GoldRose, the strongest controllable strategy is not “write for an LLM.” It is:
+For ELDREVE, the strongest controllable strategy is not “write for an LLM.” It is:
 
 - publish accurate, complete, visible product information;
 - keep page, structured data, feed, inventory, shipping, and checkout facts identical;
@@ -30,11 +30,11 @@ For GoldRose, the strongest controllable strategy is not “write for an LLM.”
 - create useful occasion and comparison content that answers real shopping questions;
 - measure qualified referrals and sales, not only whether a chatbot mentions the brand.
 
-The immediate blocker is data trust. GoldRose currently shows placeholder reviews, discounts, shipping promises, options, and sales claims on its product page. It also lacks public privacy, terms, shipping, returns, and contact pages. Fix these before submitting to merchant programs.
+The immediate blocker is data trust. ELDREVE currently shows placeholder reviews, discounts, shipping promises, options, and sales claims on its product page. It also lacks public privacy, terms, shipping, returns, and contact pages. Fix these before submitting to merchant programs.
 
 ## Evidence labels
 
-- **Confirmed:** stated in current official documentation or directly observed on GoldRose.
+- **Confirmed:** stated in current official documentation or directly observed on ELDREVE.
 - **Vendor-stated:** a platform describes its own system; useful, but exact weights remain private.
 - **Emerging research:** a paper or preprint under controlled conditions, not proof of a durable production ranking factor.
 - **Inference:** a practical conclusion formed by combining the evidence; it should be tested.
@@ -69,7 +69,7 @@ This makes topical coverage and clear facts more useful than repeating one exact
 
 Platforms combine different sources:
 
-| Source                                         | Typical role                                                                   | GoldRose control                        |
+| Source                                         | Typical role                                                                   | ELDREVE control                        |
 | ---------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------- |
 | Crawled/indexed pages                          | Discover the brand, products, guides, policies, and supporting evidence        | High                                    |
 | Merchant feeds and catalog APIs                | Precise title, variant, price, availability, image, shipping, and policy facts | High                                    |
@@ -197,7 +197,7 @@ Microsoft says organic Copilot shopping uses web information and Microsoft Merch
 
 `PerplexityBot` builds the search index and is not described as a training crawler. `Perplexity-User` fetches a page in response to a user request and generally ignores robots rules. Perplexity’s current Instant Buy through PayPal is limited to selected merchant products and US availability. ([Perplexity crawlers](https://docs.perplexity.ai/docs/resources/perplexity-crawlers), [Perplexity Instant Buy](https://www.perplexity.ai/help-center/en/articles/12932923-instant-buy-buy-with-paypal))
 
-PayPal Store Sync exposes catalog, cart, order, and checkout information to supported AI shopping assistants. Its current documented prerequisites include an existing PayPal merchant, physical goods sold in USD to US customers, PayPal Orders v2 or Braintree, and an accessible catalog. GoldRose already uses Orders v2 and sells physical goods in USD, so this is the closest technical fit once its catalog and policies are production-ready. Access still has to be requested; eligibility is not guaranteed. ([PayPal Store Sync overview](https://developer.paypal.com/store-sync/overview), [PayPal AI-discovery guidance](https://www.paypal.com/us/brc/article/optimize-products-for-ai-discovery))
+PayPal Store Sync exposes catalog, cart, order, and checkout information to supported AI shopping assistants. Its current documented prerequisites include an existing PayPal merchant, physical goods sold in USD to US customers, PayPal Orders v2 or Braintree, and an accessible catalog. ELDREVE already uses Orders v2 and sells physical goods in USD, so this is the closest technical fit once its catalog and policies are production-ready. Access still has to be requested; eligibility is not guaranteed. ([PayPal Store Sync overview](https://developer.paypal.com/store-sync/overview), [PayPal AI-discovery guidance](https://www.paypal.com/us/brc/article/optimize-products-for-ai-discovery))
 
 ## 3. What actually improves visibility
 
@@ -257,7 +257,7 @@ AI systems can consult reviews, publisher comparisons, creator content, forums, 
 
 The original academic “GEO” paper found that adding citations, quotations, and statistics could increase its visibility metric in a fixed benchmark by up to 40%, depending on the domain. It did **not** test durable organic product ranking or revenue. Newer controlled preprints suggest topical relevance and context position are strong citation drivers and warn that results vary substantially by platform and pipeline. Treat these as content-quality clues, not guaranteed ranking recipes. ([GEO paper](https://arxiv.org/abs/2311.09735), [Princeton publication record](https://collaborate.princeton.edu/en/publications/geo-generative-engine-optimization/), [2026 GEO survey preprint](https://arxiv.org/abs/2607.14035), [controlled retrieval preprint](https://arxiv.org/abs/2605.25517))
 
-## 4. GoldRose storefront audit
+## 4. ELDREVE storefront audit
 
 The audit used the repository and the live production endpoints on 23 July 2026.
 
@@ -273,7 +273,7 @@ The audit used the repository and the live production endpoints on 23 July 2026.
 | `llms.txt`              | Dynamically lists products, prices, stock, links, countries, and contact                                                                                     | Helpful optional summary, but not a Google requirement or proven ranking factor; current content must be made truthful             | **P1**   |
 | Attribution             | First-party beacon captures UTM/referrer, but channel grouping lacks ChatGPT, Perplexity, Claude, Copilot, and Gemini                                        | AI traffic will fragment into raw source labels                                                                                    | **P2**   |
 
-### Crawler policy that GoldRose should use
+### Crawler policy that ELDREVE should use
 
 Treat these categories separately:
 
@@ -319,7 +319,7 @@ becoming a second, drifting roadmap.
 
 The authoritative readiness gates and success measures are in
 [search-discovery-implementation.md](search-discovery-implementation.md).
-The central conclusion from this research remains: GoldRose is not ready for
+The central conclusion from this research remains: ELDREVE is not ready for
 merchant submission until its visible claims, product data, inventory,
 checkout, policies, structured data, and feeds agree.
 
@@ -402,4 +402,4 @@ checkout, policies, structured data, and feeds agree.
 
 ---
 
-**Bottom line:** AI product visibility is ordinary search eligibility plus excellent commerce data, trustworthy evidence, and platform-specific distribution. GoldRose already has a useful technical foundation—server-rendered product routes, sitemap, metadata, JSON-LD, a database catalog, PayPal Orders v2, and first-party attribution. Its next gain will come from making every public claim true and every commercial fact consistent, then distributing that canonical catalog through Merchant Center and eligible AI-commerce programs.
+**Bottom line:** AI product visibility is ordinary search eligibility plus excellent commerce data, trustworthy evidence, and platform-specific distribution. ELDREVE already has a useful technical foundation—server-rendered product routes, sitemap, metadata, JSON-LD, a database catalog, PayPal Orders v2, and first-party attribution. Its next gain will come from making every public claim true and every commercial fact consistent, then distributing that canonical catalog through Merchant Center and eligible AI-commerce programs.

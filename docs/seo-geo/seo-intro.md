@@ -10,7 +10,7 @@ for sequencing, ownership, gates, and acceptance criteria. Use
 
 ## What the repository already has
 
-GoldRose does not have “essentially one indexable page.” It already has `/`,
+ELDREVE does not have “essentially one indexable page.” It already has `/`,
 `/shop`, and one canonical `/products/[slug]` route per active product, plus a
 sitemap, robots rules, metadata, Open Graph data, Product JSON-LD, and
 `/llms.txt`. That is a useful technical baseline.
@@ -54,7 +54,7 @@ Free-listing appearance is not guaranteed. Eligibility depends on accurate
 product data, a functional and trustworthy site, matching landing pages, and
 applicable shipping/return information.
 
-For GoldRose's small catalog, a generated scheduled feed is sufficient; a
+For ELDREVE's small catalog, a generated scheduled feed is sufficient; a
 standalone catalog API is unnecessary. The same normalized records can later
 produce an OpenAI feed and be reused or imported by Microsoft.
 

@@ -1,4 +1,4 @@
-# GoldRose Admin & Native Checkout — Design Document
+# ELDREVE Admin & Native Checkout — Design Document
 
 |                  |                                                                                                                                                                                                                                                                                                            |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,7 +105,7 @@
 
 ## 1. Overview
 
-Build "our own Shopify" for GoldRose in **one phase**:
+Build "our own Shopify" for ELDREVE in **one phase**:
 
 - an `/admin` area that **is the Shopify admin, as far as the owner can
   tell** — same navigation, screens, wording (in English and 中文), and
@@ -115,7 +115,7 @@ Build "our own Shopify" for GoldRose in **one phase**:
   PayPal Orders API v2 (the owner's verified business account, proven with a
   real payment on 2026-07-15; provider choice is OQ-1, §4).
 
-GoldRose sells **internationally** (not US-only, decided 2026-07-21).
+ELDREVE sells **internationally** (not US-only, decided 2026-07-21).
 Shopify is removed as part of this build, not after it. Development and
 testing run against the payment sandbox; live keys are swapped in at launch.
 
@@ -329,7 +329,7 @@ Shared, non-variant fields — mirrors Shopify's product form.
 | `requires_shipping`            | bool                      | Shipping card                                                            |
 | `country_of_origin`, `hs_code` | text                      | Customs information (Shipping card) — needed for international shipments |
 | `seo_title`, `seo_description` | text                      | "Search engine listing" card with Google preview                         |
-| `best_for`, `badge`, `details` | text / text[]             | GoldRose copy fields                                                     |
+| `best_for`, `badge`, `details` | text / text[]             | ELDREVE copy fields                                                     |
 | `option_names`                 | text[] ≤ 3                | Shopify's option model (e.g. `{Box color}`)                              |
 | `status`                       | active / draft / archived | Tabs on the list page                                                    |
 | `position`                     | int                       | Card order on /shop (storefront has no collections)                      |
@@ -558,7 +558,7 @@ product becomes discoverable without a redeploy.
   Settings → Search engine & AI (§9.11).
 - **JSON-LD structured data**, emitted server-side from the DB:
   `Organization` + `WebSite` on home; `Product` on product pages (name,
-  images, description, brand GoldRose, USD price, availability derived
+  images, description, brand ELDREVE, USD price, availability derived
   from live stock); `BreadcrumbList` on product pages.
 
 **GEO — generative engine optimization** (being the answer when an AI
@@ -738,7 +738,7 @@ Automatic discounts and Buy X get Y are V2.
 | Payments                                                               | Provider status: sandbox/live indicator, client-id tail, webhook health — adapt                                                                           |
 | Checkout                                                               | Mock-mode indicator; discount field toggle — adapt                                                                                                        |
 | Shipping and delivery                                                  | Zone-based rates: zones (seed: United States · Rest of world) → countries → rate + free-shipping threshold (replaces `lib/business.ts` constants) — adapt |
-| Markets                                                                | Countries GoldRose sells & ships to, grouped into the shipping zones; currency: USD for all markets in V1 — adapt                                         |
+| Markets                                                                | Countries ELDREVE sells & ships to, grouped into the shipping zones; currency: USD for all markets in V1 — adapt                                         |
 | Taxes and duties                                                       | Tax rate (0 while testing) + launch note; import duties are the buyer's responsibility, stated at checkout — adapt                                        |
 | Notifications                                                          | Email toggles + previews: order confirmation (buyer), shipping confirmation (buyer), new-order alert (owner) — adapt, via Resend (§10.3)                  |
 | Users and permissions                                                  | Owner row from `admin_users`; staff = future — adapt                                                                                                      |

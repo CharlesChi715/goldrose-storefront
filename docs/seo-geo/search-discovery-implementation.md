@@ -4,7 +4,7 @@
 **Scope:** SEO, AI-search/GEO, product feeds, and measurement  
 **Last verified:** 2026-07-23
 
-This is the operational plan for making GoldRose discoverable in conventional
+This is the operational plan for making ELDREVE discoverable in conventional
 search, shopping surfaces, and AI-assisted product discovery. Use
 [geo-intro.md](geo-intro.md) for the research and platform background, and
 [seo-intro.md](seo-intro.md) for the concise opportunity map. Do not track
@@ -146,7 +146,7 @@ For the initial catalog:
 5. Monitor item-level diagnostics; fix the underlying record rather than
    platform-specific copies.
 
-Google supports structured data, Merchant Center feeds, or both. GoldRose
+Google supports structured data, Merchant Center feeds, or both. ELDREVE
 should use both because the feed carries controlled, refreshed offer facts
 while page markup explains the landing page. Free-listing eligibility does not
 guarantee that Google will show an item.
@@ -269,7 +269,7 @@ Start small. Candidate pages must be based on evidence of shopper need:
 - accurate comparison of gold-dipped, gold-plated, preserved, artificial, and
   fresh roses;
 - selected anniversary, Valentine's Day, or Mother's Day guides only when
-  GoldRose can provide materially different advice for each intent.
+  ELDREVE can provide materially different advice for each intent.
 
 Before publishing a page, require:
 

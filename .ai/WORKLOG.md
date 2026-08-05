@@ -4763,3 +4763,58 @@ Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
   display-width padding (CJK = 2 cols), `─…▶` arrow stretch, negative shifts,
   built-in re-measure. SKILL.md now delegates to it. Verified on a fixture
   incl. a shift round-trip. Not repo code — logged for history only.
+
+## 2026-08-05 — ELDREVE rename (AI-021) on `feat/eldreve-rename`
+
+Charles renamed the design team's Figma file Veloria → ELDREVE and asked for
+the repo to follow, in its own worktree/branch. Closed AI-021.
+
+**Owner ruling captured:** prose casing is **all-caps ELDREVE everywhere**,
+matching the wordmark — the open half of AI-021.
+
+Three stale brand names were in the repo, not the two AI-021 recorded:
+
+1. `GoldRose` / `GOLDROSE` — the substitution the pre-DQ-34 syncs painted over
+   the frames' own wordmark. 177 occurrences, 91 code files.
+2. `Eldreve` (title case) — 5 strings in the Supabase auth email templates,
+   normalised to ELDREVE.
+3. `Veloria` / `VELORIA` — never customer copy at all; it was the *asset
+   namespace* `public/veloria/` plus a `next.config.ts` cache-header rule and
+   "the VELORIA design" in file comments. 75 files.
+
+**Scope rule that made it safe:** replace one-word `GoldRose`/`GOLDROSE` only.
+Every lowercase `goldrose` is an identifier and every spaced "Gold Rose" is the
+literal product noun, so both were left untouched by construction rather than
+by review. Kept on purpose:
+
+- localStorage/cookie keys — `goldrose-cart-v2`, `goldrose-wishlist`,
+  `goldrose-admin-session-v1`, `goldrose-visitor-id`, `goldrose-session-id`,
+  `goldrose-forum-read`, `goldrose.recent-searches`, `__goldrose_table_store__`.
+  Renaming them is an unmigrated data change: every admin session drops, every
+  saved cart and wishlist empties, and no customer ever sees the string.
+- `goldrose-storefront.vercel.app` (live host), `owner@goldrose.local` and
+  `support@goldrose.example` (local-mode fixtures asserted in six specs),
+  `~/Documents/Work/gold_rose` (records path).
+- "24K Gold Rose", "gold roses" — product noun, not brand.
+
+**Two classes of damage a blind `sed` did, both repaired:**
+
+- Frame-import comments that documented the old substitution became
+  self-contradictory ("ELDREVE substituted for the ELDREVE") in 12 files —
+  rewritten to say the frames' mark simply *is* the brand.
+- Indefinite articles: "a GoldRose gift" is correct, "a ELDREVE gift" is not.
+  Two customer-facing strings fixed to "an ELDREVE".
+
+Also learned: BSD `sed` on macOS does not support `\b`, so a word-boundary
+substitution silently no-ops. `grep -E` does support it — the mismatch is easy
+to miss because the command exits 0.
+
+**Verified:** `tsc --noEmit` clean; 67/67 unit tests pass; `next build`
+succeeds; all 154 static image paths resolve after the folder move and every
+dynamic `/eldreve/<subdir>/${…}` prefix has its directory present. The 2 lint
+warnings (unused `x`/`w` in `BrandWordmark`) predate the branch.
+
+**Left for Charles:** the repo/dir and GitHub project are still
+`goldrose-storefront` (a rename with remote/Vercel consequences, deliberately
+out of scope), and `account-chrome.tsx` references `1523-955.svg`, which has
+never existed under either name.

@@ -1,6 +1,6 @@
 ---
 name: agent-delivery
-description: Follow the GoldRose agent-delivery write-back workflow — file unresolved matters as AI-nnn (session file + INBOX row + in-place tag), record answers, close via the agent-inbox CLI. Use when finishing a session with open questions, when Charles says to write back / file a matter / check or close the inbox, or when handling AI-nnn tags.
+description: Follow the ELDREVE agent-delivery write-back workflow — file unresolved matters as AI-nnn (session file + INBOX row + in-place tag), record answers, close via the agent-inbox CLI. Use when finishing a session with open questions, when Charles says to write back / file a matter / check or close the inbox, or when handling AI-nnn tags.
 ---
 
 # Agent-delivery write-back workflow

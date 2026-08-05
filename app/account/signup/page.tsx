@@ -23,8 +23,8 @@ import { SignupScreen } from "@/components/screens/SignupScreen";
 export const metadata: Metadata = {
   // AI-020 (answered 2026-08-04): this is the storefront's one login page, not
   // just the create-account step, so the title says what the page does. The
-  // route name still says "signup" — renaming it is a redirect exercise best
-  // done with the ELDREVE rename (AI-021), not smuggled in here.
+  // route name still says "signup" — renaming it is a redirect exercise, kept
+  // out of the ELDREVE rename (AI-021, closed 2026-08-05) and still open.
   title: "Sign in — ELDREVE",
   robots: { index: false },
 };

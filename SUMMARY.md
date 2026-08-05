@@ -65,8 +65,8 @@ Open linked resources only when the task needs them.
 - **Three-tab bottom nav** replaced the four-tab bar (2026-08-03): 商务/Wholesale
   removed per the design team; Login/Me session swap restored.
 - **DQ-34 answered 2026-08-03:** the ELDREVE wordmark was never a placeholder —
-  it is the brand. The repo's GoldRose substitution (~23 call sites) is now
-  wrong and retires with the rename (OQ-4).
+  it is the brand. The repo's GoldRose substitution is retired: the rename
+  landed 2026-08-05 (see OQ-4 / AI-021).
 - **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
   MENU/PDP/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
@@ -154,7 +154,8 @@ Open linked resources only when the task needs them.
    `0006` stamps `orders.auth_user_id` so OTP-signed-in customers see their
    orders at `/account`. Guest lookup is still unbuilt.
 5. Enter real shipping rates (OQ-2) and product content (OQ-3).
-6. Replace third-party/dev imagery; reconcile palettes, wordmarks, tabs.
+6. Replace third-party/dev imagery; reconcile palettes and tabs. (Wordmarks
+   are done — the ELDREVE rename landed 2026-08-05, see OQ-4.)
 7. Launch checks + [database backups](docs/features/backend/db-backups.md).
 8. After acceptance: capture screenshots, cancel Shopify, revoke the Figma
    token, begin marketing.
@@ -189,10 +190,17 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
   **Production only** on 2026-08-03, so previews still take `lib/email.ts`'s
   console-log fallback on purpose. Records:
   `~/Documents/Work/gold_rose/{eldreve-domain-registration,domain-setup}.md`.
-  **Still pending:** billing → hua's PayPal, and the GoldRose→ELDREVE rename
-  (~270 occurrences in ~110 files; scoped, not started).
-  AI-TAG(AI-021): OWNER-DECISION — the rename needs its own branch and a ruling
-  on prose casing (ELDREVE vs Eldreve).
+  **Still pending:** billing → hua's PayPal.
+- **Rename done 2026-08-05 (AI-021), branch `feat/eldreve-rename`.** Prose
+  casing is **all-caps ELDREVE everywhere** (owner ruling). Three stale names
+  went: `GoldRose`/`GOLDROSE` in all copy, titles, alt text and admin i18n;
+  the title-case "Eldreve" in the Supabase auth email templates; and the
+  `public/veloria/` asset namespace → `public/eldreve/`. Kept on purpose
+  because they are identifiers, not copy: the lowercase `goldrose-*`
+  localStorage/cookie keys (renaming them drops every admin session and
+  empties every saved cart), `goldrose-storefront.vercel.app`, the
+  `owner@goldrose.local` test fixture, and the literal noun "24K Gold Rose".
+  Not attempted: renaming the repo/dir and the GitHub project.
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
 - Path `~/Documents/Work/gold_rose` for company or additional info. 
 

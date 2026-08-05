@@ -34,10 +34,10 @@ never accepted from the CSV.
 | --- | ------------------- | --- | ------------------------------------- |
 | 1   | `id`                | —   | primary key                           |
 | 2   | `handle`            | —   | URL segment, unique — derived from title by `lib/admin/product-handle.ts`, frozen once non-draft |
-| 3   | `title`             | ✓   | name 1/3: full name — PDP heading + fallback for the other two (e.g. "GoldRose Signature 24K Gold Rose"); the only column with no default |
+| 3   | `title`             | ✓   | name 1/3: full name — PDP heading + fallback for the other two (e.g. "ELDREVE Signature 24K Gold Rose"); the only column with no default |
 | 4   | `short_name`        | ○   | name 2/3: short name — shop cards + browser tab |
 | 5   | `description`       | ✓ if active | desc 1/2: full text on the PDP + fallback for search snippet — also the `<meta description>`, `og:description` and JSON-LD `description`; unlike `short_name` it has no fallback, so blank means Google and every shared link get nothing |
-| 6   | `vendor`            | ○   | brand/maker (admin-only, 供应商) — defaults 'GoldRose'; ours until reselling others |
+| 6   | `vendor`            | ○   | brand/maker (admin-only, 供应商) — defaults 'ELDREVE'; ours until reselling others |
 | 7   | `product_type`      | ○   | category label, admin-only ("Gold Dipped Rose", "Gift Bundle") — searchable in the admin list; mirrors the SKU TYPE segment |
 | 8   | `tags`              | ○   | text[]                                |
 | 9   | `charge_tax`        | ○   | bool, defaults true                   |

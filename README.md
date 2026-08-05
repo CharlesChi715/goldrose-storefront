@@ -4,7 +4,7 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# GoldRose Storefront
+# ELDREVE Storefront
 
 Direct-to-consumer storefront for a 24K gold-dipped rose gift line, with its
 own Shopify-clone admin and native checkout. No Shopify code remains.

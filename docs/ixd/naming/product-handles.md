@@ -4,7 +4,7 @@
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **What this is**   | A deterministic algorithm for deriving `products.handle` (the `/products/<handle>` URL segment) from `products.title`. Any person or AI model following it must produce the **identical** string.                                                              |
 | **Scope**          | Public product URLs only. SKU naming is [`Database.md`](../../Database.md#sku-naming-convention-2026-07-25); Figma frame and section naming is [`figma-route-rule.md`](figma-route-rule.md) in this folder.                                                    |
-| **Status**         | **Adopted** — this is the final rule for new GoldRose product handles.                                                                                                                                                                                         |
+| **Status**         | **Adopted** — this is the final rule for new ELDREVE product handles.                                                                                                                                                                                         |
 | **Version**        | 2.1 — full-title slugification with stop words retained, adopted 2026-07-30. Replaced v1.0, which stripped boilerplate, stop words, brand and variant tokens and truncated at 60 chars.                                                                        |
 | **Owner**          | Charles                                                                                                                                                                                                                                                        |
 | **Implementation** | `productHandle()` in [`lib/admin/product-handle.ts`](../../../lib/admin/product-handle.ts); the fixtures below are enforced by [`tests/unit/product-handle.test.ts`](../../../tests/unit/product-handle.test.ts), which parses this file (`npm run test:unit`) |
@@ -70,7 +70,7 @@ title or set a deliberate, unique manual handle.
 Any implementation or model must reproduce every row exactly.
 
 ⚠️ **Every title below is an invented test input, not a product name.** No
-GoldRose product title is decided yet (OQ-3), and none of these is a proposal.
+ELDREVE product title is decided yet (OQ-3), and none of these is a proposal.
 Each row exists only to pin one behaviour of the algorithm:
 
 | Row | Pins                                                                   |

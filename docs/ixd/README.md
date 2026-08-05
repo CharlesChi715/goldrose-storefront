@@ -73,13 +73,13 @@ Message from me to ai agents: leave placeholder in unsure things
    than or equal to the original price; confirm that the mock uses placeholder
    data. - yes placeholder data
 5. **Assets:** The mock contains third-party brand imagery, such as the gift
-   box in the N-07 banner. Replace all of it with GoldRose assets before
+   box in the N-07 banner. Replace all of it with ELDREVE assets before
    launch. -- how did you tell its from third-party? yes just do it for current dev.
    `⚠️ Developer note`: the tell is the dark-green gift box in the photo — it
    carries a gold crest and a partially visible wordmark (reads "VILOW… ROSE",
-   not GoldRose), so the photo is another brand's (or AI-mocked) product shot.
+   not ELDREVE), so the photo is another brand's (or AI-mocked) product shot.
    The same image is already live on the deployed `/shop` hero
-   (`public/eldreve/shop-hero.png`). Swapping it needs a GoldRose-branded
+   (`public/eldreve/shop-hero.png`). Swapping it needs a ELDREVE-branded
    replacement photo (ties into OQ-3 real product content); the banner is
    pixel-diff-guarded, so the swap is an asset replacement at the same size,
    not a re-crop.

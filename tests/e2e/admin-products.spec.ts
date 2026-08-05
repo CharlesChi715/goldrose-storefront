@@ -26,9 +26,7 @@ test("products list shows seeded products with inventory summaries", async ({
 }) => {
   await adminLogin(page);
   await page.goto("/admin/products");
-  await expect(
-    page.getByText("ELDREVE Signature 24K Gold Rose"),
-  ).toBeVisible();
+  await expect(page.getByText("ELDREVE Signature 24K Gold Rose")).toBeVisible();
   await expect(page.getByText("ELDREVE Boxed Keepsake Rose")).toBeVisible();
   await expect(page.getByText("ELDREVE Premium Gift Bundle")).toBeVisible();
   await expect(
