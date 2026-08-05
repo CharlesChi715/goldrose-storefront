@@ -35,9 +35,11 @@ npm run figma:brief       # the whole scoping report in one call  ← READ THIS
 ```
 
 `brief` is one process printing scope (`changes`, with each added frame's
-inbound links), the ready count, unresolved comment threads, the scaffold
-targets, and the route drift. **Use it instead of running the parts** — the
-parts cost ~0.03s each, so the expense of a sync is round-trips, not compute.
+inbound links), unresolved comment threads, the scaffold targets, the
+ready-but-not-built list, and the route drift. **Use it instead of running the
+parts** — the parts cost ~0.03s each, so the expense of a sync is round-trips,
+not compute. Every command reports its own timing to stderr, so if a step feels
+slow you can say where the time went instead of guessing.
 
 Drop to a single view only when the briefing is not enough:
 
@@ -55,21 +57,52 @@ since a run is ~0.14s of which nearly all is parsing the cache, and the search
 itself is free:
 
 ```bash
-node scripts/figma/cli.mjs node <id> <id> <id>   # subtrees → .data/figma/nodes/
-node scripts/figma/cli.mjs node <id> --text      # just the copy, for wording
-node scripts/figma/cli.mjs render <id> <id> --scale 2   # PNGs for the band-diff
+node scripts/figma/cli.mjs node <id> <id> --outline  # ← the layout, ~5KB/frame
+node scripts/figma/cli.mjs assets <id> --list        # what art it needs
+node scripts/figma/cli.mjs assets <id> <id>          # export it, batched
+node scripts/figma/cli.mjs render <id> --scale 2     # PNG for the band-diff
+node scripts/figma/cli.mjs node <id> --text          # just the copy, for wording
+node scripts/figma/cli.mjs node <id>                 # raw subtree, ~500KB — last resort
 ```
+
+**Read `--outline`, not the raw subtree.** One indented line per layer with
+position, size, colour, font and copy — the same screen in ~5KB instead of
+~500KB, because the raw node carries style tables, render bounds and constraint
+objects that a Tailwind rewrite never consults. Fall back to the raw JSON only
+when the outline genuinely lacks something.
+
+**`assets` exports the frame's art** — vectors as SVG, image fills as PNG@2x,
+batched into one request per format, named `<node-id>.<ext>` into
+`public/eldreve/screens/` (the convention the 1,200 existing files follow).
+Existing files are never overwritten without `--force`, since a committed asset
+may have been hand-corrected.
+
+Run `--list` first and prune: the detector is deliberately over-eager, so five
+identical stars come back as five files when the component only needs one. It
+is a proposal, not a verdict.
 
 Every command takes `--json` for machine-shaped output.
 
-**`changes` is the scope of the delivery.** It diffs top-level frame hashes
-against the baseline set at the end of the last sync. Import what it lists;
-do not re-read frames it says are unchanged. If it reports no baseline, this
-is the first run — treat `ready` as the scope instead.
+**Scope is two lists, not one.**
 
-**Close the loop:** after the import lands, run `npm run figma:baseline`. That
-snapshot is what makes the next `changes` meaningful; skipping it makes the
-next sync re-read everything.
+- **`changes`** — what moved since the last import. A hash diff, so it is blind
+  by construction to anything that was already ready and already unbuilt.
+- **`unbuilt`** — Ready-for-dev frames with no route in the repo. The standing
+  backlog. A delivery with **no changed frames is not an empty delivery** if
+  this list is non-empty; that is exactly what happened on 2026-08-05.
+
+Both are in `brief`. Import what they list; do not re-read unchanged frames.
+
+**Close the loop:** after the import lands — and only then — run
+`npm run figma:baseline`. It stamps "everything here is built", records the
+commit it was stamped at, and re-runs `unbuilt` to warn you if that claim is
+false. Never run it while merely testing tooling: a false baseline makes the
+next sync look empty.
+
+**Known mismatches live in [`scripts/figma/drift-allowlist.json`](../../../scripts/figma/drift-allowlist.json).**
+When you decide a frame legitimately has no route (built as a sheet, a modal,
+part of another page) or a route legitimately has no frame, add it there with a
+reason — otherwise every future sync re-examines the same settled cases.
 
 **Every added frame prints its inbound links.** Building the page is only half
 of an import — the other half is the bridge to it. `changes` lists, under each
