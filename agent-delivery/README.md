@@ -7,9 +7,9 @@ never the work itself. Read this file and [`INBOX.md`](INBOX.md) after
 before finishing.
 
 **The complete workflow lives in the `agent-delivery` skill**
-([`.claude/skills/agent-delivery/SKILL.md`](../.claude/skills/agent-delivery/SKILL.md);
-Codex reads a mirror at `.agents/skills/agent-delivery/`): how to file a
-matter (session file + INBOX row + in-place tag), pick the next ID, record
+([`.agents/skills/agent-delivery/SKILL.md`](../.agents/skills/agent-delivery/SKILL.md)
+— the tracked source of truth; `.claude/skills/agent-delivery` is a symlink
+into it, and `.claude/` is gitignored): how to file a matter (session file + INBOX row + in-place tag), pick the next ID, record
 answers, and close via `npm run agent-inbox:close`. Load the skill before
 filing or closing anything here.
 

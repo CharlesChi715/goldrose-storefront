@@ -64,7 +64,7 @@ valid on every tier, so `["pdx1"]` is safe regardless of plan.
 
 ## Verification
 
-- `curl -sI https://goldrose-storefront.vercel.app/api/beacon | grep x-vercel-id`
+- `curl -sI https://eldreve.com/api/beacon | grep x-vercel-id`
   on an uncached dynamic route should show `pdx1`.
 - Admin language toggle and checkout should feel same-or-faster from Sydney
   (one Pacific hop instead of one per query).

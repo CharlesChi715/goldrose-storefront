@@ -6,7 +6,7 @@
 | **Owner**        | Charles — store dev                                                                                                                                                                                                                                                                                        |
 | **Users**        | Charles' teammates                                                                                                                                                                                                                                                                                         |
 | **Audience**     | Implementing agents and Charles. Agents: read `SUMMARY.md` first, then §0 and §2 below                                                                                                                                                                                                                     |
-| **Version**      | Rev 4.4 · 2026-07-22 — full history in §17                                                                                                                                                                                                                                                                 |
+| **Version**      | Rev 4.4 · 2026-07-22 — full history in §17. Status notes reconciled with the repo 2026-08-04 (§12); the spec itself is unchanged                                                                                                                                                                                                                                                                 |
 | **Related docs** | `SUMMARY.md` (repository entrypoint + current operations/release state) · `docs/seo-geo/search-discovery-implementation.md` (SEO/GEO implementation) · `docs/ideas.md`. **Historical, never implement from:** the former `docs/archive/` (deleted 2026-07-27; in git history), Shopify-era README sections |
 
 ## Table of contents
@@ -888,10 +888,18 @@ Happens inside this build, not after it — but **cancelling is the very last
 step**, because the live Shopify admin is the visual reference for the clone
 (§1).
 
-- **Delete** (checkout stage): `lib/shopify/` (config, client, mock,
+> **Status 2026-08-04.** The deletion below is **done** — no `lib/shopify/`,
+> no permalink branch, no `shop_pay` entry, no `SHOPIFY_*` variable remains
+> anywhere in the repo. What survives is the deliberate Polaris dependency
+> (`@shopify/polaris`, `-icons`, `-viz`), which is the admin's UI framework and
+> stays. The subscription is still live and cancels only after the §14.3
+> walkthrough. `docs/shopify-reference/` was never created — the screenshots
+> below are still outstanding.
+
+- ~~**Delete** (checkout stage): `lib/shopify/` (config, client, mock,
   permalink, types), the permalink branch in the checkout page, the
   `shop_pay` payment method entry, all `SHOPIFY_*` env vars from
-  `.env.example` / `.env.local` / Vercel.
+  `.env.example` / `.env.local` / Vercel.~~ **Done.**
 - **Keep**: the mock checkout engine (`lib/checkout/process.ts` card/express
   simulation) — it becomes the no-keys dev mode.
 - **Before cancelling**: full-page screenshots of every Shopify admin screen
@@ -905,8 +913,8 @@ step**, because the live Shopify admin is the visual reference for the clone
 - **Launch prerequisites** (tracked in the `SUMMARY.md` release queue; not
   blockers while testing): sales-tax approach (simplest is tax-inclusive
   pricing or a tax API at launch), real shipping rates per zone + carrier
-  choice for international, customs/duties stance, real domain, policy
-  pages.
+  choice for international, customs/duties stance, policy pages. (Real domain:
+  **done** — `eldreve.com` is live since 2026-08-03, OQ-4.)
 
 ---
 

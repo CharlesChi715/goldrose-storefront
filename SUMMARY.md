@@ -60,8 +60,8 @@ Open linked resources only when the task needs them.
 - **Simplified homepage imported 2026-08-04** (frame `2380:370`, section
   首页一级), replacing the earlier "ignore the homepage frames" hold. Canvas
   8673 → 5193; bands 11 → 7 (A-4/A-7/A-8/A-10 deleted at source). The homepage
-  and shop IxD tables retired to `archive/ixd-home-shop/` — interaction design
-  is maintained in Figma now.
+  and shop IxD tables were retired — interaction design is maintained in Figma
+  now.
 - **Three-tab bottom nav** replaced the four-tab bar (2026-08-03): 商务/Wholesale
   removed per the design team; Login/Me session swap restored.
 - **DQ-34 answered 2026-08-03:** the ELDREVE wordmark was never a placeholder —
@@ -70,7 +70,8 @@ Open linked resources only when the task needs them.
 - **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
   MENU/PDP/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
-  Coverage is partial: 3 of the home page's 7 bands carry `data-el="…-SECTION"`;
+  Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
+  (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
   the rest waits on a signed-off section vocabulary
   ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
 - **Product-handle rule** ([`product-handles.md`](docs/ixd/naming/product-handles.md)
@@ -84,7 +85,9 @@ Open linked resources only when the task needs them.
 - `/bag` items, tracking timeline, shipping choices and card fields are visual
   placeholders; the real cart enters through `/checkout`.
 - The [owner walkthrough](docs/admin-design.md#143-final-acceptance) is pending.
-  Shopify code is removed; cancel the subscription only after acceptance.
+  The Shopify *store integration* is removed (no `lib/shopify/`, no `SHOPIFY_*`
+  vars); the `@shopify/polaris` UI framework is the admin's own and stays.
+  Cancel the subscription only after acceptance.
 - **Next:** owner activation/UAT → real shipping and product content → card
   integration → launch hardening.
 
@@ -106,9 +109,10 @@ Open linked resources only when the task needs them.
   next-devtools and playwright — all need one-time approval, Supabase needs
   `/mcp` OAuth. All four are global in `~/.codex/config.toml`. Skills live
   twice: `.agents/skills/` is the **source of truth** and `.claude/skills/`
-  symlinks `figma-sync` + `agent-delivery` into it. Still real duplicates that
-  drift silently — symlink them when convenient: `supabase`,
-  `supabase-postgres-best-practices`. `supply-chain-risk-auditor` exists only
+  symlinks all four into it — `figma-sync`, `agent-delivery`, and, since
+  2026-08-04, `supabase` + `supabase-postgres-best-practices` (they were still
+  byte-identical copies when converged, so nothing was lost).
+  `supply-chain-risk-auditor` exists only
   under `.agents/`. `.claude/` is gitignored, so the tracked path for any skill
   is always `.agents/…`.
 
@@ -149,10 +153,10 @@ Open linked resources only when the task needs them.
    (~3k/month) against real volume.
 3. Configure PayPal sandbox, begin Advanced Checkout onboarding; install
    `cloudflared`/`ngrok` when webhook testing starts.
-4. Delete the leftover `/orders` → `/admin/orders` redirect (`app/orders/page.tsx`).
-   No customer link points at it — they all use the real `/orders/track` — and
-   `0006` stamps `orders.auth_user_id` so OTP-signed-in customers see their
-   orders at `/account`. Guest lookup is still unbuilt.
+4. Build guest order lookup. `0006` stamps `orders.auth_user_id` so OTP-signed-in
+   customers already see their orders at `/account`; guests still have only
+   `/orders/track`. (The leftover `/orders` → `/admin/orders` redirect was
+   deleted 2026-08-04.)
 5. Enter real shipping rates (OQ-2) and product content (OQ-3).
 6. Replace third-party/dev imagery; reconcile palettes, wordmarks, tabs.
 7. Launch checks + [database backups](docs/features/backend/db-backups.md).
@@ -190,7 +194,10 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
   console-log fallback on purpose. Records:
   `~/Documents/Work/gold_rose/{eldreve-domain-registration,domain-setup}.md`.
   **Still pending:** billing → hua's PayPal, and the GoldRose→ELDREVE rename
-  (~270 occurrences in ~110 files; scoped, not started).
+  (measured 2026-08-04: **227 occurrences in 109 files** of code —
+  components 77, app 67, lib 42, tests 37, supabase 3, scripts 1 — plus ~67
+  more in docs. Start with `app/layout.tsx:22-36`, which puts "GoldRose" in the
+  `<title>` and OG card of every page in production. Scoped, not started).
   AI-TAG(AI-021): OWNER-DECISION — the rename needs its own branch and a ruling
   on prose casing (ELDREVE vs Eldreve).
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
@@ -211,7 +218,7 @@ goldrose-storefront/
 ├── docs/                 # Specs, roadmaps, guides
 ├── agent-delivery/       # Agent workflow rules, INBOX, session write-backs
 ├── team-deliveries/      # Upstream deliveries: inbox/ + originals/ (kept)
-├── archive/              # Superseded repo docs; never referenced from anywhere
+├── archive/              # Retired docs; nothing here is used or referenced
 ├── trash/                # Scratch, gitignored, deletable; never referenced
 ├── .agents/              # Skills source of truth (.claude/ symlinks into it)
 ├── .ai/                  # Optional work history; never startup context

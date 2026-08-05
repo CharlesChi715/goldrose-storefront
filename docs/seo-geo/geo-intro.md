@@ -7,6 +7,13 @@ AI shopping changes quickly. This report separates confirmed platform documentat
 Implementation is tracked only in
 [search-discovery-implementation.md](search-discovery-implementation.md).
 
+> **Reconciled 2026-08-04.** The report's findings still stand; two facts in its
+> storefront audit have moved since 23 July. (1) The site is now
+> <https://eldreve.com> — the brand is ELDREVE, and every "GoldRose" below is
+> pending the rename (AI-021). (2) Seven `/policies/*` routes now exist, but they
+> are **coming-soon scaffolds with no policy text** (AI-012), so the audit's
+> conclusion is unchanged: there is still nothing a merchant program can read.
+
 ## Executive summary
 
 AI systems do not use one universal “AI ranking.” They usually:

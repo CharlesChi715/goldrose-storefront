@@ -5,7 +5,15 @@ no longer referenced by any code. They are parked here rather than deleted so
 they stay easy to find and restore; the paths below mirror where each file used
 to live, so restoring is a plain `git mv` back.
 
-Retired **2026-07-26**. Nothing here is served — Next.js only serves `public/`.
+Nothing here is served — Next.js only serves `public/`.
+
+## Retired 2026-08-04
+
+| Path here              | Came from                | Why it was retired                                                                                                                                                                                                     |
+| ---------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bottom-nav-buttons/`  | `assets/bottom-nav-buttons/` | ~7 MB of raw source art for the **four-tab** bottom bar, `WHOLESALE.png`/`wholesalecolor.png` included. The bar became three tabs on 2026-08-03 (商务/Wholesale dropped) and the live icons are Figma SVG exports under `public/veloria/nav/`. Nothing referenced these files. |
+
+## Retired 2026-07-26
 
 | Path here                                       | Came from            | Why it was retired                                                                                                                                                                                     |
 | ----------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
