@@ -167,7 +167,6 @@ function ProductCard({
   href: string;
   data: CardData | null;
 }) {
-  const heartX = slot.w === 203 ? 154 : 155; // 收藏 art: 162/374 in frame coords
   return (
     <Link
       href={href}
@@ -217,12 +216,14 @@ function ProductCard({
         style={{ ...abs(9, 234, slot.starsW, 11), display: "block" }}
       />
       {/* Price pair — one flowing row so live prices with cents never overlap
-          the compare-at (same reasoning as the server page before). */}
+          the compare-at (same reasoning as the server page before). Since the
+          wishlist heart went (owner, 2026-08-05) the row gets the card's full
+          inset width instead of stopping short of it. */}
       <div
         className={notoSC.className}
         data-live-text
         style={{
-          ...abs(9, 249, heartX - 13, 43),
+          ...abs(9, 249, slot.w - 18, 43),
           display: "flex",
           alignItems: "center",
           gap: 6,
@@ -246,13 +247,6 @@ function ProductCard({
           </span>
         ) : null}
       </div>
-      <img
-        src="/eldreve/home/58-86.png"
-        alt=""
-        width={40}
-        height={43}
-        style={{ ...abs(heartX, 249, 40, 43), display: "block" }}
-      />
     </Link>
   );
 }

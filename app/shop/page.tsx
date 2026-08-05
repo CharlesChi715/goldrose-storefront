@@ -6,8 +6,16 @@
  * file. Every coordinate, size, color, and font value comes verbatim from
  * the Figma REST API. Photo assets in /public/eldreve(/home) are exact 2x
  * node renders. Product cards keep the live-catalog wiring (name, price,
- * compare-at, link → /products/[slug]); star rows and hearts are static
- * design art (ratings/wishlist are out of scope this release, IxD README).
+ * compare-at, link → /products/[slug]); the star row is static design art
+ * (ratings are out of scope this release, IxD README).
+ *
+ * The card's wishlist heart was removed on the owner's instruction
+ * (2026-08-05), which also settles the IxD README's open question 3 the same
+ * way it was already answered there ("no"): the frame draws a heart, but
+ * wishlist is not in this release, and a heart that does nothing invites the
+ * tap. The freed width went to the price row. The header heart on the product
+ * page is a different control and stays — it is wired to a real device-local
+ * wishlist (components/WishlistButton.tsx).
  */
 
 import type { Metadata } from "next";
