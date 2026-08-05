@@ -66,7 +66,7 @@ const MOCK_ORDERS: OrdersListOrder[] = [
     statusColor: GOLD,
     price: "$129.00",
     chip: "shipped",
-    photoSrc: "/veloria/screens/1523-3434.png",
+    photoSrc: "/eldreve/screens/1523-3434.png",
     primary: { label: "TRACK ORDER", href: "/orders/track" },
   },
   {
@@ -76,7 +76,7 @@ const MOCK_ORDERS: OrdersListOrder[] = [
     statusColor: "#4F9133",
     price: "$109.00",
     chip: "delivered",
-    photoSrc: "/veloria/screens/1523-3446.png",
+    photoSrc: "/eldreve/screens/1523-3446.png",
     primary: { label: "BUY AGAIN", href: "/shop" },
     // 1523:3449 — the one-line title left room; the mock hand-nudged the
     // status line 7px up on this card only.
@@ -89,7 +89,7 @@ const MOCK_ORDERS: OrdersListOrder[] = [
     statusColor: "#F07D14",
     price: "$149.00",
     chip: "processing",
-    photoSrc: "/veloria/screens/1523-3458.png",
+    photoSrc: "/eldreve/screens/1523-3458.png",
     primary: { label: "VIEW STATUS", href: "/orders/track" },
   },
 ];
@@ -138,7 +138,7 @@ export function OrdersListScreen({
           (1523:3470, box starts 1px off-canvas) + wordmark render (1523:3471) */}
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-3470.png"
+        src="/eldreve/screens/1523-3470.png"
         style={abs(-1, 18, 40, 42)}
       />
       <BrandWordmark x={152} y={13.5} w={140} h={51} />
@@ -290,7 +290,7 @@ export function OrdersListScreen({
               }}
             >
               <img
-                src={`/veloria/screens/${CHIP_ART[order.chip]}.png`}
+                src={`/eldreve/screens/${CHIP_ART[order.chip]}.png`}
                 alt={order.chip}
                 width={88}
                 height={32}

@@ -49,7 +49,7 @@ export function PersonalInfoScreen() {
           frame 1523:955 is empty); pointer-events off so the SettingsHeader
           button underneath keeps the click. */}
       <img
-        src="/veloria/screens/1523-1014.png"
+        src="/eldreve/screens/1523-1014.png"
         alt=""
         width={40}
         height={42}
@@ -66,7 +66,7 @@ export function PersonalInfoScreen() {
         Review and update your account details.
       </div>
       <img
-        src="/veloria/screens/1523-959.svg"
+        src="/eldreve/screens/1523-959.svg"
         alt=""
         width={88}
         height={60}
@@ -76,7 +76,7 @@ export function PersonalInfoScreen() {
       {/* form card — styled divs, not live inputs (no profile backend) */}
       <div style={sCard(16, 230, 398, 520)} />
       <img
-        src="/veloria/screens/1523-965.svg"
+        src="/eldreve/screens/1523-965.svg"
         alt=""
         width={24}
         height={24}
@@ -94,7 +94,7 @@ export function PersonalInfoScreen() {
       <div style={{ ...abs(34, 446, 362, 1), background: SAND }} />
 
       <img
-        src="/veloria/screens/1523-976.svg"
+        src="/eldreve/screens/1523-976.svg"
         alt=""
         width={24}
         height={24}
@@ -121,7 +121,7 @@ export function PersonalInfoScreen() {
         Edit
       </div>
       <img
-        src="/veloria/screens/1523-984.svg"
+        src="/eldreve/screens/1523-984.svg"
         alt=""
         width={20}
         height={20}
@@ -130,7 +130,7 @@ export function PersonalInfoScreen() {
       {/* 1523:987 verify note — ink banner with cream text in this delivery */}
       <div style={sCard(34, 574, 362, 40, { bg: INK, r: 10, stroke: false })} />
       <img
-        src="/veloria/screens/1523-988.svg"
+        src="/eldreve/screens/1523-988.svg"
         alt=""
         width={24}
         height={24}
@@ -142,7 +142,7 @@ export function PersonalInfoScreen() {
       <div style={{ ...abs(34, 632, 362, 1), background: SAND }} />
 
       <img
-        src="/veloria/screens/1523-992.svg"
+        src="/eldreve/screens/1523-992.svg"
         alt=""
         width={24}
         height={24}
@@ -154,7 +154,7 @@ export function PersonalInfoScreen() {
       <div style={field(34, 692, 362, 44)} />
       <div style={{ ...abs(46, 704, 280), ...txt(14, 20, INK) }}>English</div>
       <img
-        src="/veloria/screens/1523-998.svg"
+        src="/eldreve/screens/1523-998.svg"
         alt=""
         width={18}
         height={18}
@@ -164,7 +164,7 @@ export function PersonalInfoScreen() {
       {/* security note — white card now (was pink in 07-28) */}
       <div style={sCard(16, 762, 398, 68)} />
       <img
-        src="/veloria/screens/1523-1001.svg"
+        src="/eldreve/screens/1523-1001.svg"
         alt=""
         width={24}
         height={24}
@@ -182,7 +182,7 @@ export function PersonalInfoScreen() {
         }
       </div>
       <img
-        src="/veloria/screens/1523-1005.svg"
+        src="/eldreve/screens/1523-1005.svg"
         alt=""
         width={42}
         height={42}
@@ -193,7 +193,7 @@ export function PersonalInfoScreen() {
           Inter label (1523:1011 is the batch's one Inter text node) */}
       <div style={sCard(16, 842, 398, 58, { bg: INK, r: 16, stroke: false })} />
       <img
-        src="/veloria/screens/1523-1008.svg"
+        src="/eldreve/screens/1523-1008.svg"
         alt=""
         width={24}
         height={24}

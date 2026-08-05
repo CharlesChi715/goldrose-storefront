@@ -91,7 +91,7 @@ bytes are uploaded separately — a CSV can only name a file, never carry one.
 home card photo (`null` renders a card with no picture), the `og:image` for
 every shared link, and the first entry of the JSON-LD `image[]` — which Google
 treats as required for Product rich results. ⚠️ It is *not* the PDP hero: that
-is still hardcoded to `/veloria/detail-hero.png`
+is still hardcoded to `/eldreve/detail-hero.png`
 (`app/products/[slug]/page.tsx`), and `images[0]` supplies only its alt text
 until the live-wiring in
 [features/product-content-pipeline.md](features/product-content-pipeline.md).

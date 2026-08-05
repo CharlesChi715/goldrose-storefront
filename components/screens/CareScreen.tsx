@@ -177,7 +177,7 @@ export function CareScreen({
     >
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-3679.png"
+        src="/eldreve/screens/1523-3679.png"
         style={abs(0, 16, 45, 48)}
       />
       <div
@@ -221,7 +221,7 @@ export function CareScreen({
         {"We’re here for you.\nOur support team is ready to assist."}
       </div>
       <img
-        src="/veloria/screens/1523-3681.png"
+        src="/eldreve/screens/1523-3681.png"
         alt=""
         width={104}
         height={104}

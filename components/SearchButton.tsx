@@ -14,7 +14,7 @@ import { useState } from "react";
 import { SearchOverlay } from "@/components/SearchOverlay";
 
 export function SearchButton({
-  src = "/veloria/screens/1523-1681.png",
+  src = "/eldreve/screens/1523-1681.png",
   style,
 }: {
   src?: string;

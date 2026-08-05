@@ -53,7 +53,7 @@ function Row({
     <>
       <div style={sCard(34, y, 362, 72, { bg: CREAM, r: 10, shadow: false })} />
       <img
-        src={`/veloria/screens/${icon}.svg`}
+        src={`/eldreve/screens/${icon}.svg`}
         alt=""
         width={iw}
         height={ih}
@@ -95,7 +95,7 @@ export function PreferencesScreen() {
           frame 1523:1016 is empty); pointer-events off so the SettingsHeader
           button underneath keeps the click. */}
       <img
-        src="/veloria/screens/1523-1077.png"
+        src="/eldreve/screens/1523-1077.png"
         alt=""
         width={40}
         height={42}
@@ -118,7 +118,7 @@ export function PreferencesScreen() {
         {"Manage how we communicate with you\nand personalize your experience."}
       </div>
       <img
-        src="/veloria/screens/1523-1020.svg"
+        src="/eldreve/screens/1523-1020.svg"
         alt=""
         width={72}
         height={72}
@@ -182,7 +182,7 @@ export function PreferencesScreen() {
       {/* privacy card */}
       <div style={sCard(16, 760, 398, 144, { bg: PINK })} />
       <img
-        src="/veloria/screens/1523-1068.svg"
+        src="/eldreve/screens/1523-1068.svg"
         alt=""
         width={24}
         height={24}
@@ -206,7 +206,7 @@ export function PreferencesScreen() {
         }
       </div>
       <img
-        src="/veloria/screens/1523-1073.svg"
+        src="/eldreve/screens/1523-1073.svg"
         alt=""
         width={58}
         height={58}

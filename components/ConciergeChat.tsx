@@ -3,7 +3,7 @@
 /**
  * ROLE OF THIS FILE
  * The concierge "chatbox" — the mascot sticker + dark green chat bar from the
- * VELORIA design, lifted out of the page canvas into a fixed overlay that
+ * ELDREVE design, lifted out of the page canvas into a fixed overlay that
  * floats just above the bottom nav (same scaling technique as BottomNav).
  * Clicking it opens a PLACEHOLDER chat panel; a real chat widget will replace
  * the panel body later.
@@ -51,7 +51,7 @@ function ChatPanel({
     >
       <div style={{ position: "relative", height: 48, background: "#06372E" }}>
         <img
-          src="/veloria/concierge-mascot.png"
+          src="/eldreve/concierge-mascot.png"
           alt=""
           width={34}
           height={34}
@@ -292,7 +292,7 @@ export function ConciergeChat({
       }}
     >
       <img
-        src="/veloria/concierge-mascot.png"
+        src="/eldreve/concierge-mascot.png"
         alt=""
         width={98}
         height={98}

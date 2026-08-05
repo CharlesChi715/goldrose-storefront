@@ -34,7 +34,7 @@ import { ReturnReasonSheet } from "@/components/screens/returns/ReturnReasonShee
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 const TITLE_INK = "#171311";
 const SUBTITLE_INK = "#2E2926";
 const TAB_BG = "#FFF8F0";

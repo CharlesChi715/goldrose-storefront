@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * /account/business — the Business & Partnerships screen, reached from the
- * account-type tabs on /account. Pixel-exact import of VELORIA frame 74:55
+ * account-type tabs on /account. Pixel-exact import of ELDREVE frame 74:55
  * (2026-07-25); see components/login/BusinessLogin.tsx.
  *
  * Static like the rest of the storefront: sign-in and the enquiry CTAs are

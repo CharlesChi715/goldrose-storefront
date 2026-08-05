@@ -186,7 +186,7 @@ function ProductCard({
           catalog photos are not the frame's 203×204, so they cover-crop. */}
       <img
         className="gr-photo"
-        src={data?.image ?? `/veloria/home/${img}.png`}
+        src={data?.image ?? `/eldreve/home/${img}.png`}
         alt={data ? data.shortName : "Artisan 24K gold-dipped eternal rose"}
         width={slot.w}
         height={204}
@@ -210,7 +210,7 @@ function ProductCard({
         {data?.shortName ?? "Double Rose Gift Set"}
       </div>
       <img
-        src={`/veloria/home/${slot.stars}.svg`}
+        src={`/eldreve/home/${slot.stars}.svg`}
         alt="Five star rating"
         width={slot.starsW}
         height={11}
@@ -247,7 +247,7 @@ function ProductCard({
         ) : null}
       </div>
       <img
-        src="/veloria/home/58-86.png"
+        src="/eldreve/home/58-86.png"
         alt=""
         width={40}
         height={43}
@@ -554,7 +554,7 @@ export function ShopInteractive({
                 </span>
                 {selected ? (
                   <img
-                    src="/veloria/screens/1100-145.svg"
+                    src="/eldreve/screens/1100-145.svg"
                     alt=""
                     width={13}
                     height={13}

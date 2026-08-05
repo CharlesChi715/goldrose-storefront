@@ -23,7 +23,7 @@ import { BackButton } from "@/components/BackButton";
 import { abs, txt } from "@/lib/figma-layout";
 import { playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 const INK = "#3B2F2F";
 const GOLD = "#D4AF37";
 const SAND = "#E5D9C9";

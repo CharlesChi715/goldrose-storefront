@@ -1,6 +1,6 @@
 /**
  * ROLE OF THIS FILE
- * Shared Google-font loaders (next/font) for the VELORIA-design pages
+ * Shared Google-font loaders (next/font) for the ELDREVE-design pages
  * (/shop, /products/[slug]) and their shared chrome. Each export carries a
  * `className` that sets the font-family; weights still need to be set per
  * element to match the Figma node data exactly.
@@ -16,7 +16,7 @@ import {
   Sorts_Mill_Goudy,
 } from "next/font/google";
 
-/** Tenor Sans 400 — the VELORIA display/headline face. */
+/** Tenor Sans 400 — the ELDREVE display/headline face. */
 export const tenor = Tenor_Sans({ weight: "400", subsets: ["latin"] });
 
 /** Inter 400–700 — the general UI/body face. */

@@ -5,7 +5,7 @@
  * their icons as TEXT glyphs (◷ ▢ ♡ ⌖ …) in Noto Sans SC; browsers resolve
  * those to different fallback fonts than Figma does (established gotcha), so
  * every ornamental glyph is served as Figma's own outlined-SVG export from
- * /public/veloria/screens. The exports are cropped to ink extents, so they
+ * /public/eldreve/screens. The exports are cropped to ink extents, so they
  * are placed at natural size, centred on the glyph's design box.
  */
 
@@ -14,7 +14,7 @@ import { abs } from "@/lib/figma-layout";
 /**
  * One glyph SVG at natural (ink) size, centred on the node's design box.
  *
- * @param src - Figma node id of the export under /veloria/screens.
+ * @param src - Figma node id of the export under /eldreve/screens.
  * @param x - Node box left, frame coordinates.
  * @param y - Node box top.
  * @param w - Node box width.
@@ -39,7 +39,7 @@ export function Glyph({
   const [iw, ih] = ink;
   return (
     <img
-      src={`/veloria/screens/${src}.svg`}
+      src={`/eldreve/screens/${src}.svg`}
       alt=""
       width={iw}
       height={ih}

@@ -77,7 +77,7 @@ export function BrandWordmark({
 }) {
   return (
     <img
-      src="/veloria/brand/eldreve-140x51.png"
+      src="/eldreve/brand/eldreve-140x51.png"
       alt="ELDREVE"
       width={140}
       height={51}
@@ -102,7 +102,7 @@ export function SettingsHeader({ title }: { title: string }) {
     <>
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-955.svg"
+        src="/eldreve/screens/1523-955.svg"
         style={abs(36, 53, 24, 24)}
       />
       <div
@@ -138,7 +138,7 @@ export function AccountNavBand() {
         const body = (
           <>
             <img
-              src={`/veloria/screens/${item.icon}.svg`}
+              src={`/eldreve/screens/${item.icon}.svg`}
               alt=""
               width={22}
               height={22}

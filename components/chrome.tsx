@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Shared chrome for the pages imported from the VELORIA Figma file
+ * Shared chrome for the pages imported from the ELDREVE Figma file
  * (file 3CXNpmuuyNyCW70qOci0oM): / (homepage redesign), /shop and
  * /products/[slug] (frame 详情页). All frames share a 430px-wide canvas,
  * promo bar, header, and the white bottom tab bar. All coordinates/colors
@@ -9,7 +9,7 @@
  * viewport (per Charles's request) with Home/Shop tabs wired to routes.
  *
  * The `abs`/`txt` style helpers this file used to export are pure CSS math
- * with no JSX, so they now live in lib/figma-layout.ts. "veloria" was the
+ * with no JSX, so they now live in lib/figma-layout.ts. "eldreve" was the
  * Figma file's name, never the brand — hence chrome.tsx.
  */
 
@@ -135,7 +135,7 @@ export function PromoBar({
       {isDefault || !slogan ? (
         // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
         <img
-          src={brown ? "/veloria/home/549-95.svg" : "/veloria/glyph-promo.png"}
+          src={brown ? "/eldreve/home/549-95.svg" : "/eldreve/glyph-promo.png"}
           alt={
             slogan ??
             "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"
@@ -203,7 +203,7 @@ export function VHeader({
         aria-label="Home"
       >
         <img
-          src="/veloria/logo.png"
+          src="/eldreve/logo.png"
           alt="ELDREVE"
           width={136}
           height={39}
@@ -257,7 +257,7 @@ export function HomeHeader() {
         aria-label="Home"
       >
         <img
-          src="/veloria/brand/eldreve-136x40.png"
+          src="/eldreve/brand/eldreve-136x40.png"
           alt="ELDREVE"
           width={136}
           height={40}
@@ -280,7 +280,7 @@ export function HomeHeader() {
         aria-label="Cart"
       >
         <img
-          src="/veloria/screens/1523-1682.png"
+          src="/eldreve/screens/1523-1682.png"
           alt=""
           style={{ display: "block", width: "100%", height: "100%" }}
         />
@@ -300,7 +300,7 @@ export function ShopHeader() {
       <MenuButton style={abs(7, 41.5, 40, 43)} />
       <BackButton
         fallback="/"
-        src="/veloria/home/56-71.png"
+        src="/eldreve/home/56-71.png"
         style={abs(77, 41.5, 40, 43)}
       />
       <Link
@@ -309,7 +309,7 @@ export function ShopHeader() {
         aria-label="Home"
       >
         <img
-          src="/veloria/brand/eldreve-136x40.png"
+          src="/eldreve/brand/eldreve-136x40.png"
           alt="ELDREVE"
           width={136}
           height={40}
@@ -324,7 +324,7 @@ export function ShopHeader() {
         aria-label="Cart"
       >
         <img
-          src="/veloria/screens/1523-1682.png"
+          src="/eldreve/screens/1523-1682.png"
           alt=""
           style={{ display: "block", width: "100%", height: "100%" }}
         />
@@ -349,7 +349,7 @@ type Tab = {
 };
 
 // Nav art imported 2026-08-02 from the current frames' own tab renders
-// (public/veloria/nav/). THREE TABS: the design dropped 商务 / Wholesale —
+// (public/eldreve/nav/). THREE TABS: the design dropped 商务 / Wholesale —
 // every screen frame under a Ready-for-dev section draws Home / Shop /
 // account at x 18 / 179 / 340 (2024:276 login, 2024:284 dashboard, 2024:292
 // PDP, 1523:1646 shop, 2380:812 home, 2436:368 the new auth screen), and the
@@ -384,9 +384,9 @@ const TABS: Tab[] = [
 ];
 
 // Bare ids resolve against the 07-25 home render set; an id containing "/" is a
-// path into a sibling set under /veloria.
+// path into a sibling set under /eldreve.
 const tabArtSrc = (id: string) =>
-  id.includes("/") ? `/veloria/${id}.png` : `/veloria/home/${id}.png`;
+  id.includes("/") ? `/eldreve/${id}.png` : `/eldreve/home/${id}.png`;
 
 // Every tab's art sits at the same spot inside its 70×59 hit area.
 const TAB_ART_STYLE: React.CSSProperties = {

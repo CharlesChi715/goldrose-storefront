@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         // Static design/nav/product images (Figma exports; replaced rarely and
         // only by hand). Default is max-age=0 → every repeat view revalidates;
         // cache 7 days and serve stale for 30 while revalidating instead.
-        source: "/:dir(veloria|home|products|top-nav)/:path*",
+        source: "/:dir(eldreve|home|products|top-nav)/:path*",
         headers: [
           {
             key: "Cache-Control",

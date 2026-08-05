@@ -42,7 +42,7 @@ export function HeroCarousel() {
       name="HOME-HERO"
       renderSlide={() => (
         <img
-          src="/veloria/screens/1523-1675.png"
+          src="/eldreve/screens/1523-1675.png"
           alt="Gold-dipped rose in a gift box"
           width={430}
           height={317}

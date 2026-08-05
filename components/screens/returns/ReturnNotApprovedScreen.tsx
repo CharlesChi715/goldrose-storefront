@@ -26,7 +26,7 @@ import {
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 const TITLE_INK = "#171311";
 const HEADING_INK = "#1A1412";
 const LABEL_INK = "#211C1A";

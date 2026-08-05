@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * B-3 "Business Partnerships" — pixel-exact import of VELORIA frame 1523:567
+ * B-3 "Business Partnerships" — pixel-exact import of ELDREVE frame 1523:567
  * (07-29 restyle, 430×1907): brand hero, 120+ colorway swatches, the partner
  * grid, four "Why ELDREVE" advantage cards, the 4-step process with two CTAs
  * and — new in the 07-29 frames — the mascot bottom-nav band drawn in-frame.
@@ -115,7 +115,7 @@ const STEPS = [
 
 /* Both CTA arrows (I1523:661;1523:389 / I1523:662;1523:392) export
    byte-identical; one file serves both. */
-const ARROW = "/veloria/screens/I1523-661_1523-389.svg";
+const ARROW = "/eldreve/screens/I1523-661_1523-389.svg";
 
 /* 1523:664…1523:671 — nav tabs: mascot art (labels baked in, Wholesale ships
    its active state) on the shared 70-wide hit grid. Wholesale is drawn active
@@ -166,7 +166,7 @@ function Advantage({
   const copyX = imgSide === "left" ? 174 : 8;
   const photo = (
     <img
-      src={`/veloria/screens/${img.src}.png`}
+      src={`/eldreve/screens/${img.src}.png`}
       alt={img.alt}
       width={154}
       height={100}
@@ -236,7 +236,7 @@ export function PartnershipsScreen() {
             4.5px above the band's top edge, cropped by design. */}
         <div style={{ ...abs(16, 14, 398, 42), overflow: "hidden" }}>
           <img
-            src="/veloria/screens/1523-571.png"
+            src="/eldreve/screens/1523-571.png"
             alt=""
             width={40}
             height={42}
@@ -247,7 +247,7 @@ export function PartnershipsScreen() {
             }}
           />
           <img
-            src="/veloria/screens/1523-572.png"
+            src="/eldreve/screens/1523-572.png"
             alt="ELDREVE"
             width={140}
             height={51}
@@ -299,7 +299,7 @@ export function PartnershipsScreen() {
             the 0/6/16 drop shadow, so its box bleeds 16px each side and starts
             10px above the node (y 208 → 198); section 01 clips the tail. */}
         <img
-          src="/veloria/screens/1523-575.png"
+          src="/eldreve/screens/1523-575.png"
           alt="Pink velvet ELDREVE gift box beside a gold-dipped rose"
           width={430}
           height={270}
@@ -318,7 +318,7 @@ export function PartnershipsScreen() {
         {/* 1523:577 heading row */}
         <div style={{ ...abs(16, 14, 398, 30), overflow: "hidden" }}>
           <img
-            src="/veloria/screens/1523-578.svg"
+            src="/eldreve/screens/1523-578.svg"
             alt=""
             width={11}
             height={14}
@@ -343,7 +343,7 @@ export function PartnershipsScreen() {
             120+ Curated Colorways
           </div>
           <img
-            src="/veloria/screens/1523-580.svg"
+            src="/eldreve/screens/1523-580.svg"
             alt=""
             width={11}
             height={14}
@@ -461,7 +461,7 @@ export function PartnershipsScreen() {
                 }}
               >
                 <img
-                  src={`/veloria/screens/${p.src}.svg`}
+                  src={`/eldreve/screens/${p.src}.svg`}
                   alt={p.alt}
                   width={p.glyph.w}
                   height={p.glyph.h}
@@ -757,7 +757,7 @@ export function PartnershipsScreen() {
         {NAV_TABS.map((tab) => {
           const art = (
             <img
-              src={`/veloria/screens/${tab.src}.png`}
+              src={`/eldreve/screens/${tab.src}.png`}
               alt={tab.label}
               width={50}
               height={57}

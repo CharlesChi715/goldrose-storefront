@@ -2,9 +2,9 @@
 /**
  * ROLE OF THIS FILE
  * The /shop page — a pixel-exact implementation of the "shop" frame (node
- * 24:396, 430×1822, 2026-07-25 redesign palette) from the VELORIA Figma
+ * 24:396, 430×1822, 2026-07-25 redesign palette) from the ELDREVE Figma
  * file. Every coordinate, size, color, and font value comes verbatim from
- * the Figma REST API. Photo assets in /public/veloria(/home) are exact 2x
+ * the Figma REST API. Photo assets in /public/eldreve(/home) are exact 2x
  * node renders. Product cards keep the live-catalog wiring (name, price,
  * compare-at, link → /products/[slug]); star rows and hearts are static
  * design art (ratings/wishlist are out of scope this release, IxD README).
@@ -148,7 +148,7 @@ export default async function ShopPage({
           and dots baked into the frame render); bleeds 7px past both canvas
           edges — the canvas clips it, as Figma does. */}
         <img
-          src="/veloria/screens/1523-1626.png"
+          src="/eldreve/screens/1523-1626.png"
           alt="Featured collection"
           width={444}
           height={202}

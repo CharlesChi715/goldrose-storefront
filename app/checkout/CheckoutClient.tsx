@@ -78,7 +78,7 @@ import type { PaymentMethodId } from "@/lib/checkout/types";
 import type { CatalogProduct } from "@/lib/supabase/types.ts";
 
 const brandName = "ELDREVE";
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 
 /** What /api/checkout accepts — "none" is the skip-payment testing flow. */
 type SubmitMethod = PaymentMethodId | "none";
@@ -311,7 +311,7 @@ function CheckoutHeader({ step, onBack }: { step: Step; onBack: () => void }) {
           text node with the same ELDREVE wordmark raster the rest of the
           file uses (2460:377/381, 140×51 at x145). */}
       <img
-        src="/veloria/brand/eldreve-140x51.png"
+        src="/eldreve/brand/eldreve-140x51.png"
         alt="ELDREVE"
         width={140}
         height={51}

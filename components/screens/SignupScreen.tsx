@@ -297,7 +297,7 @@ export function SignupScreen() {
           image at its box (see the file header) */}
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-3344.png"
+        src="/eldreve/screens/1523-3344.png"
         style={abs(0, 18, 40, 42)}
       />
       <BrandWordmark x={153} y={13.5} w={140} h={51} />
@@ -325,7 +325,7 @@ export function SignupScreen() {
         }
       </div>
       <img
-        src="/veloria/screens/1523-3318.png"
+        src="/eldreve/screens/1523-3318.png"
         alt="Sapphire blue gold-dipped rose"
         width={178}
         height={250}
@@ -367,7 +367,7 @@ export function SignupScreen() {
           />
           {field.crop ? (
             <img
-              src={`/veloria/screens/${field.icon}.png`}
+              src={`/eldreve/screens/${field.icon}.png`}
               alt=""
               style={{ ...abs(...field.crop), display: "block" }}
             />

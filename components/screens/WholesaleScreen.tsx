@@ -15,7 +15,7 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 
 /** HTML collapses the design's double spaces; nbsp + space keeps them. */
 const NB = " ";

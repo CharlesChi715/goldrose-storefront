@@ -866,7 +866,7 @@ verification is its auth).
 ## 11. Pixel-perfection vs editable content
 
 Conflict: the promo slogan is currently served as a PNG crop of Figma's own
-render (`public/veloria/glyph-promo.png`) because its ✦ glyphs hit different
+render (`public/eldreve/glyph-promo.png`) because its ✦ glyphs hit different
 fallback fonts in browsers.
 
 Resolution — `PromoBar({ slogan, isDefault })`:

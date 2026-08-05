@@ -30,7 +30,7 @@ export function A2() {
       {/* 157:57 ornament — Figma-rendered glyph strip (✿ hits fallback fonts) */}
       <img
         data-el="HOME-FEATURED-ORNAMENT"
-        src="/veloria/home/157-57.svg"
+        src="/eldreve/home/157-57.svg"
         alt="—   ✿   —"
         width={140}
         height={22}
@@ -99,7 +99,7 @@ export function A2() {
         style={{ ...abs(328, 184, 82, 22), display: "block" }}
       >
         <img
-          src="/veloria/home/157-61.svg"
+          src="/eldreve/home/157-61.svg"
           alt="View all →"
           width={82}
           height={22}

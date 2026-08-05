@@ -89,7 +89,7 @@ export function A11() {
       <div style={{ ...abs(0, 0, 430, 287), overflow: "hidden" }}>
         {/* 2380:764 rose divider */}
         <img
-          src="/veloria/home/506-89.svg"
+          src="/eldreve/home/506-89.svg"
           alt=""
           width={88}
           height={20}
@@ -97,7 +97,7 @@ export function A11() {
         />
         {/* 2380:768 story photo */}
         <img
-          src="/veloria/home/508-90.png"
+          src="/eldreve/home/508-90.png"
           alt="Gold-preserved rose with ELDREVE gift packaging"
           width={204}
           height={259}
@@ -173,7 +173,7 @@ export function A11() {
             READ OUR STORY
           </div>
           <img
-            src="/veloria/home/506-98.svg"
+            src="/eldreve/home/506-98.svg"
             alt="→"
             width={13}
             height={7}
@@ -186,7 +186,7 @@ export function A11() {
       <div style={{ ...abs(0, 286, 430, 233), overflow: "hidden" }}>
         {/* 2380:778 rose divider */}
         <img
-          src="/veloria/home/507-87.svg"
+          src="/eldreve/home/507-87.svg"
           alt=""
           width={100}
           height={20}
@@ -237,7 +237,7 @@ export function A11() {
               {q}
             </div>
             <img
-              src="/veloria/home/507-100.svg"
+              src="/eldreve/home/507-100.svg"
               alt="＋"
               width={11}
               height={11}
@@ -258,7 +258,7 @@ export function A11() {
             node box, so the strip is drawn at natural size and centred rather
             than stretched to 190×33. */}
         <img
-          src="/veloria/home/2380-796.svg"
+          src="/eldreve/home/2380-796.svg"
           alt="VIEW ALL FAQs →"
           width={190}
           height={33}
@@ -272,7 +272,7 @@ export function A11() {
 
       {/* 2380:775 · second story photo, beside the gift card */}
       <img
-        src="/veloria/home/2380-775.png"
+        src="/eldreve/home/2380-775.png"
         alt="Gold-dipped rose in its keepsake box"
         width={204}
         height={204}

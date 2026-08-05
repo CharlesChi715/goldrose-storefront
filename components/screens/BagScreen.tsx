@@ -30,7 +30,7 @@ import { BackButton } from "@/components/BackButton";
 import { abs } from "@/lib/figma-layout";
 import { goudy, notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 
 // 1523:3067 / 3068 / 3069 — member-benefit labels, glyph-led so each is
 // Figma's own SVG render placed at the TEXT node's box (x is card-relative).
@@ -986,7 +986,7 @@ export function BagScreen() {
             whiteSpace: "nowrap",
           }}
         >
-          Auri, your VELORIA concierge, is here 24/7.
+          Auri, your ELDREVE concierge, is here 24/7.
         </div>
         <div
           style={{

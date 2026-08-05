@@ -144,7 +144,7 @@ function Content({ card, n }: { card: Card; n: number }) {
       {/* 2380:412 / 2380:421 cta — Figma-rendered strip */}
       <img
         data-el={`HOME-FEATURED-PRODUCT-CTA-${n}`}
-        src="/veloria/home/376-182.svg"
+        src="/eldreve/home/376-182.svg"
         alt="View Product →"
         width={86}
         height={13}
@@ -210,7 +210,7 @@ export function BestSellersRail() {
                 <img
                   className="gr-photo"
                   data-el={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
-                  src="/veloria/home/373-174.png"
+                  src="/eldreve/home/373-174.png"
                   alt={card.alt}
                   width={252}
                   height={271}
@@ -227,7 +227,7 @@ export function BestSellersRail() {
                 <img
                   className="gr-photo"
                   data-el={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
-                  src="/veloria/home/2380-416.png"
+                  src="/eldreve/home/2380-416.png"
                   alt={card.alt}
                   width={card.width}
                   height={card.photoH}

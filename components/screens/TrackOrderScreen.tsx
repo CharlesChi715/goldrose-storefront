@@ -26,7 +26,7 @@ import { TrackReturnSheet } from "@/components/screens/TrackReturnSheet";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 
 const GREEN = "#09442E"; // flow brand: headline, done markers, values
 const INK = "#29211F";

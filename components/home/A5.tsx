@@ -33,7 +33,7 @@ export function A5() {
     >
       {/* 2380:479 · header ornament (rose + lines) */}
       <img
-        src="/veloria/home/424-150.svg"
+        src="/eldreve/home/424-150.svg"
         alt=""
         width={142}
         height={34}
@@ -44,7 +44,7 @@ export function A5() {
           to a system font in the browser, so it is served as Figma's own render
           rather than live text. */}
       <img
-        src="/veloria/home/2380-455.svg"
+        src="/eldreve/home/2380-455.svg"
         alt="— ♡ —"
         width={160}
         height={20}
@@ -85,7 +85,7 @@ export function A5() {
           whiteSpace: "nowrap",
         }}
       >
-        Find a ELDREVE for every meaningful moment.
+        Find an ELDREVE for every meaningful moment.
       </div>
 
       {/*
@@ -106,7 +106,7 @@ export function A5() {
         }}
       >
         <img
-          src="/veloria/home/425-151.svg"
+          src="/eldreve/home/425-151.svg"
           alt=""
           style={{ ...abs(14.75, 6, 16.5, 18), display: "block" }}
         />
@@ -234,7 +234,7 @@ export function A5() {
       </Link>
       {/* 425:155 · more-occasions arrow (off-canvas) */}
       <img
-        src="/veloria/home/425-155.svg"
+        src="/eldreve/home/425-155.svg"
         alt=""
         width={12}
         height={18}
@@ -263,7 +263,7 @@ export function A5() {
           }}
         >
           <img
-            src="/veloria/home/162-97.png"
+            src="/eldreve/home/162-97.png"
             alt="Valentine's Day gold-dipped rose gift"
             width={210}
             height={235}
@@ -302,7 +302,7 @@ export function A5() {
         </div>
         {/* 189:149 · CTA (rendered strip) */}
         <img
-          src="/veloria/home/189-149.svg"
+          src="/eldreve/home/189-149.svg"
           alt="SHOP VALENTINE'S GIFTS →"
           width={186}
           height={16}

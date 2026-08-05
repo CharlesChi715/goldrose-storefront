@@ -70,7 +70,7 @@ export function PrivacySecurityScreen() {
       <BrandWordmark x={145} y={0} w={140} h={51} />
       <BackButton
         fallback="/account/privacy"
-        src="/veloria/screens/1523-1014.png"
+        src="/eldreve/screens/1523-1014.png"
         style={abs(14, 64, 40, 42)}
       />
       <div
@@ -96,7 +96,7 @@ export function PrivacySecurityScreen() {
         {"Manage your personal details, preferences,\nand privacy controls."}
       </div>
       <img
-        src="/veloria/screens/1526-115.svg"
+        src="/eldreve/screens/1526-115.svg"
         alt=""
         width={76}
         height={76}
@@ -106,7 +106,7 @@ export function PrivacySecurityScreen() {
       {/* security card (1526:119) */}
       <div style={sCard(16, 239, 398, 427)} />
       <img
-        src="/veloria/screens/1526-120.svg"
+        src="/eldreve/screens/1526-120.svg"
         alt=""
         width={22}
         height={22}
@@ -118,7 +118,7 @@ export function PrivacySecurityScreen() {
           export) + inert ghost button; no live inputs by design */}
       <div style={{ ...abs(34, 293, 120), ...txt(10, 16, INK) }}>Password</div>
       <img
-        src="/veloria/screens/1526-124.svg"
+        src="/eldreve/screens/1526-124.svg"
         alt="Password hidden"
         width={94}
         height={3}

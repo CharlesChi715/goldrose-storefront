@@ -5,7 +5,7 @@
  * account view (orders placed with the account's email, passkey
  * management).
  *
- * Signed out, this renders the pixel-exact VELORIA frame 74:53 (imported
+ * Signed out, this renders the pixel-exact ELDREVE frame 74:53 (imported
  * 2026-07-25) and signs in with an emailed one-time code. Signed in, it keeps
  * the hand-built account view — the design ships no signed-in frame. All auth
  * runs client-side; the page itself stays static.

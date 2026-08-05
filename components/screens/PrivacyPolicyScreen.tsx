@@ -115,7 +115,7 @@ export function PrivacyPolicyScreen() {
         {"Learn how we collect, use, and\nprotect your information."}
       </div>
       <img
-        src="/veloria/screens/1523-1140.svg"
+        src="/eldreve/screens/1523-1140.svg"
         alt=""
         width={78}
         height={78}
@@ -132,7 +132,7 @@ export function PrivacyPolicyScreen() {
             />
           ) : null}
           <img
-            src={`/veloria/screens/${row.icon.src}.svg`}
+            src={`/eldreve/screens/${row.icon.src}.svg`}
             alt=""
             width={Math.round(row.icon.w)}
             height={Math.round(row.icon.h)}

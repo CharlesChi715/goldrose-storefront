@@ -36,21 +36,21 @@ type Review = {
 
 const REVIEWS: readonly Review[] = [
   {
-    photo: "/veloria/home/163-101.png",
+    photo: "/eldreve/home/163-101.png",
     photoBox: [0, -55, 132, 170],
     photoAlt: "Customer photo of a gold rose gift",
     quote: "“The most beautiful gift I’ve ever received.”",
     quoteX: 8,
   },
   {
-    photo: "/veloria/home/193-152.png",
+    photo: "/eldreve/home/193-152.png",
     photoBox: [0, 0, 122, 69],
     photoAlt: "Customer photo of a gold rose gift",
     quote: "“My wife was speechless on our anniversary.”",
     quoteX: 8,
   },
   {
-    photo: "/veloria/home/193-157.png",
+    photo: "/eldreve/home/193-157.png",
     photoBox: [0, 0, 122, 69],
     photoAlt: "Customer photo of a gold rose gift",
     quote: "“Elegant and meaningful for our client.”",
@@ -111,7 +111,7 @@ function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
         {quote}
       </div>
       <img
-        src="/veloria/home/163-103.svg"
+        src="/eldreve/home/163-103.svg"
         alt="★★★★★"
         width={106}
         height={11}
@@ -123,7 +123,7 @@ function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
         }}
       />
       <img
-        src="/veloria/home/442-149.svg"
+        src="/eldreve/home/442-149.svg"
         alt=""
         width={12}
         height={12}

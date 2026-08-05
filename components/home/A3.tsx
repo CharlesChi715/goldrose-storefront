@@ -26,7 +26,7 @@ import { playfair, notoSC } from "@/lib/fonts";
 const PROMISE = [
   {
     x: 0,
-    icon: "/veloria/home/159-84.svg",
+    icon: "/eldreve/home/159-84.svg",
     iconX: 38,
     iconW: 14,
     alt: "✿",
@@ -36,7 +36,7 @@ const PROMISE = [
   },
   {
     x: 97,
-    icon: "/veloria/home/159-87.svg",
+    icon: "/eldreve/home/159-87.svg",
     iconX: 38.5,
     iconW: 13,
     alt: "✦",
@@ -46,7 +46,7 @@ const PROMISE = [
   },
   {
     x: 194,
-    icon: "/veloria/home/159-90.svg",
+    icon: "/eldreve/home/159-90.svg",
     iconX: 38,
     iconW: 14,
     alt: "◇",
@@ -56,7 +56,7 @@ const PROMISE = [
   },
   {
     x: 291,
-    icon: "/veloria/home/159-93.svg",
+    icon: "/eldreve/home/159-93.svg",
     iconX: 38,
     iconW: 14,
     alt: "▣",
@@ -102,7 +102,7 @@ export function A3() {
         style={{ ...abs(350, 1433, 80, 20), display: "block" }}
       >
         <img
-          src="/veloria/home/159-70.svg"
+          src="/eldreve/home/159-70.svg"
           alt="View all →"
           width={80}
           height={20}
@@ -141,7 +141,7 @@ export function A3() {
             <img
               data-el={`HOME-READY-TO-SHIP-PRODUCT-IMG-${i + 1}`}
               className="gr-photo"
-              src="/veloria/home/159-78.png"
+              src="/eldreve/home/159-78.png"
               alt="Mini rose dome with light"
               width={588}
               height={896}
@@ -170,7 +170,7 @@ export function A3() {
           {/* price/meta strip (rendered glyph strip) */}
           <img
             data-el={`HOME-READY-TO-SHIP-PRODUCT-META-${i + 1}`}
-            src="/veloria/home/159-80.svg"
+            src="/eldreve/home/159-80.svg"
             alt="$69.00 · Ships in 1–2 business days · View Product →"
             width={180}
             height={36}
@@ -187,7 +187,7 @@ export function A3() {
       {/* 2380:453 · "—   ✿   —" ornament (rendered glyph strip) */}
       <img
         data-el="HOME-PROMISE-ORNAMENT"
-        src="/veloria/home/2380-453.svg"
+        src="/eldreve/home/2380-453.svg"
         alt="— ✿ —"
         width={140}
         height={22}

@@ -29,7 +29,7 @@ export default defineConfig({
   },
   use: {
     baseURL: "http://localhost:3001",
-    // The VELORIA design frames are authored at 430px wide (mobile). A fixed
+    // The ELDREVE design frames are authored at 430px wide (mobile). A fixed
     // viewport + scale factor keeps snapshots byte-stable across runs.
     viewport: { width: 430, height: 932 },
     deviceScaleFactor: 1,

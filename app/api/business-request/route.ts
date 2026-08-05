@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * POST /api/business-request — enquiries from the Business & Partnerships
- * screen (VELORIA frame 74:55). The design's SUBMIT REQUEST / BOOK
+ * screen (ELDREVE frame 74:55). The design's SUBMIT REQUEST / BOOK
  * CONSULTATION CTAs have no backend of their own; the agreed V1 is "static +
  * email the request" (owner, 2026-07-25), so this route just validates and
  * mails the owner. Nothing is persisted — when a B2B pipeline earns a table,

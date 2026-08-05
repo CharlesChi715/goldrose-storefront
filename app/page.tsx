@@ -5,7 +5,7 @@
  * Ready-for-dev section 首页一级, imported 2026-08-04. Every coordinate,
  * size, color and font value comes verbatim from the Figma REST API data;
  * each surviving A-module lives in components/home/. The 430-wide canvas
- * scales to the viewport (ScaleFrame); photo assets in /public/veloria/home
+ * scales to the viewport (ScaleFrame); photo assets in /public/eldreve/home
  * are exact 2× node renders. It also carries the store's Schema.org
  * structured data and the admin-editable promo slogan.
  *

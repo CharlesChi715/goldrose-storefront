@@ -128,7 +128,7 @@ export function RemindersScreen() {
       {/* header — ‹ back (1523:3538), Gift Reminders title in the header band, divider */}
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-3538.png"
+        src="/eldreve/screens/1523-3538.png"
         style={abs(0, 19, 45, 48)}
       />
       <div
@@ -412,7 +412,7 @@ export function RemindersScreen() {
       </div>
       {/* ✉ 1523:3523 — frame-render crop at its measured ink box */}
       <img
-        src="/veloria/screens/1523-3523.png"
+        src="/eldreve/screens/1523-3523.png"
         alt=""
         style={{ ...abs(48.5, 729.5, 17, 11), display: "block" }}
       />

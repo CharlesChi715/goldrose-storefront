@@ -20,7 +20,7 @@ import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { notoSC, playfair } from "@/lib/fonts";
 
 // The CTA arrow glyph (I2380:379;1523:389) as an exact render.
-const ARROW = "/veloria/home/465-156.svg";
+const ARROW = "/eldreve/home/465-156.svg";
 
 // Benefit tiles 2380:380 / 2380:383 — icon glyphs served as exact SVG
 // renders; x offsets are relative to each tile's own box.
@@ -28,13 +28,13 @@ const TILES = [
   {
     x: 32,
     w: 176,
-    icon: { src: "/veloria/home/155-60.svg", x: 80, w: 16, alt: "✿" },
+    icon: { src: "/eldreve/home/155-60.svg", x: 80, w: 16, alt: "✿" },
     label: { x: 65, w: 46, lines: ["Made from", "Real Roses"] },
   },
   {
     x: 224,
     w: 174,
-    icon: { src: "/veloria/home/155-66.svg", x: 79, w: 16, alt: "▣" },
+    icon: { src: "/eldreve/home/155-66.svg", x: 79, w: 16, alt: "▣" },
     label: { x: 65, w: 44, lines: ["Gift-Ready", "Packaging"] },
   },
 ];

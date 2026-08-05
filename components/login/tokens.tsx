@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Tokens and helpers shared by the two imported VELORIA account frames —
+ * Tokens and helpers shared by the two imported ELDREVE account frames —
  * 1523:2470 ("loginpage" sign-in) and 1523:2947 (Business & Partnerships),
  * the 2026-07-29 delivery. Both are 430-wide canvases built from the same
  * palette and the same glyph pipeline, so the values live here rather than

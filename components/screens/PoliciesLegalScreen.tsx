@@ -29,7 +29,7 @@ import {
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const ART = "/veloria/screens/";
+const ART = "/eldreve/screens/";
 
 // 2246:427…329 — the seven policy entries, frame order (letters A–J are the
 // design file's internal names, not visible text). Card pitch 84 from y309.
@@ -105,7 +105,7 @@ export function PoliciesLegalScreen() {
       <BrandWordmark x={145} y={0} w={140} h={51} />
       <BackButton
         fallback="/account/privacy"
-        src="/veloria/screens/1523-1014.png"
+        src="/eldreve/screens/1523-1014.png"
         style={abs(17, 69, 40, 42)}
       />
       <div

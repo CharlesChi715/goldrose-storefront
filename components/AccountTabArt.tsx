@@ -51,7 +51,7 @@ export function AccountTabArt({ isActive }: { isActive: boolean }) {
   const face = signedIn ? "me" : "login";
   return (
     <img
-      src={`/veloria/nav/${face}${isActive ? "-active" : ""}.png`}
+      src={`/eldreve/nav/${face}${isActive ? "-active" : ""}.png`}
       alt={signedIn ? "Me" : "Login"}
       width={50}
       height={57}

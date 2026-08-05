@@ -79,7 +79,7 @@ Message from me to ai agents: leave placeholder in unsure things
    carries a gold crest and a partially visible wordmark (reads "VILOW… ROSE",
    not GoldRose), so the photo is another brand's (or AI-mocked) product shot.
    The same image is already live on the deployed `/shop` hero
-   (`public/veloria/shop-hero.png`). Swapping it needs a GoldRose-branded
+   (`public/eldreve/shop-hero.png`). Swapping it needs a GoldRose-branded
    replacement photo (ties into OQ-3 real product content); the banner is
    pixel-diff-guarded, so the swap is an asset replacement at the same size,
    not a re-crop.

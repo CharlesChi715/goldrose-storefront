@@ -68,7 +68,7 @@ const MOCK_ORDER: DashboardRecentOrder = {
   line2: "Order #GR202508180888",
   status: "SHIPPED  ·  Arrives Aug 25",
   price: "$129.00",
-  photoSrc: "/veloria/screens/916-130.png",
+  photoSrc: "/eldreve/screens/916-130.png",
 };
 
 type Tile = {
@@ -310,7 +310,7 @@ function Dashboard({
       {/* 939:155/162 header — back art + logo, no promo bar on this screen */}
       <BackButton
         fallback="/"
-        src="/veloria/home/56-71.png"
+        src="/eldreve/home/56-71.png"
         style={abs(backX, 19.5, 40, 43)}
       />
       <Link
@@ -319,7 +319,7 @@ function Dashboard({
         aria-label="Home"
       >
         <img
-          src="/veloria/brand/eldreve-136x40.png"
+          src="/eldreve/brand/eldreve-136x40.png"
           alt="ELDREVE"
           width={136}
           height={40}

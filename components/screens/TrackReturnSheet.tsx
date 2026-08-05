@@ -28,7 +28,7 @@ import NoCalcScale from "@/components/NoCalcScale";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
 

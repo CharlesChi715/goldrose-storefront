@@ -98,7 +98,7 @@ export function LogoutConfirmScreen() {
       <BrandWordmark x={145} y={0} w={140} h={51} />
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-1225.png"
+        src="/eldreve/screens/1523-1225.png"
         style={abs(12, 70, 40, 42)}
       />
       <div
@@ -124,7 +124,7 @@ export function LogoutConfirmScreen() {
         {"You’re about to sign out of\nyour account on this device."}
       </div>
       <img
-        src="/veloria/screens/1523-1194.svg"
+        src="/eldreve/screens/1523-1194.svg"
         alt=""
         width={94}
         height={82}
@@ -155,7 +155,7 @@ export function LogoutConfirmScreen() {
             />
           ) : (
             <img
-              src={`/veloria/screens/${note.icon}.svg`}
+              src={`/eldreve/screens/${note.icon}.svg`}
               alt=""
               width={note.box[2]}
               height={note.box[3]}

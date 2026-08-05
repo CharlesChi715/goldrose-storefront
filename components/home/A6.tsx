@@ -78,7 +78,7 @@ export function A6() {
 
       {/* Header ornament · rose and lines (431:265) */}
       <img
-        src="/veloria/home/424-150.svg"
+        src="/eldreve/home/424-150.svg"
         alt=""
         width={142}
         height={34}
@@ -172,7 +172,7 @@ export function A6() {
 
       {/* Reviews ornament + heading + subtitle (2380:607, 2380:576, 2380:614) */}
       <img
-        src="/veloria/home/436-337.svg"
+        src="/eldreve/home/436-337.svg"
         alt=""
         width={58.149}
         height={13.923}
@@ -244,7 +244,7 @@ export function A6() {
           Read Customer Stories
         </div>
         <img
-          src="/veloria/home/I163-111_145-55.svg"
+          src="/eldreve/home/I163-111_145-55.svg"
           alt="→"
           width={11}
           height={13}

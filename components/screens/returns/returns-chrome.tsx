@@ -56,7 +56,7 @@ export function card(
  * centring on the box (the shared Glyph helper) would sit the ink ~7px high
  * — verified against the frame renders.
  *
- * @param src Figma node id of the export under /veloria/screens.
+ * @param src Figma node id of the export under /eldreve/screens.
  * @param x Node box left, frame coordinates.
  * @param y Node box top.
  * @param w Node box width.
@@ -90,7 +90,7 @@ export function LineGlyph({
   const left = align === "left" ? x : x + (w - iw) / 2;
   return (
     <img
-      src={`/veloria/screens/${src}.svg`}
+      src={`/eldreve/screens/${src}.svg`}
       alt=""
       width={iw}
       height={ih}
@@ -123,7 +123,7 @@ export function ReturnsHeader({
     <>
       <BackButton
         fallback={backFallback}
-        src="/veloria/screens/1523-3470.png"
+        src="/eldreve/screens/1523-3470.png"
         style={abs(15, 24.5 + dy, 40, 43)}
       />
       <BrandWordmark x={145} y={20.5 + dy} w={140} h={51} />
@@ -133,7 +133,7 @@ export function ReturnsHeader({
         style={{ ...abs(375, 24.5 + dy, 40, 43), display: "block" }}
       >
         <img
-          src="/veloria/screens/2024-320-2024-317.png"
+          src="/eldreve/screens/2024-320-2024-317.png"
           alt=""
           width={40}
           height={43}

@@ -26,7 +26,7 @@ import { CREAM, INK, SAND } from "@/components/screens/account-chrome";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const ART = "/veloria/screens/";
+const ART = "/eldreve/screens/";
 /** Hairline color of the hub's row dividers (stroke #DED6CC at weight 0.7). */
 const HAIR = "#DED6CC";
 

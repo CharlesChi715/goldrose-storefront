@@ -93,7 +93,7 @@ export function KeepsakeShareScreen() {
       {/* 1523:1453 draws an "ELDREVE" monogram — the 07-28 rose emblem
           stays, centred in the monogram's box. */}
       <img
-        src="/veloria/screens/1245-118.svg"
+        src="/eldreve/screens/1245-118.svg"
         alt=""
         width={28}
         height={28}
@@ -110,10 +110,10 @@ export function KeepsakeShareScreen() {
         The 4th recipient
       </div>
       <div style={{ ...abs(56, 244, 318), ...txt(9, 16, GOLD, "center") }}>
-        in San Francisco to receive a ELDREVE gift
+        in San Francisco to receive an ELDREVE gift
       </div>
       <img
-        src="/veloria/screens/1523-1439.png"
+        src="/eldreve/screens/1523-1439.png"
         alt=""
         width={278}
         height={228}

@@ -28,7 +28,7 @@ import { BackButton } from "@/components/BackButton";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 
-const A = "/veloria/screens";
+const A = "/eldreve/screens";
 
 const GREEN = "#09442E"; // brand green: headline, values, primary CTA
 const INK = "#29211F";

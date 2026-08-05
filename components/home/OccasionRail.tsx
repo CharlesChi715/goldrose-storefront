@@ -45,7 +45,7 @@ type RecipientCard = {
 const RECIPIENT_CARDS: RecipientCard[] = [
   {
     // 436:277 · Gifts for Wife
-    photo: { src: "/veloria/home/436-279.png", x: -25.4 },
+    photo: { src: "/eldreve/home/436-279.png", x: -25.4 },
     title: { y: 159, lineHeight: "21px", text: "Valentine's Day\nGifts" },
     // 436:282 · copy (Goudy is single-weight; design's 500 not applied)
     copy: {
@@ -61,7 +61,7 @@ const RECIPIENT_CARDS: RecipientCard[] = [
   },
   {
     // 436:291 · Thoughtful Gifts She'll Love
-    photo: { src: "/veloria/home/436-293.png", x: -241.3 },
+    photo: { src: "/eldreve/home/436-293.png", x: -241.3 },
     title: { y: 161, lineHeight: "21px", text: "Valentine's Day\nGifts" },
     // 436:296 · copy (Goudy, single-weight)
     copy: {
@@ -77,7 +77,7 @@ const RECIPIENT_CARDS: RecipientCard[] = [
   },
   {
     // 436:305 · Anniversary Gifts for Wife (the design parks this one clipped)
-    photo: { src: "/veloria/home/436-307.png", x: -457.2 },
+    photo: { src: "/eldreve/home/436-307.png", x: -457.2 },
     title: { y: 166, lineHeight: "18px", text: "Anniversary Gifts\nfor Wife" },
     // 436:309 · copy
     copy: {
@@ -198,7 +198,7 @@ export function OccasionRail() {
             </div>
             {/* 436:283/297/311 · card ornament */}
             <img
-              src="/veloria/home/436-283.svg"
+              src="/eldreve/home/436-283.svg"
               alt=""
               style={{
                 ...abs(61.233, card.ornamentY, 53.534, 12.818),
@@ -207,7 +207,7 @@ export function OccasionRail() {
             />
             {/* 436:290/304/310 · CTA (rendered strip) */}
             <img
-              src="/veloria/home/191-154.svg"
+              src="/eldreve/home/191-154.svg"
               alt="SHOP WIFE GIFTS →"
               width={152}
               height={13}

@@ -66,9 +66,9 @@ const CRAFT_STEPS = [
 // Per-step craft photos for crops 1–3 (165:141 / 165:146 / 165:151); crop 4
 // is baked into the 165-155.svg frame render below.
 const CRAFT_PHOTOS = [
-  "/veloria/home/165-141.png",
-  "/veloria/home/165-146.png",
-  "/veloria/home/165-151.png",
+  "/eldreve/home/165-141.png",
+  "/eldreve/home/165-146.png",
+  "/eldreve/home/165-151.png",
 ];
 
 // Six workshop gallery crops (2380:692…2380:702), coords relative to the lower
@@ -225,7 +225,7 @@ export function A9() {
       ))}
       {/* 165:155 · craft crop 4 — the whole frame is served as one Figma SVG render */}
       <img
-        src="/veloria/home/165-155.svg"
+        src="/eldreve/home/165-155.svg"
         alt={CRAFT_STEPS[3].alt}
         width={90}
         height={96}
@@ -305,7 +305,7 @@ export function A9() {
         style={{ ...abs(93, 380, 246, 38), display: "block" }}
       >
         <img
-          src="/veloria/home/165-180.svg"
+          src="/eldreve/home/165-180.svg"
           alt="EXPLORE OUR CRAFT →"
           width={246}
           height={38}
@@ -323,7 +323,7 @@ export function A9() {
       >
         {/* 482:118 · rose divider */}
         <img
-          src="/veloria/home/482-118.svg"
+          src="/eldreve/home/482-118.svg"
           alt=""
           width={104}
           height={14}
@@ -373,7 +373,7 @@ export function A9() {
             }}
           >
             <img
-              src="/veloria/home/482-129.png"
+              src="/eldreve/home/482-129.png"
               alt={c.alt}
               width={430}
               height={913}
@@ -443,7 +443,7 @@ export function A9() {
                   }}
                 >
                   <img
-                    src="/veloria/home/482-129.png"
+                    src="/eldreve/home/482-129.png"
                     alt={`${c.title} certificate`}
                     width={430}
                     height={913}

@@ -115,7 +115,7 @@ export function SupportChatScreen() {
       {/* header — the 返回 arrow (1523:1524) is the frame's own render */}
       <BackButton
         fallback="/care"
-        src="/veloria/screens/1523-1524.png"
+        src="/eldreve/screens/1523-1524.png"
         style={abs(13, 17, 40, 43)}
       />
       <div
@@ -159,7 +159,7 @@ export function SupportChatScreen() {
         </span>
       </div>
       <img
-        src="/veloria/screens/1523-1481.png"
+        src="/eldreve/screens/1523-1481.png"
         alt=""
         width={82}
         height={78}
@@ -235,7 +235,7 @@ export function SupportChatScreen() {
             </div>
             {/* 1523:1495/1505/1515 — identical avatar exports, one file serves all */}
             <img
-              src="/veloria/screens/1523-1495.svg"
+              src="/eldreve/screens/1523-1495.svg"
               alt=""
               width={28}
               height={28}
@@ -275,7 +275,7 @@ export function SupportChatScreen() {
       <Glyph src="1523-1520" x={294} y={883} w={30} h={20} ink={[9, 9]} />
       {/* ☺ (1523:1521) — the 07-28 frame-render crop, box centre unchanged at (349,893) */}
       <img
-        src="/veloria/screens/1244-163.png"
+        src="/eldreve/screens/1244-163.png"
         alt=""
         width={16}
         height={16}

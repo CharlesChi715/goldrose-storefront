@@ -70,7 +70,7 @@ export function DeleteConfirmScreen() {
       <BrandWordmark x={148} y={0} w={140} h={51} />
       <BackButton
         fallback="/account"
-        src="/veloria/screens/1523-1265.png"
+        src="/eldreve/screens/1523-1265.png"
         style={abs(15, 68, 40, 42)}
       />
       <div
@@ -96,7 +96,7 @@ export function DeleteConfirmScreen() {
         {"Permanently close your account\nand remove associated data."}
       </div>
       <img
-        src="/veloria/screens/1523-1230.svg"
+        src="/eldreve/screens/1523-1230.svg"
         alt=""
         width={92}
         height={78}
@@ -106,7 +106,7 @@ export function DeleteConfirmScreen() {
       {/* warnings */}
       <div style={sCard(16, 270, 398, 324)} />
       <img
-        src="/veloria/screens/1523-1235.svg"
+        src="/eldreve/screens/1523-1235.svg"
         alt=""
         width={28}
         height={28}
@@ -140,7 +140,7 @@ export function DeleteConfirmScreen() {
       {/* confirm card — styled div for the DELETE field, checkbox flips visually */}
       <div style={sCard(16, 606, 398, 196)} />
       <img
-        src="/veloria/screens/1523-1252.svg"
+        src="/eldreve/screens/1523-1252.svg"
         alt=""
         width={24}
         height={24}

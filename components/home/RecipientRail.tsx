@@ -153,7 +153,7 @@ export function RecipientRail() {
               }}
             >
               <img
-                src="/veloria/home/163-86.png"
+                src="/eldreve/home/163-86.png"
                 alt="Gold-dipped rose gift"
                 width={546.1}
                 height={911.9}
@@ -195,7 +195,7 @@ export function RecipientRail() {
               {card.copy.text}
             </div>
             <img
-              src="/veloria/home/436-283.svg"
+              src="/eldreve/home/436-283.svg"
               alt=""
               width={53.534}
               height={12.818}
@@ -205,7 +205,7 @@ export function RecipientRail() {
               }}
             />
             <img
-              src="/veloria/home/191-154.svg"
+              src="/eldreve/home/191-154.svg"
               alt="SHOP WIFE GIFTS →"
               width={152}
               height={13}

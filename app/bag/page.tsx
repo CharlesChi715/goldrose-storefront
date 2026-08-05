@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * The shopping bag (`/bag`) — a pixel-exact import of the "B-1 · Shopping
- * Bag" frame (1523:3059, 430×1726, 07-29 restyle) from the VELORIA file. The line
+ * Bag" frame (1523:3059, 430×1726, 07-29 restyle) from the ELDREVE file. The line
  * items are still the design's placeholder rows: the cart itself lives in
  * localStorage (lib/cart/store.ts) and wiring it into this layout is a
  * follow-up. The checkout CTA goes to the real /checkout.

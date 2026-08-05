@@ -2,13 +2,13 @@
 /**
  * ROLE OF THIS FILE
  * The product detail page (/products/[slug]) — a pixel-exact implementation
- * of the 详情页 frame (node 2:2, 430×2501) from the VELORIA Figma file.
+ * of the 详情页 frame (node 2:2, 430×2501) from the ELDREVE Figma file.
  *
  * AI-TAG(AI-016): AGENT-UNSURE — Figma's Ready-for-dev PDP is now 1523:3971
  * at 430×1616; this page is still the July layout. See
  * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
  * Every coordinate, size, color, and font value comes verbatim from the
- * Figma REST API; photo assets in /public/veloria are exact 2x node renders.
+ * Figma REST API; photo assets in /public/eldreve are exact 2x node renders.
  *
  * Every product renders the same pixel design; the slug picks the product,
  * and live name/price/photos come from the DB catalog (lib/supabase/catalog)
@@ -225,7 +225,7 @@ export default async function ProductDetailPage({
         >
           <img
             className="gr-photo"
-            src="/veloria/detail-hero.png"
+            src="/eldreve/detail-hero.png"
             alt={product.images[0]?.alt ?? product.title}
             width={398}
             height={250}
@@ -288,7 +288,7 @@ export default async function ProductDetailPage({
             Real Rose · Hand-Finished · Made to Last
           </div>
           <img
-            src="/veloria/glyph-stars-14.png"
+            src="/eldreve/glyph-stars-14.png"
             alt="5 stars"
             width={72}
             height={21}
@@ -368,7 +368,7 @@ export default async function ProductDetailPage({
           ].map((row, i) => (
             <div key={row.label}>
               <img
-                src={`/veloria/${row.glyph}.png`}
+                src={`/eldreve/${row.glyph}.png`}
                 alt=""
                 width={row.glyphW}
                 height={28}
@@ -472,7 +472,7 @@ export default async function ProductDetailPage({
               }}
             >
               <img
-                src={`/veloria/${tile.img}.png`}
+                src={`/eldreve/${tile.img}.png`}
                 alt={tile.label}
                 width={30}
                 height={30}
@@ -584,7 +584,7 @@ export default async function ProductDetailPage({
                 }}
               />
               <img
-                src={`/veloria/${tile.glyph}.png`}
+                src={`/eldreve/${tile.glyph}.png`}
                 alt=""
                 width={30}
                 height={36}
@@ -682,7 +682,7 @@ export default async function ProductDetailPage({
               }}
             >
               <img
-                src={`/veloria/${row.glyph}.png`}
+                src={`/eldreve/${row.glyph}.png`}
                 alt=""
                 width={row.glyphW}
                 height={28}
@@ -711,7 +711,7 @@ export default async function ProductDetailPage({
               ) : (
                 // The "＋" glyph, as design pixels (fallback fonts render it differently)
                 <img
-                  src="/veloria/glyph-pers-plus.png"
+                  src="/eldreve/glyph-pers-plus.png"
                   alt=""
                   width={20}
                   height={24}
@@ -759,7 +759,7 @@ export default async function ProductDetailPage({
             PayPal
           </div>
           <img
-            src="/veloria/glyph-applepay.png"
+            src="/eldreve/glyph-applepay.png"
             alt="Apple Pay"
             width={48}
             height={24}
@@ -782,7 +782,7 @@ export default async function ProductDetailPage({
             {"View All \u00A0›"}
           </div>
           <img
-            src="/veloria/ugc-strip.png"
+            src="/eldreve/ugc-strip.png"
             alt="Customer unboxing photos"
             width={366}
             height={82}
@@ -834,7 +834,7 @@ export default async function ProductDetailPage({
             keep its beauty
           </div>
           <img
-            src="/veloria/about-rose.png"
+            src="/eldreve/about-rose.png"
             alt="Gold dipped rose detail"
             width={190}
             height={196}
@@ -864,7 +864,7 @@ export default async function ProductDetailPage({
             4.9
           </div>
           <img
-            src="/veloria/glyph-stars-15.png"
+            src="/eldreve/glyph-stars-15.png"
             alt="5 stars"
             width={80}
             height={22}
@@ -1042,7 +1042,7 @@ export default async function ProductDetailPage({
               }}
             >
               <img
-                src={`/veloria/${card.img}.png`}
+                src={`/eldreve/${card.img}.png`}
                 alt={card.name}
                 width={116}
                 height={102}
@@ -1061,7 +1061,7 @@ export default async function ProductDetailPage({
                 {card.name}
               </div>
               <img
-                src="/veloria/glyph-stars-9.png"
+                src="/eldreve/glyph-stars-9.png"
                 alt="5 stars"
                 width={60}
                 height={15}

@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * The Business & Partnerships screen, imported pixel-exact from VELORIA frame
+ * The Business & Partnerships screen, imported pixel-exact from ELDREVE frame
  * 1523:2947 ("Business · Procurement", 430×1614, 2026-07-29 delivery). Seven
  * design modules stack on a 430-wide canvas: 01 Procurement Hero, 02 Account
  * Type Tabs, 03 Procurement Sign In, 04 Procurement Services, 05 Purchasing
@@ -46,7 +46,7 @@ import {
   Glyph,
 } from "@/components/login/tokens";
 
-const A = "/veloria/business";
+const A = "/eldreve/business";
 
 /* ---------- 01 · Procurement Hero (1523:2949, 430×310) ---------- */
 
@@ -86,7 +86,7 @@ function ProcurementHero() {
       </div>
       <BackButton
         fallback="/account"
-        src="/veloria/home/56-71.png"
+        src="/eldreve/home/56-71.png"
         style={abs(16, 24, 40, 43)}
       />
       <Link
@@ -95,7 +95,7 @@ function ProcurementHero() {
         aria-label="ELDREVE home"
       >
         <img
-          src="/veloria/brand/eldreve-136x40.png"
+          src="/eldreve/brand/eldreve-136x40.png"
           alt="ELDREVE"
           style={{ display: "block", width: 136, height: 40 }}
         />
@@ -783,7 +783,7 @@ export function BusinessLogin() {
           {/* Same ✉ node as the sign-in frame, same size — reuse the PNG; the
               07-29 SVG re-export (1523-2964.svg) degrades to a solid box. */}
           <img
-            src="/veloria/login/76-69.png"
+            src="/eldreve/login/76-69.png"
             alt=""
             style={{ ...abs(14, 16.5, 19, 19), display: "block" }}
           />

@@ -221,7 +221,7 @@ export function SearchOverlay({
             }}
           >
             <img
-              src="/veloria/screens/1523-3308.png"
+              src="/eldreve/screens/1523-3308.png"
               alt=""
               style={{ display: "block", width: 40, height: 43 }}
             />
@@ -229,7 +229,7 @@ export function SearchOverlay({
           {/* 1523:3309 brand wordmark image — the ELDREVE mark, shipped
           pixel-exact (the dialog keeps its "Search" aria-label). */}
           <img
-            src="/veloria/brand/eldreve-136x40.png"
+            src="/eldreve/brand/eldreve-136x40.png"
             alt="ELDREVE"
             width={136}
             height={40}

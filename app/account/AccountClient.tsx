@@ -10,7 +10,7 @@
  * AI-020 answered 2026-08-04 (owner): /account/signup is the ONE login page.
  * A visitor who is not signed in is redirected there rather than being shown
  * a login screen at this URL. The old second login screen (ShoppingLogin,
- * VELORIA frame 74:53) is deleted — it predated the live signup flow and was
+ * ELDREVE frame 74:53) is deleted — it predated the live signup flow and was
  * never repointed when that went live on 08-03, which is why two login
  * screens ran in parallel for a week.
  *

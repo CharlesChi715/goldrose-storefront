@@ -259,7 +259,7 @@ export function MenuDrawer({
         >
           {/* 2361:339 · brand wordmark, the same art the page headers use */}
           <img
-            src="/veloria/brand/eldreve-140x51.png"
+            src="/eldreve/brand/eldreve-140x51.png"
             alt="ELDREVE"
             width={140}
             height={51}
@@ -280,7 +280,7 @@ export function MenuDrawer({
             }}
           >
             <img
-              src="/veloria/menu/close.svg"
+              src="/eldreve/menu/close.svg"
               alt=""
               width={20}
               height={20}
@@ -350,7 +350,7 @@ export function MenuDrawer({
                     {row.link.label}
                   </div>
                   <img
-                    src="/veloria/menu/chevron-right.svg"
+                    src="/eldreve/menu/chevron-right.svg"
                     alt=""
                     width={18}
                     height={18}
@@ -371,7 +371,7 @@ export function MenuDrawer({
             const inner = (
               <>
                 <img
-                  src={`/veloria/menu/${group.icon}.svg`}
+                  src={`/eldreve/menu/${group.icon}.svg`}
                   alt=""
                   width={28}
                   height={28}
@@ -390,7 +390,7 @@ export function MenuDrawer({
                   {group.title}
                 </div>
                 <img
-                  src={`/veloria/menu/chevron-${expanded ? "up" : "down"}.svg`}
+                  src={`/eldreve/menu/chevron-${expanded ? "up" : "down"}.svg`}
                   alt=""
                   width={20}
                   height={20}

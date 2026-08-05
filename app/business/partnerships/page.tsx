@@ -2,7 +2,7 @@
  * ROLE OF THIS FILE
  * Corporate partnerships (`/business/partnerships`) — a pixel-exact import of
  * the "B-3 · Business Partnerships" frame (1523:567, 430×1907, 07-29) from the
- * VELORIA Figma file: hero, colourways, partner grid, advantages, the
+ * ELDREVE Figma file: hero, colourways, partner grid, advantages, the
  * four-step process and two CTAs (the frame carries no enquiry form). Copy is
  * the design's own placeholder text. "Apply for wholesale" links to
  * /business/wholesale; "Contact business team" has no destination yet, so it

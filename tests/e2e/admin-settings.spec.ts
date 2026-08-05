@@ -139,7 +139,7 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   // Default → the PNG crop serves.
   await page.goto("/shop");
   await expect(
-    page.locator('img[src="/veloria/home/549-95.svg"]'),
+    page.locator('img[src="/eldreve/home/549-95.svg"]'),
   ).toBeVisible();
 
   // Edit in Content → real text renders in the same box.
@@ -155,7 +155,7 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   await expect(
     page.getByText("FREE SHIPPING OVER $75 · ELDREVE"),
   ).toBeVisible();
-  await expect(page.locator('img[src="/veloria/home/549-95.svg"]')).toHaveCount(
+  await expect(page.locator('img[src="/eldreve/home/549-95.svg"]')).toHaveCount(
     0,
   );
 
@@ -165,7 +165,7 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   await expect(page.getByText("Content saved").first()).toBeVisible();
   await page.goto("/shop");
   await expect(
-    page.locator('img[src="/veloria/home/549-95.svg"]'),
+    page.locator('img[src="/eldreve/home/549-95.svg"]'),
   ).toBeVisible();
 });
 

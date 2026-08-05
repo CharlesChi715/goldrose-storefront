@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * The four product-page overlays, restyled 2026-07-29 to the VELORIA
+ * The four product-page overlays, restyled 2026-07-29 to the ELDREVE
  * unification frames, plus the transparent triggers that open them from the
  * rows the page already draws:
  *
@@ -97,10 +97,10 @@ const COLORS = [
 // the three shop-card photos the frame's thumb fills reuse (872ee15b/
 // 982aff27/d1715c8b are the home renders, just cropped to 86×106).
 const MEDIA = [
-  "/veloria/screens/1523-4260.png",
-  "/veloria/home/58-91.png",
-  "/veloria/home/58-103.png",
-  "/veloria/home/58-61.png",
+  "/eldreve/screens/1523-4260.png",
+  "/eldreve/home/58-91.png",
+  "/eldreve/home/58-103.png",
+  "/eldreve/home/58-61.png",
 ];
 
 // 1523:4389…4411 — unboxing tiles (badges baked into the renders).
@@ -283,7 +283,7 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
         </div>
         {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass */}
         <GlyphImg
-          src="/veloria/screens/1523-4220.svg"
+          src="/eldreve/screens/1523-4220.svg"
           x={282}
           y={60}
           w={128}
@@ -344,7 +344,7 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
           {/* 1523:4231 «Recent⌄» — glyph-bearing label; the 07-29 export is
               missing, so the identically-specced 925-198 pixels stay in. */}
           <GlyphImg
-            src="/veloria/screens/925-198.svg"
+            src="/eldreve/screens/925-198.svg"
             x={6}
             y={11}
             w={68}
@@ -358,7 +358,7 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
           return (
             <div key={review.author}>
               <GlyphImg
-                src="/veloria/screens/1523-4232.svg"
+                src="/eldreve/screens/1523-4232.svg"
                 x={20}
                 y={y}
                 w={120}
@@ -466,7 +466,7 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
           }}
         />
         <GlyphImg
-          src="/veloria/screens/1523-4293.svg"
+          src="/eldreve/screens/1523-4293.svg"
           x={30}
           y={51}
           w={32}
@@ -542,7 +542,7 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
               }}
             >
               <img
-                src={`/veloria/screens/${option.img}.png`}
+                src={`/eldreve/screens/${option.img}.png`}
                 alt={option.name}
                 width={70}
                 height={62}
@@ -575,7 +575,7 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
               {isSelected ? (
                 // 1523:4311 ✓ — card-relative (96,7), Figma's gold glyph
                 <img
-                  src="/veloria/screens/1523-4311.svg"
+                  src="/eldreve/screens/1523-4311.svg"
                   alt=""
                   style={{
                     ...abs(96, 7, 23, 23),
@@ -598,7 +598,7 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
           }}
         />
         <img
-          src={`/veloria/screens/${selected === 1 ? "1523-4353" : color.img}.png`}
+          src={`/eldreve/screens/${selected === 1 ? "1523-4353" : color.img}.png`}
           alt=""
           width={50}
           height={52}
@@ -673,7 +673,7 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
         style={{ ...RESET, ...abs(18, 30, 42, 50) }}
       >
         <GlyphImg
-          src="/veloria/screens/1523-4258.svg"
+          src="/eldreve/screens/1523-4258.svg"
           x={0}
           y={0}
           w={42}
@@ -749,7 +749,7 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
         </span>
       </button>
       <GlyphImg
-        src="/veloria/screens/1523-4265.svg"
+        src="/eldreve/screens/1523-4265.svg"
         x={86}
         y={727}
         w={28}
@@ -762,7 +762,7 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
         Pinch to zoom
       </div>
       <GlyphImg
-        src="/veloria/screens/1523-4267.svg"
+        src="/eldreve/screens/1523-4267.svg"
         x={248}
         y={725}
         w={30}
@@ -992,7 +992,7 @@ function UnboxingGallery({ onClose }: { onClose: () => void }) {
             }}
           >
             <img
-              src={`/veloria/screens/${tile}.png`}
+              src={`/eldreve/screens/${tile}.png`}
               alt="Customer unboxing photo"
               width={118}
               height={122}
@@ -1044,7 +1044,7 @@ export function PdpOverlays() {
       >
         <img
           className="gr-photo"
-          src="/veloria/screens/1523-4195.png"
+          src="/eldreve/screens/1523-4195.png"
           alt=""
           width={398}
           height={250}
