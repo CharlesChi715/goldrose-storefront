@@ -27,6 +27,7 @@
     "figma:proto": "node scripts/figma/cli.mjs proto",
     "figma:comments": "node scripts/figma/cli.mjs comments",
     "figma:routes": "node scripts/figma/cli.mjs routes",
+    "figma:unbuilt": "node scripts/figma/cli.mjs unbuilt",
     "figma:baseline": "node scripts/figma/cli.mjs baseline",
     "polish": "npm run format"
   },
