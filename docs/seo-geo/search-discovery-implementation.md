@@ -2,7 +2,8 @@
 
 **Status:** implementation source of truth  
 **Scope:** SEO, AI-search/GEO, product feeds, and measurement  
-**Last verified:** 2026-07-23
+**Last verified:** 2026-07-23 (platform research) · **repo facts reconciled:**
+2026-08-04
 
 This is the operational plan for making ELDREVE discoverable in conventional
 search, shopping surfaces, and AI-assisted product discovery. Use

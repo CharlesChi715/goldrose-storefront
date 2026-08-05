@@ -1,14 +1,13 @@
 /**
  * ROLE OF THIS FILE
- * /account — the storefront "Me" tab (owner request 2026-07-23): customer
- * sign-in with Google / Apple (first round) and passkeys, then a simple
- * account view (orders placed with the account's email, passkey
+ * /account — the storefront "Me" tab (owner request 2026-07-23): the
+ * signed-in account view (orders placed with the account's email, passkey
  * management).
  *
- * Signed out, this renders the pixel-exact ELDREVE frame 74:53 (imported
- * 2026-07-25) and signs in with an emailed one-time code. Signed in, it keeps
- * the hand-built account view — the design ships no signed-in frame. All auth
- * runs client-side; the page itself stays static.
+ * Signed-in only since AI-020 (2026-08-04): /account/signup is the single
+ * login page, and AccountClient redirects there when there is no session.
+ * The design ships no signed-in frame, so this keeps the hand-built account
+ * view. All auth runs client-side; the page itself stays static.
  */
 
 import type { Metadata } from "next";

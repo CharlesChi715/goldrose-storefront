@@ -85,8 +85,8 @@ team’s parts follow.
 ```
 路由 · 状态 · 端 · 设计团队自己的部分（随意）
 ```
-    路由解释：我们的网站是https://goldrose-storefront.vercel.app/，
-    点击shop页面，网址变成：https://goldrose-storefront.vercel.app/shop
+    路由解释：我们的网站是https://eldreve.com/，
+    点击shop页面，网址变成：https://eldreve.com/shop
     多出来的/shop就是路由route（都以/开头）。
 
 **归属规则（v2 核心）：「端」是分界线。**

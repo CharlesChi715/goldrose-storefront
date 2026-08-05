@@ -1,8 +1,8 @@
 # Ideas & Backlog
 
 A running list of ideas to capture, review, and triage. Keep raw ideas here;
-once an idea is accepted, move it into the README "Recommended Next Steps" or
-turn it into a real task.
+once an idea is accepted, move it into a feature record under
+[`docs/features/`](features/README.md) — see the lifecycle diagram there.
 
 > **Rule:** This file holds only ideas as given by the owner. Do not add
 > AI-generated descriptions, elaboration, or sub-bullets — record the idea in

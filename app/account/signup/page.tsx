@@ -10,10 +10,6 @@
  * header). This page stays a server component so the metadata below is
  * static; the interactive screen is the client component it renders.
  *
- * AI-TAG(AI-020): AGENT-UNSURE — the frame is a unified email entry point
- * while its name, this route and the title still say "create account", and
- * it duplicates the signed-out /account login screen. See
- * /agent-delivery/sessions/figma-sync-signup-mepage-08-02-feat-figma-sync.md.
  */
 
 import { Suspense } from "react";

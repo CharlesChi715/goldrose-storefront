@@ -203,7 +203,7 @@ export function VHeader({
         aria-label="Home"
       >
         <img
-          src="/eldreve/logo.png"
+          src="/eldreve/brand/eldreve-136x40.png"
           alt="ELDREVE"
           width={136}
           height={39}

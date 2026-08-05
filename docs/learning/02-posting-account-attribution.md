@@ -16,7 +16,7 @@ Commit: `17730c3 feat(analytics): per-account attribution for sales commissions`
 The owner runs several social accounts per platform (e.g. multiple TikTok accounts, one per salesperson). Each account posts links tagged with its own `utm_content` name, e.g.
 
 ```
-https://goldrose-storefront.vercel.app/?utm_source=tiktok&utm_content=amy&utm_campaign=rose-video-1
+https://eldreve.com/?utm_source=tiktok&utm_content=amy&utm_campaign=rose-video-1
 ```
 
 When a visitor clicks such a link, browses, and buys, the admin can see:

@@ -4764,6 +4764,91 @@ Branch `feat/products-upload`, commit `88f9dc3` (rebased onto main, not merged).
   built-in re-measure. SKILL.md now delegates to it. Verified on a fixture
   incl. a shift round-trip. Not repo code — logged for history only.
 
+## 2026-08-04 — repo-wide stale sweep (/tidy, apply mode)
+
+Read-only audit of the whole tree first (docs, non-code folders, code), then
+applied the findings. Verification: typecheck clean, lint unchanged (2
+pre-existing warnings), 67/67 unit, **101/101 e2e**, build clean, Prettier clean.
+
+- **Dead code removed** (each verified zero-reference before deleting):
+  `AccountNavBand` + its 5-tab `NAV` table and now-unused `Link` import, and
+  `ICON_GOLD` (`components/screens/account-chrome.tsx`); `playfairSC`
+  (`lib/fonts.ts`) — an unused export that still made next/font self-host a
+  Google font; `expressMethods` (`lib/checkout/methods.ts`).
+- **`app/orders/page.tsx` deleted** — release-queue item 4. Zero inbound links
+  (customers use `/orders/track` and `/account/orders`); build confirms the
+  route is gone and `/orders/track` survives.
+- **Stale comments corrected**: `app/account/page.tsx` claimed the deleted
+  frame 74:53 was the signed-out render (contradicted AI-020);
+  `app/layout.tsx` told readers never to set a domain and named the vercel.app
+  host, contradicting the resolved OQ-4.
+- **AI-020 closed** via `agent-inbox:close` (SUMMARY had recorded it answered
+  while the tracker still had it OPEN) — archived, row + tag cleared, 22 open.
+- **INBOX "Session files" table rebuilt** — it omitted
+  `figma-sync-homepage-08-04` entirely (6 of the then-23 open matters) and had
+  4 wrong counts. Now newest-first with a note on what `0` means.
+- **Docs reconciled**: deleted 0-byte `docs/domain.md`; `features/README.md` no
+  longer claims a roadmap tree that does not exist and gained a hand-written
+  index of all 9 feature records (the torn-down generator *was* the index);
+  `engagement-tracking.md` retargeted from the old 11/15-band homepage to the
+  real 7 bands (A-5/A-6/A-9 untagged); `learning/07` repointed from the deleted
+  `ShoppingLogin.tsx` to `SignupScreen.tsx` with the current OTP flow; three
+  stale `goldrose-storefront.vercel.app` URLs → `eldreve.com`; `admin-design.md`
+  §12 marks the Shopify deletion done and flags that `docs/shopify-reference/`
+  was never created; SEO docs carry a dated reconciliation note rather than a
+  faked re-verification; `ideas.md` no longer points at a README section that
+  does not exist. **docs/ has zero dead relative links.**
+- **SUMMARY.md**: "Shopify code is removed" reworded — read literally it told a
+  future agent to rip out the Polaris admin UI; dwell coverage corrected 3→4 of
+  7 bands; rename scope replaced with a measured 227 occurrences / 109 files
+  plus the `app/layout.tsx:22-36` starting point; release-queue item 4 rewritten
+  as guest order lookup; archive rule reworded to match actual practice.
+- **Structure**: `assets/bottom-nav-buttons/` (~7 MB of four-tab source art incl.
+  the removed WHOLESALE tab) → `assets/archive/` with a README row; the two
+  duplicated `.claude/skills/` dirs symlinked to `.agents/` while still
+  byte-identical; `agent-delivery/README.md` repointed from the gitignored
+  `.claude/` path to the tracked `.agents/` one; removed the empty
+  `scripts/features/` shell; cleared gitignored scratch; deleted 4 merged local
+  branches (only `main` + the two unmerged remain).
+- **Fixed a long-red e2e spec**: `admin-auth.spec.ts`'s final English assertion
+  lacked `exact: true` (every 中文 assertion in the same test had it), so it
+  matched both "Orders" and "All orders" and tripped Playwright strict mode.
+  The suite is green for the first time since the Orders submenu was added.
+
+Deliberately NOT done: the GoldRose→ELDREVE rename (AI-021 — owner ruling
+pending on prose casing) and the 4-tab Wholesale band still drawn by
+`PartnershipsScreen.tsx` (a design call, not a cleanup).
+
+## 2026-08-04 — Stale-asset sweep: GoldRose wordmark retired from the header
+
+- Spotted while building a 512×512 app logo for the TikTok app registration:
+  the repo's `public/veloria/logo.png` is the **GoldRose** wordmark, and
+  `components/chrome.tsx:206` was serving it under `alt="ELDREVE"` on /shop and
+  every page using that header variant. The other two headers in the same file
+  already used `eldreve-136x40.png`; pointed the third at it too. A live brand
+  bug, not merely an unused file — and fixing it is what made the asset
+  archivable.
+- Archived to `assets/archive/` (mirroring the original path, per the existing
+  convention): `public/veloria/logo.png`, `public/home/logo.png`.
+  `public/home/` is now empty; the rest had been archived previously.
+- Verified: `tsc --noEmit` clean; 5 routes (/, /shop, product, /checkout,
+  /account) render 78 image references, none pointing at archived paths, none
+  returning other than 200.
+- **Audit method worth reusing.** A filename-only grep reported 1276 assets as
+  unreferenced; spotting the runtime template `` `/veloria/${card.img}.png` ``
+  and re-matching on filename *stems* cut that to 1043. Static grep cannot see
+  dynamically built paths, so any dead-asset sweep must search for path-building
+  templates first and match the loosest plausible token. The naive list would
+  have deleted 233 live images.
+- **Not swept, deliberately:** 900 files under `public/veloria/screens` are
+  Figma frame exports the design work still refers to; `veloria/home` (106) is
+  mixed, since bands went 11→7 with A-4/A-7/A-8/A-10 deleted at source;
+  `veloria/login` (9) is the strongest remaining stale candidate because the
+  `ShoppingLogin` screen was deleted (AI-020). Unreferenced ≠ stale — the rest
+  needs a design-team call.
+- Note: VELORIA is the design team's **Figma file name**, not a brand name, so
+  `public/veloria/` needs no rename in the GoldRose→ELDREVE project.
+
 ## 2026-08-05 — ELDREVE rename (AI-021) on `feat/eldreve-rename`
 
 Charles renamed the design team's Figma file Veloria → ELDREVE and asked for

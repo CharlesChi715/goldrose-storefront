@@ -2,7 +2,9 @@
 
 **Purpose:** concise, verified background—not the implementation tracker
 
-**Last verified:** 2026-07-23
+**Last verified:** 2026-07-23 · **reconciled** 2026-08-04 (see
+[geo-intro.md](geo-intro.md)'s reconciliation note — the domain moved to
+eldreve.com and the `/policies/*` scaffolds landed without text)
 
 Use [search-discovery-implementation.md](search-discovery-implementation.md)
 for sequencing, ownership, gates, and acceptance criteria. Use
