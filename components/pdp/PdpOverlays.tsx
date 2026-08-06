@@ -247,6 +247,44 @@ function GlyphImg({
   );
 }
 
+/**
+ * A star row drawn from the design's own five-star glyph, filled to `fill`
+ * (0–1): a dimmed copy carries the empty stars, a clipped copy the earned
+ * ones. `natural` is the artwork's intrinsic width, so the clip lands in the
+ * gaps between stars rather than through one.
+ */
+function StarFill({
+  src,
+  x,
+  y,
+  w,
+  h,
+  natural,
+  fill,
+  label,
+}: {
+  src: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  natural: number;
+  fill: number;
+  label: string;
+}) {
+  const clipped = Math.max(0, Math.min(1, fill)) * natural;
+  return (
+    <div role="img" aria-label={label} style={abs(x, y, w, h)}>
+      <div style={{ ...abs(0, 0, w, h), opacity: 0.26 }}>
+        <GlyphImg src={src} x={0} y={0} w={w} h={h} align="left" />
+      </div>
+      <div style={{ ...abs(0, 0, clipped, h), overflow: "hidden" }}>
+        <GlyphImg src={src} x={0} y={0} w={w} h={h} align="left" />
+      </div>
+    </div>
+  );
+}
+
 /* ---------- the four overlays ---------- */
 
 function ReviewsDrawer({
@@ -304,15 +342,30 @@ function ReviewsDrawer({
         >
           {live && stats ? stats.average : "4.9"}
         </div>
-        {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass */}
-        <GlyphImg
-          src="/eldreve/screens/1523-4220.svg"
-          x={282}
-          y={60}
-          w={128}
-          h={26}
-          align="left"
-        />
+        {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass. With
+            live reviews it fills to the real average, so the art can never
+            show five stars for a 4.5 score. */}
+        {live && stats ? (
+          <StarFill
+            src="/eldreve/screens/1523-4220.svg"
+            x={282}
+            y={60}
+            w={128}
+            h={26}
+            natural={109}
+            fill={stats.average / 5}
+            label={`${stats.average} out of 5 stars`}
+          />
+        ) : (
+          <GlyphImg
+            src="/eldreve/screens/1523-4220.svg"
+            x={282}
+            y={60}
+            w={128}
+            h={26}
+            align="left"
+          />
+        )}
         <div style={{ ...abs(286, 90, 120), ...txt(15, 19, INK) }}>
           {live && stats
             ? `${stats.count} Review${stats.count === 1 ? "" : "s"}`
@@ -402,19 +455,16 @@ function ReviewsDrawer({
                   align="left"
                 />
               ) : (
-                <div
-                  aria-label={`${review.rating} of 5 stars`}
-                  style={{
-                    ...abs(20, 0, 120, 21),
-                    ...txt(16, 21, GOLD),
-                    letterSpacing: 3,
-                  }}
-                >
-                  {"★".repeat(review.rating)}
-                  <span style={{ opacity: 0.3 }}>
-                    {"★".repeat(5 - review.rating)}
-                  </span>
-                </div>
+                <StarFill
+                  src="/eldreve/screens/1523-4232.svg"
+                  x={20}
+                  y={0}
+                  w={120}
+                  h={21}
+                  natural={89}
+                  fill={review.rating / 5}
+                  label={`${review.rating} out of 5 stars`}
+                />
               )}
               <div
                 className={playfair.className}
