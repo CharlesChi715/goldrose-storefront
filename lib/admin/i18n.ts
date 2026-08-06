@@ -28,6 +28,7 @@ const en = {
   "nav.customers": "Customers",
   "nav.content": "Content",
   "nav.content.all": "All content",
+  "nav.content.home": "Home page",
   "nav.content.files": "Files",
   "nav.content.ideas": "Ideas",
   "nav.analytics": "Analytics",
@@ -669,6 +670,52 @@ const en = {
   "content.saved": "Content saved",
   "content.slot.help.promo":
     "✦ symbols may look slightly different from the original design once edited",
+  "content.home.link.title": "Home page sections",
+  "content.home.link.body":
+    "Headings, copy, buttons and links for every section of the storefront home page — and which sections show.",
+  "content.home.link.action": "Edit home page",
+
+  // Content → Home page (§9.8)
+  "home.title": "Home page",
+  "home.subtitle":
+    "Every section of the storefront home page, top to bottom. Saving publishes straight to the live site.",
+  "home.preview": "View home page",
+  "home.jump": "Jump to a section",
+  "home.unsaved": "Unsaved changes",
+  "home.unsavedBody":
+    "Your edits are not live yet. Save changes to publish them, or discard to go back.",
+  "home.discard": "Discard",
+  "home.saved": "Home page updated",
+  "home.saveFailed": "Could not save — check the link fields and try again",
+  "home.reset": "Reset",
+  "home.edited": "Edited",
+  "home.hidden": "Hidden",
+  "home.hide": "Hide section",
+  "home.show": "Show section",
+  "home.hideNote":
+    "Hiding a section removes its whole band and moves everything below it up the page.",
+  "home.hiddenNote":
+    "This section is not on the live home page. Everything below it has moved up.",
+  "home.resetSection": "Reset section",
+  "home.resetSection.title": "Reset this section to the design?",
+  "home.resetSection.body":
+    "Every edit in this section goes back to the design team's original wording, and the section is shown again. This cannot be undone.",
+  "home.resetAll": "Reset whole page",
+  "home.resetAll.title": "Reset the whole home page to the design?",
+  "home.resetAll.body":
+    "Every edit on every section goes back to the design team's original wording, and every hidden section is shown again. This cannot be undone.",
+  "home.artwork": "Design artwork",
+  "home.artworkHelp":
+    "This wording is part of an image exported from Figma, so it cannot be typed here — ask the design team to change it.",
+  "home.managed": "Managed elsewhere",
+  "home.managedOpen": "Open the screen that owns this",
+  "home.overBudget":
+    "Longer than the design's box — the end may be cut off on the live page.",
+  "home.charsOf": "of about",
+  "home.chars": "characters",
+  "home.badHref":
+    "Links must start with / (a page on this site), # , https:// , mailto: or tel:",
+  "home.multilineHelp": "One line per line — Enter starts a new line.",
 
   // Content → Ideas (visitor feedback)
   "ideas.column.message": "Idea",
@@ -708,6 +755,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.customers": "客户",
   "nav.content": "内容",
   "nav.content.all": "所有内容",
+  "nav.content.home": "首页",
   "nav.content.files": "文件",
   "nav.content.ideas": "想法",
   "nav.analytics": "分析",
@@ -1293,6 +1341,46 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "content.reset": "恢复原始内容",
   "content.saved": "内容已保存",
   "content.slot.help.promo": "编辑后 ✦ 符号可能与原设计略有差异",
+  "content.home.link.title": "首页板块",
+  "content.home.link.body":
+    "编辑店面首页每个板块的标题、文案、按钮和链接，并控制哪些板块显示。",
+  "content.home.link.action": "编辑首页",
+
+  "home.title": "首页",
+  "home.subtitle": "店面首页的全部板块，按页面顺序排列。保存后立即发布到线上。",
+  "home.preview": "查看首页",
+  "home.jump": "跳转到板块",
+  "home.unsaved": "有未保存的修改",
+  "home.unsavedBody": "修改尚未生效。点击保存以发布，或放弃修改。",
+  "home.discard": "放弃修改",
+  "home.saved": "首页已更新",
+  "home.saveFailed": "保存失败——请检查链接字段后重试",
+  "home.reset": "恢复原文",
+  "home.edited": "已修改",
+  "home.hidden": "已隐藏",
+  "home.hide": "隐藏此板块",
+  "home.show": "显示此板块",
+  "home.hideNote": "隐藏板块会移除整个区块，其下方的所有内容将整体上移。",
+  "home.hiddenNote": "此板块不会显示在线上首页，其下方内容已整体上移。",
+  "home.resetSection": "恢复此板块",
+  "home.resetSection.title": "将此板块恢复为设计稿内容？",
+  "home.resetSection.body":
+    "此板块的所有修改都将恢复为设计团队的原始文案，并重新显示该板块。此操作无法撤销。",
+  "home.resetAll": "恢复整个页面",
+  "home.resetAll.title": "将整个首页恢复为设计稿内容？",
+  "home.resetAll.body":
+    "所有板块的全部修改都将恢复为设计团队的原始文案，并重新显示所有已隐藏的板块。此操作无法撤销。",
+  "home.artwork": "设计稿图片",
+  "home.artworkHelp":
+    "该文字已烘焙进 Figma 导出的图片中，无法在此输入——请联系设计团队修改。",
+  "home.managed": "在其他页面管理",
+  "home.managedOpen": "前往对应管理页面",
+  "home.overBudget": "超出设计稿文本框宽度——线上页面可能会被截断。",
+  "home.charsOf": "字符，建议不超过约",
+  "home.chars": "字符",
+  "home.badHref":
+    "链接需以 / （本站页面）、# 、https:// 、mailto: 或 tel: 开头",
+  "home.multilineHelp": "每行一段——按回车换行。",
 
   "ideas.column.message": "想法",
   "ideas.column.from": "来自",

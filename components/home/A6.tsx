@@ -19,6 +19,7 @@ import { RecipientRail } from "@/components/home/RecipientRail";
 import { ReviewsRail } from "@/components/home/ReviewsRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 /* Recipient filter chips (static, not clickable). "Wife" is the selected
    state: orange stroke + orange label; the rest share the neutral pair. */
@@ -29,7 +30,6 @@ const CHIPS = [
     stroke: "#C76E29",
     labelX: 25.5,
     labelW: 19,
-    label: "Wife",
     color: "#BD5C1A",
   },
   {
@@ -38,7 +38,6 @@ const CHIPS = [
     stroke: "#E5D6C2",
     labelX: 72,
     labelW: 40,
-    label: "Girlfriend",
     color: "#3B2E2E",
   },
   {
@@ -47,7 +46,6 @@ const CHIPS = [
     stroke: "#E5D6C2",
     labelX: 136,
     labelW: 22,
-    label: "Mom",
     color: "#3B2E2E",
   },
   {
@@ -56,7 +54,6 @@ const CHIPS = [
     stroke: "#E5D6C2",
     labelX: 183.5,
     labelW: 31,
-    label: "Friends",
     color: "#3B2E2E",
   },
   {
@@ -65,12 +62,12 @@ const CHIPS = [
     stroke: "#E5D6C2",
     labelX: 240,
     labelW: 34,
-    label: "Couples",
     color: "#3B2E2E",
   },
 ] as const;
 
-export function A6() {
+export function A6({ c }: { c: HomeText["recipient"] }) {
+  const chips = [c.chip_1, c.chip_2, c.chip_3, c.chip_4, c.chip_5];
   return (
     <>
       {/* Module background (138:62) */}
@@ -98,7 +95,7 @@ export function A6() {
           whiteSpace: "nowrap",
         }}
       >
-        Shop by Recipient
+        {c.title}
       </div>
       <div
         className={goudy.className}
@@ -111,32 +108,32 @@ export function A6() {
           whiteSpace: "nowrap",
         }}
       >
-        Choose a rose gift for someone special.
+        {c.intro}
       </div>
 
       {/* Recipient filter chips (163:105…191:152) — static */}
-      {CHIPS.map((c) => (
+      {CHIPS.map((chip, i) => (
         <div
-          key={c.label}
+          key={chip.x}
           style={{
-            ...abs(c.x, 2435, c.w, 30),
+            ...abs(chip.x, 2435, chip.w, 30),
             background: "#FFF6EC",
             borderRadius: 999,
-            boxShadow: `inset 0 0 0 1px ${c.stroke}`,
+            boxShadow: `inset 0 0 0 1px ${chip.stroke}`,
           }}
         >
           <div
             className={notoSC.className}
             style={{
-              ...abs(c.labelX - c.x, 9.5, c.labelW),
+              ...abs(chip.labelX - chip.x, 9.5, chip.labelW),
               fontSize: 9,
               lineHeight: "10.8px",
               fontWeight: 400,
-              color: c.color,
+              color: chip.color,
               whiteSpace: "nowrap",
             }}
           >
-            {c.label}
+            {chips[i]}
           </div>
         </div>
       ))}
@@ -148,7 +145,7 @@ export function A6() {
       {/* 2380:526 / 2380:540 / 2380:554 · recipient cards — a swipeable rail
           since 2026-08-04 (H-22), on the same shared Carousel as A-5's
           structurally identical rail. */}
-      <RecipientRail />
+      <RecipientRail c={c} />
 
       {/* 2380:601 · dots 4 and 5 — the design draws five for three cards, so
           these two stay inert; RecipientRail wires the first three. */}
@@ -190,7 +187,7 @@ export function A6() {
           whiteSpace: "nowrap",
         }}
       >
-        Real Gifts, Real Moments
+        {c.reviews_title}
       </div>
       <div
         className={goudy.className}
@@ -203,7 +200,7 @@ export function A6() {
           whiteSpace: "nowrap",
         }}
       >
-        Loved by thousands, given with meaning.
+        {c.reviews_intro}
       </div>
 
       <ReviewsRail />
@@ -221,7 +218,7 @@ export function A6() {
       {/* Button · Read Customer Stories (163:111) — live since 07-30; target
           from the Figma prototype link on 1523:1992 (ON_CLICK → 1573:106 /story) */}
       <Link
-        href="/story"
+        href={c.reviews_cta_href}
         aria-label="Read customer stories"
         style={{
           ...abs(91, 3031, 246, 33),
@@ -241,7 +238,7 @@ export function A6() {
             whiteSpace: "nowrap",
           }}
         >
-          Read Customer Stories
+          {c.reviews_cta_label}
         </div>
         <img
           src="/eldreve/home/I163-111_145-55.svg"

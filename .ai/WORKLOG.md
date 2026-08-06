@@ -5402,3 +5402,47 @@ team wants to draw their own footer (AI-034).
   carousel tests), product-detail pixel baseline regenerated. Drove it in a
   real browser: auto-play steps one slide width every 1.8s, a drag swipes
   without opening the viewer, a tap opens it, reduced motion parks it.
+
+## 2026-08-07 01:11 AEST
+
+**Admin can edit every home page section** — branch `worktree-admin-home-sections`.
+
+New screen Content → **Home page** (`/admin/content/home`): all 8 sections of
+`/` in page order, ~100 fields, plus a show/hide switch per Figma band.
+
+- **`lib/home-content/registry.ts`** — one declarative description of every
+  editable string, with the design's own wording as the default and the field's
+  box geometry as a character budget. The `A*` components now render from it.
+- **Overrides-only storage.** A `site_content` row exists **iff** the owner's
+  value differs from the design default. Saving the default deletes the row;
+  reset deletes the row. No migration, no ~100-row seed, and a future Figma
+  sync updates every untouched field automatically. The alternative (seeded
+  rows carrying `default_value`) would have frozen a stale default into the DB
+  the first time the design changed.
+- **Show/hide re-stacks.** The seven A-bands tile the stage contiguously
+  (32→764→1405→1868→2344→3133→4124→5134 + 59 nav), so hiding one drops it,
+  slides later bands up by its height via a `translateY` wrapper, and shrinks
+  `ScaleFrame`. `HomeBand` renders children bare when the shift is 0, so the
+  untouched page emits exactly the DOM it did before — that is what lets the
+  pixel baseline stay byte-identical.
+- **Four field kinds.** `text`/`multiline`/`url` are typed in; `artwork` is
+  wording baked into a Figma SVG (§11) and `managed` is catalogue/review data —
+  both listed read-only with the reason, so the screen is a complete inventory.
+- **`isSafeHref`** rejects `javascript:` and friends at the write; the client
+  blocks Save on a bad link so one typo cannot cost a round of edits.
+- `promo.slogan` moved off `/admin/content` (which now filters `policy.`,
+  `home.`, `promo.`) and gained a pointer card to the new screen.
+
+**Two things the work turned up**
+
+- Five footer labels pad with **U+00A0**, not a space — the pixel test caught a
+  2px shift when I transcribed them as ordinary spaces (a normal space at the
+  edge of a `nowrap` flex item collapses). They are now written as escape
+  sequences in the registry rather than as invisible characters.
+- The hero eyebrow still reads `— G O L D R O S E —`: a miss in the 2026-08-05
+  ELDREVE rename. Left as-is (changing it is a copy decision, and it would move
+  the pixel baseline) but it is now editable in admin.
+
+**Verified:** typecheck, lint, 11 new unit tests (91 total), 4 new e2e tests,
+full e2e suite, and all three pixel baselines byte-identical. Drove the screen
+in a real browser at 1280×1150.

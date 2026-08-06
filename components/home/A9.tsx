@@ -16,6 +16,7 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 const GOLD = "#D4AF37";
 const CREAM = "#FFF6EC";
@@ -28,37 +29,29 @@ const CRAFT_STEPS = [
   {
     x: 20,
     num: "01",
-    title: "Hand-Selected",
     titleW: 90,
     centerTitle: true,
-    copy: "Only the most beautiful real roses at the perfect bloom.",
     alt: "Hand-selecting real roses at perfect bloom",
   },
   {
     x: 120,
     num: "02",
-    title: "Expert Finishing",
     titleW: 92,
     centerTitle: false,
-    copy: "Carefully finished by hand in pure 24k gold.",
     alt: "Rose being finished by hand in pure 24k gold",
   },
   {
     x: 220,
     num: "03",
-    title: "Quality Checked",
     titleW: 90,
     centerTitle: false,
-    copy: "Inspected for beauty, durability and perfection.",
     alt: "Gold-dipped rose under quality inspection",
   },
   {
     x: 320,
     num: "04",
-    title: "Protected & Packaged",
     titleW: 90,
     centerTitle: false,
-    copy: "Protected and packaged to arrive beautifully.",
     alt: "Gold rose protected and packaged for delivery",
   },
 ];
@@ -132,13 +125,25 @@ const WORKSHOP_CROPS = [
 
 // Certificate columns (2380:707…2380:726), x relative to the 422×116 strip.
 const CERTIFICATES = [
-  { x: 0, imgX: -120, title: "US Patent", num: "US 11,324,751 B2" },
-  { x: 116, imgX: -194, title: "European Patent", num: "EP 3 982 104 B1" },
-  { x: 232, imgX: -268, title: "China Patent", num: "ZL 2021 2 1234567.8" },
-  { x: 348, imgX: -341, title: "ISO 9001:2015", num: "Quality Certified" },
+  { x: 0, imgX: -120 },
+  { x: 116, imgX: -194 },
+  { x: 232, imgX: -268 },
+  { x: 348, imgX: -341 },
 ];
 
-export function A9() {
+export function A9({ c }: { c: HomeText["craft"] }) {
+  const steps = [
+    { title: c.step_1_title, copy: c.step_1_copy },
+    { title: c.step_2_title, copy: c.step_2_copy },
+    { title: c.step_3_title, copy: c.step_3_copy },
+    { title: c.step_4_title, copy: c.step_4_copy },
+  ];
+  const certs = [
+    { title: c.cert_1_title, num: c.cert_1_number },
+    { title: c.cert_2_title, num: c.cert_2_number },
+    { title: c.cert_3_title, num: c.cert_3_number },
+    { title: c.cert_4_title, num: c.cert_4_number },
+  ];
   return (
     // id="craft" — in-page anchor kept for deep links; the A-4 card that used
     // to target it was deleted at source in the 2026-08-04 sync.
@@ -163,7 +168,7 @@ export function A9() {
           whiteSpace: "nowrap",
         }}
       >
-        {"—   REAL ROSES, FINISHED WITH CARE   —"}
+        {c.eyebrow}
       </div>
 
       {/* 165:138 · title */}
@@ -176,11 +181,10 @@ export function A9() {
           color: INK,
           fontWeight: 500,
           textAlign: "center",
+          whiteSpace: "pre-line",
         }}
       >
-        Real Roses, Carefully
-        <br />
-        Preserved and Finished
+        {c.title}
       </div>
 
       {/* 165:139 · intro */}
@@ -194,8 +198,7 @@ export function A9() {
           textAlign: "center",
         }}
       >
-        Each rose is hand-selected, naturally preserved, and finished in pure
-        24k gold with meticulous care.
+        {c.intro}
       </div>
 
       {/* 165:140/145/150 · craft photo crops 1–3: 90×96 windows into the full
@@ -252,7 +255,7 @@ export function A9() {
       ))}
 
       {/* 165:143/148/153/158 · step titles */}
-      {CRAFT_STEPS.map((s) => (
+      {CRAFT_STEPS.map((s, i) => (
         <div
           key={s.num}
           className={playfair.className}
@@ -272,12 +275,12 @@ export function A9() {
               : {}),
           }}
         >
-          {s.title}
+          {steps[i].title}
         </div>
       ))}
 
       {/* 165:144/149/154/159 · step copy (vertically centered 82×42 boxes) */}
-      {CRAFT_STEPS.map((s) => (
+      {CRAFT_STEPS.map((s, i) => (
         <div
           key={s.num}
           className={goudy.className}
@@ -292,7 +295,7 @@ export function A9() {
             justifyContent: "center",
           }}
         >
-          {s.copy}
+          {steps[i].copy}
         </div>
       ))}
 
@@ -300,7 +303,7 @@ export function A9() {
           prototype wires ON_CLICK → 1573:107 (/craft). Button chrome + label
           stay Figma's baked render; the Link only adds the hit area. */}
       <Link
-        href="/craft"
+        href={c.cta_href}
         aria-label="Explore our craft"
         style={{ ...abs(93, 380, 246, 38), display: "block" }}
       >
@@ -343,7 +346,7 @@ export function A9() {
             whiteSpace: "nowrap",
           }}
         >
-          Inside the ELDREVE Workshop
+          {c.workshop_title}
         </div>
 
         {/* 482:123 · workshop copy */}
@@ -355,11 +358,10 @@ export function A9() {
             lineHeight: "10px",
             color: INK,
             textAlign: "center",
+            whiteSpace: "pre-line",
           }}
         >
-          See where real roses are prepared, finished,
-          <br />
-          inspected and packed for delivery.
+          {c.workshop_copy}
         </div>
 
         {/* 482:124 · six workshop gallery crops */}
@@ -414,7 +416,7 @@ export function A9() {
             whiteSpace: "nowrap",
           }}
         >
-          {"—  VERIFIED QUALITY  —"}
+          {c.verified_title}
         </div>
 
         {/* 2380:705 · Patents & Certificates bordered panel. The design
@@ -430,10 +432,10 @@ export function A9() {
         >
           {/* 2380:706 · four certificates */}
           <div style={{ ...abs(0, 10, 422, 116), overflow: "hidden" }}>
-            {CERTIFICATES.map((c) => (
+            {CERTIFICATES.map((cert, i) => (
               <div
-                key={c.title}
-                style={{ ...abs(c.x, 0, 69, 116), overflow: "hidden" }}
+                key={cert.x}
+                style={{ ...abs(cert.x, 0, 69, 116), overflow: "hidden" }}
               >
                 <div
                   style={{
@@ -444,11 +446,11 @@ export function A9() {
                 >
                   <img
                     src="/eldreve/home/482-129.png"
-                    alt={`${c.title} certificate`}
+                    alt={`${certs[i].title} certificate`}
                     width={430}
                     height={913}
                     style={{
-                      ...abs(c.imgX, -684, 430, 913),
+                      ...abs(cert.imgX, -684, 430, 913),
                       maxWidth: "none",
                       objectFit: "cover",
                       display: "block",
@@ -476,7 +478,7 @@ export function A9() {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {c.title}
+                  {certs[i].title}
                 </div>
                 <div
                   className={notoSC.className}
@@ -490,7 +492,7 @@ export function A9() {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {c.num}
+                  {certs[i].num}
                 </div>
               </div>
             ))}
