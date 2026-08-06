@@ -5113,3 +5113,35 @@ written), then the six new files were removed — nothing left in the tree.
 - Verified: typecheck, lint, full e2e 106 green in both states; drawer scroll
   proven with seven rows (624px window over 1050px of content, wheel moved it
   to the end); pending rows confirmed invisible to the storefront.
+
+## 2026-08-06 (3) — /account/personal-info made real
+
+Branch `worktree-account-personal-info-live`. The last account screen still
+rendering the mock's "Olivia Carter" now reads and writes the signed-in
+customer's own profile.
+
+- `lib/account/profile-fields.ts` (new) — pure field rules: name
+  normalisation, the full-name split, the language list, email shape. No
+  `server-only`, so the browser and `npm run test:unit` can both use it.
+- `lib/account/profile.ts` (new) — `getPersonalInfo` / `savePersonalInfo`.
+  Auth `user_metadata` is the source of truth (`full_name` written too, so the
+  /account greeting follows); the name is mirrored onto the customers row
+  already linked by `auth_user_id` and never claimed by email
+  (`mailer_autoconfirm` is on — verified against the live project).
+- Email change delegates to `updateUser({ email })` and reports what actually
+  came back — applied, or awaiting confirmation — rather than assuming the
+  project's secure-email-change setting.
+- `app/account/personal-info/page.tsx` is now an async Server Component:
+  reads the session, `redirect()`s to `/account/signup` when signed out, and
+  passes `savePersonalInfoAction` down as a prop. Route is `force-dynamic`.
+- `components/screens/PersonalInfoScreen.tsx` keeps every Figma coordinate;
+  live `<input>`s / `<select>` sit inside the frame's own field boxes, the
+  frame's Edit + pencil became the real edit toggle, and the canvas grew
+  932 → 972 for a status line (no designed element moved).
+- `scripts/apply-auth-email-templates.mjs` gained the email-change template
+  (points back at /account/personal-info via /auth/confirm). **Not applied** —
+  run the script to activate.
+- Tests: 7 new unit tests for the field rules; the e2e personal-info case now
+  asserts the signed-out redirect. Full suite 103 pass / 2 fail, both
+  pre-existing `product-detail` pixel diffs (reproduced with the change
+  stashed).

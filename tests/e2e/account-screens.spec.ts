@@ -2,25 +2,31 @@
  * ROLE OF THIS FILE
  * Smoke cover for the 2026-07-28 ACCOUNT-PRIVACY-SUPPORT screens (personal
  * info, preferences, security, privacy policy, log out, delete, returns,
- * support chat, keepsake card). These are static design imports, so the
+ * support chat, keepsake card). Most are still static design imports, so the
  * checks are deliberately shallow — the route renders, the wired links point
  * where the route table says, the visual-only controls flip, and the
  * deliberately-inert placeholders stay inert (no live inputs, no live
  * destructive button). Pixel fidelity is the pixel-diff net's job.
+ *
+ * The suite always runs the file adapter with Supabase blanked, so the one
+ * screen that stopped being a placeholder — personal info, live 2026-08-06 —
+ * can only be checked for its signed-out behaviour here. The form itself
+ * needs a real session and is exercised by hand against hosted Supabase, the
+ * same footing as the rest of customer auth (see account.spec.ts).
  */
 
 import { test, expect } from "@playwright/test";
 
-test("personal info renders as an inert placeholder (no live inputs)", async ({
+test("personal info is signed-in only: no session, no form", async ({
   page,
 }) => {
   await page.goto("/account/personal-info");
-  await expect(
-    page.getByText("Personal Information", { exact: true }),
-  ).toBeVisible();
-  await expect(page.getByText("olivia@email.com")).toBeVisible();
-  // The hazard rule: mock fields are styled divs, never live inputs.
-  await expect(page.locator("input")).toHaveCount(0);
+  // /account/signup is the one login page (AI-020), and this page holds the
+  // visitor's real name and email — it must never render to a stranger.
+  await expect(page).toHaveURL(/\/account\/signup$/);
+  await expect(page.getByText("Continue with your email")).toBeVisible();
+  // The mock it replaced is gone for good: no "Olivia Carter" anywhere.
+  await expect(page.getByText("olivia@email.com")).toHaveCount(0);
 });
 
 test("preference toggles flip visually", async ({ page }) => {
