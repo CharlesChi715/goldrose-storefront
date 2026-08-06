@@ -21,6 +21,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConciergeChat } from "@/components/ConciergeChat";
+import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import {
   ForwardIcon,
   PromoBar,
@@ -232,6 +233,9 @@ export default async function ShopPage({
           </span>
         )}
       </ScaleFrame>
+
+      {/* Outside the fixed canvas on purpose — see SiteLegalFooter. */}
+      <SiteLegalFooter />
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
           placeholder chat panel on click. */}
