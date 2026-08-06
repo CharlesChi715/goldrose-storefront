@@ -1250,6 +1250,9 @@ export function buildSeedTables(
     inventory_movements: [],
     forum_threads: [],
     forum_posts: [],
+    // Reviews start empty everywhere: the PDP falls back to the design's
+    // mock rows until real published reviews exist (pre-launch rule).
+    product_reviews: [],
     ...demo,
     site_content: [
       {

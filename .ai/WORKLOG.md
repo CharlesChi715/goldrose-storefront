@@ -5066,3 +5066,24 @@ written), then the six new files were removed — nothing left in the tree.
   strip so rows dissolve at the rim, and a 150ms open ease with a
   reduced-motion opt-out. Per-row work is painted to the DOM in one rAF per
   frame, not through React state. Depth is now pinned by test.
+
+## 2026-08-06 — Product reviews backend + PDP drawer goes live (mentor session)
+
+- Schema designed with Charles step by step, then built on his "do it":
+  `product_reviews` (migration `0007`, **applied to hosted**) — text product_id
+  FK cascade, nullable order/user FKs set-null, author_name snapshot, 1–5
+  rating check, photo_urls text[], pending/published/rejected + rejected_reason
+  (FTC 16 CFR 465: content-neutral moderation, never hard-delete), partial
+  index on published, RLS anon-select-published-only.
+- `lib/reviews/db.ts` (getStore dual-mode: list published, live avg/count —
+  option a, no denormalized counters), `POST /api/reviews` (zod, registered-
+  only in hosted mode, always inserts pending).
+- `/account/orders/review` PUBLISH wired (closes AI-031; ?product=&order=
+  params, default signature rose); submitted state relabels THANK YOU.
+- PDP rating row + reviews drawer render live rows/stats when any published
+  review exists (mock art stays as fallback while empty — pre-launch rule);
+  drawer list region is now a real scroller (mock 150px pitch kept).
+- Verified: typecheck, lint, full e2e (106) green; pixel baseline regenerated
+  (rating row now data-live-text masked); local loop POST→publish→PDP proven.
+- Deliberate gaps: experience chip has no column (local-only), photo upload UI
+  not wired (schema ready), no admin moderation screen yet.

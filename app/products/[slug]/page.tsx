@@ -22,6 +22,7 @@ import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { BuyButtons } from "@/components/BuyButtons";
 import { getCatalog, getCatalogProduct } from "@/lib/supabase/catalog.ts";
 import { getPromoSlogan } from "@/lib/content";
+import { listPublishedReviews, reviewStats } from "@/lib/reviews/db.ts";
 import { fileUrl } from "@/lib/files-url";
 import { siteBaseUrl } from "@/lib/admin/settings";
 import { formatMoney } from "@/lib/money";
@@ -138,6 +139,15 @@ export default async function ProductDetailPage({
   }
   if (!catalogProduct) notFound();
   const product = catalogProduct;
+  // Real published reviews (pending/rejected never leave the server); the
+  // mock art stays as the visible fallback while the table is empty.
+  let reviews: Awaited<ReturnType<typeof listPublishedReviews>> = [];
+  try {
+    reviews = await listPublishedReviews(product.id);
+  } catch {
+    reviews = [];
+  }
+  const stats = reviewStats(reviews);
   const variantId =
     product.variants.find((v) => v.in_stock)?.id ??
     product.variants[0]?.id ??
@@ -293,8 +303,13 @@ export default async function ProductDetailPage({
             height={21}
             style={{ ...abs(0, 96, 72, 21), display: "block" }}
           />
-          <div style={{ ...abs(76, 99, 112), ...txt(12, 14.523, "#B8A69A") }}>
-            {"4.9 · 286 Reviews \u00A0›"}
+          <div
+            data-live-text
+            style={{ ...abs(76, 99, 112), ...txt(12, 14.523, "#B8A69A") }}
+          >
+            {stats.count > 0
+              ? `${stats.average} · ${stats.count} Review${stats.count === 1 ? "" : "s"} \u00A0›`
+              : "4.9 · 286 Reviews \u00A0›"}
           </div>
           <div
             className={notoSC.className}
@@ -708,7 +723,15 @@ export default async function ProductDetailPage({
 
         {/* Overlay triggers + drawers (reviews / colors / media / unboxing) —
           last child so the transparent hit-areas stack above every section. */}
-        <PdpOverlays />
+        <PdpOverlays
+          reviews={reviews.map((review) => ({
+            author: review.author_name ?? "ELDREVE Customer",
+            date: review.created_at.slice(0, 10),
+            body: review.body,
+            rating: review.rating,
+          }))}
+          stats={stats}
+        />
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the

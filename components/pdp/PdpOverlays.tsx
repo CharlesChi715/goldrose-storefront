@@ -51,10 +51,21 @@ const RESET: React.CSSProperties = {
 
 type OverlayId = "reviews" | "colors" | "media" | "unboxing";
 
+/** One review as the drawer renders it (server rows mapped by the PDP page). */
+export type PdpReview = {
+  author: string;
+  date: string;
+  body: string;
+  /** 1–5; absent on the design's mock rows (they render the mock star art). */
+  rating?: number;
+};
+
+export type PdpReviewStats = { average: number; count: number };
+
 /* ---------- design data ---------- */
 
 // 1523:4232…4255 — the four review rows (150px pitch groups starting y=308).
-const REVIEWS = [
+const REVIEWS: PdpReview[] = [
   {
     author: "Emma L.",
     date: "3 days ago",
@@ -238,7 +249,19 @@ function GlyphImg({
 
 /* ---------- the four overlays ---------- */
 
-function ReviewsDrawer({ onClose }: { onClose: () => void }) {
+function ReviewsDrawer({
+  onClose,
+  reviews,
+  stats,
+}: {
+  onClose: () => void;
+  reviews: PdpReview[];
+  stats: PdpReviewStats | null;
+}) {
+  // Real rows when any exist; the design's mock set otherwise (pre-launch
+  // "visibly mocked" rule — an empty drawer would read as broken).
+  const live = reviews.length > 0;
+  const rows = live ? reviews : REVIEWS;
   return (
     <OverlayStage scrim="rgba(20,13,10,0.24)" onClose={onClose} label="Reviews">
       {/* 1523:4215 — sheet from y=120 of the 932 stage */}
@@ -279,7 +302,7 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
             fontWeight: 500,
           }}
         >
-          4.9
+          {live && stats ? stats.average : "4.9"}
         </div>
         {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass */}
         <GlyphImg
@@ -291,7 +314,9 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
           align="left"
         />
         <div style={{ ...abs(286, 90, 120), ...txt(15, 19, INK) }}>
-          286 Reviews
+          {live && stats
+            ? `${stats.count} Review${stats.count === 1 ? "" : "s"}`
+            : "286 Reviews"}
         </div>
 
         {/* filter chips — static art like the mock (one review set only) */}
@@ -352,35 +377,64 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        {/* 1523:4232… — four static review rows on a 150px pitch */}
-        {REVIEWS.map((review, i) => {
-          const y = 188 + i * 150;
-          return (
-            <div key={review.author}>
-              <GlyphImg
-                src="/eldreve/screens/1523-4232.svg"
-                x={20}
-                y={y}
-                w={120}
-                h={21}
-                align="left"
-              />
+        {/* 1523:4232… — review rows on the mock's 150px pitch, now a real
+            scrolling list: the region below the chips scrolls, the header
+            and chips above stay put. Row-internal offsets are the mock's. */}
+        <div
+          style={{
+            ...abs(0, 188, 430, 624),
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {rows.map((review, i) => (
+            <div
+              key={`${review.author}-${i}`}
+              style={{ position: "relative", height: 150 }}
+            >
+              {review.rating === undefined ? (
+                <GlyphImg
+                  src="/eldreve/screens/1523-4232.svg"
+                  x={20}
+                  y={0}
+                  w={120}
+                  h={21}
+                  align="left"
+                />
+              ) : (
+                <div
+                  aria-label={`${review.rating} of 5 stars`}
+                  style={{
+                    ...abs(20, 0, 120, 21),
+                    ...txt(16, 21, GOLD),
+                    letterSpacing: 3,
+                  }}
+                >
+                  {"★".repeat(review.rating)}
+                  <span style={{ opacity: 0.3 }}>
+                    {"★".repeat(5 - review.rating)}
+                  </span>
+                </div>
+              )}
               <div
                 className={playfair.className}
                 style={{
-                  ...abs(20, y + 30, 190),
+                  ...abs(20, 30, 190),
                   ...txt(20, 24, INK),
                   fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
                 {review.author}&nbsp;&nbsp;●
               </div>
-              <div style={{ ...abs(218, y + 34, 120), ...txt(12, 16, INK) }}>
+              <div style={{ ...abs(218, 34, 120), ...txt(12, 16, INK) }}>
                 {review.date}
               </div>
               <div
                 style={{
-                  ...abs(392, y + 4, 18),
+                  ...abs(392, 4, 18),
                   ...txt(20, 22, INK, "center"),
                   fontWeight: 700,
                 }}
@@ -389,17 +443,18 @@ function ReviewsDrawer({ onClose }: { onClose: () => void }) {
               </div>
               <div
                 style={{
-                  ...abs(20, y + 62, 370),
+                  ...abs(20, 62, 370, 72),
                   ...txt(12, 20, INK),
                   whiteSpace: "normal",
+                  overflow: "hidden",
                 }}
               >
                 {review.body}
               </div>
-              <div style={{ ...abs(20, y + 140, 390, 1), background: SAND }} />
+              <div style={{ ...abs(20, 140, 390, 1), background: SAND }} />
             </div>
-          );
-        })}
+          ))}
+        </div>
         {/* 1523:4256 — the mock's decorative scroll indicator */}
         <div
           style={{
@@ -1015,7 +1070,13 @@ function UnboxingGallery({ onClose }: { onClose: () => void }) {
  * Mounted inside the PDP's ScaleFrame: absolutely-positioned transparent
  * triggers over the rows the server page draws, plus the portal overlays.
  */
-export function PdpOverlays() {
+export function PdpOverlays({
+  reviews = [],
+  stats = null,
+}: {
+  reviews?: PdpReview[];
+  stats?: PdpReviewStats | null;
+}) {
   const [open, setOpen] = useState<OverlayId | null>(null);
   const mounted = useSyncExternalStore(
     subscribeToNothing,
@@ -1076,7 +1137,10 @@ export function PdpOverlays() {
       />
 
       {mounted && open === "reviews"
-        ? createPortal(<ReviewsDrawer onClose={close} />, document.body)
+        ? createPortal(
+            <ReviewsDrawer onClose={close} reviews={reviews} stats={stats} />,
+            document.body,
+          )
         : null}
       {mounted && open === "colors"
         ? createPortal(<ColorDrawer onClose={close} />, document.body)

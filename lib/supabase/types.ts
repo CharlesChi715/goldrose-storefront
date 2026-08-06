@@ -309,6 +309,25 @@ export type ForumPostRow = {
   attachments?: ForumAttachment[];
 };
 
+export type ProductReviewRow = {
+  id: string;
+  product_id: string;
+  /** Purchase this review came from; null = no linked order (imports, guests). */
+  order_id: string | null;
+  /** Reviewer's auth uid; null after account deletion (on delete set null). */
+  user_id: string | null;
+  /** Display-name snapshot taken at submit time; null = "ELDREVE Customer". */
+  author_name: string | null;
+  /** 1–5 stars (DB check constraint enforces the range). */
+  rating: number;
+  body: string;
+  photo_urls: string[];
+  /** Content-neutral moderation only (FTC 16 CFR 465); never hard-deleted. */
+  status: "pending" | "published" | "rejected";
+  rejected_reason: string | null;
+  created_at: string;
+};
+
 export type SettingRow = {
   key: string;
   value: unknown;
@@ -337,6 +356,7 @@ export type DbTables = {
   forum_threads: ForumThreadRow;
   forum_posts: ForumPostRow;
   site_content: SiteContentRow;
+  product_reviews: ProductReviewRow;
   settings: SettingRow;
   admin_users: AdminUserRow;
 };
@@ -360,6 +380,7 @@ export const TABLE_NAMES: TableName[] = [
   "forum_threads",
   "forum_posts",
   "site_content",
+  "product_reviews",
   "settings",
   "admin_users",
 ];
