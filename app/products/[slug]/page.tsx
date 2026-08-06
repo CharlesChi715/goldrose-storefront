@@ -31,6 +31,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ConciergeChat } from "@/components/ConciergeChat";
+import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { PromoBar, ScaleFrame, VHeader } from "@/components/chrome";
 import { PdpOverlays } from "@/components/pdp/PdpOverlays";
 import { abs, txt } from "@/lib/figma-layout";
@@ -880,6 +881,9 @@ export default async function ProductDetailPage({
           productTitle={product.title}
         />
       </ScaleFrame>
+
+      {/* Outside the fixed canvas on purpose — see SiteLegalFooter. */}
+      <SiteLegalFooter />
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
           placeholder chat panel on click. Bar paints over the mascot here,

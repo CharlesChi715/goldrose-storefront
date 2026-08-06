@@ -17,6 +17,7 @@
 
 import type { Metadata } from "next";
 import { ScaleFrame, PromoBar, HomeHeader } from "@/components/chrome";
+import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { playfair } from "@/lib/fonts";
 import { A1 } from "@/components/home/A1";
 import { A2 } from "@/components/home/A2";
@@ -111,35 +112,39 @@ export default async function HomePage() {
   ];
 
   return (
-    // 2380:370 is 5193 tall: A-11 ends at 5134 and the bottom nav fills the
-    // last 59px (it renders as a fixed overlay, outside this stage).
-    <ScaleFrame
-      height={5193}
-      background="#FFF6EC"
-      fontClass={playfair.className}
-      navActive="Home"
-    >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-      <PromoBar
-        slogan={promo.text}
-        isDefault={promo.isDefault}
-        variant="brown"
-      />
-      {/* Band offsets are 2380:370's own: A-1 @32, A-2 @764, A-3 @1405,
+    <>
+      {/* 2380:370 is 5193 tall: A-11 ends at 5134 and the bottom nav fills
+          the last 59px (it renders as a fixed overlay, outside this stage). */}
+      <ScaleFrame
+        height={5193}
+        background="#FFF6EC"
+        fontClass={playfair.className}
+        navActive="Home"
+      >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <PromoBar
+          slogan={promo.text}
+          isDefault={promo.isDefault}
+          variant="brown"
+        />
+        {/* Band offsets are 2380:370's own: A-1 @32, A-2 @764, A-3 @1405,
           A-5 @1868, A-6 @2344, A-9 @3133, A-11 @4124. */}
-      <A1 />
-      <A2 />
-      <A3 />
-      <A5 />
-      <A6 />
-      <A9 />
-      <A11 />
-      {/* Header last: A-1's opaque module background covers y32-98, and the
+        <A1 />
+        <A2 />
+        <A3 />
+        <A5 />
+        <A6 />
+        <A9 />
+        <A11 />
+        {/* Header last: A-1's opaque module background covers y32-98, and the
           header (chrome, not part of any module) must paint above it. */}
-      <HomeHeader />
-    </ScaleFrame>
+        <HomeHeader />
+      </ScaleFrame>
+      {/* Outside the fixed 5193 canvas on purpose — see SiteLegalFooter. */}
+      <SiteLegalFooter />
+    </>
   );
 }

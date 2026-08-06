@@ -7,7 +7,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
+import { adminLogin, ADMIN_VIEWPORT, settleFixedChrome } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -104,6 +104,7 @@ test("long names ellipsize without layout shift (masked diff still gates)", asyn
       window.scrollTo(0, 0);
     });
     await page.waitForLoadState("networkidle");
+    await settleFixedChrome(page);
     await expect(page).toHaveScreenshot("product-detail-masked.png", {
       fullPage: true,
       mask: [page.locator("[data-live-text]")],

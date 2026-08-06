@@ -5261,6 +5261,73 @@ routine (this file, and both baselines) but one was not.
 **Still open from (5):** `components/home/A3.tsx:128` and
 `components/home/BestSellersRail.tsx:193` have the same ring-under-photo bug
 the shop card had. Not touched.
+## 2026-08-06 (7) — Company legal identity (`worktree-feat-company-legal-info`)
+
+Charles asked whether the site should carry company-name information. It must:
+PayPal Advanced Checkout onboarding checks for a legal business name and
+contact route, US CAN-SPAM requires a physical postal address in every
+commercial email (our Resend order emails included), and an unidentified
+seller costs conversion on a $100+ gift.
+
+Shipped the plumbing, left the owner data blank on purpose:
+
+- `lib/company.ts` (new) — the one formatter for the identity:
+  `companyPostalLines`, `hasCompanyIdentity`, `companyEmailFooter`. Pure, no
+  I/O. Blank owner data yields nothing rather than a half-filled block.
+- `lib/supabase/seed-data.ts` — `SettingsShape.store` gained `legal_name`,
+  `registration_number`, `address_lines`; seeded blank. The seed contact email
+  moved off the pre-rename `support@goldrose.example`.
+- `/admin/settings` → General → **Legal business identity** (`SettingsView.tsx`,
+  `actions.ts`, `lib/admin/i18n.ts` EN + 中文). The zod schema accepts `""` so a
+  half-filled form still saves; the address is one textarea, one line per row,
+  because postal formats differ by country.
+- `components/screens/ContactLegalScreen.tsx` + `app/policies/contact-legal/` —
+  the coming-soon scaffold became a real, indexable page. Deliberately not a
+  pixel-exact import: frame `2118:245` is still not Ready-for-dev, but the page
+  is a payment prerequisite, so it ships as plain typography in the shared
+  cream/Playfair idiom.
+- `lib/email.ts` — the buyer's order-confirmation and shipping-confirmation
+  emails now carry the postal footer; the owner's internal alert does not.
+- `tests/unit/company.test.ts` — 5 tests. 72/72 unit tests, typecheck and lint
+  clean; both page states verified in the browser at 375×812.
+
+Filed AI-033 (owner: the registered entity details, and the China-vs-US
+seller-of-record decision) and AI-034 (design: no per-page footer surface for a
+legal identity line — the A-11 band is a fixed-height Figma import).
+
+Gotcha worth remembering: the local file adapter holds the whole DB in memory
+and flushes on shutdown, so patching `.data/db.json` under a running dev server
+is silently reverted. Stop the server, patch, then start.
+
+### 2026-08-06 (same day, follow-up) — the footer, and why it became urgent
+
+Charles asked whether a footer had been built. It had not — the plan was to
+leave the legal identity in the MENU overlay and the Policies & Legal hub. Then
+he supplied the real driver: **TikTok rejected the Business API application**
+with "your company name doesn't match your email domain or company website
+information". The application named *Zhongshu Technology Worldwide Limited*
+against https://eldreve.com; the reviewer found no such company on the site.
+
+Menus don't help there — reviewers and crawlers don't open them. So:
+
+- `components/SiteLegalFooter.tsx` (new) — "© 2026 ELDREVE · Zhongshu
+  Technology Worldwide Limited" plus a link to the legal notice, on `/`,
+  `/shop` and `/products/[slug]`. Rendered as a **sibling after** `ScaleFrame`,
+  not inside it: every public page is a fixed-height pixel-exact canvas, so an
+  in-canvas line would overflow and be reset by the next Figma sync. This is
+  the first storefront element deliberately outside the Figma canvas.
+- `lib/company.ts` — split `hasCompanyIdentity` into `hasCompanyName` (name
+  only) and `hasPostalIdentity` (name + address). The old single predicate
+  would have hidden the entity name on the legal page until an address arrived
+  — exactly the failure TikTok cited. CAN-SPAM still gates the *email* footer
+  on a real address.
+- `lib/supabase/seed-data.ts` — the entity name is now the seed default.
+
+⚠️ Seeds only fill *missing* keys, so production will not pick this up on
+deploy: the hosted `store` row must be saved once at `/admin/settings`.
+
+Still open: registration number and postal address (AI-033); whether the design
+team wants to draw their own footer (AI-034).
 
 ## 2026-08-06 — /shop renders only real catalog products
 
