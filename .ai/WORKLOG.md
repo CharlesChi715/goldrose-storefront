@@ -5402,3 +5402,40 @@ team wants to draw their own footer (AI-034).
   carousel tests), product-detail pixel baseline regenerated. Drove it in a
   real browser: auto-play steps one slide width every 1.8s, a drag swipes
   without opening the viewer, a tap opens it, reduced motion parks it.
+
+## 2026-08-07 00:43 AEST
+
+- **Stale sweep across the repo** (branch `worktree-remove-stale`). Scope set
+  with Charles: delete `archive/` + unreferenced `public/` assets + fix the
+  doc pointers; **keep `scripts/features/cli.mjs`** (his call — the roadmap
+  generator rebuild still needs it) even though nothing calls it today.
+- **`archive/` deleted** — 57 files, 5.8MB (the superseded ixd-home-shop
+  homepage/shop interaction tables and 55 frame JPEGs). SUMMARY.md already
+  described it as unreferenced; a repo-wide grep confirmed zero inbound links.
+- **1,029 unreferenced files removed from `public/`** — 51MB; the folder goes
+  75MB → 24MB and 1477 → 448 files. Leftovers from the homepage simplification
+  (11 bands → 7, frame 2380:370) and screens superseded by later Ready-for-dev
+  frames. `public/` is served, so all of it was publicly reachable design
+  material.
+- **The scan had to be rewritten once.** A filename-only match reported 1,244
+  unused files, but asset paths here are frequently dynamic — e.g.
+  `app/products/[slug]/page.tsx:481` renders
+  `src={\`/eldreve/screens/\${row.glyph}.svg\`}` off a bare `"1523-4002"` string,
+  which no filename grep can see. Final rule: keep a file if its full basename
+  **or** its bare stem appears anywhere in any tracked source/doc/config. That
+  spared 204 live assets the naive scan had condemned.
+- **Checked against the Figma pipeline before deleting:** `scripts/figma/cli.mjs:510`
+  only uses `existsSync` as a skip-if-present guard and `figma:baseline` stamps
+  frames, not files — so a deleted asset is simply re-exported by the next
+  `assets` run. Reversible via git history and re-export both.
+- **Docs corrected:** dropped the `archive/` row from the SUMMARY.md structure
+  chart, added a stale-sweep state bullet, and fixed `team-deliveries/README.md`
+  which still routed superseded docs to `archive/`. Left alone deliberately:
+  `region-alignment.md` and `admin-design.md` already say "since-deleted"
+  (accurate history), and the ShoppingLogin/veloria mentions are deliberate
+  records of past removals.
+- **Clean already, nothing to do:** no unused npm dependencies, no unreferenced
+  modules under `components/` or `lib/`, no empty directories.
+- **Verified:** typecheck, build, 80 unit tests, 111 e2e tests all pass —
+  including the three pixel baselines (home, shop, product-detail), which are
+  the real proof no rendered image went missing.

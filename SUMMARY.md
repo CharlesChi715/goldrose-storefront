@@ -115,6 +115,14 @@ Open linked resources only when the task needs them.
   The Shopify *store integration* is removed (no `lib/shopify/`, no `SHOPIFY_*`
   vars); the `@shopify/polaris` UI framework is the admin's own and stays.
   Cancel the subscription only after acceptance.
+- **Stale sweep 2026-08-07.** `archive/` deleted (git history is the archive
+  now), and 1,029 unreferenced files removed from `public/` — 75MB → 24MB,
+  1477 → 448 files. Those were Figma exports nothing renders, left by the
+  homepage simplification and superseded screens; `public/` is served, so they
+  were publicly reachable. Verified by build, 80 unit and 111 e2e tests
+  (incl. the three pixel baselines). A deleted asset is re-exported by the
+  next `npm run figma:assets`. Kept on purpose: `scripts/features/cli.mjs`
+  (owner ruling — the generator rebuild still needs it).
 - **Next:** owner activation/UAT → real shipping and product content → card
   integration → launch hardening.
 
@@ -251,7 +259,6 @@ goldrose-storefront/
 ├── docs/                 # Specs, roadmaps, guides
 ├── agent-delivery/       # Agent workflow rules, INBOX, session write-backs
 ├── team-deliveries/      # Upstream deliveries: inbox/ + originals/ (kept)
-├── archive/              # Retired docs; nothing here is used or referenced
 ├── trash/                # Scratch, gitignored, deletable; never referenced
 ├── .agents/              # Skills source of truth (.claude/ symlinks into it)
 ├── .ai/                  # Optional work history; never startup context
