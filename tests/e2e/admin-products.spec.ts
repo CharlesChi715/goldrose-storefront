@@ -125,3 +125,77 @@ test("inventory screen: four columns, reasoned adjustment, history", async ({
   await expect(modal.getByText("e2e adjustment").first()).toBeVisible();
   await expect(modal.getByText("+3").first()).toBeVisible();
 });
+
+/*
+ * 取景框 (owner, 2026-08-06). Storefront photo boxes are fixed design
+ * rectangles drawn with object-fit: cover, so the browser crops to the centre
+ * and an off-centre subject gets cut. The Media card's framing box is the PDP
+ * photo window at its true 398×250; dragging the photo inside it writes
+ * product_images.focal_x/focal_y (migration 0008), which every cover-fitted
+ * box then honours.
+ */
+test("framing box: drag sets the focal point, and the storefront honours it", async ({
+  page,
+}) => {
+  await adminLogin(page);
+  await page.goto("/admin/products/premium-gift-bundle");
+
+  await page.getByRole("button", { name: "Adjust framing" }).first().click();
+  const modal = page.getByRole("dialog");
+  const frame = modal.locator("img").first();
+  await expect(frame).toBeVisible();
+
+  // The frame IS the PDP photo box, to the pixel — that is the whole point.
+  const box = await frame.boundingBox();
+  expect(Math.round(box!.width)).toBe(398);
+  expect(Math.round(box!.height)).toBe(250);
+
+  // Start from a known point rather than whatever a previous run left.
+  await modal.getByRole("button", { name: "Centre" }).click();
+  // The seed photos are square, so only the vertical axis has slack; drag up
+  // to reveal the bottom of the photo, which is a HIGHER Y percentage.
+  await expect(modal.getByText(/· 50% \/ 50%$/)).toBeVisible();
+  const centre = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 };
+  await page.mouse.move(centre.x, centre.y);
+  await page.mouse.down();
+  for (const dy of [-20, -40, -60, -80]) {
+    await page.mouse.move(centre.x, centre.y + dy);
+  }
+  await page.mouse.up();
+  await expect(modal.getByText(/· 50% \/ 100%$/)).toBeVisible();
+
+  await modal.getByRole("button", { name: "Done" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Product saved").first()).toBeVisible();
+
+  try {
+    // The product page crops to the saved point, not the centre.
+    await page.goto("/products/premium-gold-rose-gift-bundle", {
+      waitUntil: "networkidle",
+    });
+    const hero = page.locator('button[aria-label*=" photo 1"] img').first();
+    await expect(hero).toHaveCSS("object-position", "50% 100%");
+    // …and so does the shop card, from the same one stored point.
+    await page.goto("/shop", { waitUntil: "networkidle" });
+    await expect(
+      page.locator(
+        'a[href="/products/premium-gold-rose-gift-bundle"] img.gr-photo',
+      ),
+    ).toHaveCSS("object-position", "50% 100%");
+  } finally {
+    // Put it back so later runs start from the seeded centre crop.
+    await page.setViewportSize(ADMIN_VIEWPORT);
+    await page.goto("/admin/products/premium-gift-bundle");
+    await page.getByRole("button", { name: "Adjust framing" }).first().click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Centre" })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Done" })
+      .click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Product saved").first()).toBeVisible();
+  }
+});

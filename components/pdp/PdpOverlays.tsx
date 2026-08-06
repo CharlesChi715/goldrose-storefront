@@ -759,7 +759,7 @@ function MediaViewer({
 }: {
   onClose: () => void;
   /** The same photo set the hero carousel pages through. */
-  shots: string[];
+  shots: Array<{ src: string; focus: string }>;
 }) {
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
@@ -771,18 +771,24 @@ function MediaViewer({
       label="Product photos"
       background="#040404"
     >
+      {/* 2571:375 "Close Menu · 44px" — the frame's own close control, top
+          right, with its 20×20 icon inset 12px. The 1523 import missed it
+          (it was added to the frame later), so the viewer shipped with only
+          a top-left back chevron the frame no longer draws, and closing
+          worked solely through OverlayStage's invisible scrim — you could
+          dismiss it but never see how (owner, 2026-08-06). */}
       <button
         type="button"
-        aria-label="Back"
+        aria-label="Close product photos"
         onClick={onClose}
-        style={{ ...RESET, ...abs(18, 30, 42, 50) }}
+        style={{ ...RESET, ...abs(376, 10, 44, 44) }}
       >
-        <GlyphImg
-          src="/eldreve/screens/1523-4258.svg"
-          x={0}
-          y={0}
-          w={42}
-          h={50}
+        <img
+          src="/eldreve/screens/2571-376.svg"
+          alt=""
+          width={20}
+          height={20}
+          style={{ ...abs(12, 12, 20, 20), display: "block" }}
         />
       </button>
       <div
@@ -797,7 +803,7 @@ function MediaViewer({
       </div>
       {/* 1523:4260 — FIT inside 410×620 */}
       <img
-        src={shots[index]}
+        src={shots[index].src}
         alt={`Product photo ${index + 1}`}
         style={{
           ...abs(10, 102, 410, 620),
@@ -887,7 +893,7 @@ function MediaViewer({
           borderRadius: 18,
         }}
       >
-        {shots.map((src, i) => (
+        {shots.map(({ src }, i) => (
           <button
             key={src}
             type="button"
@@ -1128,15 +1134,20 @@ export function PdpOverlays({
 }: {
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
-  /** The product's photos — the hero carousel and the media viewer. */
-  media?: string[];
+  /**
+   * The product's photos with their framing (CSS object-position), for the
+   * hero carousel; the viewer shows each photo whole and ignores the focus.
+   */
+  media?: Array<{ src: string; focus: string }>;
   /** Names the hero slides for screen readers. */
   productTitle?: string;
 }) {
   const [open, setOpen] = useState<OverlayId | null>(null);
   // One source of truth for both the hero and the viewer. A product with no
   // photos of its own falls back to the frame's set rather than an empty box.
-  const shots = media.length ? media : MEDIA;
+  const shots = media.length
+    ? media
+    : MEDIA.map((src) => ({ src, focus: "50% 50%" }));
   const mounted = useSyncExternalStore(
     subscribeToNothing,
     onTheClient,
@@ -1168,7 +1179,7 @@ export function PdpOverlays({
         onActivate={() => setOpen("media")}
         renderSlide={(i) => (
           <img
-            src={shots[i]}
+            src={shots[i].src}
             alt=""
             width={398}
             height={250}
@@ -1176,6 +1187,8 @@ export function PdpOverlays({
               ...abs(0, 0, 398, 250),
               display: "block",
               objectFit: "cover",
+              // The admin framed this photo against exactly this box.
+              objectPosition: shots[i].focus,
             }}
           />
         )}

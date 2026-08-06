@@ -69,6 +69,8 @@ export type CardData = {
   compareAt: string | null;
   /** The product's own catalog photo; null falls back to the slot's frame art. */
   image: string | null;
+  /** CSS object-position from the admin's framing box (migration 0008). */
+  focus: string;
 };
 
 /** Grid cross-fade on sort change — same 150ms ease as PageFade's tab fade. */
@@ -182,6 +184,7 @@ function ProductCard({
           ...abs(0, 0, slot.w, 204),
           display: "block",
           objectFit: "cover",
+          objectPosition: data.focus,
         }}
       />
       <div
