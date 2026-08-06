@@ -279,31 +279,98 @@ test("the return sheet's Confirm Return lands on the request-submitted page", as
   ).toBeVisible();
 });
 
-test("the shop pagination walks pages and reorders the placeholder cards", async ({
+test("the shop grid shows one card per real product and nothing else", async ({
   page,
 }) => {
   await page.goto("/shop");
-  const photos = () =>
-    page.$$eval(".gr-card-zoom .gr-photo", (els) =>
-      els.map((el) => el.getAttribute("src")),
-    );
-  const pageOne = await photos();
 
-  await page.getByRole("link", { name: "Page 3" }).click();
-  await expect(page).toHaveURL(/\/shop\?page=3$/);
-  await expect(page.getByRole("link", { name: "Page 3" })).toHaveAttribute(
-    "aria-current",
-    "page",
+  // The seed catalog is smaller than the frame's eight slots. The grid used to
+  // cycle it to fill them all, drawing the same products several times over
+  // five identical "pages"; it now draws each product exactly once.
+  const links = await page.$$eval(".gr-card-zoom", (els) =>
+    els.map((el) => el.getAttribute("href")),
   );
-  // The same products rotated into different slots (OQ-3). Compared as a whole
-  // sequence, not by the first card: card photos now follow the product rather
-  // than the slot, and with only three real products several pages happen to
-  // open on the same one — the grids still differ further down.
-  expect(await photos()).not.toEqual(pageOne);
+  expect(links.length).toBeGreaterThan(0);
+  expect(new Set(links).size).toBe(links.length);
+  for (const href of links) expect(href).toMatch(/^\/products\/[a-z0-9-]+$/);
 
-  // The next-page arrow is inert on the last page, as the design draws it.
-  await page.goto("/shop?page=5");
+  // The count above the grid is the same list, not the frame's flat "120".
+  await expect(
+    page.getByText(`${links.length} GIFTS`, { exact: true }),
+  ).toBeVisible();
+
+  // One page of results draws no pager at all — no page numbers, no arrow.
+  await expect(page.getByRole("link", { name: /^Page \d+$/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Next page" })).toHaveCount(0);
+
+  // An out-of-range page falls back to the canonical listing rather than
+  // rendering an empty grid at full canvas height.
+  await page.goto("/shop?page=5");
+  expect(await page.$$eval(".gr-card-zoom", (els) => els.length)).toBe(
+    links.length,
+  );
+});
+
+/*
+ * The PDP hero is an auto-playing, swipeable carousel over the product's own
+ * photos (owner, 2026-08-06), on the same shared component as the homepage
+ * hero. The suite pins reduced motion so pixel baselines stay parked on slide
+ * 1 — auto-play only exists without it, so this block opts out.
+ */
+test.describe("the PDP hero carousel", () => {
+  test.use({ contextOptions: { reducedMotion: "no-preference" } });
+
+  const dots = (page: import("@playwright/test").Page) =>
+    page.getByRole("button", { name: /^Show .+ photo \d+$/ });
+  const activeDot = (page: import("@playwright/test").Page) =>
+    dots(page).evaluateAll((els) =>
+      els.findIndex((el) => el.getAttribute("aria-current") === "true"),
+    );
+
+  test("auto-plays through the product's photos", async ({ page }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    // One dot per catalog photo — the frame's fixed four are gone.
+    await expect(dots(page).first()).toBeVisible();
+    expect(await dots(page).count()).toBeGreaterThan(1);
+    expect(await activeDot(page)).toBe(0);
+    // Advances on its own, without touching anything.
+    await expect.poll(() => activeDot(page), { timeout: 8000 }).not.toBe(0);
+  });
+
+  test("a drag swipes the track without opening the photo viewer", async ({
+    page,
+  }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    await page.mouse.move(300, 220);
+    await page.mouse.down();
+    for (const x of [260, 200, 150, 120]) await page.mouse.move(x, 220);
+    await page.mouse.up();
+    // The drag must not also count as a tap on the slide.
+    await expect(
+      page.getByRole("dialog", { name: "Product photos" }),
+    ).toHaveCount(0);
+  });
+
+  test("a tap on the hero still opens the photo viewer", async ({ page }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    await page.mouse.click(215, 220);
+    await expect(
+      page.getByRole("dialog", { name: "Product photos" }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("dialog", { name: "Product photos" }),
+    ).toHaveCount(0);
+  });
+});
+
+test("a shop search that matches nothing shows no cards, not the whole catalog", async ({
+  page,
+}) => {
+  await page.goto("/shop?q=zzzznotaproduct");
+  expect(await page.$$eval(".gr-card-zoom", (els) => els.length)).toBe(0);
+  await expect(page.getByText("0 GIFTS", { exact: true })).toBeVisible();
+  await expect(page.getByText(/No gifts match/)).toBeVisible();
 });
 
 // The Gift Shopping ⇄ Business & Partnerships tabs lived on the second login

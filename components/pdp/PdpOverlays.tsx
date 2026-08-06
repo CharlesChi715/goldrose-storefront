@@ -8,7 +8,7 @@
  *
  *   PDP-REVIEW-OPEN-DRAWER   1523:4185 (panel 1523:4215) ← the rating row
  *   PDP-COLOR-OPEN-DRAWER    1523:4275 (panel 1523:4289) ← "View All 120 Colors ›"
- *   PDP-MEDIA-OPEN           1523:4257 ← the hero photo
+ *   PDP-MEDIA-OPEN           1523:4257 ← the hero photo (drawn here too)
  *   PDP-UNBOXING-OPEN-GALLERY 1523:4359 (panel 1523:4368) ← unboxing "View All ›"
  *
  * Geometry, colors, fonts and copy are verbatim from the Figma REST data.
@@ -18,12 +18,22 @@
  * content the frames paint behind each scrim is the live page's job, not
  * drawn here.
  *
- * Content is the mocks' own: the reviews, the twelve color cards and the
- * twelve unboxing tiles are design placeholders — the catalog has no review,
- * color-option or UGC tables yet (docs/ixd/README.md). Color selection and
- * the unboxing chips/tabs are cosmetic for the same reason. The media viewer
- * pages through the design's four product images for real. The mocks' iOS
- * home indicator (1523:4274) is not implemented — C-3 status-bar precedent.
+ * The HERO is drawn here rather than by the page (owner, 2026-08-06): it is
+ * an auto-playing, swipeable carousel over the product's own photos, built on
+ * the homepage's shared Carousel so it behaves exactly like H-03. The tap
+ * target has to sit above the photo to open the media viewer, and two stacked
+ * photo layers could never hold the same slide — so the trigger IS the photo.
+ *
+ * Content: the REVIEWS drawer is real — rows, average and count come from
+ * product_reviews, and an empty table shows an empty drawer rather than the
+ * frame's four named testimonials (owner, 2026-08-06: a mock review is
+ * indistinguishable from a real one, so it is a review claim, not "visibly
+ * mocked" art). The twelve color cards and twelve unboxing tiles are still
+ * design placeholders — the catalog has no color-option or UGC tables yet
+ * (docs/ixd/README.md), so color selection and the unboxing chips/tabs stay
+ * cosmetic. The media viewer pages through the design's four product images
+ * for real. The mocks' iOS home indicator (1523:4274) is not implemented —
+ * C-3 status-bar precedent.
  */
 
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -31,6 +41,7 @@ import { createPortal } from "react-dom";
 import NoCalcScale from "@/components/NoCalcScale";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
+import { Carousel } from "@/components/home/Carousel";
 
 const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
@@ -40,6 +51,11 @@ const SHEET_BG = "#FFFEFB";
 const REVIEW_BG = "#FFFBF6"; // the reviews sheet's own white (1523:4215) — the other two drawers keep #FFFEFB
 const TILE_BG = "#F0E8DE"; // unboxing media-card ground behind each photo (1523:4388…)
 const GREY = "#706661";
+
+// The hero pagination row: 7px indicators on a 14px pitch. The frame draws
+// the active one as an 18px pill, but HeroCarousel already settled that call
+// for the site — one size for every dot, active by colour.
+const DOT_PITCH = 14;
 
 const RESET: React.CSSProperties = {
   appearance: "none",
@@ -56,37 +72,13 @@ export type PdpReview = {
   author: string;
   date: string;
   body: string;
-  /** 1–5; absent on the design's mock rows (they render the mock star art). */
+  /** 1–5; optional so a row with no score keeps the frame's flat star art. */
   rating?: number;
 };
 
 export type PdpReviewStats = { average: number; count: number };
 
 /* ---------- design data ---------- */
-
-// 1523:4232…4255 — the four review rows (150px pitch groups starting y=308).
-const REVIEWS: PdpReview[] = [
-  {
-    author: "Emma L.",
-    date: "3 days ago",
-    body: "Absolutely stunning! The blue rose is even more beautiful in person. It arrived perfectly and the gift box feels so elegant.",
-  },
-  {
-    author: "Michael T.",
-    date: "1 week ago",
-    body: "Bought this for our anniversary and my wife loved it. Beautiful workmanship and exceptional presentation.",
-  },
-  {
-    author: "Sophie M.",
-    date: "2 weeks ago",
-    body: "Gorgeous rose and beautifully packaged. Shipping was fast and everything arrived in perfect shape.",
-  },
-  {
-    author: "David R.",
-    date: "2 weeks ago",
-    body: "Such a unique and thoughtful gift. The gold detailing adds a truly luxurious touch.",
-  },
-];
 
 // 1523:4303…4351 — the twelve color cards, frame order.
 const COLORS = [
@@ -296,10 +288,12 @@ function ReviewsDrawer({
   reviews: PdpReview[];
   stats: PdpReviewStats | null;
 }) {
-  // Real rows when any exist; the design's mock set otherwise (pre-launch
-  // "visibly mocked" rule — an empty drawer would read as broken).
+  // Real rows only. The design's four mock rows carried names, dates and
+  // testimonial text that a shopper cannot tell from real ones, which is a
+  // review claim rather than "visibly mocked" art; with an empty table the
+  // drawer still opens and says so instead (owner, 2026-08-06).
   const live = reviews.length > 0;
-  const rows = live ? reviews : REVIEWS;
+  const rows = reviews;
   return (
     <OverlayStage scrim="rgba(20,13,10,0.24)" onClose={onClose} label="Reviews">
       {/* 1523:4215 — sheet from y=120 of the 932 stage */}
@@ -340,36 +334,27 @@ function ReviewsDrawer({
             fontWeight: 500,
           }}
         >
-          {live && stats ? stats.average : "4.9"}
+          {live && stats ? stats.average : "—"}
         </div>
         {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass. With
             live reviews it fills to the real average, so the art can never
             show five stars for a 4.5 score. */}
-        {live && stats ? (
-          <StarFill
-            src="/eldreve/screens/1523-4220.svg"
-            x={282}
-            y={60}
-            w={128}
-            h={26}
-            natural={109}
-            fill={stats.average / 5}
-            label={`${stats.average} out of 5 stars`}
-          />
-        ) : (
-          <GlyphImg
-            src="/eldreve/screens/1523-4220.svg"
-            x={282}
-            y={60}
-            w={128}
-            h={26}
-            align="left"
-          />
-        )}
+        <StarFill
+          src="/eldreve/screens/1523-4220.svg"
+          x={282}
+          y={60}
+          w={128}
+          h={26}
+          natural={109}
+          fill={live && stats ? stats.average / 5 : 0}
+          label={
+            live && stats ? `${stats.average} out of 5 stars` : "No ratings yet"
+          }
+        />
         <div style={{ ...abs(286, 90, 120), ...txt(15, 19, INK) }}>
           {live && stats
             ? `${stats.count} Review${stats.count === 1 ? "" : "s"}`
-            : "286 Reviews"}
+            : "No reviews yet"}
         </div>
 
         {/* filter chips — static art like the mock (one review set only) */}
@@ -440,6 +425,14 @@ function ReviewsDrawer({
             WebkitOverflowScrolling: "touch",
           }}
         >
+          {rows.length === 0 ? (
+            <div
+              className={playfair.className}
+              style={{ ...abs(20, 8, 390), ...txt(15, 22, GREY) }}
+            >
+              No reviews yet — be the first to review this rose.
+            </div>
+          ) : null}
           {rows.map((review, i) => (
             <div
               key={`${review.author}-${i}`}
@@ -760,10 +753,17 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
   );
 }
 
-function MediaViewer({ onClose }: { onClose: () => void }) {
+function MediaViewer({
+  onClose,
+  shots,
+}: {
+  onClose: () => void;
+  /** The same photo set the hero carousel pages through. */
+  shots: string[];
+}) {
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
-    setIndex((i) => (i + delta + MEDIA.length) % MEDIA.length);
+    setIndex((i) => (i + delta + shots.length) % shots.length);
   return (
     <OverlayStage
       scrim="transparent"
@@ -793,11 +793,11 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
           fontWeight: 500,
         }}
       >
-        {index + 1} / {MEDIA.length}
+        {index + 1} / {shots.length}
       </div>
       {/* 1523:4260 — FIT inside 410×620 */}
       <img
-        src={MEDIA[index]}
+        src={shots[index]}
         alt={`Product photo ${index + 1}`}
         style={{
           ...abs(10, 102, 410, 620),
@@ -887,7 +887,7 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
           borderRadius: 18,
         }}
       >
-        {MEDIA.map((src, i) => (
+        {shots.map((src, i) => (
           <button
             key={src}
             type="button"
@@ -1123,11 +1123,20 @@ function UnboxingGallery({ onClose }: { onClose: () => void }) {
 export function PdpOverlays({
   reviews = [],
   stats = null,
+  media = [],
+  productTitle = "Product",
 }: {
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
+  /** The product's photos — the hero carousel and the media viewer. */
+  media?: string[];
+  /** Names the hero slides for screen readers. */
+  productTitle?: string;
 }) {
   const [open, setOpen] = useState<OverlayId | null>(null);
+  // One source of truth for both the hero and the viewer. A product with no
+  // photos of its own falls back to the frame's set rather than an empty box.
+  const shots = media.length ? media : MEDIA;
   const mounted = useSyncExternalStore(
     subscribeToNothing,
     onTheClient,
@@ -1137,31 +1146,40 @@ export function PdpOverlays({
 
   return (
     <>
-      {/* Hero (16,94 398×281) → media viewer. The button carries its own copy
-          of the hero art (1523:4195, the 07-29 blue rose) so the wired
-          hover-zoom keeps working — a plain transparent cover would sit
-          outside the zoom container and kill it. */}
-      <button
-        type="button"
-        aria-label="Open product photos"
-        onClick={() => setOpen("media")}
-        className="gr-card-zoom"
-        style={{
-          ...RESET,
-          ...abs(16, 94, 398, 281),
-          borderRadius: 15,
-          overflow: "hidden",
-        }}
-      >
-        <img
-          className="gr-photo"
-          src="/eldreve/screens/1523-4195.png"
-          alt=""
-          width={398}
-          height={250}
-          style={{ ...abs(0, 8, 398, 250), borderRadius: 18, display: "block" }}
-        />
-      </button>
+      {/* Hero (photo window 16,102 398×250) → media viewer. This IS the hero:
+          the page draws only the card behind it, because the trigger has to
+          sit on top to catch the tap and two stacked photo layers could never
+          stay on the same slide. Built on the homepage's shared Carousel so
+          the product's own photos auto-play and follow the finger exactly as
+          H-03 does (owner, 2026-08-06). Dots are all one size, active by
+          colour — the same call HeroCarousel made. */}
+      <Carousel
+        window={{ left: 16, top: 102, width: 398, height: 250 }}
+        radius={18}
+        count={shots.length}
+        dots={
+          shots.length > 1
+            ? shots.map((_, i) => ({ x: 16 + i * DOT_PITCH, y: 362, size: 7 }))
+            : []
+        }
+        activeColor="#153C34"
+        idleColor="#DED9D0"
+        label={`${productTitle} photo`}
+        onActivate={() => setOpen("media")}
+        renderSlide={(i) => (
+          <img
+            src={shots[i]}
+            alt=""
+            width={398}
+            height={250}
+            style={{
+              ...abs(0, 0, 398, 250),
+              display: "block",
+              objectFit: "cover",
+            }}
+          />
+        )}
+      />
       {/* Rating row (rel 0,98 in the info card at 16,375) → reviews drawer */}
       <button
         type="button"
@@ -1196,7 +1214,10 @@ export function PdpOverlays({
         ? createPortal(<ColorDrawer onClose={close} />, document.body)
         : null}
       {mounted && open === "media"
-        ? createPortal(<MediaViewer onClose={close} />, document.body)
+        ? createPortal(
+            <MediaViewer onClose={close} shots={shots} />,
+            document.body,
+          )
         : null}
       {mounted && open === "unboxing"
         ? createPortal(<UnboxingGallery onClose={close} />, document.body)

@@ -227,12 +227,28 @@ const SEED_PRODUCTS: SeedProduct[] = [
       status: "active",
       position: 3,
     },
+    // Three photos, not one: a real product carries several (the live
+    // catalog's rose has five), and the PDP hero only auto-plays and swipes
+    // when there is more than one — the other two seed products stay
+    // single-photo so both paths have a fixture.
     images: [
       {
         product_id: "premium-gift-bundle",
         path: "/products/gold-rose-detail.jpg",
         alt: "Close-up detail graphic of a gold dipped rose",
         position: 0,
+      },
+      {
+        product_id: "premium-gift-bundle",
+        path: "/products/gold-rose-box.jpg",
+        alt: "The bundle's gift box, closed",
+        position: 1,
+      },
+      {
+        product_id: "premium-gift-bundle",
+        path: "/products/gold-rose-stand.jpg",
+        alt: "Gold dipped rose displayed beside a brown gift box",
+        position: 2,
       },
     ],
     variants: [

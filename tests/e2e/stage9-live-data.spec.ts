@@ -7,7 +7,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
+import { adminLogin, ADMIN_VIEWPORT, settleFixedChrome } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -27,6 +27,45 @@ test("shop cards and product page show live catalog values", async ({
     page.getByText("ELDREVE Signature 24K Gold Rose").first(),
   ).toBeVisible();
   await expect(page.getByText("BUY NOW · $49.99")).toBeVisible();
+});
+
+test("the product page draws catalog values, not the frame's fixed art", async ({
+  page,
+}) => {
+  await page.goto("/products/signature-24k-gold-rose", {
+    waitUntil: "networkidle",
+  });
+
+  // Badge pill, strapline and discount all come off the catalog row now; the
+  // discount is computed from the two prices rather than printed flat.
+  await expect(page.getByText("SAVE 44%", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Real rose base · Clear display stand · Gift-ready"),
+  ).toBeVisible();
+  await expect(page.getByText("44% OFF", { exact: true })).toBeVisible();
+
+  // Every hero carousel slide is one of the product's own photos, not a
+  // /eldreve design render. (Dots are buttons too but hold no image.)
+  const heroes = await page.$$eval('button[aria-label*=" photo "] img', (els) =>
+    els.map((el) => el.getAttribute("src")),
+  );
+  expect(heroes.length).toBeGreaterThan(0);
+  for (const src of heroes) expect(src).not.toMatch(/^\/eldreve\//);
+
+  // None of the values the frame invented may reappear: a fixed badge, a
+  // fixed discount, or review claims the product_reviews table cannot back.
+  for (const invented of [
+    "BEST SELLER",
+    "15% OFF",
+    "286 Reviews",
+    "Based on 286 reviews",
+    "Sarah M.",
+  ]) {
+    await expect(
+      page.getByText(invented, { exact: false }),
+      `frame placeholder "${invented}" is back on the PDP`,
+    ).toHaveCount(0);
+  }
 });
 
 test("long names ellipsize without layout shift (masked diff still gates)", async ({
@@ -65,6 +104,7 @@ test("long names ellipsize without layout shift (masked diff still gates)", asyn
       window.scrollTo(0, 0);
     });
     await page.waitForLoadState("networkidle");
+    await settleFixedChrome(page);
     await expect(page).toHaveScreenshot("product-detail-masked.png", {
       fullPage: true,
       mask: [page.locator("[data-live-text]")],

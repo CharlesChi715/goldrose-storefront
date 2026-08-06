@@ -12,6 +12,7 @@
  */
 
 import { test, expect, type Page } from "@playwright/test";
+import { settleFixedChrome } from "./helpers";
 
 async function settlePage(page: Page) {
   await page.evaluate(async () => {
@@ -24,6 +25,7 @@ async function settlePage(page: Page) {
     window.scrollTo(0, 0);
   });
   await page.waitForLoadState("networkidle");
+  await settleFixedChrome(page);
 }
 
 test("pixel baseline: home (masked blend-mode art)", async ({ page }) => {

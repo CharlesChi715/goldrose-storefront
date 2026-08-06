@@ -8,8 +8,24 @@
  * Figma REST API; photo assets in /public/eldreve are exact 2x node renders.
  *
  * Every product renders the same pixel design; the slug picks the product,
- * and live name/price/photos come from the DB catalog (lib/supabase/catalog)
- * in the designated boxes (§14.2 Stage 9).
+ * and the catalog row (lib/supabase/catalog) fills the designated boxes
+ * (§14.2 Stage 9).
+ *
+ * WHAT COMES FROM THE DATABASE (owner, 2026-08-06 — the page used to draw
+ * most of this as fixed art): the hero photo, the badge pill, the strapline
+ * (first three `details` bullets), title, price, compare-at, the discount
+ * pill (computed from the two prices, not a fixed "15% OFF"), the ABOUT
+ * copy (`description`), and every number in the reviews band — average,
+ * count, star fill, histogram and the quoted review, all from
+ * product_reviews. With no reviews the band STAYS on the page (owner) and
+ * reads as unrated; it no longer borrows the frame's "4.9 · 286 Reviews",
+ * which would be a review claim the table cannot support.
+ *
+ * WHAT IS STILL THE FRAME'S OWN: the three shipping benefits (store policy,
+ * not product data), the ABOUT slogan, and the unboxing gallery with its
+ * "(1,354)" count — kept visible on the owner's instruction; there is no UGC
+ * table behind it. `best_for` and any `details` past the third have no box
+ * in this frame yet — they need a design slot.
  */
 
 import type { Metadata } from "next";
@@ -100,7 +116,8 @@ function Section({
   clip?: boolean;
   /** Optional hook class (e.g. the hover-zoom wrapper). */
   className?: string;
-  children: React.ReactNode;
+  /** Omitted by the hero, whose contents are drawn over it by PdpOverlays. */
+  children?: React.ReactNode;
 }) {
   return (
     <div
@@ -141,8 +158,8 @@ export default async function ProductDetailPage({
   }
   if (!catalogProduct) notFound();
   const product = catalogProduct;
-  // Real published reviews (pending/rejected never leave the server); the
-  // mock art stays as the visible fallback while the table is empty.
+  // Real published reviews (pending/rejected never leave the server). An
+  // empty table now reads as unrated rather than borrowing the frame's.
   let reviews: Awaited<ReturnType<typeof listPublishedReviews>> = [];
   try {
     reviews = await listPublishedReviews(product.id);
@@ -151,6 +168,11 @@ export default async function ProductDetailPage({
   }
   const stats = reviewStats(reviews);
   const hasReviews = stats.count > 0;
+  /* How much of the star art is left unveiled. The band stays on the page
+     with no reviews (owner, 2026-08-06) — it just reads as unrated instead
+     of borrowing the frame's 4.9, which would be a review claim the table
+     cannot support. */
+  const starFill = hasReviews ? stats.average / 5 : 0;
   // 5★…1★ counts drive the band-10 histogram; the newest review is the one
   // the band quotes.
   const histogram = [5, 4, 3, 2, 1].map(
@@ -166,6 +188,31 @@ export default async function ProductDetailPage({
   // that compensates for the PNG-pixel design.
   const base = siteBaseUrl();
   const defaultVariant = product.variants[0];
+
+  /* Values the frame draws as fixed art, resolved from the row the slug
+     found. The frame's own words survive ONLY where the catalog has no
+     column behind them — the ABOUT slogan and the three shipping benefits,
+     which are store policy rather than product data. */
+  // The gold pill: the frame says BEST SELLER, the catalog says what it is.
+  const badge = (product.badge ?? "").trim().toUpperCase();
+  // The frame's "Real Rose · Hand-Finished · Made to Last" strapline reads
+  // exactly like the first detail bullets, so that is what fills it.
+  const strapline = (product.details ?? []).slice(0, 3).join(" · ");
+  const priceCents = defaultVariant?.price_cents ?? 0;
+  const compareCents = defaultVariant?.compare_at_price_cents ?? null;
+  // The frame prints a flat "15% OFF". The real saving is the two prices,
+  // and printing less than the true discount costs sales.
+  const discountPercent =
+    compareCents != null && compareCents > priceCents
+      ? Math.round(((compareCents - priceCents) / compareCents) * 100)
+      : null;
+  // The product's own photos, not the design's stock renders: the first
+  // fills the hero, the second the ABOUT panel beside the copy.
+  const heroImage = product.images[0] ? fileUrl(product.images[0].path) : null;
+  const aboutImage = product.images[1]
+    ? fileUrl(product.images[1].path)
+    : heroImage;
+
   const structuredData = [
     {
       "@context": "https://schema.org",
@@ -228,9 +275,10 @@ export default async function ProductDetailPage({
           when wishlist enters scope. */}
         <VHeader backHref="/shop" right="search" brand="eldreve" />
 
-        {/* 03 · Hero */}
-        {/* The hero photo zooms inside its clipped frame on hover (gr-card-zoom
-          + gr-photo, app/globals.css) — pointer devices only. */}
+        {/* 03 · Hero — the card only. The photo track and its pagination dots
+          are drawn by PdpOverlays' Carousel below: the tap target has to sit
+          on top of the photo to open the media viewer, so it may as well BE
+          the photo. Two stacked layers could never hold the same slide. */}
         <Section
           x={16}
           y={94}
@@ -239,55 +287,35 @@ export default async function ProductDetailPage({
           radius={15}
           background="#FFFBF6"
           clip
-          className="gr-card-zoom"
-        >
-          <img
-            className="gr-photo"
-            src="/eldreve/detail-hero.png"
-            alt={product.images[0]?.alt ?? product.title}
-            width={398}
-            height={250}
-            fetchPriority="high"
-            style={{ ...abs(0, 8, 398, 250), display: "block" }}
-          />
-          <div
-            style={{
-              ...abs(0, 268, 18, 7),
-              background: "#153C34",
-              borderRadius: 3.5,
-            }}
-          />
-          {[25, 39, 53].map((x) => (
-            <div
-              key={x}
-              style={{
-                ...abs(x, 268, 7, 7),
-                background: "#DED9D0",
-                borderRadius: "50%",
-              }}
-            />
-          ))}
-        </Section>
+        />
 
         {/* 04 · Product info */}
         <div style={{ ...abs(16, 375, 398, 166), background: "#FFFBF6" }}>
-          <div
-            style={{
-              ...abs(0, 8, 91, 21),
-              background: "#D4AF37",
-              borderRadius: 99,
-            }}
-          >
+          {/* The catalog's badge, in the frame's pill. A product with no
+              badge gets no pill rather than a borrowed one. */}
+          {badge ? (
             <div
+              data-live-text
               style={{
-                ...abs(10, 4, 71),
-                ...txt(11, 13.312, "#FFF6EC"),
-                fontWeight: 500,
+                ...abs(0, 8, 91, 21),
+                background: "#D4AF37",
+                borderRadius: 99,
               }}
             >
-              BEST SELLER
+              <div
+                style={{
+                  ...abs(10, 4, 71),
+                  ...txt(11, 13.312, "#FFF6EC"),
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {badge}
+              </div>
             </div>
-          </div>
+          ) : null}
           <div
             className={cormorant.className}
             data-live-text
@@ -302,8 +330,20 @@ export default async function ProductDetailPage({
           >
             {product.title}
           </div>
-          <div style={{ ...abs(0, 75, 398), ...txt(13, 15.733, "#B8A69A") }}>
-            Real Rose · Hand-Finished · Made to Last
+          {/* The catalog's first three detail bullets, in the frame's
+              strapline box; the frame's own line covers a product that
+              carries none. */}
+          <div
+            data-live-text
+            style={{
+              ...abs(0, 75, 398),
+              ...txt(13, 15.733, "#B8A69A"),
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {strapline || "Real Rose · Hand-Finished · Made to Last"}
           </div>
           {/* Same treatment as the reviews band: the art fills to the live
               average instead of always showing five stars. The art is the
@@ -313,7 +353,7 @@ export default async function ProductDetailPage({
             data-live-text
             role="img"
             aria-label={
-              hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
+              hasReviews ? `${stats.average} out of 5 stars` : "No ratings yet"
             }
             style={abs(0.53, 100.51, 69, 13)}
           >
@@ -324,20 +364,13 @@ export default async function ProductDetailPage({
               height={13}
               style={{ ...abs(0, 0, 69, 13), display: "block" }}
             />
-            {hasReviews ? (
-              <div
-                style={{
-                  ...abs(
-                    (stats.average / 5) * 69,
-                    0,
-                    69 - (stats.average / 5) * 69,
-                    13,
-                  ),
-                  background: "#FFFBF6",
-                  opacity: 0.74,
-                }}
-              />
-            ) : null}
+            <div
+              style={{
+                ...abs(starFill * 69, 0, 69 - starFill * 69, 13),
+                background: "#FFFBF6",
+                opacity: 0.74,
+              }}
+            />
           </div>
           {/* Width 130, not the frame's 112: a live count has to fit
               without painting outside its pixel-test mask. */}
@@ -345,9 +378,9 @@ export default async function ProductDetailPage({
             data-live-text
             style={{ ...abs(76, 99, 130), ...txt(12, 14.523, "#B8A69A") }}
           >
-            {stats.count > 0
+            {hasReviews
               ? `${stats.average} · ${stats.count} Review${stats.count === 1 ? "" : "s"} \u00A0›`
-              : "4.9 · 286 Reviews \u00A0›"}
+              : "No reviews yet \u00A0›"}
           </div>
           <div
             className={notoSC.className}
@@ -374,23 +407,29 @@ export default async function ProductDetailPage({
               {formatMoney(defaultVariant.compare_at_price_cents)}
             </div>
           ) : null}
-          <div
-            style={{
-              ...abs(191, 128.5, 70, 23),
-              background: "#F5EDDB",
-              borderRadius: 99,
-            }}
-          >
+          {/* Computed from the two prices above it, so the pill can never
+              disagree with them; no compare-at price, no pill. */}
+          {discountPercent != null ? (
             <div
+              data-live-text
               style={{
-                ...abs(10, 4, 50),
-                ...txt(12, 14.523, "#D4AF37"),
-                fontWeight: 500,
+                ...abs(191, 128.5, 70, 23),
+                background: "#F5EDDB",
+                borderRadius: 99,
               }}
             >
-              15% OFF
+              <div
+                style={{
+                  ...abs(10, 4, 50),
+                  ...txt(12, 14.523, "#D4AF37"),
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {discountPercent}% OFF
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
 
         {/* 05 · Benefits */}
@@ -594,22 +633,37 @@ export default async function ProductDetailPage({
           >
             {"Crafted to Last\nMade for Love"}
           </div>
+          {/* The catalog description. The frame's box holds three lines, so
+              a longer description clamps there instead of spilling over the
+              art beside it — the whole text still ships in the meta
+              description and the Product JSON-LD. */}
           <div
+            data-live-text
             style={{
               ...abs(18, 110.5, 185, 60),
               ...txt(10.5, 20, "#4A403B"),
               whiteSpace: "normal",
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 3,
+              overflow: "hidden",
             }}
           >
-            A real rose, expertly preserved and hand-finished in 24K gold to
-            keep its beauty
+            {product.description ||
+              "A real rose, expertly preserved and hand-finished in 24K gold to keep its beauty"}
           </div>
+          {/* The product's second photo (its detail shot), falling back to
+              the first and then to the frame's art. */}
           <img
-            src="/eldreve/about-rose.png"
-            alt="Gold dipped rose detail"
+            src={aboutImage ?? "/eldreve/about-rose.png"}
+            alt={product.images[1]?.alt || product.title}
             width={190}
             height={196}
-            style={{ ...abs(217, 0, 190, 196), display: "block" }}
+            style={{
+              ...abs(217, 0, 190, 196),
+              display: "block",
+              objectFit: "cover",
+            }}
           />
         </Section>
 
@@ -641,7 +695,7 @@ export default async function ProductDetailPage({
               fontWeight: 700,
             }}
           >
-            {hasReviews ? stats.average : "4.9"}
+            {hasReviews ? stats.average : "—"}
           </div>
           {/* The star art fills to the real average once reviews exist, so it
               can never show five stars for a 4.5 score. */}
@@ -649,7 +703,7 @@ export default async function ProductDetailPage({
             data-live-text
             role="img"
             aria-label={
-              hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
+              hasReviews ? `${stats.average} out of 5 stars` : "No ratings yet"
             }
             style={abs(25.07, 123.69, 74, 14)}
           >
@@ -662,21 +716,15 @@ export default async function ProductDetailPage({
             />
             {/* Stars past the average fade under a veil in the card's own
                 colour. Carried over from the palette PNG this replaced; the
-                node export has real alpha, so a clipped copy would work too. */}
-            {hasReviews ? (
-              <div
-                style={{
-                  ...abs(
-                    (stats.average / 5) * 74,
-                    0,
-                    74 - (stats.average / 5) * 74,
-                    14,
-                  ),
-                  background: "#FFFBF6",
-                  opacity: 0.74,
-                }}
-              />
-            ) : null}
+                node export has real alpha, so a clipped copy would work too.
+                With no reviews the veil covers all five. */}
+            <div
+              style={{
+                ...abs(starFill * 74, 0, 74 - starFill * 74, 14),
+                background: "#FFFBF6",
+                opacity: 0.74,
+              }}
+            />
           </div>
           <div
             data-live-text
@@ -684,7 +732,7 @@ export default async function ProductDetailPage({
           >
             {hasReviews
               ? `Based on ${stats.count} review${stats.count === 1 ? "" : "s"}`
-              : "Based on 286 reviews"}
+              : "No reviews yet"}
           </div>
           {[
             {
@@ -692,8 +740,6 @@ export default async function ProductDetailPage({
               label: "5 stars",
               labelW: 33,
               trackX: 171,
-              fill: 136.5,
-              pct: "91%",
               pctX: 329,
             },
             {
@@ -701,8 +747,6 @@ export default async function ProductDetailPage({
               label: "4 stars",
               labelW: 33,
               trackX: 171,
-              fill: 10.5,
-              pct: "7%",
               pctX: 329,
             },
             {
@@ -710,8 +754,6 @@ export default async function ProductDetailPage({
               label: "3 stars",
               labelW: 33,
               trackX: 171,
-              fill: 2.1,
-              pct: "1.4%",
               pctX: 329,
             },
             {
@@ -719,8 +761,6 @@ export default async function ProductDetailPage({
               label: "2 stars",
               labelW: 33,
               trackX: 171,
-              fill: 2,
-              pct: "0.4%",
               pctX: 329,
             },
             {
@@ -728,28 +768,22 @@ export default async function ProductDetailPage({
               label: "1 star",
               labelW: 26,
               trackX: 164,
-              fill: 2,
-              pct: "0.2%",
               pctX: 322,
             },
           ].map((row, index) => {
-            // Live share of this star band; the design's own numbers stand in
-            // until the product has reviews. A non-zero share keeps the
-            // design's 2px minimum bar so it never disappears entirely.
+            // Live share of this star band. With no reviews every band is
+            // empty rather than carrying the frame's 91/7/1.4/0.4/0.2 —
+            // those are review claims. A non-zero share keeps the design's
+            // 2px minimum bar so it never disappears entirely.
             const share = hasReviews ? histogram[index] / stats.count : 0;
             const percent = share * 100;
-            const fill = hasReviews
-              ? share > 0
-                ? Math.max(2, share * 150)
-                : 0
-              : row.fill;
-            const label = hasReviews
-              ? percent === 0
+            const fill = share > 0 ? Math.max(2, share * 150) : 0;
+            const label =
+              percent === 0
                 ? "0%"
                 : percent >= 10
                   ? `${Math.round(percent)}%`
-                  : `${percent.toFixed(1)}%`
-              : row.pct;
+                  : `${percent.toFixed(1)}%`;
             return (
               <div key={row.label}>
                 <div
@@ -818,7 +852,7 @@ export default async function ProductDetailPage({
             >
               {featured
                 ? `“${featured.body}”`
-                : "“Beautiful craftsmanship — perfect for gifting.”"}
+                : "Be the first to review this rose."}
             </div>
             {/* "Verified Buyer" is a claim, so it is only made for reviews
                 that carry the order they came from. */}
@@ -828,7 +862,7 @@ export default async function ProductDetailPage({
             >
               {featured
                 ? `— ${featured.author_name ?? "ELDREVE Customer"}${featured.order_id ? " · Verified Buyer" : ""}`
-                : "— Sarah M. · Verified Buyer"}
+                : ""}
             </div>
           </div>
         </Section>
@@ -843,6 +877,8 @@ export default async function ProductDetailPage({
             rating: review.rating,
           }))}
           stats={stats}
+          media={product.images.map((image) => fileUrl(image.path))}
+          productTitle={product.title}
         />
       </ScaleFrame>
 
