@@ -44,6 +44,16 @@ Open linked resources only when the task needs them.
 - **Customer sign-in is live end to end (2026-08-03).** `/account/signup` does
   real email validation → `signInWithOtp` → 6-digit code → consent-gated
   CONTINUE → `verifyOtp` → `/account`. The same email carries a one-tap link.
+- **`/account/personal-info` is live (2026-08-06).** Real name, email and
+  language, saved via `lib/account/profile.ts` to the auth user's
+  `user_metadata` (source of truth) and mirrored onto the linked `customers`
+  row — never linked by email. Email changes go through
+  `updateUser({ email })`; the project has secure email change on, so both
+  addresses confirm. Signed-in only; signed out it redirects to
+  `/account/signup`. ⚠️ The repo now carries an email-change mail template
+  that is **not yet applied** — run
+  `node scripts/apply-auth-email-templates.mjs` so the link returns to the
+  page instead of the homepage.
 - **AI-020 answered 2026-08-04 (owner): `/account/signup` is the ONLY login
   page.** `/account` is signed-in only and redirects there otherwise; the
   second login screen (`ShoppingLogin`, frame 74:53) is deleted. It carried the

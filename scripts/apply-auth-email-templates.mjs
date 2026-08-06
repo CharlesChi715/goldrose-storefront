@@ -9,9 +9,15 @@
  *   node scripts/apply-auth-email-templates.mjs
  *
  * Auth: uses SUPABASE_ACCESS_TOKEN if set, else the Supabase CLI's token
- * from the macOS keychain (the CLI must be logged in). Only the two mail
+ * from the macOS keychain (the CLI must be logged in). Only the three mail
  * templates and their subjects are PATCHed — never site_url (the passkey
  * RP ID depends on it) or any other auth setting.
+ *
+ * 2026-08-06 — the email-change template joined the set, now that
+ * /account/personal-info can start an email change. NOT YET APPLIED: run the
+ * script to activate it. Until then the project keeps its earlier version,
+ * which works but sends people to the homepage instead of back to the page
+ * they started on.
  */
 
 import { execSync } from "node:child_process";
@@ -37,6 +43,12 @@ const codeFallback =
   "<p>Reading this on a different device? Enter this code on the sign-in page instead: <strong>{{ .Token }}</strong></p>\n" +
   "<p>If you didn’t request this email, you can safely ignore it.</p>";
 
+// Email changes verify through the same route (type=email_change is one of
+// Supabase's own EmailOtpType values), then return to the screen that started
+// the change so its banner can report what is still pending.
+const changeLink =
+  "{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change&next=/account/personal-info";
+
 const patch = {
   // Existing customers asking to sign in.
   mailer_subjects_magic_link: "Sign in to ELDREVE",
@@ -53,6 +65,22 @@ const patch = {
     "<p>Tap the button below to confirm your email and sign in — the link works once and expires in about an hour.</p>\n" +
     `<p><a href="${confirmLink}">Confirm and sign in</a></p>\n` +
     codeFallback,
+  // Changing the address from /account/personal-info. The project has secure
+  // email change on, so THIS ONE TEMPLATE is sent twice — once to the current
+  // address and once to the new one — and both links must be opened before
+  // the change takes effect. The copy therefore has to read correctly from
+  // either inbox, which is why it never says "your new address" outright.
+  //
+  // It lands on /auth/confirm like the sign-in mails rather than on Supabase's
+  // own {{ .ConfirmationURL }}, so the visitor comes back to the page they
+  // started on and can see what is still outstanding.
+  mailer_subjects_email_change: "Confirm your ELDREVE email change",
+  mailer_templates_email_change_content:
+    "<h2>Confirm your email change</h2>\n\n" +
+    "<p>A request was made to move the ELDREVE account {{ .Email }} to {{ .NewEmail }}.</p>\n" +
+    "<p>For your security we ask both addresses to confirm, so you may receive this email twice — open the link in each.</p>\n" +
+    `<p><a href="${changeLink}">Confirm this email change</a></p>\n` +
+    "<p>If you didn’t request this change, you can safely ignore this email — nothing changes until both links are opened.</p>",
 };
 
 const response = await fetch(
@@ -73,4 +101,5 @@ const config = await response.json();
 console.log("Applied. The project now sends:");
 console.log(`  magic link   → "${config.mailer_subjects_magic_link}"`);
 console.log(`  confirmation → "${config.mailer_subjects_confirmation}"`);
+console.log(`  email change → "${config.mailer_subjects_email_change}"`);
 console.log(`  site_url (untouched): ${config.site_url}`);
