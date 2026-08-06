@@ -5261,3 +5261,25 @@ routine (this file, and both baselines) but one was not.
 **Still open from (5):** `components/home/A3.tsx:128` and
 `components/home/BestSellersRail.tsx:193` have the same ring-under-photo bug
 the shop card had. Not touched.
+
+## 2026-08-06 — /shop renders only real catalog products
+
+- **Ask (owner):** make /shop show only the product that actually exists in
+  the database.
+- **Cause:** the grid cycled the catalog to fill the Figma frame's eight fixed
+  slots (`data[c % data.length]`), so the single hosted product was drawn
+  eight times, across five rotated "pages" — plus a hardcoded "120 GIFTS" and
+  a "Show 36 Results" button.
+- **Change:** the frame's numbers are now grid CAPACITY, not content. One card
+  per product; row count, pager and canvas height are derived from the
+  catalog. Constants read back off the slot table (top 408.5, pitch 308, card
+  297, pager gap 27, pager 32, tail 133.5), so a full eight-card page rebuilds
+  the frame's 1822 exactly — verified at 1822 with 12 seeded products.
+- Real paging (8/page, windowed 5-button pager, hidden at one page), counts
+  wired to the catalog, `?q=` preserved across pages, and a first empty state
+  (no-match search / empty catalog / failed read) since the grid can now be
+  empty.
+- **Verified:** typecheck, lint, build, 74 unit tests, 107 e2e tests, `/shop`
+  pixel baseline regenerated (canvas 1822 → 1147 for the 3-product seed).
+- **Left for design:** the "Ruby Red"/"Gift Sets" chips and the 5-star card
+  art are still static frame art; the empty-state line has no Figma frame.

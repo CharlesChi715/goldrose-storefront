@@ -279,31 +279,45 @@ test("the return sheet's Confirm Return lands on the request-submitted page", as
   ).toBeVisible();
 });
 
-test("the shop pagination walks pages and reorders the placeholder cards", async ({
+test("the shop grid shows one card per real product and nothing else", async ({
   page,
 }) => {
   await page.goto("/shop");
-  const photos = () =>
-    page.$$eval(".gr-card-zoom .gr-photo", (els) =>
-      els.map((el) => el.getAttribute("src")),
-    );
-  const pageOne = await photos();
 
-  await page.getByRole("link", { name: "Page 3" }).click();
-  await expect(page).toHaveURL(/\/shop\?page=3$/);
-  await expect(page.getByRole("link", { name: "Page 3" })).toHaveAttribute(
-    "aria-current",
-    "page",
+  // The seed catalog is smaller than the frame's eight slots. The grid used to
+  // cycle it to fill them all, drawing the same products several times over
+  // five identical "pages"; it now draws each product exactly once.
+  const links = await page.$$eval(".gr-card-zoom", (els) =>
+    els.map((el) => el.getAttribute("href")),
   );
-  // The same products rotated into different slots (OQ-3). Compared as a whole
-  // sequence, not by the first card: card photos now follow the product rather
-  // than the slot, and with only three real products several pages happen to
-  // open on the same one — the grids still differ further down.
-  expect(await photos()).not.toEqual(pageOne);
+  expect(links.length).toBeGreaterThan(0);
+  expect(new Set(links).size).toBe(links.length);
+  for (const href of links) expect(href).toMatch(/^\/products\/[a-z0-9-]+$/);
 
-  // The next-page arrow is inert on the last page, as the design draws it.
-  await page.goto("/shop?page=5");
+  // The count above the grid is the same list, not the frame's flat "120".
+  await expect(
+    page.getByText(`${links.length} GIFTS`, { exact: true }),
+  ).toBeVisible();
+
+  // One page of results draws no pager at all — no page numbers, no arrow.
+  await expect(page.getByRole("link", { name: /^Page \d+$/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Next page" })).toHaveCount(0);
+
+  // An out-of-range page falls back to the canonical listing rather than
+  // rendering an empty grid at full canvas height.
+  await page.goto("/shop?page=5");
+  expect(await page.$$eval(".gr-card-zoom", (els) => els.length)).toBe(
+    links.length,
+  );
+});
+
+test("a shop search that matches nothing shows no cards, not the whole catalog", async ({
+  page,
+}) => {
+  await page.goto("/shop?q=zzzznotaproduct");
+  expect(await page.$$eval(".gr-card-zoom", (els) => els.length)).toBe(0);
+  await expect(page.getByText("0 GIFTS", { exact: true })).toBeVisible();
+  await expect(page.getByText(/No gifts match/)).toBeVisible();
 });
 
 // The Gift Shopping ⇄ Business & Partnerships tabs lived on the second login

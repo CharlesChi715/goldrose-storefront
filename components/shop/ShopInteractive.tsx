@@ -9,11 +9,16 @@
  * fonts are verbatim from the Figma REST data.
  *
  * What is real and what is cosmetic:
+ * - The GRID is real: one card per catalog product, never more. The frame's
+ *   eight slots are capacity, not content — an eight-card page fills them
+ *   all, and a one-product catalog draws exactly one card (owner,
+ *   2026-08-06). The product count above the grid counts the same list.
  * - Sorting is REAL: the four dropdown rows reorder the live catalog data
  *   inside the design's fixed grid slots. "New" is the default catalog order
  *   (the state the frame draws); "Recommended" keeps that order under its
  *   own name until merchandising rules exist; the two price rows sort by
- *   price_cents.
+ *   price_cents. The sort applies to the whole catalog before the page is
+ *   sliced, so it holds across pages rather than within one.
  * - The filter drawer is COSMETIC (B-2 checkout-picker precedent): chips
  *   toggle visually, Reset restores the frame's default selection, and the
  *   confirm button closes the drawer. The catalog has no collection/
@@ -143,29 +148,14 @@ const defaultFilterSelection = () =>
     group.options.findIndex((option) => option.selected),
   );
 
-/**
- * Which card's content belongs in grid slot `slot` on `page` — same rotation
- * the server page used before this component existed (placeholder paging).
- */
-function contentIndex(
-  slot: number,
-  page: number,
-  cardCount: number,
-  rotatePerPage: number,
-) {
-  return (slot + (page - 1) * rotatePerPage) % cardCount;
-}
-
 function ProductCard({
   slot,
-  img,
   href,
   data,
 }: {
   slot: SlotSpec;
-  img: string;
   href: string;
-  data: CardData | null;
+  data: CardData;
 }) {
   return (
     <Link
@@ -184,8 +174,8 @@ function ProductCard({
           catalog photos are not the frame's 203×204, so they cover-crop. */}
       <img
         className="gr-photo"
-        src={data?.image ?? `/eldreve/home/${img}.png`}
-        alt={data ? data.shortName : "Artisan 24K gold-dipped eternal rose"}
+        src={data.image ?? `/eldreve/home/${slot.img}.png`}
+        alt={data.shortName}
         width={slot.w}
         height={204}
         style={{
@@ -205,7 +195,7 @@ function ProductCard({
           textOverflow: "ellipsis",
         }}
       >
-        {data?.shortName ?? "Double Rose Gift Set"}
+        {data.shortName}
       </div>
       <img
         src={`/eldreve/home/${slot.stars}.svg`}
@@ -230,9 +220,9 @@ function ProductCard({
         }}
       >
         <span style={{ ...txt(20, 24, INK), fontWeight: 700, flexShrink: 0 }}>
-          {data?.price ?? "$219"}
+          {data.price}
         </span>
-        {data === null || data.compareAt !== null ? (
+        {data.compareAt !== null ? (
           <span
             style={{
               ...txt(14, 16.8, MUTED),
@@ -242,7 +232,7 @@ function ProductCard({
               textOverflow: "ellipsis",
             }}
           >
-            {data?.compareAt ?? "$189.00"}
+            {data.compareAt}
           </span>
         ) : null}
       </div>
@@ -268,12 +258,16 @@ export function ShopInteractive({
   slots,
   data,
   page,
-  rotatePerPage,
+  pageSize,
+  emptyNote,
 }: {
   slots: SlotSpec[];
+  /** The whole (search-filtered) catalog; this component slices the page. */
   data: CardData[];
   page: number;
-  rotatePerPage: number;
+  pageSize: number;
+  /** Shown in place of the grid when `data` is empty. */
+  emptyNote: string;
 }) {
   const [sort, setSort] = useState<SortKey>("new");
   const [sortOpen, setSortOpen] = useState(false);
@@ -312,41 +306,30 @@ export function ShopInteractive({
     }, FADE_MS);
   };
 
-  // Fill the grid FIRST, then sort what it holds. The catalog is shorter than
-  // the eight design slots (OQ-3), so it cycles to fill them — and sorting the
-  // catalog before that cycling made the visible prices restart every time the
-  // loop came round ($79, $64, $49, $79 …). Ordering the filled grid instead
-  // keeps the sequence strictly monotonic; equal prices stay in fill order
-  // because Array#sort is stable. `art` rides along so a product without its
-  // own photo keeps the frame art it was filled with.
-  const filled = slots.map((_, i) => {
-    const c = contentIndex(i, page, slots.length, rotatePerPage);
-    return {
-      art: slots[c].img,
-      card: data.length ? data[c % data.length] : null,
-    };
-  });
-  if (sort === "high")
-    filled.sort(
-      (a, b) => (b.card?.priceCents ?? 0) - (a.card?.priceCents ?? 0),
-    );
-  if (sort === "low")
-    filled.sort(
-      (a, b) => (a.card?.priceCents ?? 0) - (b.card?.priceCents ?? 0),
-    );
+  // Sort the WHOLE catalog, then slice out this page — so "Price: Low to
+  // High" means low to high across the shop, not just within the page you
+  // happen to be on. Equal prices keep catalog order because Array#sort is
+  // stable, and the copy keeps the server's array untouched. The grid used to
+  // cycle the catalog to fill all eight slots and sort the filled result
+  // instead; that drew the one real product eight times (owner, 2026-08-06).
+  const sorted = [...data];
+  if (sort === "high") sorted.sort((a, b) => b.priceCents - a.priceCents);
+  if (sort === "low") sorted.sort((a, b) => a.priceCents - b.priceCents);
+  const visible = sorted.slice((page - 1) * pageSize, page * pageSize);
 
   const overlayOpen = sortOpen || filterOpen;
 
   return (
     <>
       {/* 927:153 SHOP-PRODUCT-COUNT-CARD — the overlay frames patch the base
-          frame's "120 Apparel" with the gift-shop count. */}
+          frame's "120 Apparel" with the gift-shop count, which the frame drew
+          as a flat "120 GIFTS". It counts the real catalog now. */}
       <div style={{ ...abs(0, 307, 185, 45), background: CREAM }} />
       <div
         className={playfair.className}
         style={{ ...abs(18, 321, 150), ...txt(13, 18, INK), fontWeight: 500 }}
       >
-        120 GIFTS
+        {data.length} {data.length === 1 ? "GIFT" : "GIFTS"}
       </div>
 
       {/* Sort pill (921:134/138) — now a real dropdown trigger. */}
@@ -474,9 +457,10 @@ export function ShopInteractive({
         </div>
       ))}
 
-      {/* Product grid — slot geometry is the design's; which card sits in
-          each slot rotates per page and follows the chosen sort. The wrapper
-          is unpositioned on purpose: the cards stay absolutely placed against
+      {/* Product grid — slot geometry is the design's, one slot per real
+          product, in the chosen sort order. Unused slots are simply not
+          drawn; the server shortens the canvas to match. The wrapper is
+          unpositioned on purpose: the cards stay absolutely placed against
           the same canvas, and it exists only to fade them as one unit. */}
       <div
         style={{
@@ -484,18 +468,30 @@ export function ShopInteractive({
           transition: `opacity ${FADE_MS}ms ease`,
         }}
       >
-        {slots.map((slot, i) => {
-          const { art, card } = filled[i];
-          return (
+        {visible.length ? (
+          visible.map((card, i) => (
             <ProductCard
-              key={i}
-              slot={slot}
-              img={art}
-              href={card ? `/products/${card.handle}` : "/shop"}
+              key={card.handle}
+              slot={slots[i]}
+              href={`/products/${card.handle}`}
               data={card}
             />
-          );
-        })}
+          ))
+        ) : (
+          /* No design exists for an empty grid (docs/ixd/README.md), so this
+             is the page's own type at the grid's top-left, not invented art.
+             It is reachable three ways: a search that matches nothing, an
+             empty catalog, and a catalog read that failed. */
+          <div
+            className={playfair.className}
+            style={{
+              ...abs(18, slots[0].y, 394),
+              ...txt(15, 20, INK_SOFT),
+            }}
+          >
+            {emptyNote}
+          </div>
+        )}
       </div>
 
       {/* Click-away backdrop for either overlay. */}
@@ -667,8 +663,9 @@ export function ShopInteractive({
           >
             <span style={{ ...txt(17, 21, INK), fontWeight: 500 }}>Reset</span>
           </button>
-          {/* The design's fixed result count — the drawer is cosmetic until
-              the catalog carries these fields (docs/ixd/README.md). */}
+          {/* The drawer stays cosmetic until the catalog carries these fields
+              (docs/ixd/README.md), so the button closes on the full catalog —
+              and the count says so instead of the frame's fixed "36". */}
           <button
             type="button"
             onClick={() => setFilterOpen(false)}
@@ -691,7 +688,7 @@ export function ShopInteractive({
                 fontWeight: 500,
               }}
             >
-              Show 36 Results
+              Show {data.length} Result{data.length === 1 ? "" : "s"}
             </span>
           </button>
         </div>

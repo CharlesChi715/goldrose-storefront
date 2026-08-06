@@ -9,6 +9,14 @@
  * compare-at, link → /products/[slug]); the star row is static design art
  * (ratings are out of scope this release, IxD README).
  *
+ * The grid renders ONE card per real catalog product and nothing else
+ * (owner, 2026-08-06). It used to cycle the catalog to fill all eight of the
+ * frame's slots, so a single product was drawn eight times across five
+ * identical "pages". The frame's numbers are now the grid's CAPACITY rather
+ * than its content: the canvas height, the row count and the pager are all
+ * derived from how many products exist, and a full eight-card page rebuilds
+ * the frame's 1822 exactly (see CANVAS below).
+ *
  * The card's wishlist heart was removed on the owner's instruction
  * (2026-08-05), which also settles the IxD README's open question 3 the same
  * way it was already answered there ("no"): the frame draws a heart, but
@@ -43,9 +51,10 @@ import { getCatalog } from "@/lib/supabase/catalog.ts";
 export const revalidate = 300;
 
 /**
- * Pages 2-5 are the same eight placeholder products in a different order, so
- * they are kept out of search results until real paging exists; page 1 stays
- * the canonical /shop listing.
+ * Pages past the first are real slices of the catalog now, but they are still
+ * kept out of the index: page 1 is the canonical /shop listing, and search
+ * results (?q=, handed over from /search) are per-visitor slices that should
+ * never be indexed at all.
  */
 export async function generateMetadata({
   searchParams,
@@ -54,10 +63,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const params = await searchParams;
   const requested = Number(params.page);
-  const paged =
-    Number.isInteger(requested) && requested > 1 && requested <= PAGE_COUNT;
-  // Search results (?q=, from /search) are user-specific slices of the same
-  // eight cards — keep them out of the index like pages 2-5.
+  // Out-of-range pages fall back to page 1 in the body; noindexing anything
+  // past the first page covers both without a second catalog read here.
+  const paged = Number.isInteger(requested) && requested > 1;
   const noindex = paged || Boolean(params.q?.trim());
   return {
     title: paged ? `Shop · page ${requested}` : "Shop",
@@ -76,7 +84,8 @@ const INK_SOFT = "#4A403B";
 
 // Left cards are 203 wide, right cards 204 (verbatim frame widths); `img` is
 // the 2x render of that card's own Product Visual node, `stars` the row's
-// star-glyph render (185px left / 186px right).
+// star-glyph render (185px left / 186px right). Slots are capacity: the grid
+// fills as many as there are products and leaves the rest undrawn.
 const CARDS: SlotSpec[] = [
   { x: 8, y: 408.5, w: 203, img: "58-61", stars: "58-64", starsW: 185 },
   { x: 219, y: 408.5, w: 204, img: "58-91", stars: "58-94", starsW: 186 },
@@ -88,14 +97,56 @@ const CARDS: SlotSpec[] = [
   { x: 219, y: 1332.5, w: 204, img: "58-158", stars: "58-94", starsW: 186 },
 ];
 
+/** The frame's grid holds eight cards — four rows of two. */
+const PAGE_SIZE = CARDS.length;
+const COLUMNS = 2;
+
+/* ---------- Canvas geometry, read back off the frame ---------- */
+
 /**
- * Pagination is placeholder depth: the design draws five pages, and there is
- * only one page of real products (OQ-3). Every page therefore shows the SAME
- * eight cards, rotated into different grid slots so the pages are visibly
- * distinct — page 1 keeps the design's exact order.
+ * CANVAS — the frame is 1822 tall with four full card rows and a pager. Every
+ * number below is recovered from the slot table above so a shorter grid keeps
+ * the design's own spacing instead of leaving a void where the missing rows
+ * were: first row top 408.5, row pitch 308 (716.5 − 408.5), card height 297,
+ * 27 from the last row down to the pager (1656.5 − 1629.5), pager 32 tall,
+ * then 133.5 of tail (1822 − 1688.5). Four rows plus a pager therefore
+ * reproduces 1822 to the pixel; anything less simply ends sooner.
  */
-const PAGE_COUNT = 5;
-const ROTATE_PER_PAGE = 3;
+const GRID_TOP = CARDS[0].y;
+const ROW_PITCH = CARDS[COLUMNS].y - CARDS[0].y;
+const CARD_H = 297;
+const PAGER_GAP = 27;
+const PAGER_H = 32;
+const TAIL = 133.5;
+/** Height reserved for the line that replaces the grid when nothing matches. */
+const EMPTY_H = 60;
+
+/**
+ * The frame draws five page buttons, 32 wide on a 44 pitch, running x=110 to
+ * x=286 — centred on the 430 canvas. Fewer pages keep the pitch and re-centre
+ * (each button dropped shifts the row half a pitch inward); more pages window
+ * five buttons around the current one rather than overflowing the canvas.
+ */
+const PAGER_MAX = 5;
+const PAGER_PITCH = 44;
+const PAGER_X0 = 110;
+/** The next-page chevron sits 41.052 right of the last button, 4.09 lower. */
+const ARROW_DX = 41.052;
+const ARROW_DY = 4.09;
+
+/** The page buttons to draw, and where, for the current page. */
+function pagerButtons(page: number, pageCount: number) {
+  const shown = Math.min(PAGER_MAX, pageCount);
+  const first = Math.min(
+    Math.max(1, page - Math.floor(shown / 2)),
+    pageCount - shown + 1,
+  );
+  const x0 = PAGER_X0 + ((PAGER_MAX - shown) * PAGER_PITCH) / 2;
+  return Array.from({ length: shown }, (_, i) => ({
+    n: first + i,
+    x: x0 + i * PAGER_PITCH,
+  }));
+}
 
 /* ---------- Page ---------- */
 
@@ -105,29 +156,28 @@ export default async function ShopPage({
   searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const params = await searchParams;
-  const requested = Number(params.page);
-  const page =
-    Number.isInteger(requested) && requested >= 1 && requested <= PAGE_COUNT
-      ? requested
-      : 1;
-  const query = (params.q ?? "").trim().toLowerCase();
-  // Card links + promo slogan come from the DB; a dead DB degrades gracefully.
+  const query = (params.q ?? "").trim();
+
+  // Card content and the promo slogan come from the DB, and each degrades on
+  // its own: a dead catalog shows the empty line below rather than a grid of
+  // invented products, and a dead slogan still leaves the catalog readable.
   let cardData: CardData[] = [];
-  let promo = { text: "", isDefault: true };
+  let failed = false;
   try {
-    // Card order = active products by position (§8); cards cycle the catalog.
+    // Card order = active products by position (§8).
     const catalog = await getCatalog();
-    // /search hands off here as ?q= — a plain title/short-name match. When
-    // nothing matches, the full catalog renders (the design has no empty
-    // state for the grid; noted in docs/ixd/README.md).
-    const matches = query
+    // /search hands off here as ?q= — a plain title/short-name match. No
+    // matches now means no cards; it used to fall back to the whole catalog
+    // because the eight fixed slots had to be filled either way.
+    const needle = query.toLowerCase();
+    const matches = needle
       ? catalog.filter((product) =>
           `${product.title} ${product.short_name ?? ""}`
             .toLowerCase()
-            .includes(query),
+            .includes(needle),
         )
       : catalog;
-    cardData = (matches.length ? matches : catalog).map((product) => ({
+    cardData = matches.map((product) => ({
       handle: product.handle,
       shortName: product.short_name || product.title,
       price: formatMoney(product.variants[0]?.price_cents ?? 0),
@@ -140,15 +190,56 @@ export default async function ShopPage({
       // photo travels with the product when the grid is sorted.
       image: product.images[0] ? fileUrl(product.images[0].path) : null,
     }));
+  } catch {
+    failed = true;
+  }
+
+  let promo = { text: "", isDefault: true };
+  try {
     promo = await getPromoSlogan();
   } catch {
-    // fixed design still renders
+    // the frame's default slogan still renders
   }
+
+  // Real paging: how many products there are decides how many pages exist,
+  // how many rows this page draws, and therefore how tall the canvas is.
+  const pageCount = Math.max(1, Math.ceil(cardData.length / PAGE_SIZE));
+  const requested = Number(params.page);
+  const page =
+    Number.isInteger(requested) && requested >= 1 && requested <= pageCount
+      ? requested
+      : 1;
+  const cardsOnPage = Math.max(
+    0,
+    Math.min(PAGE_SIZE, cardData.length - (page - 1) * PAGE_SIZE),
+  );
+  const rows = Math.ceil(cardsOnPage / COLUMNS);
+  // One page of results needs no pager, exactly as it needs no page numbers.
+  const showPager = pageCount > 1;
+  const gridBottom =
+    rows > 0 ? GRID_TOP + (rows - 1) * ROW_PITCH + CARD_H : GRID_TOP + EMPTY_H;
+  const pagerY = gridBottom + PAGER_GAP;
+  const height = gridBottom + (showPager ? PAGER_GAP + PAGER_H : 0) + TAIL;
+
+  // Page 1 keeps the bare /shop URL so the canonical page has no query
+  // string; a search carries its ?q= across pages instead of dropping it.
+  const pageHref = (n: number) => {
+    const qs = new URLSearchParams();
+    if (query) qs.set("q", query);
+    if (n > 1) qs.set("page", String(n));
+    const search = qs.toString();
+    return search ? `/shop?${search}` : "/shop";
+  };
+
+  const buttons = showPager ? pagerButtons(page, pageCount) : [];
+  const arrowX = buttons.length
+    ? buttons[buttons.length - 1].x + ARROW_DX
+    : PAGER_X0;
 
   return (
     <>
       <ScaleFrame
-        height={1822}
+        height={height}
         background="#FFF6EC"
         fontClass={tenor.className}
       >
@@ -182,55 +273,67 @@ export default async function ShopPage({
           slots={CARDS}
           data={cardData}
           page={page}
-          rotatePerPage={ROTATE_PER_PAGE}
+          pageSize={PAGE_SIZE}
+          emptyNote={
+            failed
+              ? "We couldn’t load the collection just now — please refresh."
+              : query
+                ? `No gifts match “${query}”.`
+                : "No gifts available yet."
+          }
         />
 
-        {/* Pagination — page 1 keeps the bare /shop URL so the canonical page
-          has no query string. */}
-        {[110, 154, 198, 242, 286].map((x, i) => {
-          const n = i + 1;
-          const active = n === page;
-          return (
+        {/* Pagination — drawn only when there is more than one real page. */}
+        {showPager
+          ? buttons.map(({ n, x }) => {
+              const active = n === page;
+              return (
+                <Link
+                  key={n}
+                  href={pageHref(n)}
+                  aria-label={`Page ${n}`}
+                  aria-current={active ? "page" : undefined}
+                  style={{
+                    ...abs(x, pagerY, 32, 32),
+                    display: "block",
+                    background: active ? INK : "rgba(184,166,154,0.10)",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: 4.76,
+                      width: "100%",
+                      textAlign: "center",
+                      ...txt(16, 24, active ? "#FFF6EC" : INK_SOFT),
+                    }}
+                  >
+                    {n}
+                  </div>
+                </Link>
+              );
+            })
+          : null}
+        {/* Next page; inert on the last one, exactly as the design draws it. */}
+        {showPager ? (
+          page < pageCount ? (
             <Link
-              key={n}
-              href={n === 1 ? "/shop" : `/shop?page=${n}`}
-              aria-label={`Page ${n}`}
-              aria-current={active ? "page" : undefined}
+              href={pageHref(page + 1)}
+              aria-label="Next page"
               style={{
-                ...abs(x, 1656.5, 32, 32),
+                ...abs(arrowX, pagerY + ARROW_DY, 24, 24),
                 display: "block",
-                background: active ? INK : "rgba(184,166,154,0.10)",
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: 4.76,
-                  width: "100%",
-                  textAlign: "center",
-                  ...txt(16, 24, active ? "#FFF6EC" : INK_SOFT),
-                }}
-              >
-                {n}
-              </div>
+              <ForwardIcon color={INK} />
             </Link>
-          );
-        })}
-        {/* Next page; inert on the last one, exactly as the design draws it. */}
-        {page < PAGE_COUNT ? (
-          <Link
-            href={`/shop?page=${page + 1}`}
-            aria-label="Next page"
-            style={{ ...abs(327.052, 1660.59, 24, 24), display: "block" }}
-          >
-            <ForwardIcon color={INK} />
-          </Link>
-        ) : (
-          <span style={abs(327.052, 1660.59, 24, 24)}>
-            <ForwardIcon color={INK} />
-          </span>
-        )}
+          ) : (
+            <span style={abs(arrowX, pagerY + ARROW_DY, 24, 24)}>
+              <ForwardIcon color={INK} />
+            </span>
+          )
+        ) : null}
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the
