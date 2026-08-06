@@ -26,6 +26,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run format:check
+      - run: npm run check:assets
       - run: npm run test:unit
       # `next build` prerenders pages that read .data/db.json in local mode,
       # and that directory is gitignored — seed it first.

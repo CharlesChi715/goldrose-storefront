@@ -287,11 +287,11 @@ export default async function ProductDetailPage({
             Real Rose · Hand-Finished · Made to Last
           </div>
           <img
-            src="/eldreve/glyph-stars-14.png"
+            src="/eldreve/screens/1523-3993.svg"
             alt="5 stars"
-            width={72}
-            height={21}
-            style={{ ...abs(0, 96, 72, 21), display: "block" }}
+            width={69}
+            height={13}
+            style={{ ...abs(0.53, 100.51, 69, 13), display: "block" }}
           />
           <div style={{ ...abs(76, 99, 112), ...txt(12, 14.523, "#B8A69A") }}>
             {"4.9 · 286 Reviews \u00A0›"}
@@ -351,23 +351,34 @@ export default async function ProductDetailPage({
           background="#FFFBF6"
         >
           {[
+            // Icon geometry is each node's absoluteRenderBounds (the ink), not
+            // its 24px-tall text box, so the glyph lands where Figma draws it.
             {
-              glyph: "glyph-benefit-1",
-              glyphW: 24,
+              glyph: "1523-4002",
+              glyphX: 17.02,
+              glyphY: 19.48,
+              glyphW: 16,
+              glyphH: 16,
               labelX: 46,
               label: "Ships from U.S. Warehouse 🇺🇸",
               y: 14,
             },
             {
-              glyph: "glyph-benefit-2",
-              glyphW: 24,
+              glyph: "1523-4006",
+              glyphX: 17.02,
+              glyphY: 73.34,
+              glyphW: 13,
+              glyphH: 13,
               labelX: 43,
               label: "Delivered in 3–5 Business Days",
               y: 66,
             },
             {
-              glyph: "glyph-benefit-3",
-              glyphW: 26,
+              glyph: "1523-4010",
+              glyphX: 18,
+              glyphY: 122.4,
+              glyphW: 16,
+              glyphH: 16,
               labelX: 48,
               label: "Premium Gift Box Included",
               y: 118,
@@ -375,12 +386,12 @@ export default async function ProductDetailPage({
           ].map((row, i) => (
             <div key={row.label}>
               <img
-                src={`/eldreve/${row.glyph}.png`}
+                src={`/eldreve/screens/${row.glyph}.svg`}
                 alt=""
                 width={row.glyphW}
-                height={28}
+                height={row.glyphH}
                 style={{
-                  ...abs(14, row.y - 2, row.glyphW, 28),
+                  ...abs(row.glyphX, row.glyphY, row.glyphW, row.glyphH),
                   display: "block",
                 }}
               />
@@ -579,11 +590,11 @@ export default async function ProductDetailPage({
             4.9
           </div>
           <img
-            src="/eldreve/glyph-stars-15.png"
+            src="/eldreve/screens/1523-4112.svg"
             alt="5 stars"
-            width={80}
-            height={22}
-            style={{ ...abs(22, 119, 80, 22), display: "block" }}
+            width={74}
+            height={14}
+            style={{ ...abs(25.07, 123.69, 74, 14), display: "block" }}
           />
           <div style={{ ...abs(9.5, 144, 105), ...txt(10, 12.102, "#B8A69A") }}>
             Based on 286 reviews
