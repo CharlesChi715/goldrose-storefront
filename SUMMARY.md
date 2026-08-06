@@ -75,6 +75,14 @@ Open linked resources only when the task needs them.
   landed 2026-08-05 (see OQ-4 / AI-021).
 - **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
   MENU/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
+- **Product reviews are real (2026-08-06, PR #30, `feat/product-reviews`).**
+  `product_reviews` table live on hosted (migration `0007`; content-neutral
+  moderation, never hard-deleted), `lib/reviews/db.ts` + `POST /api/reviews`,
+  the `/account/orders/review` PUBLISH button wired (closes AI-031), PDP
+  rating row/drawer show live stats and scroll; design mock stays the visible
+  fallback while no review is published. Missing on purpose: photo-upload UI
+  (column ready) and an admin moderation screen (publish needs manual DB
+  update for now).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
