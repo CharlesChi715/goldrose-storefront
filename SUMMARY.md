@@ -105,9 +105,10 @@ Open linked resources only when the task needs them.
   collisions throw (no `-2`), non-draft handles are frozen. ⚠️ Duplicate in the
   Chinese admin (副本 prefix) now errors by design; `product_redirects` doesn't exist.
 - **Feature-roadmap generator** was torn down 2026-08-01; a from-scratch rebuild
-  (front matter only, no registry, no groups) is in progress. Until it lands,
-  [`docs/features/README.md`](docs/features/README.md) has no generated block
-  and there are no `features:*` scripts or CI check.
+  (front matter only, no registry, no groups) is in progress. Its first piece,
+  `scripts/features/cli.mjs`, reached `main` 2026-08-06 but nothing calls it:
+  [`docs/features/README.md`](docs/features/README.md) still has no generated
+  block and there are no `features:*` scripts or CI check.
 - `/bag` items, tracking timeline, shipping choices and card fields are visual
   placeholders; the real cart enters through `/checkout`.
 - The [owner walkthrough](docs/admin-design.md#143-final-acceptance) is pending.

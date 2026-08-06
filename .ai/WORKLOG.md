@@ -5145,3 +5145,40 @@ customer's own profile.
   asserts the signed-out redirect. Full suite 103 pass / 2 fail, both
   pre-existing `product-detail` pixel diffs (reproduced with the change
   stashed).
+
+## 2026-08-06 (4) — Every unmerged branch consolidated into `main`
+
+Asked to read all unmerged branches and merge them. Twelve refs existed;
+only four carried commits `main` did not already have. The other eight
+(`chore/figma-sync-skill-trim`, `chore/stale-sweep-08-04`, `feat/figma-sync`,
+`feat/products-upload`, `test/integration`, `feat/eldreve-rename`,
+`worktree-feat-company-legal-info`, `worktree-glyph-node-exports`) are
+0-ahead — fully contained already, stale refs only.
+
+- Merged with `--no-ff`, smallest first, in a throwaway worktree on `main` so
+  the primary checkout (on `feat/figma-sync`, with an uncommitted
+  `docs/ideas.md` edit) was never touched:
+  `dependabot/actions-checkout-7` (CI `actions/checkout` v4 → v7, matching the
+  `setup-node@v7` already there), `learn/features-rebuild`
+  (`scripts/features/cli.mjs`, the front-matter-only generator rebuild — 13
+  lines, unreferenced, inert), `feat/product-reviews` (5 commits),
+  `worktree-account-personal-info-live` (1 commit).
+- One conflict, in this file: both feature branches appended a same-day entry
+  at the same anchor. Kept both, renumbered the account one to `(3)`.
+  `SUMMARY.md` auto-merged — the two branches wrote to different sections.
+- No content lost: for each branch, merged `main` is byte-identical to the
+  branch tip across every file that branch owned (shared docs excluded).
+- Verified before pushing, because `main` deploys to production: lint (0
+  errors; the 2 `account-chrome.tsx` warnings pre-date this), typecheck,
+  `format:check`, `test:unit` 74/74, `seed --reset` + `build`, and the full
+  Playwright suite **106/106** — the pixel run CI cannot do on Linux. The two
+  `product-detail` diffs the account branch reported are gone, because the
+  reviews branch regenerated that baseline.
+- Hosted DB checked read-only before the push: `product_reviews` exists,
+  migration `0007` applied, 2 published rows. Merged `main` needs no
+  `db push`.
+- Branches deliberately NOT deleted: `feat/product-reviews` and
+  `worktree-account-personal-info-live` are still checked out in live
+  worktrees. Two other worktrees (`feat-company-legal-info`,
+  `glyph-node-exports`) hold uncommitted in-flight work with no commits behind
+  it — left alone; it is not yet mergeable.
