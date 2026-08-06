@@ -175,7 +175,6 @@ function ProductCard({
         ...abs(slot.x, slot.y, slot.w, 297),
         display: "block",
         background: CARD_BG,
-        boxShadow: `inset 0 0 0 1px ${SAND}`,
         borderRadius: 14,
         overflow: "hidden",
       }}
@@ -247,6 +246,20 @@ function ProductCard({
           </span>
         ) : null}
       </div>
+      {/* The card's 1px inside stroke, as a top layer rather than an inset
+          shadow on the Link. Figma paints a frame's stroke above its children;
+          CSS paints an inset shadow below them, so the photo — which reaches
+          the card's top, left and right edges — was covering three sides of
+          it. Same radius and clip, so it lands exactly on the design's edge. */}
+      <div
+        aria-hidden
+        style={{
+          ...abs(0, 0, slot.w, 297),
+          boxShadow: `inset 0 0 0 1px ${SAND}`,
+          borderRadius: 14,
+          pointerEvents: "none",
+        }}
+      />
     </Link>
   );
 }

@@ -5182,3 +5182,82 @@ only four carried commits `main` did not already have. The other eight
   worktrees. Two other worktrees (`feat-company-legal-info`,
   `glyph-node-exports`) hold uncommitted in-flight work with no commits behind
   it — left alone; it is not yet mergeable.
+
+## 2026-08-06 (5) — Crop-glyph sweep, the shop card's missing outline, a CI guard
+
+Started from two things Charles spotted in the preview and ended up auditing
+the whole class.
+
+**The class of bug.** `c5bcc68` cropped symbol glyphs straight out of a flat
+frame render instead of exporting the Figma nodes, so those files are fully
+opaque and carry the render's background with them. Invisible while the surface
+stayed white; a pale rectangle once it became the `#FFFBF6` card. The crops even
+carried the wrong gold — `#C89233` against Figma's `#D4AF37`.
+
+Audited all 515 served PNGs for a real alpha channel (colour type 4/6, or a
+`tRNS` chunk on 0/2/3). 20 are fully opaque: 5 are photographs, correctly so;
+15 were the crop batch. Of those, 11 were already dead files, 1 is fine, and
+**3 were live bugs nobody had reported yet** — `glyph-benefit-1/2/3`, the ✦ ◷ □
+icons in the PDP benefits card, baked on `#FFFFFF` at 84–91% coverage.
+
+In every case the correct transparent node export was **already committed**
+under `public/eldreve/screens/`; only the page was still pointing at the crop.
+Repointed five `<img>`s — stars `1523-3993` / `1523-4112`, icons `1523-4002` /
+`1523-4006` / `1523-4010` — and placed each on its node's
+`absoluteRenderBounds` (the ink) rather than its text box, which is 24px tall
+for a 16px glyph and would have floated them high. Deleted all 14 crops.
+`glyph-promo.png` stays: it is baked on `#06372E` and `chrome.tsx` draws it only
+on the `#06372E` promo bar, so there is no seam.
+
+**Shop card frames were hidden behind the photo.** The card carried its 1px
+`#E5D9C9` ring as `boxShadow: inset` on the `<Link>`. CSS paints an inset shadow
+*below* descendants; Figma paints a frame's stroke *above* its children
+(`1523:1546`: 204×297, 1px INSIDE, radius 14, clips). The photo reaches the
+card's top/left/right edges, so it covered three sides. Moved the ring to a
+`pointerEvents: none` overlay as the last child — same radius, clipped by the
+card's own `overflow: hidden`.
+
+**The guard.** `scripts/check-opaque-assets.mjs` (`npm run check:assets`, wired
+into CI before `test:unit`) fails on any icon-sized served PNG without alpha.
+"Icon-sized" means not larger than 200px in *both* directions, so a wide-and-
+short glyph strip cannot slip past. `glyph-promo.png` is allow-listed with its
+reason. Proven by re-introducing a deleted crop: exit 1, correctly named.
+
+Full Playwright suite green, 106/106. Both pixel baselines regenerated — the
+`product-detail` one had been failing before any of this work (committed at
+2501px against a PDP that now renders 1616px, the height of frame `1523:3971`),
+so it was stale from the branch's own redesign rather than from these edits.
+
+**Same pattern, not touched:** `components/home/A3.tsx:128` and
+`components/home/BestSellersRail.tsx:193` place the ring under an
+edge-to-edge photo exactly as the shop card did.
+
+## 2026-08-06 (6) — `worktree-glyph-node-exports` merged: the star art has to be both
+
+Entry (4) left this branch out because it had no commits yet, only a dirty
+worktree. It committed, so it is in `main` now. Three conflicts; two were
+routine (this file, and both baselines) but one was not.
+
+- **The PDP star art.** `feat/product-reviews` had made both star rows fill to
+  the live average, veiling the stars past it — built on
+  `glyph-stars-14/15.png`, which entry (5) *deletes*. Taking either side alone
+  was wrong: HEAD would 404 on a deleted asset, theirs would silently revert
+  the rows to a hardcoded "4.9 · 286". Resolved as **(5)'s asset and geometry
+  + (1)'s live behaviour** — the node exports `1523-3993.svg` (69×13 at
+  0.53,100.51) and `1523-4112.svg` (74×14 at 25.07,123.69), with the veil
+  rescaled to those boxes. The count text keeps its widened 130 mask, not the
+  frame's 112, so a live value cannot paint outside it.
+- The veil's stated reason changed: it existed because the palette PNG had no
+  alpha. The node exports do, so a clipped copy would work — kept the veil
+  (it still reads correctly) and corrected the comment rather than leaving a
+  false one.
+- **Baselines.** Both branches regenerated `product-detail-masked-darwin.png`
+  from the same ancestor, so neither side matched the combined page.
+  Regenerated after merging; `shop-masked-darwin.png` had one side only and
+  merged cleanly.
+- Checked that no code references any of the 14 deleted crops (only this
+  file's prose does), and `npm run check:assets` — the new CI guard — passes.
+
+**Still open from (5):** `components/home/A3.tsx:128` and
+`components/home/BestSellersRail.tsx:193` have the same ring-under-photo bug
+the shop card had. Not touched.

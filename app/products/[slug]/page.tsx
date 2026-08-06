@@ -305,30 +305,32 @@ export default async function ProductDetailPage({
             Real Rose · Hand-Finished · Made to Last
           </div>
           {/* Same treatment as the reviews band: the art fills to the live
-              average instead of always showing five stars. */}
+              average instead of always showing five stars. The art is the
+              node export - real alpha, Figma's #D4AF37 - placed on its
+              absoluteRenderBounds rather than its 24px-tall text box. */}
           <div
             data-live-text
             role="img"
             aria-label={
               hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
             }
-            style={abs(0, 96, 72, 21)}
+            style={abs(0.53, 100.51, 69, 13)}
           >
             <img
-              src="/eldreve/glyph-stars-14.png"
+              src="/eldreve/screens/1523-3993.svg"
               alt=""
-              width={72}
-              height={21}
-              style={{ ...abs(0, 0, 72, 21), display: "block" }}
+              width={69}
+              height={13}
+              style={{ ...abs(0, 0, 69, 13), display: "block" }}
             />
             {hasReviews ? (
               <div
                 style={{
                   ...abs(
-                    (stats.average / 5) * 72,
+                    (stats.average / 5) * 69,
                     0,
-                    72 - (stats.average / 5) * 72,
-                    21,
+                    69 - (stats.average / 5) * 69,
+                    13,
                   ),
                   background: "#FFFBF6",
                   opacity: 0.74,
@@ -336,6 +338,8 @@ export default async function ProductDetailPage({
               />
             ) : null}
           </div>
+          {/* Width 130, not the frame's 112: a live count has to fit
+              without painting outside its pixel-test mask. */}
           <div
             data-live-text
             style={{ ...abs(76, 99, 130), ...txt(12, 14.523, "#B8A69A") }}
@@ -399,23 +403,34 @@ export default async function ProductDetailPage({
           background="#FFFBF6"
         >
           {[
+            // Icon geometry is each node's absoluteRenderBounds (the ink), not
+            // its 24px-tall text box, so the glyph lands where Figma draws it.
             {
-              glyph: "glyph-benefit-1",
-              glyphW: 24,
+              glyph: "1523-4002",
+              glyphX: 17.02,
+              glyphY: 19.48,
+              glyphW: 16,
+              glyphH: 16,
               labelX: 46,
               label: "Ships from U.S. Warehouse 🇺🇸",
               y: 14,
             },
             {
-              glyph: "glyph-benefit-2",
-              glyphW: 24,
+              glyph: "1523-4006",
+              glyphX: 17.02,
+              glyphY: 73.34,
+              glyphW: 13,
+              glyphH: 13,
               labelX: 43,
               label: "Delivered in 3–5 Business Days",
               y: 66,
             },
             {
-              glyph: "glyph-benefit-3",
-              glyphW: 26,
+              glyph: "1523-4010",
+              glyphX: 18,
+              glyphY: 122.4,
+              glyphW: 16,
+              glyphH: 16,
               labelX: 48,
               label: "Premium Gift Box Included",
               y: 118,
@@ -423,12 +438,12 @@ export default async function ProductDetailPage({
           ].map((row, i) => (
             <div key={row.label}>
               <img
-                src={`/eldreve/${row.glyph}.png`}
+                src={`/eldreve/screens/${row.glyph}.svg`}
                 alt=""
                 width={row.glyphW}
-                height={28}
+                height={row.glyphH}
                 style={{
-                  ...abs(14, row.y - 2, row.glyphW, 28),
+                  ...abs(row.glyphX, row.glyphY, row.glyphW, row.glyphH),
                   display: "block",
                 }}
               />
@@ -635,26 +650,26 @@ export default async function ProductDetailPage({
             aria-label={
               hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
             }
-            style={abs(22, 119, 80, 22)}
+            style={abs(25.07, 123.69, 74, 14)}
           >
             <img
-              src="/eldreve/glyph-stars-15.png"
+              src="/eldreve/screens/1523-4112.svg"
               alt=""
-              width={80}
-              height={22}
-              style={{ ...abs(0, 0, 80, 22), display: "block" }}
+              width={74}
+              height={14}
+              style={{ ...abs(0, 0, 74, 14), display: "block" }}
             />
-            {/* The glyph is a palette PNG with no alpha, so the stars past
-                the average fade under a veil in the card's own colour rather
-                than under a second, clipped copy of the art. */}
+            {/* Stars past the average fade under a veil in the card's own
+                colour. Carried over from the palette PNG this replaced; the
+                node export has real alpha, so a clipped copy would work too. */}
             {hasReviews ? (
               <div
                 style={{
                   ...abs(
-                    (stats.average / 5) * 80,
+                    (stats.average / 5) * 74,
                     0,
-                    80 - (stats.average / 5) * 80,
-                    22,
+                    74 - (stats.average / 5) * 74,
+                    14,
                   ),
                   background: "#FFFBF6",
                   opacity: 0.74,
