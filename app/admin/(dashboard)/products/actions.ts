@@ -69,7 +69,14 @@ const saveProductSchema = z.object({
   option_names: z.array(z.string().trim().min(1).max(120)).max(3),
   images: z
     .array(
-      z.object({ path: z.string().min(1).max(500), alt: z.string().max(500) }),
+      z.object({
+        path: z.string().min(1).max(500),
+        alt: z.string().max(500),
+        // Framing chosen in the admin's PDP-sized frame; absent on any form
+        // saved before 0008, which means the centre crop.
+        focal_x: z.number().int().min(0).max(100).optional(),
+        focal_y: z.number().int().min(0).max(100).optional(),
+      }),
     )
     .max(20),
   variants: z.array(variantSchema).min(1).max(100),

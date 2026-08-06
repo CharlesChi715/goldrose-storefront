@@ -5402,3 +5402,39 @@ team wants to draw their own footer (AI-034).
   carousel tests), product-detail pixel baseline regenerated. Drove it in a
   real browser: auto-play steps one slide width every 1.8s, a drag swipes
   without opening the viewer, a tap opens it, reduced motion parks it.
+
+## 2026-08-06 — PDP photo viewer close icon + admin 取景框
+
+Two owner reports.
+
+**1. The photo viewer had no visible close control.** Figma frame 1523:4257
+carries a `Close Menu · 44px` button at (376,10) with a 20×20 icon; the 1523
+import missed it (it was added to the frame later, node 2571:375). What
+shipped instead was a top-left back chevron the frame no longer draws, so
+dismissing worked only through OverlayStage's invisible full-page scrim —
+tapping where the X should be closed the viewer without ever showing one.
+Exported node 2571:376 to `public/eldreve/screens/2571-376.svg` and put the
+frame's real button in; the stale chevron is gone.
+
+**2. 取景框 — framing box in the admin Media card.** Every storefront photo
+box is a fixed design rectangle drawn with object-fit: cover, so the browser
+crops to the CENTRE and an off-centre subject gets cut, with no way to say
+otherwise.
+- Migration `0008_product_image_focal_point.sql`: `focal_x`/`focal_y`
+  smallints (0-100, default 50) on `product_images`, plus `create or replace
+  view catalog_products` carrying them in the images jsonb. Replace, not
+  drop+create, so the view's grants survive and the storefront never sees a
+  moment without its only readable object. Dry-run against the hosted DB
+  inside a transaction and rolled back — valid, and nothing persisted.
+- `ImageFramer` (app/admin/(dashboard)/products/): the PDP photo window at its
+  true 398×250, photo cover-fitted inside, drag to reposition, rule-of-thirds
+  guides, live percentage readout, Centre to reset. Says so when a photo has
+  no slack to drag. A focal point, not a crop: no second file, no pixels lost,
+  and one stored point re-solves for every box size.
+- Honoured by the PDP hero carousel, the ABOUT panel and the shop cards. The
+  admin thumbnails preview it too.
+- **Not yet applied to hosted** — `supabase db push` is required before this
+  merges, or admin product saves will fail on a table without the columns.
+- **Verified:** typecheck, lint, build, 80 unit tests, 112 e2e tests including
+  a new round-trip (drag in admin → save → PDP and shop card both crop to
+  50% 100%).

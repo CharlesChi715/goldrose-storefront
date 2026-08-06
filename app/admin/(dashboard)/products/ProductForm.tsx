@@ -43,6 +43,7 @@ import {
   setProductStatusAction,
   uploadImagesAction,
 } from "./actions";
+import { ImageFramer } from "./ImageFramer";
 
 /**
  * Host shown in the Google preview under "Search engine listing". Env-driven
@@ -58,7 +59,14 @@ const SEO_PREVIEW_HOST = (
   .replace(/^https?:\/\//, "")
   .replace(/\/+$/, "");
 
-export type FormImage = { path: string; url: string; alt: string };
+export type FormImage = {
+  path: string;
+  url: string;
+  alt: string;
+  /** CSS object-position percentages; 50/50 is a plain centre crop. */
+  focalX: number;
+  focalY: number;
+};
 
 export type FormVariant = {
   id: string | null;
@@ -159,6 +167,8 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const [seoDescription, setSeoDescription] = useState(initial.seoDescription);
   const [weightOz, setWeightOz] = useState(initial.weightOz);
   const [images, setImages] = useState<FormImage[]>(initial.images);
+  // Which image the 取景框 modal is framing; null = closed.
+  const [framingIndex, setFramingIndex] = useState<number | null>(null);
 
   // Option editor: names + comma-separated values, mirrored from the loaded
   // variants so existing combos keep their ids and stock.
@@ -262,6 +272,8 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
           path: image.path,
           url: image.url,
           alt: "",
+          focalX: 50,
+          focalY: 50,
         })),
       ]);
     } else {
@@ -315,7 +327,12 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
       seo_description: seoDescription.trim() || null,
       weight_oz: weightOz.trim() ? Number(weightOz) : null,
       option_names: optionNames.map((name) => name.trim()).filter(Boolean),
-      images: images.map((image) => ({ path: image.path, alt: image.alt })),
+      images: images.map((image) => ({
+        path: image.path,
+        alt: image.alt,
+        focal_x: image.focalX,
+        focal_y: image.focalY,
+      })),
       variants: variants.map((variant) => ({
         id: variant.id,
         option_values: variant.option_values,
@@ -515,6 +532,8 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                               : String(index + 1)}
                           </Badge>
                         </InlineStack>
+                        {/* The thumbnail honours the framing choice, so the
+                            grid shows what the storefront will crop to. */}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={image.url}
@@ -523,10 +542,17 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                             width: "100%",
                             aspectRatio: "1",
                             objectFit: "cover",
+                            objectPosition: `${image.focalX}% ${image.focalY}%`,
                             borderRadius: 8,
                             border: "1px solid var(--p-color-border)",
                           }}
                         />
+                        <Button
+                          size="micro"
+                          onClick={() => setFramingIndex(index)}
+                        >
+                          {t("form.media.frame")}
+                        </Button>
                         <TextField
                           label={t("form.media.alt")}
                           placeholder={t("form.media.alt.ph")}
@@ -1011,6 +1037,54 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
           </BlockStack>
         </Layout.Section>
       </Layout>
+
+      {/* 取景框 — opened per image from the Media card. It holds the PDP
+          photo box at its true 398×250, so what the owner leaves inside the
+          frame is literally what the product page shows. */}
+      <Modal
+        open={framingIndex !== null}
+        onClose={() => setFramingIndex(null)}
+        title={t("form.media.frame.title")}
+        primaryAction={{
+          content: t("form.media.frame.done"),
+          onAction: () => setFramingIndex(null),
+        }}
+        secondaryActions={[
+          {
+            content: t("form.media.frame.reset"),
+            onAction: () =>
+              setImages((current) =>
+                current.map((entry, entryIndex) =>
+                  entryIndex === framingIndex
+                    ? { ...entry, focalX: 50, focalY: 50 }
+                    : entry,
+                ),
+              ),
+          },
+        ]}
+      >
+        <Modal.Section>
+          {framingIndex !== null && images[framingIndex] ? (
+            <ImageFramer
+              url={images[framingIndex].url}
+              alt={images[framingIndex].alt}
+              focalX={images[framingIndex].focalX}
+              focalY={images[framingIndex].focalY}
+              hint={t("form.media.frame.hint")}
+              fitsHint={t("form.media.frame.fits")}
+              onChange={(focalX, focalY) =>
+                setImages((current) =>
+                  current.map((entry, entryIndex) =>
+                    entryIndex === framingIndex
+                      ? { ...entry, focalX, focalY }
+                      : entry,
+                  ),
+                )
+              }
+            />
+          ) : null}
+        </Modal.Section>
+      </Modal>
 
       <Modal
         open={confirmDelete}

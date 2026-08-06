@@ -45,6 +45,13 @@ export type ProductImageRow = {
   path: string;
   alt: string;
   position: number;
+  /**
+   * CSS object-position percentages (0-100), set by dragging the photo inside
+   * the admin's PDP-sized frame. 50/50 is a plain centre crop, which is what
+   * every box did before this existed (migration 0008).
+   */
+  focal_x: number;
+  focal_y: number;
 };
 
 export type ProductVariantRow = {
@@ -428,7 +435,14 @@ export interface TableStore {
 
 /* ---------- Storefront read models ---------- */
 
-export type CatalogImage = { path: string; alt: string; position: number };
+export type CatalogImage = {
+  path: string;
+  alt: string;
+  position: number;
+  /** Crop focus for every cover-fitted box; see ProductImageRow. */
+  focal_x: number;
+  focal_y: number;
+};
 
 export type CatalogVariant = {
   id: string;

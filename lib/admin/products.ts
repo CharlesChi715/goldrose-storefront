@@ -24,6 +24,16 @@ import type {
   ProductVariantRow,
 } from "@/lib/supabase/types.ts";
 
+/**
+ * A focal-point percentage the database will accept. The column is
+ * `check (between 0 and 100)`, so a stray value would fail the whole save;
+ * anything missing or non-finite means "centre", the pre-0008 behaviour.
+ */
+function clampPercent(value: number | undefined): number {
+  if (value == null || !Number.isFinite(value)) return 50;
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
 export type ProductListRow = {
   product: ProductRow;
   thumbnailPath: string | null;
@@ -169,7 +179,17 @@ export type SaveProductInput = {
   seo_description: string | null;
   weight_oz: number | null;
   option_names: string[];
-  images: Array<{ path: string; alt: string }>;
+  /**
+   * Order is the contract (position comes from the index). `focal_x`/`focal_y`
+   * are the admin's framing choice, in CSS object-position percentages;
+   * omitted means the centre crop every box did before migration 0008.
+   */
+  images: Array<{
+    path: string;
+    alt: string;
+    focal_x?: number;
+    focal_y?: number;
+  }>;
   variants: Array<{
     id: string | null; // null = new variant
     option_values: string[];
@@ -372,6 +392,8 @@ export async function saveProduct(
         path: image.path,
         alt: image.alt,
         position: index,
+        focal_x: clampPercent(image.focal_x),
+        focal_y: clampPercent(image.focal_y),
       })),
     );
   }

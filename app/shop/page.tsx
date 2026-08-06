@@ -190,6 +190,9 @@ export default async function ShopPage({
       // Resolved server-side (local path or Supabase storage URL) so the card
       // photo travels with the product when the grid is sorted.
       image: product.images[0] ? fileUrl(product.images[0].path) : null,
+      // The admin framed this photo for the PDP box; object-position
+      // re-solves for the card's own shape, so the same choice holds here.
+      focus: `${product.images[0]?.focal_x ?? 50}% ${product.images[0]?.focal_y ?? 50}%`,
     }));
   } catch {
     failed = true;
