@@ -18,12 +18,16 @@
  * content the frames paint behind each scrim is the live page's job, not
  * drawn here.
  *
- * Content is the mocks' own: the reviews, the twelve color cards and the
- * twelve unboxing tiles are design placeholders — the catalog has no review,
- * color-option or UGC tables yet (docs/ixd/README.md). Color selection and
- * the unboxing chips/tabs are cosmetic for the same reason. The media viewer
- * pages through the design's four product images for real. The mocks' iOS
- * home indicator (1523:4274) is not implemented — C-3 status-bar precedent.
+ * Content: the REVIEWS drawer is real — rows, average and count come from
+ * product_reviews, and an empty table shows an empty drawer rather than the
+ * frame's four named testimonials (owner, 2026-08-06: a mock review is
+ * indistinguishable from a real one, so it is a review claim, not "visibly
+ * mocked" art). The twelve color cards and twelve unboxing tiles are still
+ * design placeholders — the catalog has no color-option or UGC tables yet
+ * (docs/ixd/README.md), so color selection and the unboxing chips/tabs stay
+ * cosmetic. The media viewer pages through the design's four product images
+ * for real. The mocks' iOS home indicator (1523:4274) is not implemented —
+ * C-3 status-bar precedent.
  */
 
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -56,37 +60,13 @@ export type PdpReview = {
   author: string;
   date: string;
   body: string;
-  /** 1–5; absent on the design's mock rows (they render the mock star art). */
+  /** 1–5; optional so a row with no score keeps the frame's flat star art. */
   rating?: number;
 };
 
 export type PdpReviewStats = { average: number; count: number };
 
 /* ---------- design data ---------- */
-
-// 1523:4232…4255 — the four review rows (150px pitch groups starting y=308).
-const REVIEWS: PdpReview[] = [
-  {
-    author: "Emma L.",
-    date: "3 days ago",
-    body: "Absolutely stunning! The blue rose is even more beautiful in person. It arrived perfectly and the gift box feels so elegant.",
-  },
-  {
-    author: "Michael T.",
-    date: "1 week ago",
-    body: "Bought this for our anniversary and my wife loved it. Beautiful workmanship and exceptional presentation.",
-  },
-  {
-    author: "Sophie M.",
-    date: "2 weeks ago",
-    body: "Gorgeous rose and beautifully packaged. Shipping was fast and everything arrived in perfect shape.",
-  },
-  {
-    author: "David R.",
-    date: "2 weeks ago",
-    body: "Such a unique and thoughtful gift. The gold detailing adds a truly luxurious touch.",
-  },
-];
 
 // 1523:4303…4351 — the twelve color cards, frame order.
 const COLORS = [
@@ -296,10 +276,12 @@ function ReviewsDrawer({
   reviews: PdpReview[];
   stats: PdpReviewStats | null;
 }) {
-  // Real rows when any exist; the design's mock set otherwise (pre-launch
-  // "visibly mocked" rule — an empty drawer would read as broken).
+  // Real rows only. The design's four mock rows carried names, dates and
+  // testimonial text that a shopper cannot tell from real ones, which is a
+  // review claim rather than "visibly mocked" art; with an empty table the
+  // drawer still opens and says so instead (owner, 2026-08-06).
   const live = reviews.length > 0;
-  const rows = live ? reviews : REVIEWS;
+  const rows = reviews;
   return (
     <OverlayStage scrim="rgba(20,13,10,0.24)" onClose={onClose} label="Reviews">
       {/* 1523:4215 — sheet from y=120 of the 932 stage */}
@@ -340,36 +322,27 @@ function ReviewsDrawer({
             fontWeight: 500,
           }}
         >
-          {live && stats ? stats.average : "4.9"}
+          {live && stats ? stats.average : "—"}
         </div>
         {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass. With
             live reviews it fills to the real average, so the art can never
             show five stars for a 4.5 score. */}
-        {live && stats ? (
-          <StarFill
-            src="/eldreve/screens/1523-4220.svg"
-            x={282}
-            y={60}
-            w={128}
-            h={26}
-            natural={109}
-            fill={stats.average / 5}
-            label={`${stats.average} out of 5 stars`}
-          />
-        ) : (
-          <GlyphImg
-            src="/eldreve/screens/1523-4220.svg"
-            x={282}
-            y={60}
-            w={128}
-            h={26}
-            align="left"
-          />
-        )}
+        <StarFill
+          src="/eldreve/screens/1523-4220.svg"
+          x={282}
+          y={60}
+          w={128}
+          h={26}
+          natural={109}
+          fill={live && stats ? stats.average / 5 : 0}
+          label={
+            live && stats ? `${stats.average} out of 5 stars` : "No ratings yet"
+          }
+        />
         <div style={{ ...abs(286, 90, 120), ...txt(15, 19, INK) }}>
           {live && stats
             ? `${stats.count} Review${stats.count === 1 ? "" : "s"}`
-            : "286 Reviews"}
+            : "No reviews yet"}
         </div>
 
         {/* filter chips — static art like the mock (one review set only) */}
@@ -440,6 +413,14 @@ function ReviewsDrawer({
             WebkitOverflowScrolling: "touch",
           }}
         >
+          {rows.length === 0 ? (
+            <div
+              className={playfair.className}
+              style={{ ...abs(20, 8, 390), ...txt(15, 22, GREY) }}
+            >
+              No reviews yet — be the first to review this rose.
+            </div>
+          ) : null}
           {rows.map((review, i) => (
             <div
               key={`${review.author}-${i}`}
@@ -760,10 +741,18 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
   );
 }
 
-function MediaViewer({ onClose }: { onClose: () => void }) {
+function MediaViewer({
+  onClose,
+  media,
+}: {
+  onClose: () => void;
+  /** The product's own photos; the design's set covers a product with none. */
+  media: string[];
+}) {
+  const shots = media.length ? media : MEDIA;
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
-    setIndex((i) => (i + delta + MEDIA.length) % MEDIA.length);
+    setIndex((i) => (i + delta + shots.length) % shots.length);
   return (
     <OverlayStage
       scrim="transparent"
@@ -793,11 +782,11 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
           fontWeight: 500,
         }}
       >
-        {index + 1} / {MEDIA.length}
+        {index + 1} / {shots.length}
       </div>
       {/* 1523:4260 — FIT inside 410×620 */}
       <img
-        src={MEDIA[index]}
+        src={shots[index]}
         alt={`Product photo ${index + 1}`}
         style={{
           ...abs(10, 102, 410, 620),
@@ -887,7 +876,7 @@ function MediaViewer({ onClose }: { onClose: () => void }) {
           borderRadius: 18,
         }}
       >
-        {MEDIA.map((src, i) => (
+        {shots.map((src, i) => (
           <button
             key={src}
             type="button"
@@ -1123,9 +1112,15 @@ function UnboxingGallery({ onClose }: { onClose: () => void }) {
 export function PdpOverlays({
   reviews = [],
   stats = null,
+  heroImage = null,
+  media = [],
 }: {
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
+  /** The product's first photo, drawn in the hero trigger's own copy. */
+  heroImage?: string | null;
+  /** All of the product's photos, for the media viewer. */
+  media?: string[];
 }) {
   const [open, setOpen] = useState<OverlayId | null>(null);
   const mounted = useSyncExternalStore(
@@ -1138,9 +1133,11 @@ export function PdpOverlays({
   return (
     <>
       {/* Hero (16,94 398×281) → media viewer. The button carries its own copy
-          of the hero art (1523:4195, the 07-29 blue rose) so the wired
-          hover-zoom keeps working — a plain transparent cover would sit
-          outside the zoom container and kill it. */}
+          of the hero photo so the wired hover-zoom keeps working — a plain
+          transparent cover would sit outside the zoom container and kill it.
+          That copy has to be the PRODUCT's photo: it covers the page's hero
+          exactly, so the frame's 07-29 blue rose (1523:4195) used to be what
+          a shopper saw no matter which product they opened. */}
       <button
         type="button"
         aria-label="Open product photos"
@@ -1155,11 +1152,16 @@ export function PdpOverlays({
       >
         <img
           className="gr-photo"
-          src="/eldreve/screens/1523-4195.png"
+          src={heroImage ?? "/eldreve/screens/1523-4195.png"}
           alt=""
           width={398}
           height={250}
-          style={{ ...abs(0, 8, 398, 250), borderRadius: 18, display: "block" }}
+          style={{
+            ...abs(0, 8, 398, 250),
+            borderRadius: 18,
+            display: "block",
+            objectFit: "cover",
+          }}
         />
       </button>
       {/* Rating row (rel 0,98 in the info card at 16,375) → reviews drawer */}
@@ -1196,7 +1198,10 @@ export function PdpOverlays({
         ? createPortal(<ColorDrawer onClose={close} />, document.body)
         : null}
       {mounted && open === "media"
-        ? createPortal(<MediaViewer onClose={close} />, document.body)
+        ? createPortal(
+            <MediaViewer onClose={close} media={media} />,
+            document.body,
+          )
         : null}
       {mounted && open === "unboxing"
         ? createPortal(<UnboxingGallery onClose={close} />, document.body)

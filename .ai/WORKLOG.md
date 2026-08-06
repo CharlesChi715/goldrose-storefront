@@ -5283,3 +5283,27 @@ the shop card had. Not touched.
   pixel baseline regenerated (canvas 1822 → 1147 for the 3-product seed).
 - **Left for design:** the "Ruby Red"/"Gift Sets" chips and the 5-star card
   art are still static frame art; the empty-state line has no Figma frame.
+
+## 2026-08-06 — the product page now renders the catalog row
+
+- **Ask (owner):** "this PDP totally not generated from database" — wire it;
+  keep the review block and the unboxing count on the page.
+- **Was live before:** title, price, compare-at. Nothing else. Description,
+  SKU and photos reached only the `<meta>` tags and the Product JSON-LD.
+- **Now from the DB:** hero photo (and the media trigger's own copy that
+  covered it), the ABOUT panel photo, the media viewer's set, the badge pill
+  (`badge`, was a flat BEST SELLER), the strapline (first three `details`),
+  the discount pill (computed — 31% on the live product, was a flat "15% OFF"),
+  the ABOUT copy (`description`, 3-line clamp), and every number in the
+  reviews band and drawer.
+- **Zero reviews now reads as unrated** — the band and drawer stay on the page
+  per the owner, but the frame's "4.9 · 286 Reviews", the 91/7/1.4/0.4/0.2
+  histogram, the "Sarah M. · Verified Buyer" quote and the drawer's four
+  named testimonials are gone. Those were review claims with an empty
+  product_reviews table (US FTC exposure before launch).
+- **Left as the frame's own, on instruction or for want of a slot:** the
+  unboxing gallery and its "(1,354)", the three shipping benefits (store
+  policy), the ABOUT slogan, colour cards. `best_for` and `details` past the
+  third still have no box in the frame.
+- **Verified:** typecheck, lint, build, 74 unit tests, 108 e2e tests (one new
+  PDP regression test), product-detail pixel baseline regenerated.

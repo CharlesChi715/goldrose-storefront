@@ -29,6 +29,45 @@ test("shop cards and product page show live catalog values", async ({
   await expect(page.getByText("BUY NOW · $49.99")).toBeVisible();
 });
 
+test("the product page draws catalog values, not the frame's fixed art", async ({
+  page,
+}) => {
+  await page.goto("/products/signature-24k-gold-rose", {
+    waitUntil: "networkidle",
+  });
+
+  // Badge pill, strapline and discount all come off the catalog row now; the
+  // discount is computed from the two prices rather than printed flat.
+  await expect(page.getByText("SAVE 44%", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Real rose base · Clear display stand · Gift-ready"),
+  ).toBeVisible();
+  await expect(page.getByText("44% OFF", { exact: true })).toBeVisible();
+
+  // Both hero layers — the page's photo and the media trigger's own copy that
+  // covers it — are the product's image, not a /eldreve design render.
+  const heroes = await page.$$eval(".gr-card-zoom .gr-photo", (els) =>
+    els.map((el) => el.getAttribute("src")),
+  );
+  expect(heroes.length).toBeGreaterThan(0);
+  for (const src of heroes) expect(src).not.toMatch(/^\/eldreve\//);
+
+  // None of the values the frame invented may reappear: a fixed badge, a
+  // fixed discount, or review claims the product_reviews table cannot back.
+  for (const invented of [
+    "BEST SELLER",
+    "15% OFF",
+    "286 Reviews",
+    "Based on 286 reviews",
+    "Sarah M.",
+  ]) {
+    await expect(
+      page.getByText(invented, { exact: false }),
+      `frame placeholder "${invented}" is back on the PDP`,
+    ).toHaveCount(0);
+  }
+});
+
 test("long names ellipsize without layout shift (masked diff still gates)", async ({
   page,
 }) => {
