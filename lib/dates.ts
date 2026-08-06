@@ -64,3 +64,27 @@ export function formatShortDateTime(iso: string): string {
   const meridiem = hours24 < 12 ? "AM" : "PM";
   return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${hours12}:${pad(date.getMinutes())} ${meridiem}`;
 }
+
+/**
+ * Format an ISO timestamp the way the review design writes dates — "3 days
+ * ago", "1 week ago". Rendered on the server (the PDP revalidates every 300
+ * seconds), so there is no client recompute to mismatch on hydration.
+ *
+ * @param iso - ISO 8601 timestamp string.
+ * @param now - Reference instant; defaults to the current time.
+ * @returns A relative label, e.g. "Today", "Yesterday", "2 weeks ago".
+ */
+export function formatRelativeDay(iso: string, now: Date = new Date()): string {
+  const days = Math.floor(
+    (now.getTime() - new Date(iso).getTime()) / 86_400_000,
+  );
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  const weeks = Math.floor(days / 7);
+  if (days < 28) return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+  const months = Math.floor(days / 30);
+  if (days < 365) return months <= 1 ? "1 month ago" : `${months} months ago`;
+  const years = Math.floor(days / 365);
+  return years === 1 ? "1 year ago" : `${years} years ago`;
+}

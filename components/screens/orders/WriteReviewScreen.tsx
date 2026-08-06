@@ -18,17 +18,17 @@
  * for stars past the chosen one. Both are flagged for a design ruling; the
  * frame ships no selected art for either control.
  *
- * PUBLISH REVIEW is deliberately inert: there is no reviews backend and no
- * frame for a submitted state, so the button must not fake an outcome. Filed
- * for a decision rather than wired to a guess.
+ * PUBLISH REVIEW posts to /api/reviews and stores a `pending` row (owner
+ * decision 2026-08-06 — this closes AI-031). The submitted state has no
+ * frame, so it is minimal: the button relabels to THANK YOU and locks; the
+ * experience chip has no database column and stays a local-only choice.
  *
  * Data: the product card is the design's own mock order (the /account/orders/
- * details and delivered precedent) — no per-order backend feeds this page.
+ * details and delivered precedent); ?product/?order query params carry the
+ * real linkage when a caller supplies them.
  *
  * AI-TAG(AI-030): AGENT-DECISION — the chip and star selected states are ours;
  * the frame ships none. See /agent-delivery/sessions/figma-sync-orders-08-05-feat-figma-sync.md.
- * AI-TAG(AI-031): OWNER-DECISION — PUBLISH REVIEW is inert until there is a
- * reviews backend. Same session file.
  */
 
 import { useState } from "react";
@@ -140,10 +140,48 @@ function MediaTile({
   );
 }
 
-export function WriteReviewScreen() {
+export function WriteReviewScreen({
+  productHandle,
+  orderId,
+}: {
+  productHandle: string;
+  orderId: string | null;
+}) {
   const [experience, setExperience] = useState<string | null>(null);
   const [rating, setRating] = useState<number | null>(null);
   const [body, setBody] = useState("");
+  const [phase, setPhase] = useState<"idle" | "sending" | "done">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  const ready = rating !== null && body.trim().length >= 2 && phase === "idle";
+
+  async function publish() {
+    if (!ready || rating === null) return;
+    setPhase("sending");
+    setError(null);
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productHandle,
+          rating,
+          body: body.trim(),
+          ...(orderId ? { orderId } : {}),
+        }),
+      });
+      const result = (await response.json()) as { ok: boolean; error?: string };
+      if (!result.ok) {
+        setError(result.error ?? "Could not save your review.");
+        setPhase("idle");
+        return;
+      }
+      setPhase("done");
+    } catch {
+      setError("Could not save your review — please try again.");
+      setPhase("idle");
+    }
+  }
 
   return (
     <ScaleFrame
@@ -374,13 +412,28 @@ export function WriteReviewScreen() {
         </div>
       ))}
 
-      {/* 2452:400/401 publish — inert until there is a reviews backend */}
-      <div
+      {/* error line — no frame for this; kept to the form's own palette */}
+      {error ? (
+        <div style={{ ...abs(16, 805, 398), ...txt(11, 16, INK, "center") }}>
+          {error}
+        </div>
+      ) : null}
+
+      {/* 2452:400/401 publish → POST /api/reviews (stored as pending) */}
+      <button
+        type="button"
+        onClick={publish}
+        disabled={!ready}
+        aria-label="Publish review"
         style={{
           ...abs(16, 831, 398, 54),
           background: INK,
           boxShadow: `inset 0 0 0 1.3px ${GOLD}`,
           borderRadius: 14,
+          border: "none",
+          padding: 0,
+          cursor: ready ? "pointer" : "default",
+          opacity: phase === "done" || ready ? 1 : 0.45,
         }}
       />
       <div
@@ -389,9 +442,14 @@ export function WriteReviewScreen() {
           ...txt(14, 16, GOLD, "center"),
           fontWeight: 500,
           letterSpacing: 1.12,
+          pointerEvents: "none",
         }}
       >
-        PUBLISH REVIEW
+        {phase === "done"
+          ? "THANK YOU — SENT FOR REVIEW"
+          : phase === "sending"
+            ? "PUBLISHING…"
+            : "PUBLISH REVIEW"}
       </div>
     </ScaleFrame>
   );

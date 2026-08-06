@@ -22,6 +22,8 @@ import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { BuyButtons } from "@/components/BuyButtons";
 import { getCatalog, getCatalogProduct } from "@/lib/supabase/catalog.ts";
 import { getPromoSlogan } from "@/lib/content";
+import { listPublishedReviews, reviewStats } from "@/lib/reviews/db.ts";
+import { formatRelativeDay } from "@/lib/dates";
 import { fileUrl } from "@/lib/files-url";
 import { siteBaseUrl } from "@/lib/admin/settings";
 import { formatMoney } from "@/lib/money";
@@ -138,6 +140,22 @@ export default async function ProductDetailPage({
   }
   if (!catalogProduct) notFound();
   const product = catalogProduct;
+  // Real published reviews (pending/rejected never leave the server); the
+  // mock art stays as the visible fallback while the table is empty.
+  let reviews: Awaited<ReturnType<typeof listPublishedReviews>> = [];
+  try {
+    reviews = await listPublishedReviews(product.id);
+  } catch {
+    reviews = [];
+  }
+  const stats = reviewStats(reviews);
+  const hasReviews = stats.count > 0;
+  // 5★…1★ counts drive the band-10 histogram; the newest review is the one
+  // the band quotes.
+  const histogram = [5, 4, 3, 2, 1].map(
+    (star) => reviews.filter((review) => review.rating === star).length,
+  );
+  const featured = reviews[0];
   const variantId =
     product.variants.find((v) => v.in_stock)?.id ??
     product.variants[0]?.id ??
@@ -286,15 +304,45 @@ export default async function ProductDetailPage({
           <div style={{ ...abs(0, 75, 398), ...txt(13, 15.733, "#B8A69A") }}>
             Real Rose · Hand-Finished · Made to Last
           </div>
-          <img
-            src="/eldreve/glyph-stars-14.png"
-            alt="5 stars"
-            width={72}
-            height={21}
-            style={{ ...abs(0, 96, 72, 21), display: "block" }}
-          />
-          <div style={{ ...abs(76, 99, 112), ...txt(12, 14.523, "#B8A69A") }}>
-            {"4.9 · 286 Reviews \u00A0›"}
+          {/* Same treatment as the reviews band: the art fills to the live
+              average instead of always showing five stars. */}
+          <div
+            data-live-text
+            role="img"
+            aria-label={
+              hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
+            }
+            style={abs(0, 96, 72, 21)}
+          >
+            <img
+              src="/eldreve/glyph-stars-14.png"
+              alt=""
+              width={72}
+              height={21}
+              style={{ ...abs(0, 0, 72, 21), display: "block" }}
+            />
+            {hasReviews ? (
+              <div
+                style={{
+                  ...abs(
+                    (stats.average / 5) * 72,
+                    0,
+                    72 - (stats.average / 5) * 72,
+                    21,
+                  ),
+                  background: "#FFFBF6",
+                  opacity: 0.74,
+                }}
+              />
+            ) : null}
+          </div>
+          <div
+            data-live-text
+            style={{ ...abs(76, 99, 130), ...txt(12, 14.523, "#B8A69A") }}
+          >
+            {stats.count > 0
+              ? `${stats.average} · ${stats.count} Review${stats.count === 1 ? "" : "s"} \u00A0›`
+              : "4.9 · 286 Reviews \u00A0›"}
           </div>
           <div
             className={notoSC.className}
@@ -570,23 +618,57 @@ export default async function ProductDetailPage({
           </div>
           <div
             className={notoSC.className}
+            data-live-text
             style={{
               ...abs(30, 66, 64, 50),
               ...txt(42, 50.4, "#3B2F2F"),
               fontWeight: 700,
             }}
           >
-            4.9
+            {hasReviews ? stats.average : "4.9"}
           </div>
-          <img
-            src="/eldreve/glyph-stars-15.png"
-            alt="5 stars"
-            width={80}
-            height={22}
-            style={{ ...abs(22, 119, 80, 22), display: "block" }}
-          />
-          <div style={{ ...abs(9.5, 144, 105), ...txt(10, 12.102, "#B8A69A") }}>
-            Based on 286 reviews
+          {/* The star art fills to the real average once reviews exist, so it
+              can never show five stars for a 4.5 score. */}
+          <div
+            data-live-text
+            role="img"
+            aria-label={
+              hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
+            }
+            style={abs(22, 119, 80, 22)}
+          >
+            <img
+              src="/eldreve/glyph-stars-15.png"
+              alt=""
+              width={80}
+              height={22}
+              style={{ ...abs(0, 0, 80, 22), display: "block" }}
+            />
+            {/* The glyph is a palette PNG with no alpha, so the stars past
+                the average fade under a veil in the card's own colour rather
+                than under a second, clipped copy of the art. */}
+            {hasReviews ? (
+              <div
+                style={{
+                  ...abs(
+                    (stats.average / 5) * 80,
+                    0,
+                    80 - (stats.average / 5) * 80,
+                    22,
+                  ),
+                  background: "#FFFBF6",
+                  opacity: 0.74,
+                }}
+              />
+            ) : null}
+          </div>
+          <div
+            data-live-text
+            style={{ ...abs(9.5, 144, 105), ...txt(10, 12.102, "#B8A69A") }}
+          >
+            {hasReviews
+              ? `Based on ${stats.count} review${stats.count === 1 ? "" : "s"}`
+              : "Based on 286 reviews"}
           </div>
           {[
             {
@@ -597,7 +679,6 @@ export default async function ProductDetailPage({
               fill: 136.5,
               pct: "91%",
               pctX: 329,
-              pctW: 21,
             },
             {
               y: 86,
@@ -607,7 +688,6 @@ export default async function ProductDetailPage({
               fill: 10.5,
               pct: "7%",
               pctX: 329,
-              pctW: 15,
             },
             {
               y: 105,
@@ -617,7 +697,6 @@ export default async function ProductDetailPage({
               fill: 2.1,
               pct: "1.4%",
               pctX: 329,
-              pctW: 24,
             },
             {
               y: 124,
@@ -627,7 +706,6 @@ export default async function ProductDetailPage({
               fill: 2,
               pct: "0.4%",
               pctX: 329,
-              pctW: 24,
             },
             {
               y: 143,
@@ -637,44 +715,67 @@ export default async function ProductDetailPage({
               fill: 2,
               pct: "0.2%",
               pctX: 322,
-              pctW: 24,
             },
-          ].map((row) => (
-            <div key={row.label}>
-              <div
-                style={{
-                  ...abs(130, row.y, row.labelW),
-                  ...txt(10, 12.102, "#4A403B"),
-                }}
-              >
-                {row.label}
-              </div>
-              <div
-                style={{
-                  ...abs(row.trackX, row.y + 3, 150, 6),
-                  background: "#E5D9C9",
-                  borderRadius: 99,
-                }}
-              >
+          ].map((row, index) => {
+            // Live share of this star band; the design's own numbers stand in
+            // until the product has reviews. A non-zero share keeps the
+            // design's 2px minimum bar so it never disappears entirely.
+            const share = hasReviews ? histogram[index] / stats.count : 0;
+            const percent = share * 100;
+            const fill = hasReviews
+              ? share > 0
+                ? Math.max(2, share * 150)
+                : 0
+              : row.fill;
+            const label = hasReviews
+              ? percent === 0
+                ? "0%"
+                : percent >= 10
+                  ? `${Math.round(percent)}%`
+                  : `${percent.toFixed(1)}%`
+              : row.pct;
+            return (
+              <div key={row.label}>
                 <div
                   style={{
-                    ...abs(0, 0, row.fill, 6),
-                    background: "#D4AF37",
+                    ...abs(130, row.y, row.labelW),
+                    ...txt(10, 12.102, "#4A403B"),
+                  }}
+                >
+                  {row.label}
+                </div>
+                <div
+                  data-live-text
+                  style={{
+                    ...abs(row.trackX, row.y + 3, 150, 6),
+                    background: "#E5D9C9",
                     borderRadius: 99,
                   }}
-                />
+                >
+                  <div
+                    style={{
+                      ...abs(0, 0, fill, 6),
+                      background: "#D4AF37",
+                      borderRadius: 99,
+                    }}
+                  />
+                </div>
+                <div
+                  className={notoSC.className}
+                  data-live-text
+                  style={{
+                    // Wider than the design's text node so a live percentage
+                    // ("50%") still ends inside the box — the label is
+                    // left-aligned at pctX, so nothing moves on screen.
+                    ...abs(row.pctX, row.y, 34),
+                    ...txt(10, 12, "#4A403B"),
+                  }}
+                >
+                  {label}
+                </div>
               </div>
-              <div
-                className={notoSC.className}
-                style={{
-                  ...abs(row.pctX, row.y, row.pctW),
-                  ...txt(10, 12, "#4A403B"),
-                }}
-              >
-                {row.pct}
-              </div>
-            </div>
-          ))}
+            );
+          })}
           <div
             style={{
               ...abs(16, 185, 366, 74),
@@ -690,25 +791,43 @@ export default async function ProductDetailPage({
               }}
             />
             <div
+              data-live-text
               style={{
                 ...abs(64, 22.5, 288),
                 ...txt(12, 14.523, "#3B2F2F"),
                 fontWeight: 500,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              “Beautiful craftsmanship — perfect for gifting.”
+              {featured
+                ? `“${featured.body}”`
+                : "“Beautiful craftsmanship — perfect for gifting.”"}
             </div>
+            {/* "Verified Buyer" is a claim, so it is only made for reviews
+                that carry the order they came from. */}
             <div
+              data-live-text
               style={{ ...abs(64, 39.5, 288), ...txt(10, 12.102, "#B8A69A") }}
             >
-              — Sarah M. · Verified Buyer
+              {featured
+                ? `— ${featured.author_name ?? "ELDREVE Customer"}${featured.order_id ? " · Verified Buyer" : ""}`
+                : "— Sarah M. · Verified Buyer"}
             </div>
           </div>
         </Section>
 
         {/* Overlay triggers + drawers (reviews / colors / media / unboxing) —
           last child so the transparent hit-areas stack above every section. */}
-        <PdpOverlays />
+        <PdpOverlays
+          reviews={reviews.map((review) => ({
+            author: review.author_name ?? "ELDREVE Customer",
+            date: formatRelativeDay(review.created_at),
+            body: review.body,
+            rating: review.rating,
+          }))}
+          stats={stats}
+        />
       </ScaleFrame>
 
       {/* Chatbox (mascot + bar) floats fixed above the nav; opens the

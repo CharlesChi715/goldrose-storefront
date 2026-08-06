@@ -5066,3 +5066,50 @@ written), then the six new files were removed — nothing left in the tree.
   strip so rows dissolve at the rim, and a 150ms open ease with a
   reduced-motion opt-out. Per-row work is painted to the DOM in one rAF per
   frame, not through React state. Depth is now pinned by test.
+
+## 2026-08-06 — Product reviews backend + PDP drawer goes live (mentor session)
+
+- Schema designed with Charles step by step, then built on his "do it":
+  `product_reviews` (migration `0007`, **applied to hosted**) — text product_id
+  FK cascade, nullable order/user FKs set-null, author_name snapshot, 1–5
+  rating check, photo_urls text[], pending/published/rejected + rejected_reason
+  (FTC 16 CFR 465: content-neutral moderation, never hard-delete), partial
+  index on published, RLS anon-select-published-only.
+- `lib/reviews/db.ts` (getStore dual-mode: list published, live avg/count —
+  option a, no denormalized counters), `POST /api/reviews` (zod, registered-
+  only in hosted mode, always inserts pending).
+- `/account/orders/review` PUBLISH wired (closes AI-031; ?product=&order=
+  params, default signature rose); submitted state relabels THANK YOU.
+- PDP rating row + reviews drawer render live rows/stats when any published
+  review exists (mock art stays as fallback while empty — pre-launch rule);
+  drawer list region is now a real scroller (mock 150px pitch kept).
+- Verified: typecheck, lint, full e2e (106) green; pixel baseline regenerated
+  (rating row now data-live-text masked); local loop POST→publish→PDP proven.
+- Deliberate gaps: experience chip has no column (local-only), photo upload UI
+  not wired (schema ready), no admin moderation screen yet.
+
+## 2026-08-06 (2) — Two demonstration reviews, and the PDP stops contradicting itself
+
+- `npm run seed:reviews` (`scripts/seed-demo-reviews.ts`, fixed ids, idempotent,
+  `-- --remove` reverses it) inserts two published reviews. Run against the
+  local file store and against hosted Supabase — both now show 4.5 · 2 reviews
+  on the signature rose. They are demonstration content: remove before launch.
+- The PDP's own "Customer Reviews" band was still hardcoded to 4.9 / "Based on
+  286 reviews" / a fixed testimonial while the info card showed live numbers.
+  It now reads the same data: average, count, star histogram (percentages and
+  bar fills), and the newest review as the featured quote.
+- Honesty details worth keeping: "Verified Buyer" is printed only for reviews
+  that carry an `order_id`; the star art fills to the real average (a clipped
+  copy of the design glyph in the drawer, a veil over the unearned stars in
+  band 10, because that PNG is palette-based with no alpha) so 4.5 can never
+  render as five full stars.
+- Review dates now read like the design ("4 days ago") via
+  `formatRelativeDay()` in `lib/dates.ts`, server-rendered so hydration agrees.
+- Pixel baseline: every review-driven box carries `data-live-text`, and the
+  percentage labels + rating row were widened past their Figma text width so a
+  live value ("50%") cannot paint outside its mask. Baseline regenerated in the
+  no-reviews state (what CI seeds) and verified to still pass with the two
+  demo rows present — so CI stays green either way.
+- Verified: typecheck, lint, full e2e 106 green in both states; drawer scroll
+  proven with seven rows (624px window over 1050px of content, wheel moved it
+  to the end); pending rows confirmed invisible to the storefront.

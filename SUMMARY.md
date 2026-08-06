@@ -75,6 +75,16 @@ Open linked resources only when the task needs them.
   landed 2026-08-05 (see OQ-4 / AI-021).
 - **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
   MENU/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
+- **Product reviews are real (2026-08-06, PR #30, `feat/product-reviews`).**
+  `product_reviews` table live on hosted (migration `0007`; content-neutral
+  moderation, never hard-deleted), `lib/reviews/db.ts` + `POST /api/reviews`,
+  the `/account/orders/review` PUBLISH button wired (closes AI-031), PDP
+  rating row/drawer show live stats and scroll; design mock stays the visible
+  fallback while no review is published. Two demonstration reviews are seeded
+  on hosted and locally (`npm run seed:reviews`; `-- --remove` reverses it) —
+  they are not customer content and must go before launch. Missing on purpose:
+  photo-upload UI (column ready) and an admin moderation screen (publish needs
+  a manual DB update for now).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
@@ -166,7 +176,8 @@ Open linked resources only when the task needs them.
 5. Enter real shipping rates (OQ-2) and product content (OQ-3).
 6. Replace third-party/dev imagery; reconcile palettes and tabs. (Wordmarks
    are done — the ELDREVE rename landed 2026-08-05, see OQ-4.)
-7. Launch checks + [database backups](docs/features/backend/db-backups.md).
+7. Launch checks (incl. `npm run seed:reviews -- --remove`) + [database
+   backups](docs/features/backend/db-backups.md).
 8. After acceptance: capture screenshots, cancel Shopify, revoke the Figma
    token, begin marketing.
 
