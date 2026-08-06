@@ -304,13 +304,38 @@ export default async function ProductDetailPage({
           <div style={{ ...abs(0, 75, 398), ...txt(13, 15.733, "#B8A69A") }}>
             Real Rose · Hand-Finished · Made to Last
           </div>
-          <img
-            src="/eldreve/glyph-stars-14.png"
-            alt="5 stars"
-            width={72}
-            height={21}
-            style={{ ...abs(0, 96, 72, 21), display: "block" }}
-          />
+          {/* Same treatment as the reviews band: the art fills to the live
+              average instead of always showing five stars. */}
+          <div
+            data-live-text
+            role="img"
+            aria-label={
+              hasReviews ? `${stats.average} out of 5 stars` : "5 stars"
+            }
+            style={abs(0, 96, 72, 21)}
+          >
+            <img
+              src="/eldreve/glyph-stars-14.png"
+              alt=""
+              width={72}
+              height={21}
+              style={{ ...abs(0, 0, 72, 21), display: "block" }}
+            />
+            {hasReviews ? (
+              <div
+                style={{
+                  ...abs(
+                    (stats.average / 5) * 72,
+                    0,
+                    72 - (stats.average / 5) * 72,
+                    21,
+                  ),
+                  background: "#FFFBF6",
+                  opacity: 0.74,
+                }}
+              />
+            ) : null}
+          </div>
           <div
             data-live-text
             style={{ ...abs(76, 99, 130), ...txt(12, 14.523, "#B8A69A") }}
