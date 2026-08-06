@@ -23,8 +23,9 @@ Raw deliveries from the design team (and any other upstream source) enter here.
   parsing. The parse **output** goes into the repo proper; this folder keeps the
   **originals** the output came from.
 
-Superseded repo docs go to `archive/`. Scratch goes to `trash/`. Neither belongs
-here.
+Superseded repo docs are deleted, not filed — git history is the archive (the
+`archive/` folder was removed 2026-08-07). Scratch goes to `trash/`. Neither
+belongs here.
 
 ## Running a parse
 
