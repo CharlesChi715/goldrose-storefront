@@ -12,8 +12,14 @@ import { saveSetting } from "@/lib/admin/settings";
 import { revalidateStorefront } from "@/lib/admin/products";
 import { saveContentText } from "@/lib/content";
 
+// The legal-identity fields allow "" on purpose: the registered entity is
+// owner data that arrives after launch prep starts, and a half-filled form
+// must still save. The storefront hides the notice until they are complete.
 const storeSchema = z.object({
   name: z.string().trim().min(1).max(120),
+  legal_name: z.string().trim().max(200),
+  registration_number: z.string().trim().max(80),
+  address_lines: z.array(z.string().trim().max(200)).max(8),
   contact_email: z.string().trim().email().max(254),
   order_number_prefix: z.string().trim().max(10),
 });

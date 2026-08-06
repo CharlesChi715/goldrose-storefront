@@ -8,6 +8,7 @@
  */
 
 import { carrierLabel } from "./shipping/carriers.ts";
+import { companyEmailFooter, type CompanyIdentity } from "./company.ts";
 import { getStore } from "./supabase/store.ts";
 import type { OrderLineRow, OrderRow } from "./supabase/types.ts";
 
@@ -18,22 +19,24 @@ type NotificationToggles = {
 };
 
 /**
- * Read the notification toggles, store name, and owner contact email from
- * the settings table, defaulting every toggle to on and the store name to
- * "ELDREVE" when unset.
+ * Read the notification toggles, store name, legal identity, and owner
+ * contact email from the settings table, defaulting every toggle to on and
+ * the store name to "ELDREVE" when unset.
  *
- * @returns The toggles plus storeName and ownerEmail.
+ * @returns The toggles, storeName, ownerEmail, and the company footer block
+ *   ("" until the owner supplies the registered entity).
  */
 async function getEmailSettings(): Promise<{
   toggles: NotificationToggles;
   storeName: string;
   ownerEmail: string;
+  footer: string;
 }> {
   const settings = await getStore().all("settings");
   const notifications = settings.find((row) => row.key === "notifications")
     ?.value as Partial<NotificationToggles> | undefined;
   const store = settings.find((row) => row.key === "store")?.value as
-    { name?: string; contact_email?: string } | undefined;
+    Partial<CompanyIdentity> | undefined;
   return {
     toggles: {
       order_confirmation: notifications?.order_confirmation ?? true,
@@ -42,7 +45,23 @@ async function getEmailSettings(): Promise<{
     },
     storeName: store?.name ?? "ELDREVE",
     ownerEmail: store?.contact_email ?? "",
+    footer: companyEmailFooter(store ?? {}),
   };
+}
+
+/**
+ * Append the company's postal identity to a buyer-facing email. US CAN-SPAM
+ * requires a valid physical postal address in every commercial message, and
+ * the buyer's two order emails are exactly that. No-ops while the identity
+ * is unset, so a half-configured store sends a clean email rather than a
+ * stub footer.
+ *
+ * @param body - The message body.
+ * @param footer - The company block from getEmailSettings.
+ * @returns The body, with the footer rule and block appended when present.
+ */
+function withCompanyFooter(body: string, footer: string): string {
+  return footer ? `${body}\n\n—\n${footer}` : body;
 }
 
 function money(cents: number): string {
@@ -128,14 +147,17 @@ export async function sendOrderPlacedEmails(
   order: OrderRow,
   lines: OrderLineRow[],
 ): Promise<void> {
-  const { toggles, storeName, ownerEmail } = await getEmailSettings();
+  const { toggles, storeName, ownerEmail, footer } = await getEmailSettings();
   const summary = orderSummaryText(order, lines);
 
   if (toggles.order_confirmation && order.email) {
     await deliver(
       order.email,
       `${storeName} — order ${order.name} confirmed`,
-      `Thank you for your order!\n\n${summary}\n\nWe'll email you again when it ships.`,
+      withCompanyFooter(
+        `Thank you for your order!\n\n${summary}\n\nWe'll email you again when it ships.`,
+        footer,
+      ),
     );
   }
   if (toggles.new_order_alert && ownerEmail) {
@@ -159,7 +181,7 @@ export async function sendShippingConfirmationEmail(
   order: OrderRow,
   lines: OrderLineRow[],
 ): Promise<void> {
-  const { toggles, storeName } = await getEmailSettings();
+  const { toggles, storeName, footer } = await getEmailSettings();
   if (!toggles.shipping_confirmation || !order.email) {
     return;
   }
@@ -170,7 +192,10 @@ export async function sendShippingConfirmationEmail(
   await deliver(
     order.email,
     `${storeName} — order ${order.name} is on its way`,
-    `Good news — your order has shipped!${tracking}\n\n${orderSummaryText(order, lines)}`,
+    withCompanyFooter(
+      `Good news — your order has shipped!${tracking}\n\n${orderSummaryText(order, lines)}`,
+      footer,
+    ),
   );
 }
 

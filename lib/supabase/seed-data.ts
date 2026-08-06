@@ -283,7 +283,17 @@ const SEED_PRODUCTS: SeedProduct[] = [
 ];
 
 export type SettingsShape = {
-  store: { name: string; contact_email: string; order_number_prefix: string };
+  store: {
+    name: string;
+    /** Registered entity behind the brand — the seller of record. Blank until the owner supplies it. */
+    legal_name: string;
+    /** Company/business registration number as issued. Blank until supplied. */
+    registration_number: string;
+    /** Registered postal address, one line per entry; last line carries the country. */
+    address_lines: string[];
+    contact_email: string;
+    order_number_prefix: string;
+  };
   shipping_zones: Array<{
     id: string;
     name: string;
@@ -313,7 +323,18 @@ export type SettingsShape = {
 export const SEED_SETTINGS: SettingsShape = {
   store: {
     name: "ELDREVE",
-    contact_email: "support@goldrose.example",
+    // The entity named as Company Name on the TikTok Business API
+    // application against eldreve.com (2026-08-06). It is published in the
+    // site footer and on /policies/contact-legal so a platform reviewer can
+    // match the application to the website — the exact check TikTok failed.
+    legal_name: "Zhongshu Technology Worldwide Limited",
+    // AI-TAG(AI-033): OWNER-DECISION — still needed: the registration number
+    // and the registered postal address (US CAN-SPAM requires the address in
+    // order emails). Blank ships safely — both stay hidden until supplied. See
+    // /agent-delivery/sessions/company-legal-info-08-06-worktree-feat-company-legal-info.md.
+    registration_number: "",
+    address_lines: [],
+    contact_email: "support@eldreve.com",
     order_number_prefix: "#",
   },
   shipping_zones: [
@@ -346,6 +367,9 @@ export const SEED_SETTINGS: SettingsShape = {
     new_order_alert: true,
   },
   search_engine: {
+    // AI-TAG(AI-035): OWNER-TODO — the HOSTED row still says "GoldRose"; seeds
+    // only fill missing keys, so this value never reaches production. See
+    // /agent-delivery/sessions/company-legal-info-08-06-worktree-feat-company-legal-info.md.
     home_title: "ELDREVE — 24K Gold Dipped Roses",
     home_description:
       "Real roses preserved in 24K gold. Timeless anniversary, Valentine's Day, and milestone gifts, shipped internationally.",

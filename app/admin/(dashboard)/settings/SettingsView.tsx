@@ -91,6 +91,17 @@ export function SettingsView({
     settings.store.order_number_prefix,
   );
 
+  // Legal identity — the registered entity behind the brand. Edited as one
+  // textarea because postal formats differ per country; stored as one line
+  // per array entry.
+  const [legalName, setLegalName] = useState(settings.store.legal_name);
+  const [registrationNumber, setRegistrationNumber] = useState(
+    settings.store.registration_number,
+  );
+  const [addressText, setAddressText] = useState(
+    settings.store.address_lines.join("\n"),
+  );
+
   // Checkout
   const [discountField, setDiscountField] = useState(
     settings.checkout.discount_field_enabled,
@@ -188,6 +199,38 @@ export function SettingsView({
                 maxLength={10}
               />
             </InlineGrid>
+
+            <Divider />
+            <Text as="h3" variant="headingSm">
+              {t("settings.legal.title")}
+            </Text>
+            <Text as="p" tone="subdued" variant="bodySm">
+              {t("settings.legal.help")}
+            </Text>
+            <InlineGrid columns={{ xs: 1, md: 2 }} gap="300">
+              <TextField
+                label={t("settings.legal.legalName")}
+                value={legalName}
+                onChange={setLegalName}
+                autoComplete="off"
+                maxLength={200}
+              />
+              <TextField
+                label={t("settings.legal.registrationNumber")}
+                value={registrationNumber}
+                onChange={setRegistrationNumber}
+                autoComplete="off"
+                maxLength={80}
+              />
+            </InlineGrid>
+            <TextField
+              label={t("settings.legal.address")}
+              helpText={t("settings.legal.addressHelp")}
+              value={addressText}
+              onChange={setAddressText}
+              autoComplete="off"
+              multiline={4}
+            />
             <InlineStack align="end">
               <Button
                 variant="primary"
@@ -196,6 +239,12 @@ export function SettingsView({
                   save(() =>
                     saveStoreSettingsAction({
                       name: storeName,
+                      legal_name: legalName,
+                      registration_number: registrationNumber,
+                      address_lines: addressText
+                        .split("\n")
+                        .map((line) => line.trim())
+                        .filter((line) => line.length > 0),
                       contact_email: contactEmail,
                       order_number_prefix: orderPrefix,
                     }),

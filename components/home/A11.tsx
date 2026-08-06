@@ -12,6 +12,11 @@
  * placeholders) was replaced at source by the gift card + newsletter +
  * footer-links layout below, and both hairline dividers were deleted. Every
  * footer link and both CTAs now carry a real prototype target.
+ *
+ * 2026-08-06: the legal identity line customers and platform reviewers need
+ * is NOT in this band — it renders after the ScaleFrame, in
+ * components/SiteLegalFooter.tsx, precisely so this fixed-height import stays
+ * untouched by it. Nothing to do here.
  */
 
 import Link from "next/link";
