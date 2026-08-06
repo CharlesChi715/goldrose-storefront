@@ -5307,3 +5307,31 @@ the shop card had. Not touched.
   third still have no box in the frame.
 - **Verified:** typecheck, lint, build, 74 unit tests, 108 e2e tests (one new
   PDP regression test), product-detail pixel baseline regenerated.
+
+## 2026-08-06 — the PDP hero is an auto-playing, swipeable carousel
+
+- **Ask (owner):** make the product pictures auto-play and swipe like the
+  homepage carousel.
+- Built on the existing shared `components/home/Carousel.tsx`, so the feel is
+  identical to H-03: 1.8s auto-play, the track follows the finger
+  pixel-for-pixel while held, 40px release commits to the neighbour, 6px tap
+  slop separates tap from drag, auto-play pauses on hover/drag and is off
+  under reduced motion.
+- The hero **moved into `PdpOverlays`**. It had two stacked photo layers at the
+  same rect (the page's `<img>` and the media trigger's own copy, which exists
+  so the hover-zoom worked); two tracks could never hold the same slide, and
+  the trigger has to stay on top to open the viewer. The page now draws only
+  the card behind it.
+- Dots are generated from the photo count, all one size, active by colour —
+  the call `HeroCarousel` already made for the site. A single-photo product
+  gets no dots. The frame's 18px active pill is gone with them.
+- Carousel gained two optional props: `onActivate` (slides become buttons
+  instead of links) and `radius`. Home page behaviour is unchanged.
+- Hover-zoom on the hero is dropped; it fought the drag and the homepage hero
+  has none either.
+- Seed fixture: `premium-gold-rose-gift-bundle` now carries three photos so
+  both paths (multi-photo carousel, single-photo hero) have a fixture.
+- **Verified:** typecheck, lint, build, 74 unit tests, 111 e2e tests (three new
+  carousel tests), product-detail pixel baseline regenerated. Drove it in a
+  real browser: auto-play steps one slide width every 1.8s, a drag swipes
+  without opening the viewer, a tap opens it, reduced motion parks it.

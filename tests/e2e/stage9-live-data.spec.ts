@@ -44,9 +44,9 @@ test("the product page draws catalog values, not the frame's fixed art", async (
   ).toBeVisible();
   await expect(page.getByText("44% OFF", { exact: true })).toBeVisible();
 
-  // Both hero layers — the page's photo and the media trigger's own copy that
-  // covers it — are the product's image, not a /eldreve design render.
-  const heroes = await page.$$eval(".gr-card-zoom .gr-photo", (els) =>
+  // Every hero carousel slide is one of the product's own photos, not a
+  // /eldreve design render. (Dots are buttons too but hold no image.)
+  const heroes = await page.$$eval('button[aria-label*=" photo "] img', (els) =>
     els.map((el) => el.getAttribute("src")),
   );
   expect(heroes.length).toBeGreaterThan(0);

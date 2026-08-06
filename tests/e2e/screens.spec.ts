@@ -311,6 +311,59 @@ test("the shop grid shows one card per real product and nothing else", async ({
   );
 });
 
+/*
+ * The PDP hero is an auto-playing, swipeable carousel over the product's own
+ * photos (owner, 2026-08-06), on the same shared component as the homepage
+ * hero. The suite pins reduced motion so pixel baselines stay parked on slide
+ * 1 — auto-play only exists without it, so this block opts out.
+ */
+test.describe("the PDP hero carousel", () => {
+  test.use({ contextOptions: { reducedMotion: "no-preference" } });
+
+  const dots = (page: import("@playwright/test").Page) =>
+    page.getByRole("button", { name: /^Show .+ photo \d+$/ });
+  const activeDot = (page: import("@playwright/test").Page) =>
+    dots(page).evaluateAll((els) =>
+      els.findIndex((el) => el.getAttribute("aria-current") === "true"),
+    );
+
+  test("auto-plays through the product's photos", async ({ page }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    // One dot per catalog photo — the frame's fixed four are gone.
+    await expect(dots(page).first()).toBeVisible();
+    expect(await dots(page).count()).toBeGreaterThan(1);
+    expect(await activeDot(page)).toBe(0);
+    // Advances on its own, without touching anything.
+    await expect.poll(() => activeDot(page), { timeout: 8000 }).not.toBe(0);
+  });
+
+  test("a drag swipes the track without opening the photo viewer", async ({
+    page,
+  }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    await page.mouse.move(300, 220);
+    await page.mouse.down();
+    for (const x of [260, 200, 150, 120]) await page.mouse.move(x, 220);
+    await page.mouse.up();
+    // The drag must not also count as a tap on the slide.
+    await expect(
+      page.getByRole("dialog", { name: "Product photos" }),
+    ).toHaveCount(0);
+  });
+
+  test("a tap on the hero still opens the photo viewer", async ({ page }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    await page.mouse.click(215, 220);
+    await expect(
+      page.getByRole("dialog", { name: "Product photos" }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("dialog", { name: "Product photos" }),
+    ).toHaveCount(0);
+  });
+});
+
 test("a shop search that matches nothing shows no cards, not the whole catalog", async ({
   page,
 }) => {

@@ -115,7 +115,8 @@ function Section({
   clip?: boolean;
   /** Optional hook class (e.g. the hover-zoom wrapper). */
   className?: string;
-  children: React.ReactNode;
+  /** Omitted by the hero, whose contents are drawn over it by PdpOverlays. */
+  children?: React.ReactNode;
 }) {
   return (
     <div
@@ -273,9 +274,10 @@ export default async function ProductDetailPage({
           when wishlist enters scope. */}
         <VHeader backHref="/shop" right="search" brand="eldreve" />
 
-        {/* 03 · Hero */}
-        {/* The hero photo zooms inside its clipped frame on hover (gr-card-zoom
-          + gr-photo, app/globals.css) — pointer devices only. */}
+        {/* 03 · Hero — the card only. The photo track and its pagination dots
+          are drawn by PdpOverlays' Carousel below: the tap target has to sit
+          on top of the photo to open the media viewer, so it may as well BE
+          the photo. Two stacked layers could never hold the same slide. */}
         <Section
           x={16}
           y={94}
@@ -284,42 +286,7 @@ export default async function ProductDetailPage({
           radius={15}
           background="#FFFBF6"
           clip
-          className="gr-card-zoom"
-        >
-          {/* The product's own photo. Catalog photos are not the frame's
-              398×250, so they cover-crop, exactly as the shop cards do. The
-              design render is the fallback for a product with no photo. */}
-          <img
-            className="gr-photo"
-            src={heroImage ?? "/eldreve/detail-hero.png"}
-            alt={product.images[0]?.alt || product.title}
-            width={398}
-            height={250}
-            fetchPriority="high"
-            style={{
-              ...abs(0, 8, 398, 250),
-              display: "block",
-              objectFit: "cover",
-            }}
-          />
-          <div
-            style={{
-              ...abs(0, 268, 18, 7),
-              background: "#153C34",
-              borderRadius: 3.5,
-            }}
-          />
-          {[25, 39, 53].map((x) => (
-            <div
-              key={x}
-              style={{
-                ...abs(x, 268, 7, 7),
-                background: "#DED9D0",
-                borderRadius: "50%",
-              }}
-            />
-          ))}
-        </Section>
+        />
 
         {/* 04 · Product info */}
         <div style={{ ...abs(16, 375, 398, 166), background: "#FFFBF6" }}>
@@ -909,8 +876,8 @@ export default async function ProductDetailPage({
             rating: review.rating,
           }))}
           stats={stats}
-          heroImage={heroImage}
           media={product.images.map((image) => fileUrl(image.path))}
+          productTitle={product.title}
         />
       </ScaleFrame>
 

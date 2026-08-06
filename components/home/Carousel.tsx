@@ -74,7 +74,10 @@ const EDGE_RESISTANCE = 3;
  * @param dots - Dot positions/sizes, verbatim from the design.
  * @param activeColor - Dot colour when current.
  * @param idleColor - Dot colour when not current.
- * @param href - Destination for a card tap.
+ * @param href - Destination for a card tap. Ignored when `onActivate` is set.
+ * @param onActivate - Tap handler; when given, slides are buttons rather than
+ * links (the PDP hero opens an overlay instead of navigating).
+ * @param radius - Corner radius of the clipped window.
  * @param label - Human name used in the dots' accessible labels.
  * @param name - Element-name prefix, e.g.
  * `HOME-HERO`. Stamps `data-el` on the window (`-MEDIA`), each slide
@@ -93,6 +96,8 @@ export function Carousel({
   activeColor,
   idleColor,
   href = "/placeholder",
+  onActivate,
+  radius,
   label,
   name,
   cellWidth,
@@ -107,6 +112,8 @@ export function Carousel({
   activeColor: string;
   idleColor: string;
   href?: string;
+  onActivate?: () => void;
+  radius?: number;
   label: string;
   name?: string;
   cellWidth?: number;
@@ -157,6 +164,7 @@ export function Carousel({
         style={{
           ...abs(win.left, win.top, win.width, win.height),
           overflow: "hidden",
+          ...(radius != null ? { borderRadius: radius } : {}),
           // Horizontal drags are ours; vertical ones must still scroll the page.
           touchAction: "pan-y",
         }}
@@ -210,26 +218,54 @@ export function Carousel({
             userSelect: "none",
           }}
         >
-          {Array.from({ length: count }, (_, i) => (
-            <Link
-              key={i}
-              data-el={name && `${name}-SLIDE-${i + 1}`}
-              href={href}
-              aria-label={`${label} ${i + 1}`}
-              tabIndex={i === index ? 0 : -1}
-              style={{
-                position: "absolute",
-                left: i * pitch,
-                top: 0,
-                width: cell,
-                height: win.height,
-                display: "block",
-                overflow: "hidden",
-              }}
-            >
-              {renderSlide(i)}
-            </Link>
-          ))}
+          {Array.from({ length: count }, (_, i) => {
+            const cellStyle: React.CSSProperties = {
+              position: "absolute",
+              left: i * pitch,
+              top: 0,
+              width: cell,
+              height: win.height,
+              display: "block",
+              overflow: "hidden",
+            };
+            const el = name && `${name}-SLIDE-${i + 1}`;
+            const slideLabel = `${label} ${i + 1}`;
+            const focus = i === index ? 0 : -1;
+            // A slide that opens an overlay cannot be a link — there is no
+            // URL to go to — but it must stay the same drag target, so the
+            // window's tap/drag discrimination still governs it.
+            return onActivate ? (
+              <button
+                key={i}
+                data-el={el}
+                type="button"
+                onClick={onActivate}
+                aria-label={slideLabel}
+                tabIndex={focus}
+                style={{
+                  ...cellStyle,
+                  appearance: "none",
+                  border: 0,
+                  padding: 0,
+                  background: "transparent",
+                  cursor: "pointer",
+                }}
+              >
+                {renderSlide(i)}
+              </button>
+            ) : (
+              <Link
+                key={i}
+                data-el={el}
+                href={href}
+                aria-label={slideLabel}
+                tabIndex={focus}
+                style={cellStyle}
+              >
+                {renderSlide(i)}
+              </Link>
+            );
+          })}
         </div>
       </div>
 

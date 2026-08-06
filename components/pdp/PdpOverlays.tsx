@@ -8,7 +8,7 @@
  *
  *   PDP-REVIEW-OPEN-DRAWER   1523:4185 (panel 1523:4215) ← the rating row
  *   PDP-COLOR-OPEN-DRAWER    1523:4275 (panel 1523:4289) ← "View All 120 Colors ›"
- *   PDP-MEDIA-OPEN           1523:4257 ← the hero photo
+ *   PDP-MEDIA-OPEN           1523:4257 ← the hero photo (drawn here too)
  *   PDP-UNBOXING-OPEN-GALLERY 1523:4359 (panel 1523:4368) ← unboxing "View All ›"
  *
  * Geometry, colors, fonts and copy are verbatim from the Figma REST data.
@@ -17,6 +17,12 @@
  * sheets sit flush with the screen edge at any viewport height. The page
  * content the frames paint behind each scrim is the live page's job, not
  * drawn here.
+ *
+ * The HERO is drawn here rather than by the page (owner, 2026-08-06): it is
+ * an auto-playing, swipeable carousel over the product's own photos, built on
+ * the homepage's shared Carousel so it behaves exactly like H-03. The tap
+ * target has to sit above the photo to open the media viewer, and two stacked
+ * photo layers could never hold the same slide — so the trigger IS the photo.
  *
  * Content: the REVIEWS drawer is real — rows, average and count come from
  * product_reviews, and an empty table shows an empty drawer rather than the
@@ -35,6 +41,7 @@ import { createPortal } from "react-dom";
 import NoCalcScale from "@/components/NoCalcScale";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
+import { Carousel } from "@/components/home/Carousel";
 
 const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
@@ -44,6 +51,11 @@ const SHEET_BG = "#FFFEFB";
 const REVIEW_BG = "#FFFBF6"; // the reviews sheet's own white (1523:4215) — the other two drawers keep #FFFEFB
 const TILE_BG = "#F0E8DE"; // unboxing media-card ground behind each photo (1523:4388…)
 const GREY = "#706661";
+
+// The hero pagination row: 7px indicators on a 14px pitch. The frame draws
+// the active one as an 18px pill, but HeroCarousel already settled that call
+// for the site — one size for every dot, active by colour.
+const DOT_PITCH = 14;
 
 const RESET: React.CSSProperties = {
   appearance: "none",
@@ -743,13 +755,12 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
 
 function MediaViewer({
   onClose,
-  media,
+  shots,
 }: {
   onClose: () => void;
-  /** The product's own photos; the design's set covers a product with none. */
-  media: string[];
+  /** The same photo set the hero carousel pages through. */
+  shots: string[];
 }) {
-  const shots = media.length ? media : MEDIA;
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
     setIndex((i) => (i + delta + shots.length) % shots.length);
@@ -1112,17 +1123,20 @@ function UnboxingGallery({ onClose }: { onClose: () => void }) {
 export function PdpOverlays({
   reviews = [],
   stats = null,
-  heroImage = null,
   media = [],
+  productTitle = "Product",
 }: {
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
-  /** The product's first photo, drawn in the hero trigger's own copy. */
-  heroImage?: string | null;
-  /** All of the product's photos, for the media viewer. */
+  /** The product's photos — the hero carousel and the media viewer. */
   media?: string[];
+  /** Names the hero slides for screen readers. */
+  productTitle?: string;
 }) {
   const [open, setOpen] = useState<OverlayId | null>(null);
+  // One source of truth for both the hero and the viewer. A product with no
+  // photos of its own falls back to the frame's set rather than an empty box.
+  const shots = media.length ? media : MEDIA;
   const mounted = useSyncExternalStore(
     subscribeToNothing,
     onTheClient,
@@ -1132,38 +1146,40 @@ export function PdpOverlays({
 
   return (
     <>
-      {/* Hero (16,94 398×281) → media viewer. The button carries its own copy
-          of the hero photo so the wired hover-zoom keeps working — a plain
-          transparent cover would sit outside the zoom container and kill it.
-          That copy has to be the PRODUCT's photo: it covers the page's hero
-          exactly, so the frame's 07-29 blue rose (1523:4195) used to be what
-          a shopper saw no matter which product they opened. */}
-      <button
-        type="button"
-        aria-label="Open product photos"
-        onClick={() => setOpen("media")}
-        className="gr-card-zoom"
-        style={{
-          ...RESET,
-          ...abs(16, 94, 398, 281),
-          borderRadius: 15,
-          overflow: "hidden",
-        }}
-      >
-        <img
-          className="gr-photo"
-          src={heroImage ?? "/eldreve/screens/1523-4195.png"}
-          alt=""
-          width={398}
-          height={250}
-          style={{
-            ...abs(0, 8, 398, 250),
-            borderRadius: 18,
-            display: "block",
-            objectFit: "cover",
-          }}
-        />
-      </button>
+      {/* Hero (photo window 16,102 398×250) → media viewer. This IS the hero:
+          the page draws only the card behind it, because the trigger has to
+          sit on top to catch the tap and two stacked photo layers could never
+          stay on the same slide. Built on the homepage's shared Carousel so
+          the product's own photos auto-play and follow the finger exactly as
+          H-03 does (owner, 2026-08-06). Dots are all one size, active by
+          colour — the same call HeroCarousel made. */}
+      <Carousel
+        window={{ left: 16, top: 102, width: 398, height: 250 }}
+        radius={18}
+        count={shots.length}
+        dots={
+          shots.length > 1
+            ? shots.map((_, i) => ({ x: 16 + i * DOT_PITCH, y: 362, size: 7 }))
+            : []
+        }
+        activeColor="#153C34"
+        idleColor="#DED9D0"
+        label={`${productTitle} photo`}
+        onActivate={() => setOpen("media")}
+        renderSlide={(i) => (
+          <img
+            src={shots[i]}
+            alt=""
+            width={398}
+            height={250}
+            style={{
+              ...abs(0, 0, 398, 250),
+              display: "block",
+              objectFit: "cover",
+            }}
+          />
+        )}
+      />
       {/* Rating row (rel 0,98 in the info card at 16,375) → reviews drawer */}
       <button
         type="button"
@@ -1199,7 +1215,7 @@ export function PdpOverlays({
         : null}
       {mounted && open === "media"
         ? createPortal(
-            <MediaViewer onClose={close} media={media} />,
+            <MediaViewer onClose={close} shots={shots} />,
             document.body,
           )
         : null}
