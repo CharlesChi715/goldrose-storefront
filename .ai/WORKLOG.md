@@ -5748,3 +5748,39 @@ departure from the frame; Figma needs the same 16px change.
 Side note: the worktree branched from `origin/main`, which is behind local
 `main` and still carries the duplicate `Carousel` import that b0b3a93 repaired.
 Rebased onto local `main` before working.
+
+## 2026-08-07 — `best_for` becomes the /shop filter vocabulary
+
+Branch `feat/best-for-facets`. The filter drawer's eleven Collections /
+Occasion / Recipient chips were cosmetic because no catalog field backed them;
+`products.best_for` was the nearest thing and held a prose blurb no page
+rendered. It is now `text[]` holding facet slugs, unbounded per product.
+
+- `lib/catalog/facets.ts` — the single vocabulary: 11 stored slugs in three
+  groups, plus Price and Availability computed from `price_cents` and stock
+  and never stored. Slugs are globally unique (the group is recovered from the
+  value); the index build throws on a duplicate, `assertBestFor` throws on an
+  unknown or derived value at the admin's save.
+- Migration `0009` — drops `catalog_products`, retypes `best_for` to `text[]`
+  (old sentences dropped, not guessed at), recreates the view with a `stocked`
+  boolean beside `in_stock`, re-grants to anon. **Not pushed to hosted yet.**
+- `/shop` filters server-side from `?f=jewel,anniversary` so the grid, the
+  "N GIFTS" count and the pager share one authority. OR inside a heading, AND
+  across headings. Facet URLs are noindexed like `?q=`.
+- The drawer multi-selects, "Show N Results" counts the pending selection
+  before the tap, Reset clears it, and the active-chip row is real with a
+  working ×. The frames' two fixed chips ("Ruby Red", "Gift Sets") are gone —
+  the only pixel change; baseline updated, home and PDP byte-identical.
+- Admin "Best for" text box → grouped multi-select (EN/中文). The round-trip
+  test caught a real bug on the way: Polaris `ChoiceList` echoes back the whole
+  `selected` array it is handed, not just its own group, so the naive merge
+  double-counted the other groups' slugs. `assertBestFor` refused the save
+  instead of storing junk — the validation earning its keep on day one.
+- Tests: `tests/unit/facets.test.ts` (vocabulary, AND/OR, price bands,
+  availability), `tests/e2e/shop-filters.spec.ts` (9 cases), and an
+  admin -> storefront round trip in `admin-products.spec.ts`. Green: 126 e2e,
+  112 unit.
+
+Open: push `0009` to hosted (owner call — it drops the three blurbs), then
+re-pick each product's facets in the admin, since the migration starts every
+row empty.

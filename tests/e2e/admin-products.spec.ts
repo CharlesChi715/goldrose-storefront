@@ -199,3 +199,48 @@ test("framing box: drag sets the focal point, and the storefront honours it", as
     await expect(page.getByText("Product saved").first()).toBeVisible();
   }
 });
+
+/**
+ * "Best for" is the /shop filter drawer's own vocabulary (lib/catalog/facets.ts,
+ * 2026-08-07), so the admin's tick boxes and the shop's chips have to be the
+ * same eleven values or a product becomes unreachable by the filter that was
+ * chosen for it. This walks the whole path: tick → save → the storefront.
+ */
+test("Best for: ticks are unlimited, and the shop filters on what was saved", async ({
+  page,
+}) => {
+  await adminLogin(page);
+  await page.goto("/admin/products/signature-gold-rose");
+
+  // The seeded facets come back ticked, across all three groups.
+  await expect(page.getByLabel("Classic Collection")).toBeChecked();
+  await expect(page.getByLabel("Anniversary")).toBeChecked();
+  await expect(page.getByLabel("Wife")).toBeChecked();
+  await expect(page.getByLabel("Sparkle Collection")).not.toBeChecked();
+
+  try {
+    // A second collection AND a third recipient — nothing caps either group.
+    await page.getByLabel("Sparkle Collection").check();
+    await page.getByLabel("Mother").check();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Product saved").first()).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByLabel("Sparkle Collection")).toBeChecked();
+    await expect(page.getByLabel("Classic Collection")).toBeChecked();
+    await expect(page.getByLabel("Mother")).toBeChecked();
+
+    // The shop agrees: this product now answers to Sparkle as well.
+    await page.goto("/shop?f=sparkle", { waitUntil: "networkidle" });
+    await expect(
+      page.locator('a[href="/products/signature-24k-gold-rose"]'),
+    ).toBeVisible();
+  } finally {
+    // Put the seeded selection back for later runs.
+    await page.goto("/admin/products/signature-gold-rose");
+    await page.getByLabel("Sparkle Collection").uncheck();
+    await page.getByLabel("Mother").uncheck();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Product saved").first()).toBeVisible();
+  }
+});

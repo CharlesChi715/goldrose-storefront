@@ -19,26 +19,39 @@
  *   own name until merchandising rules exist; the two price rows sort by
  *   price_cents. The sort applies to the whole catalog before the page is
  *   sliced, so it holds across pages rather than within one.
- * - The filter drawer is COSMETIC (B-2 checkout-picker precedent): chips
- *   toggle visually, Reset restores the frame's default selection, and the
- *   confirm button closes the drawer. The catalog has no collection/
- *   occasion/recipient/availability fields yet, so wiring it would fake a
- *   capability the backend does not have (docs/ixd/README.md).
- * - The two label chips ("Ruby Red", "Gift Sets") stay static art like the
- *   "Women"/"All apparel" pair they replace: the base shop frame (24:396)
- *   still carries the template's apparel wording; both overlay frames patch
- *   the row with the gift-shop labels, so the corrected wording is what
- *   ships (designer slip flagged in docs/ixd/README.md).
+ * - The filter drawer is REAL since 2026-08-07. Collections/Occasion/Recipient
+ *   match `products.best_for` (migration 0009); Price and Availability are
+ *   computed from the catalog's own price and stock. Every chip multi-selects,
+ *   and the vocabulary — slugs, wording, and what each derived chip means —
+ *   comes from lib/catalog/facets.ts, never from this file.
+ * - The selection lives in the URL (`?f=jewel,anniversary`), not in state
+ *   here: the server owns the grid, the count and the pager, so the three
+ *   cannot disagree, and a filtered shop is a link a shopper can send.
+ *   `Show N Results` counts a PENDING selection against `subjects` before the
+ *   navigation happens; Reset clears the pending chips rather than restoring
+ *   the frame's drawn selection, which was art rather than a default.
+ * - The active-filter chip row is real too, one chip per applied facet with a
+ *   working ×. It replaces the two fixed label chips the frames drew ("Ruby
+ *   Red", "Gift Sets" — themselves a patch over the template's "Women"/"All
+ *   apparel"): those were a picture of a filtered shop, and an unfiltered shop
+ *   now correctly shows none. The row keeps the frame's origin, height, radius
+ *   and type but flows, because the number of chips is no longer two.
  */
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CloseIcon,
   DownIcon,
   FilterIcon,
   ListviewIcon,
 } from "@/components/chrome";
+import {
+  facetLabel,
+  matchesFacets,
+  type FacetSubject,
+} from "@/lib/catalog/facets.ts";
 import { abs, txt } from "@/lib/figma-layout";
 import { inter, notoSC, playfair } from "@/lib/fonts";
 
@@ -89,66 +102,68 @@ const SORT_ROWS: Array<{ key: SortKey; label: string }> = [
   { key: "low", label: "Price: Low to High" },
 ];
 
-// 923:252 filter drawer groups — labels and the frame's default selection.
-const FILTER_GROUPS: Array<{
+/**
+ * 923:252 filter drawer — GEOMETRY ONLY. Each chip's box is the frame's, and
+ * each `slug` names the facet it stands for; the wording and the meaning both
+ * live in lib/catalog/facets.ts so a re-worded chip never has to be edited
+ * twice. The frame also drew five chips pre-selected — that was a picture of
+ * a filtered shop, not a default, and it is deliberately not reproduced: an
+ * unfiltered /shop starts with nothing ticked.
+ */
+const FILTER_ROWS: Array<{
   title: string;
   y: number;
-  options: Array<{ label: string; x: number; w: number; selected?: boolean }>;
+  chips: Array<{ slug: string; x: number; w: number }>;
 }> = [
   {
     title: "Collections",
     y: 368,
-    options: [
-      { label: "Jewel Collection", x: 32, w: 126, selected: true },
-      { label: "Classic Collection", x: 166, w: 112 },
-      { label: "Sparkle Collection", x: 286, w: 112 },
+    chips: [
+      { slug: "jewel", x: 32, w: 126 },
+      { slug: "classic", x: 166, w: 112 },
+      { slug: "sparkle", x: 286, w: 112 },
     ],
   },
   {
     title: "Occasion",
     y: 438,
-    options: [
-      { label: "Anniversary", x: 32, w: 100, selected: true },
-      { label: "Birthday", x: 140, w: 76 },
-      { label: "Wedding", x: 224, w: 80 },
-      { label: "Valentine’s", x: 312, w: 86 },
+    chips: [
+      { slug: "anniversary", x: 32, w: 100 },
+      { slug: "birthday", x: 140, w: 76 },
+      { slug: "wedding", x: 224, w: 80 },
+      { slug: "valentines", x: 312, w: 86 },
     ],
   },
   {
     title: "Recipient",
     y: 508,
-    options: [
-      { label: "Wife", x: 32, w: 60 },
-      { label: "Girlfriend", x: 100, w: 92, selected: true },
-      { label: "Mother", x: 200, w: 74 },
-      { label: "Friends", x: 282, w: 70 },
+    chips: [
+      { slug: "wife", x: 32, w: 60 },
+      { slug: "girlfriend", x: 100, w: 92 },
+      { slug: "mother", x: 200, w: 74 },
+      { slug: "friends", x: 282, w: 70 },
     ],
   },
   {
     title: "Price",
     y: 578,
-    options: [
-      { label: "Under $100", x: 32, w: 88 },
-      { label: "$100–$199", x: 128, w: 92 },
-      { label: "$200–$299", x: 228, w: 96, selected: true },
-      { label: "$300+", x: 332, w: 66 },
+    chips: [
+      { slug: "under-100", x: 32, w: 88 },
+      { slug: "100-199", x: 128, w: 92 },
+      { slug: "200-299", x: 228, w: 96 },
+      { slug: "300-plus", x: 332, w: 66 },
     ],
   },
   {
     title: "Availability",
     y: 648,
-    options: [
-      { label: "In Stock", x: 32, w: 82 },
-      { label: "Ready to Ship", x: 122, w: 112, selected: true },
-      { label: "Pre-Order", x: 242, w: 90 },
+    chips: [
+      { slug: "in-stock", x: 32, w: 82 },
+      { slug: "ready-to-ship", x: 122, w: 112 },
+      { slug: "pre-order", x: 242, w: 90 },
     ],
   },
 ];
-
-const defaultFilterSelection = () =>
-  FILTER_GROUPS.map((group) =>
-    group.options.findIndex((option) => option.selected),
-  );
 
 function ProductCard({
   slot,
@@ -262,22 +277,33 @@ export function ShopInteractive({
   data,
   page,
   pageSize,
+  query,
+  selected,
+  subjects,
   emptyNote,
 }: {
   slots: SlotSpec[];
-  /** The whole (search-filtered) catalog; this component slices the page. */
+  /** The catalog after search AND facets; this component slices the page. */
   data: CardData[];
   page: number;
   pageSize: number;
+  /** The live ?q= search, carried through every URL this component builds. */
+  query: string;
+  /** Facet slugs currently APPLIED — the drawer opens showing these. */
+  selected: string[];
+  /** Filterable facts for the search-matched catalog, before facets. */
+  subjects: FacetSubject[];
   /** Shown in place of the grid when `data` is empty. */
   emptyNote: string;
 }) {
+  const router = useRouter();
   const [sort, setSort] = useState<SortKey>("new");
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterSelection, setFilterSelection] = useState<number[]>(
-    defaultFilterSelection,
-  );
+  // What the drawer shows before "Show N Results" is tapped. Opening the
+  // drawer re-seeds it from what is actually applied (below), so a selection
+  // abandoned by tapping the backdrop is never presented as if it were live.
+  const [pending, setPending] = useState<string[]>(selected);
   const [fading, setFading] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -321,6 +347,34 @@ export function ShopInteractive({
   const visible = sorted.slice((page - 1) * pageSize, page * pageSize);
 
   const overlayOpen = sortOpen || filterOpen;
+
+  /**
+   * The /shop URL for a given facet selection. Page is dropped on purpose: a
+   * different filter is a different result set, so page 4 of the old one is
+   * meaningless — and often past the end of the new one.
+   */
+  const filterHref = (slugs: string[]) => {
+    const qs = new URLSearchParams();
+    if (query) qs.set("q", query);
+    if (slugs.length) qs.set("f", slugs.join(","));
+    const search = qs.toString();
+    return search ? `/shop?${search}` : "/shop";
+  };
+
+  // `scroll: false` — the shopper is looking at the drawer or the chip row,
+  // both well down the page; jumping to the top would hide the change they
+  // just made.
+  const apply = (slugs: string[]) => {
+    setFilterOpen(false);
+    router.push(filterHref(slugs), { scroll: false });
+  };
+
+  // How many products the PENDING selection would leave, counted against the
+  // pre-facet catalog rather than the grid — the grid already has the applied
+  // filter in it and would only ever count down.
+  const pendingCount = subjects.filter((subject) =>
+    matchesFacets(subject, pending),
+  ).length;
 
   return (
     <>
@@ -400,7 +454,11 @@ export function ShopInteractive({
         aria-label="Filters"
         aria-expanded={filterOpen}
         onClick={() => {
-          setFilterOpen((open) => !open);
+          const opening = !filterOpen;
+          // Re-seed on the way open, not on the way shut: the drawer should
+          // always show the shop the shopper is actually in.
+          if (opening) setPending(selected);
+          setFilterOpen(opening);
           setSortOpen(false);
         }}
         style={{
@@ -417,48 +475,63 @@ export function ShopInteractive({
         </span>
       </button>
 
-      {/* Active filter chips (929:169/172) — static art, like the apparel
-          pair before them; the drawer is the interactive surface. */}
-      {[
-        {
-          x: 17,
-          w: 109,
-          label: "Ruby Red",
-          labelX: 10,
-          labelW: 67,
-          closeX: 83,
-        },
-        {
-          x: 134,
-          w: 103,
-          label: "Gift Sets",
-          labelX: 10,
-          labelW: 61,
-          closeX: 77,
-        },
-      ].map((chip) => (
-        <div key={chip.label} style={abs(chip.x, 359, chip.w, 32)}>
-          <div
-            style={{
-              ...abs(-1, -1, chip.w + 2, 34),
-              border: `1px solid ${SAND}`,
-              borderRadius: 31,
-            }}
-          />
-          <div
-            style={{
-              ...abs(chip.labelX, 8, chip.labelW),
-              ...txt(14, 16, INK, "center"),
-              letterSpacing: 0.14,
-            }}
-          >
-            {chip.label}
-          </div>
-          <span style={abs(chip.closeX, 8, 16, 16)}>
-            <CloseIcon color={INK_SOFT} />
-          </span>
+      {/* Active filter chips (929:169/172) — one per applied facet, each ×
+          dropping just that one. The frame fixed two chips at fixed widths;
+          eleven facets with labels from "Wife" to "Sparkle Collection" cannot
+          be placed that way, so the row flows from the frame's own origin at
+          the frame's own height and scrolls sideways rather than colliding
+          with the grid. Chip padding reproduces the frame's: 10 left, 6 before
+          the 16px ×, 10 right. Nothing selected draws nothing. */}
+      {selected.length ? (
+        <div
+          style={{
+            ...abs(17, 359, 396, 32),
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            overflowX: "auto",
+            overflowY: "hidden",
+            scrollbarWidth: "none",
+          }}
+        >
+          {selected.map((slug) => (
+            <button
+              key={slug}
+              type="button"
+              aria-label={`Remove filter ${facetLabel(slug)}`}
+              onClick={() => apply(selected.filter((item) => item !== slug))}
+              style={{
+                flex: "0 0 auto",
+                height: 32,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "0 10px",
+                background: "transparent",
+                border: `1px solid ${SAND}`,
+                borderRadius: 31,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span
+                style={{
+                  ...txt(14, 16, INK),
+                  letterSpacing: 0.14,
+                }}
+              >
+                {facetLabel(slug)}
+              </span>
+              <span
+                style={{ width: 16, height: 16, display: "block" }}
+                aria-hidden
+              >
+                <CloseIcon color={INK_SOFT} />
+              </span>
+            </button>
+          ))}
         </div>
-      ))}
+      ) : null}
 
       {/* Product grid — slot geometry is the design's, one slot per real
           product, in the chosen sort order. Unused slots are simply not
@@ -598,35 +671,38 @@ export function ShopInteractive({
             overflow: "hidden",
           }}
         >
-          {FILTER_GROUPS.map((group, gi) => (
-            <div key={group.title}>
+          {FILTER_ROWS.map((row) => (
+            <div key={row.title}>
               <div
                 style={{
-                  ...abs(16, group.y - 356, 180),
+                  ...abs(16, row.y - 356, 180),
                   ...txt(15, 19, INK),
                   fontWeight: 500,
                 }}
               >
-                {group.title}
+                {row.title}
               </div>
-              {group.options.map((option, oi) => {
-                const selected = filterSelection[gi] === oi;
+              {row.chips.map((chip) => {
+                const on = pending.includes(chip.slug);
                 return (
                   <button
-                    key={option.label}
+                    key={chip.slug}
                     type="button"
-                    aria-pressed={selected}
+                    aria-pressed={on}
+                    // Multi-select: chips within a heading are alternatives
+                    // (OR), so "Birthday or Wedding" has to be expressible.
+                    // Tapping a lit chip is how it goes out again.
                     onClick={() =>
-                      setFilterSelection((current) =>
-                        current.map((sel, idx) =>
-                          idx === gi ? (sel === oi ? -1 : oi) : sel,
-                        ),
+                      setPending((current) =>
+                        current.includes(chip.slug)
+                          ? current.filter((slug) => slug !== chip.slug)
+                          : [...current, chip.slug],
                       )
                     }
                     style={{
-                      ...abs(option.x - 16, group.y - 356 + 28, option.w, 32),
-                      background: selected ? GOLD : CARD_BG,
-                      boxShadow: `inset 0 0 0 1px ${selected ? GOLD : SAND}`,
+                      ...abs(chip.x - 16, row.y - 356 + 28, chip.w, 32),
+                      background: on ? GOLD : CARD_BG,
+                      boxShadow: `inset 0 0 0 1px ${on ? GOLD : SAND}`,
                       borderRadius: 9,
                       border: 0,
                       padding: 0,
@@ -639,12 +715,12 @@ export function ShopInteractive({
                         left: 6,
                         right: 6,
                         top: 8,
-                        ...txt(11, 16, selected ? CREAM : INK, "center"),
+                        ...txt(11, 16, on ? CREAM : INK, "center"),
                         fontWeight: 500,
                       }}
                     >
-                      {option.label}
-                      {selected ? "  ✓" : ""}
+                      {facetLabel(chip.slug)}
+                      {on ? "  ✓" : ""}
                     </span>
                   </button>
                 );
@@ -652,9 +728,13 @@ export function ShopInteractive({
             </div>
           ))}
           <div style={{ ...abs(16, 372, 366, 1), background: SAND }} />
+          {/* Reset empties the drawer rather than restoring the five chips
+              the frame drew lit — those were never a default (see
+              FILTER_ROWS). It only clears the pending selection; the shop
+              still changes on "Show N Results", like every other chip here. */}
           <button
             type="button"
-            onClick={() => setFilterSelection(defaultFilterSelection())}
+            onClick={() => setPending([])}
             style={{
               ...abs(18, 398, 88, 21),
               background: "transparent",
@@ -666,12 +746,12 @@ export function ShopInteractive({
           >
             <span style={{ ...txt(17, 21, INK), fontWeight: 500 }}>Reset</span>
           </button>
-          {/* The drawer stays cosmetic until the catalog carries these fields
-              (docs/ixd/README.md), so the button closes on the full catalog —
-              and the count says so instead of the frame's fixed "36". */}
+          {/* The count is the real one for the pending selection, in place of
+              the frame's fixed "36" — so the shopper knows before tapping
+              whether they are about to empty the shop. */}
           <button
             type="button"
-            onClick={() => setFilterOpen(false)}
+            onClick={() => apply(pending)}
             style={{
               ...abs(146, 390, 236, 52),
               background: GOLD,
@@ -691,7 +771,7 @@ export function ShopInteractive({
                 fontWeight: 500,
               }}
             >
-              Show {data.length} Result{data.length === 1 ? "" : "s"}
+              Show {pendingCount} Result{pendingCount === 1 ? "" : "s"}
             </span>
           </button>
         </div>

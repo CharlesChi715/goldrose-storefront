@@ -23,6 +23,7 @@ import {
   Button,
   Card,
   Checkbox,
+  ChoiceList,
   Divider,
   InlineGrid,
   InlineStack,
@@ -35,7 +36,12 @@ import {
   Toast,
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import { useAdminT } from "../../PolarisShell";
+import {
+  BEST_FOR_GROUPS,
+  facetBySlug,
+  type FacetGroupKey,
+} from "@/lib/catalog/facets.ts";
+import { useAdminLang, useAdminT } from "../../PolarisShell";
 import {
   deleteProductsAction,
   duplicateProductAction,
@@ -90,7 +96,8 @@ export type ProductFormInitial = {
   vendor: string;
   productType: string;
   tags: string[];
-  bestFor: string;
+  /** Shop filter facet slugs (lib/catalog/facets.ts), any number of them. */
+  bestFor: string[];
   badge: string;
   details: string[];
   position: string;
@@ -140,6 +147,7 @@ function splitCsv(text: string): string[] {
 
 export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const t = useAdminT();
+  const lang = useAdminLang();
   const router = useRouter();
   const [saving, startSaving] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,7 +156,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const [title, setTitle] = useState(initial.title);
   const [shortName, setShortName] = useState(initial.shortName);
   const [description, setDescription] = useState(initial.description);
-  const [bestFor, setBestFor] = useState(initial.bestFor);
+  const [bestFor, setBestFor] = useState<string[]>(initial.bestFor);
   const [badge, setBadge] = useState(initial.badge);
   const [detailsText, setDetailsText] = useState(initial.details.join(", "));
   const [position, setPosition] = useState(initial.position);
@@ -296,6 +304,24 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
     });
   }
 
+  /**
+   * Apply one "Best for" group's tick boxes.
+   *
+   * Polaris hands each ChoiceList the WHOLE selection and echoes that whole
+   * array back with its own value added or removed — so `next` carries the
+   * other two groups' slugs as well, and taking it wholesale would double
+   * them. Only this group's part of `next` is authoritative; the rest of the
+   * selection is carried over from state. The save re-orders the result
+   * (`assertBestFor`).
+   */
+  function chooseFacets(group: FacetGroupKey, next: string[]) {
+    const mine = next.filter((slug) => facetBySlug(slug)?.group === group);
+    setBestFor((current) => [
+      ...current.filter((slug) => facetBySlug(slug)?.group !== group),
+      ...mine,
+    ]);
+  }
+
   function save() {
     setError(null);
     const variants = hasOptions
@@ -314,7 +340,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
       vendor: vendor.trim(),
       product_type: productType.trim(),
       tags: splitCsv(tagsText),
-      best_for: bestFor.trim(),
+      best_for: bestFor,
       badge: badge.trim(),
       details: splitCsv(detailsText),
       position: position.trim() ? Number(position) : null,
@@ -462,14 +488,39 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   multiline={6}
                   requiredIndicator
                 />
-                <TextField
-                  label={t("form.bestFor")}
-                  placeholder={t("form.bestFor.ph")}
-                  helpText={t("form.bestFor.help")}
-                  value={bestFor}
-                  onChange={setBestFor}
-                  autoComplete="off"
-                />
+                {/* Best for — the /shop filter drawer's own chips, so this is
+                    a closed list rather than a text box: anything typed by
+                    hand would match no chip and hide the product from the
+                    filter it was meant to appear under. Tick as many as
+                    apply, in any mix of the three groups (owner, 2026-08-07);
+                    ticking none simply keeps the product out of those
+                    filters, never off the shop. */}
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingSm">
+                    {t("form.bestFor")}
+                  </Text>
+                  <Text as="p" variant="bodySm" tone="subdued">
+                    {t("form.bestFor.help")}
+                  </Text>
+                  <InlineGrid columns={{ xs: 1, sm: 3 }} gap="400">
+                    {BEST_FOR_GROUPS.map((group) => (
+                      <ChoiceList
+                        key={group.key}
+                        allowMultiple
+                        title={lang === "zh" ? group.titleZh : group.title}
+                        choices={group.facets.map((facet) => ({
+                          label: lang === "zh" ? facet.labelZh : facet.label,
+                          value: facet.slug,
+                        }))}
+                        // Each list is handed the whole selection and shows the
+                        // part that is its own; slugs are unique across groups,
+                        // so no list can ever claim another's value.
+                        selected={bestFor}
+                        onChange={(next) => chooseFacets(group.key, next)}
+                      />
+                    ))}
+                  </InlineGrid>
+                </BlockStack>
                 <TextField
                   label={t("form.badge")}
                   placeholder={t("form.badge.ph")}

@@ -109,6 +109,20 @@ Open linked resources only when the task needs them.
   Spec: [`admin-design.md` §9.8.1](docs/admin-design.md#981-content--home-page).
   ⚠️ The hero eyebrow still reads `— G O L D R O S E —`, a miss in the 08-05
   ELDREVE rename; it is now editable, so it is an owner decision, not a deploy.
+- **The /shop filter drawer is real (2026-08-07, `feat/best-for-facets`).**
+  `products.best_for` changed from a dormant prose blurb to `text[]` holding
+  filter slugs (migration `0009` — **written, not yet pushed to hosted**), and
+  a product may carry any number of them. The vocabulary is one closed list in
+  [`lib/catalog/facets.ts`](lib/catalog/facets.ts): eleven stored slugs under
+  Collections/Occasion/Recipient, plus Price and Availability computed from
+  `price_cents` and stock and never stored. Slugs are globally unique so the
+  group is recovered from the value; a duplicate throws at import. Selection
+  lives in the URL (`?f=jewel,anniversary`, noindexed) so the grid, the count
+  and the pager cannot disagree — OR inside a heading, AND across headings. The
+  admin's "Best for" text box became a grouped multi-select. ⚠️ The frames'
+  two fixed active-filter chips ("Ruby Red", "Gift Sets") are gone: an
+  unfiltered shop now correctly shows none, which is the only pixel change
+  (baseline updated; home and PDP byte-identical).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
@@ -171,8 +185,10 @@ Open linked resources only when the task needs them.
   e2e tests use this mode. `npm run seed -- --reset` restores it. Admin is open
   unless `ADMIN_DEV_PASSWORD` is set; customer sign-in is unavailable.
 - **Hosted mode:** add migrations as `supabase/migrations/000N_*.sql` and apply
-  with `supabase db push` — never the web SQL editor. `0001`–`0003`, `0005`,
-  `0006` applied; `0004` is permanently skipped (its orphan history row was
+  with `supabase db push` — never the web SQL editor. `0001`–`0003` and
+  `0005`–`0008` applied (verified 2026-08-07); `0009` is written but **not
+  pushed**, so hosted still has `best_for` as text and no variant `stocked`.
+  `0004` is permanently skipped (its orphan history row was
   repaired 2026-07-28 — intentional, not a gap). Use `psql` for read-only
   ad-hoc queries; `supabase db dump` needs Docker.
 

@@ -10,6 +10,7 @@ import "server-only";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/supabase/store.ts";
+import { assertBestFor } from "@/lib/catalog/facets.ts";
 import {
   HANDLE_MAX_LENGTH,
   HANDLE_PATTERN,
@@ -166,7 +167,8 @@ export type SaveProductInput = {
   vendor: string;
   product_type: string;
   tags: string[];
-  best_for: string;
+  /** Shop filter facet slugs; validated against `lib/catalog/facets.ts`. */
+  best_for: string[];
   badge: string;
   details: string[];
   position: number | null; // null = append (create) or keep (update)
@@ -306,7 +308,10 @@ export async function saveProduct(
     hs_code: input.hs_code,
     seo_title: input.seo_title,
     seo_description: input.seo_description,
-    best_for: input.best_for,
+    // The vocabulary is closed and the column has no CHECK, so this call is
+    // the only thing standing between a typo and a product that no filter can
+    // reach. It throws rather than dropping the bad value (lib/catalog/facets.ts).
+    best_for: assertBestFor(input.best_for),
     badge: input.badge,
     details: input.details,
     option_names: input.option_names,

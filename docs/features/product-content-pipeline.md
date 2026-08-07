@@ -118,7 +118,7 @@ these are what customers and Google actually read.
 | 14 | Compare-at price | ●     | ○                       | `…compare_at_price_cents` — the struck-through "was" price         |
 | 15 | On hand          | ●     | ○ — first import only   | `…inventory_on_hand` — opening stock; re-imports must not touch it |
 | 16 | Badge            | ▪     | ○                       | `products.badge` — card label ("Save 44%") — ⚠️ dormant            |
-| 17 | Best for         | ▪     | ○                       | `products.best_for` — occasion blurb — ⚠️ dormant                  |
+| 17 | Best for         | ▪     | ○ — `;` separated       | `products.best_for` — /shop filter facet slugs; closed list        |
 | 18 | Details          | ▪     | ○ — `;` separated       | `products.details` — the PDP bullet list                           |
 | 19 | SEO title        | ▪     | ○                       | `products.seo_title` — Google heading — ⚠️ not read yet            |
 | 20 | SEO description  | ▪     | ○                       | `products.seo_description` — Google snippet — ⚠️ not read yet      |

@@ -28,7 +28,12 @@ export type ProductRow = {
   hs_code: string | null;
   seo_title: string | null;
   seo_description: string | null;
-  best_for: string;
+  /**
+   * Shop filter facets — slugs from `lib/catalog/facets.ts`, any number of
+   * them across Collections/Occasion/Recipient (migration 0009). Validate
+   * with `assertBestFor()` before writing; the column has no CHECK.
+   */
+  best_for: string[];
   badge: string;
   details: string[];
   option_names: string[];
@@ -451,7 +456,14 @@ export type CatalogVariant = {
   position: number;
   price_cents: number;
   compare_at_price_cents: number | null;
+  /** Can be bought at all — true for sell-when-out-of-stock variants. */
   in_stock: boolean;
+  /**
+   * Has units on hand right now (untracked variants count as yes). Paired
+   * with `in_stock` it separates a pre-order from a shelf item without ever
+   * exposing a stock COUNT (§7.2, migration 0009).
+   */
+  stocked: boolean;
 };
 
 /** One row of the catalog_products view (§6.3) — safe columns only. */
@@ -461,7 +473,8 @@ export type CatalogProduct = {
   title: string;
   short_name: string;
   description: string;
-  best_for: string;
+  /** Shop filter facets; see ProductRow.best_for. */
+  best_for: string[];
   badge: string;
   details: string[];
   tags: string[];

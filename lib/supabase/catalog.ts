@@ -90,6 +90,7 @@ export const getCatalog = cache(async (): Promise<CatalogProduct[]> => {
             !variant.track_quantity ||
             variant.continue_selling_when_oos ||
             variant.inventory_on_hand > 0,
+          stocked: !variant.track_quantity || variant.inventory_on_hand > 0,
         })),
     }));
 });
