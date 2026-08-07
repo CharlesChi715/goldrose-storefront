@@ -234,3 +234,35 @@ test("a URL carrying two price bands is narrowed to one", async ({ page }) => {
     page.getByRole("button", { name: "Remove filter $300+" }),
   ).toHaveCount(0);
 });
+
+test("an empty shop still shows the whole drawer, so the filter can be undone", async ({
+  page,
+}) => {
+  // Birthday + Mother matches nothing: one product is for a birthday, another
+  // is for a mother, neither is both. The canvas shortens to fit its (absent)
+  // grid, and the drawer is drawn inside that canvas — so this combination
+  // used to clip the panel mid-"Price", hiding the only controls that could
+  // put the shop back (app/shop/page.tsx, DRAWER_FLOOR).
+  await page.goto("/shop?f=birthday,mother");
+  await expect(page.getByText(/^0 GIFTS$/)).toBeVisible();
+  await openDrawer(page);
+
+  const panel = page.getByRole("dialog", { name: "Filters" });
+  const stage = page.locator(".figv-stage");
+  const [panelBox, stageBox] = [
+    await panel.boundingBox(),
+    await stage.boundingBox(),
+  ];
+  // The bottom edges are what proves it. Clipping leaves the panel in the DOM
+  // and reports its full layout box, so toBeVisible() passed all along and
+  // getBoundingClientRect is unmoved by the ancestor's overflow — only the
+  // stage being the shorter of the two ever showed the bug.
+  expect(panelBox!.y + panelBox!.height).toBeLessThanOrEqual(
+    stageBox!.y + stageBox!.height,
+  );
+
+  // And the controls that were cut off work: Reset then Show puts the shop back.
+  await page.getByRole("button", { name: "Reset" }).click();
+  await page.getByRole("button", { name: /^Show 3 Results$/ }).click();
+  await expect(cards(page)).toHaveCount(3);
+});
