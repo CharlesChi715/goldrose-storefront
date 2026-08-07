@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/require-hosted-dev.mjs",
     "dev": "next dev",
     "build": "node scripts/validate-env.mjs && next build",
     "start": "next start",
