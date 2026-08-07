@@ -288,6 +288,14 @@ const en = {
   "form.media.moveLeft": "Move left",
   "form.media.moveRight": "Move right",
   "form.media.remove": "Remove image",
+  "form.media.frame": "Adjust framing",
+  "form.media.frame.title": "Framing · what the product page shows",
+  "form.media.frame.hint":
+    "Drag the photo to choose what stays inside the frame. The frame is the exact size of the photo box on the product page.",
+  "form.media.frame.fits":
+    "This photo already matches the frame — there is nothing to reposition.",
+  "form.media.frame.reset": "Centre",
+  "form.media.frame.done": "Done",
   "form.pricing.title": "Pricing",
   "form.price": "Price",
   "form.compareAt": "Compare-at price",
@@ -938,6 +946,13 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.media.moveLeft": "左移",
   "form.media.moveRight": "右移",
   "form.media.remove": "移除图片",
+  "form.media.frame": "调整取景",
+  "form.media.frame.title": "取景框 · 商品页显示的范围",
+  "form.media.frame.hint":
+    "拖动图片以选择保留在取景框内的部分。取景框与商品页图片区域尺寸完全一致。",
+  "form.media.frame.fits": "该图片与取景框比例一致——无需调整位置。",
+  "form.media.frame.reset": "居中",
+  "form.media.frame.done": "完成",
   "form.pricing.title": "定价",
   "form.price": "价格",
   "form.compareAt": "原价",

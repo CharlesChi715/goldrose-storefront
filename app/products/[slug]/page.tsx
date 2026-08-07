@@ -212,6 +212,11 @@ export default async function ProductDetailPage({
   const aboutImage = product.images[1]
     ? fileUrl(product.images[1].path)
     : heroImage;
+  /* Every photo box here is object-fit: cover, so the browser would crop to
+     the centre; the admin's 取景框 says which part actually matters
+     (product_images.focal_x/y, migration 0008). */
+  const focus = (image: (typeof product.images)[number] | undefined) =>
+    `${image?.focal_x ?? 50}% ${image?.focal_y ?? 50}%`;
 
   const structuredData = [
     {
@@ -663,6 +668,7 @@ export default async function ProductDetailPage({
               ...abs(217, 0, 190, 196),
               display: "block",
               objectFit: "cover",
+              objectPosition: focus(product.images[1] ?? product.images[0]),
             }}
           />
         </Section>
@@ -877,7 +883,10 @@ export default async function ProductDetailPage({
             rating: review.rating,
           }))}
           stats={stats}
-          media={product.images.map((image) => fileUrl(image.path))}
+          media={product.images.map((image) => ({
+            src: fileUrl(image.path),
+            focus: focus(image),
+          }))}
           productTitle={product.title}
         />
       </ScaleFrame>

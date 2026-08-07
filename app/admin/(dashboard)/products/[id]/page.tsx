@@ -53,6 +53,10 @@ export default async function EditProductPage({
       path: image.path,
       url: fileUrl(image.path),
       alt: image.alt,
+      // Rows written before 0008 have no point stored; centre is what they
+      // were already cropped to.
+      focalX: image.focal_x ?? 50,
+      focalY: image.focal_y ?? 50,
     })),
     variants: detail.variants.map((variant) => ({
       id: variant.id,

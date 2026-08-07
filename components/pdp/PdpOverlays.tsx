@@ -8,7 +8,7 @@
  *
  *   PDP-REVIEW-OPEN-DRAWER   1523:4185 (panel 1523:4215) ← the rating row
  *   PDP-COLOR-OPEN-DRAWER    1523:4275 (panel 1523:4289) ← "View All 120 Colors ›"
- *   PDP-MEDIA-OPEN           1523:4257 ← the hero photo (drawn here too)
+ *   PDP-MEDIA-OPEN           1523:4257 ← the hero photo (drawn here too) (drawn here too)
  *   PDP-UNBOXING-OPEN-GALLERY 1523:4359 (panel 1523:4368) ← unboxing "View All ›"
  *
  * Geometry, colors, fonts and copy are verbatim from the Figma REST data.
@@ -34,6 +34,22 @@
  * cosmetic. The media viewer pages through the design's four product images
  * for real. The mocks' iOS home indicator (1523:4274) is not implemented —
  * C-3 status-bar precedent.
+ * The HERO is drawn here rather than by the page (owner, 2026-08-06): it is
+ * an auto-playing, swipeable carousel over the product's own photos, built on
+ * the homepage's shared Carousel so it behaves exactly like H-03. The tap
+ * target has to sit above the photo to open the media viewer, and two stacked
+ * photo layers could never hold the same slide — so the trigger IS the photo.
+ *
+ * Content: the REVIEWS drawer is real — rows, average and count come from
+ * product_reviews, and an empty table shows an empty drawer rather than the
+ * frame's four named testimonials (owner, 2026-08-06: a mock review is
+ * indistinguishable from a real one, so it is a review claim, not "visibly
+ * mocked" art). The twelve color cards and twelve unboxing tiles are still
+ * design placeholders — the catalog has no color-option or UGC tables yet
+ * (docs/ixd/README.md), so color selection and the unboxing chips/tabs stay
+ * cosmetic. The media viewer pages through the design's four product images
+ * for real. The mocks' iOS home indicator (1523:4274) is not implemented —
+ * C-3 status-bar precedent.
  */
 
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -41,6 +57,7 @@ import { createPortal } from "react-dom";
 import NoCalcScale from "@/components/NoCalcScale";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
+import { Carousel } from "@/components/home/Carousel";
 import { Carousel } from "@/components/home/Carousel";
 
 const INK = "#3B2F2F";
@@ -51,6 +68,11 @@ const SHEET_BG = "#FFFEFB";
 const REVIEW_BG = "#FFFBF6"; // the reviews sheet's own white (1523:4215) — the other two drawers keep #FFFEFB
 const TILE_BG = "#F0E8DE"; // unboxing media-card ground behind each photo (1523:4388…)
 const GREY = "#706661";
+
+// The hero pagination row: 7px indicators on a 14px pitch. The frame draws
+// the active one as an 18px pill, but HeroCarousel already settled that call
+// for the site — one size for every dot, active by colour.
+const DOT_PITCH = 14;
 
 // The hero pagination row: 7px indicators on a 14px pitch. The frame draws
 // the active one as an 18px pill, but HeroCarousel already settled that call
@@ -72,6 +94,7 @@ export type PdpReview = {
   author: string;
   date: string;
   body: string;
+  /** 1–5; optional so a row with no score keeps the frame's flat star art. */
   /** 1–5; optional so a row with no score keeps the frame's flat star art. */
   rating?: number;
 };
@@ -292,7 +315,12 @@ function ReviewsDrawer({
   // testimonial text that a shopper cannot tell from real ones, which is a
   // review claim rather than "visibly mocked" art; with an empty table the
   // drawer still opens and says so instead (owner, 2026-08-06).
+  // Real rows only. The design's four mock rows carried names, dates and
+  // testimonial text that a shopper cannot tell from real ones, which is a
+  // review claim rather than "visibly mocked" art; with an empty table the
+  // drawer still opens and says so instead (owner, 2026-08-06).
   const live = reviews.length > 0;
+  const rows = reviews;
   const rows = reviews;
   return (
     <OverlayStage scrim="rgba(20,13,10,0.24)" onClose={onClose} label="Reviews">
@@ -335,6 +363,7 @@ function ReviewsDrawer({
           }}
         >
           {live && stats ? stats.average : "—"}
+          {live && stats ? stats.average : "—"}
         </div>
         {/* 1523:4220 — 22px star row, gold-filled in the 07-29 pass. With
             live reviews it fills to the real average, so the art can never
@@ -351,9 +380,22 @@ function ReviewsDrawer({
             live && stats ? `${stats.average} out of 5 stars` : "No ratings yet"
           }
         />
+        <StarFill
+          src="/eldreve/screens/1523-4220.svg"
+          x={282}
+          y={60}
+          w={128}
+          h={26}
+          natural={109}
+          fill={live && stats ? stats.average / 5 : 0}
+          label={
+            live && stats ? `${stats.average} out of 5 stars` : "No ratings yet"
+          }
+        />
         <div style={{ ...abs(286, 90, 120), ...txt(15, 19, INK) }}>
           {live && stats
             ? `${stats.count} Review${stats.count === 1 ? "" : "s"}`
+            : "No reviews yet"}
             : "No reviews yet"}
         </div>
 
@@ -425,6 +467,14 @@ function ReviewsDrawer({
             WebkitOverflowScrolling: "touch",
           }}
         >
+          {rows.length === 0 ? (
+            <div
+              className={playfair.className}
+              style={{ ...abs(20, 8, 390), ...txt(15, 22, GREY) }}
+            >
+              No reviews yet — be the first to review this rose.
+            </div>
+          ) : null}
           {rows.length === 0 ? (
             <div
               className={playfair.className}
@@ -764,6 +814,7 @@ function MediaViewer({
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
     setIndex((i) => (i + delta + shots.length) % shots.length);
+    setIndex((i) => (i + delta + shots.length) % shots.length);
   return (
     <OverlayStage
       scrim="transparent"
@@ -771,18 +822,24 @@ function MediaViewer({
       label="Product photos"
       background="#040404"
     >
+      {/* 2571:375 "Close Menu · 44px" — the frame's own close control, top
+          right, with its 20×20 icon inset 12px. The 1523 import missed it
+          (it was added to the frame later), so the viewer shipped with only
+          a top-left back chevron the frame no longer draws, and closing
+          worked solely through OverlayStage's invisible scrim — you could
+          dismiss it but never see how (owner, 2026-08-06). */}
       <button
         type="button"
-        aria-label="Back"
+        aria-label="Close product photos"
         onClick={onClose}
-        style={{ ...RESET, ...abs(18, 30, 42, 50) }}
+        style={{ ...RESET, ...abs(376, 10, 44, 44) }}
       >
-        <GlyphImg
-          src="/eldreve/screens/1523-4258.svg"
-          x={0}
-          y={0}
-          w={42}
-          h={50}
+        <img
+          src="/eldreve/screens/2571-376.svg"
+          alt=""
+          width={20}
+          height={20}
+          style={{ ...abs(12, 12, 20, 20), display: "block" }}
         />
       </button>
       <div
@@ -793,6 +850,7 @@ function MediaViewer({
           fontWeight: 500,
         }}
       >
+        {index + 1} / {shots.length}
         {index + 1} / {shots.length}
       </div>
       {/* 1523:4260 — FIT inside 410×620 */}
@@ -1125,6 +1183,8 @@ export function PdpOverlays({
   stats = null,
   media = [],
   productTitle = "Product",
+  media = [],
+  productTitle = "Product",
 }: {
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
@@ -1214,6 +1274,10 @@ export function PdpOverlays({
         ? createPortal(<ColorDrawer onClose={close} />, document.body)
         : null}
       {mounted && open === "media"
+        ? createPortal(
+            <MediaViewer onClose={close} shots={shots} />,
+            document.body,
+          )
         ? createPortal(
             <MediaViewer onClose={close} shots={shots} />,
             document.body,

@@ -71,6 +71,8 @@ const SEED_PRODUCTS: SeedProduct[] = [
         path: "/products/gold-rose-stand.jpg",
         alt: "Gold dipped rose displayed beside a brown gift box",
         position: 0,
+        focal_x: 50,
+        focal_y: 50,
       },
     ],
     variants: [
@@ -152,6 +154,8 @@ const SEED_PRODUCTS: SeedProduct[] = [
         path: "/products/gold-rose-box.jpg",
         alt: "Gold dipped rose shown with a presentation box",
         position: 0,
+        focal_x: 50,
+        focal_y: 50,
       },
     ],
     variants: [
@@ -237,6 +241,24 @@ const SEED_PRODUCTS: SeedProduct[] = [
         path: "/products/gold-rose-detail.jpg",
         alt: "Close-up detail graphic of a gold dipped rose",
         position: 0,
+        focal_x: 50,
+        focal_y: 50,
+      },
+      {
+        product_id: "premium-gift-bundle",
+        path: "/products/gold-rose-box.jpg",
+        alt: "The bundle's gift box, closed",
+        position: 1,
+        focal_x: 50,
+        focal_y: 50,
+      },
+      {
+        product_id: "premium-gift-bundle",
+        path: "/products/gold-rose-stand.jpg",
+        alt: "Gold dipped rose displayed beside a brown gift box",
+        position: 2,
+        focal_x: 50,
+        focal_y: 50,
       },
       {
         product_id: "premium-gift-bundle",
