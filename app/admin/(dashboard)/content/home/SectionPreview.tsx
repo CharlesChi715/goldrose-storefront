@@ -159,6 +159,14 @@ export function SectionPreview({
   const boxWidth = Math.round(width * zoom);
   const boxHeight = Math.round(fullHeight * zoom);
   const shownAt = Math.round(scale * 100);
+  // Centred by arithmetic, not by `justify-content: center`, so the offset is
+  // always a whole pixel. Flex halves the free space, and the free space is odd
+  // on about half the slider's positions — which puts the box's left edge, its
+  // 1px border and the band's flush-left content on a half CSS pixel, a whole
+  // device pixel at 2×. Alternating between the two on every step of a drag is
+  // a shimmer down the left edge of the frame.
+  const boxLeft = Math.round((stageWidth - boxWidth) / 2);
+  const boxTop = Math.round((stageHeight - boxHeight) / 2);
 
   return (
     <Box background="bg-surface-secondary" borderRadius="200" padding="200">
@@ -180,21 +188,26 @@ export function SectionPreview({
               </Text>
             </Tooltip>
             {/* Said out loud, because small type that nobody asked for reads
-                as a rendering fault rather than a deliberate zoom. */}
-            {shownAt < 100 ? (
-              <Tooltip content={t("home.previewZoomed")}>
-                <Text as="span" variant="bodySm" tone="subdued">
-                  {`${shownAt}%`}
-                </Text>
-              </Tooltip>
-            ) : null}
+                as a rendering fault rather than a deliberate zoom. Always
+                rendered — at zoom 1 it crosses 100% mid-track, and a label that
+                appears is a row that grows, directly above the frame. */}
+            <Tooltip content={t("home.previewZoomed")}>
+              <Text as="span" variant="bodySm" tone="subdued">
+                {`${shownAt}%`}
+              </Text>
+            </Tooltip>
           </InlineStack>
           <InlineStack gap="300" blockAlign="center">
-            {width !== mainWidth ? (
-              <Button variant="plain" onClick={() => setWidth(mainWidth)}>
-                {t("home.previewSync")}
-              </Button>
-            ) : null}
+            {/* Disabled rather than unmounted when the two already agree, for
+                the same reason as the reset button below: this row sits above
+                the frame, so a control that mounts mid-drag moves it. */}
+            <Button
+              variant="plain"
+              disabled={width === mainWidth}
+              onClick={() => setWidth(mainWidth)}
+            >
+              {t("home.previewSync")}
+            </Button>
             <Button
               variant="plain"
               onClick={() => setRefreshed((count) => count + 1)}
@@ -226,22 +239,23 @@ export function SectionPreview({
         {/* 1 · The stage: fixed size, so the page below never moves. */}
         <div
           style={{
+            position: "relative",
             width: stageWidth,
             height: stageHeight,
             maxWidth: "100%",
             margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           {/* 2 · The frame box — the phone's own outline, so it resizes. The
               border and the rounded corner live HERE rather than on the iframe:
               a scaled iframe scales its own border too, so at 40% the outline
-              would thin to a hairline and the corner would tighten. */}
+              would thin to a hairline and the corner would tighten. Placed at a
+              rounded offset rather than centred by flex — see boxLeft. */}
           <div
             style={{
-              position: "relative",
+              position: "absolute",
+              left: boxLeft,
+              top: boxTop,
               width: boxWidth,
               height: boxHeight,
               overflow: "hidden",
@@ -268,9 +282,14 @@ export function SectionPreview({
                 // all sides.
                 transformOrigin: "top left",
                 transform: `scale(${scale})`,
-                // Its own compositor layer: the scale then changes without
-                // re-rastering the band on every frame of the drag.
-                willChange: "transform",
+                // No `will-change` here on purpose. It was the obvious thing to
+                // add and it buys nothing: sweeping an iframe's transform by
+                // hand costs 13.89ms per frame against a 13.86ms idle frame, so
+                // the browser already composites this. A standing promotion
+                // hint on nine cross-document iframes, on a 26,000px page, is a
+                // real cost against Chromium's layer budget — and when that
+                // budget is exceeded it de-promotes silently, which would take
+                // the actual fix down with it.
               }}
             />
           </div>

@@ -208,10 +208,11 @@ test("each width slider is the section's own, and Match reconciles it", async ({
       .locator("iframe")
       .evaluate((el) => (el.parentElement as HTMLElement).offsetWidth);
 
-  // Everything starts at the design's own 430, so nothing offers to sync.
-  await expect(
-    craft.getByRole("button", { name: "Match the main preview" }),
-  ).toHaveCount(0);
+  // Everything starts at the design's own 430, so there is nothing to sync.
+  // The control is present but dead rather than absent: it sits in the row
+  // directly above the frame, and a button that mounts mid-drag moves it.
+  const match = craft.getByRole("button", { name: "Match the main preview" });
+  await expect(match).toBeDisabled();
   const craftAtDesign = await boxWidth(craft);
   const storyAtDesign = await boxWidth(story);
 
@@ -223,11 +224,10 @@ test("each width slider is the section's own, and Match reconciles it", async ({
     "360px",
   );
   expect(await boxWidth(craft)).toBe(craftAtDesign);
+  await expect(match).toBeEnabled();
 
-  await craft.getByRole("button", { name: "Match the main preview" }).click();
-  await expect(
-    craft.getByRole("button", { name: "Match the main preview" }),
-  ).toHaveCount(0);
+  await match.click();
+  await expect(match).toBeDisabled();
   const craftMatched = await boxWidth(craft);
   expect(craftMatched).toBeLessThan(craftAtDesign);
   // One section's slider never moves another's.
@@ -249,4 +249,20 @@ test("each width slider is the section's own, and Match reconciles it", async ({
       (el) => (el.parentElement!.parentElement as HTMLElement).offsetHeight,
     );
   expect(stageAfter).toBe(stageBefore);
+
+  // And the frame sits at a WHOLE-pixel offset inside that stage at every
+  // setting. Centring it with `justify-content: center` halves the free space,
+  // which is odd at about half the slider's positions — putting the box's 1px
+  // border and the band's flush-left content on a half CSS pixel, a whole
+  // device pixel at 2×. Alternating between the two on every step of a drag is
+  // a shimmer down the left edge, so the offset is rounded instead.
+  const ready = page.locator('[data-home-section="ready"]');
+  for (const w of ["440", "437", "430", "421", "377", "320"]) {
+    await ready.locator("input[type=range]").fill(w);
+    const offset = await ready.locator("iframe").evaluate((el) => {
+      const box = el.parentElement as HTMLElement;
+      return [box.offsetLeft, box.offsetTop];
+    });
+    expect(offset.every(Number.isInteger)).toBe(true);
+  }
 });

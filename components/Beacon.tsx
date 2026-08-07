@@ -67,6 +67,31 @@ function getSessionId(): string | null {
   }
 }
 
+/**
+ * Whether this document was opened as an admin preview — LATCHED, because the
+ * evidence is destroyed by the first click.
+ *
+ * The whole-page preview loads `/?adminPreview=N`, and its links are real: a
+ * tap on the bottom nav client-navigates to `/shop`, the query string goes, and
+ * a query-string check would arm the beacon for the rest of the session. The
+ * flag is module scope, so it survives every client-side navigation in this
+ * document and dies with it.
+ *
+ * @returns True once this document has been identified as a preview.
+ */
+function isAdminPreview(): boolean {
+  if (previewLatch) return true;
+  try {
+    previewLatch =
+      window.location.pathname.startsWith("/preview/") ||
+      new URLSearchParams(window.location.search).has("adminPreview");
+  } catch {
+    previewLatch = false;
+  }
+  return previewLatch;
+}
+let previewLatch = false;
+
 export function Beacon() {
   // 1. Next.js updates the router state
   // 2. React schedules Beacon to render again
@@ -86,8 +111,7 @@ export function Beacon() {
       // framed with ?adminPreview=. A teammate proof-reading copy is not a
       // visit, and counting them would put fake traffic — and fake dwell time
       // — in the owner's own analytics.
-      pathname.startsWith("/preview/") ||
-      new URLSearchParams(window.location.search).has("adminPreview")
+      isAdminPreview()
     ) {
       return;
     }
