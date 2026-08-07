@@ -3,18 +3,21 @@
 /**
  * ROLE OF THIS FILE
  * Client half of Content → Home page (§9.8): one annotated section per band of
- * the storefront home page, in page order, with every editable string, photo,
- * colour and timing, its "Edited" state and one-click reset, plus the section's
+ * the storefront home page, in page order, with every editable string, photo
+ * and timing, its "Edited" state and one-click reset, plus the section's
  * show/hide switch — beside a live preview of the page itself.
  *
  * WHO THIS SCREEN IS FOR
  * Not only the owner. It is used by teammates who did not build the site and do
  * not have the Figma file open, so several choices here trade compactness for
  * being unmistakable:
- * - A LIVE PREVIEW sits beside the editor. The homepage is a fixed 430-wide
- *   stage where a heading is one line in a box somebody sized in Figma, so
- *   "will this fit" is a question only the page can answer. Save, and it
- *   reloads.
+ * - A LIVE PREVIEW sits beside the editor, on a width slider spanning the
+ *   narrowest phone still in use to the widest sold today, so a teammate can
+ *   see the page at the size a customer actually holds. Save, and it reloads.
+ *   Be careful what you claim for it: ScaleFrame scales the whole 430 stage as
+ *   ONE, so a narrower width shrinks everything rather than re-wrapping any
+ *   text. It answers "is this legible on a small phone", NOT "does this copy
+ *   still fit its box" — that is what the per-field character budgets are for.
  * - SEARCH spans every field on the page. With ~180 fields across 8 sections,
  *   finding "the gold caption on the second best-seller card" by scrolling is
  *   worse than typing "caption".
@@ -35,12 +38,7 @@
  *   the same button as copy edits made "Hide" look like it had not worked.
  */
 
-import {
-  useMemo,
-  useState,
-  useSyncExternalStore,
-  useTransition,
-} from "react";
+import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Badge,
@@ -56,6 +54,7 @@ import {
   Link as PolarisLink,
   Modal,
   Page,
+  RangeSlider,
   Text,
   TextField,
   Toast,
@@ -78,13 +77,7 @@ export type FieldView = {
   label: string;
   labelZh: string;
   kind:
-    | "text"
-    | "multiline"
-    | "url"
-    | "image"
-    | "number"
-    | "artwork"
-    | "managed";
+    "text" | "multiline" | "url" | "image" | "number" | "artwork" | "managed";
   value: string;
   defaultValue: string;
   edited: boolean;
@@ -126,6 +119,26 @@ type PhotoTarget = { section: SectionView; field: FieldView } | null;
 
 /** Remembers that the owner has dismissed the "how this screen works" note. */
 const INTRO_KEY = "goldrose-admin-home-intro-dismissed";
+
+/**
+ * The preview's width range, in CSS pixels — the width a website actually sees,
+ * which is not the phone's physical size or its megapixel screen width.
+ *
+ * The ends are real phones rather than round numbers: 320 is the narrowest
+ * viewport still in circulation (the original iPhone SE and compact budget
+ * Androids) and 440 is the iPhone 16 Pro Max, the widest mainstream phone. In
+ * between sit 360 (most Androids), 375 (iPhone SE 3), 393 (iPhone 15/16), 412
+ * (Pixel 8 Pro) and 430 — the design's own canvas.
+ *
+ * Worth knowing before trusting this control: ScaleFrame scales the fixed 430
+ * stage by `min(100vw, 480px) / 430`, so the whole page scales as ONE. Dragging
+ * narrower makes everything smaller; it never re-wraps a line. The slider
+ * answers "is this readable on a small phone", not "does this text fit".
+ */
+const PREVIEW_MIN_WIDTH = 320;
+const PREVIEW_MAX_WIDTH = 440;
+/** The frame's own canvas width — where the slider starts and resets to. */
+const DESIGN_WIDTH = 430;
 
 /** Nothing else writes this key, so there is no external change to subscribe to. */
 const noopSubscribe = () => () => {};
@@ -235,6 +248,9 @@ export function HomeSectionsEditor({
   // Bumped after every save so the preview iframe reloads; a plain reload()
   // is not available across the frame boundary once it has navigated.
   const [previewNonce, setPreviewNonce] = useState(0);
+  // Which phone width the preview is standing in for. Session-local: it is a
+  // way of looking at the page, not a setting that belongs to the store.
+  const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
 
   /** The live value of a field: the local draft if touched, else what is saved. */
   const valueOf = (section: SectionView, field: FieldView): string =>
@@ -264,7 +280,9 @@ export function HomeSectionsEditor({
     () =>
       sections.flatMap((section) =>
         section.fields
-          .filter((field) => fieldError(field, valueOf(section, field)) !== null)
+          .filter(
+            (field) => fieldError(field, valueOf(section, field)) !== null,
+          )
           .map((field) => `${section.id}.${field.id}`),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -510,7 +528,9 @@ export function HomeSectionsEditor({
           value={value}
           disabled={readOnly}
           multiline={
-            field.kind === "multiline" ? Math.min(field.lines ?? 2, 8) : undefined
+            field.kind === "multiline"
+              ? Math.min(field.lines ?? 2, 8)
+              : undefined
           }
           autoComplete="off"
           error={errorText}
@@ -664,7 +684,7 @@ export function HomeSectionsEditor({
               </BlockStack>
             </Card>
 
-            {/* The page itself, so "will this fit" is answerable here. */}
+            {/* The page itself, at whatever phone width the owner picks. */}
             <Card>
               <BlockStack gap="200">
                 <InlineStack align="space-between" blockAlign="center">
@@ -681,6 +701,47 @@ export function HomeSectionsEditor({
                 <Text as="p" variant="bodySm" tone="subdued">
                   {t("home.livePreviewHelp")}
                 </Text>
+
+                <RangeSlider
+                  label={
+                    <InlineStack gap="200" blockAlign="center">
+                      <Text as="span" variant="bodyMd">
+                        {t("home.previewWidth")}
+                      </Text>
+                      <Text as="span" variant="bodyMd" fontWeight="semibold">
+                        {`${previewWidth} px`}
+                      </Text>
+                      {previewWidth !== DESIGN_WIDTH ? (
+                        <Button
+                          variant="plain"
+                          onClick={() => setPreviewWidth(DESIGN_WIDTH)}
+                        >
+                          {t("home.previewWidthReset")}
+                        </Button>
+                      ) : null}
+                    </InlineStack>
+                  }
+                  min={PREVIEW_MIN_WIDTH}
+                  max={PREVIEW_MAX_WIDTH}
+                  step={1}
+                  value={previewWidth}
+                  output
+                  prefix={
+                    <Text as="span" variant="bodySm" tone="subdued">
+                      {PREVIEW_MIN_WIDTH}
+                    </Text>
+                  }
+                  suffix={
+                    <Text as="span" variant="bodySm" tone="subdued">
+                      {PREVIEW_MAX_WIDTH}
+                    </Text>
+                  }
+                  helpText={t("home.previewWidthHelp")}
+                  onChange={(next) =>
+                    setPreviewWidth(typeof next === "number" ? next : next[0])
+                  }
+                />
+
                 <Box
                   background="bg-surface-secondary"
                   borderRadius="200"
@@ -692,7 +753,10 @@ export function HomeSectionsEditor({
                     title={t("home.livePreview")}
                     style={{
                       display: "block",
-                      width: 430,
+                      // The whole point of the slider: this width IS the
+                      // viewport the storefront sees, so ScaleFrame scales the
+                      // 430 canvas against it exactly as a real phone would.
+                      width: previewWidth,
                       height: 620,
                       maxWidth: "100%",
                       margin: "0 auto",

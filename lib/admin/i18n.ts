@@ -758,8 +758,12 @@ const en = {
   "home.undo": "Undo",
   "home.livePreview": "Live preview",
   "home.livePreviewHelp":
-    "The real home page, at phone width. It refreshes when you save, so you can check that new wording fits its box.",
+    "The real home page, at the phone width you choose below. It refreshes when you save.",
   "home.refreshPreview": "Refresh",
+  "home.previewWidth": "Preview width",
+  "home.previewWidthHelp":
+    "Drag to see the page on a smaller or larger phone — from the narrowest still in use to the widest sold today. The page scales as a whole, so a narrow phone makes everything smaller rather than re-wrapping the text.",
+  "home.previewWidthReset": "Back to design width",
 
   // Content → Home page · photos
   "home.photo.title": "Change photo",
@@ -783,7 +787,8 @@ const en = {
   "home.photo.pathHelp":
     "For a picture that ships with the site, e.g. /eldreve/home/508-90.png",
   "home.photo.usePath": "Use this path",
-  "home.photo.uploadFailed": "Could not upload that photo — try a smaller file.",
+  "home.photo.uploadFailed":
+    "Could not upload that photo — try a smaller file.",
 
   // Content → Ideas (visitor feedback)
   "ideas.column.message": "Idea",
@@ -1491,8 +1496,12 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.undo": "撤销",
   "home.livePreview": "实时预览",
   "home.livePreviewHelp":
-    "手机宽度下的真实首页。保存后会自动刷新，方便你确认新文字是否放得下。",
+    "真实首页，按下方选择的手机宽度显示。保存后会自动刷新。",
   "home.refreshPreview": "刷新",
+  "home.previewWidth": "预览宽度",
+  "home.previewWidthHelp":
+    "拖动可查看页面在更小或更大手机上的效果——从目前仍在使用的最窄机型，到当前在售的最宽机型。页面整体等比缩放，因此宽度变窄只会让所有内容变小，文字不会重新换行。",
+  "home.previewWidthReset": "恢复设计宽度",
 
   // 内容 → 首页 · 图片
   "home.photo.title": "更换图片",
@@ -1505,7 +1514,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.photo.libraryEmpty":
     "还没有上传过图片。在此上传的图片也会出现在「内容 → 文件」中。",
   "home.photo.size": "设计尺寸：",
-  "home.photo.fit.cover": "图片会裁切填满此区域，任何比例都可用——超出部分会被裁掉。",
+  "home.photo.fit.cover":
+    "图片会裁切填满此区域，任何比例都可用——超出部分会被裁掉。",
   "home.photo.fit.stretch":
     "设计稿会将图片拉伸填满，比例不同的图片会变形。请尽量贴近上方尺寸。",
   "home.photo.fit.window":
