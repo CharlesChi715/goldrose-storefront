@@ -125,6 +125,27 @@ Open linked resources only when the task needs them.
   Spec: [`admin-design.md` §9.8.1](docs/admin-design.md#981-content--home-page).
   ⚠️ The hero eyebrow still reads `— G O L D R O S E —`, a miss in the 08-05
   ELDREVE rename; it is now editable, so it is an owner decision, not a deploy.
+- **Photos, the two hidden rails and rail speed followed (2026-08-07,
+  `worktree-admin-home-customization`).** New field kinds `image` (21 photos,
+  each paired with a description) and `number` (one shared card-rail speed,
+  bounded so the glide can never outlast the cycle). `components/home/HomePhoto.tsx`
+  is the load-bearing piece: most homepage photos are a hand-picked rectangle of
+  a much larger source seen behind a small opening, so it draws Figma's traced
+  geometry while the value is still the design's and switches to a plain
+  `object-fit: cover` fill once replaced — the promo bar's `isDefault` idiom.
+  Photo paths must point at this site (remote origins, `data:` and
+  protocol-relative `//host` are refused at the write). `BestSellersRail` and
+  `ReviewsRail` took no props at all, so 2 product titles, 2 prices, 3 review
+  quotes and "Verified Purchase" were literals no screen could reach while the
+  registry claimed they were "managed elsewhere" — both wired, both pointers
+  corrected. The hero's four dots now back four real slides (all defaulting to
+  the design's one photo) and no longer fall through to `/placeholder`. The
+  screen itself is built for teammates: live preview beside the editor, search
+  across ~180 fields, "only what I changed", per-section counts, first-run
+  guidance, and a photo dialog leading with upload + the existing library.
+  **Colours were declined** — the owner ruled appearance stays with the design
+  team, and the brand gold and ink are painted into the exported ornament SVGs,
+  so a token change would leave a half-recoloured page.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one

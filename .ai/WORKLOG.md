@@ -5994,3 +5994,69 @@ quota would stop a customer signing in.
   `console.log` → stdout, and Playwright's `webServer` ignores stdout by
   default while piping stderr. The eleven lines seen before were the failure
   path's `console.error`. Nothing is hidden that was not already hidden.
+
+## 2026-08-07 — Home page: photos, the two hidden rails, rail speed, and an admin built for teammates
+
+Branch `worktree-admin-home-customization` (merged origin/main mid-way, after
+the 08-07 design sync landed).
+
+**More of the page is editable.** Two new registry field kinds: `image` (21
+photos, each paired with its own description, uploading to the same store as
+Content -> Files) and `number` (one shared speed for all four card rails,
+bounded so the glide can never outlast the cycle). `components/home/HomePhoto.tsx`
+is why the photo work is safe: most homepage photos are a hand-picked rectangle
+of a much larger source seen through a small opening (A-3's row photo is
+588x896 slid to -34,-689 behind a 170x99 window; the occasion and recipient
+cards are three windows onto ONE 546x912 sprite). Those offsets mean nothing
+for any other picture, so a teammate's upload would have shown a blank corner.
+HomePhoto draws Figma's geometry verbatim while the value is still the
+design's, and fills the opening with object-fit: cover once it is not — the
+same isDefault switch the promo bar already used. Verified in one render: card
+1 untouched at 252x271/(-1,-7), card 2 replaced at 250x240/(0,0).
+
+**Two rails were invisible to the admin.** BestSellersRail and ReviewsRail took
+no props at all, so two product titles, two prices, three review quotes and the
+"Verified Purchase" label were literals no screen could reach — while the
+registry told the owner they were "managed elsewhere" and linked to screens
+that do not touch them. Both wired; both false pointers corrected. The hero's
+four dots now back four real slides (all defaulting to the design's single
+photo, so the untouched render is unchanged) and stopped falling through to
+/placeholder.
+
+**The screen is built for teammates, not only the owner.** Live preview of the
+real page beside the editor, search across ~180 fields, "only show what I have
+changed", per-section changed counts, first-run guidance, Undo for unsaved
+drafts, and a photo dialog that leads with upload and the already-uploaded
+library, states the design size and how the photo is fitted, and can put the
+design's own picture back. Bilingual throughout.
+
+**Colours declined (owner ruling).** Appearance stays with the design team.
+Verified first that the brand gold #D4AF37 and ink #3B2F2F are painted into the
+exported ornament SVGs, so a token change would have left a half-recoloured
+page. The `color` kind built for it was removed rather than left as dead code.
+
+**Two things worth remembering.**
+1. A unit test caught a hole I had introduced: `//evil.example/pixel.gif` is
+   protocol-relative — starts with a slash, carries no colon — so it slipped
+   past both checks while loading from a remote host. That is a tracking pixel
+   on every homepage visit. Fixed and pinned.
+2. `railTiming()` first lived in Carousel.tsx, a "use client" module, so
+   app/page.tsx calling it failed the PRODUCTION build ("Attempted to call
+   railTiming() from the server"). Dev mode does not enforce that boundary, so
+   it survived a whole browser session and only surfaced under `next build`.
+   Moved to lib/home-content/rail-timing.ts and deliberately NOT re-exported
+   from Carousel, since a re-export is still a client export.
+
+**Also worth recording:** pixel-baseline runs in a worktree are only meaningful
+if nothing else is serving port 3001. playwright.config.ts sets
+`reuseExistingServer: !CI`, so another worktree's server silently answers and
+the baselines can look green when they are not. Check with
+`lsof -nP -iTCP:3001 -sTCP:LISTEN` first.
+
+Verified: tsc clean, eslint 0 errors, 142/142 unit, 134/134 e2e including all
+three pixel baselines against a real production build of the worktree.
+
+Still open: A-9's workshop gallery and certificate thumbnails are ten crops of
+one picture and are not editable; A-3's $69.00 is baked into 159-80.svg, so the
+home page states that price whatever the catalogue says (a launch risk, not an
+editability gap).
