@@ -11,12 +11,15 @@
 -- lib/catalog/facets.ts. A product may carry ANY number of values across the
 -- three groups, including none (owner ruling, 2026-08-07).
 --
--- THE OLD SENTENCES ARE DROPPED, NOT CONVERTED
--- Prose cannot be machine-read into a controlled vocabulary without guessing,
--- and a wrong guess is worse than a blank: it puts a product under a filter
--- the owner never chose. Every row therefore starts empty and is re-picked in
--- the admin, where the chips are now a multi-select. Nothing is lost that a
--- page was showing — the column was dormant on the storefront.
+-- WHAT HAPPENS TO THE OLD TEXT
+-- Prose is dropped, not guessed at: a wrong guess is worse than a blank,
+-- because it puts a product under a filter the owner never chose. The one
+-- exception is a value that is ALREADY a chip name — the free-text box invited
+-- that, and both hosted products say "Classic Collection" verbatim. An exact,
+-- case-insensitive match on a label is a translation rather than a guess, so
+-- those carry across; everything else starts empty and is re-picked in the
+-- admin, where the chips are now a multi-select. Nothing is lost that a page
+-- was showing — the column was dormant on the storefront.
 --
 -- NO CHECK CONSTRAINT ON THE VALUES
 -- The vocabulary is enforced in lib/catalog/facets.ts (`assertBestFor`), on
@@ -32,8 +35,26 @@ drop view if exists public.catalog_products;
 alter table public.products
   alter column best_for drop default;
 
+-- One row per chip, so the mapping is readable and auditable rather than a
+-- clever string transform. Anything not listed becomes an empty list.
 alter table public.products
-  alter column best_for type text[] using '{}'::text[];
+  alter column best_for type text[] using (
+    case lower(btrim(best_for))
+      when 'jewel collection'   then array['jewel']
+      when 'classic collection' then array['classic']
+      when 'sparkle collection' then array['sparkle']
+      when 'anniversary'        then array['anniversary']
+      when 'birthday'           then array['birthday']
+      when 'wedding'            then array['wedding']
+      when 'valentine''s'       then array['valentines']
+      when 'valentine’s'        then array['valentines']
+      when 'wife'               then array['wife']
+      when 'girlfriend'         then array['girlfriend']
+      when 'mother'             then array['mother']
+      when 'friends'            then array['friends']
+      else '{}'::text[]
+    end
+  );
 
 alter table public.products
   alter column best_for set default '{}'::text[];
