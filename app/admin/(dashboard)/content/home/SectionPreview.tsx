@@ -108,15 +108,26 @@ export function SectionPreview({
   // natural height is the band's height at the same scale. Never stretched: a
   // wrong height would crop or letterbox the band.
   const fullHeight = Math.round((bandHeight * width) / DESIGN_WIDTH);
-  // Then the whole frame is zoomed out to fit. This is NOT the width slider by
-  // another name: the iframe is still laid out at `width`, so the storefront
-  // inside it still sees the phone the slider picked and lays out for it. The
-  // zoom only changes how big that phone appears on the admin screen — which
-  // is why a 40% preview is still a truthful answer to "does this fit a 360px
-  // phone", just a small one.
-  const zoom = Math.min(1, FIT_HEIGHT / fullHeight);
+  // Then the whole frame is zoomed out to fit.
+  //
+  // The zoom is fixed PER BAND — derived from the band's own design height,
+  // never from the slider's width. Deriving it from `fullHeight` (the obvious
+  // way, and how this shipped first) made the slider do nothing at all: the
+  // frame grew with the width and the zoom shrank by exactly the same factor,
+  // so the box came out the same size at 320 as at 440, pixel for pixel. The
+  // control looked live and moved nothing.
+  //
+  // Held constant, the box is `width × zoom` — proportional to the width
+  // again, so dragging narrower visibly shrinks the preview, which is the same
+  // thing the page-wide preview does and the only thing phone width CAN show
+  // here: ScaleFrame scales the whole 430 stage as one, so a narrow phone
+  // makes everything smaller rather than re-wrapping any line.
+  const zoom = Math.min(1, FIT_HEIGHT / bandHeight);
   const boxWidth = Math.round(width * zoom);
   const boxHeight = Math.round(fullHeight * zoom);
+  // What the band is actually shown at, against its 430-wide design: the zoom
+  // AND the width both feed it, so the number moves when the slider does.
+  const shownAt = Math.round((zoom * width * 100) / DESIGN_WIDTH);
 
   return (
     <Box background="bg-surface-secondary" borderRadius="200" padding="200">
@@ -139,10 +150,10 @@ export function SectionPreview({
             </Tooltip>
             {/* Said out loud, because small type that nobody asked for reads
                 as a rendering fault rather than a deliberate zoom. */}
-            {zoom < 1 ? (
+            {shownAt < 100 ? (
               <Tooltip content={t("home.previewZoomed")}>
                 <Text as="span" variant="bodySm" tone="subdued">
-                  {`${Math.round(zoom * 100)}%`}
+                  {`${shownAt}%`}
                 </Text>
               </Tooltip>
             ) : null}

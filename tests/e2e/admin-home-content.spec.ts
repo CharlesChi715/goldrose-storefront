@@ -215,4 +215,17 @@ test("each width slider is the section's own, and Match reconciles it", async ({
   ).toHaveCount(0);
   // One section's slider never moves another's.
   await expect(story.locator("iframe")).toHaveCSS("width", "430px");
+
+  // ...and the slider changes what you SEE, not only the iframe's attribute.
+  // The frame is zoomed out to fit, and deriving that zoom from the slider's
+  // own width once cancelled the two out exactly: the iframe dutifully
+  // resized, the visible box came out identical at 320 and at 440, and the
+  // control moved nothing. So this asserts the box, not the frame.
+  const visibleWidth = () =>
+    craft
+      .locator("iframe")
+      .evaluate((el) => (el.parentElement as HTMLElement).offsetWidth);
+  const atMatched = await visibleWidth();
+  await craft.locator("input[type=range]").fill("320");
+  expect(await visibleWidth()).toBeLessThan(atMatched);
 });
