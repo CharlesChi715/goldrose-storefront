@@ -6060,3 +6060,33 @@ Still open: A-9's workshop gallery and certificate thumbnails are ten crops of
 one picture and are not editable; A-3's $69.00 is baked into 159-80.svg, so the
 home page states that price whatever the catalogue says (a launch risk, not an
 editability gap).
+
+## 2026-08-08 — Per-section live previews on Content → Home page
+
+Branch `worktree-admin-home-section-previews` (from
+`worktree-admin-home-customization`), commit `7db6fbe`.
+
+- New storefront route `/preview/home/[section]`: one homepage band drawn on a
+  stage exactly its own height, slid up by its own y-offset, with no promo bar,
+  header or bottom tab bar. Admin-only via `requireAdmin()` — it renders a
+  section even when the owner has hidden it. Kept out of `/admin/*` on purpose:
+  Polaris' stylesheet would change the global CSS a pixel-exact band renders in.
+- `components/home/bands.tsx` states the section → component mapping once;
+  `app/page.tsx` now reads it too, so a preview cannot drift from the page.
+- `lib/home-content/preview.ts` holds the preview geometry: every band's own
+  `{y, h}`, `promo`'s stated (it is chrome, so the registry gives it no band),
+  and `motion` borrowing the Featured band — a rail speed needs something
+  moving to be judged, and the screen labels it as a stand-in.
+- Each section's frame carries its own 320–440 width slider, "Back to design
+  width", Refresh, "Open in a new tab", and **"Match the main preview"**, which
+  appears only when that section's width differs from the page-wide preview's.
+  Widths are session-local and sparse (absent = 430).
+- Fixed alongside: the Beacon was recording admin previews as real visits.
+  `/preview/*` and any page carrying `?adminPreview` are now skipped, so the
+  page-wide preview stops putting fake traffic and dwell time in the owner's
+  analytics.
+- Verified: 134 e2e (all three pixel baselines byte-identical) + 142 unit tests
+  pass. Three new tests cover the frames, the standalone render and the sync.
+  ⚠️ The suite reuses any server already on 3001, so a second worktree's dev
+  server silently invalidates a run — the first pass here failed four tests for
+  that reason alone.

@@ -146,6 +146,20 @@ Open linked resources only when the task needs them.
   **Colours were declined** — the owner ruled appearance stays with the design
   team, and the brand gold and ink are painted into the exported ornament SVGs,
   so a token change would leave a half-recoloured page.
+- **Every section previews itself (2026-08-08,
+  `worktree-admin-home-section-previews`).** Content → Home page opens each
+  section with a frame showing that band and nothing else — new storefront
+  route `/preview/home/[section]`, admin-only via `requireAdmin()`, which draws
+  one band on a stage its own height with no promo bar, header or tab bar. It
+  is deliberately NOT under `/admin/*`: Polaris' stylesheet would change the
+  CSS a pixel-exact band renders in. `components/home/bands.tsx` states the
+  section → component mapping once and the homepage reads it too, so a preview
+  cannot drift from the page; `lib/home-content/preview.ts` holds the geometry
+  (`promo` stated because it is chrome, `motion` borrowing the Featured band
+  because a rail speed needs something moving). Each frame has its own width
+  slider plus **"Match the main preview"**, shown only when it differs. Also
+  fixed: the Beacon was counting admin previews as real visits — `/preview/*`
+  and `?adminPreview` are now skipped.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one
