@@ -738,7 +738,6 @@ const en = {
     "Links must start with / (a page on this site), # , https:// , mailto: or tel:",
   "home.bad.image":
     "Pick a photo with the button above, or type a path that starts with / — photos have to come from this site.",
-  "home.bad.color": "Use a 6-digit colour code like #FFF6EC.",
   "home.bad.number": "Enter a whole number inside the range shown.",
   "home.blocked": "One field needs fixing before you can save",
   "home.blockedBody":
@@ -785,10 +784,6 @@ const en = {
     "For a picture that ships with the site, e.g. /eldreve/home/508-90.png",
   "home.photo.usePath": "Use this path",
   "home.photo.uploadFailed": "Could not upload that photo — try a smaller file.",
-
-  // Content → Home page · colours
-  "home.color.baked":
-    "Careful: this colour is also painted into artwork the design team exported, which will NOT change with it —",
 
   // Content → Ideas (visitor feedback)
   "ideas.column.message": "Idea",
@@ -1476,7 +1471,6 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
     "链接需以 / （本站页面）、#、https://、mailto: 或 tel: 开头。",
   "home.bad.image":
     "请用上方按钮选择图片，或填写以 / 开头的路径——图片必须来自本站。",
-  "home.bad.color": "请填写 6 位颜色代码，例如 #FFF6EC。",
   "home.bad.number": "请填写所示范围内的整数。",
   "home.blocked": "有一处需要修改后才能保存",
   "home.blockedBody":
@@ -1521,10 +1515,6 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.photo.pathHelp": "用于站内自带图片，例如 /eldreve/home/508-90.png",
   "home.photo.usePath": "使用此路径",
   "home.photo.uploadFailed": "图片上传失败——请尝试更小的文件。",
-
-  // 内容 → 首页 · 颜色
-  "home.color.baked":
-    "请注意：此颜色也已烘焙进设计团队导出的图片中，那部分不会随之改变——",
 
   "ideas.column.message": "想法",
   "ideas.column.from": "来自",

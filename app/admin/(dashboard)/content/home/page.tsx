@@ -59,7 +59,6 @@ export default async function HomeContentPage() {
       managedAt: field.managedAt ?? null,
       box: field.box ?? null,
       fit: field.fit ?? null,
-      bakedInto: field.bakedInto ?? null,
       numMin: field.numMin ?? null,
       numMax: field.numMax ?? null,
       unit: field.unit ?? null,

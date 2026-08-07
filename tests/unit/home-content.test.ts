@@ -18,7 +18,6 @@ import {
   fieldError,
   homeDefault,
   isEditable,
-  isHexColor,
   isSafeHref,
   isSafeImagePath,
   slotKey,
@@ -177,7 +176,7 @@ test("no design default exceeds its own character budget", () => {
  * photo path, a hex colour and a millisecond count are all bounded by their own
  * rule (`fieldError`) instead, exercised below.
  */
-const UNBUDGETED = new Set(["url", "image", "color", "number"]);
+const UNBUDGETED = new Set(["url", "image", "number"]);
 
 test("every typed-in field carries a length budget", () => {
   // Every editable PROSE field should tell the owner roughly how much room the
@@ -293,14 +292,6 @@ test("a photo path may only point at this site", () => {
     "",
   ]) {
     assert.ok(!isSafeImagePath(bad), `${bad} should be refused`);
-  }
-});
-
-test("a colour must be a plain 6-digit hex", () => {
-  assert.ok(isHexColor("#FFF6EC"));
-  assert.ok(isHexColor("#fff6ec"));
-  for (const bad of ["#FFF", "fff6ec", "rgb(255,246,236)", "var(--x)", "red"]) {
-    assert.ok(!isHexColor(bad), `${bad} should be refused`);
   }
 });
 

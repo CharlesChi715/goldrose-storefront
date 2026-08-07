@@ -18,8 +18,6 @@
  * - `image` — a photo in a fixed design box. The stored value is a servable
  *   path (a `/public` asset, an uploaded file, or a Storage key), resolved by
  *   `fileUrl()` exactly like product media.
- * - `color` — one hex value in the page palette, delivered to the storefront as
- *   a CSS custom property so a change repaints without moving a pixel.
  * - `number` — a bounded integer (rail timings). Stored as a string like every
  *   other slot; `numMin`/`numMax` bound it.
  * - `artwork` — the label is baked into a Figma SVG/PNG render (glyph strips,
@@ -49,7 +47,6 @@ export type HomeFieldKind =
   | "multiline"
   | "url"
   | "image"
-  | "color"
   | "number"
   | "artwork"
   | "managed";
@@ -102,14 +99,6 @@ export type HomeField = {
   readonly box?: { readonly w: number; readonly h: number };
   /** How the component fits the photo into that box — see HomeImageFit. */
   readonly fit?: HomeImageFit;
-
-  /* --- `color` fields ---------------------------------------------------- */
-  /**
-   * Artwork that has this colour BAKED IN and will therefore not follow a
-   * change — listed so the admin can say so instead of the owner finding a
-   * half-recoloured page. Empty/absent means the colour is fully live.
-   */
-  readonly bakedInto?: readonly string[];
 
   /* --- `number` fields --------------------------------------------------- */
   readonly numMin?: number;
@@ -2195,7 +2184,6 @@ const EDITABLE: ReadonlySet<HomeFieldKind> = new Set([
   "multiline",
   "url",
   "image",
-  "color",
   "number",
 ]);
 
@@ -2275,33 +2263,20 @@ export function isSafeImagePath(value: string): boolean {
 }
 
 /**
- * Whether a colour value is a plain 6-digit hex. Restrictive on purpose: the
- * value is interpolated into a CSS custom property, and `#fff` / `rgb()` /
- * `var(…)` would all widen that to arbitrary CSS.
- *
- * @param value - The colour the owner picked.
- * @returns True for `#RRGGBB`, in either case.
- */
-export function isHexColor(value: string): boolean {
-  return /^#[0-9a-f]{6}$/i.test(value.trim());
-}
-
-/**
  * Validate one field's value for its kind. The single place the server, the
  * admin's inline feedback and the tests all agree on what is acceptable.
  *
  * @param field - The registry field being written.
  * @param value - The owner's value.
  * @returns null when the value is acceptable, else a stable reason code the
- *   admin turns into a translated message: "href" | "image" | "color" | "number".
+ *   admin turns into a translated message: "href" | "image" | "number".
  */
 export function fieldError(
   field: HomeField,
   value: string,
-): "href" | "image" | "color" | "number" | null {
+): "href" | "image" | "number" | null {
   if (field.kind === "url") return isSafeHref(value) ? null : "href";
   if (field.kind === "image") return isSafeImagePath(value) ? null : "image";
-  if (field.kind === "color") return isHexColor(value) ? null : "color";
   if (field.kind === "number") {
     const parsed = Number(value.trim());
     if (!Number.isInteger(parsed)) return "number";

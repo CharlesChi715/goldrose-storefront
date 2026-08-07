@@ -82,7 +82,6 @@ export type FieldView = {
     | "multiline"
     | "url"
     | "image"
-    | "color"
     | "number"
     | "artwork"
     | "managed";
@@ -100,8 +99,6 @@ export type FieldView = {
   box: { w: number; h: number } | null;
   /** `image`: how the photo is fitted into that box. */
   fit: "cover" | "stretch" | "window" | null;
-  /** `color`: artwork that has this colour baked in and will not follow. */
-  bakedInto: readonly string[] | null;
   /** `number`: bounds and unit. */
   numMin: number | null;
   numMax: number | null;
@@ -174,11 +171,6 @@ function isSafeImagePath(value: string): boolean {
   return /^[A-Za-z0-9][A-Za-z0-9._/-]*\.[A-Za-z0-9]+$/.test(path);
 }
 
-/** Same rule as the registry's isHexColor. */
-function isHexColor(value: string): boolean {
-  return /^#[0-9a-f]{6}$/i.test(value.trim());
-}
-
 /**
  * The reason a value is unacceptable, or null. Mirrors the registry's
  * `fieldError` so the reason code — and therefore the message — is the same one
@@ -191,10 +183,9 @@ function isHexColor(value: string): boolean {
 function fieldError(
   field: FieldView,
   value: string,
-): "href" | "image" | "color" | "number" | null {
+): "href" | "image" | "number" | null {
   if (field.kind === "url") return isSafeHref(value) ? null : "href";
   if (field.kind === "image") return isSafeImagePath(value) ? null : "image";
-  if (field.kind === "color") return isHexColor(value) ? null : "color";
   if (field.kind === "number") {
     const parsed = Number(value.trim());
     if (!Number.isInteger(parsed)) return "number";
@@ -478,57 +469,6 @@ export function HomeSectionsEditor({
               ) : null}
             </BlockStack>
           </InlineStack>
-        </BlockStack>
-      );
-    }
-
-    /* --- Colour --------------------------------------------------------- */
-    if (field.kind === "color") {
-      return (
-        <BlockStack key={key} gap="200">
-          {labelFor(field, dirty)}
-          <InlineStack gap="300" blockAlign="center" wrap={false}>
-            {/* The native swatch is the control people reach for; the hex box
-                beside it is what a design hand-off actually gives you. */}
-            <input
-              type="color"
-              value={isHexColor(value) ? value : "#000000"}
-              aria-label={zh ? field.labelZh : field.label}
-              onChange={(event) => set(event.target.value.toUpperCase())}
-              style={{
-                width: 48,
-                height: 36,
-                padding: 0,
-                border: "1px solid #e3e3e3",
-                borderRadius: 8,
-                background: "none",
-                cursor: "pointer",
-              }}
-            />
-            <Box width="140px">
-              <TextField
-                label=""
-                labelHidden
-                value={value}
-                autoComplete="off"
-                error={errorText}
-                onChange={(next) => set(next)}
-              />
-            </Box>
-            {resetControl(section, field, dirty)}
-          </InlineStack>
-          {note ? (
-            <Text as="span" variant="bodySm" tone="subdued">
-              {note}
-            </Text>
-          ) : null}
-          {field.bakedInto && field.bakedInto.length > 0 ? (
-            <Banner tone="warning">
-              <p>
-                {t("home.color.baked")} {field.bakedInto.join(", ")}
-              </p>
-            </Banner>
-          ) : null}
         </BlockStack>
       );
     }
