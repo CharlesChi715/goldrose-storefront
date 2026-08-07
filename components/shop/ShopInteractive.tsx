@@ -20,10 +20,17 @@
  *   price_cents. The sort applies to the whole catalog before the page is
  *   sliced, so it holds across pages rather than within one.
  * - The filter drawer is COSMETIC (B-2 checkout-picker precedent): chips
- *   toggle visually, Reset restores the frame's default selection, and the
- *   confirm button closes the drawer. The catalog has no collection/
+ *   toggle visually, Reset clears every group, and the confirm button closes
+ *   the drawer — and is disabled while nothing is selected, so "show results"
+ *   is never offered for an empty filter. The catalog has no collection/
  *   occasion/recipient/availability fields yet, so wiring it would fake a
  *   capability the backend does not have (docs/ixd/README.md).
+ * - Either overlay closes on a click anywhere outside it, or on Escape. The
+ *   in-canvas backdrop below only reaches the 430-wide stage; a click in the
+ *   page margins beside it, or on the bottom nav under it, is caught by the
+ *   document listener instead (the stage is transformed, so a fixed-position
+ *   backdrop would be contained and clipped by it rather than covering the
+ *   viewport).
  * - The two label chips ("Ruby Red", "Gift Sets") stay static art like the
  *   "Women"/"All apparel" pair they replace: the base shop frame (24:396)
  *   still carries the template's apparel wording; both overlay frames patch
@@ -145,10 +152,14 @@ const FILTER_GROUPS: Array<{
   },
 ];
 
+/** The frame's own selection — what the drawer shows when it first opens. */
 const defaultFilterSelection = () =>
   FILTER_GROUPS.map((group) =>
     group.options.findIndex((option) => option.selected),
   );
+
+/** Nothing chosen in any group; -1 is a group's "no option" value. */
+const clearedFilterSelection = () => FILTER_GROUPS.map(() => -1);
 
 function ProductCard({
   slot,
@@ -280,6 +291,10 @@ export function ShopInteractive({
   );
   const [fading, setFading] = useState(false);
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sortPanel = useRef<HTMLDivElement | null>(null);
+  const sortTrigger = useRef<HTMLButtonElement | null>(null);
+  const filterPanel = useRef<HTMLDivElement | null>(null);
+  const filterTrigger = useRef<HTMLButtonElement | null>(null);
 
   // A pending fade must not fire into an unmounted tree.
   useEffect(
@@ -320,7 +335,43 @@ export function ShopInteractive({
   if (sort === "low") sorted.sort((a, b) => a.priceCents - b.priceCents);
   const visible = sorted.slice((page - 1) * pageSize, page * pageSize);
 
+  const nothingSelected = filterSelection.every((sel) => sel === -1);
+
   const overlayOpen = sortOpen || filterOpen;
+
+  /**
+   * Dismiss whichever overlay is open on a press outside it, or on Escape.
+   * The backdrop below covers the 430-wide stage; this covers the rest of the
+   * document — the page margins beside the stage on a wide window, and the
+   * bottom nav under it. Capture-phase `pointerdown` so the decision is made
+   * before any underlying control reacts, and the open panel plus its own
+   * trigger count as "inside" — without the trigger, its press would close
+   * here and its click would immediately reopen.
+   */
+  useEffect(() => {
+    if (!overlayOpen) return;
+    const closeAll = () => {
+      setSortOpen(false);
+      setFilterOpen(false);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      const inside = [sortPanel, sortTrigger, filterPanel, filterTrigger].some(
+        (ref) => ref.current?.contains(target),
+      );
+      if (!inside) closeAll();
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeAll();
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [overlayOpen]);
 
   return (
     <>
@@ -338,6 +389,7 @@ export function ShopInteractive({
       {/* Sort pill (921:134/138) — now a real dropdown trigger. */}
       <button
         type="button"
+        ref={sortTrigger}
         aria-haspopup="menu"
         aria-expanded={sortOpen}
         onClick={() => {
@@ -396,6 +448,7 @@ export function ShopInteractive({
       {/* Filter button (929:162) — opens the drawer. */}
       <button
         type="button"
+        ref={filterTrigger}
         aria-haspopup="dialog"
         aria-label="Filters"
         aria-expanded={filterOpen}
@@ -520,6 +573,7 @@ export function ShopInteractive({
       {sortOpen ? (
         <div
           role="menu"
+          ref={sortPanel}
           className={playfair.className}
           style={{
             ...abs(206, 357, 206, 190),
@@ -588,6 +642,7 @@ export function ShopInteractive({
       {filterOpen ? (
         <div
           role="dialog"
+          ref={filterPanel}
           aria-label="Filters"
           className={playfair.className}
           style={{
@@ -652,9 +707,13 @@ export function ShopInteractive({
             </div>
           ))}
           <div style={{ ...abs(16, 372, 366, 1), background: SAND }} />
+          {/* Reset clears every group rather than restoring the frame's own
+              selection: "reset" reads as "cancel what I picked", and the
+              drawer already opens on the frame's defaults, so restoring them
+              from here would leave the chosen-state row looking unresettable. */}
           <button
             type="button"
-            onClick={() => setFilterSelection(defaultFilterSelection())}
+            onClick={() => setFilterSelection(clearedFilterSelection())}
             style={{
               ...abs(18, 398, 88, 21),
               background: "transparent",
@@ -668,17 +727,22 @@ export function ShopInteractive({
           </button>
           {/* The drawer stays cosmetic until the catalog carries these fields
               (docs/ixd/README.md), so the button closes on the full catalog —
-              and the count says so instead of the frame's fixed "36". */}
+              and the count says so instead of the frame's fixed "36".
+              With every group cleared there is nothing to show results FOR, so
+              it goes disabled: same gold at 45%, which reads as unavailable
+              without inventing a colour the frame does not have. */}
           <button
             type="button"
+            disabled={nothingSelected}
             onClick={() => setFilterOpen(false)}
             style={{
               ...abs(146, 390, 236, 52),
               background: GOLD,
+              opacity: nothingSelected ? 0.45 : 1,
               borderRadius: 10,
               border: 0,
               padding: 0,
-              cursor: "pointer",
+              cursor: nothingSelected ? "not-allowed" : "pointer",
             }}
           >
             <span
