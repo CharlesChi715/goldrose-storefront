@@ -191,13 +191,29 @@ test("each width slider is the section's own, and Match reconciles it", async ({
   await openEditor(page);
   const craft = page.locator('[data-home-section="craft"]');
   const story = page.locator('[data-home-section="story"]');
-  const widthOf = (frame: ReturnType<Page["locator"]>) =>
-    frame.evaluate((el) => (el as HTMLIFrameElement).style.width);
+
+  /**
+   * The width of the BOX around a section's frame — what the eye actually
+   * lands on, and the only honest measure here.
+   *
+   * Not the iframe's own width: that is pinned to the design's 430 forever and
+   * the slider is applied as a transform, so the iframe's width says nothing
+   * about what the control did. An earlier version of this test asserted
+   * exactly that and passed straight through a bug where the visible box came
+   * out identical at 320 and at 440 — the slider looked live and moved
+   * nothing.
+   */
+  const boxWidth = (section: ReturnType<Page["locator"]>) =>
+    section
+      .locator("iframe")
+      .evaluate((el) => (el.parentElement as HTMLElement).offsetWidth);
 
   // Everything starts at the design's own 430, so nothing offers to sync.
   await expect(
     craft.getByRole("button", { name: "Match the main preview" }),
   ).toHaveCount(0);
+  const craftAtDesign = await boxWidth(craft);
+  const storyAtDesign = await boxWidth(story);
 
   // Move the PAGE-WIDE preview to a narrow phone. The sections do not follow —
   // that is the point of separate sliders — but each now offers to.
@@ -206,26 +222,31 @@ test("each width slider is the section's own, and Match reconciles it", async ({
     "width",
     "360px",
   );
-  await expect(await widthOf(craft.locator("iframe"))).toBe("430px");
+  expect(await boxWidth(craft)).toBe(craftAtDesign);
 
   await craft.getByRole("button", { name: "Match the main preview" }).click();
-  await expect(craft.locator("iframe")).toHaveCSS("width", "360px");
   await expect(
     craft.getByRole("button", { name: "Match the main preview" }),
   ).toHaveCount(0);
+  const craftMatched = await boxWidth(craft);
+  expect(craftMatched).toBeLessThan(craftAtDesign);
   // One section's slider never moves another's.
-  await expect(story.locator("iframe")).toHaveCSS("width", "430px");
+  expect(await boxWidth(story)).toBe(storyAtDesign);
 
-  // ...and the slider changes what you SEE, not only the iframe's attribute.
-  // The frame is zoomed out to fit, and deriving that zoom from the slider's
-  // own width once cancelled the two out exactly: the iframe dutifully
-  // resized, the visible box came out identical at 320 and at 440, and the
-  // control moved nothing. So this asserts the box, not the frame.
-  const visibleWidth = () =>
-    craft
-      .locator("iframe")
-      .evaluate((el) => (el.parentElement as HTMLElement).offsetWidth);
-  const atMatched = await visibleWidth();
+  // Dragging further still shrinks it — and the room reserved for the frame
+  // does NOT change, which is what stops this ~26,000px page re-computing its
+  // scroll thumb on every frame of a drag.
+  const stageBefore = await craft
+    .locator("iframe")
+    .evaluate(
+      (el) => (el.parentElement!.parentElement as HTMLElement).offsetHeight,
+    );
   await craft.locator("input[type=range]").fill("320");
-  expect(await visibleWidth()).toBeLessThan(atMatched);
+  expect(await boxWidth(craft)).toBeLessThan(craftMatched);
+  const stageAfter = await craft
+    .locator("iframe")
+    .evaluate(
+      (el) => (el.parentElement!.parentElement as HTMLElement).offsetHeight,
+    );
+  expect(stageAfter).toBe(stageBefore);
 });

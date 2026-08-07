@@ -54,12 +54,12 @@ import {
   Link as PolarisLink,
   Modal,
   Page,
-  RangeSlider,
   Text,
   TextField,
   Toast,
 } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
+import { MainPreview } from "./MainPreview";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import { SectionPreview } from "./SectionPreview";
 import {
@@ -258,16 +258,9 @@ export function HomeSectionsEditor({
   // Which phone width the preview is standing in for. Session-local: it is a
   // way of looking at the page, not a setting that belongs to the store.
   const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
-  // Per-section preview widths, by section id. Absent means "still at the
-  // design width" — kept sparse so nothing has to be seeded when a section is
-  // added, and so "everything agrees" is the state you get by doing nothing.
-  const [sectionWidths, setSectionWidths] = useState<Record<string, number>>(
-    {},
-  );
-
-  /** The width one section's own preview is set to. */
-  const widthOf = (sectionId: string): number =>
-    sectionWidths[sectionId] ?? DESIGN_WIDTH;
+  // Each section's own preview width is deliberately NOT here: it lives in the
+  // SectionPreview that owns it, so dragging one slider does not re-render this
+  // screen's ~180 fields on every pixel. See that file for the measurements.
 
   /** The live value of a field: the local draft if touched, else what is saved. */
   const valueOf = (section: SectionView, field: FieldView): string =>
@@ -701,90 +694,17 @@ export function HomeSectionsEditor({
               </BlockStack>
             </Card>
 
-            {/* The page itself, at whatever phone width the owner picks. */}
-            <Card>
-              <BlockStack gap="200">
-                <InlineStack align="space-between" blockAlign="center">
-                  <Text as="h2" variant="headingSm">
-                    {t("home.livePreview")}
-                  </Text>
-                  <Button
-                    variant="plain"
-                    onClick={() => setPreviewNonce((n) => n + 1)}
-                  >
-                    {t("home.refreshPreview")}
-                  </Button>
-                </InlineStack>
-                <Text as="p" variant="bodySm" tone="subdued">
-                  {t("home.livePreviewHelp")}
-                </Text>
-
-                <RangeSlider
-                  label={
-                    <InlineStack gap="200" blockAlign="center">
-                      <Text as="span" variant="bodyMd">
-                        {t("home.previewWidth")}
-                      </Text>
-                      <Text as="span" variant="bodyMd" fontWeight="semibold">
-                        {`${previewWidth} px`}
-                      </Text>
-                      {previewWidth !== DESIGN_WIDTH ? (
-                        <Button
-                          variant="plain"
-                          onClick={() => setPreviewWidth(DESIGN_WIDTH)}
-                        >
-                          {t("home.previewWidthReset")}
-                        </Button>
-                      ) : null}
-                    </InlineStack>
-                  }
-                  min={PREVIEW_MIN_WIDTH}
-                  max={PREVIEW_MAX_WIDTH}
-                  step={1}
-                  value={previewWidth}
-                  output
-                  prefix={
-                    <Text as="span" variant="bodySm" tone="subdued">
-                      {PREVIEW_MIN_WIDTH}
-                    </Text>
-                  }
-                  suffix={
-                    <Text as="span" variant="bodySm" tone="subdued">
-                      {PREVIEW_MAX_WIDTH}
-                    </Text>
-                  }
-                  helpText={t("home.previewWidthHelp")}
-                  onChange={(next) =>
-                    setPreviewWidth(typeof next === "number" ? next : next[0])
-                  }
-                />
-
-                <Box
-                  background="bg-surface-secondary"
-                  borderRadius="200"
-                  padding="200"
-                >
-                  <iframe
-                    key={previewNonce}
-                    src={`/?adminPreview=${previewNonce}`}
-                    title={t("home.livePreview")}
-                    style={{
-                      display: "block",
-                      // The whole point of the slider: this width IS the
-                      // viewport the storefront sees, so ScaleFrame scales the
-                      // 430 canvas against it exactly as a real phone would.
-                      width: previewWidth,
-                      height: 620,
-                      maxWidth: "100%",
-                      margin: "0 auto",
-                      border: "1px solid #e3e3e3",
-                      borderRadius: 8,
-                      background: "#FFF6EC",
-                    }}
-                  />
-                </Box>
-              </BlockStack>
-            </Card>
+            {/* The page itself, at whatever phone width the owner picks.
+                Its own component so that dragging its slider re-renders one
+                card rather than this screen's ~180 fields — see MainPreview. */}
+            <MainPreview
+              designWidth={DESIGN_WIDTH}
+              min={PREVIEW_MIN_WIDTH}
+              max={PREVIEW_MAX_WIDTH}
+              nonce={previewNonce}
+              onRefresh={() => setPreviewNonce((n) => n + 1)}
+              onWidthSettled={setPreviewWidth}
+            />
           </BlockStack>
         </Layout.Section>
 
@@ -821,17 +741,10 @@ export function HomeSectionsEditor({
                       bandHeight={section.preview.height}
                       borrowed={section.preview.borrowed}
                       hidden={section.hideable && !section.visible}
-                      width={widthOf(section.id)}
                       mainWidth={previewWidth}
                       min={PREVIEW_MIN_WIDTH}
                       max={PREVIEW_MAX_WIDTH}
                       nonce={previewNonce}
-                      onWidthChange={(next) =>
-                        setSectionWidths((current) => ({
-                          ...current,
-                          [section.id]: next,
-                        }))
-                      }
                     />
                   ) : null}
 

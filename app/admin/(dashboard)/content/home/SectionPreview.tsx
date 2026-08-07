@@ -68,12 +68,10 @@ const FIT_HEIGHT = 400;
  * @param props.borrowed - True when this section has nothing of its own on the
  *   page and the frame is standing in with another band (the rail speed).
  * @param props.hidden - True when the owner has switched this section off.
- * @param props.width - The phone width this preview is standing in for.
  * @param props.mainWidth - The width the page-wide preview is set to.
  * @param props.min - Narrowest selectable width, shared with the main preview.
  * @param props.max - Widest selectable width, shared with the main preview.
  * @param props.nonce - Bumped by the parent after every save, to reload.
- * @param props.onWidthChange - Called with the width the owner dragged to.
  * @returns The preview card that opens the section.
  */
 export function SectionPreview({
@@ -81,53 +79,86 @@ export function SectionPreview({
   bandHeight,
   borrowed,
   hidden,
-  width,
   mainWidth,
   min,
   max,
   nonce,
-  onWidthChange,
 }: {
   sectionId: string;
   bandHeight: number;
   borrowed: boolean;
   hidden: boolean;
-  width: number;
   mainWidth: number;
   min: number;
   max: number;
   nonce: number;
-  onWidthChange: (width: number) => void;
 }) {
   const t = useAdminT();
   // Reloading this one frame without disturbing the other seven.
   const [refreshed, setRefreshed] = useState(0);
   const key = `${nonce}-${refreshed}`;
+  /**
+   * This section's width lives HERE, not in the editor above.
+   *
+   * It was in the parent, one map for all nine sections, which is the tidier
+   * place for it right up until you drag: a slider pixel became a re-render of
+   * the whole screen — nine frames and ~180 Polaris fields — and cost 27ms on
+   * top of a 14ms frame. Measured on this machine: 41ms per frame while
+   * dragging, against 13.9ms for the transform on its own, which is to say the
+   * transform was free and every millisecond of the stutter was React.
+   *
+   * Held locally, a drag re-renders this one card. The cost: a section filtered
+   * out by the search box unmounts and comes back at the design width. That is
+   * a way of looking at one band, not a setting, and "Match the main preview"
+   * puts it back in a click.
+   */
+  const [width, setWidth] = useState(DESIGN_WIDTH);
 
   // The route scales the 430-wide stage to the frame's width, so the frame's
   // natural height is the band's height at the same scale. Never stretched: a
   // wrong height would crop or letterbox the band.
   const fullHeight = Math.round((bandHeight * width) / DESIGN_WIDTH);
-  // Then the whole frame is zoomed out to fit.
-  //
-  // The zoom is fixed PER BAND — derived from the band's own design height,
-  // never from the slider's width. Deriving it from `fullHeight` (the obvious
-  // way, and how this shipped first) made the slider do nothing at all: the
-  // frame grew with the width and the zoom shrank by exactly the same factor,
-  // so the box came out the same size at 320 as at 440, pixel for pixel. The
-  // control looked live and moved nothing.
-  //
-  // Held constant, the box is `width × zoom` — proportional to the width
-  // again, so dragging narrower visibly shrinks the preview, which is the same
-  // thing the page-wide preview does and the only thing phone width CAN show
-  // here: ScaleFrame scales the whole 430 stage as one, so a narrow phone
-  // makes everything smaller rather than re-wrapping any line.
-  const zoom = Math.min(1, FIT_HEIGHT / bandHeight);
+
+  /* --- The geometry, and why the slider is smooth ------------------------
+     Three sizes, and only the middle one changes while you drag.
+
+     1. THE STAGE is fixed. It reserves the room the widest setting needs, so
+        the admin document's height never changes mid-drag. That is what stops
+        the page scrollbar flashing: this page is ~26,000px tall, so a box that
+        grows and shrinks by 100px re-computes the scroll thumb on every frame
+        of the drag, and the strip strobes. Reserve the space and it is still.
+
+     2. THE FRAME BOX resizes. It is the phone's own outline, so it has to —
+        but it sits INSIDE the fixed stage and holds a single absolutely
+        positioned child, so resizing it reflows nothing but itself.
+
+     3. THE IFRAME NEVER RESIZES. It is laid out at the design's own 430 and
+        the slider's width is applied as an outer `scale()`, which the browser
+        composites instead of re-laying out.
+
+     That last one is not an approximation. ScaleFrame already renders a FIXED
+     430-wide stage and scales it by `min(100vw, 480px) / 430`, so an iframe
+     430 wide scaled by w/430 composes to exactly the transform an iframe w
+     wide would have applied itself — and nothing in the previewed tree keys
+     off viewport width (globals.css has only `hover`/`pointer` and
+     `prefers-reduced-motion` queries). Before this, every pixel of slider
+     travel re-laid out a 991px document with twenty images inside it.
+     --------------------------------------------------------------------- */
+
+  // Fitted against the WIDEST setting, so the stage it reserves is the biggest
+  // the frame will ever be and the reservation is never wrong.
+  const widestHeight = (bandHeight * max) / DESIGN_WIDTH;
+  const zoom = Math.min(1, FIT_HEIGHT / widestHeight);
+  const stageWidth = Math.round(max * zoom);
+  const stageHeight = Math.round(widestHeight * zoom);
+
+  // What the band is drawn at right now, against its 430-wide design. One
+  // number: the fit zoom and the slider's width both feed it, which is why it
+  // moves when the slider does.
+  const scale = (zoom * width) / DESIGN_WIDTH;
   const boxWidth = Math.round(width * zoom);
   const boxHeight = Math.round(fullHeight * zoom);
-  // What the band is actually shown at, against its 430-wide design: the zoom
-  // AND the width both feed it, so the number moves when the slider does.
-  const shownAt = Math.round((zoom * width * 100) / DESIGN_WIDTH);
+  const shownAt = Math.round(scale * 100);
 
   return (
     <Box background="bg-surface-secondary" borderRadius="200" padding="200">
@@ -160,7 +191,7 @@ export function SectionPreview({
           </InlineStack>
           <InlineStack gap="300" blockAlign="center">
             {width !== mainWidth ? (
-              <Button variant="plain" onClick={() => onWidthChange(mainWidth)}>
+              <Button variant="plain" onClick={() => setWidth(mainWidth)}>
                 {t("home.previewSync")}
               </Button>
             ) : null}
@@ -192,38 +223,57 @@ export function SectionPreview({
           </Text>
         ) : null}
 
-        {/* The border and the rounded corner belong to the BOX, not the frame:
-            a scaled iframe scales its own border too, so at 40% the outline
-            would thin to a hairline and the corner would tighten. */}
+        {/* 1 · The stage: fixed size, so the page below never moves. */}
         <div
           style={{
-            width: boxWidth,
-            height: boxHeight,
+            width: stageWidth,
+            height: stageHeight,
             maxWidth: "100%",
             margin: "0 auto",
-            overflow: "hidden",
-            border: "1px solid #e3e3e3",
-            borderRadius: 8,
-            background: "#FFF6EC",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <iframe
-            key={key}
-            src={`/preview/home/${sectionId}?n=${key}`}
-            title={`${t("home.sectionPreview")} — ${sectionId}`}
+          {/* 2 · The frame box — the phone's own outline, so it resizes. The
+              border and the rounded corner live HERE rather than on the iframe:
+              a scaled iframe scales its own border too, so at 40% the outline
+              would thin to a hairline and the corner would tighten. */}
+          <div
             style={{
-              display: "block",
-              // This width IS the viewport the storefront sees, so the band
-              // lays out against it exactly as it would on that phone.
-              width,
-              height: fullHeight,
-              border: 0,
-              // Top left, so the scaled frame lands in the box's corner rather
-              // than being scaled about its centre and cropped on all sides.
-              transformOrigin: "top left",
-              transform: zoom < 1 ? `scale(${zoom})` : undefined,
+              position: "relative",
+              width: boxWidth,
+              height: boxHeight,
+              overflow: "hidden",
+              border: "1px solid #e3e3e3",
+              borderRadius: 8,
+              background: "#FFF6EC",
             }}
-          />
+          >
+            {/* 3 · The frame itself, at the design's own width forever. */}
+            <iframe
+              key={key}
+              src={`/preview/home/${sectionId}?n=${key}`}
+              title={`${t("home.sectionPreview")} — ${sectionId}`}
+              style={{
+                display: "block",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: DESIGN_WIDTH,
+                height: bandHeight,
+                border: 0,
+                // Top left, so the scaled frame lands in the box's corner
+                // rather than being scaled about its centre and cropped on
+                // all sides.
+                transformOrigin: "top left",
+                transform: `scale(${scale})`,
+                // Its own compositor layer: the scale then changes without
+                // re-rastering the band on every frame of the drag.
+                willChange: "transform",
+              }}
+            />
+          </div>
         </div>
 
         {/* The width control is one row: the label carries the number and the
@@ -239,14 +289,17 @@ export function SectionPreview({
               <Text as="span" variant="bodySm" fontWeight="semibold">
                 {`${width} px`}
               </Text>
-              {width !== DESIGN_WIDTH ? (
-                <Button
-                  variant="plain"
-                  onClick={() => onWidthChange(DESIGN_WIDTH)}
-                >
-                  {t("home.previewWidthReset")}
-                </Button>
-              ) : null}
+              {/* Always rendered, disabled at the design width, rather than
+                  mounted on demand. A button that appears is a row that grows,
+                  and this row is directly above the frame: mounting it mid-drag
+                  stepped the whole page 4px the moment you left 430. */}
+              <Button
+                variant="plain"
+                disabled={width === DESIGN_WIDTH}
+                onClick={() => setWidth(DESIGN_WIDTH)}
+              >
+                {t("home.previewWidthReset")}
+              </Button>
             </InlineStack>
           }
           min={min}
@@ -264,7 +317,7 @@ export function SectionPreview({
             </Text>
           }
           onChange={(next) =>
-            onWidthChange(typeof next === "number" ? next : next[0])
+            setWidth(typeof next === "number" ? next : next[0])
           }
         />
       </BlockStack>
