@@ -6032,3 +6032,50 @@ state; no code changed):
 - OQ-2 marked a hard gate (a shipping rate is a charged price); OQ-3 marked
   gradual, with price/stock true even while copy and photos stay placeholder.
 - Seeded demo reviews flagged as the one mock that is never safe live.
+
+## 2026-08-07 — dev pinned to hosted data; 0009/0010 pushed; 0011 written
+
+- **Dev may no longer run on the file adapter** (owner call, site going live).
+  New `scripts/require-hosted-dev.mjs` wired as `predev`: `npm run dev` exits 1
+  when any Supabase variable is blank, because a dev server backed by the
+  3-product seed looks like the live 2-product shop and is not. Local mode is
+  not deleted — it sleeps. The Playwright suite still runs in it (it blanks the
+  variables for its own `build && start` server, so `predev` never fires), and
+  `ALLOW_LOCAL_MODE=1 npm run dev` wakes it deliberately. Removed the
+  `goldrose-local-mode` launch entry and the temporary `goldrose-prod-3001`.
+  Documented in `.env.example` and SUMMARY.
+- **Hosted DB checked:** 2 products, not 3. `best_for` was still `text`, so
+  every Collection/Occasion/Recipient chip matched nothing on hosted —
+  `subject.bestFor.includes(slug)` is SUBSTRING matching on a string. This is
+  what the owner's 0-result `/shop` URL actually was.
+- **Pushed `0009` + `0010`** to cfvsvgbldnzkcjvbwnjp. `best_for` is now
+  `text[]`; both products converted `Classic Collection` → `{classic}` via the
+  migration's lookup table. Spotlight columns present.
+- **Found a live regression and wrote `0011` (NOT PUSHED — permission denied).**
+  `0009` added `stocked` to `catalog_products`; `0010`, authored against the
+  pre-0009 view, rebuilt it without that key. Order made `0010` last, so the
+  key is gone on hosted: "Ready to Ship" matches nothing, "Pre-Order" matches
+  everything sellable. `0011` restates the view with BOTH the spotlight image
+  fields and `stocked`. **Needs `supabase db push`.**
+- **Hardened `scripts/check-migrations.mjs`,** which had reported "ok". Two
+  misses: the body stopped at the first `from` — inside catalog_products that
+  is the images subquery, so the variants object was never read — and only
+  `table.column`/`as alias` shapes were collected, so a `jsonb_build_object`
+  key was invisible. Now reads to the statement's semicolon and collects quoted
+  keys. Verified it would have flagged `0010` dropping `stocked`.
+- Verified: 138 unit (2 new, 1 rewritten to the new contract), e2e filter spec
+  12/12, eslint clean.
+- Launch gates still open: `CHECKOUT_SKIP_PAYMENT=1` is set in `.env.local`;
+  hosted `product_reviews` is empty (nothing to remove); hosted products carry
+  only `{classic}`, so Occasion/Recipient chips return nothing until set in admin.
+
+### 2026-08-07 (cont.) — 0011 pushed and verified
+
+- `supabase db push` applied `0011`; hosted history is now 0001–0003, 0005–0011.
+- `catalog_products` carries both feature sets again: variants have `in_stock`
+  AND `stocked`, images have `card_focal_x/y` and `card_zoom`.
+- Behaviour checked by running `matchesFacets` against the real hosted values:
+  classic 2/2, jewel 0/2, in-stock 2/2, ready-to-ship 2/2, pre-order 0/2,
+  birthday 0/2. Before 0011 the last two were 0/2 and 2/2 — both wrong.
+- Remaining on hosted: products carry only `{classic}`, so Occasion and
+  Recipient chips return nothing until someone sets "Best for" per product.
