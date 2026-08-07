@@ -22,6 +22,7 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 const INK = "#291A13";
 const BROWN = "#3B2F2F";
@@ -36,50 +37,35 @@ const GLOW =
    to the A11/02 FAQ frame. Every row's prototype goes to the same place: the
    concierge chat (1537:111 → /care/chat), which is where an unanswered
    question actually gets answered. */
-const FAQ_ROWS = [
-  { y: 85, q: "Are ELDREVE gifts made from real roses?" },
-  { y: 124, q: "Can I personalize a gift?" },
-  { y: 163, q: "How are gifts protected during shipping?" },
-  { y: 202, q: "Do you accept corporate and bulk orders?" },
-] as const;
+const FAQ_ROWS = [{ y: 85 }, { y: 124 }, { y: 163 }, { y: 202 }] as const;
 
 /* 2380:849…2380:865 · the footer link cloud. The design lays these out as
    eight individually-placed, centre-aligned text boxes rather than a row —
    the leading/trailing spaces in the labels are load-bearing, because they
    shift the centred text inside its own box, so they are kept verbatim. */
 const FOOTER_LINKS = [
-  { x: 148, y: 926, w: 82, h: 20, label: "SHOP", href: "/shop" },
-  { x: 215, y: 928, w: 65, h: 16, label: "OUR CRAFT ", href: "/craft" },
-  { x: 196, y: 938, w: 160, h: 39, label: "OUR STORY", href: "/story" },
-  { x: 183, y: 950, w: 67, h: 16, label: "FAQ ", href: "/care" },
-  { x: 141, y: 953, w: 46, h: 11, label: "BLOG ", href: "/blog" },
-  {
-    x: 156,
-    y: 966,
-    w: 121,
-    h: 29,
-    label: "SHIPPING & RETURNS",
-    href: "/policies/returns-refunds-cancellations",
-  },
-  {
-    x: 96,
-    y: 972,
-    w: 68,
-    h: 17,
-    label: " PRIVACY",
-    href: "/policies/privacy",
-  },
-  {
-    x: 287,
-    y: 977,
-    w: 39,
-    h: 4,
-    label: " TERMS",
-    href: "/policies/terms-of-service",
-  },
+  { x: 148, y: 926, w: 82, h: 20 },
+  { x: 215, y: 928, w: 65, h: 16 },
+  { x: 196, y: 938, w: 160, h: 39 },
+  { x: 183, y: 950, w: 67, h: 16 },
+  { x: 141, y: 953, w: 46, h: 11 },
+  { x: 156, y: 966, w: 121, h: 29 },
+  { x: 96, y: 972, w: 68, h: 17 },
+  { x: 287, y: 977, w: 39, h: 4 },
 ] as const;
 
-export function A11() {
+export function A11({ c }: { c: HomeText["story"] }) {
+  const faqs = [c.faq_1, c.faq_2, c.faq_3, c.faq_4];
+  const footer = [
+    { label: c.footer_1_label, href: c.footer_1_href },
+    { label: c.footer_2_label, href: c.footer_2_href },
+    { label: c.footer_3_label, href: c.footer_3_href },
+    { label: c.footer_4_label, href: c.footer_4_href },
+    { label: c.footer_5_label, href: c.footer_5_href },
+    { label: c.footer_6_label, href: c.footer_6_href },
+    { label: c.footer_7_label, href: c.footer_7_href },
+    { label: c.footer_8_label, href: c.footer_8_href },
+  ];
   return (
     // 2380:727 module frame — children are positioned relative to (0, 4124).
     <div
@@ -120,7 +106,7 @@ export function A11() {
             whiteSpace: "pre-line",
           }}
         >
-          {"A Real Rose Made\nto Outlive the Moment"}
+          {c.story_title}
         </div>
         <div
           data-el="HOME-STORY-BODY-TEXT"
@@ -133,9 +119,7 @@ export function A11() {
             whiteSpace: "pre-line",
           }}
         >
-          {
-            "At ELDREVE, we believe the most meaningful\ngifts are more than beautiful — they’re personal.\nEach real rose is carefully preserved in 24K gold,\ncapturing not just a flower, but a memory,\na milestone, a feeling.\n\nWe don’t just preserve roses.\nWe preserve what matters."
-          }
+          {c.story_body}
         </div>
         <div
           className={playfair.className}
@@ -148,12 +132,12 @@ export function A11() {
             whiteSpace: "pre-line",
           }}
         >
-          {"A flower may fade.\nThe story does not have to."}
+          {c.story_quote}
         </div>
         {/* 2380:772 CTA · Read Our Story → 2274:275 (/story) */}
         <Link
           data-el="HOME-STORY-READ-BTN"
-          href="/story"
+          href={c.story_cta_href}
           aria-label="Read our story"
           style={{
             ...abs(22, 227, 138, 28),
@@ -175,7 +159,7 @@ export function A11() {
               whiteSpace: "nowrap",
             }}
           >
-            READ OUR STORY
+            {c.story_cta_label}
           </div>
           <img
             src="/eldreve/home/506-98.svg"
@@ -212,14 +196,14 @@ export function A11() {
             whiteSpace: "nowrap",
           }}
         >
-          Frequently Asked Questions
+          {c.faq_title}
         </div>
         {/* FAQ rows — every row's prototype target is /care/chat */}
-        {FAQ_ROWS.map(({ y, q }, i) => (
+        {FAQ_ROWS.map(({ y }, i) => (
           <Link
-            key={q}
+            key={y}
             data-el={`HOME-FAQ-ROW-${i + 1}`}
-            href="/care/chat"
+            href={c.faq_href}
             style={{
               ...abs(31, y, 368, 28),
               display: "block",
@@ -239,7 +223,7 @@ export function A11() {
                 whiteSpace: "nowrap",
               }}
             >
-              {q}
+              {faqs[i]}
             </div>
             <img
               src="/eldreve/home/507-100.svg"
@@ -256,7 +240,7 @@ export function A11() {
           own, so it follows the FAQ rows to the concierge chat. */}
       <Link
         data-el="HOME-FAQ-VIEW-ALL-LINK"
-        href="/care/chat"
+        href={c.faq_href}
         style={{ ...abs(131, 519, 190, 33), display: "block" }}
       >
         {/* Figma exports glyph strips at their INK bounds (104×9), not the
@@ -308,7 +292,7 @@ export function A11() {
             whiteSpace: "pre-line",
           }}
         >
-          {"Give Them a Rose\nThey Will Remember"}
+          {c.gift_title}
         </div>
         <div
           data-el="HOME-GIFT-CTA-BODY-TEXT"
@@ -324,12 +308,12 @@ export function A11() {
             whiteSpace: "pre-line",
           }}
         >
-          {"Choose a classic design\nand let your message last."}
+          {c.gift_body}
         </div>
         {/* 2380:810 → 1523:1526 (/shop) */}
         <Link
           data-el="HOME-GIFT-CTA-SHOP-BTN"
-          href="/shop"
+          href={c.gift_cta_href}
           style={{
             ...abs(11, 158, 145, 26),
             display: "block",
@@ -349,7 +333,7 @@ export function A11() {
               whiteSpace: "nowrap",
             }}
           >
-            SHOP GOLD ROSES
+            {c.gift_cta_label}
           </div>
         </Link>
       </div>
@@ -369,7 +353,7 @@ export function A11() {
             alignItems: "center",
           }}
         >
-          Keep Meaningful Moments Close
+          {c.newsletter_title}
         </div>
         <div
           data-el="HOME-NEWSLETTER-BODY-TEXT"
@@ -385,7 +369,7 @@ export function A11() {
             whiteSpace: "pre-line",
           }}
         >
-          {"New stories, gifting inspiration,\nand occasional updates."}
+          {c.newsletter_body}
         </div>
 
         {/* 2380:801 · the whole input+JOIN group is one prototype link to
@@ -397,7 +381,7 @@ export function A11() {
             /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md. */}
         <Link
           data-el="HOME-NEWSLETTER-JOIN-BTN"
-          href="/account/signup"
+          href={c.newsletter_href}
           aria-label="Join the ELDREVE mailing list"
           style={{ ...abs(200, 27.5, 184, 42), display: "block" }}
         >
@@ -420,7 +404,7 @@ export function A11() {
                 whiteSpace: "nowrap",
               }}
             >
-              Email address
+              {c.newsletter_placeholder}
             </div>
           </div>
           <div
@@ -442,7 +426,7 @@ export function A11() {
                 whiteSpace: "nowrap",
               }}
             >
-              JOIN
+              {c.newsletter_button}
             </div>
           </div>
         </Link>
@@ -451,9 +435,9 @@ export function A11() {
       {/* ---- 2380:849…2380:865 · footer link cloud ---- */}
       {FOOTER_LINKS.map((l, i) => (
         <Link
-          key={l.label}
+          key={l.x}
           data-el={`HOME-FOOTER-LINK-${i + 1}`}
-          href={l.href}
+          href={footer[i].href}
           className={notoSC.className}
           style={{
             ...abs(l.x, l.y, l.w, l.h),
@@ -467,7 +451,7 @@ export function A11() {
             whiteSpace: "nowrap",
           }}
         >
-          {l.label}
+          {footer[i].label}
         </Link>
       ))}
     </div>

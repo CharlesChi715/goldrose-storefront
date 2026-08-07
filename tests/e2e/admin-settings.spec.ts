@@ -142,14 +142,13 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
     page.locator('img[src="/eldreve/home/549-95.svg"]'),
   ).toBeVisible();
 
-  // Edit in Content → real text renders in the same box.
+  // Edit in Content → Home page → real text renders in the same box. The
+  // slogan moved to the homepage editor with the rest of the page's copy.
   await adminLogin(page);
-  await page.goto("/admin/content");
-  await page
-    .getByLabel("Top banner slogan")
-    .fill("FREE SHIPPING OVER $75 · ELDREVE");
+  await page.goto("/admin/content/home");
+  await page.getByLabel("Slogan").fill("FREE SHIPPING OVER $75 · ELDREVE");
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByText("Content saved").first()).toBeVisible();
+  await expect(page.getByText("Home page updated").first()).toBeVisible();
 
   await page.goto("/shop");
   await expect(
@@ -160,9 +159,9 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   );
 
   // Reset → the PNG returns (pixel-diff stays perfect).
-  await page.goto("/admin/content");
-  await page.getByRole("button", { name: "Reset to original" }).click();
-  await expect(page.getByText("Content saved").first()).toBeVisible();
+  await page.goto("/admin/content/home");
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
+  await expect(page.getByText("Home page updated").first()).toBeVisible();
   await page.goto("/shop");
   await expect(
     page.locator('img[src="/eldreve/home/549-95.svg"]'),

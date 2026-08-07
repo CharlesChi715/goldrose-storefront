@@ -703,12 +703,47 @@ segments.
 
 Maps Shopify's Content section to our slot system:
 
-- **Slots**: one card per `site_content` row. V1 slot: **"Top banner
-  slogan"** with text input, reset button, and the note *"✦ symbols may look
-  slightly different from the original design once edited"* (§11). Future
-  slots (hero banner, featured products) are new rows, not new code.
+- **Slots**: one card per `site_content` row, with text input and reset button.
+  Slots owned by another screen are filtered out here: `policy.*` (Settings →
+  Policies), and `home.*` + `promo.*` (Content → Home page, below).
+- **Home page** (`/admin/content/home`) — *added 2026-08-07*. Every editable
+  string on `/`, section by section in page order, plus a show/hide switch per
+  Figma band. See §9.8.1.
 - **Files**: browser for the Storage bucket — preview, copy URL, delete
   unused uploads (Shopify's Content → Files).
+
+#### 9.8.1 Content → Home page
+
+The homepage is a pixel-exact import of Figma frame `2380:370`, so it needed a
+different shape from the flat slot list.
+
+- **The registry is the schema.** `lib/home-content/registry.ts` declares every
+  section and field with the design's own wording as the default. The
+  components render from it, so a Figma re-sync updates the default and
+  "Reset to original" in one place. `site_content` stores **only overrides**: a
+  row exists if and only if the owner's value differs from the design. Nothing
+  was seeded and no migration was needed. This is the earlier note "future slots
+  are new rows, not new code" taken one step further — new fields are new
+  registry entries, and not even rows until someone edits them.
+- **Four field kinds.** `text` / `multiline` / `url` are typed in. `artwork` is
+  wording baked into a Figma SVG (glyph strips, whole button chrome) — listed
+  read-only with the reason, per §11. `managed` is data owned by another screen
+  (catalogue, reviews) — listed read-only with a link to it. Listing all four
+  makes the screen a complete inventory of the page rather than a partial one
+  with silent gaps.
+- **Character budgets warn, never block.** The design's boxes are fixed-width
+  and mostly `nowrap`, so long copy is clipped on the live page. `fieldBudget()`
+  estimates the room from the box geometry, floored at the length of the
+  design's own wording so the warning is never on at rest.
+- **Show/hide re-stacks the page.** The seven A-module bands tile the stage
+  contiguously, so hiding one drops it, slides every later band up by its
+  height (a `translateY` wrapper — no imported coordinate is rewritten) and
+  shrinks the stage by the same amount. With everything visible every shift is
+  0 and the wrapper renders nothing, which is what keeps the home pixel
+  baseline byte-identical. The promo bar is chrome, not a band: editable,
+  not hideable.
+- **Links are validated before they reach an anchor** (`isSafeHref`): in-site
+  paths, fragments, and `http(s)` / `mailto:` / `tel:` only.
 
 ### 9.9 Analytics (`/admin/analytics`) — clone
 

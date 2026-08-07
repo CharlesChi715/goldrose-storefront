@@ -15,8 +15,9 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
 import { BestSellersRail } from "@/components/home/BestSellersRail";
+import type { HomeText } from "@/lib/home-content/registry";
 
-export function A2() {
+export function A2({ c }: { c: HomeText["featured"] }) {
   return (
     // 2380:399 module frame — children positioned relative to (0, 764)
     <div
@@ -56,7 +57,7 @@ export function A2() {
           whiteSpace: "nowrap",
         }}
       >
-        Featured Rose Gifts
+        {c.title}
       </div>
 
       {/* 157:59 subtitle */}
@@ -73,7 +74,7 @@ export function A2() {
           whiteSpace: "nowrap",
         }}
       >
-        Timeless roses for meaningful moments.
+        {c.subtitle}
       </div>
 
       {/* 157:60 "Best Sellers" heading */}
@@ -89,13 +90,13 @@ export function A2() {
           whiteSpace: "nowrap",
         }}
       >
-        Best Sellers
+        {c.rail_title}
       </div>
 
       {/* 157:61 "View all  →" — Figma-rendered strip, links to /shop */}
       <Link
         data-el="HOME-FEATURED-VIEW-ALL-LINK"
-        href="/shop"
+        href={c.view_all_href}
         style={{ ...abs(328, 184, 82, 22), display: "block" }}
       >
         <img

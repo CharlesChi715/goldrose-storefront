@@ -19,6 +19,7 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 /* 2380:427…2380:438 · the four Real Rose Promise tiles. Identical structure,
    so only the icon render, its width and the two label lines differ; x/labelX
@@ -32,7 +33,6 @@ const PROMISE = [
     alt: "✿",
     labelX: 24.5,
     labelW: 41,
-    label: "Made from\nReal Roses",
   },
   {
     x: 97,
@@ -42,7 +42,6 @@ const PROMISE = [
     alt: "✦",
     labelX: 29,
     labelW: 32,
-    label: "Hand\nFinished",
   },
   {
     x: 194,
@@ -52,7 +51,6 @@ const PROMISE = [
     alt: "◇",
     labelX: 28.5,
     labelW: 33,
-    label: "Quality\nChecked",
   },
   {
     x: 291,
@@ -62,7 +60,6 @@ const PROMISE = [
     alt: "▣",
     labelX: 25.5,
     labelW: 39,
-    label: "Gift-Ready\nPackaging",
   },
 ] as const;
 
@@ -74,7 +71,8 @@ const ROWS = [
   { x: 25, y: 1577, w: 385 },
 ] as const;
 
-export function A3() {
+export function A3({ c }: { c: HomeText["ready"] }) {
+  const promises = [c.promise_1, c.promise_2, c.promise_3, c.promise_4];
   return (
     <>
       {/* 2380:422 · module background — decoration, deliberately unnamed */}
@@ -93,12 +91,12 @@ export function A3() {
           whiteSpace: "nowrap",
         }}
       >
-        Ready to Ship
+        {c.title}
       </div>
       {/* 2380:424 · "View all →" (rendered glyph strip) */}
       <Link
         data-el="HOME-READY-TO-SHIP-VIEW-ALL-LINK"
-        href="/shop"
+        href={c.view_all_href}
         style={{ ...abs(350, 1433, 80, 20), display: "block" }}
       >
         <img
@@ -120,7 +118,7 @@ export function A3() {
           key={row.y}
           data-el={`HOME-READY-TO-SHIP-PRODUCT-CARD-${i + 1}`}
           className="gr-card-zoom"
-          href="/shop"
+          href={c.card_href}
           style={{
             ...abs(row.x, row.y, row.w, 99),
             display: "block",
@@ -165,7 +163,7 @@ export function A3() {
               whiteSpace: "nowrap",
             }}
           >
-            Mini Rose Dome + Light
+            {c.card_title}
           </div>
           {/* price/meta strip (rendered glyph strip) */}
           <img
@@ -213,7 +211,7 @@ export function A3() {
           whiteSpace: "nowrap",
         }}
       >
-        Real Rose Promise
+        {c.promise_title}
       </div>
 
       {/* 2380:426 · Real Rose Promise benefits row */}
@@ -253,7 +251,7 @@ export function A3() {
                 whiteSpace: "pre-line",
               }}
             >
-              {p.label}
+              {promises[i]}
             </div>
           </div>
         ))}

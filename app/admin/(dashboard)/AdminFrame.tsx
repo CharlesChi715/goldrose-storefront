@@ -214,6 +214,7 @@ export function AdminFrame({
             selected: selected("/admin/content"),
             subNavigationItems: [
               { url: "/admin/content", label: t("nav.content.all") },
+              { url: "/admin/content/home", label: t("nav.content.home") },
               { url: "/admin/content/files", label: t("nav.content.files") },
               { url: "/admin/content/ideas", label: t("nav.content.ideas") },
             ],

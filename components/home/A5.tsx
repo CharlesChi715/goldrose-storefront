@@ -20,8 +20,9 @@ import Link from "next/link";
 import { OccasionRail } from "@/components/home/OccasionRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
-export function A5() {
+export function A5({ c }: { c: HomeText["occasion"] }) {
   return (
     // 138:61 — module frame; clips the over-wide chip + card rails.
     <div
@@ -69,7 +70,7 @@ export function A5() {
           whiteSpace: "nowrap",
         }}
       >
-        Shop by Occasion
+        {c.title}
       </div>
 
       {/* 162:84 · intro */}
@@ -85,7 +86,7 @@ export function A5() {
           whiteSpace: "nowrap",
         }}
       >
-        Find an ELDREVE for every meaningful moment.
+        {c.intro}
       </div>
 
       {/*
@@ -95,7 +96,7 @@ export function A5() {
       */}
       {/* 425:150 · Valentine's Day (selected) */}
       <Link
-        href="/shop"
+        href={c.chips_href}
         style={{
           ...abs(12, 91, 118, 30),
           display: "block",
@@ -121,12 +122,12 @@ export function A5() {
             whiteSpace: "nowrap",
           }}
         >
-          Valentine&apos;s Day
+          {c.chip_1}
         </div>
       </Link>
       {/* 162:103 · Mother's Day */}
       <Link
-        href="/shop"
+        href={c.chips_href}
         style={{
           ...abs(135, 91, 86, 30),
           display: "block",
@@ -147,12 +148,12 @@ export function A5() {
             whiteSpace: "nowrap",
           }}
         >
-          Mother&apos;s Day
+          {c.chip_2}
         </div>
       </Link>
       {/* 162:105 · Birthday */}
       <Link
-        href="/shop"
+        href={c.chips_href}
         style={{
           ...abs(226, 91, 70, 30),
           display: "block",
@@ -173,7 +174,7 @@ export function A5() {
             whiteSpace: "nowrap",
           }}
         >
-          Birthday
+          {c.chip_3}
         </div>
       </Link>
       {/* 2380:474 · Christmas. The Figma label reads "Chritsmas" — a source
@@ -182,7 +183,7 @@ export function A5() {
           node 2380:474. See
           /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md. */}
       <Link
-        href="/shop"
+        href={c.chips_href}
         style={{
           ...abs(301, 91, 82, 30),
           display: "block",
@@ -203,12 +204,12 @@ export function A5() {
             whiteSpace: "nowrap",
           }}
         >
-          Christmas
+          {c.chip_4}
         </div>
       </Link>
       {/* 2380:475 · Anniversary (clipped at the module's right edge) */}
       <Link
-        href="/shop"
+        href={c.chips_href}
         style={{
           ...abs(388, 91, 86, 30),
           display: "block",
@@ -229,7 +230,7 @@ export function A5() {
             whiteSpace: "nowrap",
           }}
         >
-          Anniversary
+          {c.chip_5}
         </div>
       </Link>
       {/* 425:155 · more-occasions arrow (off-canvas) */}
@@ -243,7 +244,7 @@ export function A5() {
 
       {/* 162:95 · Occasion Card · Valentine's Day (off-canvas rail item) */}
       <Link
-        href="/shop"
+        href={c.chips_href}
         style={{
           ...abs(464, 135, 210, 360),
           display: "block",
@@ -315,7 +316,7 @@ export function A5() {
         />
       </Link>
 
-      <OccasionRail />
+      <OccasionRail c={c} />
 
       {/* 2380:486 · dots 4–7 — the design draws seven for three cards, so
           these four stay inert; OccasionRail wires the first three. Positioned

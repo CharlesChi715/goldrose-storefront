@@ -18,28 +18,31 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { notoSC, playfair } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 // The CTA arrow glyph (I2380:379;1523:389) as an exact render.
 const ARROW = "/eldreve/home/465-156.svg";
 
 // Benefit tiles 2380:380 / 2380:383 — icon glyphs served as exact SVG
-// renders; x offsets are relative to each tile's own box.
+// renders; x offsets are relative to each tile's own box. The two labels are
+// owner-editable, so they arrive as `c.benefit_1` / `c.benefit_2`.
 const TILES = [
   {
     x: 32,
     w: 176,
     icon: { src: "/eldreve/home/155-60.svg", x: 80, w: 16, alt: "✿" },
-    label: { x: 65, w: 46, lines: ["Made from", "Real Roses"] },
+    label: { x: 65, w: 46 },
   },
   {
     x: 224,
     w: 174,
     icon: { src: "/eldreve/home/155-66.svg", x: 79, w: 16, alt: "▣" },
-    label: { x: 65, w: 44, lines: ["Gift-Ready", "Packaging"] },
+    label: { x: 65, w: 44 },
   },
 ];
 
-export function A1() {
+export function A1({ c }: { c: HomeText["hero"] }) {
+  const benefits = [c.benefit_1, c.benefit_2];
   return (
     // 2380:374 module frame — children below are positioned relative to it.
     <div
@@ -64,7 +67,7 @@ export function A1() {
           whiteSpace: "nowrap",
         }}
       >
-        {"—   G O L D R O S E   —"}
+        {c.eyebrow}
       </div>
 
       {/* 2380:376 hero title */}
@@ -78,11 +81,10 @@ export function A1() {
           fontWeight: 500,
           color: "#3B2F2F",
           textAlign: "center",
+          whiteSpace: "pre-line",
         }}
       >
-        Gold-Dipped Roses
-        <br />
-        Made from Real Roses
+        {c.title}
       </div>
 
       {/* 2380:377 hero subtitle */}
@@ -99,7 +101,7 @@ export function A1() {
           whiteSpace: "nowrap",
         }}
       >
-        Eternal Beauty, Endless Love
+        {c.subtitle}
       </div>
 
       {/* 2380:378 hero body — wraps naturally inside its 306px box */}
@@ -115,14 +117,13 @@ export function A1() {
           textAlign: "center",
         }}
       >
-        Discover real preserved rose gifts for anniversaries, birthdays,
-        weddings and meaningful moments.
+        {c.body}
       </div>
 
       {/* 2380:379 CTA · Shop Gold-Dipped Roses */}
       <Link
         data-el="HOME-HERO-SHOP-BTN"
-        href="/shop"
+        href={c.cta_href}
         style={{
           ...abs(32, 598, 366, 44),
           display: "block",
@@ -143,7 +144,7 @@ export function A1() {
             whiteSpace: "nowrap",
           }}
         >
-          SHOP GOLD-DIPPED ROSES
+          {c.cta_label}
         </div>
         <img
           src={ARROW}
@@ -186,11 +187,10 @@ export function A1() {
               fontWeight: 400,
               color: "#3B2F2F",
               textAlign: "center",
+              whiteSpace: "pre-line",
             }}
           >
-            {t.label.lines[0]}
-            <br />
-            {t.label.lines[1]}
+            {benefits[i]}
           </div>
         </div>
       ))}

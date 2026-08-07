@@ -17,6 +17,7 @@ import {
 } from "@/components/home/Carousel";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 /** One card of the 436:319 recipient rail, at cell coordinates. */
 type RecipientCard = {
@@ -108,7 +109,9 @@ const DOTS = [
  *
  * @returns A slow, one-card-at-a-time carousel clipped to the canvas edge.
  */
-export function OccasionRail() {
+export function OccasionRail({ c }: { c: HomeText["occasion"] }) {
+  const titles = [c.card_1_title, c.card_2_title, c.card_3_title];
+  const copies = [c.card_1_copy, c.card_2_copy, c.card_3_copy];
   return (
     /*
       436:319 · recipient card rail — the design draws three cards side by
@@ -132,7 +135,7 @@ export function OccasionRail() {
       dots={DOTS}
       activeColor="#B27A38"
       idleColor="#E5D1B2"
-      href="/shop"
+      href={c.card_href}
       label="occasion"
       renderSlide={(i) => {
         const card = RECIPIENT_CARDS[i];
@@ -179,7 +182,7 @@ export function OccasionRail() {
                 whiteSpace: "pre-line",
               }}
             >
-              {card.title.text}
+              {titles[i]}
             </div>
             {/* 436:282/296/309 · copy */}
             <div
@@ -194,7 +197,7 @@ export function OccasionRail() {
                 whiteSpace: "nowrap",
               }}
             >
-              {card.copy.text}
+              {copies[i]}
             </div>
             {/* 436:283/297/311 · card ornament */}
             <img

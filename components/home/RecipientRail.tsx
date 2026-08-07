@@ -26,6 +26,7 @@ import {
 } from "@/components/home/Carousel";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import type { HomeText } from "@/lib/home-content/registry";
 
 /** One card of the recipient rail, at CELL coordinates. */
 type Card = {
@@ -113,7 +114,9 @@ const DOTS = [
  *
  * @returns A slow, one-card-at-a-time carousel clipped to the canvas edge.
  */
-export function RecipientRail() {
+export function RecipientRail({ c }: { c: HomeText["recipient"] }) {
+  const titles = [c.card_1_title, c.card_2_title, c.card_3_title];
+  const copies = [c.card_1_copy, c.card_2_copy, c.card_3_copy];
   return (
     /* The design draws three cards side by side (x=15/201/387, 176 wide on a
        186 pitch, the third clipped by the canvas edge). The window stops at
@@ -128,7 +131,7 @@ export function RecipientRail() {
       dots={DOTS}
       activeColor="#C46E29"
       idleColor="#E0CCB2"
-      href="/shop"
+      href={c.card_href}
       label="recipient"
       renderSlide={(i) => {
         const card = CARDS[i];
@@ -177,7 +180,7 @@ export function RecipientRail() {
                 whiteSpace: "pre-line",
               }}
             >
-              {card.title.text}
+              {titles[i]}
             </div>
             <div
               className={card.copy.font}
@@ -192,7 +195,7 @@ export function RecipientRail() {
                   card.copy.font === notoSC.className ? undefined : "nowrap",
               }}
             >
-              {card.copy.text}
+              {copies[i]}
             </div>
             <img
               src="/eldreve/home/436-283.svg"

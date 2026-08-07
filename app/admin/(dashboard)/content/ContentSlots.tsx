@@ -43,6 +43,23 @@ export function ContentSlots({ slots }: { slots: ContentSlot[] }) {
   return (
     <Page title={t("nav.content")}>
       <BlockStack gap="400">
+        {/* Entry point to the homepage editor — the storefront's biggest body
+            of owner-editable copy lives there, not in the slot list below. */}
+        <Card>
+          <BlockStack gap="200">
+            <Text as="h2" variant="headingSm">
+              {t("content.home.link.title")}
+            </Text>
+            <Text as="p" tone="subdued">
+              {t("content.home.link.body")}
+            </Text>
+            <InlineStack align="end">
+              <Button url="/admin/content/home">
+                {t("content.home.link.action")}
+              </Button>
+            </InlineStack>
+          </BlockStack>
+        </Card>
         <Text as="h2" variant="headingSm">
           {t("content.slots.title")}
         </Text>

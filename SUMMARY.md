@@ -95,6 +95,20 @@ Open linked resources only when the task needs them.
   they are not customer content and must go before launch. Missing on purpose:
   photo-upload UI (column ready) and an admin moderation screen (publish needs
   a manual DB update for now).
+- **The whole home page is admin-editable (2026-08-07, `worktree-admin-home-sections`).**
+  Content → **Home page** (`/admin/content/home`) lists all 8 sections in page
+  order with ~100 fields — headings, copy, button labels, links, chips, FAQ
+  rows, certificates, footer links — plus a show/hide switch per Figma band.
+  `lib/home-content/registry.ts` holds the design defaults; `site_content`
+  stores **only overrides** (a row exists iff the value differs from the
+  design), so there is no migration and no seed, and a Figma re-sync updates
+  every untouched field. Hiding a band re-stacks the page and shrinks the
+  stage; with nothing hidden the render is byte-identical (all 3 pixel
+  baselines pass). Figma-baked labels and catalogue/review data are listed
+  read-only with the reason. `promo.slogan` moved here from `/admin/content`.
+  Spec: [`admin-design.md` §9.8.1](docs/admin-design.md#981-content--home-page).
+  ⚠️ The hero eyebrow still reads `— G O L D R O S E —`, a miss in the 08-05
+  ELDREVE rename; it is now editable, so it is an owner decision, not a deploy.
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
