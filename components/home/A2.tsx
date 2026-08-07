@@ -15,7 +15,7 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
 import { BestSellersRail } from "@/components/home/BestSellersRail";
-import type { RailTiming } from "@/components/home/Carousel";
+import type { RailTiming } from "@/lib/home-content/rail-timing";
 import type { HomeText } from "@/lib/home-content/registry";
 
 export function A2({

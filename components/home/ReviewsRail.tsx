@@ -12,7 +12,8 @@
  * exactly as A-6 drew them.
  */
 
-import { Carousel, type RailTiming } from "@/components/home/Carousel";
+import { Carousel } from "@/components/home/Carousel";
+import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
 import { fileUrl } from "@/lib/files-url";

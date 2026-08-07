@@ -19,7 +19,7 @@ import { RecipientRail } from "@/components/home/RecipientRail";
 import { ReviewsRail } from "@/components/home/ReviewsRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
-import type { RailTiming } from "@/components/home/Carousel";
+import type { RailTiming } from "@/lib/home-content/rail-timing";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /* Recipient filter chips (static, not clickable). "Wife" is the selected

@@ -41,54 +41,10 @@ export const AUTOPLAY_MS = 1800;
 
 const SLIDE_MS = 420;
 
-/**
- * The four card rails advance one card at a time and the owner asked for them
- * to move SLOWLY (2026-07-26), so they override both timings: a long pause on
- * each card and a long glide between them.
- *
- * These are the DESIGN defaults. Since 2026-08-07 the live values come from the
- * registry's `motion` section (Content → Home page → Slideshow speed) and are
- * threaded to every rail as one shared `timing` prop, so the four never drift
- * apart. The registry's bounds keep the glide strictly shorter than the cycle,
- * which is what stops a rail advancing before it has finished sliding.
- */
-export const RAIL_AUTOPLAY_MS = 4200;
-export const RAIL_SLIDE_MS = 900;
-
-/** The shared rail timing, resolved from the registry and passed down. */
-export type RailTiming = { autoplayMs: number; slideMs: number };
-
-/** The design's own timing, used when nothing has been saved. */
-export const DESIGN_RAIL_TIMING: RailTiming = {
-  autoplayMs: RAIL_AUTOPLAY_MS,
-  slideMs: RAIL_SLIDE_MS,
-};
-
-/**
- * Turn the registry's two stored strings into a usable timing.
- *
- * Falls back to the design value per field rather than for the pair, so one
- * unreadable slot cannot silently retime the other — and a rail always gets a
- * number, never NaN, which would make setInterval fire continuously.
- *
- * @param cycle - The stored "how long each card stays" value.
- * @param glide - The stored "how long the slide takes" value.
- * @returns The timing to hand to every rail.
- */
-export function railTiming(cycle: string, glide: string): RailTiming {
-  const parsedCycle = Number(cycle);
-  const parsedGlide = Number(glide);
-  return {
-    autoplayMs:
-      Number.isFinite(parsedCycle) && parsedCycle > 0
-        ? parsedCycle
-        : RAIL_AUTOPLAY_MS,
-    slideMs:
-      Number.isFinite(parsedGlide) && parsedGlide > 0
-        ? parsedGlide
-        : RAIL_SLIDE_MS,
-  };
-}
+/* The rails' shared timing lives in lib/home-content/rail-timing.ts and is NOT
+   re-exported here. This is a "use client" module, so anything it exports is a
+   client export: `app/page.tsx` resolving the timing would fail the production
+   build (dev mode does not enforce it). Import from the lib module directly. */
 
 /** Release travel that commits to the neighbouring slide; less springs back. */
 const SWIPE_PX = 40;

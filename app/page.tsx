@@ -27,7 +27,7 @@ import { A6 } from "@/components/home/A6";
 import { A9 } from "@/components/home/A9";
 import { A11 } from "@/components/home/A11";
 import { HomeBand } from "@/components/home/HomeBand";
-import { railTiming } from "@/components/home/Carousel";
+import { railTiming } from "@/lib/home-content/rail-timing";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
 import { getHomeContent } from "@/lib/home-content";

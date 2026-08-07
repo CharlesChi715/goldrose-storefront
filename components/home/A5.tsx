@@ -20,7 +20,7 @@ import Link from "next/link";
 import { OccasionRail } from "@/components/home/OccasionRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
-import type { RailTiming } from "@/components/home/Carousel";
+import type { RailTiming } from "@/lib/home-content/rail-timing";
 import type { HomeText } from "@/lib/home-content/registry";
 
 export function A5({

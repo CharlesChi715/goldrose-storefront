@@ -19,7 +19,8 @@
  * absolute, exactly as A-6 drew them.
  */
 
-import { Carousel, type RailTiming } from "@/components/home/Carousel";
+import { Carousel } from "@/components/home/Carousel";
+import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";

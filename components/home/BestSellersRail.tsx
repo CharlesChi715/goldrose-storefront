@@ -28,7 +28,8 @@
  */
 
 import { abs } from "@/lib/figma-layout";
-import { Carousel, type RailTiming } from "@/components/home/Carousel";
+import { Carousel } from "@/components/home/Carousel";
+import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { playfair, notoSC } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeText } from "@/lib/home-content/registry";
