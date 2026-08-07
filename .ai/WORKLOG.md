@@ -5439,80 +5439,6 @@ otherwise.
   a new round-trip (drag in admin → save → PDP and shop card both crop to
   50% 100%).
 
-## 2026-08-06 — /shop renders only real catalog products
-
-- **Ask (owner):** make /shop show only the product that actually exists in
-  the database.
-- **Cause:** the grid cycled the catalog to fill the Figma frame's eight fixed
-  slots (`data[c % data.length]`), so the single hosted product was drawn
-  eight times, across five rotated "pages" — plus a hardcoded "120 GIFTS" and
-  a "Show 36 Results" button.
-- **Change:** the frame's numbers are now grid CAPACITY, not content. One card
-  per product; row count, pager and canvas height are derived from the
-  catalog. Constants read back off the slot table (top 408.5, pitch 308, card
-  297, pager gap 27, pager 32, tail 133.5), so a full eight-card page rebuilds
-  the frame's 1822 exactly — verified at 1822 with 12 seeded products.
-- Real paging (8/page, windowed 5-button pager, hidden at one page), counts
-  wired to the catalog, `?q=` preserved across pages, and a first empty state
-  (no-match search / empty catalog / failed read) since the grid can now be
-  empty.
-- **Verified:** typecheck, lint, build, 74 unit tests, 107 e2e tests, `/shop`
-  pixel baseline regenerated (canvas 1822 → 1147 for the 3-product seed).
-- **Left for design:** the "Ruby Red"/"Gift Sets" chips and the 5-star card
-  art are still static frame art; the empty-state line has no Figma frame.
-
-## 2026-08-06 — the product page now renders the catalog row
-
-- **Ask (owner):** "this PDP totally not generated from database" — wire it;
-  keep the review block and the unboxing count on the page.
-- **Was live before:** title, price, compare-at. Nothing else. Description,
-  SKU and photos reached only the `<meta>` tags and the Product JSON-LD.
-- **Now from the DB:** hero photo (and the media trigger's own copy that
-  covered it), the ABOUT panel photo, the media viewer's set, the badge pill
-  (`badge`, was a flat BEST SELLER), the strapline (first three `details`),
-  the discount pill (computed — 31% on the live product, was a flat "15% OFF"),
-  the ABOUT copy (`description`, 3-line clamp), and every number in the
-  reviews band and drawer.
-- **Zero reviews now reads as unrated** — the band and drawer stay on the page
-  per the owner, but the frame's "4.9 · 286 Reviews", the 91/7/1.4/0.4/0.2
-  histogram, the "Sarah M. · Verified Buyer" quote and the drawer's four
-  named testimonials are gone. Those were review claims with an empty
-  product_reviews table (US FTC exposure before launch).
-- **Left as the frame's own, on instruction or for want of a slot:** the
-  unboxing gallery and its "(1,354)", the three shipping benefits (store
-  policy), the ABOUT slogan, colour cards. `best_for` and `details` past the
-  third still have no box in the frame.
-- **Verified:** typecheck, lint, build, 74 unit tests, 108 e2e tests (one new
-  PDP regression test), product-detail pixel baseline regenerated.
-
-## 2026-08-06 — the PDP hero is an auto-playing, swipeable carousel
-
-- **Ask (owner):** make the product pictures auto-play and swipe like the
-  homepage carousel.
-- Built on the existing shared `components/home/Carousel.tsx`, so the feel is
-  identical to H-03: 1.8s auto-play, the track follows the finger
-  pixel-for-pixel while held, 40px release commits to the neighbour, 6px tap
-  slop separates tap from drag, auto-play pauses on hover/drag and is off
-  under reduced motion.
-- The hero **moved into `PdpOverlays`**. It had two stacked photo layers at the
-  same rect (the page's `<img>` and the media trigger's own copy, which exists
-  so the hover-zoom worked); two tracks could never hold the same slide, and
-  the trigger has to stay on top to open the viewer. The page now draws only
-  the card behind it.
-- Dots are generated from the photo count, all one size, active by colour —
-  the call `HeroCarousel` already made for the site. A single-photo product
-  gets no dots. The frame's 18px active pill is gone with them.
-- Carousel gained two optional props: `onActivate` (slides become buttons
-  instead of links) and `radius`. Home page behaviour is unchanged.
-- Hover-zoom on the hero is dropped; it fought the drag and the homepage hero
-  has none either.
-- Seed fixture: `premium-gold-rose-gift-bundle` now carries three photos so
-  both paths (multi-photo carousel, single-photo hero) have a fixture.
-- **Verified:** typecheck, lint, build, 74 unit tests, 111 e2e tests (three new
-  carousel tests), product-detail pixel baseline regenerated. Drove it in a
-  real browser: auto-play steps one slide width every 1.8s, a drag swipes
-  without opening the viewer, a tap opens it, reduced motion parks it.
-
 ## 2026-08-07 00:43 AEST
 
 - **Stale sweep across the repo** (branch `worktree-remove-stale`). Scope set
@@ -5925,3 +5851,35 @@ several agent sessions branching in parallel — so it recurs by construction.
 - **Verified:** lint clean, typecheck clean, format clean, `check:assets`,
   `check:migrations` green on the real sequence, 135 unit tests (126 + 9 new),
   production build.
+
+## 2026-08-07 20:25 AEST — the worklog stops conflicting on every merge
+
+Second of the two follow-ups. `.ai/WORKLOG.md` is append-only, so it conflicts
+on nearly every merge — four of the eight on 2026-08-07 — always the same
+shape: two branches appended after the same point, and the resolution is
+always "keep both sides". No judgement, just friction, and hand-resolving it
+is how three entries got duplicated in the first place.
+
+- **`.gitattributes` (new)** marks `.ai/WORKLOG.md merge=union`. `union` is
+  compiled into git rather than being a custom driver, so a fresh clone gets
+  the behaviour with no setup. Also pins
+  `tests/e2e/__screenshots__/*.png binary` — git already detects that, but it
+  stops a future `* text=auto` from ever line-ending-normalising a baseline.
+- **Proved, not assumed.** Made two throwaway branches that each appended a
+  different entry and merged them: previously a guaranteed conflict, now
+  `Auto-merging .ai/WORKLOG.md` with zero conflicted files and both entries
+  present. The test also turned up a cosmetic wrinkle worth knowing — the
+  blank line between the two new entries can be absorbed — which is written
+  into `.gitattributes` next to the rule.
+- **The cost is documented next to the rule:** union can never report a
+  conflict on this path again, so two edits to the *same* line would both
+  survive silently. Fine for a log, wrong for anything else, so the rule names
+  one file rather than `*.md`.
+- **Removed three duplicated 2026-08-06 entries** (`/shop renders only real
+  catalog products`, `the product page now renders the catalog row`, `the PDP
+  hero is an auto-playing, swipeable carousel`) — residue of the same
+  double-merge that broke `PdpOverlays.tsx`. Verified byte-identical by md5
+  before deleting; 326 → 323 entries. Two other repeated headings
+  (`2026-06-30 16:52`, `2026-07-15 15:21`) turned out to be **different
+  content that happens to share a timestamp** and were left alone — the md5
+  check is the only reason they survived.
