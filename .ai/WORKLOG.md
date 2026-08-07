@@ -5840,3 +5840,48 @@ Open: push `0009` to hosted — `supabase db push` is blocked for the agent by
 the permission classifier, so the owner runs it. Values that are already chip
 names carry across (both hosted rows say "Classic Collection" -> `classic`);
 everything else starts empty and is re-picked in the admin.
+
+## 2026-08-07 19:30 AEST — five more branches merged, and a migration collision
+
+Second consolidation pass. `main` was not checked out anywhere (a concurrent
+session had moved this directory onto `feat/best-for-facets`), so the merges
+were done in a dedicated worktree checked out on `main` — which advances the
+ref through real merges instead of force-moving it.
+
+- **Merged, in order:** `worktree-feat-shop-filter-dialog`,
+  `worktree-feat-coming-soon-header`, `worktree-pdp-subtitle-wrap`,
+  `worktree-media-spotlight`, `feat/best-for-facets`.
+- **`worktree-feat-coming-soon-header` was another empty branch** — zero
+  commits, the whole brand-top-nav change uncommitted in its worktree. Same
+  pattern as `worktree-pdp-subtitle-wrap` earlier today. Committed on the
+  branch first, then merged.
+- **⚠️ Two migrations were both numbered `0009`.** `worktree-media-spotlight`
+  wrote `0009_product_image_spotlight.sql`; `feat/best-for-facets` wrote
+  `0009_product_best_for_facets.sql`. Neither was pushed, so spotlight was
+  renumbered to `0010`. **The order is load-bearing, not cosmetic:**
+  `0009` does `drop view catalog_products` and recreates it carrying only
+  `focal_x`/`focal_y`, while `0010` `create or replace`s it with the full
+  spotlight set. Run the other way round, `0009` would silently strip the
+  spotlight columns from the view the storefront reads, and framing would
+  stop working with nothing failing loudly. Both view column lists are
+  identical, so the `create or replace` in `0010` is valid after `0009`.
+  References updated in `SUMMARY.md`, `docs/admin-design.md`, the worklog and
+  the migration's own comments.
+- **`ShopInteractive.tsx` was the real merge**, 5 hunks: two sessions rewrote
+  the same filter drawer. `feat/best-for-facets` supersedes
+  `worktree-feat-shop-filter-dialog` — it replaced the drawer's whole state
+  model (`filterSelection` indices → `pending` facet slugs), so the branch
+  wins on Reset, the confirm button and the removed helpers. Kept from the
+  other side: the outside-click/Escape dismissal, which is orthogonal and had
+  no counterpart. Also removed `nothingSelected`, which git had auto-merged
+  into a dangling reference to a state variable the branch deleted — a clean
+  merge that would not have compiled.
+- **`lib/admin/products.ts` and `tests/e2e/admin-products.spec.ts`** were
+  both-sides-added conflicts, not either/or: two imports and two independent
+  tests landing at the same spot. Both sides kept.
+- **Verified** on the merge commit in an isolated checkout: typecheck clean,
+  lint clean (2 pre-existing warnings), format clean, 126 unit tests, the
+  production build, and 129 e2e tests including every pixel baseline. One
+  earlier `ECONNRESET` on `/sitemap.xml` was a flake — that spec passes alone
+  and the full re-run was 129/129.
+- **Not done:** nothing pushed. `main` is 18 commits ahead of `origin/main`.

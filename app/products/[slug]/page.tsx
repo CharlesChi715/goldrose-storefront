@@ -13,6 +13,8 @@
  * adds 16px, so the info card is 182 tall (frame: 166), every section below it
  * sits 16px lower than the frame, and the stage is 1632 (frame: 1616). The
  * frame itself still says 1616 — Figma needs the same change.
+ * AI-TAG(AI-036): OWNER-TODO — get frame 1523:3971 changed to match. See
+ * /agent-delivery/sessions/branch-consolidation-08-07.md.
  *
  * Every product renders the same pixel design; the slug picks the product,
  * and the catalog row (lib/supabase/catalog) fills the designated boxes
