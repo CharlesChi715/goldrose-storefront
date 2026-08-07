@@ -1,4 +1,4 @@
-// scripts for learning dont delete it. 
+// scripts for learning dont delete it.
 import { readdirSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
 
