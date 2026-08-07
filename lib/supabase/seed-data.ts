@@ -260,18 +260,6 @@ const SEED_PRODUCTS: SeedProduct[] = [
         focal_x: 50,
         focal_y: 50,
       },
-      {
-        product_id: "premium-gift-bundle",
-        path: "/products/gold-rose-box.jpg",
-        alt: "The bundle's gift box, closed",
-        position: 1,
-      },
-      {
-        product_id: "premium-gift-bundle",
-        path: "/products/gold-rose-stand.jpg",
-        alt: "Gold dipped rose displayed beside a brown gift box",
-        position: 2,
-      },
     ],
     variants: [
       {
