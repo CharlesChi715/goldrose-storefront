@@ -5687,3 +5687,30 @@ conflicts.
   build. Two of my runs reported a false pass/fail from the `pdp-subtitle-wrap`
   worktree's server before I caught it. Not fixed here.
 
+
+## 2026-08-07 17:45 AEST — the consolidation pushed, CI back to green
+
+Follow-on to the merge above, after a CI-monitor event flagged PR #35.
+
+- **PR #35's failure was one trailing space.** `prettier --check` rejected
+  line 1 of `scripts/features/cli.mjs`. `git log -- <file>` put it on 9355636
+  ("Add explanatory comment to preserve learning scripts") — already on `main`,
+  inherited by the PR rather than caused by it. `main`'s own CI had been red
+  for its last two runs. Comment wording untouched; only the whitespace went.
+- **No feedback to answer.** The PR's only comment was vercel[bot]'s
+  deployment table — zero inline comments, zero reviews, nothing to reply to.
+- **Pushed** `9355636..b5cc0b1` (8 commits, no divergence). PR #35 auto-closed
+  as MERGED, GitHub deleted its head branch, and the CI run on `b5cc0b1` is the
+  first green one after two failures.
+- **Branches cleaned to `main` only on GitHub.** Deleted `feat/figma-sync`,
+  `feat/product-reviews`, `worktree-account-personal-info-live` remotely, and
+  the two local branches no worktree held. Every deletion was gated on
+  `git merge-base --is-ancestor <branch> main` first; the locals went via
+  `git branch -d`, which refuses anything unmerged. Worktrees left in place.
+- **A second session is working in this same directory.** It committed
+  `2ba7a61` (review-caption centring) mid-run, then `fdc2c71`/`305c0e7`/
+  `dd3e7cb` (Best Sellers card size) after the push, and created
+  `worktree-fix-bestsellers-card-size`, `worktree-media-spotlight`,
+  `worktree-pdp-subtitle-wrap` and `fix/pdp-badge-truncation`. None of it was
+  touched here, and `main` sits 3 commits ahead of `origin/main` because those
+  three are not mine to push.
