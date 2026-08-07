@@ -734,7 +734,10 @@ export default async function ProductDetailPage({
           </div>
           <div
             data-live-text
-            style={{ ...abs(9.5, 144, 105), ...txt(10, 12.102, "#B8A69A") }}
+            style={{
+              ...abs(9.5, 144, 105),
+              ...txt(10, 12.102, "#B8A69A", "center"),
+            }}
           >
             {hasReviews
               ? `Based on ${stats.count} review${stats.count === 1 ? "" : "s"}`
