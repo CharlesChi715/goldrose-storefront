@@ -42,6 +42,11 @@ import NoCalcScale from "@/components/NoCalcScale";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
 import { Carousel } from "@/components/home/Carousel";
+import {
+  CENTRE,
+  spotlightStyle,
+  type SpotlightArea,
+} from "@/lib/images/spotlight";
 
 const INK = "#3B2F2F";
 const SAND = "#E5D9C9";
@@ -758,8 +763,12 @@ function MediaViewer({
   shots,
 }: {
   onClose: () => void;
-  /** The same photo set the hero carousel pages through. */
-  shots: Array<{ src: string; focus: string }>;
+  /**
+   * The same photo set the hero carousel pages through. Only `src` is read:
+   * this viewer draws each photo WHOLE (object-fit: contain), so it shows the
+   * original upload rather than the spotlight the hero window is cropped to.
+   */
+  shots: Array<{ src: string; spotlight: SpotlightArea }>;
 }) {
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
@@ -1135,10 +1144,11 @@ export function PdpOverlays({
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
   /**
-   * The product's photos with their framing (CSS object-position), for the
-   * hero carousel; the viewer shows each photo whole and ignores the focus.
+   * The product's photos with the spotlight area the admin framed for THIS
+   * window; the viewer below shows each photo whole and ignores the area,
+   * which is the point of storing an area instead of cropping the file.
    */
-  media?: Array<{ src: string; focus: string }>;
+  media?: Array<{ src: string; spotlight: SpotlightArea }>;
   /** Names the hero slides for screen readers. */
   productTitle?: string;
 }) {
@@ -1147,7 +1157,7 @@ export function PdpOverlays({
   // photos of its own falls back to the frame's set rather than an empty box.
   const shots = media.length
     ? media
-    : MEDIA.map((src) => ({ src, focus: "50% 50%" }));
+    : MEDIA.map((src) => ({ src, spotlight: CENTRE }));
   const mounted = useSyncExternalStore(
     subscribeToNothing,
     onTheClient,
@@ -1186,9 +1196,10 @@ export function PdpOverlays({
             style={{
               ...abs(0, 0, 398, 250),
               display: "block",
-              objectFit: "cover",
-              // The admin framed this photo against exactly this box.
-              objectPosition: shots[i].focus,
+              // The admin framed this photo against exactly this box, so the
+              // spotlight applies here in full — point AND zoom. The Carousel
+              // window already clips, which a zoomed photo relies on.
+              ...spotlightStyle(shots[i].spotlight),
             }}
           />
         )}

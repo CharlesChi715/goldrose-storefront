@@ -290,11 +290,20 @@ const en = {
   "form.media.moveRight": "Move right",
   "form.media.remove": "Remove image",
   "form.media.frame": "Adjust framing",
-  "form.media.frame.title": "Framing · what the product page shows",
+  "form.media.unframed": "Needs framing",
+  "form.media.frame.title": "Framing · what each box shows",
   "form.media.frame.hint":
-    "Drag the photo to choose what stays inside the frame. The frame is the exact size of the photo box on the product page.",
+    "Drag the photo to move it under the frame, and use the slider to zoom in. Whatever stays inside is what shoppers see.",
   "form.media.frame.fits":
-    "This photo already matches the frame — there is nothing to reposition.",
+    "This photo already matches the frame — zoom in if you want to show less of it.",
+  "form.media.frame.zoom": "Zoom",
+  "form.media.frame.pdp": "Product page",
+  "form.media.frame.pdp.help":
+    "The photo window at the top of the product page, at its real size. Tapping it still opens the full photo, uncropped.",
+  "form.media.frame.card": "Shop card",
+  "form.media.frame.card.help":
+    "The card in the shop grid. It is a different shape from the product page, so the hero photo is framed for it separately.",
+  "form.media.frame.card.follow": "Use the same part as the product page",
   "form.media.frame.reset": "Centre",
   "form.media.frame.done": "Done",
   "form.pricing.title": "Pricing",
@@ -995,10 +1004,19 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.media.moveRight": "右移",
   "form.media.remove": "移除图片",
   "form.media.frame": "调整取景",
-  "form.media.frame.title": "取景框 · 商品页显示的范围",
+  "form.media.unframed": "待取景",
+  "form.media.frame.title": "取景框 · 各区域显示的范围",
   "form.media.frame.hint":
-    "拖动图片以选择保留在取景框内的部分。取景框与商品页图片区域尺寸完全一致。",
-  "form.media.frame.fits": "该图片与取景框比例一致——无需调整位置。",
+    "拖动图片调整位置，使用滑块放大。留在取景框内的部分就是买家看到的画面。",
+  "form.media.frame.fits": "该图片与取景框比例一致——如需显示更少内容，请放大。",
+  "form.media.frame.zoom": "缩放",
+  "form.media.frame.pdp": "商品页",
+  "form.media.frame.pdp.help":
+    "商品页顶部的图片区域，按真实尺寸显示。点击该图片仍会打开未裁剪的完整原图。",
+  "form.media.frame.card": "商店卡片",
+  "form.media.frame.card.help":
+    "商店列表中的卡片。其比例与商品页不同，因此主图需要单独取景。",
+  "form.media.frame.card.follow": "与商品页使用相同范围",
   "form.media.frame.reset": "居中",
   "form.media.frame.done": "完成",
   "form.pricing.title": "定价",

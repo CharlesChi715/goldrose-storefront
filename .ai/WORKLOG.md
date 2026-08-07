@@ -5687,3 +5687,41 @@ conflicts.
   build. Two of my runs reported a false pass/fail from the `pdp-subtitle-wrap`
   worktree's server before I caught it. Not fixed here.
 
+
+## 2026-08-07 — Spotlight areas for every product photo (`worktree-media-spotlight`)
+
+**Ask:** every uploaded photo should have a spotlight area chosen for it — the
+view the PDP image viewer shows — while the fullscreen viewer keeps showing the
+whole original; and the hero should sit properly in the shop card, which needs
+its own selected area.
+
+**Already in the repo (0008, `feat/pdp-image-framing`):** one focal POINT per
+photo driving CSS `object-position`, shared by every box. The fullscreen
+`MediaViewer` already drew photos with `object-fit: contain`, so "the full
+viewer shows the original" needed no change — verified, not rebuilt.
+
+**Built:**
+
+- Migration `0009_product_image_spotlight.sql` — `focal_zoom` (not null, 100),
+  nullable `card_focal_x/card_focal_y/card_zoom`, and `framed`; `catalog_products`
+  replaced to carry them (`framed` stays admin-only).
+- `lib/images/spotlight.ts` — the one place that turns a framing choice into
+  CSS. An area is a point plus a zoom, never a cropped file: `object-position`
+  places the point, `transform: scale()` about that same `transform-origin`
+  zooms about it. Zoom 100 emits NO transform, because a no-op `scale(1)` still
+  promotes a compositing layer and moves antialiasing — that is what keeps the
+  three pixel baselines byte-identical.
+- Admin: `ImageFramer` is now window-agnostic (takes a box + area) with a zoom
+  slider; the dialog holds both windows; uploading opens it on the new photo;
+  unframed photos carry a "Needs framing" badge. EN + 中文 strings added.
+- Storefront: PDP viewer applies point and zoom; shop card uses its own area;
+  the PDP ABOUT panel takes the point but NOT the zoom (that zoom was authored
+  against a 398x250 box and ABOUT is a near-square 190x196).
+
+**Verified:** typecheck, eslint, prettier, `npm run build`; 99 unit tests
+(8 new) and the full 117-test e2e suite including the three pixel baselines.
+
+**Notes:** `0009` is NOT pushed to hosted — storefront reads tolerate its
+absence, an admin product save does not. A "never framed" card area is stored
+as NULL and must stay NULL; flattening it to the spotlight would lose the
+owner's ability to say "follow the product page".

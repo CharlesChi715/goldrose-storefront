@@ -40,6 +40,7 @@ import {
   ListviewIcon,
 } from "@/components/chrome";
 import { abs, txt } from "@/lib/figma-layout";
+import { spotlightStyle, type SpotlightArea } from "@/lib/images/spotlight";
 import { inter, notoSC, playfair } from "@/lib/fonts";
 
 const INK = "#3B2F2F";
@@ -69,8 +70,12 @@ export type CardData = {
   compareAt: string | null;
   /** The product's own catalog photo; null falls back to the slot's frame art. */
   image: string | null;
-  /** CSS object-position from the admin's framing box (migration 0008). */
-  focus: string;
+  /**
+   * The area the owner framed against THIS card's photo box — point and zoom
+   * (migration 0009). A hero never framed for the card resolves to the PDP
+   * spotlight's point at no zoom, the pre-0009 crop.
+   */
+  card: SpotlightArea;
 };
 
 /** Grid cross-fade on sort change — same 150ms ease as PageFade's tab fade. */
@@ -183,8 +188,9 @@ function ProductCard({
         style={{
           ...abs(0, 0, slot.w, 204),
           display: "block",
-          objectFit: "cover",
-          objectPosition: data.focus,
+          // The card's own framing. A zoomed photo overflows this box by
+          // design; the Link wrapping it already sets overflow: hidden.
+          ...spotlightStyle(data.card),
         }}
       />
       <div
