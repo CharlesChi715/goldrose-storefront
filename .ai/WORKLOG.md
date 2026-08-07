@@ -5970,3 +5970,27 @@ each of the 29 against the repo: 56 still-old, 5 already-done, 5 diverged,
   unset, so the fix is one line in the config's `env` block. Resend is also
   Supabase's SMTP for customer sign-in, so tests are competing with real
   auth mail.
+
+## 2026-08-07 21:40 AEST — the e2e suite stops sending real email
+
+Found while verifying the search + figma-sync merges: a full e2e run returned
+eleven Resend errors ending in **429 daily_quota_exceeded**. The suite has
+been spending the live email allowance on test mail every run.
+
+`playwright.config.ts` already blanks the PayPal keys, the skip-payment flag
+and the Supabase keys, each with a comment saying why — the environment must
+not reach a real service. `RESEND_API_KEY` was simply missed. It matters more
+than the others: Resend is also Supabase's SMTP for customer sign-in, so a
+test run competes with real one-time codes, and a run that exhausts the daily
+quota would stop a customer signing in.
+
+- Added `RESEND_API_KEY: ""` and `RESEND_FROM: ""` to the config's `env`
+  block. No app change was needed — `lib/email.ts` has logged to the console
+  instead of sending since §0.2 whenever the key is unset.
+- **Verified with the live key present** (`.env.local` copied into the test
+  checkout, so the unfixed config *would* have sent): 134/134 e2e pass and
+  **zero** Resend API responses, down from eleven.
+- Why the console fallback is not visible in the run either: it uses
+  `console.log` → stdout, and Playwright's `webServer` ignores stdout by
+  default while piping stderr. The eleven lines seen before were the failure
+  path's `console.error`. Nothing is hidden that was not already hidden.

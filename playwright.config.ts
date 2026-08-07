@@ -63,6 +63,14 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
+      // And never let it send real email. `RESEND_API_KEY` in .env.local is
+      // the live account, and Resend is also Supabase's SMTP for customer
+      // sign-in — so an unblanked run spends the sign-in allowance on test
+      // mail. A full suite on 2026-08-07 exhausted the DAILY quota (429),
+      // which would have blocked real one-time codes. `lib/email.ts` logs to
+      // the console when the key is unset, which is what the suite wants.
+      RESEND_API_KEY: "",
+      RESEND_FROM: "",
       // Known password for the local-adapter admin login tests.
       ADMIN_DEV_PASSWORD: "stage2-test-password",
     },
