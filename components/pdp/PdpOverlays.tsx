@@ -809,7 +809,7 @@ function MediaViewer({
 }: {
   onClose: () => void;
   /** The same photo set the hero carousel pages through. */
-  shots: string[];
+  shots: Array<{ src: string; focus: string }>;
 }) {
   const [index, setIndex] = useState(0);
   const step = (delta: number) =>
@@ -855,7 +855,7 @@ function MediaViewer({
       </div>
       {/* 1523:4260 — FIT inside 410×620 */}
       <img
-        src={shots[index]}
+        src={shots[index].src}
         alt={`Product photo ${index + 1}`}
         style={{
           ...abs(10, 102, 410, 620),
@@ -945,7 +945,7 @@ function MediaViewer({
           borderRadius: 18,
         }}
       >
-        {shots.map((src, i) => (
+        {shots.map(({ src }, i) => (
           <button
             key={src}
             type="button"
@@ -1188,15 +1188,20 @@ export function PdpOverlays({
 }: {
   reviews?: PdpReview[];
   stats?: PdpReviewStats | null;
-  /** The product's photos — the hero carousel and the media viewer. */
-  media?: string[];
+  /**
+   * The product's photos with their framing (CSS object-position), for the
+   * hero carousel; the viewer shows each photo whole and ignores the focus.
+   */
+  media?: Array<{ src: string; focus: string }>;
   /** Names the hero slides for screen readers. */
   productTitle?: string;
 }) {
   const [open, setOpen] = useState<OverlayId | null>(null);
   // One source of truth for both the hero and the viewer. A product with no
   // photos of its own falls back to the frame's set rather than an empty box.
-  const shots = media.length ? media : MEDIA;
+  const shots = media.length
+    ? media
+    : MEDIA.map((src) => ({ src, focus: "50% 50%" }));
   const mounted = useSyncExternalStore(
     subscribeToNothing,
     onTheClient,
@@ -1228,7 +1233,7 @@ export function PdpOverlays({
         onActivate={() => setOpen("media")}
         renderSlide={(i) => (
           <img
-            src={shots[i]}
+            src={shots[i].src}
             alt=""
             width={398}
             height={250}
@@ -1236,6 +1241,8 @@ export function PdpOverlays({
               ...abs(0, 0, 398, 250),
               display: "block",
               objectFit: "cover",
+              // The admin framed this photo against exactly this box.
+              objectPosition: shots[i].focus,
             }}
           />
         )}
