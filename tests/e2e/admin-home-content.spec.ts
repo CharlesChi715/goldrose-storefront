@@ -60,6 +60,36 @@ test("every homepage section is listed, in page order", async ({ page }) => {
   await expect(page.getByLabel("“View all” label").first()).toBeDisabled();
 });
 
+test("the section map is the page drawn to scale, and jumps where it points", async ({
+  page,
+}) => {
+  await openEditor(page);
+  const map = page.locator("[data-home-map]");
+  await expect(map).toBeVisible();
+
+  // Every section is reachable from it: the seven bands, plus the two with no
+  // band of their own — the promo bar above the map, slideshow speed below it.
+  await expect(map.locator("[data-home-map-row]")).toHaveCount(9);
+
+  // Each link is exactly as tall as its band at the map's scale, which is the
+  // whole point: A-9 is 991px of page and A-3 is 327px after the 2026-08-07
+  // trim, and a wrapped list of names cannot show that at all.
+  const craft = await map.locator('[data-home-map-row="craft"]').boundingBox();
+  const ready = await map.locator('[data-home-map-row="ready"]').boundingBox();
+  expect(craft!.height / ready!.height).toBeGreaterThan(2.5);
+
+  // A band's strip over the thumbnail starts where its link starts. Off by a
+  // pixel here would mean the map and the page had drifted apart.
+  const strip = await map
+    .locator('[data-home-map-strip="craft"]')
+    .boundingBox();
+  expect(Math.abs(strip!.y - craft!.y)).toBeLessThan(1.5);
+
+  // And it is navigation, not decoration.
+  await map.locator('[data-home-map-row="story"]').click();
+  await expect(page.locator('[data-home-section="story"]')).toBeInViewport();
+});
+
 test("editing a section heading reaches the live home page, and resets", async ({
   page,
 }) => {

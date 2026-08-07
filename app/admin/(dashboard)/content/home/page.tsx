@@ -29,7 +29,7 @@ import {
 } from "./HomeSectionsEditor";
 
 export default async function HomeContentPage() {
-  const { text, visible, overridden } = await getHomeContent();
+  const { text, visible, layout, overridden } = await getHomeContent();
   const resolved = text as unknown as Record<string, Record<string, string>>;
 
   const sections: SectionView[] = HOME_SECTION_LIST.map((section) => ({
@@ -41,6 +41,17 @@ export default async function HomeContentPage() {
     blurbZh: section.blurbZh,
     hideable: section.band !== null,
     visible: visible[section.id as HomeSectionId],
+    // Where this band actually lands on the live stage — its imported `y` plus
+    // the shift that hiding or trimming an earlier band applied. Resolved here
+    // rather than in the browser so the section map cannot disagree with the
+    // page it is a picture of. A hidden band has no place on the stage at all.
+    band:
+      section.band && visible[section.id as HomeSectionId]
+        ? {
+            top: section.band.y + layout.shift[section.id as HomeSectionId],
+            height: section.band.h,
+          }
+        : null,
     fields: section.fields.map((field) => ({
       id: field.id,
       label: field.label,
@@ -78,5 +89,11 @@ export default async function HomeContentPage() {
     library = [];
   }
 
-  return <HomeSectionsEditor sections={sections} library={library} />;
+  return (
+    <HomeSectionsEditor
+      sections={sections}
+      library={library}
+      frameHeight={layout.frameHeight}
+    />
+  );
 }

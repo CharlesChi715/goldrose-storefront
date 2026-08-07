@@ -765,6 +765,16 @@ different shape from the flat slot list.
   0 and the wrapper renders nothing, which is what keeps the home pixel
   baseline byte-identical. The promo bar is chrome, not a band: editable,
   not hideable.
+- **The section list IS the page.** "Jump to a section" is the home page drawn
+  small — one iframe of `/`, scaled to fit — with each section's link occupying
+  exactly the vertical span of the band it opens, labelled with the share of the
+  page that band takes. It is built from the same `homeLayout` arithmetic as the
+  live page, resolved server-side, so the map cannot disagree with the thing it
+  is a picture of; hovering either a link or a band lights up the other. The two
+  sections with no band of their own sit outside the stack — the promo bar above
+  it (32px of chrome, 4px at map scale, too small to hold a link), slideshow
+  speed below it — and a hidden band joins them there, having no area left to
+  point at.
 - **Links are validated before they reach an anchor** (`isSafeHref`): in-site
   paths, fragments, and `http(s)` / `mailto:` / `tel:` only.
 

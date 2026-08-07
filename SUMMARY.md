@@ -143,6 +143,11 @@ Open linked resources only when the task needs them.
   screen itself is built for teammates: live preview beside the editor, search
   across ~180 fields, "only what I changed", per-section counts, first-run
   guidance, and a photo dialog leading with upload + the existing library.
+  **"Jump to a section" is the page itself** (2026-08-08,
+  `worktree-home-page-map`): the whole home page rendered small, each section's
+  link exactly as tall as the band it opens and labelled with its share of the
+  page, off the same `homeLayout` maths as the live render — so a teammate
+  navigates by sight rather than by module code.
   **Colours were declined** — the owner ruled appearance stays with the design
   team, and the brand gold and ink are painted into the exported ornament SVGs,
   so a token change would leave a half-recoloured page.

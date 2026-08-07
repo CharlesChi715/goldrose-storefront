@@ -60,6 +60,7 @@ import {
   Toast,
 } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
+import { HomePageMap } from "./HomePageMap";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import {
   resetHomeFieldAction,
@@ -108,6 +109,8 @@ export type SectionView = {
   blurbZh: string;
   hideable: boolean;
   visible: boolean;
+  /** Its span on the live stage, for the section map; null when it has none. */
+  band: { top: number; height: number } | null;
   fields: FieldView[];
 };
 
@@ -226,9 +229,12 @@ function fileUrl(storedPath: string): string {
 export function HomeSectionsEditor({
   sections,
   library,
+  frameHeight,
 }: {
   sections: SectionView[];
   library: LibraryItem[];
+  /** The live stage height, hidden bands already removed — the map's ruler. */
+  frameHeight: number;
 }) {
   const t = useAdminT();
   const lang = useAdminLang();
@@ -657,28 +663,22 @@ export function HomeSectionsEditor({
                     <Text as="h2" variant="headingSm">
                       {t("home.jump")}
                     </Text>
-                    <InlineStack gap="300" wrap>
-                      {sections.map((section) => {
-                        const count = editedCount(section);
-                        return (
-                          <InlineStack
-                            key={section.id}
-                            gap="100"
-                            blockAlign="center"
-                          >
-                            <PolarisLink url={`#home-section-${section.id}`}>
-                              {`${section.module} · ${zh ? section.titleZh : section.title}`}
-                            </PolarisLink>
-                            {count > 0 ? (
-                              <Badge tone="info">{String(count)}</Badge>
-                            ) : null}
-                            {section.hideable && !section.visible ? (
-                              <Badge tone="critical">{t("home.hidden")}</Badge>
-                            ) : null}
-                          </InlineStack>
-                        );
-                      })}
-                    </InlineStack>
+                    {/* The links are the page: see HomePageMap. It shares the
+                        preview's nonce, so a save redraws both together. */}
+                    <HomePageMap
+                      frameHeight={frameHeight}
+                      nonce={previewNonce}
+                      sections={sections.map((section) => ({
+                        id: section.id,
+                        module: section.module,
+                        title: section.title,
+                        titleZh: section.titleZh,
+                        band: section.band,
+                        hideable: section.hideable,
+                        visible: section.visible,
+                        edited: editedCount(section),
+                      }))}
+                    />
                   </>
                 )}
               </BlockStack>

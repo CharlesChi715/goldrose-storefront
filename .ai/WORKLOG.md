@@ -6060,3 +6060,31 @@ Still open: A-9's workshop gallery and certificate thumbnails are ten crops of
 one picture and are not editable; A-3's $69.00 is baked into 159-80.svg, so the
 home page states that price whatever the catalogue says (a launch risk, not an
 editability gap).
+
+## 2026-08-08 — "Jump to a section" becomes a map of the page
+
+Branch `worktree-home-page-map` (off `worktree-admin-home-customization`).
+
+The flat link wrap on `/admin/content/home` is replaced by the home page drawn
+small: one iframe of `/` scaled to fit 600px, with each section's link occupying
+exactly the vertical span of the band it opens and labelled with its share of
+the page (A-9 and A-11 are 20% each; A-3 is 6%). Hovering either a link or a
+band lights up the other.
+
+- New `app/admin/(dashboard)/content/home/HomePageMap.tsx`; the editor passes
+  it the resolved band geometry and the live stage height.
+- `page.tsx` now sends `band = {top: y + layout.shift[id], height: h}` per
+  section — the same `homeLayout` arithmetic the live page uses, resolved
+  server-side so the map cannot drift from what it pictures. A hidden band gets
+  `null` and is listed below the map with the slideshow-speed setting; the promo
+  bar (32px of chrome, 4px at map scale) is labelled above it.
+- The map box uses an inset box-shadow rather than a border, so its 1px frame
+  takes no layout space and the strips stay flush with the link column.
+- i18n: `home.map.*` in EN + 中文. Spec bullet added to `admin-design.md` §9.8.1.
+- Verified: tsc, eslint, 142 unit tests, and the 5 `admin-home-content` e2e
+  tests (new one asserts proportional row heights, strip/row alignment within
+  1.5px, and that a click brings the section's editor into view). Storefront
+  untouched, so the three pixel baselines are unaffected.
+
+Note: the e2e suite reuses whatever is on port 3001; another session's
+hosted-mode server was there, so the run needed a private port (3801).
