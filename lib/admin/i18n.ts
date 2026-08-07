@@ -768,11 +768,13 @@ const en = {
   // Content → Home page · the per-section preview
   "home.sectionPreview": "This section on its own",
   "home.sectionPreviewHelp":
-    "Only this band of the home page — no header and no tab bar — at its own size. It refreshes when you save.",
+    "Only this band of the home page — no header, no tab bar. It refreshes when you save; open it in a new tab to see it full size.",
   "home.sectionPreviewHidden":
     "This section is switched off, so it is not on the live page right now. The preview shows what turning it back on would put there.",
   "home.sectionPreviewBorrowed":
     "Shown on the Best Sellers band, because this speed has nothing of its own on the page — watch the cards move.",
+  "home.previewZoomed":
+    "Zoomed out so the whole band fits. Open it in a new tab to read it at full size.",
   "home.previewSync": "Match the main preview",
   "home.previewOpen": "Open in a new tab",
 
@@ -1517,11 +1519,13 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   // 内容 → 首页 · 单个板块预览
   "home.sectionPreview": "单独预览本板块",
   "home.sectionPreviewHelp":
-    "只显示首页的这一段——没有顶部导航，也没有底部标签栏——并保持其原始高度。保存后会自动刷新。",
+    "只显示首页的这一段——没有顶部导航，也没有底部标签栏。保存后会自动刷新；如需完整尺寸，请在新标签页中打开。",
   "home.sectionPreviewHidden":
     "本板块已隐藏，目前不会出现在线上页面。此预览显示的是重新开启后的效果。",
   "home.sectionPreviewBorrowed":
     "以「热销」板块演示：该速度本身在页面上没有对应内容，请观察卡片的滚动。",
+  "home.previewZoomed":
+    "已缩小以完整显示整段。如需按原尺寸阅读，请在新标签页中打开。",
   "home.previewSync": "与主预览宽度一致",
   "home.previewOpen": "在新标签页中打开",
 

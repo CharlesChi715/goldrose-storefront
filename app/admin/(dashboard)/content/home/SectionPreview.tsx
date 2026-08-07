@@ -35,6 +35,7 @@ import {
   InlineStack,
   RangeSlider,
   Text,
+  Tooltip,
 } from "@shopify/polaris";
 import { useAdminT } from "../../../PolarisShell";
 
@@ -42,11 +43,21 @@ import { useAdminT } from "../../../PolarisShell";
 const DESIGN_WIDTH = 430;
 
 /**
- * Tallest frame a section preview is given before it scrolls inside itself.
- * The Story band is 1010 stage pixels; eight bands at full height would make
- * the editor unusable, and a band that scrolls is still a band you can read.
+ * The height a section preview is fitted into, in admin pixels.
+ *
+ * The band is not cropped to this: it is ZOOMED OUT until the whole of it fits
+ * (see the zoom maths below). A cropped preview answers "what is at the top of
+ * this band", which is the one question you did not need to ask — you already
+ * know which section you clicked. The whole band answers "did my heading land,
+ * and does the section still hang together", which is the reason to look.
+ *
+ * The value is deliberately much smaller than the tallest band (Story is 1010
+ * stage pixels): eight full-height previews turned the editor into a page of
+ * previews with the fields buried between them. At 400 the zoom lands between
+ * 40% (Story, Craft) and 100% (the short bands), and "Open in a new tab" is
+ * there when small is too small to read.
  */
-const MAX_FRAME_HEIGHT = 720;
+const FIT_HEIGHT = 400;
 
 /**
  * One section's standalone live preview, with its own width control.
@@ -94,18 +105,48 @@ export function SectionPreview({
   const key = `${nonce}-${refreshed}`;
 
   // The route scales the 430-wide stage to the frame's width, so the frame's
-  // natural height is the band's height at the same scale. Capped, never
-  // stretched: a wrong height would crop or letterbox the band.
-  const scaled = Math.round((bandHeight * width) / DESIGN_WIDTH);
-  const frameHeight = Math.min(scaled, MAX_FRAME_HEIGHT);
+  // natural height is the band's height at the same scale. Never stretched: a
+  // wrong height would crop or letterbox the band.
+  const fullHeight = Math.round((bandHeight * width) / DESIGN_WIDTH);
+  // Then the whole frame is zoomed out to fit. This is NOT the width slider by
+  // another name: the iframe is still laid out at `width`, so the storefront
+  // inside it still sees the phone the slider picked and lays out for it. The
+  // zoom only changes how big that phone appears on the admin screen — which
+  // is why a 40% preview is still a truthful answer to "does this fit a 360px
+  // phone", just a small one.
+  const zoom = Math.min(1, FIT_HEIGHT / fullHeight);
+  const boxWidth = Math.round(width * zoom);
+  const boxHeight = Math.round(fullHeight * zoom);
 
   return (
-    <Box background="bg-surface-secondary" borderRadius="200" padding="300">
-      <BlockStack gap="200">
+    <Box background="bg-surface-secondary" borderRadius="200" padding="200">
+      {/* Every row here earns its height: the block repeats eight times, so a
+          line of prose that reads well once is 8 lines of scrolling on the
+          screen. The explanation lives in the title's tooltip and the help text
+          below the slider instead. */}
+      <BlockStack gap="150">
         <InlineStack align="space-between" blockAlign="center" gap="200">
-          <Text as="h3" variant="headingSm">
-            {t("home.sectionPreview")}
-          </Text>
+          <InlineStack gap="200" blockAlign="center">
+            <Tooltip content={t("home.sectionPreviewHelp")}>
+              <Text
+                as="h3"
+                variant="bodySm"
+                fontWeight="semibold"
+                tone="subdued"
+              >
+                {t("home.sectionPreview")}
+              </Text>
+            </Tooltip>
+            {/* Said out loud, because small type that nobody asked for reads
+                as a rendering fault rather than a deliberate zoom. */}
+            {zoom < 1 ? (
+              <Tooltip content={t("home.previewZoomed")}>
+                <Text as="span" variant="bodySm" tone="subdued">
+                  {`${Math.round(zoom * 100)}%`}
+                </Text>
+              </Tooltip>
+            ) : null}
+          </InlineStack>
           <InlineStack gap="300" blockAlign="center">
             {width !== mainWidth ? (
               <Button variant="plain" onClick={() => onWidthChange(mainWidth)}>
@@ -118,12 +159,17 @@ export function SectionPreview({
             >
               {t("home.refreshPreview")}
             </Button>
+            <Button
+              variant="plain"
+              url={`/preview/home/${sectionId}`}
+              target="_blank"
+            >
+              {t("home.previewOpen")}
+            </Button>
           </InlineStack>
         </InlineStack>
 
-        <Text as="p" variant="bodySm" tone="subdued">
-          {t("home.sectionPreviewHelp")}
-        </Text>
+        {/* Only the two exceptional states get a line of their own. */}
         {borrowed ? (
           <Text as="p" variant="bodySm" tone="subdued">
             {t("home.sectionPreviewBorrowed")}
@@ -135,31 +181,51 @@ export function SectionPreview({
           </Text>
         ) : null}
 
-        <iframe
-          key={key}
-          src={`/preview/home/${sectionId}?n=${key}`}
-          title={`${t("home.sectionPreview")} — ${sectionId}`}
+        {/* The border and the rounded corner belong to the BOX, not the frame:
+            a scaled iframe scales its own border too, so at 40% the outline
+            would thin to a hairline and the corner would tighten. */}
+        <div
           style={{
-            display: "block",
-            // This width IS the viewport the storefront sees, so the band
-            // scales against it exactly as it would on that phone.
-            width,
-            height: frameHeight,
+            width: boxWidth,
+            height: boxHeight,
             maxWidth: "100%",
             margin: "0 auto",
+            overflow: "hidden",
             border: "1px solid #e3e3e3",
             borderRadius: 8,
             background: "#FFF6EC",
           }}
-        />
+        >
+          <iframe
+            key={key}
+            src={`/preview/home/${sectionId}?n=${key}`}
+            title={`${t("home.sectionPreview")} — ${sectionId}`}
+            style={{
+              display: "block",
+              // This width IS the viewport the storefront sees, so the band
+              // lays out against it exactly as it would on that phone.
+              width,
+              height: fullHeight,
+              border: 0,
+              // Top left, so the scaled frame lands in the box's corner rather
+              // than being scaled about its centre and cropped on all sides.
+              transformOrigin: "top left",
+              transform: zoom < 1 ? `scale(${zoom})` : undefined,
+            }}
+          />
+        </div>
 
+        {/* The width control is one row: the label carries the number and the
+            reset, and the min/max ends sit on the track rather than above it.
+            `labelHidden` would have been shorter still, but a bare slider under
+            a phone-shaped frame reads as a carousel position, not a width. */}
         <RangeSlider
           label={
             <InlineStack gap="200" blockAlign="center">
-              <Text as="span" variant="bodyMd">
+              <Text as="span" variant="bodySm" tone="subdued">
                 {t("home.previewWidth")}
               </Text>
-              <Text as="span" variant="bodyMd" fontWeight="semibold">
+              <Text as="span" variant="bodySm" fontWeight="semibold">
                 {`${width} px`}
               </Text>
               {width !== DESIGN_WIDTH ? (
@@ -176,7 +242,6 @@ export function SectionPreview({
           max={max}
           step={1}
           value={width}
-          output
           prefix={
             <Text as="span" variant="bodySm" tone="subdued">
               {min}
@@ -191,16 +256,6 @@ export function SectionPreview({
             onWidthChange(typeof next === "number" ? next : next[0])
           }
         />
-
-        <InlineStack align="end">
-          <Button
-            variant="plain"
-            url={`/preview/home/${sectionId}`}
-            target="_blank"
-          >
-            {t("home.previewOpen")}
-          </Button>
-        </InlineStack>
       </BlockStack>
     </Box>
   );
