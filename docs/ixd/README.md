@@ -28,8 +28,8 @@ The `data-el` attributes themselves are in code. Current naming docs:
   attribute vocabulary tying a rendered element back to its design component
 
 The 2026-07-25 design-team naming guide was archived on 2026-07-31; the three
-docs above supersede it. Its raw source stays in
-[`team-deliveries/originals/2026-07-25-figma-naming-guide/`](../../team-deliveries/originals/2026-07-25-figma-naming-guide/).
+docs above supersede it. Its raw source (a translated spreadsheet) was deleted
+on 2026-08-07 as superseded — recover it from git history if it is ever needed.
 
 ## How to reference an entry
 

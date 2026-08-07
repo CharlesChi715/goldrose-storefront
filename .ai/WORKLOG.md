@@ -5883,3 +5883,25 @@ is how three entries got duplicated in the first place.
   (`2026-06-30 16:52`, `2026-07-15 15:21`) turned out to be **different
   content that happens to share a timestamp** and were left alone — the md5
   check is the only reason they survived.
+
+## 2026-08-07 20:42 AEST
+
+- **Deleted the `2026-07-25-figma-naming-guide` delivery batch** from
+  `team-deliveries/originals/` — `Figma_UI_Naming_Guide_GoldRose.xlsx` (a
+  translated spreadsheet) and its `batch.md`. Charles's ruling: the guide is a
+  translation, the adopted naming rules were regenerated into `docs/ixd/naming/`
+  on 2026-07-31, so the source is dead weight.
+- **This is a deliberate exception to `team-deliveries/originals/README.md`**,
+  which says deliveries are never deleted because they are the authority on
+  wording disputes. Git history holds the bytes (`c53435d` and later), the same
+  reasoning the 08-07 stale sweep used for `archive/`. One side effect: the
+  batch's sha256 is gone from the pre-parse duplicate check, so a re-delivery of
+  that spreadsheet would read as new rather than as a duplicate.
+- **Closed `AI-005`** (was: is that spreadsheet an incoming delivery or a
+  generated export?) — the deletion moots it. Charles closed it via
+  `agent-inbox:close`; the record is in `agent-delivery/archive/`. Its "Affected
+  place" line was rewritten first so the archived record does not point at a
+  path that no longer exists.
+- **Repointed the one live reference**, `docs/ixd/README.md`, from "its raw
+  source stays in …" to a note that it was deleted as superseded. The two
+  remaining mentions are dated WORKLOG entries and were left as history.
