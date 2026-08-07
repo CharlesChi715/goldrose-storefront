@@ -5663,3 +5663,27 @@ conflicts.
   left unfixed as out of scope. And `app/products/[slug]/page.tsx` picked up an
   uncommitted one-line change (a `"center"` align on the review-count label) at
   17:31, mid-run, from a concurrent session — untouched here.
+
+## 2026-08-07 — Best Sellers rail: one card size
+
+**Branch:** `worktree-fix-bestsellers-card-size` → merged to `main` (`305c0e7`, unpushed).
+
+- The 08-04 frame drew card 2 (`2380:415`) as a 184×349 box 17px below card 1's
+  250×366. The owner read that as a rendering fault, not a stagger, so both
+  cards now draw into card 1's box. The geometry moved from per-card fields to
+  module constants in `components/home/BestSellersRail.tsx`, so no card can
+  carry its own size. **This is a deliberate deviation from the frame — a Figma
+  re-sync must not restore the smaller box.**
+- Widening the card widened a defect the frame already had: `2380-416.png` is a
+  368×444 canvas whose right 21% is transparent padding, so the photo window's
+  `#F3C6D1` backing showed as a pink strip down the card's right edge. The photo
+  is now a left-anchored bleed box scaled until its opaque part alone covers the
+  window, clipped by the window — the idiom card 1 already used.
+- `tests/e2e/__screenshots__/home-darwin.png` rebuilt; the pixel diff is
+  confined to that one card. 91 unit + 116 e2e pass.
+- ⚠️ **Found while testing:** `playwright.config.ts` hardcodes port 3001 with
+  `reuseExistingServer: !CI`, so a suite run from one worktree silently attaches
+  to whatever `next start` already holds 3001 — including another worktree's
+  build. Two of my runs reported a false pass/fail from the `pdp-subtitle-wrap`
+  worktree's server before I caught it. Not fixed here.
+
