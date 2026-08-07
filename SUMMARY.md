@@ -231,22 +231,25 @@ Open linked resources only when the task needs them.
 - **Local mode** (blank Supabase and PayPal variables): data in `.data/db.json`;
   e2e tests use this mode. `npm run seed -- --reset` restores it. Admin is open
   unless `ADMIN_DEV_PASSWORD` is set; customer sign-in is unavailable.
+  ⚠️ **`npm run dev` refuses to start in local mode (2026-08-07, owner)** —
+  `predev` runs `scripts/require-hosted-dev.mjs`, because a dev server backed
+  by the 3-product seed looks like the live 2-product shop and is not. Local
+  mode is not deleted, it sleeps: the test suite blanks the variables for its
+  own server, and `ALLOW_LOCAL_MODE=1 npm run dev` wakes it deliberately.
 - **Hosted mode:** add migrations as `supabase/migrations/000N_*.sql` and apply
   with `supabase db push` — never the web SQL editor. `0001`–`0003` and
-  `0005`–`0008` applied (verified 2026-08-07); `0004` is permanently skipped
-  (its orphan history row was repaired 2026-07-28 — intentional, not a gap).
-  ⚠️ **`0009` (best_for facets) and `0010` (image spotlight) are written but
-  NOT pushed** — hosted still has `best_for` as text, no variant `stocked` and
-  no spotlight columns. Both were authored as `0009` on separate branches;
-  spotlight was renumbered to `0010` when they merged, and **the order is
-  load-bearing**: `0009` drops and recreates `catalog_products` without the
-  spotlight columns, so `0010` must run after it to put them back. Storefront
-  *reads* survive without either (missing columns read as the old centre
-  crop), but an admin product *save* would fail — push both before the next
-  admin save. `npm run check:migrations` guards the sequence in CI — duplicate
-  numbers fail, and a rebuilt view that drops an earlier migration's column
-  warns. Use `psql` for read-only
-  ad-hoc queries; `supabase db dump` needs Docker.
+  `0005`–`0011` applied (`0009`–`0011` pushed 2026-08-07); `0004` is
+  permanently skipped (its orphan history row was repaired 2026-07-28 —
+  intentional, not a gap). Pushing `0010` exposed the mirror of the hazard this
+  note used to warn about: `0009` added `stocked` to `catalog_products`, `0010`
+  rebuilt the view from the pre-`0009` definition and dropped it again, so
+  "Ready to Ship" matched nothing and "Pre-Order" matched everything sellable.
+  `0011` restates the view with both features' fields and is applied; verified
+  against hosted with the real matcher. `npm run check:migrations` has the right check
+  but missed this one: it compares a rebuilt view's **columns**, and `stocked`
+  is a key inside the `variants` `jsonb_build_object`, one level below what the
+  heuristic reads. Extended 2026-08-07 to read those keys too. Use `psql` for
+  read-only ad-hoc queries; `supabase db dump` needs Docker.
 
 ### Release gates
 
