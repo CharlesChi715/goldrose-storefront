@@ -15,29 +15,6 @@ the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
   totals.
 - **Charles's response:** _(write the answer here)_
 
-## AI-002 · `PLACEHOLDER` · `OPEN`
-
-- **Affected place:** [`/bag` route](../../app/bag/page.tsx#L8)
-- **Current temporary behavior:** The screen renders the design's example line
-  items. The real cart is stored separately and enters the working purchase
-  flow through `/checkout`.
-- **Why it matters:** A customer can see bag contents that do not match the
-  products they selected.
-- **Recommendation:** Wire the real cart into the approved bag design before
-  launch; preserve the current visual layout while replacing the example data.
-- **Charles's response:** _(write an instruction here if its priority changes)_
-
-## AI-003 · `OWNER-TODO` · `OPEN`
-
-- **Affected place:** [Privacy-policy route](../../app/account/privacy-policy/page.tsx#L5)
-- **What Charles needs to do:** Supply or approve legally reviewed privacy-policy
-  content for the launch markets.
-- **Why it matters:** The current page contains design-mock summaries, not an
-  approved public policy.
-- **Recommendation:** Have the business's qualified legal adviser review the
-  final policy before it becomes public or indexable.
-- **Charles's response:** _(record the content source or next action here)_
-
 ## AI-004 · `OWNER-TODO` · `OPEN`
 
 - **Affected place:** [Routing table in the team deliveries README](../../team-deliveries/README.md#L50)
@@ -50,23 +27,6 @@ the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
 - **Recommendation:** Fill the table in as deliveries arrive rather than trying
   to predict every case up front; one row per kind of content actually received.
 - **Charles's response:** _(write the routing rules in `team-deliveries/README.md`)_
-
-## AI-005 · `AGENT-UNSURE` · `OPEN`
-
-- **Affected place:** [2026-07-25 naming-guide batch](../../team-deliveries/originals/2026-07-25-figma-naming-guide/batch.md#L16)
-- **What is uncertain:** Whether `Figma_UI_Naming_Guide_GoldRose.xlsx` is the
-  spreadsheet the design team **sent us** on 2026-07-25, or one **we generated
-  for them** later. The since-retired element-names doc called it "a spreadsheet
-  exported for the design team — generated", but the file's modification time is
-  25 Jul, before the 2026-07-29 correction that made the markdown the master.
-- **Why it matters:** An incoming delivery belongs in
-  `team-deliveries/originals/`; a generated export is regenerable and belongs in
-  `trash/`, since the convention is "version-control the text; generate the
-  binary."
-- **Recommendation:** Kept in `team-deliveries/originals/` for now — it is 12 KB,
-  and wrongly keeping a regenerable file is cheaper than wrongly deleting a
-  received source. Confirm which it is and move it if needed.
-- **Charles's response:** _(write the answer here)_
 
 ---
 
