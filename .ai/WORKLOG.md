@@ -5616,3 +5616,50 @@ Tooling only; lives in `~/Documents/bin`, outside this repo.
   least be visible.
 - **Verified:** `bash -n` on both, both resolve on `PATH`, guard clauses
   return 1 with usage text. Not yet run end to end.
+
+## 2026-08-07 17:33 AEST — every unmerged branch folded into `main`
+
+Asked to read all branches, merge whatever was outstanding, and settle the
+conflicts.
+
+- **Survey first.** `git fetch --prune` deleted three remote branches
+  (`feat/pdp-image-framing`, `worktree-feat-company-legal-info`,
+  `worktree-shop-real-products-only`). Checked each tip with
+  `git merge-base --is-ancestor` before trusting the prune — all four were
+  already in `main`, so nothing was lost. That left exactly two real branches.
+- **Dry-ran both** with `git merge-tree --write-tree`, which computes a merge
+  in memory without touching HEAD or the working tree. It predicted the
+  outcome exactly: one clean, one conflicting in a single file.
+- **`worktree-pdp-overlays-merge-fix` — `main` was broken.** Fast-forward.
+  `components/pdp/PdpOverlays.tsx` carried `import { Carousel }` twice (60/61)
+  and `const DOT_PITCH` twice (75/80) — both hard `SyntaxError: Identifier has
+  already been declared`, so the module could not parse. Same double-merge had
+  duplicated two `premium-gift-bundle` image rows in `seed-data.ts`; the merge
+  kept the copies carrying `focal_x`/`focal_y` and dropped the older pair.
+  A textual 3-way merge is content-blind — a repeated `const` reads as ordinary
+  added lines — which is the argument for a build gate *after* a merge, not
+  only before.
+- **`worktree-admin-home-sections` — 26 code files auto-merged**, conflict
+  confined to `.ai/WORKLOG.md`. Both sides had appended after the same point.
+  Resolved by keeping everything and restoring chronological order:
+  00:43 AEST → 01:11 AEST → session launcher. 5620 lines with markers → 5618
+  without; both entries verified present exactly once.
+- **One e2e failure was a stale fixture, not a regression.** The PDP carousel
+  test wants >1 photo dot; `.data/db.json` was seeded 2026-08-05, when
+  `premium-gift-bundle` still had one photo. The seed *source* already said
+  three. `npm run seed -- --reset` refuses when it sees a hosted DB with
+  orders, so it was re-run with the Supabase variables blanked — the same
+  trick `playwright.config.ts` uses to force local mode.
+- **Verified:** typecheck clean, lint clean (2 pre-existing warnings, 0
+  errors), 91/91 unit tests, production build, 116/116 e2e including all three
+  pixel baselines.
+- **Not done, deliberately:** nothing pushed — `main` is 5 commits ahead of
+  `origin/main` and that is Charles's call. The merged worktrees and branches
+  are left in place for the same reason.
+- **Two things turned up.** `.ai/WORKLOG.md` still carries three duplicated
+  2026-08-06 headings (`/shop renders only real catalog products`, `the product
+  page now renders the catalog row`, `the PDP hero is an auto-playing,
+  swipeable carousel`) — the same double-merge that broke `PdpOverlays.tsx`,
+  left unfixed as out of scope. And `app/products/[slug]/page.tsx` picked up an
+  uncommitted one-line change (a `"center"` align on the review-count label) at
+  17:31, mid-run, from a concurrent session — untouched here.
