@@ -5549,3 +5549,26 @@ otherwise.
 - **Verified:** typecheck, build, 80 unit tests, 111 e2e tests all pass —
   including the three pixel baselines (home, shop, product-detail), which are
   the real proof no rendered image went missing.
+
+## 2026-08-07 — session launcher split into two scripts
+
+Tooling only; lives in `~/Documents/bin`, outside this repo.
+
+- **Renamed** `start2CSession` → `claude-worktree-session`. The old name was
+  ambiguous (`2C` = to-Claude? v2?) and camelCase matched nothing else in
+  `bin/`. Checked call sites first: the only references were Claude's own
+  `.jsonl` transcripts, so nothing broke.
+- **Extracted** the tmux/Chrome lines out of the prompt heredoc into a new
+  `claude-dev-window <worktree_path> <port> <session>`. They were a template
+  the model had to reproduce verbatim; now the only non-deterministic input is
+  the worktree path, which genuinely cannot exist before Claude creates it.
+- **Fixed:** the dev window no longer vanishes when `npm run dev` crashes
+  (tmux destroys a window when its command exits — a trailing `read` holds it
+  open with the error visible). Added guards for missing worktree, missing
+  `package.json`, and absent tmux session, so failures surface as text the
+  agent can act on. Heredoc's "run these three commands" listed only two.
+- **Left alone:** the free-port probe races between closing the socket and npm
+  binding. Now that a crashed window stays open, an `EADDRINUSE` would at
+  least be visible.
+- **Verified:** `bash -n` on both, both resolve on `PATH`, guard clauses
+  return 1 with usage text. Not yet run end to end.
