@@ -127,12 +127,12 @@ test("inventory screen: four columns, reasoned adjustment, history", async ({
 });
 
 /*
- * 取景框 (owner, 2026-08-06). Storefront photo boxes are fixed design
- * rectangles drawn with object-fit: cover, so the browser crops to the centre
- * and an off-centre subject gets cut. The Media card's framing box is the PDP
- * photo window at its true 398×250; dragging the photo inside it writes
- * product_images.focal_x/focal_y (migration 0008), which every cover-fitted
- * box then honours.
+ * 取景框 (owner, 2026-08-06; spotlight areas 2026-08-07). Storefront photo
+ * boxes are fixed design rectangles drawn with object-fit: cover, so the
+ * browser crops to the centre and an off-centre subject gets cut. The Media
+ * card's framing box is the PDP photo window at its true 398×250; dragging
+ * the photo inside it writes product_images.focal_x/focal_y (migration 0008),
+ * which every cover-fitted box then honours.
  */
 test("framing box: drag sets the focal point, and the storefront honours it", async ({
   page,
@@ -153,8 +153,9 @@ test("framing box: drag sets the focal point, and the storefront honours it", as
   // Start from a known point rather than whatever a previous run left.
   await modal.getByRole("button", { name: "Centre" }).click();
   // The seed photos are square, so only the vertical axis has slack; drag up
-  // to reveal the bottom of the photo, which is a HIGHER Y percentage.
-  await expect(modal.getByText(/· 50% \/ 50%$/)).toBeVisible();
+  // to reveal the bottom of the photo, which is a HIGHER Y percentage. The
+  // readout's trailing number is the zoom, untouched at 100% here.
+  await expect(modal.getByText(/· 50% \/ 50% · 100%$/)).toBeVisible();
   const centre = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 };
   await page.mouse.move(centre.x, centre.y);
   await page.mouse.down();
@@ -162,7 +163,7 @@ test("framing box: drag sets the focal point, and the storefront honours it", as
     await page.mouse.move(centre.x, centre.y + dy);
   }
   await page.mouse.up();
-  await expect(modal.getByText(/· 50% \/ 100%$/)).toBeVisible();
+  await expect(modal.getByText(/· 50% \/ 100% · 100%$/)).toBeVisible();
 
   await modal.getByRole("button", { name: "Done" }).click();
   await page.getByRole("button", { name: "Save", exact: true }).click();
@@ -175,7 +176,8 @@ test("framing box: drag sets the focal point, and the storefront honours it", as
     });
     const hero = page.locator('button[aria-label*=" photo 1"] img').first();
     await expect(hero).toHaveCSS("object-position", "50% 100%");
-    // …and so does the shop card, from the same one stored point.
+    // …and so does the shop card, which has no area of its own here and so
+    // still follows the spotlight's point, exactly as it did before 0009.
     await page.goto("/shop", { waitUntil: "networkidle" });
     await expect(
       page.locator(
@@ -195,6 +197,96 @@ test("framing box: drag sets the focal point, and the storefront honours it", as
       .getByRole("dialog")
       .getByRole("button", { name: "Done" })
       .click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Product saved").first()).toBeVisible();
+  }
+});
+
+/*
+ * Spotlight areas (owner, 2026-08-07). A focal POINT says which pixel must
+ * survive the crop but not how much of the photo to show, and the two windows
+ * it has to serve are different shapes. So each photo now carries two areas —
+ * point plus zoom — framed independently: the PDP viewer window (398×250) and
+ * the shop card photo (203×204). This proves they really are independent, and
+ * that neither touches the original file the fullscreen viewer shows.
+ */
+test("spotlight areas: the card is framed apart from the product page", async ({
+  page,
+}) => {
+  await adminLogin(page);
+  await page.goto("/admin/products/premium-gift-bundle");
+
+  // NOT asserted here: the "Needs framing" badge count. `framed` is sticky by
+  // design — pressing Centre and confirming still means someone looked — so
+  // the count only ever falls, and a fixed number would pass once and then
+  // fail on every later run against the same local database.
+  await page.getByRole("button", { name: "Adjust framing" }).first().click();
+  const modal = page.getByRole("dialog");
+  await modal.getByRole("button", { name: "Centre" }).click();
+
+  // Out of the box the card follows the product page, so there is one frame.
+  const follow = modal.getByLabel("Use the same part as the product page");
+  await expect(follow).toBeChecked();
+  await expect(modal.locator('input[type="range"]')).toHaveCount(1);
+
+  // Zoom the product page's spotlight in to 200%.
+  await modal.locator('input[type="range"]').first().fill("200");
+  await expect(modal.getByText(/· 50% \/ 50% · 200%$/)).toBeVisible();
+
+  // Give the card its own area: a second frame appears, at the card's size.
+  await follow.uncheck();
+  const cardFrame = modal.locator("img").nth(1);
+  const box = await cardFrame.boundingBox();
+  expect(Math.round(box!.width)).toBe(203);
+  expect(Math.round(box!.height)).toBe(204);
+  // It starts from the point the card was already showing, NOT from the
+  // spotlight's zoom — otherwise unticking would jump the shop grid.
+  await expect(modal.getByText(/· 50% \/ 50% · 100%$/)).toBeVisible();
+  await modal.locator('input[type="range"]').nth(1).fill("150");
+
+  await modal.getByRole("button", { name: "Done" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Product saved").first()).toBeVisible();
+
+  try {
+    await page.goto("/products/premium-gold-rose-gift-bundle", {
+      waitUntil: "networkidle",
+    });
+    const hero = page.locator('button[aria-label*=" photo 1"] img').first();
+    // The viewer window zooms to the spotlight…
+    await expect(hero).toHaveCSS("transform", "matrix(2, 0, 0, 2, 0, 0)");
+
+    // …while the fullscreen viewer still shows the whole original upload,
+    // which is the reason an area is stored instead of a cropped file.
+    await hero.click();
+    const full = page.getByRole("dialog", { name: "Product photos" });
+    // By alt text, not the first <img>: the viewer's own close and arrow
+    // icons come earlier in the DOM.
+    await expect(full.getByAltText("Product photo 1")).toHaveCSS(
+      "object-fit",
+      "contain",
+    );
+    // The photo is shown whole — no spotlight crop reaches this viewer.
+    await expect(full.getByAltText("Product photo 1")).toHaveCSS(
+      "transform",
+      "none",
+    );
+
+    // …and the shop card uses its own zoom, not the product page's.
+    await page.goto("/shop", { waitUntil: "networkidle" });
+    await expect(
+      page.locator(
+        'a[href="/products/premium-gold-rose-gift-bundle"] img.gr-photo',
+      ),
+    ).toHaveCSS("transform", "matrix(1.5, 0, 0, 1.5, 0, 0)");
+  } finally {
+    // Put it back so later runs start from the seeded centre crop.
+    await page.setViewportSize(ADMIN_VIEWPORT);
+    await page.goto("/admin/products/premium-gift-bundle");
+    await page.getByRole("button", { name: "Adjust framing" }).first().click();
+    const reset = page.getByRole("dialog");
+    await reset.getByRole("button", { name: "Centre" }).click();
+    await reset.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByText("Product saved").first()).toBeVisible();
   }

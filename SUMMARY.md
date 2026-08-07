@@ -109,6 +109,20 @@ Open linked resources only when the task needs them.
   Spec: [`admin-design.md` §9.8.1](docs/admin-design.md#981-content--home-page).
   ⚠️ The hero eyebrow still reads `— G O L D R O S E —`, a miss in the 08-05
   ELDREVE rename; it is now editable, so it is an owner decision, not a deploy.
+- **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
+  Migration `0009` gives `product_images` two **spotlight areas** — a point
+  plus a zoom each — one framed against the PDP viewer window (398×250), one
+  against the shop card photo (203×204), because a single crop cannot serve
+  two differently-shaped boxes. Uploading a photo opens the framing dialog on
+  it, and anything nobody has framed keeps a "Needs framing" badge. Nothing is
+  ever cropped to a file: `object-position` for the point and
+  `transform: scale()` about it for the zoom (`lib/images/spotlight.ts`), so
+  the PDP's fullscreen viewer still shows the whole original. Defaults
+  reproduce the old crop exactly and zoom 100 emits no transform, so all three
+  pixel baselines pass unchanged. Spec:
+  [`admin-design.md` §9.5](docs/admin-design.md#95-products-adminproducts--clone).
+  The PDP ABOUT panel takes the point but not the zoom — that zoom was
+  authored against a wide box and this one is nearly square.
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
@@ -173,7 +187,11 @@ Open linked resources only when the task needs them.
 - **Hosted mode:** add migrations as `supabase/migrations/000N_*.sql` and apply
   with `supabase db push` — never the web SQL editor. `0001`–`0003`, `0005`,
   `0006` applied; `0004` is permanently skipped (its orphan history row was
-  repaired 2026-07-28 — intentional, not a gap). Use `psql` for read-only
+  repaired 2026-07-28 — intentional, not a gap). ⚠️ **`0009` is written but
+  NOT pushed** (`worktree-media-spotlight`). Storefront *reads* survive
+  without it (missing columns read as the old centre crop), but an admin
+  product *save* would fail on the missing columns — so push it before that
+  branch merges. Use `psql` for read-only
   ad-hoc queries; `supabase db dump` needs Docker.
 
 ### Release gates

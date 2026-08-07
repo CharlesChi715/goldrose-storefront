@@ -52,6 +52,27 @@ export type ProductImageRow = {
    */
   focal_x: number;
   focal_y: number;
+  /**
+   * Spotlight zoom percentage (100-400) over the cover-fit scale, applied
+   * about the focal point in the PDP viewer window only (migration 0009).
+   * 100 is the pre-0009 crop.
+   */
+  focal_zoom: number;
+  /**
+   * The shop card's own area, framed against the card's 203x204 photo box
+   * rather than the PDP window. Null means never framed for the card, which
+   * the storefront draws as the focal point at no zoom — the card's
+   * behaviour before 0009.
+   */
+  card_focal_x: number | null;
+  card_focal_y: number | null;
+  card_zoom: number | null;
+  /**
+   * True once an admin has confirmed this photo's areas in the Media card.
+   * Distinct from the values being 50/50/100, which is also what an unframed
+   * photo reads as — this is what lets the admin keep asking.
+   */
+  framed: boolean;
 };
 
 export type ProductVariantRow = {
@@ -442,6 +463,12 @@ export type CatalogImage = {
   /** Crop focus for every cover-fitted box; see ProductImageRow. */
   focal_x: number;
   focal_y: number;
+  /** Spotlight zoom for the PDP viewer window; see ProductImageRow. */
+  focal_zoom: number;
+  /** The shop card's own area; null = inherit the focal point at no zoom. */
+  card_focal_x: number | null;
+  card_focal_y: number | null;
+  card_zoom: number | null;
 };
 
 export type CatalogVariant = {

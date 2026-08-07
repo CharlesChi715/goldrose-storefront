@@ -49,6 +49,7 @@ import { getPromoSlogan } from "@/lib/content";
 import { listPublishedReviews, reviewStats } from "@/lib/reviews/db.ts";
 import { formatRelativeDay } from "@/lib/dates";
 import { fileUrl } from "@/lib/files-url";
+import { spotlightOf } from "@/lib/images/spotlight";
 import { siteBaseUrl } from "@/lib/admin/settings";
 import { formatMoney } from "@/lib/money";
 
@@ -221,7 +222,13 @@ export default async function ProductDetailPage({
     : heroImage;
   /* Every photo box here is object-fit: cover, so the browser would crop to
      the centre; the admin's 取景框 says which part actually matters
-     (product_images.focal_x/y, migration 0008). */
+     (product_images.focal_x/y, migration 0008).
+
+     The ABOUT panel below takes the POINT but not the zoom. A spotlight zoom
+     is authored against the 398×250 viewer window, and this box is a nearly
+     square 190×196 — replaying that zoom here would crop far past what the
+     owner was looking at when they chose it. The viewer window, which the
+     zoom belongs to, is drawn by PdpOverlays. */
   const focus = (image: (typeof product.images)[number] | undefined) =>
     `${image?.focal_x ?? 50}% ${image?.focal_y ?? 50}%`;
 
@@ -900,7 +907,7 @@ export default async function ProductDetailPage({
           stats={stats}
           media={product.images.map((image) => ({
             src: fileUrl(image.path),
-            focus: focus(image),
+            spotlight: spotlightOf(image),
           }))}
           productTitle={product.title}
         />

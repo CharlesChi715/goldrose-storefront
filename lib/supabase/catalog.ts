@@ -67,14 +67,22 @@ export const getCatalog = cache(async (): Promise<CatalogProduct[]> => {
       images: images
         .filter((image) => image.product_id === product.id)
         .sort((a, b) => a.position - b.position)
-        // Rows written before 0008 carry no focal point; centre is what they
-        // were already being cropped to.
-        .map(({ path, alt, position, focal_x, focal_y }) => ({
-          path,
-          alt,
-          position,
-          focal_x: focal_x ?? 50,
-          focal_y: focal_y ?? 50,
+        // Rows written before 0008 carry no focal point and rows before 0009
+        // no zoom; both read as the centre crop they were already drawn with.
+        // The card area stays null when unframed — the storefront resolves
+        // that to the focal point (lib/images/spotlight.ts), and flattening
+        // it here would erase the difference between "never framed for the
+        // card" and "framed dead centre".
+        .map((image) => ({
+          path: image.path,
+          alt: image.alt,
+          position: image.position,
+          focal_x: image.focal_x ?? 50,
+          focal_y: image.focal_y ?? 50,
+          focal_zoom: image.focal_zoom ?? 100,
+          card_focal_x: image.card_focal_x ?? null,
+          card_focal_y: image.card_focal_y ?? null,
+          card_zoom: image.card_zoom ?? null,
         })),
       variants: variants
         .filter((variant) => variant.product_id === product.id)

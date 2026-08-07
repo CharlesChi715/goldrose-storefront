@@ -43,6 +43,7 @@ import {
 } from "@/components/shop/ShopInteractive";
 import { abs, txt } from "@/lib/figma-layout";
 import { fileUrl } from "@/lib/files-url";
+import { cardAreaOf } from "@/lib/images/spotlight";
 import { tenor } from "@/lib/fonts";
 import { getPromoSlogan } from "@/lib/content";
 import { formatMoney } from "@/lib/money";
@@ -190,9 +191,11 @@ export default async function ShopPage({
       // Resolved server-side (local path or Supabase storage URL) so the card
       // photo travels with the product when the grid is sorted.
       image: product.images[0] ? fileUrl(product.images[0].path) : null,
-      // The admin framed this photo for the PDP box; object-position
-      // re-solves for the card's own shape, so the same choice holds here.
-      focus: `${product.images[0]?.focal_x ?? 50}% ${product.images[0]?.focal_y ?? 50}%`,
+      // The card is framed on its own: it is a different shape from the PDP
+      // window, so the hero photo gets a second area authored against THIS
+      // box. A photo never framed for the card falls back to the spotlight's
+      // point at no zoom, which is what the card showed before 0009.
+      card: cardAreaOf(product.images[0]),
     }));
   } catch {
     failed = true;
