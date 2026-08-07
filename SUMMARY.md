@@ -34,11 +34,23 @@ Open linked resources only when the task needs them.
   analytics, team, security.
 - **Marketing:** SEO/GEO, analytics, campaign/UTM attribution.
 
-## Current phase — reconciled 2026-08-04
+## Current phase — reconciled 2026-08-07
 
-- Pre-launch testing on <https://eldreve.com> (the vercel.app URL serves the
-  same deployment). No real customers or campaigns; all orders and analytics
-  are test data; uncertain public content stays visibly mocked.
+- **Going live, de-mocking gradually (decided 2026-08-07).** The site is being
+  opened for real use on <https://eldreve.com> (the vercel.app URL serves the
+  same deployment), and mock content is retired piece by piece while it is up —
+  not in one sweep beforehand. Two rules keep that safe:
+  - **Hard gates — never gradual.** Anything a stranger's money or identity
+    touches is real *before* the switch: live PayPal (owner-only),
+    `CHECKOUT_SKIP_PAYMENT` unset, migrations `0009`+`0010` pushed, real
+    shipping rates (OQ-2), demo reviews removed
+    (`npm run seed:reviews -- --remove`), database backups on.
+  - **Gradual — everything else.** Product copy, imagery and the placeholder
+    screens listed below stay visibly mocked and are replaced item by item
+    while live. A live placeholder may look unfinished; it may **never** state
+    a price, stock level, delivery date or policy we cannot honour.
+- Until every hard gate is cleared, orders and analytics remain test data and
+  no campaigns run.
 - **Built:** storefront, admin, accounts, catalog, checkout/order flow,
   analytics, SEO/GEO baseline. PayPal Orders v2 wallet checkout works in sandbox.
 - **Customer sign-in is live end to end (2026-08-03).** `/account/signup` does
@@ -108,7 +120,8 @@ Open linked resources only when the task needs them.
   rating row/drawer show live stats and scroll; design mock stays the visible
   fallback while no review is published. Two demonstration reviews are seeded
   on hosted and locally (`npm run seed:reviews`; `-- --remove` reverses it) —
-  they are not customer content and must go before launch. Missing on purpose:
+  they are not customer content and must go before the first real order
+  (fabricated reviews are the one mock that is never safe live). Missing on purpose:
   photo-upload UI (column ready) and an admin moderation screen (publish needs
   a manual DB update for now).
 - **The whole home page is admin-editable (2026-08-07, `worktree-admin-home-sections`).**
@@ -184,8 +197,9 @@ Open linked resources only when the task needs them.
   (incl. the three pixel baselines). A deleted asset is re-exported by the
   next `npm run figma:assets`. Kept on purpose: `scripts/features/cli.mjs`
   (owner ruling — the generator rebuild still needs it).
-- **Next:** owner activation/UAT → real shipping and product content → card
-  integration → launch hardening.
+- **Next:** clear the hard gates (push `0009`+`0010`, owner activation/UAT,
+  real shipping rates, live PayPal) → take real orders → keep replacing mock
+  product content and placeholder screens while live; card integration after.
 
 ## Environment and tooling — verified 2026-07-27
 
@@ -236,8 +250,12 @@ Open linked resources only when the task needs them.
 
 ### Release gates
 
+- Mock data is retired **gradually while live** (2026-08-07) — except the hard
+  gates in Current phase, which clear before the first real order. A
+  placeholder left on the live site must read as a placeholder and must never
+  assert a price, stock level, delivery date or policy we cannot honour.
 - `CHECKOUT_SKIP_PAYMENT=1` is test-only and records uncharged mock orders.
-  Remove before launch; builds reject it with `PAYPAL_ENV=live`.
+  Remove before the first real order; builds reject it with `PAYPAL_ENV=live`.
 - Only the owner may enable live PayPal.
 - Supabase configuration must be fully present or absent; the service-role key
   stays server-side.
@@ -260,17 +278,28 @@ Open linked resources only when the task needs them.
    (~3k/month) against real volume.
 3. Configure PayPal sandbox, begin Advanced Checkout onboarding; install
    `cloudflared`/`ngrok` when webhook testing starts.
-4. Build guest order lookup. `0006` stamps `orders.auth_user_id` so OTP-signed-in
+4. Push migrations `0009` then `0010` to hosted (order is load-bearing — see
+   Runtime and safety); an admin product save fails until both land.
+5. Enter real shipping rates (OQ-2) — no placeholder rate may be live.
+6. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
+   `CHECKOUT_SKIP_PAYMENT`, turn on [database
+   backups](docs/features/backend/db-backups.md).
+7. Owner enables live PayPal → **the site is open for real orders.**
+
+While live, in any order (nothing below blocks taking orders):
+
+8. Build guest order lookup. `0006` stamps `orders.auth_user_id` so OTP-signed-in
    customers already see their orders at `/account`; guests still have only
    `/orders/track`. (The leftover `/orders` → `/admin/orders` redirect was
    deleted 2026-08-04.)
-5. Enter real shipping rates (OQ-2) and product content (OQ-3).
-6. Replace third-party/dev imagery; reconcile palettes and tabs. (Wordmarks
-   are done — the ELDREVE rename landed 2026-08-05, see OQ-4.)
-7. Launch checks (incl. `npm run seed:reviews -- --remove`) + [database
-   backups](docs/features/backend/db-backups.md).
-8. After acceptance: capture screenshots, cancel Shopify, revoke the Figma
-   token, begin marketing.
+9. Replace mock product content (OQ-3) and third-party/dev imagery product by
+   product; reconcile palettes and tabs. (Wordmarks are done — the ELDREVE
+   rename landed 2026-08-05, see OQ-4.)
+10. Replace the remaining placeholder screens with working ones: `/bag` items,
+    tracking timeline, shipping choices, card fields, the 7 `/policies/*`
+    coming-soon pages.
+11. Capture screenshots, cancel Shopify, revoke the Figma token, begin
+    marketing.
 
 Later: promotion email consent
 ([`promotion-emails.md`](docs/features/backend/promotion-emails.md)), 120-SKU
@@ -284,11 +313,14 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 - **OQ-1 — decided 2026-07-26:** use
   [PayPal Advanced Cards](docs/features/card-payments.md) for Visa/Mastercard at
   checkout. Card processing is not built; Stage 0 is owner onboarding.
-- **OQ-2 — open:** rest-of-world shipping at `$19.95` is a placeholder.
-- **OQ-3 — open:** seed product details and some imagery are placeholders.
-  `/shop` cards show real catalog photos, but they are supplier composites with
-  English text baked in — replace before launch. Three products fill an
-  eight-card grid, so cards repeat.
+- **OQ-2 — open, and a hard gate:** rest-of-world shipping at `$19.95` is a
+  placeholder. A shipping rate is a price we charge, so it cannot go live mocked
+  — this must be answered before the first real order.
+- **OQ-3 — open, gradual:** seed product details and some imagery are
+  placeholders. `/shop` cards show real catalog photos, but they are supplier
+  composites with English text baked in. Three products fill an eight-card grid,
+  so cards repeat. Replaced product by product while live; each product's price
+  and stock must be true even while its copy and photos are still placeholder.
 - **OQ-4 — resolved 2026-08-03:** the brand is **ELDREVE**; `goldrose.co` is
   superseded and **`eldreve.com` is registered and live** (Cloudflare Registrar,
   boss-owned account). Wired 08-02/08-03: domain + `www` on Vercel, cert issued;

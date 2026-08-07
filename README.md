@@ -60,6 +60,12 @@ For direct hosted PostgreSQL access, the password is stored as
 `postgres.<project-ref>`. Prefer read-only queries; make schema changes through
 migrations.
 
+This is an **operator** credential, not an app variable — no code, script or CI
+job reads it, which is why it is absent from `.env.example` and must never be
+added to Vercel. It authenticates as the `postgres` role: direct SQL with RLS
+bypassed, so it is strictly more powerful than the service-role key. It exists
+for your `psql` sessions and for the password `supabase db push` asks for.
+
 ## Run & test
 
 ```bash
