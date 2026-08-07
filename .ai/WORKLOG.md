@@ -5769,7 +5769,7 @@ viewer shows the original" needed no change — verified, not rebuilt.
 
 **Built:**
 
-- Migration `0009_product_image_spotlight.sql` — `focal_zoom` (not null, 100),
+- Migration `0010_product_image_spotlight.sql` — `focal_zoom` (not null, 100),
   nullable `card_focal_x/card_focal_y/card_zoom`, and `framed`; `catalog_products`
   replaced to carry them (`framed` stays admin-only).
 - `lib/images/spotlight.ts` — the one place that turns a framing choice into
@@ -5788,7 +5788,55 @@ viewer shows the original" needed no change — verified, not rebuilt.
 **Verified:** typecheck, eslint, prettier, `npm run build`; 99 unit tests
 (8 new) and the full 117-test e2e suite including the three pixel baselines.
 
-**Notes:** `0009` is NOT pushed to hosted — storefront reads tolerate its
+**Notes:** `0010` is NOT pushed to hosted — storefront reads tolerate its
 absence, an admin product save does not. A "never framed" card area is stored
 as NULL and must stay NULL; flattening it to the spotlight would lose the
 owner's ability to say "follow the product page".
+
+
+## 2026-08-07 — `best_for` becomes the /shop filter vocabulary
+
+Branch `feat/best-for-facets`. The filter drawer's eleven Collections /
+Occasion / Recipient chips were cosmetic because no catalog field backed them;
+`products.best_for` was the nearest thing and held a prose blurb no page
+rendered. It is now `text[]` holding facet slugs, unbounded per product.
+
+- `lib/catalog/facets.ts` — the single vocabulary: 11 stored slugs in three
+  groups, plus Price and Availability computed from `price_cents` and stock
+  and never stored. Slugs are globally unique (the group is recovered from the
+  value); the index build throws on a duplicate, `assertBestFor` throws on an
+  unknown or derived value at the admin's save.
+- Migration `0009` — drops `catalog_products`, retypes `best_for` to `text[]`
+  (old sentences dropped, not guessed at), recreates the view with a `stocked`
+  boolean beside `in_stock`, re-grants to anon. **Not pushed to hosted yet.**
+- `/shop` filters server-side from `?f=jewel,anniversary` so the grid, the
+  "N GIFTS" count and the pager share one authority. OR inside a heading, AND
+  across headings. Facet URLs are noindexed like `?q=`.
+- The drawer multi-selects, "Show N Results" counts the pending selection
+  before the tap, Reset clears it, and the active-chip row is real with a
+  working ×. The frames' two fixed chips ("Ruby Red", "Gift Sets") are gone —
+  the only pixel change; baseline updated, home and PDP byte-identical.
+- Admin "Best for" text box → grouped multi-select (EN/中文). The round-trip
+  test caught a real bug on the way: Polaris `ChoiceList` echoes back the whole
+  `selected` array it is handed, not just its own group, so the naive merge
+  double-counted the other groups' slugs. `assertBestFor` refused the save
+  instead of storing junk — the validation earning its keep on day one.
+- Tests: `tests/unit/facets.test.ts` (vocabulary, AND/OR, price bands,
+  availability), `tests/e2e/shop-filters.spec.ts` (9 cases), and an
+  admin -> storefront round trip in `admin-products.spec.ts`. Green: 126 e2e,
+  112 unit.
+
+### Follow-up the same day — Price is single-choice
+
+Owner ruling: a product has one price, so overlapping bands read as a mistake
+rather than a wider search. Headings now carry a `select: "one" | "many"`
+field; Price is the only `one`. Picking a second band swaps the first, tapping
+the lit band clears it, and `parseFacetParam` narrows a hand-typed
+`?f=under-100,300-plus` to one band so no URL can reach a state the drawer
+cannot draw or undo. The rule lives in the registry, not the component, so
+taps, the chip ×, and pasted URLs all obey the same one. 118 unit, 128 e2e.
+
+Open: push `0009` to hosted — `supabase db push` is blocked for the agent by
+the permission classifier, so the owner runs it. Values that are already chip
+names carry across (both hosted rows say "Classic Collection" -> `classic`);
+everything else starts empty and is re-picked in the admin.

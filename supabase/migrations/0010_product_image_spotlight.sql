@@ -14,7 +14,7 @@
 --
 -- The zoom is a percentage over the cover-fit scale, fed to CSS transform
 -- scale() about the focal point (lib/images/spotlight.ts), so 100 is exactly
--- the pre-0009 crop and every existing row keeps the picture it has today.
+-- the pre-0010 crop and every existing row keeps the picture it has today.
 -- Nothing here writes a cropped image file: the original is stored whole, so
 -- the PDP's fullscreen viewer still has every pixel to show.
 
@@ -25,7 +25,7 @@ alter table public.product_images
     check (focal_zoom between 100 and 400),
   -- Card area. NULLABLE on purpose: null means "never framed for the card",
   -- which the storefront reads as the spotlight's point at no zoom — the
-  -- card's exact pre-0009 behaviour. A framed card writes all three together.
+  -- card's exact pre-0010 behaviour. A framed card writes all three together.
   add column if not exists card_focal_x smallint
     check (card_focal_x between 0 and 100),
   add column if not exists card_focal_y smallint

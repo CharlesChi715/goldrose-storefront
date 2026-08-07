@@ -44,7 +44,10 @@ const saveProductSchema = z.object({
   vendor: z.string().trim().max(255),
   product_type: z.string().trim().max(255),
   tags: z.array(z.string().trim().min(1).max(120)).max(50),
-  best_for: z.string().trim().max(255),
+  // Shape only — that these are REAL facet slugs is settled by assertBestFor()
+  // in lib/admin/products.ts, so the vocabulary lives in one file. No length
+  // cap: a product may carry every chip in the drawer (owner, 2026-08-07).
+  best_for: z.array(z.string().trim().min(1).max(60)),
   badge: z.string().trim().max(60),
   details: z.array(z.string().trim().min(1).max(255)).max(20),
   position: z.number().int().min(0).max(100_000).nullable(),

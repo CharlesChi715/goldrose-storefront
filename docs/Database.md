@@ -46,8 +46,8 @@ never accepted from the CSV.
 | 12  | `hs_code`           | ○   | customs                               |
 | 13  | `seo_title`         | ○   | name 3/3: Google-result override — ⚠️ stored but not yet read by the storefront |
 | 14  | `seo_description`   | ○   | desc 2/2: Google-snippet override — ⚠️ stored but not yet read by the storefront |
-| 15  | `best_for`          | ○   | one-line occasion blurb ("Anniversaries, birthdays…") — ⚠️ dormant: no page renders it, admin can't edit it |
-| 16  | `badge`             | ○   | short promo label for shop cards ("Save 44%", "Gift-ready") — ⚠️ dormant: no page renders it, admin can't edit it |
+| 15  | `best_for`          | ○   | text[] (0009) — /shop filter facets, any number of slugs from `lib/catalog/facets.ts` (collection/occasion/recipient); closed vocabulary, no DB CHECK. Was a prose blurb until 2026-08-07 |
+| 16  | `badge`             | ○   | short promo label for shop cards ("Save 44%", "Gift-ready") — ⚠️ dormant: no page renders it |
 | 17  | `details`           | ○   | text[]                                |
 | 18  | `option_names`      | ✓ if variants differ | text[], max 3 — names the variant axes |
 | 19  | `status`            | ○   | active / draft / archived — defaults draft |

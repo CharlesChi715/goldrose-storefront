@@ -41,6 +41,12 @@ import {
   type CardData,
   type SlotSpec,
 } from "@/components/shop/ShopInteractive";
+import {
+  facetSubject,
+  matchesFacets,
+  parseFacetParam,
+  type FacetSubject,
+} from "@/lib/catalog/facets.ts";
 import { abs, txt } from "@/lib/figma-layout";
 import { fileUrl } from "@/lib/files-url";
 import { cardAreaOf } from "@/lib/images/spotlight";
@@ -61,14 +67,18 @@ export const revalidate = 300;
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; f?: string }>;
 }): Promise<Metadata> {
   const params = await searchParams;
   const requested = Number(params.page);
   // Out-of-range pages fall back to page 1 in the body; noindexing anything
   // past the first page covers both without a second catalog read here.
   const paged = Number.isInteger(requested) && requested > 1;
-  const noindex = paged || Boolean(params.q?.trim());
+  // A facet selection is one shopper's slice of the same products, so it is
+  // noindexed for the reason ?q= is: /shop is the one page that should rank,
+  // and every combination of eleven chips would otherwise be its own URL
+  // competing with it.
+  const noindex = paged || Boolean(params.q?.trim()) || Boolean(params.f);
   return {
     title: paged ? `Shop · page ${requested}` : "Shop",
     description: "Shop the ELDREVE 24K gold dipped rose collection.",
@@ -155,15 +165,24 @@ function pagerButtons(page: number, pageCount: number) {
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; f?: string }>;
 }) {
   const params = await searchParams;
   const query = (params.q ?? "").trim();
+  // The filter drawer's selection travels in the URL, not in client state, so
+  // one authority decides the grid, the "N GIFTS" count and the pager. Doing
+  // it in the browser instead would leave the server's pager counting products
+  // the grid had already dropped. Unknown slugs are ignored (facets.ts).
+  const selected = parseFacetParam(params.f);
 
   // Card content and the promo slogan come from the DB, and each degrades on
   // its own: a dead catalog shows the empty line below rather than a grid of
   // invented products, and a dead slogan still leaves the catalog readable.
   let cardData: CardData[] = [];
+  // Every search-matched product's filterable facts, BEFORE the facet filter —
+  // the drawer counts its pending selection against these, so "Show 2 Results"
+  // is true before the tap rather than after it.
+  let subjects: FacetSubject[] = [];
   let failed = false;
   try {
     // Card order = active products by position (§8).
@@ -179,7 +198,12 @@ export default async function ShopPage({
             .includes(needle),
         )
       : catalog;
-    cardData = matches.map((product) => ({
+    subjects = matches.map(facetSubject);
+    // Then the drawer's chips: OR inside a heading, AND across headings.
+    const shown = matches.filter((product) =>
+      matchesFacets(facetSubject(product), selected),
+    );
+    cardData = shown.map((product) => ({
       handle: product.handle,
       shortName: product.short_name || product.title,
       price: formatMoney(product.variants[0]?.price_cents ?? 0),
@@ -233,6 +257,7 @@ export default async function ShopPage({
   const pageHref = (n: number) => {
     const qs = new URLSearchParams();
     if (query) qs.set("q", query);
+    if (selected.length) qs.set("f", selected.join(","));
     if (n > 1) qs.set("page", String(n));
     const search = qs.toString();
     return search ? `/shop?${search}` : "/shop";
@@ -281,12 +306,17 @@ export default async function ShopPage({
           data={cardData}
           page={page}
           pageSize={PAGE_SIZE}
+          query={query}
+          selected={selected}
+          subjects={subjects}
           emptyNote={
             failed
               ? "We couldn’t load the collection just now — please refresh."
               : query
                 ? `No gifts match “${query}”.`
-                : "No gifts available yet."
+                : selected.length
+                  ? "No gifts match these filters."
+                  : "No gifts available yet."
           }
         />
 

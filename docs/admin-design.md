@@ -339,7 +339,7 @@ Products also get **media**: `product_images (id, product_id, path, alt,
 position)` — multi-image upload to the Storage bucket, drag to reorder,
 first image is the card thumbnail.
 
-Each photo also carries two **spotlight areas** (migration 0009), because the
+Each photo also carries two **spotlight areas** (migration 0010), because the
 storefront's photo boxes are fixed design rectangles the photos are not shaped
 like, and one crop cannot serve two differently-shaped boxes:
 
@@ -353,7 +353,7 @@ An area is a point plus a zoom, never a cropped file: `object-position` for the
 point, `transform: scale()` about that same point for the zoom
 (`lib/images/spotlight.ts`). The original upload is stored whole, which is what
 lets the PDP's fullscreen viewer show every pixel. Defaults reproduce the
-pre-0009 crop exactly — 50/50 at zoom 100, card columns null meaning "follow
+pre-0010 crop exactly — 50/50 at zoom 100, card columns null meaning "follow
 the PDP point" — so no existing photo moves, and zoom 100 emits no `transform`
 at all so the pixel baselines stay byte-identical.
 

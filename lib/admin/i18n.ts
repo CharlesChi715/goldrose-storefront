@@ -247,7 +247,6 @@ const en = {
   "form.description.ph":
     "What the product is, how it is made, and what makes it worth giving.",
   "form.shortName.ph": "e.g. Signature Rose",
-  "form.bestFor.ph": "e.g. Anniversaries, birthdays and romantic gifting",
   "form.badge.ph": "e.g. Best seller",
   "form.details.ph": "e.g. Real rose base, Clear display stand, Gift-ready box",
   "form.media.alt.ph": "e.g. A 24K gold-dipped rose in a glass dome",
@@ -275,7 +274,7 @@ const en = {
     "Shown on shop cards and as the product page title. Leave blank to use the first 40 characters of the title.",
   "form.bestFor": "Best for",
   "form.bestFor.help":
-    "Who or what the product suits, e.g. Anniversaries and birthdays.",
+    "The shop's own filter chips. Tick every one that applies — there is no limit, and a shopper finds this product under each. Ticking none keeps it out of these filters only.",
   "form.badge": "Badge",
   "form.badge.help": "Short label on the product card, e.g. Best seller.",
   "form.details": "Details (comma separated)",
@@ -962,7 +961,6 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.title.ph": "例如：24K 镀金永生玫瑰",
   "form.description.ph": "产品是什么、如何制作，以及它值得赠送的理由。",
   "form.shortName.ph": "例如：经典玫瑰",
-  "form.bestFor.ph": "例如：周年纪念、生日与浪漫送礼",
   "form.badge.ph": "例如：热销",
   "form.details.ph": "例如：真实玫瑰花材, 透明展示底座, 礼盒包装",
   "form.media.alt.ph": "例如：玻璃罩中的 24K 镀金玫瑰",
@@ -989,7 +987,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.shortName.help":
     "显示在商店卡片和产品页标题上。留空则取标题的前 40 个字符。",
   "form.bestFor": "适用场景",
-  "form.bestFor.help": "产品适合的人群或场合，例如「周年纪念与生日」。",
+  "form.bestFor.help":
+    "商店筛选栏的选项。适用的全部勾选，数量不限，顾客在每一项下都能找到该产品。不勾选只表示不出现在这些筛选中。",
   "form.badge": "角标",
   "form.badge.help": "产品卡片上的短标签，例如「热销」。",
   "form.details": "详情要点（用逗号分隔）",

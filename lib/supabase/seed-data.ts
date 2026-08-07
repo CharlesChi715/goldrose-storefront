@@ -67,7 +67,10 @@ const SEED_PRODUCTS: SeedProduct[] = [
       hs_code: "7117.19",
       seo_title: null,
       seo_description: null,
-      best_for: "Anniversaries, birthdays, and classic romantic gifting.",
+      // Shop filter facets (lib/catalog/facets.ts). Placeholder merchandising
+      // like the rest of the seed copy (OQ-3), but spread across the three
+      // groups on purpose so the drawer has something to narrow.
+      best_for: ["classic", "anniversary", "birthday", "wife", "girlfriend"],
       badge: "Save 44%",
       details: [
         "Real rose base",
@@ -150,7 +153,7 @@ const SEED_PRODUCTS: SeedProduct[] = [
       hs_code: "7117.19",
       seo_title: null,
       seo_description: null,
-      best_for: "Valentine's Day, Mother's Day, and milestone moments.",
+      best_for: ["jewel", "valentines", "wedding", "mother", "girlfriend"],
       badge: "Gift-ready",
       details: [
         "Embossed keepsake box",
@@ -233,7 +236,7 @@ const SEED_PRODUCTS: SeedProduct[] = [
       hs_code: "7117.19",
       seo_title: null,
       seo_description: null,
-      best_for: "Customers who want the most complete gift option.",
+      best_for: ["sparkle", "anniversary", "wedding", "wife", "friends"],
       badge: "Best value",
       details: [
         "Detail-focused finish",
