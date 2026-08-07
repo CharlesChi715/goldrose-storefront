@@ -135,7 +135,7 @@ test("parseMigrationName splits version from slug", () => {
   assert.equal(parseMigrationName("nope.sql"), null);
 });
 
-test("viewDefinitions reads the select list, not the whole statement", () => {
+test("viewDefinitions reads the whole statement, subqueries included", () => {
   const defs = viewDefinitions(
     `create or replace view public.v as
        select p.id, p.handle as slug, jsonb_agg(i.path) as images
@@ -143,9 +143,70 @@ test("viewDefinitions reads the select list, not the whole statement", () => {
   );
   assert.equal(defs.length, 1);
   assert.equal(defs[0].view, "v");
-  // Columns from the select list only — nothing from the WHERE.
   assert.ok(defs[0].columns.has("id"));
   assert.ok(defs[0].columns.has("slug"));
   assert.ok(defs[0].columns.has("images"));
-  assert.ok(!defs[0].columns.has("status"));
+  // `status` comes from the WHERE and is not a column of the view. Collecting
+  // it is deliberate: reading only up to the first `from` used to truncate the
+  // real catalog view at its FIRST subquery, hiding everything after it. The
+  // extra names are harmless because both definitions are read the same way,
+  // so a name present in both cancels out of the comparison.
+  assert.ok(defs[0].columns.has("status"));
+});
+
+test("viewDefinitions sees jsonb_build_object keys, not just columns", () => {
+  // The shape of catalog_products: the storefront's real contract is the keys
+  // INSIDE the JSON payload, one level below the view's own column list.
+  const defs = viewDefinitions(
+    `create or replace view public.v as
+       select
+         p.id,
+         coalesce((
+           select jsonb_agg(jsonb_build_object(
+             'path', i.path, 'card_zoom', i.card_zoom
+           ) order by i.position)
+           from product_images i where i.product_id = p.id
+         ), '[]'::jsonb) as images,
+         coalesce((
+           select jsonb_agg(jsonb_build_object(
+             'in_stock', v.inventory_on_hand > 0,
+             'stocked', (not v.track_quantity) or v.inventory_on_hand > 0
+           ) order by v.position)
+           from product_variants v where v.product_id = p.id
+         ), '[]'::jsonb) as variants
+       from products p where p.status = 'active';`,
+  );
+  assert.equal(defs.length, 1);
+  // Past the first `from` — the variants subquery is the second one.
+  assert.ok(defs[0].columns.has("variants"));
+  assert.ok(defs[0].columns.has("stocked"));
+  assert.ok(defs[0].columns.has("in_stock"));
+  assert.ok(defs[0].columns.has("card_zoom"));
+});
+
+test("a rebuilt view that drops a JSON key is caught, as a dropped column is", () => {
+  // The 2026-08-07 regression, reduced: 0009 added `stocked` to the variants
+  // object, 0010 rebuilt the view from the pre-0009 definition and dropped it.
+  // Both files' view COLUMNS were identical, so nothing was flagged and the
+  // loss reached the hosted database.
+  const { errors, warnings } = inspectMigrations([
+    {
+      name: "0009_facets.sql",
+      sql: `create view public.catalog_products as
+              select p.id, (select jsonb_build_object(
+                'in_stock', v.a, 'stocked', v.b) from variants v) as variants
+              from products p;`,
+    },
+    {
+      name: "0010_spotlight.sql",
+      sql: `create or replace view public.catalog_products as
+              select p.id, (select jsonb_build_object(
+                'in_stock', v.a) from variants v) as variants
+              from products p;`,
+    },
+  ]);
+  assert.deepEqual(errors, [], "still a judgement call, not a hard failure");
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /view catalog_products/);
+  assert.match(warnings[0], /stocked/);
 });
