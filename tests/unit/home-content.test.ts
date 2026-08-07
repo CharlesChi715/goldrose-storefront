@@ -15,10 +15,15 @@ import {
   HOME_SECTION_LIST,
   allHomeKeys,
   fieldBudget,
+  fieldError,
+  homeDefault,
   isEditable,
+  isHexColor,
   isSafeHref,
+  isSafeImagePath,
   slotKey,
   visibilityKey,
+  type HomeField,
 } from "../../lib/home-content/registry.ts";
 import {
   HOME_FRAME_HEIGHT,
@@ -140,12 +145,29 @@ test("no design default exceeds its own character budget", () => {
   }
 });
 
+/**
+ * Kinds a character budget cannot mean anything for. A budget answers "will
+ * this still fit the design's box", which is a question about typed prose — a
+ * photo path, a hex colour and a millisecond count are all bounded by their own
+ * rule (`fieldError`) instead, exercised below.
+ */
+const UNBUDGETED = new Set(["url", "image", "color", "number"]);
+
 test("every typed-in field carries a length budget", () => {
-  // Links are free-length; every other editable field should tell the owner
-  // roughly how much room the design's box has.
+  // Every editable PROSE field should tell the owner roughly how much room the
+  // design's box has — except photo descriptions, which are read aloud by
+  // screen readers rather than drawn, so they have no box to overflow.
   for (const section of HOME_SECTION_LIST) {
+    // Derived from this section's own photos rather than guessed from a name
+    // suffix, so it exempts exactly the descriptions and nothing else.
+    const altIds = new Set(
+      section.fields
+        .filter((field) => field.kind === "image")
+        .map((field) => `${field.id}_alt`),
+    );
     for (const field of section.fields) {
-      if (!isEditable(field) || field.kind === "url") continue;
+      if (!isEditable(field) || UNBUDGETED.has(field.kind)) continue;
+      if (altIds.has(field.id)) continue;
       assert.notEqual(
         fieldBudget(field),
         null,
@@ -165,4 +187,111 @@ test("every link field's own default passes the link check", () => {
       );
     }
   }
+});
+
+test("every field's own default passes its own kind's rule", () => {
+  // The design is by definition acceptable. If a default ever fails here, the
+  // owner would be unable to save the value already on the live page.
+  for (const section of HOME_SECTION_LIST) {
+    for (const field of section.fields) {
+      if (!isEditable(field)) continue;
+      assert.equal(
+        fieldError(field, field.value),
+        null,
+        `${section.id}.${field.id} default is rejected by its own rule`,
+      );
+    }
+  }
+});
+
+test("every photo field describes its design box and how it is fitted", () => {
+  // HomePhoto needs both to place an owner's upload; without them a replaced
+  // photo would fall back to the design's traced crop offsets and show the
+  // wrong region of the picture.
+  for (const section of HOME_SECTION_LIST) {
+    for (const field of section.fields) {
+      if (field.kind !== "image") continue;
+      assert.ok(field.box, `${section.id}.${field.id} has no design box`);
+      assert.ok(field.box!.w > 0 && field.box!.h > 0);
+      assert.ok(field.fit, `${section.id}.${field.id} does not say how it fits`);
+    }
+  }
+});
+
+test("every photo field is paired with a description the owner can edit", () => {
+  // A swapped photo keeping the previous one's alt text is a worse
+  // accessibility outcome than not being able to swap it at all, so the pairing
+  // is pinned rather than left to reviewers to notice.
+  for (const section of HOME_SECTION_LIST) {
+    const ids = new Set(section.fields.map((field) => field.id));
+    for (const field of section.fields) {
+      if (field.kind !== "image") continue;
+      // One rule everywhere: the description is the photo field's id + "_alt".
+      const alt = `${field.id}_alt`;
+      assert.ok(
+        ids.has(alt),
+        `${section.id}.${field.id} has no matching ${alt} field`,
+      );
+    }
+  }
+});
+
+test("homeDefault returns the registry's own value, and nothing for a stranger", () => {
+  // HomePhoto compares against this to decide "design crop or owner's upload",
+  // so a wrong answer here silently changes how every photo is drawn.
+  for (const section of HOME_SECTION_LIST) {
+    for (const field of section.fields) {
+      assert.equal(homeDefault(section.id, field.id), field.value);
+    }
+  }
+  assert.equal(homeDefault("hero", "no_such_field"), "");
+  assert.equal(homeDefault("no_such_section", "title"), "");
+});
+
+test("a photo path may only point at this site", () => {
+  for (const good of [
+    "/eldreve/home/508-90.png",
+    "/api/files/abc.jpg",
+    "uploads/2026/rose.webp",
+    "rose.png",
+  ]) {
+    assert.ok(isSafeImagePath(good), `${good} should be allowed`);
+  }
+  for (const bad of [
+    "https://evil.example/pixel.gif", // remote origin: a tracking pixel on every visit
+    "//evil.example/pixel.gif",
+    "data:image/svg+xml;base64,AAAA",
+    "javascript:alert(1)",
+    "/eldreve/../../etc/passwd",
+    "has space.png",
+    "",
+  ]) {
+    assert.ok(!isSafeImagePath(bad), `${bad} should be refused`);
+  }
+});
+
+test("a colour must be a plain 6-digit hex", () => {
+  assert.ok(isHexColor("#FFF6EC"));
+  assert.ok(isHexColor("#fff6ec"));
+  for (const bad of ["#FFF", "fff6ec", "rgb(255,246,236)", "var(--x)", "red"]) {
+    assert.ok(!isHexColor(bad), `${bad} should be refused`);
+  }
+});
+
+test("a number field is held inside its own bounds", () => {
+  const field = {
+    id: "autoplay",
+    label: "Autoplay",
+    labelZh: "自动播放",
+    kind: "number",
+    value: "4200",
+    numMin: 800,
+    numMax: 20000,
+  } satisfies HomeField;
+  assert.equal(fieldError(field, "4200"), null);
+  assert.equal(fieldError(field, "800"), null);
+  assert.equal(fieldError(field, "799"), "number");
+  assert.equal(fieldError(field, "20001"), "number");
+  assert.equal(fieldError(field, "1.5"), "number");
+  assert.equal(fieldError(field, "soon"), "number");
 });

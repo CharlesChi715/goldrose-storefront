@@ -22,6 +22,7 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import { fileUrl } from "@/lib/files-url";
 import type { HomeText } from "@/lib/home-content/registry";
 
 const INK = "#291A13";
@@ -88,8 +89,8 @@ export function A11({ c }: { c: HomeText["story"] }) {
         />
         {/* 2380:768 story photo */}
         <img
-          src="/eldreve/home/508-90.png"
-          alt="Gold-preserved rose with ELDREVE gift packaging"
+          src={fileUrl(c.story_photo)}
+          alt={c.story_photo_alt}
           width={204}
           height={259}
           style={{ ...abs(226, 0, 204, 259), display: "block" }}
@@ -261,8 +262,8 @@ export function A11({ c }: { c: HomeText["story"] }) {
 
       {/* 2380:775 · second story photo, beside the gift card */}
       <img
-        src="/eldreve/home/2380-775.png"
-        alt="Gold-dipped rose in its keepsake box"
+        src={fileUrl(c.gift_photo)}
+        alt={c.gift_photo_alt}
         width={204}
         height={204}
         style={{ ...abs(19, 570, 204, 204), display: "block" }}

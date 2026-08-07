@@ -3,10 +3,26 @@
 /**
  * ROLE OF THIS FILE
  * Client half of Content → Home page (§9.8): one annotated section per band of
- * the storefront home page, in page order, with every editable string, its
- * "Edited" state and one-click reset, plus the section's show/hide switch.
+ * the storefront home page, in page order, with every editable string, photo,
+ * colour and timing, its "Edited" state and one-click reset, plus the section's
+ * show/hide switch — beside a live preview of the page itself.
  *
- * Three decisions worth knowing:
+ * WHO THIS SCREEN IS FOR
+ * Not only the owner. It is used by teammates who did not build the site and do
+ * not have the Figma file open, so several choices here trade compactness for
+ * being unmistakable:
+ * - A LIVE PREVIEW sits beside the editor. The homepage is a fixed 430-wide
+ *   stage where a heading is one line in a box somebody sized in Figma, so
+ *   "will this fit" is a question only the page can answer. Save, and it
+ *   reloads.
+ * - SEARCH spans every field on the page. With ~180 fields across 8 sections,
+ *   finding "the gold caption on the second best-seller card" by scrolling is
+ *   worse than typing "caption".
+ * - Fields the owner CANNOT type into are still listed with the reason, so the
+ *   screen is a complete inventory of the page rather than a partial one with
+ *   silent gaps (§11).
+ *
+ * Three older decisions still hold:
  * - Edits are held locally and published by ONE "Save changes" action, because
  *   the homepage revalidates as a whole — a save per field would republish the
  *   page a dozen times for one round of copy edits.
@@ -14,12 +30,17 @@
  *   long copy is clipped on the live page, but only the design team can say
  *   what truly fits — an owner writing one character over should see a caution,
  *   not a wall.
- * - Fields the owner cannot type into are still listed (design artwork, data
- *   owned by another screen) with the reason, so this screen is a complete
- *   inventory of the page rather than a partial one with silent gaps.
+ * - Show/hide, and every reset, save IMMEDIATELY. They are whole-section
+ *   actions with a visible confirmation of their own, and batching them behind
+ *   the same button as copy edits made "Hide" look like it had not worked.
  */
 
-import { useMemo, useState, useTransition } from "react";
+import {
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   Badge,
@@ -28,6 +49,8 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
+  Divider,
   InlineStack,
   Layout,
   Link as PolarisLink,
@@ -38,6 +61,7 @@ import {
   Toast,
 } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
+import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import {
   resetHomeFieldAction,
   resetHomePageAction,
@@ -46,12 +70,22 @@ import {
   setHomeSectionVisibleAction,
 } from "./actions";
 
+export type { LibraryItem };
+
 /** One field as the server flattened it — both languages, ready to render. */
 export type FieldView = {
   id: string;
   label: string;
   labelZh: string;
-  kind: "text" | "multiline" | "url" | "artwork" | "managed";
+  kind:
+    | "text"
+    | "multiline"
+    | "url"
+    | "image"
+    | "color"
+    | "number"
+    | "artwork"
+    | "managed";
   value: string;
   defaultValue: string;
   edited: boolean;
@@ -62,6 +96,16 @@ export type FieldView = {
   note: string | null;
   noteZh: string | null;
   managedAt: string | null;
+  /** `image`: the design box, in stage pixels. */
+  box: { w: number; h: number } | null;
+  /** `image`: how the photo is fitted into that box. */
+  fit: "cover" | "stretch" | "window" | null;
+  /** `color`: artwork that has this colour baked in and will not follow. */
+  bakedInto: readonly string[] | null;
+  /** `number`: bounds and unit. */
+  numMin: number | null;
+  numMax: number | null;
+  unit: string | null;
 };
 
 /** One homepage section as the server flattened it. */
@@ -80,7 +124,39 @@ export type SectionView = {
 /** Which confirmation modal is open, if any. */
 type Confirm = { kind: "page" } | { kind: "section"; id: string } | null;
 
-/** Same rule as lib/home-content's isSafeHref, for inline feedback as you type. */
+/** Which field's photo dialog is open, if any. */
+type PhotoTarget = { section: SectionView; field: FieldView } | null;
+
+/** Remembers that the owner has dismissed the "how this screen works" note. */
+const INTRO_KEY = "goldrose-admin-home-intro-dismissed";
+
+/** Nothing else writes this key, so there is no external change to subscribe to. */
+const noopSubscribe = () => () => {};
+
+/**
+ * Whether the "how this screen works" note has already been dismissed.
+ *
+ * Read through `useSyncExternalStore` rather than in an effect: localStorage
+ * does not exist while the page is rendered on the server, and the server
+ * snapshot below reports "dismissed" so the note cannot flash in and out during
+ * hydration. React re-renders once with the real value after hydrating.
+ *
+ * @returns True when the note should stay hidden.
+ */
+function useIntroDismissed(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => window.localStorage.getItem(INTRO_KEY) === "1",
+    () => true,
+  );
+}
+
+/* --- Mirrors of lib/home-content/registry.ts, for inline feedback as you type.
+   Duplicated on purpose: these run on every keystroke in the browser, and the
+   server re-checks the same rules at the write, which is the check that holds
+   (a server action is reachable without this screen). ---------------------- */
+
+/** Same rule as the registry's isSafeHref. */
 function isSafeHref(value: string): boolean {
   const href = value.trim();
   if (href.length === 0 || href.length > 2000) return false;
@@ -88,7 +164,68 @@ function isSafeHref(value: string): boolean {
   return /^(https?:\/\/|mailto:|tel:)/i.test(href);
 }
 
-export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
+/** Same rule as the registry's isSafeImagePath. */
+function isSafeImagePath(value: string): boolean {
+  const path = value.trim();
+  if (path.length === 0 || path.length > 500) return false;
+  if (path.includes("..") || /\s/.test(path)) return false;
+  if (path.startsWith("//")) return false;
+  if (path.startsWith("/")) return !path.includes(":");
+  return /^[A-Za-z0-9][A-Za-z0-9._/-]*\.[A-Za-z0-9]+$/.test(path);
+}
+
+/** Same rule as the registry's isHexColor. */
+function isHexColor(value: string): boolean {
+  return /^#[0-9a-f]{6}$/i.test(value.trim());
+}
+
+/**
+ * The reason a value is unacceptable, or null. Mirrors the registry's
+ * `fieldError` so the reason code — and therefore the message — is the same one
+ * the server would give.
+ *
+ * @param field - The field being edited.
+ * @param value - The current draft value.
+ * @returns A reason code, or null when the value is fine.
+ */
+function fieldError(
+  field: FieldView,
+  value: string,
+): "href" | "image" | "color" | "number" | null {
+  if (field.kind === "url") return isSafeHref(value) ? null : "href";
+  if (field.kind === "image") return isSafeImagePath(value) ? null : "image";
+  if (field.kind === "color") return isHexColor(value) ? null : "color";
+  if (field.kind === "number") {
+    const parsed = Number(value.trim());
+    if (!Number.isInteger(parsed)) return "number";
+    if (field.numMin !== null && parsed < field.numMin) return "number";
+    if (field.numMax !== null && parsed > field.numMax) return "number";
+  }
+  return null;
+}
+
+/**
+ * Resolve a stored path to something the browser can show. Mirrors
+ * lib/files-url so the picker's thumbnails work without a round trip.
+ *
+ * @param storedPath - The value held in an image field.
+ * @returns A URL the preview can load.
+ */
+function fileUrl(storedPath: string): string {
+  if (storedPath.startsWith("/") || storedPath.startsWith("http")) {
+    return storedPath;
+  }
+  const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+  return `${base}/storage/v1/object/public/product-images/${storedPath}`;
+}
+
+export function HomeSectionsEditor({
+  sections,
+  library,
+}: {
+  sections: SectionView[];
+  library: LibraryItem[];
+}) {
   const t = useAdminT();
   const lang = useAdminLang();
   const zh = lang === "zh";
@@ -97,6 +234,16 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
   const [toast, setToast] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [photo, setPhoto] = useState<PhotoTarget>(null);
+  const [query, setQuery] = useState("");
+  const [onlyEdited, setOnlyEdited] = useState(false);
+  // Dismissal is remembered across visits; `justDismissed` closes it now.
+  const introDismissed = useIntroDismissed();
+  const [justDismissed, setJustDismissed] = useState(false);
+  const showIntro = !introDismissed && !justDismissed;
+  // Bumped after every save so the preview iframe reloads; a plain reload()
+  // is not available across the frame boundary once it has navigated.
+  const [previewNonce, setPreviewNonce] = useState(0);
 
   /** The live value of a field: the local draft if touched, else what is saved. */
   const valueOf = (section: SectionView, field: FieldView): string =>
@@ -120,27 +267,72 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
     [sections, drafts],
   );
 
-  // A bad link would be rejected server-side anyway; blocking the save here
+  // A bad value would be rejected server-side anyway; blocking the save here
   // keeps the owner from losing a whole round of edits to one typo.
-  const badLinks = useMemo(
+  const invalid = useMemo(
     () =>
       sections.flatMap((section) =>
         section.fields
-          .filter(
-            (field) =>
-              field.kind === "url" && !isSafeHref(valueOf(section, field)),
-          )
+          .filter((field) => fieldError(field, valueOf(section, field)) !== null)
           .map((field) => `${section.id}.${field.id}`),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [sections, drafts],
   );
 
+  /** How many fields in a section differ from the design, drafts included. */
+  function editedCount(section: SectionView): number {
+    return section.fields.filter(
+      (field) => field.edited || valueOf(section, field) !== field.value,
+    ).length;
+  }
+
+  /**
+   * Whether a field matches the current search box.
+   *
+   * The section's own name is deliberately NOT searched. It reads like a
+   * helpful addition and is the opposite: A-11 is called "Story, FAQ, Gift
+   * card, Newsletter & Footer", so typing "gift card" would return all forty of
+   * its fields instead of the four that are about the gift card. Finding a
+   * whole section is what "Jump to a section" above is for.
+   */
+  function matches(section: SectionView, field: FieldView): boolean {
+    if (onlyEdited && !field.edited) return false;
+    const needle = query.trim().toLowerCase();
+    if (needle.length === 0) return true;
+    return [
+      field.label,
+      field.labelZh,
+      field.group ?? "",
+      field.groupZh ?? "",
+      valueOf(section, field),
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(needle);
+  }
+
+  /** Sections that still have at least one field to show, and their fields. */
+  const filtered = useMemo(
+    () =>
+      sections
+        .map((section) => ({
+          section,
+          fields: section.fields.filter((field) => matches(section, field)),
+        }))
+        .filter((entry) => entry.fields.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sections, drafts, query, onlyEdited],
+  );
+
+  const filtering = query.trim().length > 0 || onlyEdited;
+
   function run(action: () => Promise<void>, message: string) {
     startTransition(async () => {
       try {
         await action();
         setToast(message);
+        setPreviewNonce((n) => n + 1);
         router.refresh();
       } catch {
         setToast(t("home.saveFailed"));
@@ -156,10 +348,19 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
     }, t("home.saved"));
   }
 
+  /** Drop one field's local draft without touching what is saved. */
+  function clearDraft(key: string) {
+    setDrafts((current) => {
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  }
+
   /** Fields grouped by their optional sub-heading, in registry order. */
-  function groupsOf(section: SectionView) {
+  function groupsOf(fields: FieldView[]) {
     const groups: { label: string | null; fields: FieldView[] }[] = [];
-    for (const field of section.fields) {
+    for (const field of fields) {
       const label = zh ? field.groupZh : field.group;
       const last = groups[groups.length - 1];
       if (last && last.label === (label ?? null)) last.fields.push(field);
@@ -168,54 +369,218 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
     return groups;
   }
 
+  /** The badges that sit beside a field's label. */
+  function labelFor(field: FieldView, dirty: boolean) {
+    return (
+      <InlineStack gap="200" blockAlign="center">
+        <Text as="span" variant="bodyMd">
+          {zh ? field.labelZh : field.label}
+        </Text>
+        {field.kind === "artwork" ? (
+          <Badge tone="attention">{t("home.artwork")}</Badge>
+        ) : null}
+        {field.kind === "managed" ? <Badge>{t("home.managed")}</Badge> : null}
+        {field.edited || dirty ? (
+          <Badge tone="info">{t("home.edited")}</Badge>
+        ) : null}
+      </InlineStack>
+    );
+  }
+
+  /** The "Reset" / "Undo" control, shown only once a field differs. */
+  function resetControl(
+    section: SectionView,
+    field: FieldView,
+    dirty: boolean,
+  ) {
+    if (!field.edited && !dirty) return null;
+    return (
+      <Button
+        variant="plain"
+        disabled={pending}
+        onClick={() => {
+          const key = `${section.id}.${field.id}`;
+          // An unsaved draft is only in this browser, so dropping it needs no
+          // server call — and must not touch what is published.
+          if (dirty && !field.edited) {
+            clearDraft(key);
+            return;
+          }
+          run(async () => {
+            await resetHomeFieldAction(section.id, field.id);
+            clearDraft(key);
+          }, t("home.saved"));
+        }}
+      >
+        {dirty && !field.edited ? t("home.undo") : t("home.reset")}
+      </Button>
+    );
+  }
+
   function renderField(section: SectionView, field: FieldView) {
     const key = `${section.id}.${field.id}`;
-    const label = zh ? field.labelZh : field.label;
     const note = (zh ? field.noteZh : field.note) ?? null;
-    const readOnly = field.kind === "artwork" || field.kind === "managed";
     const value = valueOf(section, field);
+    const dirty = drafts[key] !== undefined && drafts[key] !== field.value;
+    const error = fieldError(field, value);
+    const errorText = error ? t(`home.bad.${error}` as never) : undefined;
+    const set = (next: string) =>
+      setDrafts((current) => ({ ...current, [key]: next }));
+
+    /* --- Photo ---------------------------------------------------------- */
+    if (field.kind === "image") {
+      return (
+        <BlockStack key={key} gap="200">
+          {labelFor(field, dirty)}
+          <InlineStack gap="300" blockAlign="start" wrap={false}>
+            <Box
+              background="bg-surface-secondary"
+              borderRadius="200"
+              padding="150"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={fileUrl(value)}
+                alt=""
+                style={{
+                  display: "block",
+                  width: 96,
+                  height: 96,
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+            <BlockStack gap="150">
+              <InlineStack gap="200">
+                <Button
+                  disabled={pending}
+                  onClick={() => setPhoto({ section, field })}
+                >
+                  {t("home.photo.change")}
+                </Button>
+                {resetControl(section, field, dirty)}
+              </InlineStack>
+              {field.box ? (
+                <Text as="span" variant="bodySm" tone="subdued">
+                  {t("home.photo.size")} {field.box.w} × {field.box.h}
+                  {zh ? " 像素" : " px"}
+                </Text>
+              ) : null}
+              {note ? (
+                <Text as="span" variant="bodySm" tone="subdued">
+                  {note}
+                </Text>
+              ) : null}
+              {errorText ? (
+                <Text as="span" variant="bodySm" tone="critical">
+                  {errorText}
+                </Text>
+              ) : null}
+            </BlockStack>
+          </InlineStack>
+        </BlockStack>
+      );
+    }
+
+    /* --- Colour --------------------------------------------------------- */
+    if (field.kind === "color") {
+      return (
+        <BlockStack key={key} gap="200">
+          {labelFor(field, dirty)}
+          <InlineStack gap="300" blockAlign="center" wrap={false}>
+            {/* The native swatch is the control people reach for; the hex box
+                beside it is what a design hand-off actually gives you. */}
+            <input
+              type="color"
+              value={isHexColor(value) ? value : "#000000"}
+              aria-label={zh ? field.labelZh : field.label}
+              onChange={(event) => set(event.target.value.toUpperCase())}
+              style={{
+                width: 48,
+                height: 36,
+                padding: 0,
+                border: "1px solid #e3e3e3",
+                borderRadius: 8,
+                background: "none",
+                cursor: "pointer",
+              }}
+            />
+            <Box width="140px">
+              <TextField
+                label=""
+                labelHidden
+                value={value}
+                autoComplete="off"
+                error={errorText}
+                onChange={(next) => set(next)}
+              />
+            </Box>
+            {resetControl(section, field, dirty)}
+          </InlineStack>
+          {note ? (
+            <Text as="span" variant="bodySm" tone="subdued">
+              {note}
+            </Text>
+          ) : null}
+          {field.bakedInto && field.bakedInto.length > 0 ? (
+            <Banner tone="warning">
+              <p>
+                {t("home.color.baked")} {field.bakedInto.join(", ")}
+              </p>
+            </Banner>
+          ) : null}
+        </BlockStack>
+      );
+    }
+
+    /* --- Number --------------------------------------------------------- */
+    if (field.kind === "number") {
+      return (
+        <BlockStack key={key} gap="150">
+          <InlineStack gap="300" blockAlign="center" wrap={false}>
+            <Box width="180px">
+              <TextField
+                label={labelFor(field, dirty)}
+                type="number"
+                value={value}
+                suffix={field.unit ?? undefined}
+                min={field.numMin ?? undefined}
+                max={field.numMax ?? undefined}
+                autoComplete="off"
+                error={errorText}
+                helpText={note ?? undefined}
+                onChange={(next) => set(next)}
+              />
+            </Box>
+            {resetControl(section, field, dirty)}
+          </InlineStack>
+        </BlockStack>
+      );
+    }
+
+    /* --- Text, multiline, link, and the read-only kinds ----------------- */
+    const readOnly = field.kind === "artwork" || field.kind === "managed";
     const budget = field.max;
     const over = budget !== null && value.length > budget;
-    const badLink = field.kind === "url" && !isSafeHref(value);
-    const dirty = drafts[key] !== undefined && drafts[key] !== field.value;
 
     return (
       <BlockStack key={key} gap="150">
         <TextField
-          label={
-            <InlineStack gap="200" blockAlign="center">
-              <Text as="span" variant="bodyMd">
-                {label}
-              </Text>
-              {field.kind === "artwork" ? (
-                <Badge tone="attention">{t("home.artwork")}</Badge>
-              ) : null}
-              {field.kind === "managed" ? (
-                <Badge>{t("home.managed")}</Badge>
-              ) : null}
-              {field.edited || dirty ? (
-                <Badge tone="info">{t("home.edited")}</Badge>
-              ) : null}
-            </InlineStack>
-          }
+          label={labelFor(field, dirty)}
           value={value}
           disabled={readOnly}
           multiline={
-            field.kind === "multiline"
-              ? Math.min(field.lines ?? 2, 8)
-              : undefined
+            field.kind === "multiline" ? Math.min(field.lines ?? 2, 8) : undefined
           }
           autoComplete="off"
-          error={badLink ? t("home.badHref") : undefined}
+          error={errorText}
           helpText={
             readOnly
               ? (note ??
                 (field.kind === "artwork" ? t("home.artworkHelp") : undefined))
               : (note ?? undefined)
           }
-          onChange={(next) =>
-            setDrafts((current) => ({ ...current, [key]: next }))
-          }
+          onChange={(next) => set(next)}
         />
         <InlineStack align="space-between" blockAlign="center" gap="200">
           <Box>
@@ -234,32 +599,7 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
               </PolarisLink>
             ) : null}
           </Box>
-          {field.edited || dirty ? (
-            <Button
-              variant="plain"
-              disabled={pending}
-              onClick={() => {
-                if (dirty && !field.edited) {
-                  setDrafts((current) => {
-                    const next = { ...current };
-                    delete next[key];
-                    return next;
-                  });
-                  return;
-                }
-                run(async () => {
-                  await resetHomeFieldAction(section.id, field.id);
-                  setDrafts((current) => {
-                    const next = { ...current };
-                    delete next[key];
-                    return next;
-                  });
-                }, t("home.saved"));
-              }}
-            >
-              {t("home.reset")}
-            </Button>
-          ) : null}
+          {resetControl(section, field, dirty)}
         </InlineStack>
       </BlockStack>
     );
@@ -273,7 +613,7 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
       subtitle={t("home.subtitle")}
       primaryAction={{
         content: t("common.save"),
-        disabled: dirtyCount === 0 || badLinks.length > 0,
+        disabled: dirtyCount === 0 || invalid.length > 0,
         loading: pending,
         onAction: save,
       }}
@@ -289,6 +629,22 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
       <Layout>
         <Layout.Section>
           <BlockStack gap="400">
+            {showIntro ? (
+              <Banner
+                tone="info"
+                title={t("home.intro.title")}
+                onDismiss={() => {
+                  window.localStorage.setItem(INTRO_KEY, "1");
+                  setJustDismissed(true);
+                }}
+              >
+                <BlockStack gap="100">
+                  <Text as="p">{t("home.intro.body")}</Text>
+                  <Text as="p">{t("home.intro.safety")}</Text>
+                </BlockStack>
+              </Banner>
+            ) : null}
+
             {dirtyCount > 0 ? (
               // Save lives only on the page header, so the screen never shows
               // two buttons that mean the same thing.
@@ -303,27 +659,125 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
                 <p>{t("home.unsavedBody")}</p>
               </Banner>
             ) : null}
+
+            {invalid.length > 0 ? (
+              <Banner tone="critical" title={t("home.blocked")}>
+                <p>{t("home.blockedBody")}</p>
+              </Banner>
+            ) : null}
+
+            {/* Find a field · jump to a section */}
+            <Card>
+              <BlockStack gap="300">
+                <TextField
+                  label={t("home.search")}
+                  value={query}
+                  placeholder={t("home.searchPlaceholder")}
+                  autoComplete="off"
+                  clearButton
+                  onClearButtonClick={() => setQuery("")}
+                  onChange={setQuery}
+                />
+                <Checkbox
+                  label={t("home.onlyEdited")}
+                  checked={onlyEdited}
+                  onChange={setOnlyEdited}
+                />
+                {filtering ? (
+                  <Text as="p" variant="bodySm" tone="subdued">
+                    {filtered.reduce(
+                      (total, entry) => total + entry.fields.length,
+                      0,
+                    )}{" "}
+                    {t("home.matches")}
+                  </Text>
+                ) : (
+                  <>
+                    <Divider />
+                    <Text as="h2" variant="headingSm">
+                      {t("home.jump")}
+                    </Text>
+                    <InlineStack gap="300" wrap>
+                      {sections.map((section) => {
+                        const count = editedCount(section);
+                        return (
+                          <InlineStack
+                            key={section.id}
+                            gap="100"
+                            blockAlign="center"
+                          >
+                            <PolarisLink url={`#home-section-${section.id}`}>
+                              {`${section.module} · ${zh ? section.titleZh : section.title}`}
+                            </PolarisLink>
+                            {count > 0 ? (
+                              <Badge tone="info">{String(count)}</Badge>
+                            ) : null}
+                            {section.hideable && !section.visible ? (
+                              <Badge tone="critical">{t("home.hidden")}</Badge>
+                            ) : null}
+                          </InlineStack>
+                        );
+                      })}
+                    </InlineStack>
+                  </>
+                )}
+              </BlockStack>
+            </Card>
+
+            {/* The page itself, so "will this fit" is answerable here. */}
             <Card>
               <BlockStack gap="200">
-                <Text as="h2" variant="headingSm">
-                  {t("home.jump")}
-                </Text>
-                <InlineStack gap="200" wrap>
-                  {sections.map((section) => (
-                    <PolarisLink
-                      key={section.id}
-                      url={`#home-section-${section.id}`}
-                    >
-                      {`${section.module} · ${zh ? section.titleZh : section.title}`}
-                    </PolarisLink>
-                  ))}
+                <InlineStack align="space-between" blockAlign="center">
+                  <Text as="h2" variant="headingSm">
+                    {t("home.livePreview")}
+                  </Text>
+                  <Button
+                    variant="plain"
+                    onClick={() => setPreviewNonce((n) => n + 1)}
+                  >
+                    {t("home.refreshPreview")}
+                  </Button>
                 </InlineStack>
+                <Text as="p" variant="bodySm" tone="subdued">
+                  {t("home.livePreviewHelp")}
+                </Text>
+                <Box
+                  background="bg-surface-secondary"
+                  borderRadius="200"
+                  padding="200"
+                >
+                  <iframe
+                    key={previewNonce}
+                    src={`/?adminPreview=${previewNonce}`}
+                    title={t("home.livePreview")}
+                    style={{
+                      display: "block",
+                      width: 430,
+                      height: 620,
+                      maxWidth: "100%",
+                      margin: "0 auto",
+                      border: "1px solid #e3e3e3",
+                      borderRadius: 8,
+                      background: "#FFF6EC",
+                    }}
+                  />
+                </Box>
               </BlockStack>
             </Card>
           </BlockStack>
         </Layout.Section>
 
-        {sections.map((section) => (
+        {filtered.length === 0 ? (
+          <Layout.Section>
+            <Card>
+              <Text as="p" tone="subdued">
+                {t("home.noMatches")}
+              </Text>
+            </Card>
+          </Layout.Section>
+        ) : null}
+
+        {filtered.map(({ section, fields }) => (
           <Layout.AnnotatedSection
             key={section.id}
             title={zh ? section.titleZh : section.title}
@@ -345,6 +799,11 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
                   >
                     <InlineStack gap="200" blockAlign="center">
                       <Badge>{section.module}</Badge>
+                      {editedCount(section) > 0 ? (
+                        <Badge tone="info">
+                          {`${editedCount(section)} ${t("home.editedCount")}`}
+                        </Badge>
+                      ) : null}
                       {section.hideable && !section.visible ? (
                         <Badge tone="critical">{t("home.hidden")}</Badge>
                       ) : null}
@@ -374,8 +833,11 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
                     </Banner>
                   ) : null}
 
-                  {groupsOf(section).map((group, index) => (
-                    <BlockStack key={group.label ?? `g${index}`} gap="300">
+                  {/* Keyed by position, not by label: a section may open a
+                      group, break into per-card groups, and come back to the
+                      first one, so labels are not unique within a section. */}
+                  {groupsOf(fields).map((group, index) => (
+                    <BlockStack key={`${index}-${group.label ?? ""}`} gap="300">
                       {group.label ? (
                         <Text as="h3" variant="headingSm" tone="subdued">
                           {group.label}
@@ -414,6 +876,30 @@ export function HomeSectionsEditor({ sections }: { sections: SectionView[] }) {
           </Layout.AnnotatedSection>
         ))}
       </Layout>
+
+      {photo ? (
+        <PhotoPicker
+          // Keyed by field so opening a different photo remounts the dialog
+          // with that field's value, rather than re-using the last one's.
+          key={`${photo.section.id}.${photo.field.id}`}
+          open
+          label={zh ? photo.field.labelZh : photo.field.label}
+          value={valueOf(photo.section, photo.field)}
+          defaultValue={photo.field.defaultValue}
+          previewUrl={fileUrl(valueOf(photo.section, photo.field))}
+          box={photo.field.box}
+          fit={photo.field.fit}
+          library={library}
+          onChange={(path) =>
+            setDrafts((current) => ({
+              ...current,
+              [`${photo.section.id}.${photo.field.id}`]: path,
+            }))
+          }
+          onClose={() => setPhoto(null)}
+          onUploaded={() => router.refresh()}
+        />
+      ) : null}
 
       <Modal
         open={confirm !== null}

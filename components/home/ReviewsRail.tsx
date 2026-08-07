@@ -12,51 +12,62 @@
  * exactly as A-6 drew them.
  */
 
-import {
-  Carousel,
-  RAIL_AUTOPLAY_MS,
-  RAIL_SLIDE_MS,
-} from "@/components/home/Carousel";
+import { Carousel, type RailTiming } from "@/components/home/Carousel";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
+import { fileUrl } from "@/lib/files-url";
+import type { HomeText } from "@/lib/home-content/registry";
 
 /* Review cards 1–3 (nodes 163:99, 193:150, 193:155) — identical structure, so
    only the photo, its crop and the quote differ. The design lays them out on a
    134px pitch (x = 22 / 156 / 290) at y=2873, i.e. a horizontal rail, so they
    are drawn by the shared Carousel and these values are CELL coordinates
    (each card's own x/y subtracted). photoBox is the photo's rect relative to
-   the clipping image frame. */
+   the clipping image frame.
+
+   Quote, photo and alt now come from the registry through `c`; what stays here
+   is the per-card GEOMETRY, which is traced from Figma and is not owner data —
+   note card 1's photo is a 132×170 render pulled up 55px behind the 122×69
+   opening, while cards 2 and 3 fill theirs exactly. */
 type Review = {
-  photo: string;
   photoBox: readonly [number, number, number, number];
-  photoAlt: string;
-  quote: string;
   quoteX: number;
 };
 
 const REVIEWS: readonly Review[] = [
-  {
-    photo: "/eldreve/home/163-101.png",
-    photoBox: [0, -55, 132, 170],
-    photoAlt: "Customer photo of a gold rose gift",
-    quote: "“The most beautiful gift I’ve ever received.”",
-    quoteX: 8,
-  },
-  {
-    photo: "/eldreve/home/193-152.png",
-    photoBox: [0, 0, 122, 69],
-    photoAlt: "Customer photo of a gold rose gift",
-    quote: "“My wife was speechless on our anniversary.”",
-    quoteX: 8,
-  },
-  {
-    photo: "/eldreve/home/193-157.png",
-    photoBox: [0, 0, 122, 69],
-    photoAlt: "Customer photo of a gold rose gift",
-    quote: "“Elegant and meaningful for our client.”",
-    quoteX: 9,
-  },
+  { photoBox: [0, -55, 132, 170], quoteX: 8 },
+  { photoBox: [0, 0, 122, 69], quoteX: 8 },
+  { photoBox: [0, 0, 122, 69], quoteX: 9 },
 ];
+
+/** The editable strings of one review card, picked out of the `recipient` section. */
+type ReviewCopy = { photo: string; photoAlt: string; quote: string };
+
+/**
+ * Split the flat `recipient` review fields into one object per card.
+ *
+ * @param c - The resolved `recipient` section copy.
+ * @returns Review copy in slide order.
+ */
+function copyOf(c: HomeText["recipient"]): readonly ReviewCopy[] {
+  return [
+    {
+      photo: c.review_1_photo,
+      photoAlt: c.review_1_photo_alt,
+      quote: c.review_1_quote,
+    },
+    {
+      photo: c.review_2_photo,
+      photoAlt: c.review_2_photo_alt,
+      quote: c.review_2_quote,
+    },
+    {
+      photo: c.review_3_photo,
+      photoAlt: c.review_3_photo_alt,
+      quote: c.review_3_quote,
+    },
+  ];
+}
 
 /* Review pagination dots (442:161), normalized to the same visible size. The
    design draws FOUR dots for three review cards, so only the first three are
@@ -67,7 +78,12 @@ const REVIEW_DOTS = [
   { x: 222, y: 3086.5, size: 7 },
 ];
 
-function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
+function ReviewCard({
+  photoBox,
+  quoteX,
+  copy,
+  verifiedLabel,
+}: Review & { copy: ReviewCopy; verifiedLabel: string }) {
   return (
     <div
       style={{
@@ -87,8 +103,8 @@ function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
         }}
       >
         <img
-          src={photo}
-          alt={photoAlt}
+          src={fileUrl(copy.photo)}
+          alt={copy.photoAlt}
           width={photoBox[2]}
           height={photoBox[3]}
           style={{
@@ -108,7 +124,7 @@ function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
           color: "#3B2F2F",
         }}
       >
-        {quote}
+        {copy.quote}
       </div>
       <img
         src="/eldreve/home/163-103.svg"
@@ -140,7 +156,7 @@ function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
           whiteSpace: "nowrap",
         }}
       >
-        Verified Purchase
+        {verifiedLabel}
       </div>
     </div>
   );
@@ -149,9 +165,18 @@ function ReviewCard({ photo, photoBox, photoAlt, quote, quoteX }: Review) {
 /**
  * The review card rail plus the three dots that are wired to a slide.
  *
+ * @param c - The resolved `recipient` section copy, supplying all three quotes,
+ *   their photos, the shared trust label and the cards' destination.
  * @returns A slow, one-card-at-a-time carousel clipped to the canvas edge.
  */
-export function ReviewsRail() {
+export function ReviewsRail({
+  c,
+  timing,
+}: {
+  c: HomeText["recipient"];
+  timing: RailTiming;
+}) {
+  const copies = copyOf(c);
   return (
     /* Review rail (163:99, 193:150, 193:155) + its dots (442:161) — the
        three cards auto-slide one at a time, slowly, right-to-left. Cell =
@@ -163,14 +188,20 @@ export function ReviewsRail() {
       count={REVIEWS.length}
       cellWidth={122}
       step={134}
-      autoplayMs={RAIL_AUTOPLAY_MS}
-      slideMs={RAIL_SLIDE_MS}
+      autoplayMs={timing.autoplayMs}
+      slideMs={timing.slideMs}
       dots={REVIEW_DOTS}
       activeColor="#C46E29"
       idleColor="#E0CCB2"
-      href="/shop"
+      href={c.reviews_href}
       label="review"
-      renderSlide={(i) => <ReviewCard {...REVIEWS[i]} />}
+      renderSlide={(i) => (
+        <ReviewCard
+          {...REVIEWS[i]}
+          copy={copies[i]}
+          verifiedLabel={c.reviews_verified_label}
+        />
+      )}
     />
   );
 }

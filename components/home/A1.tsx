@@ -198,7 +198,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:386 hero photo window + 2380:394 dots — interactive per H-03.
           The window sits at the TOP of the band in this frame, directly under
           the header, with the dots overlaid on its lower edge. */}
-      <HeroCarousel />
+      <HeroCarousel c={c} />
     </div>
   );
 }

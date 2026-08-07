@@ -27,6 +27,7 @@ import { A6 } from "@/components/home/A6";
 import { A9 } from "@/components/home/A9";
 import { A11 } from "@/components/home/A11";
 import { HomeBand } from "@/components/home/HomeBand";
+import { railTiming } from "@/components/home/Carousel";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
 import { getHomeContent } from "@/lib/home-content";
@@ -68,6 +69,8 @@ export default async function HomePage() {
   // Owner-editable copy, section visibility and the resulting band offsets
   // (§7.9). getHomeContent never throws: with no DB it returns the design.
   const { text, visible, layout, overridden } = await getHomeContent();
+  // One timing for all four card rails, so they never drift apart (§9.8).
+  const timing = railTiming(text.motion.rail_cycle_ms, text.motion.rail_glide_ms);
   const base = siteBaseUrl();
   const structuredData = [
     {
@@ -138,16 +141,16 @@ export default async function HomePage() {
           <A1 c={text.hero} />
         </HomeBand>
         <HomeBand shift={layout.shift.featured} hidden={!visible.featured}>
-          <A2 c={text.featured} />
+          <A2 timing={timing} c={text.featured} />
         </HomeBand>
         <HomeBand shift={layout.shift.ready} hidden={!visible.ready}>
           <A3 c={text.ready} />
         </HomeBand>
         <HomeBand shift={layout.shift.occasion} hidden={!visible.occasion}>
-          <A5 c={text.occasion} />
+          <A5 timing={timing} c={text.occasion} />
         </HomeBand>
         <HomeBand shift={layout.shift.recipient} hidden={!visible.recipient}>
-          <A6 c={text.recipient} />
+          <A6 timing={timing} c={text.recipient} />
         </HomeBand>
         <HomeBand shift={layout.shift.craft} hidden={!visible.craft}>
           <A9 c={text.craft} />

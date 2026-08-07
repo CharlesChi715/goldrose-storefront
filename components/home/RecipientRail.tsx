@@ -19,20 +19,17 @@
  * absolute, exactly as A-6 drew them.
  */
 
-import {
-  Carousel,
-  RAIL_AUTOPLAY_MS,
-  RAIL_SLIDE_MS,
-} from "@/components/home/Carousel";
+import { Carousel, type RailTiming } from "@/components/home/Carousel";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /** One card of the recipient rail, at CELL coordinates. */
 type Card = {
   /** x offset of the one shared bleed crop (2380:528/542/556, ref 42c600f0). */
   photoX: number;
-  title: { y: number; text: string };
+  title: { y: number };
   copy: {
     font: string;
     x: number;
@@ -40,28 +37,28 @@ type Card = {
     width: number;
     fontSize: number;
     fontWeight?: number;
-    text: string;
   };
   ornamentY: number;
   ctaY: number;
 };
 
-/* The three cards verbatim from the design. They carry different titles, copy
-   fonts and vertical rhythm, so all three stay distinct; coordinates are
+/* The three cards' GEOMETRY, verbatim from the design — their titles, copy,
+   photos and descriptions come from the registry through `c`. They carry
+   different copy fonts and vertical rhythm, so all three stay distinct;
+   coordinates are
    CELL-relative (each card's own 15/201/387 × 2479 origin subtracted) because
    the Carousel positions the cell itself. */
 const CARDS: readonly Card[] = [
   {
     // 2380:526 · Gifts for Wife
     photoX: -25.4,
-    title: { y: 166, text: "Gifts for Wife" },
+    title: { y: 166 },
     copy: {
       font: goudy.className,
       x: 27,
       y: 193,
       width: 122,
       fontSize: 8,
-      text: "For the one who means everything.",
     },
     ornamentY: 214,
     ctaY: 235.82,
@@ -69,14 +66,13 @@ const CARDS: readonly Card[] = [
   {
     // 2380:540 · Thoughtful Gifts She'll Love
     photoX: -241.3,
-    title: { y: 161, text: "Thoughtful Gifts\nShe’ll Love" },
+    title: { y: 161 },
     copy: {
       font: goudy.className,
       x: 12,
       y: 202,
       width: 152,
       fontSize: 8,
-      text: "Romantic gifts to make her feel cherished.",
     },
     ornamentY: 219,
     ctaY: 236.82,
@@ -84,7 +80,7 @@ const CARDS: readonly Card[] = [
   {
     // 2380:554 · Anniversary Gifts for Wife (the design parks this one clipped)
     photoX: -457.2,
-    title: { y: 166, text: "Anniversary Gifts\nfor Wife" },
+    title: { y: 166 },
     copy: {
       font: notoSC.className,
       x: 14,
@@ -92,7 +88,6 @@ const CARDS: readonly Card[] = [
       width: 148,
       fontSize: 9,
       fontWeight: 400,
-      text: "Celebrate your love with a timeless gift.",
     },
     ornamentY: 236,
     ctaY: 261,
@@ -114,9 +109,17 @@ const DOTS = [
  *
  * @returns A slow, one-card-at-a-time carousel clipped to the canvas edge.
  */
-export function RecipientRail({ c }: { c: HomeText["recipient"] }) {
+export function RecipientRail({
+  c,
+  timing,
+}: {
+  c: HomeText["recipient"];
+  timing: RailTiming;
+}) {
   const titles = [c.card_1_title, c.card_2_title, c.card_3_title];
   const copies = [c.card_1_copy, c.card_2_copy, c.card_3_copy];
+  const photos = [c.card_1_photo, c.card_2_photo, c.card_3_photo];
+  const alts = [c.card_1_photo_alt, c.card_2_photo_alt, c.card_3_photo_alt];
   return (
     /* The design draws three cards side by side (x=15/201/387, 176 wide on a
        186 pitch, the third clipped by the canvas edge). The window stops at
@@ -126,8 +129,8 @@ export function RecipientRail({ c }: { c: HomeText["recipient"] }) {
       count={CARDS.length}
       cellWidth={176}
       step={186}
-      autoplayMs={RAIL_AUTOPLAY_MS}
-      slideMs={RAIL_SLIDE_MS}
+      autoplayMs={timing.autoplayMs}
+      slideMs={timing.slideMs}
       dots={DOTS}
       activeColor="#C46E29"
       idleColor="#E0CCB2"
@@ -155,16 +158,22 @@ export function RecipientRail({ c }: { c: HomeText["recipient"] }) {
                 overflow: "hidden",
               }}
             >
-              <img
-                src="/eldreve/home/163-86.png"
-                alt="Gold-dipped rose gift"
-                width={546.1}
-                height={911.9}
-                style={{
-                  ...abs(card.photoX, -210.82, 546.1, 911.9),
-                  display: "block",
+              {/* One 546×912 sprite seen through three different windows —
+                  HomePhoto keeps that verbatim for the design's own render and
+                  switches to a plain cover fill once a card is given its own
+                  photo, so the three stop being slices of one picture. */}
+              <HomePhoto
+                section="recipient"
+                field={`card_${i + 1}_photo`}
+                value={photos[i]}
+                alt={alts[i]}
+                box={{ w: 176, h: 156 }}
+                design={{
+                  x: card.photoX,
+                  y: -210.82,
+                  w: 546.1,
+                  h: 911.9,
                   objectFit: "cover",
-                  maxWidth: "none",
                 }}
               />
             </div>

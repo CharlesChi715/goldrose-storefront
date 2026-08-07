@@ -15,9 +15,16 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
 import { BestSellersRail } from "@/components/home/BestSellersRail";
+import type { RailTiming } from "@/components/home/Carousel";
 import type { HomeText } from "@/lib/home-content/registry";
 
-export function A2({ c }: { c: HomeText["featured"] }) {
+export function A2({
+  c,
+  timing,
+}: {
+  c: HomeText["featured"];
+  timing: RailTiming;
+}) {
   return (
     // 2380:399 module frame — children positioned relative to (0, 764)
     <div
@@ -115,7 +122,7 @@ export function A2({ c }: { c: HomeText["featured"] }) {
       {/* Best Sellers rail (H-09): cards 2380:406 + 2380:415 as a slow
           one-card-at-a-time carousel. No dots in this revision — the peeking
           second card is the affordance. See BestSellersRail.tsx. */}
-      <BestSellersRail />
+      <BestSellersRail c={c} timing={timing} />
     </div>
   );
 }

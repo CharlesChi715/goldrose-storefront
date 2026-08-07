@@ -7,8 +7,14 @@
  * Both language variants of every label travel to the client on purpose: the
  * admin's EN/中文 toggle is client-side state (PolarisShell), so the screen has
  * to be able to re-label itself without a server round trip.
+ *
+ * The uploaded-file list travels with it for the same reason: the photo picker
+ * has to show the library the moment it opens, and a teammate choosing a photo
+ * should not wait on a round trip to find out what they already have. It is the
+ * same list Content → Files shows.
  */
 
+import { fileUrl, listFiles } from "@/lib/admin/files";
 import {
   HOME_SECTION_LIST,
   fieldBudget,
@@ -16,7 +22,11 @@ import {
   slotKey,
   type HomeSectionId,
 } from "@/lib/home-content";
-import { HomeSectionsEditor, type SectionView } from "./HomeSectionsEditor";
+import {
+  HomeSectionsEditor,
+  type LibraryItem,
+  type SectionView,
+} from "./HomeSectionsEditor";
 
 export default async function HomeContentPage() {
   const { text, visible, overridden } = await getHomeContent();
@@ -47,8 +57,27 @@ export default async function HomeContentPage() {
       note: field.note ?? null,
       noteZh: field.noteZh ?? null,
       managedAt: field.managedAt ?? null,
+      box: field.box ?? null,
+      fit: field.fit ?? null,
+      bakedInto: field.bakedInto ?? null,
+      numMin: field.numMin ?? null,
+      numMax: field.numMax ?? null,
+      unit: field.unit ?? null,
     })),
   }));
 
-  return <HomeSectionsEditor sections={sections} />;
+  // Never fatal: with no storage configured the picker still offers upload and
+  // the design's own photos, which is better than a screen that will not load.
+  let library: LibraryItem[] = [];
+  try {
+    library = (await listFiles()).map((file) => ({
+      path: file.path,
+      url: fileUrl(file.path),
+      name: file.name,
+    }));
+  } catch {
+    library = [];
+  }
+
+  return <HomeSectionsEditor sections={sections} library={library} />;
 }

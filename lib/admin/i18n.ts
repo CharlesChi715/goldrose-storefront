@@ -725,6 +725,63 @@ const en = {
     "Links must start with / (a page on this site), # , https:// , mailto: or tel:",
   "home.multilineHelp": "One line per line — Enter starts a new line.",
 
+  // Content → Home page · validation reasons (mirrors lib/home-content fieldError)
+  "home.bad.href":
+    "Links must start with / (a page on this site), # , https:// , mailto: or tel:",
+  "home.bad.image":
+    "Pick a photo with the button above, or type a path that starts with / — photos have to come from this site.",
+  "home.bad.color": "Use a 6-digit colour code like #FFF6EC.",
+  "home.bad.number": "Enter a whole number inside the range shown.",
+  "home.blocked": "One field needs fixing before you can save",
+  "home.blockedBody":
+    "A field below is showing an error in red. Fix it — or use Discard to drop this round of edits — and Save changes will work again.",
+
+  // Content → Home page · finding your way around
+  "home.intro.title": "How this screen works",
+  "home.intro.body":
+    "Everything on the storefront home page is listed here, top to bottom, in the same order a visitor sees it. Change the wording, swap a photo, or switch a whole section off. Nothing goes live until you press Save changes.",
+  "home.intro.safety":
+    "You cannot break the page: Reset puts any field back to the design team's original, and Reset whole page puts everything back at once.",
+  "home.search": "Find a field",
+  "home.searchPlaceholder": "Search by label or by what it says now…",
+  "home.onlyEdited": "Only show fields I have changed",
+  "home.matches": "fields match",
+  "home.noMatches": "No fields match what you typed. Try a shorter word.",
+  "home.editedCount": "changed",
+  "home.undo": "Undo",
+  "home.livePreview": "Live preview",
+  "home.livePreviewHelp":
+    "The real home page, at phone width. It refreshes when you save, so you can check that new wording fits its box.",
+  "home.refreshPreview": "Refresh",
+
+  // Content → Home page · photos
+  "home.photo.title": "Change photo",
+  "home.photo.change": "Change photo",
+  "home.photo.current": "On the page now",
+  "home.photo.isDesign": "Design original",
+  "home.photo.upload": "Upload a photo",
+  "home.photo.useDesign": "Put the design's photo back",
+  "home.photo.library": "Already uploaded",
+  "home.photo.libraryEmpty":
+    "Nothing uploaded yet. Anything you upload here also appears in Content → Files.",
+  "home.photo.size": "Designed size:",
+  "home.photo.fit.cover":
+    "Your photo is cropped to fill this box, so any shape works — the edges are trimmed.",
+  "home.photo.fit.stretch":
+    "The design stretches this photo to fill its box, so a photo of a different shape will look squashed. Match the size above as closely as you can.",
+  "home.photo.fit.window":
+    "The design shows one hand-picked part of a much larger picture here. Your own photo is cropped to fill the box instead, so any shape works.",
+  "home.photo.enterPath": "Or type a path instead",
+  "home.photo.path": "Photo path",
+  "home.photo.pathHelp":
+    "For a picture that ships with the site, e.g. /eldreve/home/508-90.png",
+  "home.photo.usePath": "Use this path",
+  "home.photo.uploadFailed": "Could not upload that photo — try a smaller file.",
+
+  // Content → Home page · colours
+  "home.color.baked":
+    "Careful: this colour is also painted into artwork the design team exported, which will NOT change with it —",
+
   // Content → Ideas (visitor feedback)
   "ideas.column.message": "Idea",
   "ideas.column.from": "From",
@@ -1396,6 +1453,61 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.badHref":
     "链接需以 / （本站页面）、# 、https:// 、mailto: 或 tel: 开头",
   "home.multilineHelp": "每行一段——按回车换行。",
+
+  // 内容 → 首页 · 校验提示
+  "home.bad.href":
+    "链接需以 / （本站页面）、#、https://、mailto: 或 tel: 开头。",
+  "home.bad.image":
+    "请用上方按钮选择图片，或填写以 / 开头的路径——图片必须来自本站。",
+  "home.bad.color": "请填写 6 位颜色代码，例如 #FFF6EC。",
+  "home.bad.number": "请填写所示范围内的整数。",
+  "home.blocked": "有一处需要修改后才能保存",
+  "home.blockedBody":
+    "下方有字段显示红色错误提示。修正后即可保存；也可以点「放弃修改」丢弃本轮改动。",
+
+  // 内容 → 首页 · 导航与查找
+  "home.intro.title": "本页面使用说明",
+  "home.intro.body":
+    "店面首页的全部内容都列在这里，顺序与访客看到的一致。你可以修改文字、更换图片，或隐藏整个板块。点击「保存」后才会发布到线上。",
+  "home.intro.safety":
+    "不用担心改坏：「恢复原文」可将任意字段还原为设计稿内容，「恢复整个页面」可一次性全部还原。",
+  "home.search": "查找字段",
+  "home.searchPlaceholder": "按名称或当前内容搜索…",
+  "home.onlyEdited": "只显示我修改过的字段",
+  "home.matches": "个字段匹配",
+  "home.noMatches": "没有匹配的字段，试试更短的关键词。",
+  "home.editedCount": "处修改",
+  "home.undo": "撤销",
+  "home.livePreview": "实时预览",
+  "home.livePreviewHelp":
+    "手机宽度下的真实首页。保存后会自动刷新，方便你确认新文字是否放得下。",
+  "home.refreshPreview": "刷新",
+
+  // 内容 → 首页 · 图片
+  "home.photo.title": "更换图片",
+  "home.photo.change": "更换图片",
+  "home.photo.current": "当前线上图片",
+  "home.photo.isDesign": "设计稿原图",
+  "home.photo.upload": "上传图片",
+  "home.photo.useDesign": "恢复设计稿原图",
+  "home.photo.library": "已上传的图片",
+  "home.photo.libraryEmpty":
+    "还没有上传过图片。在此上传的图片也会出现在「内容 → 文件」中。",
+  "home.photo.size": "设计尺寸：",
+  "home.photo.fit.cover": "图片会裁切填满此区域，任何比例都可用——超出部分会被裁掉。",
+  "home.photo.fit.stretch":
+    "设计稿会将图片拉伸填满，比例不同的图片会变形。请尽量贴近上方尺寸。",
+  "home.photo.fit.window":
+    "设计稿在此显示一张大图中人工选定的局部。换成你自己的图片后，会裁切填满该区域，任何比例都可用。",
+  "home.photo.enterPath": "或直接填写路径",
+  "home.photo.path": "图片路径",
+  "home.photo.pathHelp": "用于站内自带图片，例如 /eldreve/home/508-90.png",
+  "home.photo.usePath": "使用此路径",
+  "home.photo.uploadFailed": "图片上传失败——请尝试更小的文件。",
+
+  // 内容 → 首页 · 颜色
+  "home.color.baked":
+    "请注意：此颜色也已烘焙进设计团队导出的图片中，那部分不会随之改变——",
 
   "ideas.column.message": "想法",
   "ideas.column.from": "来自",

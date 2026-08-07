@@ -13,9 +13,10 @@
  * the peeking second card is the affordance, exactly as A-3 does it. At rest
  * the band is pixel-identical to the frame.
  *
- * ⚠️ MOCKED DATA: both cards' titles, prices and photos are still the design's
- * placeholders rather than catalogue products (OQ-3), and both link to /shop
- * because the product↔card mapping is undecided.
+ * ⚠️ MOCKED DATA: both cards are still the design's placeholders rather than
+ * catalogue products (OQ-3) — but their titles, prices, captions, photos and
+ * shared destination are now owner-editable in Content → Home page, so the copy
+ * comes from `c` and only the GEOMETRY is still hard-coded here.
  *
  * AI-TAG(AI-027): AGENT-DECISION — this reverses the 07-26 "one card × four"
  * rail now that the frame carries two real cards and no dots. See
@@ -23,12 +24,10 @@
  */
 
 import { abs } from "@/lib/figma-layout";
-import {
-  Carousel,
-  RAIL_AUTOPLAY_MS,
-  RAIL_SLIDE_MS,
-} from "@/components/home/Carousel";
+import { Carousel, type RailTiming } from "@/components/home/Carousel";
 import { playfair, notoSC } from "@/lib/fonts";
+import { fileUrl } from "@/lib/files-url";
+import type { HomeText } from "@/lib/home-content/registry";
 
 /** Card 2380:406 is 250 wide; the next card starts at x=285, so the pitch is 267. */
 const CARD_W = 250;
@@ -36,9 +35,12 @@ const CARD_H = 366;
 const PITCH = 267;
 
 /**
- * The two cards verbatim from the design. They differ in box size, vertical
- * offset within the rail and photo treatment, so both carry their own values;
- * the content block's internal rhythm (12/57/75/108) is shared.
+ * One card's GEOMETRY, verbatim from the design. The two cards differ in box
+ * size, vertical offset within the rail and photo treatment, so both carry their
+ * own values; the content block's internal rhythm (12/57/75/108) is shared.
+ *
+ * Copy and photos are NOT here — they come from the registry through `c`, so a
+ * teammate can retitle or re-shoot a card without touching these numbers.
  */
 type Card = {
   /** Cell-relative offset — card 2 sits 17px lower than card 1. */
@@ -48,13 +50,9 @@ type Card = {
   /** Height of the photo window; the content block starts right below it. */
   photoH: number;
   contentH: number;
-  title: string;
-  price: string;
   priceW: number;
   /** Card 1's price node is CENTER-aligned in its 45px box; card 2's is LEFT. */
   priceCentered: boolean;
-  note: string;
-  alt: string;
 };
 
 const CARDS: readonly Card[] = [
@@ -64,12 +62,8 @@ const CARDS: readonly Card[] = [
     height: CARD_H,
     photoH: 240,
     contentH: 126,
-    title: "Personalized Gold-Dipped Rose",
-    price: "$79.00",
     priceW: 45,
     priceCentered: true,
-    note: "Personalization available",
-    alt: "Personalized gold-dipped rose",
   },
   {
     top: 17,
@@ -77,14 +71,46 @@ const CARDS: readonly Card[] = [
     height: 349,
     photoH: 222,
     contentH: 160,
-    title: "Enchanted Rose with LED Light",
-    price: "$119.00",
     priceW: 53,
     priceCentered: false,
-    note: "Gift-ready packaging",
-    alt: "Enchanted gold rose under a glass dome with LED light",
   },
 ];
+
+/** The editable strings of one card, picked out of the `featured` section. */
+type CardCopy = {
+  title: string;
+  price: string;
+  note: string;
+  photo: string;
+  alt: string;
+};
+
+/**
+ * Split the flat `featured` fields into one object per card. The registry keeps
+ * them flat (`card_1_title`, `card_2_title` …) because a slot key is one string;
+ * the rail wants them grouped.
+ *
+ * @param c - The resolved `featured` section copy.
+ * @returns Card copy in slide order.
+ */
+function copyOf(c: HomeText["featured"]): readonly CardCopy[] {
+  return [
+    {
+      title: c.card_1_title,
+      price: c.card_1_price,
+      note: c.card_1_note,
+      photo: c.card_1_photo,
+      alt: c.card_1_photo_alt,
+    },
+    {
+      title: c.card_2_title,
+      price: c.card_2_price,
+      note: c.card_2_note,
+      photo: c.card_2_photo,
+      alt: c.card_2_photo_alt,
+    },
+  ];
+}
 
 /**
  * One best-seller card's content block, drawn below its photo window. `n` is
@@ -92,7 +118,15 @@ const CARDS: readonly Card[] = [
  * unique in the DOM. Built at runtime, so the static naming test skips them,
  * exactly as it does for Carousel's own `name`-derived names.
  */
-function Content({ card, n }: { card: Card; n: number }) {
+function Content({
+  card,
+  copy,
+  n,
+}: {
+  card: Card;
+  copy: CardCopy;
+  n: number;
+}) {
   return (
     <div
       style={{
@@ -111,7 +145,7 @@ function Content({ card, n }: { card: Card; n: number }) {
           color: "#3B2F2F",
         }}
       >
-        {card.title}
+        {copy.title}
       </div>
       <div
         className={notoSC.className}
@@ -126,7 +160,7 @@ function Content({ card, n }: { card: Card; n: number }) {
           whiteSpace: "nowrap",
         }}
       >
-        {card.price}
+        {copy.price}
       </div>
       <div
         className={notoSC.className}
@@ -139,7 +173,7 @@ function Content({ card, n }: { card: Card; n: number }) {
           color: "#D4AF37",
         }}
       >
-        {card.note}
+        {copy.note}
       </div>
       {/* 2380:412 / 2380:421 cta — Figma-rendered strip */}
       <img
@@ -162,9 +196,18 @@ function Content({ card, n }: { card: Card; n: number }) {
 /**
  * The Best Sellers card rail.
  *
+ * @param c - The resolved `featured` section copy, supplying both cards' text,
+ *   photos and their shared destination.
  * @returns A slow, one-card-at-a-time carousel clipped to the canvas edge.
  */
-export function BestSellersRail() {
+export function BestSellersRail({
+  c,
+  timing,
+}: {
+  c: HomeText["featured"];
+  timing: RailTiming;
+}) {
+  const copies = copyOf(c);
   return (
     <Carousel
       // 18 → 430: the window ends at the canvas edge, so the next card peeks
@@ -173,16 +216,17 @@ export function BestSellersRail() {
       count={CARDS.length}
       cellWidth={CARD_W}
       step={PITCH}
-      autoplayMs={RAIL_AUTOPLAY_MS}
-      slideMs={RAIL_SLIDE_MS}
+      autoplayMs={timing.autoplayMs}
+      slideMs={timing.slideMs}
       dots={[]}
       activeColor="#D4AF37"
       idleColor="#E5D9C9"
-      href="/shop"
+      href={c.rail_href}
       label="best seller"
       name="HOME-FEATURED"
       renderSlide={(i) => {
         const card = CARDS[i];
+        const copy = copies[i];
         return (
           <div
             className="gr-card-zoom"
@@ -210,8 +254,8 @@ export function BestSellersRail() {
                 <img
                   className="gr-photo"
                   data-el={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
-                  src="/eldreve/home/373-174.png"
-                  alt={card.alt}
+                  src={fileUrl(copy.photo)}
+                  alt={copy.alt}
                   width={252}
                   height={271}
                   style={{
@@ -227,8 +271,8 @@ export function BestSellersRail() {
                 <img
                   className="gr-photo"
                   data-el={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
-                  src="/eldreve/home/2380-416.png"
-                  alt={card.alt}
+                  src={fileUrl(copy.photo)}
+                  alt={copy.alt}
                   width={card.width}
                   height={card.photoH}
                   style={{
@@ -238,7 +282,7 @@ export function BestSellersRail() {
                 />
               )}
             </div>
-            <Content card={card} n={i + 1} />
+            <Content card={card} copy={copy} n={i + 1} />
           </div>
         );
       }}

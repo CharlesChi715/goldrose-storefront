@@ -20,9 +20,16 @@ import Link from "next/link";
 import { OccasionRail } from "@/components/home/OccasionRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
+import type { RailTiming } from "@/components/home/Carousel";
 import type { HomeText } from "@/lib/home-content/registry";
 
-export function A5({ c }: { c: HomeText["occasion"] }) {
+export function A5({
+  c,
+  timing,
+}: {
+  c: HomeText["occasion"];
+  timing: RailTiming;
+}) {
   return (
     // 138:61 — module frame; clips the over-wide chip + card rails.
     <div
@@ -316,7 +323,7 @@ export function A5({ c }: { c: HomeText["occasion"] }) {
         />
       </Link>
 
-      <OccasionRail c={c} />
+      <OccasionRail c={c} timing={timing} />
 
       {/* 2380:486 · dots 4–7 — the design draws seven for three cards, so
           these four stay inert; OccasionRail wires the first three. Positioned

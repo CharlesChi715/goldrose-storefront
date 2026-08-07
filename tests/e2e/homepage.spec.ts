@@ -30,15 +30,17 @@ test.describe("H-03 · hero carousel and pagination dots", () => {
     await expect(dots.nth(0)).toHaveAttribute("aria-current", "true");
   });
 
-  test("cards lead to the placeholder destination", async ({ page }) => {
+  test("cards lead to the shop, and the owner can redirect them", async ({
+    page,
+  }) => {
     await page.goto("/");
-    // Placeholder target: H-03 wants the matching product detail page, but
-    // that mapping is undecided (OQ-3).
+    // Until 2026-08-07 the hero passed no href at all, so every slide fell
+    // through to the Carousel's own /placeholder default — a dead end for a
+    // real visitor. It now reads `hero.photo_href` from the registry, which
+    // ships as /shop and is editable in Content → Home page. H-03's eventual
+    // want, the matching product detail page, still depends on OQ-3.
     await page.getByRole("link", { name: "hero slide 1" }).click();
-    await expect(page).toHaveURL(/\/placeholder$/);
-    await expect(
-      page.getByRole("heading", { name: "Placeholder page" }),
-    ).toBeVisible();
+    await expect(page).toHaveURL(/\/shop$/);
   });
 
   test("the track follows the finger and holds wherever it pauses", async ({

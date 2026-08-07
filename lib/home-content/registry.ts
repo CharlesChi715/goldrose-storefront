@@ -15,11 +15,25 @@
  *
  * FIELD KINDS
  * - `text` / `multiline` / `url` — a live text node; the owner can type here.
+ * - `image` — a photo in a fixed design box. The stored value is a servable
+ *   path (a `/public` asset, an uploaded file, or a Storage key), resolved by
+ *   `fileUrl()` exactly like product media.
+ * - `color` — one hex value in the page palette, delivered to the storefront as
+ *   a CSS custom property so a change repaints without moving a pixel.
+ * - `number` — a bounded integer (rail timings). Stored as a string like every
+ *   other slot; `numMin`/`numMax` bound it.
  * - `artwork` — the label is baked into a Figma SVG/PNG render (glyph strips,
  *   whole button chrome). Shown read-only with the reason, so the owner sees
  *   the complete inventory of the page rather than a silent gap (§11).
  * - `managed` — real data that belongs to another admin screen (catalog,
  *   reviews). Shown read-only with a link to where it IS edited.
+ *
+ * EVERY VALUE IS A STRING
+ * A colour, a photo path and an autoplay interval all travel through the same
+ * one-string-per-slot path as copy does, so the file-header invariant in
+ * index.ts ("a row exists iff the value differs from the design") holds for all
+ * of them unchanged — and so does reset, dirty-tracking, and the Figma-resync
+ * behaviour. Only VALIDATION is per-kind; storage never is.
  *
  * CHARACTER BUDGETS
  * Most boxes are `white-space: nowrap` at a fixed width, so over-long copy is
@@ -31,7 +45,28 @@
 
 /** How a field is edited — see FIELD KINDS in the file header. */
 export type HomeFieldKind =
-  "text" | "multiline" | "url" | "artwork" | "managed";
+  | "text"
+  | "multiline"
+  | "url"
+  | "image"
+  | "color"
+  | "number"
+  | "artwork"
+  | "managed";
+
+/**
+ * How a replacement photo is fitted into its design box — the single fact that
+ * decides whether a teammate's upload looks right, so it is stated per field
+ * rather than left for them to discover on the live page.
+ *
+ * - `cover` — cropped to fill. Any aspect ratio is safe; the edges are trimmed.
+ * - `stretch` — the component sets no `object-fit`, so the image is squashed to
+ *   the box. Only the exact aspect ratio looks right.
+ * - `window` — the design shows a hand-picked rectangle of a much larger source
+ *   through a small opening (negative offsets traced from Figma). A normally
+ *   cropped upload shows the wrong region entirely, so these warn hardest.
+ */
+export type HomeImageFit = "cover" | "stretch" | "window";
 
 /** One editable (or explained) string inside a homepage section. */
 export type HomeField = {
@@ -61,6 +96,26 @@ export type HomeField = {
   readonly key?: string;
   /** For `managed` fields: the admin screen that owns this data. */
   readonly managedAt?: string;
+
+  /* --- `image` fields ---------------------------------------------------- */
+  /** The design box this photo is drawn into, in stage pixels. */
+  readonly box?: { readonly w: number; readonly h: number };
+  /** How the component fits the photo into that box — see HomeImageFit. */
+  readonly fit?: HomeImageFit;
+
+  /* --- `color` fields ---------------------------------------------------- */
+  /**
+   * Artwork that has this colour BAKED IN and will therefore not follow a
+   * change — listed so the admin can say so instead of the owner finding a
+   * half-recoloured page. Empty/absent means the colour is fully live.
+   */
+  readonly bakedInto?: readonly string[];
+
+  /* --- `number` fields --------------------------------------------------- */
+  readonly numMin?: number;
+  readonly numMax?: number;
+  /** Unit suffix shown beside the input, e.g. "ms". */
+  readonly unit?: string;
 };
 
 /** One homepage section — a Figma module band, or the promo bar chrome. */
@@ -181,6 +236,103 @@ export const HOME_SECTIONS = [
         noteZh: "在 306px 宽度内自动换行——这一处可以稍长。",
       },
       {
+        id: "photo_href",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Where the photos link to",
+        labelZh: "图片链接地址",
+        kind: "url",
+        value: "/shop",
+        note: "All four slides go to the same place.",
+        noteZh: "四张图片指向同一地址。",
+      },
+      {
+        id: "photo_1",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 1 photo",
+        labelZh: "第 1 张图片",
+        kind: "image",
+        value: "/eldreve/screens/1523-1675.png",
+        box: { w: 430, h: 317 },
+        fit: "stretch",
+        note: "The biggest picture on the site — the first thing a visitor sees. It fills the full width, so use a wide 430 × 317 photo (or the same shape at a larger size); a differently shaped photo is squashed rather than cropped.",
+        noteZh:
+          "全站最大的一张图，也是访客看到的第一眼。图片满宽显示，请使用 430 × 317 的横图（或同比例的更大尺寸）；比例不同的图片会被压扁而不是裁切。",
+      },
+      {
+        id: "photo_1_alt",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 1 description",
+        labelZh: "第 1 张图片描述",
+        kind: "text",
+        value: "Gold-dipped rose in a gift box",
+      },
+      {
+        id: "photo_2",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 2 photo",
+        labelZh: "第 2 张图片",
+        kind: "image",
+        value: "/eldreve/screens/1523-1675.png",
+        box: { w: 430, h: 317 },
+        fit: "stretch",
+        note: "The design ships ONE hero photo against four dots, so slides 2–4 start out as repeats of slide 1. Upload a different photo here and the slideshow becomes a real one.",
+        noteZh:
+          "设计稿只提供一张首屏图片却配了四个圆点，因此第 2–4 张默认与第 1 张相同。在此上传不同图片后，轮播才会真正轮换。",
+      },
+      {
+        id: "photo_2_alt",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 2 description",
+        labelZh: "第 2 张图片描述",
+        kind: "text",
+        value: "Gold-dipped rose in a gift box",
+      },
+      {
+        id: "photo_3",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 3 photo",
+        labelZh: "第 3 张图片",
+        kind: "image",
+        value: "/eldreve/screens/1523-1675.png",
+        box: { w: 430, h: 317 },
+        fit: "stretch",
+      },
+      {
+        id: "photo_3_alt",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 3 description",
+        labelZh: "第 3 张图片描述",
+        kind: "text",
+        value: "Gold-dipped rose in a gift box",
+      },
+      {
+        id: "photo_4",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 4 photo",
+        labelZh: "第 4 张图片",
+        kind: "image",
+        value: "/eldreve/screens/1523-1675.png",
+        box: { w: 430, h: 317 },
+        fit: "stretch",
+      },
+      {
+        id: "photo_4_alt",
+        group: "Hero slideshow",
+        groupZh: "首屏轮播",
+        label: "Slide 4 description",
+        labelZh: "第 4 张图片描述",
+        kind: "text",
+        value: "Gold-dipped rose in a gift box",
+      },
+      {
         id: "cta_label",
         group: "Shop button",
         groupZh: "购物按钮",
@@ -275,15 +427,144 @@ export const HOME_SECTIONS = [
         noteZh: "该文字已烘焙进设计稿 SVG（157-61.svg）——需由设计团队修改。",
       },
       {
-        id: "rail_cards",
-        label: "Best Sellers cards",
-        labelZh: "畅销榜卡片",
-        kind: "managed",
-        value: "Personalized Gold-Dipped Rose · Enchanted Rose with LED Light",
-        managedAt: "/admin/products",
-        note: "Placeholder product cards from the design. They become live catalogue data with the real product content (OQ-3).",
+        id: "rail_href",
+        group: "Best Sellers cards",
+        groupZh: "畅销榜卡片",
+        label: "Where the cards link to",
+        labelZh: "卡片链接地址",
+        kind: "url",
+        value: "/shop",
+        note: "Both cards go to the same place — the design has no per-card destination.",
+        noteZh: "两张卡片指向同一地址——设计稿未为单张卡片设置独立链接。",
+      },
+      {
+        id: "card_cta_label",
+        group: "Best Sellers cards",
+        groupZh: "畅销榜卡片",
+        label: "“View Product” label",
+        labelZh: "“View Product” 文字",
+        kind: "artwork",
+        value: "View Product →",
+        note: "Baked into the design's own SVG render (376-182.svg), shared by both cards — the design team changes this one.",
         noteZh:
-          "来自设计稿的占位商品卡。真实商品内容上线后将改为读取商品目录（OQ-3）。",
+          "该文字已烘焙进设计稿 SVG（376-182.svg），两张卡片共用——需由设计团队修改。",
+      },
+      {
+        id: "card_1_title",
+        group: "Card 1",
+        groupZh: "卡片 1",
+        label: "Product name",
+        labelZh: "商品名称",
+        kind: "text",
+        value: "Personalized Gold-Dipped Rose",
+        lines: 2,
+        max: budget(160, 18),
+      },
+      {
+        id: "card_1_price",
+        group: "Card 1",
+        groupZh: "卡片 1",
+        label: "Price",
+        labelZh: "价格",
+        kind: "text",
+        value: "$79.00",
+        max: budget(45, 14, 0.55),
+        note: "Typed by hand — it does not follow the product's real price yet (OQ-3). Sits in a narrow fixed box that does not wrap.",
+        noteZh:
+          "此价格为手动填写，暂不会跟随商品真实价格（OQ-3）。文字框较窄且不换行。",
+      },
+      {
+        id: "card_1_note",
+        group: "Card 1",
+        groupZh: "卡片 1",
+        label: "Gold caption",
+        labelZh: "金色小字",
+        kind: "text",
+        value: "Personalization available",
+        max: budget(160, 11),
+      },
+      {
+        id: "card_1_photo",
+        group: "Card 1",
+        groupZh: "卡片 1",
+        label: "Photo",
+        labelZh: "图片",
+        kind: "image",
+        value: "/eldreve/home/373-174.png",
+        box: { w: 252, h: 271 },
+        fit: "cover",
+        note: "Cropped to fill, so any shape is safe — the edges are trimmed.",
+        noteZh: "以裁切方式填满，任何比例都可用——超出部分会被裁掉。",
+      },
+      {
+        id: "card_1_photo_alt",
+        group: "Card 1",
+        groupZh: "卡片 1",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Personalized gold-dipped rose",
+        note: "Read aloud by screen readers and shown if the photo fails to load. Update it whenever you change the photo.",
+        noteZh: "供读屏软件朗读，图片加载失败时也会显示。更换图片时请一并修改。",
+      },
+      {
+        id: "card_2_title",
+        group: "Card 2",
+        groupZh: "卡片 2",
+        label: "Product name",
+        labelZh: "商品名称",
+        kind: "text",
+        value: "Enchanted Rose with LED Light",
+        lines: 2,
+        max: budget(160, 18),
+      },
+      {
+        id: "card_2_price",
+        group: "Card 2",
+        groupZh: "卡片 2",
+        label: "Price",
+        labelZh: "价格",
+        kind: "text",
+        value: "$119.00",
+        max: budget(53, 14, 0.55),
+        note: "Typed by hand — it does not follow the product's real price yet (OQ-3). Sits in a narrow fixed box that does not wrap.",
+        noteZh:
+          "此价格为手动填写，暂不会跟随商品真实价格（OQ-3）。文字框较窄且不换行。",
+      },
+      {
+        id: "card_2_note",
+        group: "Card 2",
+        groupZh: "卡片 2",
+        label: "Gold caption",
+        labelZh: "金色小字",
+        kind: "text",
+        value: "Gift-ready packaging",
+        max: budget(160, 11),
+      },
+      {
+        id: "card_2_photo",
+        group: "Card 2",
+        groupZh: "卡片 2",
+        label: "Photo",
+        labelZh: "图片",
+        kind: "image",
+        value: "/eldreve/home/2380-416.png",
+        box: { w: 184, h: 222 },
+        fit: "stretch",
+        note: "The design stretches this one to fill its box, so a photo of a different shape looks squashed — match 184 × 222 as closely as you can.",
+        noteZh:
+          "设计稿将此图拉伸填满，比例不同的图片会变形——请尽量贴近 184 × 222。",
+      },
+      {
+        id: "card_2_photo_alt",
+        group: "Card 2",
+        groupZh: "卡片 2",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Enchanted gold rose under a glass dome with LED light",
+        note: "Read aloud by screen readers and shown if the photo fails to load. Update it whenever you change the photo.",
+        noteZh: "供读屏软件朗读，图片加载失败时也会显示。更换图片时请一并修改。",
       },
     ],
   },
@@ -348,6 +629,29 @@ export const HOME_SECTIONS = [
         labelZh: "商品行链接",
         kind: "url",
         value: "/shop",
+      },
+      {
+        id: "card_photo",
+        group: "Ready to Ship",
+        groupZh: "现货速发",
+        label: "Row photo",
+        labelZh: "商品行图片",
+        kind: "image",
+        value: "/eldreve/home/159-78.png",
+        box: { w: 170, h: 99 },
+        fit: "window",
+        note: "⚠️ Both rows share this one photo, and the design shows only a small part of it: a tall 588 × 896 picture slid up and left behind a 170 × 99 opening. A normally cropped upload will show the wrong part of the picture — check the live page after changing it.",
+        noteZh:
+          "⚠️ 两行共用这一张图，且设计稿只显示其中一小块：588 × 896 的竖图向左上偏移后，透过 170 × 99 的开口显示。普通裁切的图片会显示错误区域——修改后请务必查看线上页面。",
+      },
+      {
+        id: "card_photo_alt",
+        group: "Ready to Ship",
+        groupZh: "现货速发",
+        label: "Row photo description",
+        labelZh: "商品行图片描述",
+        kind: "text",
+        value: "Mini rose dome with light",
       },
       {
         id: "card_meta",
@@ -536,6 +840,29 @@ export const HOME_SECTIONS = [
         max: budget(122, 8),
       },
       {
+        id: "card_1_photo",
+        group: "Occasion cards",
+        groupZh: "场合卡片",
+        label: "Card 1 photo",
+        labelZh: "卡片 1 图片",
+        kind: "image",
+        value: "/eldreve/home/436-279.png",
+        box: { w: 176, h: 156 },
+        fit: "window",
+        note: "The design shows one region of a much wider picture here. Your own photo is cropped to fill the 176 × 156 window instead, so any shape works — the edges are trimmed.",
+        noteZh:
+          "设计稿在此显示一张大图的局部。换成你自己的图片后，会按 176 × 156 裁切填满，任何比例都可用——超出部分会被裁掉。",
+      },
+      {
+        id: "card_1_photo_alt",
+        group: "Occasion cards",
+        groupZh: "场合卡片",
+        label: "Card 1 photo description",
+        labelZh: "卡片 1 图片描述",
+        kind: "text",
+        value: "Gold-dipped rose gift",
+      },
+      {
         id: "card_2_title",
         group: "Occasion cards",
         groupZh: "场合卡片",
@@ -559,6 +886,29 @@ export const HOME_SECTIONS = [
         max: budget(152, 8),
       },
       {
+        id: "card_2_photo",
+        group: "Occasion cards",
+        groupZh: "场合卡片",
+        label: "Card 2 photo",
+        labelZh: "卡片 2 图片",
+        kind: "image",
+        value: "/eldreve/home/436-293.png",
+        box: { w: 176, h: 156 },
+        fit: "window",
+        note: "The design shows one region of a much wider picture here. Your own photo is cropped to fill the 176 × 156 window instead, so any shape works — the edges are trimmed.",
+        noteZh:
+          "设计稿在此显示一张大图的局部。换成你自己的图片后，会按 176 × 156 裁切填满，任何比例都可用——超出部分会被裁掉。",
+      },
+      {
+        id: "card_2_photo_alt",
+        group: "Occasion cards",
+        groupZh: "场合卡片",
+        label: "Card 2 photo description",
+        labelZh: "卡片 2 图片描述",
+        kind: "text",
+        value: "Gold-dipped rose gift",
+      },
+      {
         id: "card_3_title",
         group: "Occasion cards",
         groupZh: "场合卡片",
@@ -578,6 +928,29 @@ export const HOME_SECTIONS = [
         kind: "text",
         value: "Celebrate your love with a timeless gift.",
         max: budget(148, 9),
+      },
+      {
+        id: "card_3_photo",
+        group: "Occasion cards",
+        groupZh: "场合卡片",
+        label: "Card 3 photo",
+        labelZh: "卡片 3 图片",
+        kind: "image",
+        value: "/eldreve/home/436-307.png",
+        box: { w: 176, h: 156 },
+        fit: "window",
+        note: "The design's crop runs past the edge of its source picture here, which is why a pink band shows on the right. Uploading your own photo fixes that — it is cropped to fill the 176 × 156 window.",
+        noteZh:
+          "设计稿此处的裁切超出了原图右边缘，因此右侧会露出粉色底色。上传自己的图片即可解决——图片会按 176 × 156 裁切填满。",
+      },
+      {
+        id: "card_3_photo_alt",
+        group: "Occasion cards",
+        groupZh: "场合卡片",
+        label: "Card 3 photo description",
+        labelZh: "卡片 3 图片描述",
+        kind: "text",
+        value: "Gold-dipped rose gift",
       },
       {
         id: "card_cta_label",
@@ -744,6 +1117,75 @@ export const HOME_SECTIONS = [
         max: budget(148, 9),
       },
       {
+        id: "card_1_photo",
+        group: "Recipient cards",
+        groupZh: "收礼人卡片",
+        label: "Card 1 photo",
+        labelZh: "卡片 1 图片",
+        kind: "image",
+        value: "/eldreve/home/163-86.png",
+        box: { w: 176, h: 156 },
+        fit: "window",
+        note: "All three cards currently show three different slices of ONE picture — that is why they look related. Upload a photo here and this card gets its own, cropped to fill 176 × 156.",
+        noteZh:
+          "三张卡片目前显示的是同一张图片的三个不同局部，所以看起来相似。在此上传图片后，这张卡片就会有自己的配图，并按 176 × 156 裁切填满。",
+      },
+      {
+        id: "card_1_photo_alt",
+        group: "Recipient cards",
+        groupZh: "收礼人卡片",
+        label: "Card 1 photo description",
+        labelZh: "卡片 1 图片描述",
+        kind: "text",
+        value: "Gold-dipped rose gift",
+      },
+      {
+        id: "card_2_photo",
+        group: "Recipient cards",
+        groupZh: "收礼人卡片",
+        label: "Card 2 photo",
+        labelZh: "卡片 2 图片",
+        kind: "image",
+        value: "/eldreve/home/163-86.png",
+        box: { w: 176, h: 156 },
+        fit: "window",
+        note: "Shares the design's picture with cards 1 and 3. Upload a photo here to give this card its own, cropped to fill 176 × 156.",
+        noteZh:
+          "与卡片 1、3 共用设计稿图片。在此上传图片后，这张卡片会有自己的配图，并按 176 × 156 裁切填满。",
+      },
+      {
+        id: "card_2_photo_alt",
+        group: "Recipient cards",
+        groupZh: "收礼人卡片",
+        label: "Card 2 photo description",
+        labelZh: "卡片 2 图片描述",
+        kind: "text",
+        value: "Gold-dipped rose gift",
+      },
+      {
+        id: "card_3_photo",
+        group: "Recipient cards",
+        groupZh: "收礼人卡片",
+        label: "Card 3 photo",
+        labelZh: "卡片 3 图片",
+        kind: "image",
+        value: "/eldreve/home/163-86.png",
+        box: { w: 176, h: 156 },
+        fit: "window",
+        note: "This card's slice runs past the right edge of the design's picture, which is why a pink band shows there. Uploading your own photo fixes it.",
+        noteZh:
+          "这张卡片的取景超出了设计稿图片的右边缘，因此右侧会露出粉色底色。上传自己的图片即可解决。",
+      },
+      {
+        id: "card_3_photo_alt",
+        group: "Recipient cards",
+        groupZh: "收礼人卡片",
+        label: "Card 3 photo description",
+        labelZh: "卡片 3 图片描述",
+        kind: "text",
+        value: "Gold-dipped rose gift",
+      },
+      {
         id: "card_cta_label",
         group: "Recipient cards",
         groupZh: "收礼人卡片",
@@ -794,17 +1236,142 @@ export const HOME_SECTIONS = [
         value: "/story",
       },
       {
-        id: "reviews_quotes",
+        id: "reviews_href",
         group: "Reviews strip",
         groupZh: "评价条",
-        label: "Review quotes",
-        labelZh: "评价内容",
-        kind: "managed",
-        value: "Three design placeholder reviews",
-        managedAt: "/admin/content",
-        note: "Placeholder quotes from the design. Real customer reviews live in the product_reviews table and surface on product pages.",
+        label: "Where the review cards link to",
+        labelZh: "评价卡片链接地址",
+        kind: "url",
+        value: "/shop",
+      },
+      {
+        id: "reviews_verified_label",
+        group: "Reviews strip",
+        groupZh: "评价条",
+        label: "Trust label on every card",
+        labelZh: "每张卡片的信任标签",
+        kind: "text",
+        value: "Verified Purchase",
+        max: budget(57, 7, 0.55),
+      },
+      {
+        id: "reviews_stars",
+        group: "Reviews strip",
+        groupZh: "评价条",
+        label: "Star rating on every card",
+        labelZh: "每张卡片的星级",
+        kind: "artwork",
+        value: "★★★★★",
+        note: "Baked into the design's own SVG render (163-103.svg) and fixed at five stars on all three cards, whatever the real ratings are — the design team changes this one.",
         noteZh:
-          "来自设计稿的占位评价。真实顾客评价存放在 product_reviews 表中，显示在商品详情页。",
+          "该星级已烘焙进设计稿 SVG（163-103.svg），三张卡片固定为五星，与真实评分无关——需由设计团队修改。",
+      },
+      {
+        id: "review_1_quote",
+        group: "Review card 1",
+        groupZh: "评价卡片 1",
+        label: "Quote",
+        labelZh: "评价文字",
+        kind: "multiline",
+        value: "“The most beautiful gift I’ve ever received.”",
+        lines: 2,
+        max: budget(106, 8.5),
+        note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars. Real reviews live in Products → Reviews.",
+        noteZh:
+          "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。真实评价见「产品 → 评价」。",
+      },
+      {
+        id: "review_1_photo",
+        group: "Review card 1",
+        groupZh: "评价卡片 1",
+        label: "Photo",
+        labelZh: "图片",
+        kind: "image",
+        value: "/eldreve/home/163-101.png",
+        box: { w: 132, h: 170 },
+        fit: "window",
+        note: "⚠️ The design shows only the MIDDLE of this photo — it is 132 × 170 pulled up by 55px behind a 122 × 69 opening. A normally cropped upload will show the wrong part; upload a tall photo whose subject sits in the middle.",
+        noteZh:
+          "⚠️ 设计稿只显示这张图的中间部分——132 × 170 的图上移 55px，透过 122 × 69 的开口显示。普通裁切的图会显示错误区域；请上传主体位于中部的竖图。",
+      },
+      {
+        id: "review_1_photo_alt",
+        group: "Review card 1",
+        groupZh: "评价卡片 1",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Customer photo of a gold rose gift",
+      },
+      {
+        id: "review_2_quote",
+        group: "Review card 2",
+        groupZh: "评价卡片 2",
+        label: "Quote",
+        labelZh: "评价文字",
+        kind: "multiline",
+        value: "“My wife was speechless on our anniversary.”",
+        lines: 2,
+        max: budget(106, 8.5),
+        note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars.",
+        noteZh: "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
+      },
+      {
+        id: "review_2_photo",
+        group: "Review card 2",
+        groupZh: "评价卡片 2",
+        label: "Photo",
+        labelZh: "图片",
+        kind: "image",
+        value: "/eldreve/home/193-152.png",
+        box: { w: 122, h: 69 },
+        fit: "cover",
+        note: "Cropped to fill a wide 122 × 69 opening, so any shape is safe.",
+        noteZh: "以裁切方式填满 122 × 69 的横向开口，任何比例都可用。",
+      },
+      {
+        id: "review_2_photo_alt",
+        group: "Review card 2",
+        groupZh: "评价卡片 2",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Customer photo of a gold rose gift",
+      },
+      {
+        id: "review_3_quote",
+        group: "Review card 3",
+        groupZh: "评价卡片 3",
+        label: "Quote",
+        labelZh: "评价文字",
+        kind: "multiline",
+        value: "“Elegant and meaningful for our client.”",
+        lines: 2,
+        max: budget(106, 8.5),
+        note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars.",
+        noteZh: "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
+      },
+      {
+        id: "review_3_photo",
+        group: "Review card 3",
+        groupZh: "评价卡片 3",
+        label: "Photo",
+        labelZh: "图片",
+        kind: "image",
+        value: "/eldreve/home/193-157.png",
+        box: { w: 122, h: 69 },
+        fit: "cover",
+        note: "Cropped to fill a wide 122 × 69 opening, so any shape is safe.",
+        noteZh: "以裁切方式填满 122 × 69 的横向开口，任何比例都可用。",
+      },
+      {
+        id: "review_3_photo_alt",
+        group: "Review card 3",
+        groupZh: "评价卡片 3",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Customer photo of a gold rose gift",
       },
     ],
   },
@@ -868,6 +1435,29 @@ export const HOME_SECTIONS = [
         max: budget(82, 8),
       },
       {
+        id: "step_1_photo",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 01 photo",
+        labelZh: "步骤 01 图片",
+        kind: "image",
+        value: "/eldreve/home/165-141.png",
+        box: { w: 90, h: 96 },
+        fit: "window",
+        note: "A small 90 × 96 window. The design shows one corner of a full-page picture here; your own photo is cropped to fill the window instead, so any shape works.",
+        noteZh:
+          "90 × 96 的小窗口。设计稿在此显示整页大图的一角；换成你自己的图片后会裁切填满窗口，任何比例都可用。",
+      },
+      {
+        id: "step_1_photo_alt",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 01 photo description",
+        labelZh: "步骤 01 图片描述",
+        kind: "text",
+        value: "Hand-selecting real roses at perfect bloom",
+      },
+      {
         id: "step_2_title",
         group: "Craft steps",
         groupZh: "工艺步骤",
@@ -887,6 +1477,29 @@ export const HOME_SECTIONS = [
         value: "Carefully finished by hand in pure 24k gold.",
         lines: 3,
         max: budget(82, 8),
+      },
+      {
+        id: "step_2_photo",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 02 photo",
+        labelZh: "步骤 02 图片",
+        kind: "image",
+        value: "/eldreve/home/165-146.png",
+        box: { w: 90, h: 96 },
+        fit: "window",
+        note: "A small 90 × 96 window. The design shows one corner of a full-page picture here; your own photo is cropped to fill the window instead, so any shape works.",
+        noteZh:
+          "90 × 96 的小窗口。设计稿在此显示整页大图的一角；换成你自己的图片后会裁切填满窗口，任何比例都可用。",
+      },
+      {
+        id: "step_2_photo_alt",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 02 photo description",
+        labelZh: "步骤 02 图片描述",
+        kind: "text",
+        value: "Gilding a real rose with 24K gold",
       },
       {
         id: "step_3_title",
@@ -910,6 +1523,29 @@ export const HOME_SECTIONS = [
         max: budget(82, 8),
       },
       {
+        id: "step_3_photo",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 03 photo",
+        labelZh: "步骤 03 图片",
+        kind: "image",
+        value: "/eldreve/home/165-151.png",
+        box: { w: 90, h: 96 },
+        fit: "window",
+        note: "A small 90 × 96 window. The design shows one corner of a full-page picture here; your own photo is cropped to fill the window instead, so any shape works.",
+        noteZh:
+          "90 × 96 的小窗口。设计稿在此显示整页大图的一角；换成你自己的图片后会裁切填满窗口，任何比例都可用。",
+      },
+      {
+        id: "step_3_photo_alt",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 03 photo description",
+        labelZh: "步骤 03 图片描述",
+        kind: "text",
+        value: "Quality checking a finished gold rose",
+      },
+      {
         id: "step_4_title",
         group: "Craft steps",
         groupZh: "工艺步骤",
@@ -918,6 +1554,18 @@ export const HOME_SECTIONS = [
         kind: "text",
         value: "Protected & Packaged",
         max: budget(90, 13),
+      },
+      {
+        id: "step_4_photo",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 04 photo",
+        labelZh: "步骤 04 图片",
+        kind: "artwork",
+        value: "Part of the design's own artwork",
+        note: "Unlike steps 01–03, step 04's picture is not a photo — the whole tile is one image exported from Figma (165-155.svg), so it cannot be swapped here. Ask the design team.",
+        noteZh:
+          "与步骤 01–03 不同，步骤 04 的图片并非照片——整块由 Figma 导出为一张图（165-155.svg），因此无法在此更换，需联系设计团队。",
       },
       {
         id: "step_4_copy",
@@ -1132,6 +1780,29 @@ export const HOME_SECTIONS = [
         value: "/story",
       },
       {
+        id: "story_photo",
+        group: "Brand story",
+        groupZh: "品牌故事",
+        label: "Photo",
+        labelZh: "图片",
+        kind: "image",
+        value: "/eldreve/home/508-90.png",
+        box: { w: 204, h: 259 },
+        fit: "stretch",
+        note: "A tall photo beside the story text. The design stretches it to fill 204 × 259, so a photo of a different shape looks squashed — use an upright photo of roughly that proportion.",
+        noteZh:
+          "故事文字旁的竖图。设计稿将其拉伸填满 204 × 259，比例不同的图片会变形——请使用接近该比例的竖图。",
+      },
+      {
+        id: "story_photo_alt",
+        group: "Brand story",
+        groupZh: "品牌故事",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Gold-preserved rose with ELDREVE gift packaging",
+      },
+      {
         id: "faq_title",
         group: "FAQ",
         groupZh: "常见问题",
@@ -1243,6 +1914,28 @@ export const HOME_SECTIONS = [
         labelZh: "按钮链接",
         kind: "url",
         value: "/shop",
+      },
+      {
+        id: "gift_photo",
+        group: "Gift card",
+        groupZh: "礼物卡",
+        label: "Photo beside the card",
+        labelZh: "礼物卡旁的图片",
+        kind: "image",
+        value: "/eldreve/home/2380-775.png",
+        box: { w: 204, h: 204 },
+        fit: "stretch",
+        note: "A square photo — the easiest swap on the page. Upload anything square and it drops straight in.",
+        noteZh: "正方形图片——全页最容易替换的一张。上传任意正方形图片即可。",
+      },
+      {
+        id: "gift_photo_alt",
+        group: "Gift card",
+        groupZh: "礼物卡",
+        label: "Photo description",
+        labelZh: "图片描述",
+        kind: "text",
+        value: "Gold-dipped rose in its keepsake box",
       },
       {
         id: "newsletter_title",
@@ -1454,6 +2147,57 @@ export const HOME_SECTIONS = [
       },
     ],
   },
+  {
+    id: "motion",
+    module: "Settings",
+    title: "Slideshow speed",
+    titleZh: "轮播速度",
+    blurb:
+      "How fast the four sliding card rails move — Best Sellers, Shop by Occasion, Shop by Recipient and the review cards. One setting governs all four, so they stay in step with each other.",
+    blurbZh:
+      "四个卡片滑动栏（畅销榜、按场合选购、按收礼人选购、顾客评价）的移动速度。四者共用一套设置，保持节奏一致。",
+    band: null,
+    fields: [
+      {
+        id: "rail_cycle_ms",
+        label: "How long each card stays before moving on",
+        labelZh: "每张卡片停留多久后切换",
+        kind: "number",
+        // The bounds below cannot overlap the glide's, so no combination of the
+        // two can produce a rail that advances before it has finished sliding.
+        value: "4200",
+        numMin: 2500,
+        numMax: 30000,
+        unit: "ms",
+        note: "In milliseconds — 1000 is one second. Higher is slower and calmer. The design's own value is 4200 (about four seconds), set on the owner's instruction to move slowly.",
+        noteZh:
+          "单位为毫秒——1000 毫秒为 1 秒。数值越大越慢、越平缓。设计稿的原值为 4200（约 4 秒），是按老板要求放慢后的设置。",
+      },
+      {
+        id: "rail_glide_ms",
+        label: "How long the sliding movement itself takes",
+        labelZh: "滑动动作本身持续多久",
+        kind: "number",
+        value: "900",
+        numMin: 200,
+        numMax: 2000,
+        unit: "ms",
+        note: "In milliseconds. Higher makes the movement itself slower and more gentle. It is always finished well before the next card is due, whatever you choose here.",
+        noteZh:
+          "单位为毫秒。数值越大，滑动动作越慢越柔和。无论如何设置，滑动都会在下一张卡片切换前结束。",
+      },
+      {
+        id: "reduced_motion",
+        label: "Visitors who ask their device to reduce motion",
+        labelZh: "已在设备上开启「减弱动态效果」的访客",
+        kind: "managed",
+        value: "The rails never auto-play for them",
+        note: "Not a setting. Some people get motion sickness from moving content and turn this on in their phone or computer settings; the rails stay still for them and they can still swipe by hand. This is an accessibility guarantee and cannot be switched off.",
+        noteZh:
+          "此项不可设置。部分人会因画面移动而不适，并在手机或电脑中开启了该选项；对他们而言滑动栏保持静止，但仍可手动滑动。这是无障碍保障，无法关闭。",
+      },
+    ],
+  },
 ] as const satisfies readonly HomeSection[];
 
 /**
@@ -1480,11 +2224,14 @@ export type HomeText = {
   };
 };
 
-/** Kinds whose value the owner can actually type into. */
+/** Kinds the owner can actually change (as opposed to artwork and managed data). */
 const EDITABLE: ReadonlySet<HomeFieldKind> = new Set([
   "text",
   "multiline",
   "url",
+  "image",
+  "color",
+  "number",
 ]);
 
 /**
@@ -1538,6 +2285,69 @@ export function isSafeHref(value: string): boolean {
 }
 
 /**
+ * Whether an image value is safe to place in an `src`. Deliberately narrower
+ * than `isSafeHref`: a photo slot only ever holds something this site serves —
+ * a `/public` asset, the local `/api/files/…` route, an uploaded Storage key —
+ * so remote origins are refused rather than validated. That keeps a homepage
+ * photo from becoming an arbitrary outbound request (and a tracking pixel) on
+ * every visit, and it keeps `data:` URIs out of an `img` entirely.
+ *
+ * @param value - The path the owner picked or typed.
+ * @returns True for site-relative paths and bare Storage object keys.
+ */
+export function isSafeImagePath(value: string): boolean {
+  const path = value.trim();
+  if (path.length === 0 || path.length > 500) return false;
+  if (path.includes("..") || /\s/.test(path)) return false;
+  // "//host/path" is PROTOCOL-RELATIVE: it starts with a slash and carries no
+  // colon, so it slips past both checks below while loading from whatever host
+  // follows. Refused before them.
+  if (path.startsWith("//")) return false;
+  // Site-relative: /public assets and the local file route.
+  if (path.startsWith("/")) return !path.includes(":");
+  // A bare Supabase Storage object key, which fileUrl() expands.
+  return /^[A-Za-z0-9][A-Za-z0-9._/-]*\.[A-Za-z0-9]+$/.test(path);
+}
+
+/**
+ * Whether a colour value is a plain 6-digit hex. Restrictive on purpose: the
+ * value is interpolated into a CSS custom property, and `#fff` / `rgb()` /
+ * `var(…)` would all widen that to arbitrary CSS.
+ *
+ * @param value - The colour the owner picked.
+ * @returns True for `#RRGGBB`, in either case.
+ */
+export function isHexColor(value: string): boolean {
+  return /^#[0-9a-f]{6}$/i.test(value.trim());
+}
+
+/**
+ * Validate one field's value for its kind. The single place the server, the
+ * admin's inline feedback and the tests all agree on what is acceptable.
+ *
+ * @param field - The registry field being written.
+ * @param value - The owner's value.
+ * @returns null when the value is acceptable, else a stable reason code the
+ *   admin turns into a translated message: "href" | "image" | "color" | "number".
+ */
+export function fieldError(
+  field: HomeField,
+  value: string,
+): "href" | "image" | "color" | "number" | null {
+  if (field.kind === "url") return isSafeHref(value) ? null : "href";
+  if (field.kind === "image") return isSafeImagePath(value) ? null : "image";
+  if (field.kind === "color") return isHexColor(value) ? null : "color";
+  if (field.kind === "number") {
+    const parsed = Number(value.trim());
+    if (!Number.isInteger(parsed)) return "number";
+    if (field.numMin !== undefined && parsed < field.numMin) return "number";
+    if (field.numMax !== undefined && parsed > field.numMax) return "number";
+    return null;
+  }
+  return null;
+}
+
+/**
  * The `site_content` key a field is stored under. Fields carry an explicit
  * `key` only when they predate this registry (the promo slogan).
  *
@@ -1567,6 +2377,30 @@ export function visibilityKey(sectionId: string): string {
  */
 export function findSection(sectionId: string): HomeSection | undefined {
   return HOME_SECTIONS.find((section) => section.id === sectionId);
+}
+
+/** `"<section>.<field>"` → the design default, built once at module load. */
+const DEFAULTS: ReadonlyMap<string, string> = new Map(
+  HOME_SECTIONS.flatMap((section) =>
+    section.fields.map(
+      (field) => [`${section.id}.${field.id}`, field.value] as const,
+    ),
+  ),
+);
+
+/**
+ * The design default of one field, for storefront components that render the
+ * design's own artwork until the owner replaces it — the `isDefault` pattern
+ * the promo bar established (components/chrome.tsx). Comparing the resolved
+ * value against this is how a component knows whether it is drawing Figma's
+ * hand-traced crop or somebody's upload.
+ *
+ * @param sectionId - The owning section's id.
+ * @param fieldId - The field id within that section.
+ * @returns The design default, or "" when the field is not in the registry.
+ */
+export function homeDefault(sectionId: string, fieldId: string): string {
+  return DEFAULTS.get(`${sectionId}.${fieldId}`) ?? "";
 }
 
 /**

@@ -19,6 +19,7 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
+import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /* 2380:427…2380:438 · the four Real Rose Promise tiles. Identical structure,
@@ -135,20 +136,24 @@ export function A3({ c }: { c: HomeText["ready"] }) {
               overflow: "hidden",
             }}
           >
-            {/* source crop, offsets are negative by design */}
-            <img
-              data-el={`HOME-READY-TO-SHIP-PRODUCT-IMG-${i + 1}`}
-              className="gr-photo"
-              src="/eldreve/home/159-78.png"
-              alt="Mini rose dome with light"
-              width={588}
-              height={896}
-              style={{
-                ...abs(-34, -689, 588, 896),
-                display: "block",
+            {/* Source crop, offsets negative by design — HomePhoto keeps them
+                verbatim for the design's own photo and falls back to a plain
+                cover fill once the owner uploads a different one. */}
+            <HomePhoto
+              section="ready"
+              field="card_photo"
+              value={c.card_photo}
+              alt={c.card_photo_alt}
+              box={{ w: 170, h: 99 }}
+              design={{
+                x: -34,
+                y: -689,
+                w: 588,
+                h: 896,
                 objectFit: "cover",
-                maxWidth: "none",
               }}
+              dataEl={`HOME-READY-TO-SHIP-PRODUCT-IMG-${i + 1}`}
+              className="gr-photo"
             />
           </div>
           <div

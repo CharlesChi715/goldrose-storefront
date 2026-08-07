@@ -14,6 +14,7 @@
 
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
+import { isAllowedImageName, uploadFile } from "@/lib/admin/files";
 import { revalidateStorefront } from "@/lib/admin/products";
 import {
   resetHomeField,
@@ -91,4 +92,37 @@ export async function setHomeSectionVisibleAction(
   await requireAdmin();
   await setHomeSectionVisible(Id.parse(section), z.boolean().parse(visible));
   revalidateStorefront();
+}
+
+/**
+ * Upload one photo from the "Change photo" dialog into the same store Content →
+ * Files uses, and hand back the path to put in the field.
+ *
+ * It returns an error rather than throwing so the dialog can show the reason
+ * beside the button; an upload that fails silently would look like a photo that
+ * simply did not appear.
+ *
+ * @param formData - A form carrying a single `file` entry.
+ * @returns The stored path on success, or a message to show the owner.
+ */
+export async function uploadHomePhotoAction(
+  formData: FormData,
+): Promise<{ ok: boolean; path?: string; error?: string }> {
+  await requireAdmin();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No file" };
+  }
+  if (!isAllowedImageName(file.name)) {
+    return { ok: false, error: "Unsupported image type" };
+  }
+  try {
+    const stored = await uploadFile(file);
+    return { ok: true, path: stored.path };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Upload failed",
+    };
+  }
 }

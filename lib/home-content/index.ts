@@ -20,9 +20,9 @@ import type { SiteContentRow } from "@/lib/supabase/types.ts";
 import { homeLayout, type HomeLayout } from "./layout.ts";
 import {
   HOME_SECTIONS,
+  fieldError,
   findSection,
   isEditable,
-  isSafeHref,
   slotKey,
   visibilityKey,
   type HomeSectionId,
@@ -166,8 +166,9 @@ async function writeSlot(
  * @param sectionId - The section the field belongs to.
  * @param fieldId - The field id within that section.
  * @param value - The owner's new text.
- * @throws When the section or field is not in the registry, is not editable,
- *   or is a link field holding an unsafe href.
+ * @throws When the section or field is not in the registry, is not editable, or
+ *   the value fails its kind's rule (unsafe href, off-site image, non-hex
+ *   colour, out-of-range number).
  */
 export async function saveHomeField(
   sectionId: string,
@@ -179,8 +180,11 @@ export async function saveHomeField(
   if (!section || !field || !isEditable(field)) {
     throw new Error(`Unknown editable home field: ${sectionId}.${fieldId}`);
   }
-  if (field.kind === "url" && !isSafeHref(value)) {
-    throw new Error(`Unsafe link for ${sectionId}.${fieldId}: ${value}`);
+  // The admin blocks these inline too; this is the check that actually holds,
+  // because a server action is reachable without the screen.
+  const invalid = fieldError(field, value);
+  if (invalid !== null) {
+    throw new Error(`Invalid ${invalid} for ${sectionId}.${fieldId}: ${value}`);
   }
   await writeSlot(
     slotKey(section.id, field),

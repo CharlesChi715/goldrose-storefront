@@ -16,6 +16,7 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeText } from "@/lib/home-content/registry";
 
 const GOLD = "#D4AF37";
@@ -56,13 +57,6 @@ const CRAFT_STEPS = [
   },
 ];
 
-// Per-step craft photos for crops 1–3 (165:141 / 165:146 / 165:151); crop 4
-// is baked into the 165-155.svg frame render below.
-const CRAFT_PHOTOS = [
-  "/eldreve/home/165-141.png",
-  "/eldreve/home/165-146.png",
-  "/eldreve/home/165-151.png",
-];
 
 // Six workshop gallery crops (2380:692…2380:702), coords relative to the lower
 // frame (0,3571); each shows an offset window into the same 430×913 source.
@@ -132,6 +126,9 @@ const CERTIFICATES = [
 ];
 
 export function A9({ c }: { c: HomeText["craft"] }) {
+  // Steps 01–03 only: step 04's tile is one Figma SVG, not a photo.
+  const CRAFT_PHOTOS = [c.step_1_photo, c.step_2_photo, c.step_3_photo];
+  const CRAFT_ALTS = [c.step_1_photo_alt, c.step_2_photo_alt, c.step_3_photo_alt];
   const steps = [
     { title: c.step_1_title, copy: c.step_1_copy },
     { title: c.step_2_title, copy: c.step_2_copy },
@@ -213,16 +210,16 @@ export function A9({ c }: { c: HomeText["craft"] }) {
             overflow: "hidden",
           }}
         >
-          <img
-            src={CRAFT_PHOTOS[i]}
-            alt={s.alt}
-            width={430}
-            height={912}
-            style={{
-              ...abs(-s.x, -170, 430, 912.397),
-              maxWidth: "none",
-              display: "block",
-            }}
+          {/* Each step's photo is the SAME full-page 430×912 render offset by
+              the tile's own x — HomePhoto keeps that verbatim for the design's
+              own picture and fills the 90×96 window once one is replaced. */}
+          <HomePhoto
+            section="craft"
+            field={`step_${i + 1}_photo`}
+            value={CRAFT_PHOTOS[i]}
+            alt={CRAFT_ALTS[i]}
+            box={{ w: 90, h: 96 }}
+            design={{ x: -s.x, y: -170, w: 430, h: 912.397 }}
           />
         </div>
       ))}

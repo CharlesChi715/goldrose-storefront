@@ -10,20 +10,23 @@
  * A-5 itself stay a server component.
  */
 
-import {
-  Carousel,
-  RAIL_AUTOPLAY_MS,
-  RAIL_SLIDE_MS,
-} from "@/components/home/Carousel";
+import { Carousel, type RailTiming } from "@/components/home/Carousel";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeText } from "@/lib/home-content/registry";
 
-/** One card of the 436:319 recipient rail, at cell coordinates. */
+/**
+ * One card of the 436:319 recipient rail, at cell coordinates.
+ *
+ * GEOMETRY ONLY. The titles, copy, photos and descriptions come from the
+ * registry through `c` — they used to be repeated here as well, which meant two
+ * copies of every default with nothing keeping them in step.
+ */
 type RecipientCard = {
   /** 436:279/293/307 — one shared bleed crop, shifted per card. */
-  photo: { src: string; x: number };
-  title: { y: number; lineHeight: string; text: string };
+  photo: { x: number };
+  title: { y: number; lineHeight: string };
   copy: {
     font: string;
     x: number;
@@ -31,7 +34,6 @@ type RecipientCard = {
     width: number;
     fontSize: number;
     fontWeight?: number;
-    text: string;
   };
   ornamentY: number;
   ctaY: number;
@@ -46,40 +48,26 @@ type RecipientCard = {
 const RECIPIENT_CARDS: RecipientCard[] = [
   {
     // 436:277 · Gifts for Wife
-    photo: { src: "/eldreve/home/436-279.png", x: -25.4 },
-    title: { y: 159, lineHeight: "21px", text: "Valentine's Day\nGifts" },
+    photo: { x: -25.4 },
+    title: { y: 159, lineHeight: "21px" },
     // 436:282 · copy (Goudy is single-weight; design's 500 not applied)
-    copy: {
-      font: goudy.className,
-      x: 27,
-      y: 206,
-      width: 122,
-      fontSize: 8,
-      text: "For the one who means everything.",
-    },
+    copy: { font: goudy.className, x: 27, y: 206, width: 122, fontSize: 8 },
     ornamentY: 223,
     ctaY: 240.82,
   },
   {
     // 436:291 · Thoughtful Gifts She'll Love
-    photo: { src: "/eldreve/home/436-293.png", x: -241.3 },
-    title: { y: 161, lineHeight: "21px", text: "Valentine's Day\nGifts" },
+    photo: { x: -241.3 },
+    title: { y: 161, lineHeight: "21px" },
     // 436:296 · copy (Goudy, single-weight)
-    copy: {
-      font: goudy.className,
-      x: 12,
-      y: 208,
-      width: 152,
-      fontSize: 8,
-      text: "Romantic gifts to make her feel cherished.",
-    },
+    copy: { font: goudy.className, x: 12, y: 208, width: 152, fontSize: 8 },
     ornamentY: 225,
     ctaY: 242.82,
   },
   {
     // 436:305 · Anniversary Gifts for Wife (the design parks this one clipped)
-    photo: { src: "/eldreve/home/436-307.png", x: -457.2 },
-    title: { y: 166, lineHeight: "18px", text: "Anniversary Gifts\nfor Wife" },
+    photo: { x: -457.2 },
+    title: { y: 166, lineHeight: "18px" },
     // 436:309 · copy
     copy: {
       font: notoSC.className,
@@ -88,7 +76,6 @@ const RECIPIENT_CARDS: RecipientCard[] = [
       width: 148,
       fontSize: 9,
       fontWeight: 400,
-      text: "Celebrate your love with a timeless gift.",
     },
     ornamentY: 236,
     ctaY: 261,
@@ -109,9 +96,17 @@ const DOTS = [
  *
  * @returns A slow, one-card-at-a-time carousel clipped to the canvas edge.
  */
-export function OccasionRail({ c }: { c: HomeText["occasion"] }) {
+export function OccasionRail({
+  c,
+  timing,
+}: {
+  c: HomeText["occasion"];
+  timing: RailTiming;
+}) {
   const titles = [c.card_1_title, c.card_2_title, c.card_3_title];
   const copies = [c.card_1_copy, c.card_2_copy, c.card_3_copy];
+  const photos = [c.card_1_photo, c.card_2_photo, c.card_3_photo];
+  const alts = [c.card_1_photo_alt, c.card_2_photo_alt, c.card_3_photo_alt];
   return (
     /*
       436:319 · recipient card rail — the design draws three cards side by
@@ -130,8 +125,8 @@ export function OccasionRail({ c }: { c: HomeText["occasion"] }) {
       count={RECIPIENT_CARDS.length}
       cellWidth={176}
       step={186}
-      autoplayMs={RAIL_AUTOPLAY_MS}
-      slideMs={RAIL_SLIDE_MS}
+      autoplayMs={timing.autoplayMs}
+      slideMs={timing.slideMs}
       dots={DOTS}
       activeColor="#B27A38"
       idleColor="#E5D1B2"
@@ -159,14 +154,16 @@ export function OccasionRail({ c }: { c: HomeText["occasion"] }) {
                 overflow: "hidden",
               }}
             >
-              <img
-                src={card.photo.src}
-                alt="Gold-dipped rose gift"
-                style={{
-                  ...abs(card.photo.x, -210.82, 546.1, 911.9),
-                  display: "block",
-                  maxWidth: "none",
-                }}
+              {/* All three cards are windows onto ONE 546×912 sprite, offset
+                  per card — HomePhoto keeps that verbatim for the design's own
+                  render and switches to a plain cover fill once replaced. */}
+              <HomePhoto
+                section="occasion"
+                field={`card_${i + 1}_photo`}
+                value={photos[i]}
+                alt={alts[i]}
+                box={{ w: 176, h: 156 }}
+                design={{ x: card.photo.x, y: -210.82, w: 546.1, h: 911.9 }}
               />
             </div>
             {/* 436:281/295/308 · title */}
