@@ -46,7 +46,9 @@ if (missing.length === 0) {
 
 // The deliberate wake-up. Loud on purpose: whoever reads the next screenshot
 // needs to know it is not the real shop.
-if (["1", "true"].includes((process.env.ALLOW_LOCAL_MODE ?? "").toLowerCase())) {
+if (
+  ["1", "true"].includes((process.env.ALLOW_LOCAL_MODE ?? "").toLowerCase())
+) {
   console.warn(
     "[dev] ALLOW_LOCAL_MODE is set — starting against the LOCAL FILE ADAPTER.",
   );
@@ -66,7 +68,9 @@ console.error(
   "[dev] not what the live shop sells — so nothing you see would be real.",
 );
 console.error("[dev]");
-console.error("[dev] Fix: copy the Supabase values into .env.local (.env.example lists them).");
+console.error(
+  "[dev] Fix: copy the Supabase values into .env.local (.env.example lists them).",
+);
 console.error(
   "[dev] Really want the file adapter? ALLOW_LOCAL_MODE=1 npm run dev",
 );
