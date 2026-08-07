@@ -17,6 +17,7 @@
     "seed:reviews": "node scripts/seed-demo-reviews.ts",
     "handles": "node scripts/product-handle.ts",
     "check:assets": "node scripts/check-opaque-assets.mjs",
+    "check:migrations": "node scripts/check-migrations.mjs",
     "test:unit": "node --test tests/unit/*.test.ts",
     "agent-inbox": "node scripts/agent-inbox.mjs list",
     "agent-inbox:close": "node scripts/agent-inbox.mjs close",

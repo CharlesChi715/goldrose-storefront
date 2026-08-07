@@ -5885,3 +5885,43 @@ ref through real merges instead of force-moving it.
   earlier `ECONNRESET` on `/sitemap.xml` was a flake — that spec passes alone
   and the full re-run was 129/129.
 - **Not done:** nothing pushed. `main` is 18 commits ahead of `origin/main`.
+
+## 2026-08-07 20:05 AEST — CI now guards the migration sequence
+
+Asked to find and fix the thing most worth improving. Picked the one failure
+class today that **no existing check could see**.
+
+The 0009 collision earlier today passed lint, typecheck, `format:check`,
+`check:assets`, the build and all 129 e2e tests — because nothing in CI reads
+a `.sql` file. Two files with different names are two adds, not a conflict, so
+git merged them silently too. It was caught by hand, and only then did the
+worse half surface: both migrations rebuild `catalog_products`, and the
+`best_for` one omits the spotlight columns, so the wrong order would have
+stripped them from the view the storefront reads with nothing failing loudly.
+Migration numbers are a shared namespace with no locking, and this repo runs
+several agent sessions branching in parallel — so it recurs by construction.
+
+- **`scripts/check-migrations.mjs`** — follows the `check-opaque-assets.mjs`
+  pattern (why-it-exists header, `--json`, exit 1 on findings). Errors:
+  a version claimed by more than one file, and a filename off
+  `NNNN_lower_snake_case.sql` (a name that will not parse would drop out of
+  the duplicate check, so it has to fail rather than pass quietly). Warnings:
+  a gap in the sequence except the deliberately-skipped `0004`, and a view
+  whose surviving definition drops a column an earlier migration exposed.
+- **Pure core, thin CLI.** `inspectMigrations(files)` takes `{name, sql}`
+  rather than reading the disk, so the tests describe a broken sequence
+  instead of creating one and keep testing the same thing as the real
+  directory grows.
+- **The view check is a heuristic, and says so.** It reads `p.column` and
+  `as alias` between `create view X as` and its `from` — enough for the
+  failure mode that motivated it, and warning-only, so a miss or a false
+  positive costs nothing.
+- **Wired in:** `npm run check:migrations`, and a CI step next to
+  `check:assets` with a comment saying why it is there.
+- **Proved against the real bug**, not just synthetic input: replaying today's
+  actual pre-fix filenames produces the duplicate-version error, and replaying
+  the reversed (dangerous) order names the exact four columns that would have
+  been lost — `focal_zoom`, `card_focal_x`, `card_focal_y`, `card_zoom`.
+- **Verified:** lint clean, typecheck clean, format clean, `check:assets`,
+  `check:migrations` green on the real sequence, 135 unit tests (126 + 9 new),
+  production build.

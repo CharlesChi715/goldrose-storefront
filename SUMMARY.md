@@ -213,7 +213,9 @@ Open linked resources only when the task needs them.
   spotlight columns, so `0010` must run after it to put them back. Storefront
   *reads* survive without either (missing columns read as the old centre
   crop), but an admin product *save* would fail — push both before the next
-  admin save. Use `psql` for read-only
+  admin save. `npm run check:migrations` guards the sequence in CI — duplicate
+  numbers fail, and a rebuilt view that drops an earlier migration's column
+  warns. Use `psql` for read-only
   ad-hoc queries; `supabase db dump` needs Docker.
 
 ### Release gates
