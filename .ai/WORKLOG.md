@@ -5714,3 +5714,10 @@ Follow-on to the merge above, after a CI-monitor event flagged PR #35.
   `worktree-pdp-subtitle-wrap` and `fix/pdp-badge-truncation`. None of it was
   touched here, and `main` sits 3 commits ahead of `origin/main` because those
   three are not mine to push.
+
+## 2026-08-07 — Shop filter drawer: outside-click dismiss, Reset clears, confirm disables
+
+- Branch `worktree-feat-shop-filter-dialog` (worktree `.claude/worktrees/feat-shop-filter-dialog`), commit `8ba7974`.
+- The drawer/sort click-away backdrop only covered the 430-wide `.figv-stage`, so clicks in the page margins beside the canvas and on the bottom nav never dismissed it. A fixed backdrop cannot reach them (the stage is scale-transformed, so it becomes the containing block and clips fixed children), so a capture-phase document `pointerdown` listener was added alongside the existing in-stage shield; Escape closes as well. The open panel and its own trigger count as inside, keeping the trigger a toggle.
+- Reset now clears every group instead of restoring the Figma default selection; with nothing selected the "Show N Results" button is `disabled` at 45% gold, cursor `not-allowed`.
+- Verified live at localhost:3610: margin click, Escape, trigger toggle twice, in-drawer chip click (stays open), Reset (all five groups cleared, button dims), press on the disabled button (no close), re-select then confirm (closes), sort dropdown margin click. `tsc --noEmit`, eslint, prettier and 91 unit tests clean; the 3 shop e2e tests pass. The `/shop` and `/product-detail` pixel baselines fail in this worktree BOTH with and without the change — pre-existing on `main`, not caused here (the newer baselines live on `feat/best-for-facets`).
