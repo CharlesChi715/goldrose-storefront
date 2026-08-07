@@ -18,6 +18,11 @@
 # trade for an append-only log and a bad one for anything else, which is why
 # the rule names one file rather than `*.md`.
 #
+# One cosmetic wrinkle, confirmed by merging two branches that had each
+# appended: the blank line separating the two new entries can be absorbed, so
+# the second heading lands directly under the first entry's last line. Harmless
+# and obvious on sight — add the blank back if it bothers you.
+#
 # Note it does not repair a bad merge already in history: three 2026-08-06
 # entries were duplicated by a double-merge before this existed and had to be
 # removed by hand.

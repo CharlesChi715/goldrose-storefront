@@ -5851,3 +5851,35 @@ several agent sessions branching in parallel — so it recurs by construction.
 - **Verified:** lint clean, typecheck clean, format clean, `check:assets`,
   `check:migrations` green on the real sequence, 135 unit tests (126 + 9 new),
   production build.
+
+## 2026-08-07 20:25 AEST — the worklog stops conflicting on every merge
+
+Second of the two follow-ups. `.ai/WORKLOG.md` is append-only, so it conflicts
+on nearly every merge — four of the eight on 2026-08-07 — always the same
+shape: two branches appended after the same point, and the resolution is
+always "keep both sides". No judgement, just friction, and hand-resolving it
+is how three entries got duplicated in the first place.
+
+- **`.gitattributes` (new)** marks `.ai/WORKLOG.md merge=union`. `union` is
+  compiled into git rather than being a custom driver, so a fresh clone gets
+  the behaviour with no setup. Also pins
+  `tests/e2e/__screenshots__/*.png binary` — git already detects that, but it
+  stops a future `* text=auto` from ever line-ending-normalising a baseline.
+- **Proved, not assumed.** Made two throwaway branches that each appended a
+  different entry and merged them: previously a guaranteed conflict, now
+  `Auto-merging .ai/WORKLOG.md` with zero conflicted files and both entries
+  present. The test also turned up a cosmetic wrinkle worth knowing — the
+  blank line between the two new entries can be absorbed — which is written
+  into `.gitattributes` next to the rule.
+- **The cost is documented next to the rule:** union can never report a
+  conflict on this path again, so two edits to the *same* line would both
+  survive silently. Fine for a log, wrong for anything else, so the rule names
+  one file rather than `*.md`.
+- **Removed three duplicated 2026-08-06 entries** (`/shop renders only real
+  catalog products`, `the product page now renders the catalog row`, `the PDP
+  hero is an auto-playing, swipeable carousel`) — residue of the same
+  double-merge that broke `PdpOverlays.tsx`. Verified byte-identical by md5
+  before deleting; 326 → 323 entries. Two other repeated headings
+  (`2026-06-30 16:52`, `2026-07-15 15:21`) turned out to be **different
+  content that happens to share a timestamp** and were left alone — the md5
+  check is the only reason they survived.
