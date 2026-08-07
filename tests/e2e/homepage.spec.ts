@@ -206,6 +206,44 @@ test.describe("H-19 · the Shop by Occasion rail", () => {
   });
 });
 
+/*
+ * A band that is shifted (a hidden section, or A-3's 08-07 trim) is wrapped by
+ * HomeBand. That wrapper was `inset: 0` — a transparent full-stage rectangle
+ * that swallowed every pointer event aimed at the bands beneath it, so the
+ * carousels stopped taking swipes. It is zero-sized now; this pins the actual
+ * symptom rather than the CSS, using real input rather than synthetic events.
+ */
+test("the homepage carousels stay reachable under the shifted bands", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const media = page.locator('[data-el="HOME-HERO-MEDIA"]');
+  await expect(media).toBeVisible();
+  const box = (await media.boundingBox())!;
+  const y = box.y + box.height / 2;
+
+  // Whatever is under the finger in the hero must belong to the hero.
+  const ownsPoint = await page.evaluate(
+    ([x, yy]) => {
+      const hit = document.elementFromPoint(x as number, yy as number);
+      return !!hit?.closest('[data-el="HOME-HERO-MEDIA"]');
+    },
+    [box.x + box.width / 2, y],
+  );
+  expect(ownsPoint).toBe(true);
+
+  // And a real drag must actually move the track.
+  const track = media.locator("> div");
+  const before = await track.evaluate((el) => getComputedStyle(el).transform);
+  await page.mouse.move(box.x + box.width * 0.75, y);
+  await page.mouse.down();
+  for (const dx of [-20, -60, -120])
+    await page.mouse.move(box.x + box.width * 0.75 + dx, y);
+  const during = await track.evaluate((el) => getComputedStyle(el).transform);
+  await page.mouse.up();
+  expect(during).not.toBe(before);
+});
+
 test.describe("H-09 · Best Sellers", () => {
   test("the rail carries the design's two distinct cards", async ({ page }) => {
     await page.goto("/");

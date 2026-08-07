@@ -5714,3 +5714,28 @@ Follow-on to the merge above, after a CI-monitor event flagged PR #35.
   `worktree-pdp-subtitle-wrap` and `fix/pdp-badge-truncation`. None of it was
   touched here, and `main` sits 3 commits ahead of `origin/main` because those
   three are not mine to push.
+
+## 2026-08-07 — Figma sync: address book, two design deletions, two carousel fixes
+
+Branch `worktree-figma-sync`. Delivery was 3 added / 40 "modified" / 1 removed
+frames; frame-by-frame diffing put the real changed count at 29 (11 flipped their
+hash on prototype/dev-status metadata only). Six read-only agents then compared
+each of the 29 against the repo: 56 still-old, 5 already-done, 5 diverged,
+11 not built.
+
+- Built `/account/addresses` (ADDRESS-BOOK 2118:247) + the add/edit bottom sheet
+  (2134:299 / 2610:373 collapse to one component with a `mode` prop). Last
+  Ready-for-dev frame with no route; `figma:unbuilt` is now empty.
+- Applied two design deletions: the `/account` three-tile shortcut band, and the
+  homepage Real Rose Promise strip (band 463 -> 327, stage 5193 -> 5057) via a
+  new `band.trim` so no later band's imported coordinates moved.
+- Fixed two interaction bugs found while checking a "carousel not swipeable"
+  report: (1) Carousel applied EDGE_RESISTANCE damping to the value tested
+  against the swipe-commit threshold, so edge swipes needed 3x travel;
+  (2) HomeBand's shift wrapper was `inset: 0`, a full-stage transparent box
+  that swallowed pointer events — latent since it was written, live only once
+  the trim gave four bands a permanent shift. Both covered by real-input tests.
+- Filed AI-037 (Figma still ships GoldRose/VELORIA the repo renamed — do not
+  import verbatim), AI-038 (`/story` descends from a deleted frame),
+  AI-039 (address book has no backend).
+- Deliberately did NOT run `figma:baseline`: 28 changed frames remain unbuilt.

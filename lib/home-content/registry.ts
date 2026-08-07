@@ -76,8 +76,19 @@ export type HomeSection = {
    * The band's y-offset and height on the 430×5193 stage. `null` means the
    * section is page chrome rather than a band, so it cannot be hidden — see
    * lib/home-content/layout.ts.
+   *
+   * `trim` is height the design team has since deleted from *inside* the band
+   * while the elements below it keep their original imported coordinates. The
+   * layout treats it as permanently removed: later bands slide up by it and
+   * the stage shrinks by it, exactly as for a hidden band, so an in-band
+   * deletion never requires rewriting the rest of the page's pixel values.
+   * `h` is the band's height after the trim.
    */
-  readonly band: { readonly y: number; readonly h: number } | null;
+  readonly band: {
+    readonly y: number;
+    readonly h: number;
+    readonly trim?: number;
+  } | null;
   readonly fields: readonly HomeField[];
 };
 
@@ -290,13 +301,15 @@ export const HOME_SECTIONS = [
   {
     id: "ready",
     module: "A-3",
-    title: "Ready to Ship & Real Rose Promise",
-    titleZh: "现货速发 与 真玫瑰承诺",
+    title: "Ready to Ship",
+    titleZh: "现货速发",
     blurb:
-      "Two in-stock product rows, then the four-icon promise strip. One Figma band, so they show and hide together.",
+      "Two in-stock product rows. The four-icon Real Rose Promise strip that used to close this band was deleted by the design team on 2026-08-07, along with its five editable fields.",
     blurbZh:
-      "两行现货商品，以及四个图标的承诺条。二者属于同一个设计板块，因此一起显示或隐藏。",
-    band: { y: 1405, h: 463 },
+      "两行现货商品。此板块原有的「真玫瑰承诺」四图标条已于 2026-08-07 由设计团队删除，其五个可编辑字段一并移除。",
+    // 08-07: the promise strip's 136px left the band; `trim` gives them back to
+    // the stage so no later band's imported coordinates have to be rewritten.
+    band: { y: 1405, h: 327, trim: 136 },
     fields: [
       {
         id: "title",
@@ -360,60 +373,6 @@ export const HOME_SECTIONS = [
         note: "Baked into the design's own SVG render (159-80.svg). It becomes live catalogue data with the real product content (OQ-3).",
         noteZh:
           "已烘焙进设计稿 SVG（159-80.svg）。真实商品内容上线后将改为读取商品目录（OQ-3）。",
-      },
-      {
-        id: "promise_title",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Strip title",
-        labelZh: "承诺条标题",
-        kind: "text",
-        value: "Real Rose Promise",
-        max: budget(260, 20),
-      },
-      {
-        id: "promise_1",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 1",
-        labelZh: "承诺 1",
-        kind: "multiline",
-        value: "Made from\nReal Roses",
-        lines: 2,
-        max: budget(41, 8),
-      },
-      {
-        id: "promise_2",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 2",
-        labelZh: "承诺 2",
-        kind: "multiline",
-        value: "Hand\nFinished",
-        lines: 2,
-        max: budget(32, 8),
-      },
-      {
-        id: "promise_3",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 3",
-        labelZh: "承诺 3",
-        kind: "multiline",
-        value: "Quality\nChecked",
-        lines: 2,
-        max: budget(33, 8),
-      },
-      {
-        id: "promise_4",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 4",
-        labelZh: "承诺 4",
-        kind: "multiline",
-        value: "Gift-Ready\nPackaging",
-        lines: 2,
-        max: budget(39, 8),
       },
     ],
   },

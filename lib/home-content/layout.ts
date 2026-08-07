@@ -11,9 +11,14 @@
  *
  * Bands are moved with a `translateY` wrapper rather than by rewriting
  * coordinates (see components/home/HomeBand.tsx), which keeps every imported
- * pixel value untouched — and when nothing is hidden every shift is 0 and the
- * wrapper renders nothing at all, so the default page is byte-identical to the
- * import.
+ * pixel value untouched.
+ *
+ * The same arithmetic absorbs a **trim** — height the design team deleted from
+ * inside a band, as happened to A-3's Real Rose Promise strip on 2026-08-07.
+ * A trim is permanent rather than owner-controlled, so it applies whether or
+ * not anything is hidden; the practical effect is that the bands below an
+ * in-band deletion slide up without a single one of their imported
+ * coordinates changing.
  */
 
 import { HOME_SECTIONS, type HomeSectionId } from "./registry.ts";
@@ -23,8 +28,11 @@ export const HOME_FRAME_HEIGHT = 5193;
 
 /** The seven hideable module bands, in page order, with their design geometry. */
 const BANDS = HOME_SECTIONS.filter(
-  (section): section is typeof section & { band: { y: number; h: number } } =>
-    section.band !== null,
+  (
+    section,
+  ): section is typeof section & {
+    band: { y: number; h: number; trim?: number };
+  } => section.band !== null,
 );
 
 /** Where each band ends up once hidden sections are removed. */
@@ -51,12 +59,19 @@ export function homeLayout(
   let removed = 0;
   for (const section of BANDS) {
     if (visible[section.id] === false) {
+      // A hidden band takes its post-trim height with it; its trim is added
+      // below either way, so the two together remove the full drawn height.
       removed += section.band.h;
-      continue;
+    } else {
+      // `-removed` would be -0 while nothing is hidden; keep it a plain 0 so
+      // the "no shift" case is literally zero everywhere it is compared or
+      // printed.
+      shift[section.id] = removed === 0 ? 0 : -removed;
     }
-    // `-removed` would be -0 while nothing is hidden; keep it a plain 0 so the
-    // "no shift" case is literally zero everywhere it is compared or printed.
-    shift[section.id] = removed === 0 ? 0 : -removed;
+    // Trim is design height deleted from inside the band, so it comes off
+    // *after* this band is placed — the band itself does not move, everything
+    // below it does.
+    removed += section.band.trim ?? 0;
   }
 
   return { shift, frameHeight: HOME_FRAME_HEIGHT - removed };

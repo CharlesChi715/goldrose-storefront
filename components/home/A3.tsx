@@ -1,67 +1,28 @@
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * Module A-3 (Figma node 2380:422) of the simplified homepage frame: two
- * Ready-to-Ship rows and the Real Rose Promise strip. Coordinates/colors/fonts
- * are verbatim Figma REST values on the 430px stage; y-range 1405–1868.
+ * Module A-3 (Figma node 2380:422) of the simplified homepage frame: the two
+ * Ready-to-Ship rows. Coordinates/colors/fonts are verbatim Figma REST values
+ * on the 430px stage; y-range 1405–1732.
  *
  * 2026-08-04 sync: the band still carries the design's "New Arrivals and Ready
  * to Ship" name but the New Arrivals half — hero image, copy card, the two
  * pendant cards and both rows of pagination dots — was deleted at source, so
- * the band went 933px → 463px. What is left has identical internals to the
- * previous revision; only the offsets moved.
+ * the band went 933px → 463px.
  *
- * This one file draws TWO named bands — READY-TO-SHIP and PROMISE — as flat
- * siblings with no per-band wrapper element, so each band's `data-el` names
- * start at its heading.
+ * 2026-08-07 sync: the **Real Rose Promise** half went the same way — the
+ * "—   ✿   —" ornament, the heading and all four benefit tiles are deleted in
+ * the new frame, taking the band 463px → 327px. That removed this file's
+ * second named band (PROMISE), so only READY-TO-SHIP remains, and the strip's
+ * four editable promise fields left the admin registry with it. The 136px is
+ * given back to the stage by `band.trim` in lib/home-content/layout.ts rather
+ * than by rewriting every later band's coordinates.
  */
 
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
-import { playfair, notoSC } from "@/lib/fonts";
+import { playfair } from "@/lib/fonts";
 import type { HomeText } from "@/lib/home-content/registry";
-
-/* 2380:427…2380:438 · the four Real Rose Promise tiles. Identical structure,
-   so only the icon render, its width and the two label lines differ; x/labelX
-   are relative to the 382×52 strip and each tile's own 90×52 box. */
-const PROMISE = [
-  {
-    x: 0,
-    icon: "/eldreve/home/159-84.svg",
-    iconX: 38,
-    iconW: 14,
-    alt: "✿",
-    labelX: 24.5,
-    labelW: 41,
-  },
-  {
-    x: 97,
-    icon: "/eldreve/home/159-87.svg",
-    iconX: 38.5,
-    iconW: 13,
-    alt: "✦",
-    labelX: 29,
-    labelW: 32,
-  },
-  {
-    x: 194,
-    icon: "/eldreve/home/159-90.svg",
-    iconX: 38,
-    iconW: 14,
-    alt: "◇",
-    labelX: 28.5,
-    labelW: 33,
-  },
-  {
-    x: 291,
-    icon: "/eldreve/home/159-93.svg",
-    iconX: 38,
-    iconW: 14,
-    alt: "▣",
-    labelX: 25.5,
-    labelW: 39,
-  },
-] as const;
 
 /* 2380:439 / 2380:446 · the two Ready-to-Ship rows. Same card, same photo,
    same crop — the design repeats one product because the real catalogue is
@@ -72,11 +33,10 @@ const ROWS = [
 ] as const;
 
 export function A3({ c }: { c: HomeText["ready"] }) {
-  const promises = [c.promise_1, c.promise_2, c.promise_3, c.promise_4];
   return (
     <>
       {/* 2380:422 · module background — decoration, deliberately unnamed */}
-      <div style={{ ...abs(0, 1405, 430, 463), background: "#FFF6EC" }} />
+      <div style={{ ...abs(0, 1405, 430, 327), background: "#FFF6EC" }} />
 
       {/* 2380:423 · Ready to Ship heading */}
       <div
@@ -181,81 +141,6 @@ export function A3({ c }: { c: HomeText["ready"] }) {
           />
         </Link>
       ))}
-
-      {/* 2380:453 · "—   ✿   —" ornament (rendered glyph strip) */}
-      <img
-        data-el="HOME-PROMISE-ORNAMENT"
-        src="/eldreve/home/2380-453.svg"
-        alt="— ✿ —"
-        width={140}
-        height={22}
-        style={{
-          ...abs(143, 1726, 140, 22),
-          display: "block",
-          objectFit: "none",
-          objectPosition: "center center",
-        }}
-      />
-
-      {/* 2380:425 · Real Rose Promise heading */}
-      <div
-        data-el="HOME-PROMISE-TITLE"
-        className={playfair.className}
-        style={{
-          ...abs(85, 1763, 260),
-          fontSize: 20,
-          lineHeight: "26.66px",
-          color: "#3B2F2F",
-          fontWeight: 500,
-          textAlign: "center",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {c.promise_title}
-      </div>
-
-      {/* 2380:426 · Real Rose Promise benefits row */}
-      <div
-        data-el="HOME-PROMISE-SECTION"
-        style={{ ...abs(24, 1798, 382, 52), overflow: "hidden" }}
-      >
-        {PROMISE.map((p, i) => (
-          <div
-            key={p.x}
-            data-el={`HOME-PROMISE-BENEFIT-CARD-${i + 1}`}
-            style={{ ...abs(p.x, 0, 90, 52), overflow: "hidden" }}
-          >
-            <img
-              data-el={`HOME-PROMISE-BENEFIT-ICON-${i + 1}`}
-              src={p.icon}
-              alt={p.alt}
-              width={p.iconW}
-              height={17}
-              style={{
-                ...abs(p.iconX, 6.5, p.iconW, 17),
-                display: "block",
-                objectFit: "none",
-                objectPosition: "left center",
-              }}
-            />
-            <div
-              data-el={`HOME-PROMISE-BENEFIT-TEXT-${i + 1}`}
-              className={notoSC.className}
-              style={{
-                ...abs(p.labelX, 25.5, p.labelW),
-                fontSize: 8,
-                lineHeight: "10px",
-                color: "#3B2F2F",
-                fontWeight: 400,
-                textAlign: "center",
-                whiteSpace: "pre-line",
-              }}
-            >
-              {promises[i]}
-            </div>
-          </div>
-        ))}
-      </div>
     </>
   );
 }

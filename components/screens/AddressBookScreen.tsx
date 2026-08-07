@@ -25,6 +25,10 @@
  * The action links keep their Figma strings verbatim, trailing spaces and
  * all (`whiteSpace: "pre"`), because the frame right-aligns each label with
  * that padding baked in — trimming them would shift every link right.
+ *
+ * AI-TAG(AI-039): PLACEHOLDER — no address backend; the three addresses are
+ * the frame's own and nothing the sheet collects is stored.
+ * See /agent-delivery/sessions/figma-sync-addresses-08-07-worktree-figma-sync.md.
  */
 
 import { useState } from "react";

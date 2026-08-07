@@ -28,20 +28,45 @@ import {
 /** The stage is 5134px of bands plus the 59px bottom nav. */
 const NAV_HEIGHT = 59;
 
+/** Height the design has deleted from inside bands, still spanned by the
+ *  imported coordinates. A-3's Real Rose Promise strip is the only one. */
+const TOTAL_TRIM = HOME_SECTION_LIST.reduce(
+  (sum, s) => sum + (s.band?.trim ?? 0),
+  0,
+);
+
 test("the bands tile the stage with no gaps and no overlap", () => {
   const bands = HOME_SECTION_LIST.filter((s) => s.band !== null);
   let y = bands[0]!.band!.y;
   for (const section of bands) {
     assert.equal(section.band!.y, y, `${section.id} starts at the wrong y`);
-    y += section.band!.h;
+    // Coordinates are the untouched import, so a band still spans its trim —
+    // the trim is closed at render time, not in the imported geometry.
+    y += section.band!.h + (section.band!.trim ?? 0);
   }
   assert.equal(y + NAV_HEIGHT, HOME_FRAME_HEIGHT);
 });
 
-test("with everything visible, nothing moves and the stage is unchanged", () => {
+test("with everything visible, only the design's own trims are removed", () => {
   const { shift, frameHeight } = homeLayout({});
-  assert.equal(frameHeight, HOME_FRAME_HEIGHT);
-  for (const value of Object.values(shift)) assert.equal(value, 0);
+  assert.equal(frameHeight, HOME_FRAME_HEIGHT - TOTAL_TRIM);
+  // Bands at or above the trimmed one never move.
+  assert.equal(shift.hero, 0);
+  assert.equal(shift.featured, 0);
+  assert.equal(shift.ready, 0);
+  // Everything below it slides up by the trim, with no band hidden.
+  assert.equal(shift.occasion, -TOTAL_TRIM);
+  assert.equal(shift.recipient, -TOTAL_TRIM);
+  assert.equal(shift.craft, -TOTAL_TRIM);
+  assert.equal(shift.story, -TOTAL_TRIM);
+});
+
+test("a trimmed band still removes its full drawn height when hidden", () => {
+  // A-3 is 327 tall with 136 trimmed away; hiding it must remove all 463 so
+  // the two mechanisms cannot double-count or under-count together.
+  const { shift, frameHeight } = homeLayout({ ready: false });
+  assert.equal(frameHeight, HOME_FRAME_HEIGHT - 463);
+  assert.equal(shift.occasion, -463);
 });
 
 test("hiding one band slides only the bands below it, by its height", () => {
@@ -59,11 +84,12 @@ test("hiding one band slides only the bands below it, by its height", () => {
 
 test("hiding several bands accumulates the shift", () => {
   const { shift, frameHeight } = homeLayout({ featured: false, craft: false });
-  assert.equal(frameHeight, HOME_FRAME_HEIGHT - 641 - 991);
+  assert.equal(frameHeight, HOME_FRAME_HEIGHT - 641 - 991 - TOTAL_TRIM);
   assert.equal(shift.hero, 0);
+  // A-3 moves for the band hidden above it, but not for its own trim.
   assert.equal(shift.ready, -641);
-  assert.equal(shift.recipient, -641);
-  assert.equal(shift.story, -641 - 991);
+  assert.equal(shift.recipient, -641 - TOTAL_TRIM);
+  assert.equal(shift.story, -641 - 991 - TOTAL_TRIM);
 });
 
 test("chrome sections are never shifted and have no visibility slot", () => {

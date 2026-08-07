@@ -55,7 +55,17 @@ const SWIPE_PX = 40;
 /** Pointer travel below this is a tap on the card, not a drag. */
 const TAP_SLOP = 6;
 
-/** Drag past the first/last cell is damped — there is no cell to reveal. */
+/**
+ * Drag past the first/last cell is damped — the track has no cell rendered
+ * beyond the ends, so the finger would otherwise drag blank canvas into view.
+ *
+ * The damping is a *display* effect only. `go()` wraps, so an edge swipe does
+ * have somewhere to land, and the commit decision therefore reads the raw
+ * finger travel (see `rawX`). Testing the damped value instead — as this did
+ * until 2026-08-07 — silently tripled the swipe distance needed at either end,
+ * and since auto-play parks each rail on a different slide, that read as "the
+ * carousel isn't swipeable".
+ */
 const EDGE_RESISTANCE = 3;
 
 /**
@@ -131,6 +141,9 @@ export function Carousel({
   const [drag, setDrag] = useState<number | null>(null);
   const startX = useRef(0);
   const dragged = useRef(false);
+  // Undamped finger travel. `drag` may be divided by EDGE_RESISTANCE for the
+  // transform, so it cannot be what decides whether the swipe commits.
+  const rawX = useRef(0);
 
   const paused = hovering || drag !== null;
 
@@ -142,8 +155,10 @@ export function Carousel({
   /** Release: commit to the neighbour if the finger travelled far enough. */
   const endDrag = () => {
     if (drag === null) return;
-    const dx = drag;
+    // The finger's own travel, not the possibly-damped transform offset.
+    const dx = rawX.current;
     setDrag(null);
+    rawX.current = 0;
     if (Math.abs(dx) >= SWIPE_PX) go(index + (dx < 0 ? 1 : -1));
   };
 
@@ -176,11 +191,13 @@ export function Carousel({
           if (e.pointerType === "mouse" && e.button !== 0) return;
           startX.current = e.clientX;
           dragged.current = false;
+          rawX.current = 0;
           setDrag(0);
         }}
         onPointerMove={(e) => {
           if (drag === null) return;
           let dx = e.clientX - startX.current;
+          rawX.current = dx;
           if (!dragged.current && Math.abs(dx) > TAP_SLOP) {
             dragged.current = true;
             // Capture only once it is a drag: a captured pointer retargets the

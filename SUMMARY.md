@@ -70,7 +70,8 @@ Open linked resources only when the task needs them.
   checkout redesign, the full returns flow, reminder date pickers and edit
   sheet, the restructured privacy hub, `/account/policies-legal` → 7
   `/policies/*` coming-soon scaffolds, the unified signup page, and the
-  three-tile `/account` dashboard (frame `1523:2536`). The PDP now matches
+  `/account` dashboard (frame `1523:2536`; its three-tile shortcut band was
+  deleted by the design team on 08-07). The PDP now matches
   Ready-for-dev frame `1523:3971` (430×1616); its live catalog data and cart
   actions remain wired.
 - **Simplified homepage imported 2026-08-04** (frame `2380:370`, section
@@ -83,8 +84,23 @@ Open linked resources only when the task needs them.
 - **DQ-34 answered 2026-08-03:** the ELDREVE wordmark was never a placeholder —
   it is the brand. The repo's GoldRose substitution is retired: the rename
   landed 2026-08-05 (see OQ-4 / AI-021).
-- **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
-  MENU/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
+- **Pending from design:** the 7 policy pages, MENU/story-long redesigns,
+  `/gift-guide` (frame 1942:182 — no route built).
+- **Figma sync 2026-08-07** (`worktree-figma-sync`). `/account/addresses`
+  (ADDRESS-BOOK `2118:247`) is built with its add/edit bottom sheet
+  (`2134:299` / `2610:373`, one component, two titles) — the last Ready-for-dev
+  frame with no route, so `figma:unbuilt` is now empty. Addresses are the
+  frame's own: no backend, and the schema holds one `default_address` rather
+  than a collection (AI-039). The same delivery deleted the `/account`
+  three-tile shortcut band and the homepage's Real Rose Promise strip; both are
+  applied, the latter via a new `band.trim` that returns its 136px to the stage
+  without moving any later band's imported coordinates (5193 → 5057). **The
+  other 28 changed frames are not imported** — chiefly the homepage typography
+  pass and seven further content deletions; the baseline is deliberately
+  un-stamped so the next sync still sees them.
+  ⚠️ The Figma file still carries **GoldRose**/**VELORIA** in three frames the
+  repo already renamed, so those frames must not be imported verbatim
+  (AI-037), and `/story` descends from a frame that no longer exists (AI-038).
 - **Product reviews are real (2026-08-06, PR #30, `feat/product-reviews`).**
   `product_reviews` table live on hosted (migration `0007`; content-neutral
   moderation, never hard-deleted), `lib/reviews/db.ts` + `POST /api/reviews`,
