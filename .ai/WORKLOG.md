@@ -6120,3 +6120,31 @@ finished and left it clean) and three branches merged.
   the frame's 91px floor. The e2e ran in a throwaway detached worktree on port
   3099 because a parallel session held 3001 for over ten minutes; the port
   shift was never committed.
+
+## 2026-08-08 00:15 AEST — merged branches and worktrees deleted
+
+Housekeeping after the day's merges. 20 branches and 12 worktrees removed;
+**6.2 GB reclaimed**, 9.2 GB → 2.9 GB.
+
+- **Kept on purpose, all four:** the main checkout; `admin-home-customization`
+  and `home-page-map`, whose branches are NOT merged (and `home-page-map` also
+  holds 5 uncommitted files); and `agent-inbox-loop-close`, which is merged but
+  carries 3 uncommitted files including edits to `scripts/agent-inbox.mjs` and
+  the agent-delivery SKILL. Deleting any of them would have destroyed work.
+- **Every deletion was gated twice** — `git merge-base --is-ancestor <branch>
+  main` and a `git status --porcelain` emptiness check re-run immediately
+  before the removal, then `git branch -d` (lowercase), which refuses anything
+  unmerged. It duly refused `worktree-agent-inbox-loop-close`, still checked
+  out in a kept worktree.
+- **Five `git worktree remove` calls failed part-way** with "failed to delete",
+  leaving directories that git had already de-registered. Not corruption — the
+  bulk of each was gone (`figma-sync` 1339 MB → 5 MB) and the branches were
+  merged, so the orphans were removed directly after confirming they were no
+  longer in `git worktree list`. 299 MB.
+- **`git gc --prune=now`** cleared the dangling objects left by the day's
+  `merge-tree` dry-runs and the deleted branches: `.git` 146 → 137 MB, and
+  `git fsck` now reports nothing. The object store barely moved because every
+  deleted branch was merged — its commits are still reachable from `main`.
+- **Verified after:** `git fsck` clean, `main` intact at `2013a70`, 138 unit
+  tests, `check:migrations` ok, inbox in sync. GitHub already carries `main`
+  only.
