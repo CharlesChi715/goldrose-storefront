@@ -5994,3 +5994,41 @@ quota would stop a customer signing in.
   `console.log` → stdout, and Playwright's `webServer` ignores stdout by
   default while piping stderr. The eleven lines seen before were the failure
   path's `console.error`. Nothing is hidden that was not already hidden.
+
+## 2026-08-07 — /shop: an empty result set no longer clips the filter drawer
+
+- Bug: with 0 matching products the shop canvas ended at 602 (grid replaced by
+  the 60px empty line), but the open filter drawer runs to 828 and is drawn
+  inside the canvas, which clips (`ScaleFrame` stage is `overflow: hidden`).
+  The panel was cut mid-"Price", losing Availability, Reset and
+  "Show N Results" — so the selection that empties the shop was the one a
+  shopper could not undo from the drawer.
+- Fix: `app/shop/page.tsx` floors the canvas at `DRAWER_FLOOR` (356 + 472 + 28
+  shadow room) via `Math.max`. Only ever fires on an empty grid — one card row
+  already reaches 839. The sort dropdown (357 + 190) was never at risk.
+- Test: `tests/e2e/shop-filters.spec.ts` gains a regression test comparing the
+  panel's bottom edge to the stage's, then driving Reset → Show to prove the
+  recovered controls work.
+- Verified: 136 unit + 135 e2e pass, including all three pixel baselines
+  (home/shop/PDP byte-identical — the floor never applies to a populated shop).
+
+## 2026-08-07 — Go-live posture recorded in SUMMARY.md
+
+Owner decision: open the site for real use and retire mock data gradually
+rather than in one pre-launch sweep. Updated SUMMARY.md only (it owns project
+state; no code changed):
+
+- Current phase: "Pre-launch testing" → "Going live, de-mocking gradually",
+  split into hard gates (money/identity — never gradual) and gradual items
+  (copy, imagery, placeholder screens).
+- Release gates: added the rule that a live placeholder must read as a
+  placeholder and may never assert a price, stock level, delivery date or
+  policy we cannot honour; CHECKOUT_SKIP_PAYMENT now "before the first real
+  order".
+- Release queue: split at go-live — items 1-7 clear before the first real
+  order (incl. pushing migrations 0009 then 0010, real shipping rates, removing
+  seeded reviews, backups on, owner enables live PayPal); items 8-11 run while
+  live.
+- OQ-2 marked a hard gate (a shipping rate is a charged price); OQ-3 marked
+  gradual, with price/stock true even while copy and photos stay placeholder.
+- Seeded demo reviews flagged as the one mock that is never safe live.
