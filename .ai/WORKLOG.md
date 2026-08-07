@@ -6079,3 +6079,44 @@ state; no code changed):
   birthday 0/2. Before 0011 the last two were 0/2 and 2/2 — both wrong.
 - Remaining on hosted: products carry only `{classic}`, so Occasion and
   Recipient chips return nothing until someone sets "Best for" per product.
+
+## 2026-08-07 23:55 AEST — three branches merged, and my migration checker was wrong
+
+`main` checked out in the working directory (the concurrent session had
+finished and left it clean) and three branches merged.
+
+- **`fix/nav-cart-login-redirect`** was already in from the previous pass. Its
+  only commit ahead of `main` was documentation — the redirect itself shipped
+  earlier as `ab559de`, and the branch's own write-back records the triage as
+  "no bug found". The name outlived the work.
+- **`fix/shop-drawer-and-hosted-guards`** — 5 commits, clean: the filter drawer
+  staying on the canvas when nothing matches, `0011`, a dev-server guard, and
+  two write-ups. Its new `scripts/require-hosted-dev.mjs` arrived unformatted
+  and would have turned CI red, so it was formatted in a follow-up commit.
+- **`fix/pdp-badge-truncation`** — 45 commits behind, one real conflict in
+  `app/products/[slug]/page.tsx`. Two independent changes had collided: the
+  branch's badge rework (one pill per phrase, the frame's 91 kept as a floor
+  for a lone pill) against today's info-card height. Resolved to the branch's
+  badge logic with **HEAD's 182** — taking the branch's stale `166` would have
+  silently reverted the owner's AI-036 ruling, and keeping HEAD's `{badge ?`
+  would not have compiled, because the rest of the file now reads `badges`.
+- **⚠️ The migration checker I added this evening was wrong, and it mattered.**
+  `0009` added a `'stocked'` key to `catalog_products`; `0010`, which recreates
+  the view last, dropped it — precisely the hazard the tool exists for — and
+  the tool reported "migrations ok". Two flaws: `viewDefinitions` cut the body
+  at the first `from`, which in this view is the one INSIDE the images
+  subquery, so everything after it was never read; and it collected only
+  `table.column` and `as alias` shapes, so a `jsonb_build_object` key was
+  invisible. The `fix/shop-drawer-and-hosted-guards` session found the real
+  regression, fixed both (read to the terminating semicolon, collect quoted
+  JSON keys) and wrote `0011` to restore `stocked`. Confirmed by replay: the
+  old logic reports nothing on that state, the fixed logic names `stocked`.
+  The lesson is not "avoid heuristics" — it is that the tool was tested against
+  synthetic fixtures and the duplicate-number case, never against this repo's
+  most complex real view, which is the one case that counted.
+- **Verified:** typecheck, lint (0 errors), format, `check:migrations`, inbox
+  in sync, 138 unit tests, and 135 e2e including every pixel baseline. The
+  badge rework moves no baseline: seeded products carry one badge, which keeps
+  the frame's 91px floor. The e2e ran in a throwaway detached worktree on port
+  3099 because a parallel session held 3001 for over ten minutes; the port
+  shift was never committed.
