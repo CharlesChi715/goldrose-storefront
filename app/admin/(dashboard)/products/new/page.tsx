@@ -14,7 +14,7 @@ const EMPTY: ProductFormInitial = {
   vendor: "",
   productType: "",
   tags: [],
-  bestFor: "",
+  bestFor: [],
   badge: "",
   details: [],
   position: "",

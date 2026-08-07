@@ -339,6 +339,24 @@ Products also get **media**: `product_images (id, product_id, path, alt,
 position)` — multi-image upload to the Storage bucket, drag to reorder,
 first image is the card thumbnail.
 
+Each photo also carries two **spotlight areas** (migration 0010), because the
+storefront's photo boxes are fixed design rectangles the photos are not shaped
+like, and one crop cannot serve two differently-shaped boxes:
+
+| Columns                                    | Box framed against          |
+| ------------------------------------------ | --------------------------- |
+| `focal_x`, `focal_y`, `focal_zoom`         | PDP viewer window, 398×250  |
+| `card_focal_x`, `card_focal_y`, `card_zoom` | Shop grid card photo, 203×204 |
+| `framed`                                    | Has an admin chosen these?  |
+
+An area is a point plus a zoom, never a cropped file: `object-position` for the
+point, `transform: scale()` about that same point for the zoom
+(`lib/images/spotlight.ts`). The original upload is stored whole, which is what
+lets the PDP's fullscreen viewer show every pixel. Defaults reproduce the
+pre-0010 crop exactly — 50/50 at zoom 100, card columns null meaning "follow
+the PDP point" — so no existing photo moves, and zoom 100 emits no `transform`
+at all so the pixel baselines stay byte-identical.
+
 **Delete vs archive:** Shopify-exact. Products have both **Archive** and
 **Delete** (red confirmation dialog, really deletes). Order history is safe
 because order lines snapshot name/sku and FK-null on delete. **Orders can
@@ -663,7 +681,12 @@ first-party `page_views` beacon (§7.12).
 - **Edit/new form** — Shopify's cards in Shopify's order:
   - Title · Description
   - **Media** — multi-image upload to the `product-images` bucket, drag to
-    reorder, alt-text editing
+    reorder, alt-text editing, and **framing** (取景框): uploading a photo
+    opens the framing dialog on it, and any photo nobody has framed carries a
+    "Needs framing" badge until someone confirms one. The dialog holds each
+    storefront window at its true size — the PDP viewer (398×250) and, when
+    the card is unticked from following it, the shop card (203×204) — with
+    drag to pan and a slider to zoom
   - **Pricing** — Price · Compare-at price · "Charge tax on this product" ·
     Cost per item with auto **Profit / Margin** (cost is private — never
     shown to customers)

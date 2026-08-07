@@ -6,6 +6,7 @@
 
 import { notFound } from "next/navigation";
 import { fileUrl } from "@/lib/admin/files";
+import { NO_ZOOM, spotlightOf } from "@/lib/images/spotlight";
 import { getProductDetail } from "@/lib/admin/products";
 import { ProductForm, type ProductFormInitial } from "../ProductForm";
 
@@ -53,10 +54,20 @@ export default async function EditProductPage({
       path: image.path,
       url: fileUrl(image.path),
       alt: image.alt,
-      // Rows written before 0008 have no point stored; centre is what they
-      // were already cropped to.
-      focalX: image.focal_x ?? 50,
-      focalY: image.focal_y ?? 50,
+      // Rows written before 0008 have no point stored and rows before 0009 no
+      // zoom; centre at no zoom is what they were already cropped to.
+      spotlight: spotlightOf(image),
+      // Null stays null: it is what makes the card follow the product page,
+      // and it is what the dialog's "same part" checkbox reads.
+      card:
+        image.card_focal_x == null || image.card_focal_y == null
+          ? null
+          : {
+              x: image.card_focal_x,
+              y: image.card_focal_y,
+              zoom: image.card_zoom ?? NO_ZOOM,
+            },
+      framed: image.framed === true,
     })),
     variants: detail.variants.map((variant) => ({
       id: variant.id,

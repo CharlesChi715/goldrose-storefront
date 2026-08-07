@@ -7,6 +7,19 @@
  * Every coordinate, size, color, and font value comes verbatim from the
  * Figma REST API; photo assets in /public/eldreve are exact 2x node renders.
  *
+ * ONE DELIBERATE DEPARTURE FROM THE FRAME (owner, 2026-08-07): the strapline
+ * box is two lines tall instead of one, because real `details` bullets do not
+ * fit the frame's single line and truncating them to "…" loses content. That
+ * adds 16px, so the info card is 182 tall (frame: 166), every section below it
+ * sits 16px lower than the frame, and the stage is 1632 (frame: 1616). The
+ * frame itself still says 1616 — Figma needs the same change.
+ * Owner ruled on it (2026-08-07): "just make it suit the content. if content
+ * exceeds, larger is fine." That is a standing rule, not a one-off — where
+ * real catalog copy will not fit a frame's box, the box grows; truncating to
+ * "…" is not an acceptable way to make it fit.
+ * AI-TAG(AI-036): OWNER-TODO — get frame 1523:3971 changed to match. See
+ * /agent-delivery/sessions/branch-consolidation-08-07.md.
+ *
  * Every product renders the same pixel design; the slug picks the product,
  * and the catalog row (lib/supabase/catalog) fills the designated boxes
  * (§14.2 Stage 9).
@@ -42,6 +55,7 @@ import { getPromoSlogan } from "@/lib/content";
 import { listPublishedReviews, reviewStats } from "@/lib/reviews/db.ts";
 import { formatRelativeDay } from "@/lib/dates";
 import { fileUrl } from "@/lib/files-url";
+import { spotlightOf } from "@/lib/images/spotlight";
 import { siteBaseUrl } from "@/lib/admin/settings";
 import { formatMoney } from "@/lib/money";
 
@@ -214,7 +228,13 @@ export default async function ProductDetailPage({
     : heroImage;
   /* Every photo box here is object-fit: cover, so the browser would crop to
      the centre; the admin's 取景框 says which part actually matters
-     (product_images.focal_x/y, migration 0008). */
+     (product_images.focal_x/y, migration 0008).
+
+     The ABOUT panel below takes the POINT but not the zoom. A spotlight zoom
+     is authored against the 398×250 viewer window, and this box is a nearly
+     square 190×196 — replaying that zoom here would crop far past what the
+     owner was looking at when they chose it. The viewer window, which the
+     zoom belongs to, is drawn by PdpOverlays. */
   const focus = (image: (typeof product.images)[number] | undefined) =>
     `${image?.focal_x ?? 50}% ${image?.focal_y ?? 50}%`;
 
@@ -266,7 +286,7 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <ScaleFrame
-        height={1616}
+        height={1632}
         background="#FFF6EC"
         fontClass={inter.className}
       >
@@ -295,7 +315,7 @@ export default async function ProductDetailPage({
         />
 
         {/* 04 · Product info */}
-        <div style={{ ...abs(16, 375, 398, 166), background: "#FFFBF6" }}>
+        <div style={{ ...abs(16, 375, 398, 182), background: "#FFFBF6" }}>
           {/* The catalog's badge, in the frame's pill. A product with no
               badge gets no pill rather than a borrowed one. */}
           {badge ? (
@@ -337,15 +357,20 @@ export default async function ProductDetailPage({
           </div>
           {/* The catalog's first three detail bullets, in the frame's
               strapline box; the frame's own line covers a product that
-              carries none. */}
+              carries none. Real bullets are routinely longer than the frame's
+              one line ("Genuine preserved rose · Rich ruby-red finish ·
+              Gold-trimmed petal edges" is 71 characters against room for ~59),
+              so the box is two lines tall and wraps instead of truncating
+              (owner, 2026-08-07). Everything below it in the card moves down
+              by the extra 16px, and so does every section on the page. A third
+              line is clipped whole by the fixed height — never an ellipsis. */}
           <div
             data-live-text
             style={{
-              ...abs(0, 75, 398),
+              ...abs(0, 75, 398, 31.466),
               ...txt(13, 15.733, "#B8A69A"),
-              whiteSpace: "nowrap",
+              whiteSpace: "normal",
               overflow: "hidden",
-              textOverflow: "ellipsis",
             }}
           >
             {strapline || "Real Rose · Hand-Finished · Made to Last"}
@@ -360,7 +385,7 @@ export default async function ProductDetailPage({
             aria-label={
               hasReviews ? `${stats.average} out of 5 stars` : "No ratings yet"
             }
-            style={abs(0.53, 100.51, 69, 13)}
+            style={abs(0.53, 116.51, 69, 13)}
           >
             <img
               src="/eldreve/screens/1523-3993.svg"
@@ -381,7 +406,7 @@ export default async function ProductDetailPage({
               without painting outside its pixel-test mask. */}
           <div
             data-live-text
-            style={{ ...abs(76, 99, 130), ...txt(12, 14.523, "#B8A69A") }}
+            style={{ ...abs(76, 115, 130), ...txt(12, 14.523, "#B8A69A") }}
           >
             {hasReviews
               ? `${stats.average} · ${stats.count} Review${stats.count === 1 ? "" : "s"} \u00A0›`
@@ -391,7 +416,7 @@ export default async function ProductDetailPage({
             className={notoSC.className}
             data-live-text
             style={{
-              ...abs(0, 122, 116, 36),
+              ...abs(0, 138, 116, 36),
               ...txt(30, 36, "#3B2F2F"),
               fontWeight: 700,
               whiteSpace: "nowrap",
@@ -404,7 +429,7 @@ export default async function ProductDetailPage({
               className={notoSC.className}
               data-live-text
               style={{
-                ...abs(128, 131.5),
+                ...abs(128, 147.5),
                 ...txt(14, 16.8, "#B8A69A"),
                 textDecoration: "line-through",
               }}
@@ -418,7 +443,7 @@ export default async function ProductDetailPage({
             <div
               data-live-text
               style={{
-                ...abs(191, 128.5, 70, 23),
+                ...abs(191, 144.5, 70, 23),
                 background: "#F5EDDB",
                 borderRadius: 99,
               }}
@@ -440,7 +465,7 @@ export default async function ProductDetailPage({
         {/* 05 · Benefits */}
         <Section
           x={16}
-          y={541}
+          y={557}
           w={398}
           h={156}
           radius={16}
@@ -516,7 +541,7 @@ export default async function ProductDetailPage({
         {/* 07 · Checkout actions — wired to the v2 cart (Stage 4) */}
         <Section
           x={16}
-          y={1360}
+          y={1376}
           w={398}
           h={144}
           radius={18}
@@ -577,7 +602,7 @@ export default async function ProductDetailPage({
         {/* 08 · Unboxing gallery */}
         <Section
           x={15}
-          y={1192}
+          y={1208}
           w={398}
           h={165}
           radius={18}
@@ -611,7 +636,7 @@ export default async function ProductDetailPage({
         {/* 09 · About */}
         <Section
           x={16}
-          y={989}
+          y={1005}
           w={398}
           h={196}
           radius={18}
@@ -676,7 +701,7 @@ export default async function ProductDetailPage({
         {/* 10 · Reviews */}
         <Section
           x={16}
-          y={706}
+          y={722}
           w={398}
           h={277}
           radius={18}
@@ -888,7 +913,7 @@ export default async function ProductDetailPage({
           stats={stats}
           media={product.images.map((image) => ({
             src: fileUrl(image.path),
-            focus: focus(image),
+            spotlight: spotlightOf(image),
           }))}
           productTitle={product.title}
         />

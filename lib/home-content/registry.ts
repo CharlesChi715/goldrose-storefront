@@ -131,8 +131,19 @@ export type HomeSection = {
    * The band's y-offset and height on the 430×5193 stage. `null` means the
    * section is page chrome rather than a band, so it cannot be hidden — see
    * lib/home-content/layout.ts.
+   *
+   * `trim` is height the design team has since deleted from *inside* the band
+   * while the elements below it keep their original imported coordinates. The
+   * layout treats it as permanently removed: later bands slide up by it and
+   * the stage shrinks by it, exactly as for a hidden band, so an in-band
+   * deletion never requires rewriting the rest of the page's pixel values.
+   * `h` is the band's height after the trim.
    */
-  readonly band: { readonly y: number; readonly h: number } | null;
+  readonly band: {
+    readonly y: number;
+    readonly h: number;
+    readonly trim?: number;
+  } | null;
   readonly fields: readonly HomeField[];
 };
 
@@ -490,8 +501,10 @@ export const HOME_SECTIONS = [
         label: "Photo",
         labelZh: "图片",
         kind: "image",
+        // 08-07: both cards draw into card 1's box, so the window is 250×240
+        // for BOTH photos now — see PHOTO_H in BestSellersRail.tsx.
         value: "/eldreve/home/373-174.png",
-        box: { w: 252, h: 271 },
+        box: { w: 250, h: 240 },
         fit: "cover",
         note: "Cropped to fill, so any shape is safe — the edges are trimmed.",
         noteZh: "以裁切方式填满，任何比例都可用——超出部分会被裁掉。",
@@ -548,12 +561,16 @@ export const HOME_SECTIONS = [
         label: "Photo",
         labelZh: "图片",
         kind: "image",
+        // 08-07: this card was resized to match card 1, and the design's own
+        // photo is scaled up inside the window to hide the transparent padding
+        // Figma exported with it. Your photo needs neither trick — it is simply
+        // cropped to fill.
         value: "/eldreve/home/2380-416.png",
-        box: { w: 184, h: 222 },
-        fit: "stretch",
-        note: "The design stretches this one to fill its box, so a photo of a different shape looks squashed — match 184 × 222 as closely as you can.",
+        box: { w: 250, h: 240 },
+        fit: "cover",
+        note: "Cropped to fill, so any shape is safe — the edges are trimmed. A photo of your own will also clear the thin pink strip the design's picture leaves down the right-hand edge.",
         noteZh:
-          "设计稿将此图拉伸填满，比例不同的图片会变形——请尽量贴近 184 × 222。",
+          "以裁切方式填满，任何比例都可用——超出部分会被裁掉。换成自己的图片后，设计稿原图右侧那条细粉色边也会一并消失。",
       },
       {
         id: "card_2_photo_alt",
@@ -571,13 +588,15 @@ export const HOME_SECTIONS = [
   {
     id: "ready",
     module: "A-3",
-    title: "Ready to Ship & Real Rose Promise",
-    titleZh: "现货速发 与 真玫瑰承诺",
+    title: "Ready to Ship",
+    titleZh: "现货速发",
     blurb:
-      "Two in-stock product rows, then the four-icon promise strip. One Figma band, so they show and hide together.",
+      "Two in-stock product rows. The four-icon Real Rose Promise strip that used to close this band was deleted by the design team on 2026-08-07, along with its five editable fields.",
     blurbZh:
-      "两行现货商品，以及四个图标的承诺条。二者属于同一个设计板块，因此一起显示或隐藏。",
-    band: { y: 1405, h: 463 },
+      "两行现货商品。此板块原有的「真玫瑰承诺」四图标条已于 2026-08-07 由设计团队删除，其五个可编辑字段一并移除。",
+    // 08-07: the promise strip's 136px left the band; `trim` gives them back to
+    // the stage so no later band's imported coordinates have to be rewritten.
+    band: { y: 1405, h: 327, trim: 136 },
     fields: [
       {
         id: "title",
@@ -664,60 +683,6 @@ export const HOME_SECTIONS = [
         note: "Baked into the design's own SVG render (159-80.svg). It becomes live catalogue data with the real product content (OQ-3).",
         noteZh:
           "已烘焙进设计稿 SVG（159-80.svg）。真实商品内容上线后将改为读取商品目录（OQ-3）。",
-      },
-      {
-        id: "promise_title",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Strip title",
-        labelZh: "承诺条标题",
-        kind: "text",
-        value: "Real Rose Promise",
-        max: budget(260, 20),
-      },
-      {
-        id: "promise_1",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 1",
-        labelZh: "承诺 1",
-        kind: "multiline",
-        value: "Made from\nReal Roses",
-        lines: 2,
-        max: budget(41, 8),
-      },
-      {
-        id: "promise_2",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 2",
-        labelZh: "承诺 2",
-        kind: "multiline",
-        value: "Hand\nFinished",
-        lines: 2,
-        max: budget(32, 8),
-      },
-      {
-        id: "promise_3",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 3",
-        labelZh: "承诺 3",
-        kind: "multiline",
-        value: "Quality\nChecked",
-        lines: 2,
-        max: budget(33, 8),
-      },
-      {
-        id: "promise_4",
-        group: "Real Rose Promise",
-        groupZh: "真玫瑰承诺",
-        label: "Promise 4",
-        labelZh: "承诺 4",
-        kind: "multiline",
-        value: "Gift-Ready\nPackaging",
-        lines: 2,
-        max: budget(39, 8),
       },
     ],
   },

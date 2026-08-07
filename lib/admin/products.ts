@@ -10,6 +10,8 @@ import "server-only";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { getStore } from "@/lib/supabase/store.ts";
+import { clampAxis, clampZoom } from "@/lib/images/spotlight.ts";
+import { assertBestFor } from "@/lib/catalog/facets.ts";
 import {
   HANDLE_MAX_LENGTH,
   HANDLE_PATTERN,
@@ -25,13 +27,13 @@ import type {
 } from "@/lib/supabase/types.ts";
 
 /**
- * A focal-point percentage the database will accept. The column is
- * `check (between 0 and 100)`, so a stray value would fail the whole save;
- * anything missing or non-finite means "centre", the pre-0008 behaviour.
+ * A card-area axis the database will accept, preserving "never framed".
+ * The card columns are nullable because null is meaningful — the storefront
+ * reads it as "inherit the spotlight point" — so unlike the spotlight's own
+ * axes a missing value must stay missing rather than becoming 50.
  */
-function clampPercent(value: number | undefined): number {
-  if (value == null || !Number.isFinite(value)) return 50;
-  return Math.min(100, Math.max(0, Math.round(value)));
+function clampCardAxis(value: number | null | undefined): number | null {
+  return value == null ? null : clampAxis(value);
 }
 
 export type ProductListRow = {
@@ -166,7 +168,8 @@ export type SaveProductInput = {
   vendor: string;
   product_type: string;
   tags: string[];
-  best_for: string;
+  /** Shop filter facet slugs; validated against `lib/catalog/facets.ts`. */
+  best_for: string[];
   badge: string;
   details: string[];
   position: number | null; // null = append (create) or keep (update)
@@ -180,15 +183,24 @@ export type SaveProductInput = {
   weight_oz: number | null;
   option_names: string[];
   /**
-   * Order is the contract (position comes from the index). `focal_x`/`focal_y`
-   * are the admin's framing choice, in CSS object-position percentages;
-   * omitted means the centre crop every box did before migration 0008.
+   * Order is the contract (position comes from the index). The rest is the
+   * admin's framing choice: `focal_*` is the spotlight the PDP viewer shows
+   * and `card_*` the shop card's own area, both in CSS object-position
+   * percentages plus a zoom over the cover-fit scale (migration 0009).
+   * Omitting the spotlight means the centre crop every box did before 0008;
+   * omitting the card area means it follows the spotlight point, as the card
+   * did before 0009.
    */
   images: Array<{
     path: string;
     alt: string;
     focal_x?: number;
     focal_y?: number;
+    focal_zoom?: number;
+    card_focal_x?: number | null;
+    card_focal_y?: number | null;
+    card_zoom?: number | null;
+    framed?: boolean;
   }>;
   variants: Array<{
     id: string | null; // null = new variant
@@ -306,7 +318,10 @@ export async function saveProduct(
     hs_code: input.hs_code,
     seo_title: input.seo_title,
     seo_description: input.seo_description,
-    best_for: input.best_for,
+    // The vocabulary is closed and the column has no CHECK, so this call is
+    // the only thing standing between a typo and a product that no filter can
+    // reach. It throws rather than dropping the bad value (lib/catalog/facets.ts).
+    best_for: assertBestFor(input.best_for),
     badge: input.badge,
     details: input.details,
     option_names: input.option_names,
@@ -392,8 +407,13 @@ export async function saveProduct(
         path: image.path,
         alt: image.alt,
         position: index,
-        focal_x: clampPercent(image.focal_x),
-        focal_y: clampPercent(image.focal_y),
+        focal_x: clampAxis(image.focal_x),
+        focal_y: clampAxis(image.focal_y),
+        focal_zoom: clampZoom(image.focal_zoom),
+        card_focal_x: clampCardAxis(image.card_focal_x),
+        card_focal_y: clampCardAxis(image.card_focal_y),
+        card_zoom: image.card_zoom == null ? null : clampZoom(image.card_zoom),
+        framed: image.framed === true,
       })),
     );
   }

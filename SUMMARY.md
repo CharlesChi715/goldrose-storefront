@@ -70,7 +70,8 @@ Open linked resources only when the task needs them.
   checkout redesign, the full returns flow, reminder date pickers and edit
   sheet, the restructured privacy hub, `/account/policies-legal` → 7
   `/policies/*` coming-soon scaffolds, the unified signup page, and the
-  three-tile `/account` dashboard (frame `1523:2536`). The PDP now matches
+  `/account` dashboard (frame `1523:2536`; its three-tile shortcut band was
+  deleted by the design team on 08-07). The PDP now matches
   Ready-for-dev frame `1523:3971` (430×1616); its live catalog data and cart
   actions remain wired.
 - **Simplified homepage imported 2026-08-04** (frame `2380:370`, section
@@ -83,8 +84,23 @@ Open linked resources only when the task needs them.
 - **DQ-34 answered 2026-08-03:** the ELDREVE wordmark was never a placeholder —
   it is the brand. The repo's GoldRose substitution is retired: the rename
   landed 2026-08-05 (see OQ-4 / AI-021).
-- **Pending from design:** ADDRESS-BOOK section, the 7 policy pages,
-  MENU/story-long redesigns, `/gift-guide` (frame 1942:182 — no route built).
+- **Pending from design:** the 7 policy pages, MENU/story-long redesigns,
+  `/gift-guide` (frame 1942:182 — no route built).
+- **Figma sync 2026-08-07** (`worktree-figma-sync`). `/account/addresses`
+  (ADDRESS-BOOK `2118:247`) is built with its add/edit bottom sheet
+  (`2134:299` / `2610:373`, one component, two titles) — the last Ready-for-dev
+  frame with no route, so `figma:unbuilt` is now empty. Addresses are the
+  frame's own: no backend, and the schema holds one `default_address` rather
+  than a collection (AI-039). The same delivery deleted the `/account`
+  three-tile shortcut band and the homepage's Real Rose Promise strip; both are
+  applied, the latter via a new `band.trim` that returns its 136px to the stage
+  without moving any later band's imported coordinates (5193 → 5057). **The
+  other 28 changed frames are not imported** — chiefly the homepage typography
+  pass and seven further content deletions; the baseline is deliberately
+  un-stamped so the next sync still sees them.
+  ⚠️ The Figma file still carries **GoldRose**/**VELORIA** in three frames the
+  repo already renamed, so those frames must not be imported verbatim
+  (AI-037), and `/story` descends from a frame that no longer exists (AI-038).
 - **Product reviews are real (2026-08-06, PR #30, `feat/product-reviews`).**
   `product_reviews` table live on hosted (migration `0007`; content-neutral
   moderation, never hard-deleted), `lib/reviews/db.ts` + `POST /api/reviews`,
@@ -109,6 +125,37 @@ Open linked resources only when the task needs them.
   Spec: [`admin-design.md` §9.8.1](docs/admin-design.md#981-content--home-page).
   ⚠️ The hero eyebrow still reads `— G O L D R O S E —`, a miss in the 08-05
   ELDREVE rename; it is now editable, so it is an owner decision, not a deploy.
+- **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
+  Migration `0010` gives `product_images` two **spotlight areas** — a point
+  plus a zoom each — one framed against the PDP viewer window (398×250), one
+  against the shop card photo (203×204), because a single crop cannot serve
+  two differently-shaped boxes. Uploading a photo opens the framing dialog on
+  it, and anything nobody has framed keeps a "Needs framing" badge. Nothing is
+  ever cropped to a file: `object-position` for the point and
+  `transform: scale()` about it for the zoom (`lib/images/spotlight.ts`), so
+  the PDP's fullscreen viewer still shows the whole original. Defaults
+  reproduce the old crop exactly and zoom 100 emits no transform, so all three
+  pixel baselines pass unchanged. Spec:
+  [`admin-design.md` §9.5](docs/admin-design.md#95-products-adminproducts--clone).
+  The PDP ABOUT panel takes the point but not the zoom — that zoom was
+  authored against a wide box and this one is nearly square.
+- **The /shop filter drawer is real (2026-08-07, `feat/best-for-facets`).**
+  `products.best_for` changed from a dormant prose blurb to `text[]` holding
+  filter slugs (migration `0009` — **written, not yet pushed to hosted**), and
+  a product may carry any number of them. The vocabulary is one closed list in
+  [`lib/catalog/facets.ts`](lib/catalog/facets.ts): eleven stored slugs under
+  Collections/Occasion/Recipient, plus Price and Availability computed from
+  `price_cents` and stock and never stored. Slugs are globally unique so the
+  group is recovered from the value; a duplicate throws at import. Selection
+  lives in the URL (`?f=jewel,anniversary`, noindexed) so the grid, the count
+  and the pager cannot disagree — OR inside a heading, AND across headings.
+  Headings multi-select except **Price, which takes one band at a time and
+  swaps** (owner, 2026-08-07); the rule is a `select` field on the group, so a
+  hand-typed URL is narrowed to one band too. The
+  admin's "Best for" text box became a grouped multi-select. ⚠️ The frames'
+  two fixed active-filter chips ("Ruby Red", "Gift Sets") are gone: an
+  unfiltered shop now correctly shows none, which is the only pixel change
+  (baseline updated; home and PDP byte-identical).
 - **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
@@ -171,9 +218,20 @@ Open linked resources only when the task needs them.
   e2e tests use this mode. `npm run seed -- --reset` restores it. Admin is open
   unless `ADMIN_DEV_PASSWORD` is set; customer sign-in is unavailable.
 - **Hosted mode:** add migrations as `supabase/migrations/000N_*.sql` and apply
-  with `supabase db push` — never the web SQL editor. `0001`–`0003`, `0005`,
-  `0006` applied; `0004` is permanently skipped (its orphan history row was
-  repaired 2026-07-28 — intentional, not a gap). Use `psql` for read-only
+  with `supabase db push` — never the web SQL editor. `0001`–`0003` and
+  `0005`–`0008` applied (verified 2026-08-07); `0004` is permanently skipped
+  (its orphan history row was repaired 2026-07-28 — intentional, not a gap).
+  ⚠️ **`0009` (best_for facets) and `0010` (image spotlight) are written but
+  NOT pushed** — hosted still has `best_for` as text, no variant `stocked` and
+  no spotlight columns. Both were authored as `0009` on separate branches;
+  spotlight was renumbered to `0010` when they merged, and **the order is
+  load-bearing**: `0009` drops and recreates `catalog_products` without the
+  spotlight columns, so `0010` must run after it to put them back. Storefront
+  *reads* survive without either (missing columns read as the old centre
+  crop), but an admin product *save* would fail — push both before the next
+  admin save. `npm run check:migrations` guards the sequence in CI — duplicate
+  numbers fail, and a rebuilt view that drops an earlier migration's column
+  warns. Use `psql` for read-only
   ad-hoc queries; `supabase db dump` needs Docker.
 
 ### Release gates

@@ -1,0 +1,34 @@
+# Per-path git behaviour. Only add a rule here with a reason written next to it.
+
+# `.ai/WORKLOG.md` is append-only: every session adds a dated entry at the end
+# and nothing edits the entries above. That makes it conflict on almost every
+# merge — four of the eight merges on 2026-08-07 stopped on it — and each
+# conflict is the same shape, two branches having appended after the same
+# point. There is no judgement in resolving one; the answer is always "keep
+# both sides".
+#
+# `union` is git's built-in driver for exactly this: instead of writing
+# conflict markers it emits the lines from both sides, ours then theirs, and
+# the merge continues. No setup is needed — unlike a custom driver it is
+# compiled into git, so a fresh clone gets the behaviour immediately.
+#
+# What it costs, so nobody is surprised: union NEVER reports a conflict in this
+# file. If two branches edit the SAME existing line — fixing a typo in an old
+# entry, say — both versions survive, side by side, silently. That is a fair
+# trade for an append-only log and a bad one for anything else, which is why
+# the rule names one file rather than `*.md`.
+#
+# One cosmetic wrinkle, confirmed by merging two branches that had each
+# appended: the blank line separating the two new entries can be absorbed, so
+# the second heading lands directly under the first entry's last line. Harmless
+# and obvious on sight — add the blank back if it bothers you.
+#
+# Note it does not repair a bad merge already in history: three 2026-08-06
+# entries were duplicated by a double-merge before this existed and had to be
+# removed by hand.
+.ai/WORKLOG.md merge=union
+
+# Pixel baselines are compared byte-for-byte by Playwright. Git's binary
+# detection already gets this right, but saying so keeps a future
+# `* text=auto` rule from ever line-ending-normalising a PNG.
+tests/e2e/__screenshots__/*.png binary

@@ -247,7 +247,6 @@ const en = {
   "form.description.ph":
     "What the product is, how it is made, and what makes it worth giving.",
   "form.shortName.ph": "e.g. Signature Rose",
-  "form.bestFor.ph": "e.g. Anniversaries, birthdays and romantic gifting",
   "form.badge.ph": "e.g. Best seller",
   "form.details.ph": "e.g. Real rose base, Clear display stand, Gift-ready box",
   "form.media.alt.ph": "e.g. A 24K gold-dipped rose in a glass dome",
@@ -275,7 +274,7 @@ const en = {
     "Shown on shop cards and as the product page title. Leave blank to use the first 40 characters of the title.",
   "form.bestFor": "Best for",
   "form.bestFor.help":
-    "Who or what the product suits, e.g. Anniversaries and birthdays.",
+    "The shop's own filter chips. Tick every one that applies — there is no limit, and a shopper finds this product under each. Ticking none keeps it out of these filters only.",
   "form.badge": "Badge",
   "form.badge.help": "Short label on the product card, e.g. Best seller.",
   "form.details": "Details (comma separated)",
@@ -290,11 +289,20 @@ const en = {
   "form.media.moveRight": "Move right",
   "form.media.remove": "Remove image",
   "form.media.frame": "Adjust framing",
-  "form.media.frame.title": "Framing · what the product page shows",
+  "form.media.unframed": "Needs framing",
+  "form.media.frame.title": "Framing · what each box shows",
   "form.media.frame.hint":
-    "Drag the photo to choose what stays inside the frame. The frame is the exact size of the photo box on the product page.",
+    "Drag the photo to move it under the frame, and use the slider to zoom in. Whatever stays inside is what shoppers see.",
   "form.media.frame.fits":
-    "This photo already matches the frame — there is nothing to reposition.",
+    "This photo already matches the frame — zoom in if you want to show less of it.",
+  "form.media.frame.zoom": "Zoom",
+  "form.media.frame.pdp": "Product page",
+  "form.media.frame.pdp.help":
+    "The photo window at the top of the product page, at its real size. Tapping it still opens the full photo, uncropped.",
+  "form.media.frame.card": "Shop card",
+  "form.media.frame.card.help":
+    "The card in the shop grid. It is a different shape from the product page, so the hero photo is framed for it separately.",
+  "form.media.frame.card.follow": "Use the same part as the product page",
   "form.media.frame.reset": "Centre",
   "form.media.frame.done": "Done",
   "form.pricing.title": "Pricing",
@@ -1010,7 +1018,6 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.title.ph": "例如：24K 镀金永生玫瑰",
   "form.description.ph": "产品是什么、如何制作，以及它值得赠送的理由。",
   "form.shortName.ph": "例如：经典玫瑰",
-  "form.bestFor.ph": "例如：周年纪念、生日与浪漫送礼",
   "form.badge.ph": "例如：热销",
   "form.details.ph": "例如：真实玫瑰花材, 透明展示底座, 礼盒包装",
   "form.media.alt.ph": "例如：玻璃罩中的 24K 镀金玫瑰",
@@ -1037,7 +1044,8 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.shortName.help":
     "显示在商店卡片和产品页标题上。留空则取标题的前 40 个字符。",
   "form.bestFor": "适用场景",
-  "form.bestFor.help": "产品适合的人群或场合，例如「周年纪念与生日」。",
+  "form.bestFor.help":
+    "商店筛选栏的选项。适用的全部勾选，数量不限，顾客在每一项下都能找到该产品。不勾选只表示不出现在这些筛选中。",
   "form.badge": "角标",
   "form.badge.help": "产品卡片上的短标签，例如「热销」。",
   "form.details": "详情要点（用逗号分隔）",
@@ -1052,10 +1060,19 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "form.media.moveRight": "右移",
   "form.media.remove": "移除图片",
   "form.media.frame": "调整取景",
-  "form.media.frame.title": "取景框 · 商品页显示的范围",
+  "form.media.unframed": "待取景",
+  "form.media.frame.title": "取景框 · 各区域显示的范围",
   "form.media.frame.hint":
-    "拖动图片以选择保留在取景框内的部分。取景框与商品页图片区域尺寸完全一致。",
-  "form.media.frame.fits": "该图片与取景框比例一致——无需调整位置。",
+    "拖动图片调整位置，使用滑块放大。留在取景框内的部分就是买家看到的画面。",
+  "form.media.frame.fits": "该图片与取景框比例一致——如需显示更少内容，请放大。",
+  "form.media.frame.zoom": "缩放",
+  "form.media.frame.pdp": "商品页",
+  "form.media.frame.pdp.help":
+    "商品页顶部的图片区域，按真实尺寸显示。点击该图片仍会打开未裁剪的完整原图。",
+  "form.media.frame.card": "商店卡片",
+  "form.media.frame.card.help":
+    "商店列表中的卡片。其比例与商品页不同，因此主图需要单独取景。",
+  "form.media.frame.card.follow": "与商品页使用相同范围",
   "form.media.frame.reset": "居中",
   "form.media.frame.done": "完成",
   "form.pricing.title": "定价",

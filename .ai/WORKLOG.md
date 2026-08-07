@@ -5439,80 +5439,6 @@ otherwise.
   a new round-trip (drag in admin → save → PDP and shop card both crop to
   50% 100%).
 
-## 2026-08-06 — /shop renders only real catalog products
-
-- **Ask (owner):** make /shop show only the product that actually exists in
-  the database.
-- **Cause:** the grid cycled the catalog to fill the Figma frame's eight fixed
-  slots (`data[c % data.length]`), so the single hosted product was drawn
-  eight times, across five rotated "pages" — plus a hardcoded "120 GIFTS" and
-  a "Show 36 Results" button.
-- **Change:** the frame's numbers are now grid CAPACITY, not content. One card
-  per product; row count, pager and canvas height are derived from the
-  catalog. Constants read back off the slot table (top 408.5, pitch 308, card
-  297, pager gap 27, pager 32, tail 133.5), so a full eight-card page rebuilds
-  the frame's 1822 exactly — verified at 1822 with 12 seeded products.
-- Real paging (8/page, windowed 5-button pager, hidden at one page), counts
-  wired to the catalog, `?q=` preserved across pages, and a first empty state
-  (no-match search / empty catalog / failed read) since the grid can now be
-  empty.
-- **Verified:** typecheck, lint, build, 74 unit tests, 107 e2e tests, `/shop`
-  pixel baseline regenerated (canvas 1822 → 1147 for the 3-product seed).
-- **Left for design:** the "Ruby Red"/"Gift Sets" chips and the 5-star card
-  art are still static frame art; the empty-state line has no Figma frame.
-
-## 2026-08-06 — the product page now renders the catalog row
-
-- **Ask (owner):** "this PDP totally not generated from database" — wire it;
-  keep the review block and the unboxing count on the page.
-- **Was live before:** title, price, compare-at. Nothing else. Description,
-  SKU and photos reached only the `<meta>` tags and the Product JSON-LD.
-- **Now from the DB:** hero photo (and the media trigger's own copy that
-  covered it), the ABOUT panel photo, the media viewer's set, the badge pill
-  (`badge`, was a flat BEST SELLER), the strapline (first three `details`),
-  the discount pill (computed — 31% on the live product, was a flat "15% OFF"),
-  the ABOUT copy (`description`, 3-line clamp), and every number in the
-  reviews band and drawer.
-- **Zero reviews now reads as unrated** — the band and drawer stay on the page
-  per the owner, but the frame's "4.9 · 286 Reviews", the 91/7/1.4/0.4/0.2
-  histogram, the "Sarah M. · Verified Buyer" quote and the drawer's four
-  named testimonials are gone. Those were review claims with an empty
-  product_reviews table (US FTC exposure before launch).
-- **Left as the frame's own, on instruction or for want of a slot:** the
-  unboxing gallery and its "(1,354)", the three shipping benefits (store
-  policy), the ABOUT slogan, colour cards. `best_for` and `details` past the
-  third still have no box in the frame.
-- **Verified:** typecheck, lint, build, 74 unit tests, 108 e2e tests (one new
-  PDP regression test), product-detail pixel baseline regenerated.
-
-## 2026-08-06 — the PDP hero is an auto-playing, swipeable carousel
-
-- **Ask (owner):** make the product pictures auto-play and swipe like the
-  homepage carousel.
-- Built on the existing shared `components/home/Carousel.tsx`, so the feel is
-  identical to H-03: 1.8s auto-play, the track follows the finger
-  pixel-for-pixel while held, 40px release commits to the neighbour, 6px tap
-  slop separates tap from drag, auto-play pauses on hover/drag and is off
-  under reduced motion.
-- The hero **moved into `PdpOverlays`**. It had two stacked photo layers at the
-  same rect (the page's `<img>` and the media trigger's own copy, which exists
-  so the hover-zoom worked); two tracks could never hold the same slide, and
-  the trigger has to stay on top to open the viewer. The page now draws only
-  the card behind it.
-- Dots are generated from the photo count, all one size, active by colour —
-  the call `HeroCarousel` already made for the site. A single-photo product
-  gets no dots. The frame's 18px active pill is gone with them.
-- Carousel gained two optional props: `onActivate` (slides become buttons
-  instead of links) and `radius`. Home page behaviour is unchanged.
-- Hover-zoom on the hero is dropped; it fought the drag and the homepage hero
-  has none either.
-- Seed fixture: `premium-gold-rose-gift-bundle` now carries three photos so
-  both paths (multi-photo carousel, single-photo hero) have a fixture.
-- **Verified:** typecheck, lint, build, 74 unit tests, 111 e2e tests (three new
-  carousel tests), product-detail pixel baseline regenerated. Drove it in a
-  real browser: auto-play steps one slide width every 1.8s, a drag swipes
-  without opening the viewer, a tap opens it, reduced motion parks it.
-
 ## 2026-08-07 00:43 AEST
 
 - **Stale sweep across the repo** (branch `worktree-remove-stale`). Scope set
@@ -5663,3 +5589,408 @@ conflicts.
   left unfixed as out of scope. And `app/products/[slug]/page.tsx` picked up an
   uncommitted one-line change (a `"center"` align on the review-count label) at
   17:31, mid-run, from a concurrent session — untouched here.
+
+## 2026-08-07 — Best Sellers rail: one card size
+
+**Branch:** `worktree-fix-bestsellers-card-size` → merged to `main` (`305c0e7`, unpushed).
+
+- The 08-04 frame drew card 2 (`2380:415`) as a 184×349 box 17px below card 1's
+  250×366. The owner read that as a rendering fault, not a stagger, so both
+  cards now draw into card 1's box. The geometry moved from per-card fields to
+  module constants in `components/home/BestSellersRail.tsx`, so no card can
+  carry its own size. **This is a deliberate deviation from the frame — a Figma
+  re-sync must not restore the smaller box.**
+- Widening the card widened a defect the frame already had: `2380-416.png` is a
+  368×444 canvas whose right 21% is transparent padding, so the photo window's
+  `#F3C6D1` backing showed as a pink strip down the card's right edge. The photo
+  is now a left-anchored bleed box scaled until its opaque part alone covers the
+  window, clipped by the window — the idiom card 1 already used.
+- `tests/e2e/__screenshots__/home-darwin.png` rebuilt; the pixel diff is
+  confined to that one card. 91 unit + 116 e2e pass.
+- ⚠️ **Found while testing:** `playwright.config.ts` hardcodes port 3001 with
+  `reuseExistingServer: !CI`, so a suite run from one worktree silently attaches
+  to whatever `next start` already holds 3001 — including another worktree's
+  build. Two of my runs reported a false pass/fail from the `pdp-subtitle-wrap`
+  worktree's server before I caught it. Not fixed here.
+
+
+## 2026-08-07 17:45 AEST — the consolidation pushed, CI back to green
+
+Follow-on to the merge above, after a CI-monitor event flagged PR #35.
+
+- **PR #35's failure was one trailing space.** `prettier --check` rejected
+  line 1 of `scripts/features/cli.mjs`. `git log -- <file>` put it on 9355636
+  ("Add explanatory comment to preserve learning scripts") — already on `main`,
+  inherited by the PR rather than caused by it. `main`'s own CI had been red
+  for its last two runs. Comment wording untouched; only the whitespace went.
+- **No feedback to answer.** The PR's only comment was vercel[bot]'s
+  deployment table — zero inline comments, zero reviews, nothing to reply to.
+- **Pushed** `9355636..b5cc0b1` (8 commits, no divergence). PR #35 auto-closed
+  as MERGED, GitHub deleted its head branch, and the CI run on `b5cc0b1` is the
+  first green one after two failures.
+- **Branches cleaned to `main` only on GitHub.** Deleted `feat/figma-sync`,
+  `feat/product-reviews`, `worktree-account-personal-info-live` remotely, and
+  the two local branches no worktree held. Every deletion was gated on
+  `git merge-base --is-ancestor <branch> main` first; the locals went via
+  `git branch -d`, which refuses anything unmerged. Worktrees left in place.
+- **A second session is working in this same directory.** It committed
+  `2ba7a61` (review-caption centring) mid-run, then `fdc2c71`/`305c0e7`/
+  `dd3e7cb` (Best Sellers card size) after the push, and created
+  `worktree-fix-bestsellers-card-size`, `worktree-media-spotlight`,
+  `worktree-pdp-subtitle-wrap` and `fix/pdp-badge-truncation`. None of it was
+  touched here, and `main` sits 3 commits ahead of `origin/main` because those
+  three are not mine to push.
+
+## 2026-08-07 — Shop filter drawer: outside-click dismiss, Reset clears, confirm disables
+
+- Branch `worktree-feat-shop-filter-dialog` (worktree `.claude/worktrees/feat-shop-filter-dialog`), commit `8ba7974`.
+- The drawer/sort click-away backdrop only covered the 430-wide `.figv-stage`, so clicks in the page margins beside the canvas and on the bottom nav never dismissed it. A fixed backdrop cannot reach them (the stage is scale-transformed, so it becomes the containing block and clips fixed children), so a capture-phase document `pointerdown` listener was added alongside the existing in-stage shield; Escape closes as well. The open panel and its own trigger count as inside, keeping the trigger a toggle.
+- Reset now clears every group instead of restoring the Figma default selection; with nothing selected the "Show N Results" button is `disabled` at 45% gold, cursor `not-allowed`.
+- Verified live at localhost:3610: margin click, Escape, trigger toggle twice, in-drawer chip click (stays open), Reset (all five groups cleared, button dims), press on the disabled button (no close), re-select then confirm (closes), sort dropdown margin click. `tsc --noEmit`, eslint, prettier and 91 unit tests clean; the 3 shop e2e tests pass. The `/shop` and `/product-detail` pixel baselines fail in this worktree BOTH with and without the change — pre-existing on `main`, not caused here (the newer baselines live on `feat/best-for-facets`).
+## 2026-08-07 — PDP strapline wraps to two lines (`worktree-pdp-subtitle-wrap`)
+
+The product page's strapline (the first three `details` bullets) was a
+single `white-space: nowrap` line that truncated with an ellipsis. Real
+catalog copy overflows it — "Genuine preserved rose · Rich ruby-red finish ·
+Gold-trimmed petal edges" is 71 characters against room for roughly 59 — so
+the box now wraps to two lines and never shows an ellipsis. A third line is
+clipped whole by the fixed height rather than ellipsized.
+
+- `app/products/[slug]/page.tsx` — strapline box 398×31.466, `white-space:
+  normal`, `overflow: hidden`, no `text-overflow`. The extra 16px pushes the
+  rating row (100.51 → 116.51), review count (99 → 115), price (122 → 138),
+  compare-at (131.5 → 147.5) and the discount pill (128.5 → 144.5) down inside
+  the info card, which grows 166 → 182. Every section below moves 16px too
+  (541→557, 706→722, 989→1005, 1192→1208, 1360→1376) and the stage is
+  1616 → 1632. The original vertical rhythm is preserved exactly (10.0px above
+  the stars, 8.5px above the price).
+- `components/pdp/PdpOverlays.tsx` — the three page-absolute hit targets follow:
+  rating row 468 → 484, ratings summary 757 → 773, unboxing "View All" 1205 → 1221.
+- `tests/e2e/__screenshots__/product-detail-masked-darwin.png` re-recorded; the
+  home and shop baselines are byte-identical.
+
+Verified: `tsc --noEmit` clean, lint clean (2 pre-existing warnings in
+`account-chrome.tsx`), 91 unit tests, 116 e2e tests incl. all three pixel
+baselines. A throwaway Playwright check with the long strapline seeded
+confirmed 31.45px rendered height and `scrollHeight === clientHeight` (nothing
+cut off).
+
+⚠️ Ready-for-dev frame `1523:3971` still says 430×1616. This is a deliberate
+departure from the frame; Figma needs the same 16px change.
+
+Side note: the worktree branched from `origin/main`, which is behind local
+`main` and still carries the duplicate `Carousel` import that b0b3a93 repaired.
+Rebased onto local `main` before working.
+## 2026-08-07 — Spotlight areas for every product photo (`worktree-media-spotlight`)
+
+**Ask:** every uploaded photo should have a spotlight area chosen for it — the
+view the PDP image viewer shows — while the fullscreen viewer keeps showing the
+whole original; and the hero should sit properly in the shop card, which needs
+its own selected area.
+
+**Already in the repo (0008, `feat/pdp-image-framing`):** one focal POINT per
+photo driving CSS `object-position`, shared by every box. The fullscreen
+`MediaViewer` already drew photos with `object-fit: contain`, so "the full
+viewer shows the original" needed no change — verified, not rebuilt.
+
+**Built:**
+
+- Migration `0010_product_image_spotlight.sql` — `focal_zoom` (not null, 100),
+  nullable `card_focal_x/card_focal_y/card_zoom`, and `framed`; `catalog_products`
+  replaced to carry them (`framed` stays admin-only).
+- `lib/images/spotlight.ts` — the one place that turns a framing choice into
+  CSS. An area is a point plus a zoom, never a cropped file: `object-position`
+  places the point, `transform: scale()` about that same `transform-origin`
+  zooms about it. Zoom 100 emits NO transform, because a no-op `scale(1)` still
+  promotes a compositing layer and moves antialiasing — that is what keeps the
+  three pixel baselines byte-identical.
+- Admin: `ImageFramer` is now window-agnostic (takes a box + area) with a zoom
+  slider; the dialog holds both windows; uploading opens it on the new photo;
+  unframed photos carry a "Needs framing" badge. EN + 中文 strings added.
+- Storefront: PDP viewer applies point and zoom; shop card uses its own area;
+  the PDP ABOUT panel takes the point but NOT the zoom (that zoom was authored
+  against a 398x250 box and ABOUT is a near-square 190x196).
+
+**Verified:** typecheck, eslint, prettier, `npm run build`; 99 unit tests
+(8 new) and the full 117-test e2e suite including the three pixel baselines.
+
+**Notes:** `0010` is NOT pushed to hosted — storefront reads tolerate its
+absence, an admin product save does not. A "never framed" card area is stored
+as NULL and must stay NULL; flattening it to the spotlight would lose the
+owner's ability to say "follow the product page".
+
+
+## 2026-08-07 — `best_for` becomes the /shop filter vocabulary
+
+Branch `feat/best-for-facets`. The filter drawer's eleven Collections /
+Occasion / Recipient chips were cosmetic because no catalog field backed them;
+`products.best_for` was the nearest thing and held a prose blurb no page
+rendered. It is now `text[]` holding facet slugs, unbounded per product.
+
+- `lib/catalog/facets.ts` — the single vocabulary: 11 stored slugs in three
+  groups, plus Price and Availability computed from `price_cents` and stock
+  and never stored. Slugs are globally unique (the group is recovered from the
+  value); the index build throws on a duplicate, `assertBestFor` throws on an
+  unknown or derived value at the admin's save.
+- Migration `0009` — drops `catalog_products`, retypes `best_for` to `text[]`
+  (old sentences dropped, not guessed at), recreates the view with a `stocked`
+  boolean beside `in_stock`, re-grants to anon. **Not pushed to hosted yet.**
+- `/shop` filters server-side from `?f=jewel,anniversary` so the grid, the
+  "N GIFTS" count and the pager share one authority. OR inside a heading, AND
+  across headings. Facet URLs are noindexed like `?q=`.
+- The drawer multi-selects, "Show N Results" counts the pending selection
+  before the tap, Reset clears it, and the active-chip row is real with a
+  working ×. The frames' two fixed chips ("Ruby Red", "Gift Sets") are gone —
+  the only pixel change; baseline updated, home and PDP byte-identical.
+- Admin "Best for" text box → grouped multi-select (EN/中文). The round-trip
+  test caught a real bug on the way: Polaris `ChoiceList` echoes back the whole
+  `selected` array it is handed, not just its own group, so the naive merge
+  double-counted the other groups' slugs. `assertBestFor` refused the save
+  instead of storing junk — the validation earning its keep on day one.
+- Tests: `tests/unit/facets.test.ts` (vocabulary, AND/OR, price bands,
+  availability), `tests/e2e/shop-filters.spec.ts` (9 cases), and an
+  admin -> storefront round trip in `admin-products.spec.ts`. Green: 126 e2e,
+  112 unit.
+
+### Follow-up the same day — Price is single-choice
+
+Owner ruling: a product has one price, so overlapping bands read as a mistake
+rather than a wider search. Headings now carry a `select: "one" | "many"`
+field; Price is the only `one`. Picking a second band swaps the first, tapping
+the lit band clears it, and `parseFacetParam` narrows a hand-typed
+`?f=under-100,300-plus` to one band so no URL can reach a state the drawer
+cannot draw or undo. The rule lives in the registry, not the component, so
+taps, the chip ×, and pasted URLs all obey the same one. 118 unit, 128 e2e.
+
+Open: push `0009` to hosted — `supabase db push` is blocked for the agent by
+the permission classifier, so the owner runs it. Values that are already chip
+names carry across (both hosted rows say "Classic Collection" -> `classic`);
+everything else starts empty and is re-picked in the admin.
+
+## 2026-08-07 19:30 AEST — five more branches merged, and a migration collision
+
+Second consolidation pass. `main` was not checked out anywhere (a concurrent
+session had moved this directory onto `feat/best-for-facets`), so the merges
+were done in a dedicated worktree checked out on `main` — which advances the
+ref through real merges instead of force-moving it.
+
+- **Merged, in order:** `worktree-feat-shop-filter-dialog`,
+  `worktree-feat-coming-soon-header`, `worktree-pdp-subtitle-wrap`,
+  `worktree-media-spotlight`, `feat/best-for-facets`.
+- **`worktree-feat-coming-soon-header` was another empty branch** — zero
+  commits, the whole brand-top-nav change uncommitted in its worktree. Same
+  pattern as `worktree-pdp-subtitle-wrap` earlier today. Committed on the
+  branch first, then merged.
+- **⚠️ Two migrations were both numbered `0009`.** `worktree-media-spotlight`
+  wrote `0009_product_image_spotlight.sql`; `feat/best-for-facets` wrote
+  `0009_product_best_for_facets.sql`. Neither was pushed, so spotlight was
+  renumbered to `0010`. **The order is load-bearing, not cosmetic:**
+  `0009` does `drop view catalog_products` and recreates it carrying only
+  `focal_x`/`focal_y`, while `0010` `create or replace`s it with the full
+  spotlight set. Run the other way round, `0009` would silently strip the
+  spotlight columns from the view the storefront reads, and framing would
+  stop working with nothing failing loudly. Both view column lists are
+  identical, so the `create or replace` in `0010` is valid after `0009`.
+  References updated in `SUMMARY.md`, `docs/admin-design.md`, the worklog and
+  the migration's own comments.
+- **`ShopInteractive.tsx` was the real merge**, 5 hunks: two sessions rewrote
+  the same filter drawer. `feat/best-for-facets` supersedes
+  `worktree-feat-shop-filter-dialog` — it replaced the drawer's whole state
+  model (`filterSelection` indices → `pending` facet slugs), so the branch
+  wins on Reset, the confirm button and the removed helpers. Kept from the
+  other side: the outside-click/Escape dismissal, which is orthogonal and had
+  no counterpart. Also removed `nothingSelected`, which git had auto-merged
+  into a dangling reference to a state variable the branch deleted — a clean
+  merge that would not have compiled.
+- **`lib/admin/products.ts` and `tests/e2e/admin-products.spec.ts`** were
+  both-sides-added conflicts, not either/or: two imports and two independent
+  tests landing at the same spot. Both sides kept.
+- **Verified** on the merge commit in an isolated checkout: typecheck clean,
+  lint clean (2 pre-existing warnings), format clean, 126 unit tests, the
+  production build, and 129 e2e tests including every pixel baseline. One
+  earlier `ECONNRESET` on `/sitemap.xml` was a flake — that spec passes alone
+  and the full re-run was 129/129.
+- **Not done:** nothing pushed. `main` is 18 commits ahead of `origin/main`.
+
+## 2026-08-07 20:05 AEST — CI now guards the migration sequence
+
+Asked to find and fix the thing most worth improving. Picked the one failure
+class today that **no existing check could see**.
+
+The 0009 collision earlier today passed lint, typecheck, `format:check`,
+`check:assets`, the build and all 129 e2e tests — because nothing in CI reads
+a `.sql` file. Two files with different names are two adds, not a conflict, so
+git merged them silently too. It was caught by hand, and only then did the
+worse half surface: both migrations rebuild `catalog_products`, and the
+`best_for` one omits the spotlight columns, so the wrong order would have
+stripped them from the view the storefront reads with nothing failing loudly.
+Migration numbers are a shared namespace with no locking, and this repo runs
+several agent sessions branching in parallel — so it recurs by construction.
+
+- **`scripts/check-migrations.mjs`** — follows the `check-opaque-assets.mjs`
+  pattern (why-it-exists header, `--json`, exit 1 on findings). Errors:
+  a version claimed by more than one file, and a filename off
+  `NNNN_lower_snake_case.sql` (a name that will not parse would drop out of
+  the duplicate check, so it has to fail rather than pass quietly). Warnings:
+  a gap in the sequence except the deliberately-skipped `0004`, and a view
+  whose surviving definition drops a column an earlier migration exposed.
+- **Pure core, thin CLI.** `inspectMigrations(files)` takes `{name, sql}`
+  rather than reading the disk, so the tests describe a broken sequence
+  instead of creating one and keep testing the same thing as the real
+  directory grows.
+- **The view check is a heuristic, and says so.** It reads `p.column` and
+  `as alias` between `create view X as` and its `from` — enough for the
+  failure mode that motivated it, and warning-only, so a miss or a false
+  positive costs nothing.
+- **Wired in:** `npm run check:migrations`, and a CI step next to
+  `check:assets` with a comment saying why it is there.
+- **Proved against the real bug**, not just synthetic input: replaying today's
+  actual pre-fix filenames produces the duplicate-version error, and replaying
+  the reversed (dangerous) order names the exact four columns that would have
+  been lost — `focal_zoom`, `card_focal_x`, `card_focal_y`, `card_zoom`.
+- **Verified:** lint clean, typecheck clean, format clean, `check:assets`,
+  `check:migrations` green on the real sequence, 135 unit tests (126 + 9 new),
+  production build.
+
+## 2026-08-07 20:25 AEST — the worklog stops conflicting on every merge
+
+Second of the two follow-ups. `.ai/WORKLOG.md` is append-only, so it conflicts
+on nearly every merge — four of the eight on 2026-08-07 — always the same
+shape: two branches appended after the same point, and the resolution is
+always "keep both sides". No judgement, just friction, and hand-resolving it
+is how three entries got duplicated in the first place.
+
+- **`.gitattributes` (new)** marks `.ai/WORKLOG.md merge=union`. `union` is
+  compiled into git rather than being a custom driver, so a fresh clone gets
+  the behaviour with no setup. Also pins
+  `tests/e2e/__screenshots__/*.png binary` — git already detects that, but it
+  stops a future `* text=auto` from ever line-ending-normalising a baseline.
+- **Proved, not assumed.** Made two throwaway branches that each appended a
+  different entry and merged them: previously a guaranteed conflict, now
+  `Auto-merging .ai/WORKLOG.md` with zero conflicted files and both entries
+  present. The test also turned up a cosmetic wrinkle worth knowing — the
+  blank line between the two new entries can be absorbed — which is written
+  into `.gitattributes` next to the rule.
+- **The cost is documented next to the rule:** union can never report a
+  conflict on this path again, so two edits to the *same* line would both
+  survive silently. Fine for a log, wrong for anything else, so the rule names
+  one file rather than `*.md`.
+- **Removed three duplicated 2026-08-06 entries** (`/shop renders only real
+  catalog products`, `the product page now renders the catalog row`, `the PDP
+  hero is an auto-playing, swipeable carousel`) — residue of the same
+  double-merge that broke `PdpOverlays.tsx`. Verified byte-identical by md5
+  before deleting; 326 → 323 entries. Two other repeated headings
+  (`2026-06-30 16:52`, `2026-07-15 15:21`) turned out to be **different
+  content that happens to share a timestamp** and were left alone — the md5
+  check is the only reason they survived.
+
+## 2026-08-07 20:42 AEST
+
+- **Deleted the `2026-07-25-figma-naming-guide` delivery batch** from
+  `team-deliveries/originals/` — `Figma_UI_Naming_Guide_GoldRose.xlsx` (a
+  translated spreadsheet) and its `batch.md`. Charles's ruling: the guide is a
+  translation, the adopted naming rules were regenerated into `docs/ixd/naming/`
+  on 2026-07-31, so the source is dead weight.
+- **This is a deliberate exception to `team-deliveries/originals/README.md`**,
+  which says deliveries are never deleted because they are the authority on
+  wording disputes. Git history holds the bytes (`c53435d` and later), the same
+  reasoning the 08-07 stale sweep used for `archive/`. One side effect: the
+  batch's sha256 is gone from the pre-parse duplicate check, so a re-delivery of
+  that spreadsheet would read as new rather than as a duplicate.
+- **Closed `AI-005`** (was: is that spreadsheet an incoming delivery or a
+  generated export?) — the deletion moots it. Charles closed it via
+  `agent-inbox:close`; the record is in `agent-delivery/archive/`. Its "Affected
+  place" line was rewritten first so the archived record does not point at a
+  path that no longer exists.
+- **Repointed the one live reference**, `docs/ixd/README.md`, from "its raw
+  source stays in …" to a note that it was deleted as superseded. The two
+  remaining mentions are dated WORKLOG entries and were left as history.
+## 2026-08-07 — Figma sync: address book, two design deletions, two carousel fixes
+
+Branch `worktree-figma-sync`. Delivery was 3 added / 40 "modified" / 1 removed
+frames; frame-by-frame diffing put the real changed count at 29 (11 flipped their
+hash on prototype/dev-status metadata only). Six read-only agents then compared
+each of the 29 against the repo: 56 still-old, 5 already-done, 5 diverged,
+11 not built.
+
+- Built `/account/addresses` (ADDRESS-BOOK 2118:247) + the add/edit bottom sheet
+  (2134:299 / 2610:373 collapse to one component with a `mode` prop). Last
+  Ready-for-dev frame with no route; `figma:unbuilt` is now empty.
+- Applied two design deletions: the `/account` three-tile shortcut band, and the
+  homepage Real Rose Promise strip (band 463 -> 327, stage 5193 -> 5057) via a
+  new `band.trim` so no later band's imported coordinates moved.
+- Fixed two interaction bugs found while checking a "carousel not swipeable"
+  report: (1) Carousel applied EDGE_RESISTANCE damping to the value tested
+  against the swipe-commit threshold, so edge swipes needed 3x travel;
+  (2) HomeBand's shift wrapper was `inset: 0`, a full-stage transparent box
+  that swallowed pointer events — latent since it was written, live only once
+  the trim gave four bands a permanent shift. Both covered by real-input tests.
+- Filed AI-037 (Figma still ships GoldRose/VELORIA the repo renamed — do not
+  import verbatim), AI-038 (`/story` descends from a deleted frame),
+  AI-039 (address book has no backend).
+- Deliberately did NOT run `figma:baseline`: 28 changed frames remain unbuilt.
+
+## 2026-08-07 21:15 AEST — search fix + figma sync merged, and an AI-nnn collision
+
+- **`worktree-fix-search-close-button`** was a third empty branch today — no
+  commits, the change uncommitted in its worktree. Committed, then merged:
+  `type="search"` makes WebKit draw its own clear ×, which sat beside the
+  frame's own affordance (1523:3270).
+- **`worktree-figma-sync`** had 17 files uncommitted (address book route +
+  sheet, two design deletions, two carousel fixes). Committed and merged.
+- **⚠️ AI-036 was claimed twice.** That session filed AI-036/037/038 while
+  AI-036 was already taken on `main` by a different matter from a parallel
+  session. Same root cause as the `0009` migration clash: `AI-nnn` is
+  allocated "highest existing + 1", which is correct for one session and racy
+  for several. Theirs renumbered to **037/038/039** across all seven places —
+  INBOX rows, session-file headings, three in-place `AI-TAG` comments,
+  `SUMMARY.md` and their worklog entry.
+- **The union driver earned itself on real work.** `.ai/WORKLOG.md`
+  auto-merged despite both sides appending — previously a guaranteed conflict.
+  `agent-delivery/INBOX.md` conflicted normally, which is the point of
+  excluding it: the branch was 20 commits behind and still carried AI-002,
+  AI-003 and AI-005, closed and archived on `main` in the meantime. The 3-way
+  merge correctly kept them deleted. Union there would have resurrected all
+  three, silently.
+- **Fixed in passing:** `main`'s AI-035 row carried a stray backtick
+  (`` eldreve.`com ``, 7 backticks on the line). It predates this merge; the
+  branch's copy was clean, so the resolution took that one.
+- **AI-036 answered** (Charles): "just make it suit the content. if content
+  exceeds, larger is fine." Recorded as a standing rule — where real catalog
+  copy will not fit a frame's box the box grows, and truncation to "…" is not
+  an acceptable fit. Marked ANSWERED; stays open until the design team applies
+  it to frame `1523:3971`.
+- **Verified:** inbox in sync (26 matters), migrations ok, typecheck clean,
+  lint clean, format clean, 136 unit tests, 134 e2e including the updated
+  home pixel baseline.
+- **⚠️ Found, not fixed:** the e2e suite sends real email. `playwright.config.ts`
+  blanks the PayPal and Supabase variables but not `RESEND_API_KEY`, so every
+  run hits the live Resend account — this run exhausted the **daily** quota
+  (429). `lib/email.ts` already falls back to a console log when the key is
+  unset, so the fix is one line in the config's `env` block. Resend is also
+  Supabase's SMTP for customer sign-in, so tests are competing with real
+  auth mail.
+
+## 2026-08-07 21:40 AEST — the e2e suite stops sending real email
+
+Found while verifying the search + figma-sync merges: a full e2e run returned
+eleven Resend errors ending in **429 daily_quota_exceeded**. The suite has
+been spending the live email allowance on test mail every run.
+
+`playwright.config.ts` already blanks the PayPal keys, the skip-payment flag
+and the Supabase keys, each with a comment saying why — the environment must
+not reach a real service. `RESEND_API_KEY` was simply missed. It matters more
+than the others: Resend is also Supabase's SMTP for customer sign-in, so a
+test run competes with real one-time codes, and a run that exhausts the daily
+quota would stop a customer signing in.
+
+- Added `RESEND_API_KEY: ""` and `RESEND_FROM: ""` to the config's `env`
+  block. No app change was needed — `lib/email.ts` has logged to the console
+  instead of sending since §0.2 whenever the key is unset.
+- **Verified with the live key present** (`.env.local` copied into the test
+  checkout, so the unfixed config *would* have sent): 134/134 e2e pass and
+  **zero** Resend API responses, down from eleven.
+- Why the console fallback is not visible in the run either: it uses
+  `console.log` → stdout, and Playwright's `webServer` ignores stdout by
+  default while piping stderr. The eleven lines seen before were the failure
+  path's `console.error`. Nothing is hidden that was not already hidden.

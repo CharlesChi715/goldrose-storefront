@@ -44,7 +44,10 @@ const saveProductSchema = z.object({
   vendor: z.string().trim().max(255),
   product_type: z.string().trim().max(255),
   tags: z.array(z.string().trim().min(1).max(120)).max(50),
-  best_for: z.string().trim().max(255),
+  // Shape only — that these are REAL facet slugs is settled by assertBestFor()
+  // in lib/admin/products.ts, so the vocabulary lives in one file. No length
+  // cap: a product may carry every chip in the drawer (owner, 2026-08-07).
+  best_for: z.array(z.string().trim().min(1).max(60)),
   badge: z.string().trim().max(60),
   details: z.array(z.string().trim().min(1).max(255)).max(20),
   position: z.number().int().min(0).max(100_000).nullable(),
@@ -72,10 +75,20 @@ const saveProductSchema = z.object({
       z.object({
         path: z.string().min(1).max(500),
         alt: z.string().max(500),
-        // Framing chosen in the admin's PDP-sized frame; absent on any form
-        // saved before 0008, which means the centre crop.
+        // The spotlight the PDP viewer shows, chosen in the admin's
+        // PDP-sized frame; absent on any form saved before 0008, which means
+        // the centre crop at no zoom.
         focal_x: z.number().int().min(0).max(100).optional(),
         focal_y: z.number().int().min(0).max(100).optional(),
+        focal_zoom: z.number().int().min(100).max(400).optional(),
+        // The shop card's own area, framed against the card's box. Nullable
+        // rather than merely optional: null is the stored value that means
+        // "never framed for the card", and the form sends it explicitly when
+        // the owner resets the card back to following the spotlight.
+        card_focal_x: z.number().int().min(0).max(100).nullable().optional(),
+        card_focal_y: z.number().int().min(0).max(100).nullable().optional(),
+        card_zoom: z.number().int().min(100).max(400).nullable().optional(),
+        framed: z.boolean().optional(),
       }),
     )
     .max(20),

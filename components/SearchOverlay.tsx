@@ -195,6 +195,10 @@ export function SearchOverlay({
         .figv-searchfix { position: fixed; inset: 0; z-index: 40; background: ${CREAM}; overflow-y: auto; overflow-x: hidden; }
         .figv-searchwrap { height: 932px; }
         .figv-searchstage { position: relative; width: 430px; height: 932px; left: calc((100% - 430px) / 2); }
+        /* WebKit draws its own cancel × inside type="search"; the frame has no
+        such control and 1523:3270 is already the clear affordance. */
+        .figv-searchinput::-webkit-search-cancel-button,
+        .figv-searchinput::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
         @supports (transform: scale(calc(100vw / 430px))) {
           .figv-searchwrap { height: calc(min(100vw, 480px) * 2.1674419); }
           .figv-searchstage { transform: scale(calc(min(100vw, 480px) / 430px)); transform-origin: top center; }
@@ -257,6 +261,7 @@ export function SearchOverlay({
           >
             <input
               ref={inputRef}
+              className="figv-searchinput"
               type="search"
               value={value}
               onChange={(event) => setValue(event.target.value)}

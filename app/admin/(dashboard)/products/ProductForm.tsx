@@ -23,6 +23,7 @@ import {
   Button,
   Card,
   Checkbox,
+  ChoiceList,
   Divider,
   InlineGrid,
   InlineStack,
@@ -35,7 +36,12 @@ import {
   Toast,
 } from "@shopify/polaris";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import { useAdminT } from "../../PolarisShell";
+import {
+  BEST_FOR_GROUPS,
+  facetBySlug,
+  type FacetGroupKey,
+} from "@/lib/catalog/facets.ts";
+import { useAdminLang, useAdminT } from "../../PolarisShell";
 import {
   deleteProductsAction,
   duplicateProductAction,
@@ -44,6 +50,27 @@ import {
   uploadImagesAction,
 } from "./actions";
 import { ImageFramer } from "./ImageFramer";
+import {
+  CENTRE,
+  NO_ZOOM,
+  PDP_VIEWER_BOX,
+  SHOP_CARD_BOX,
+  spotlightStyle,
+  type SpotlightArea,
+} from "@/lib/images/spotlight";
+
+/**
+ * The area to seed the shop card's frame with the first time it is framed
+ * separately: the spotlight's point at no zoom, which is exactly what the
+ * card has been showing while it followed the PDP. Framing the card then
+ * starts from the picture already on the shop page rather than jumping.
+ *
+ * @param image - The form's image row.
+ * @returns The card area to start from.
+ */
+function cardFallback(image: FormImage): SpotlightArea {
+  return { x: image.spotlight.x, y: image.spotlight.y, zoom: NO_ZOOM };
+}
 
 /**
  * Host shown in the Google preview under "Search engine listing". Env-driven
@@ -63,9 +90,23 @@ export type FormImage = {
   path: string;
   url: string;
   alt: string;
-  /** CSS object-position percentages; 50/50 is a plain centre crop. */
-  focalX: number;
-  focalY: number;
+  /**
+   * The area the PDP viewer window shows — point plus zoom. Always present:
+   * an unframed photo's spotlight is the plain centre cover-crop.
+   */
+  spotlight: SpotlightArea;
+  /**
+   * The shop card's own area. Null means never framed for the card, which the
+   * storefront draws as the spotlight's point at no zoom — so a photo the
+   * owner has not thought about the card for keeps its pre-0009 crop.
+   */
+  card: SpotlightArea | null;
+  /**
+   * True once someone has confirmed this photo's framing. Kept apart from the
+   * numbers because "centred, unzoomed" is also what an untouched photo reads
+   * as, and the Media card has to be able to tell those two apart to ask.
+   */
+  framed: boolean;
 };
 
 export type FormVariant = {
@@ -90,7 +131,8 @@ export type ProductFormInitial = {
   vendor: string;
   productType: string;
   tags: string[];
-  bestFor: string;
+  /** Shop filter facet slugs (lib/catalog/facets.ts), any number of them. */
+  bestFor: string[];
   badge: string;
   details: string[];
   position: string;
@@ -140,6 +182,7 @@ function splitCsv(text: string): string[] {
 
 export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const t = useAdminT();
+  const lang = useAdminLang();
   const router = useRouter();
   const [saving, startSaving] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,7 +191,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const [title, setTitle] = useState(initial.title);
   const [shortName, setShortName] = useState(initial.shortName);
   const [description, setDescription] = useState(initial.description);
-  const [bestFor, setBestFor] = useState(initial.bestFor);
+  const [bestFor, setBestFor] = useState<string[]>(initial.bestFor);
   const [badge, setBadge] = useState(initial.badge);
   const [detailsText, setDetailsText] = useState(initial.details.join(", "));
   const [position, setPosition] = useState(initial.position);
@@ -169,6 +212,13 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
   const [images, setImages] = useState<FormImage[]>(initial.images);
   // Which image the 取景框 modal is framing; null = closed.
   const [framingIndex, setFramingIndex] = useState<number | null>(null);
+  /**
+   * The photo the framing dialog is open on, resolved once. A bare
+   * `images[framingIndex]` cannot be narrowed by TypeScript — element access
+   * is not a narrowable reference — so the dialog below would have to assert
+   * non-null at every prop. One local does it properly instead.
+   */
+  const framing = framingIndex === null ? null : (images[framingIndex] ?? null);
 
   // Option editor: names + comma-separated values, mirrored from the loaded
   // variants so existing combos keep their ids and stock.
@@ -266,22 +316,44 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
     }
     const result = await uploadImagesAction(formData);
     if (result.ok) {
+      // Where the first of the new photos lands. Read before the state update
+      // rather than inside the updater: an updater must stay pure, because
+      // React runs it twice in development to prove that it is.
+      const firstNew = images.length;
       setImages((current) => [
         ...current,
         ...result.images.map((image) => ({
           path: image.path,
           url: image.url,
           alt: "",
-          focalX: 50,
-          focalY: 50,
+          spotlight: { ...CENTRE },
+          card: null,
+          framed: false,
         })),
       ]);
+      // Ask for the framing straight away. A photo arrives centre-cropped,
+      // which is the crop least likely to be the right one, so the dialog
+      // comes to the owner instead of waiting to be found.
+      setFramingIndex(firstNew);
     } else {
       setError(result.error ?? "Upload failed");
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }
+
+  /**
+   * Apply a change to the photo the framing dialog is open on. Every control
+   * in that dialog edits the same row, so they share one updater rather than
+   * each rebuilding the map-with-index by hand.
+   */
+  function updateFramedImage(patch: (image: FormImage) => FormImage) {
+    setImages((current) =>
+      current.map((entry, entryIndex) =>
+        entryIndex === framingIndex ? patch(entry) : entry,
+      ),
+    );
   }
 
   function moveImage(index: number, direction: -1 | 1) {
@@ -294,6 +366,24 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
       [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
+  }
+
+  /**
+   * Apply one "Best for" group's tick boxes.
+   *
+   * Polaris hands each ChoiceList the WHOLE selection and echoes that whole
+   * array back with its own value added or removed — so `next` carries the
+   * other two groups' slugs as well, and taking it wholesale would double
+   * them. Only this group's part of `next` is authoritative; the rest of the
+   * selection is carried over from state. The save re-orders the result
+   * (`assertBestFor`).
+   */
+  function chooseFacets(group: FacetGroupKey, next: string[]) {
+    const mine = next.filter((slug) => facetBySlug(slug)?.group === group);
+    setBestFor((current) => [
+      ...current.filter((slug) => facetBySlug(slug)?.group !== group),
+      ...mine,
+    ]);
   }
 
   function save() {
@@ -314,7 +404,7 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
       vendor: vendor.trim(),
       product_type: productType.trim(),
       tags: splitCsv(tagsText),
-      best_for: bestFor.trim(),
+      best_for: bestFor,
       badge: badge.trim(),
       details: splitCsv(detailsText),
       position: position.trim() ? Number(position) : null,
@@ -330,8 +420,17 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
       images: images.map((image) => ({
         path: image.path,
         alt: image.alt,
-        focal_x: image.focalX,
-        focal_y: image.focalY,
+        focal_x: image.spotlight.x,
+        focal_y: image.spotlight.y,
+        focal_zoom: image.spotlight.zoom,
+        // Null travels all the way to the column: it is the stored value that
+        // means "never framed for the card", and flattening it to the
+        // spotlight here would lose the owner's ability to say "follow the
+        // PDP" and have the card keep following it.
+        card_focal_x: image.card?.x ?? null,
+        card_focal_y: image.card?.y ?? null,
+        card_zoom: image.card?.zoom ?? null,
+        framed: image.framed,
       })),
       variants: variants.map((variant) => ({
         id: variant.id,
@@ -462,14 +561,39 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   multiline={6}
                   requiredIndicator
                 />
-                <TextField
-                  label={t("form.bestFor")}
-                  placeholder={t("form.bestFor.ph")}
-                  helpText={t("form.bestFor.help")}
-                  value={bestFor}
-                  onChange={setBestFor}
-                  autoComplete="off"
-                />
+                {/* Best for — the /shop filter drawer's own chips, so this is
+                    a closed list rather than a text box: anything typed by
+                    hand would match no chip and hide the product from the
+                    filter it was meant to appear under. Tick as many as
+                    apply, in any mix of the three groups (owner, 2026-08-07);
+                    ticking none simply keeps the product out of those
+                    filters, never off the shop. */}
+                <BlockStack gap="200">
+                  <Text as="h3" variant="headingSm">
+                    {t("form.bestFor")}
+                  </Text>
+                  <Text as="p" variant="bodySm" tone="subdued">
+                    {t("form.bestFor.help")}
+                  </Text>
+                  <InlineGrid columns={{ xs: 1, sm: 3 }} gap="400">
+                    {BEST_FOR_GROUPS.map((group) => (
+                      <ChoiceList
+                        key={group.key}
+                        allowMultiple
+                        title={lang === "zh" ? group.titleZh : group.title}
+                        choices={group.facets.map((facet) => ({
+                          label: lang === "zh" ? facet.labelZh : facet.label,
+                          value: facet.slug,
+                        }))}
+                        // Each list is handed the whole selection and shows the
+                        // part that is its own; slugs are unique across groups,
+                        // so no list can ever claim another's value.
+                        selected={bestFor}
+                        onChange={(next) => chooseFacets(group.key, next)}
+                      />
+                    ))}
+                  </InlineGrid>
+                </BlockStack>
                 <TextField
                   label={t("form.badge")}
                   placeholder={t("form.badge.ph")}
@@ -525,28 +649,50 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
                   <InlineGrid columns={{ xs: 2, md: 4 }} gap="300">
                     {images.map((image, index) => (
                       <BlockStack key={`${image.path}-${index}`} gap="150">
-                        <InlineStack align="start">
+                        <InlineStack align="start" gap="100">
                           <Badge tone={index === 0 ? "info" : undefined}>
                             {index === 0
                               ? t("form.media.hero")
                               : String(index + 1)}
                           </Badge>
+                          {/* The standing request. The dialog opens itself on
+                              upload, but an owner can close it, and every
+                              photo predating 0009 was never framed at all —
+                              so the ask has to survive on the screen. */}
+                          {!image.framed ? (
+                            <Badge tone="attention">
+                              {t("form.media.unframed")}
+                            </Badge>
+                          ) : null}
                         </InlineStack>
-                        {/* The thumbnail honours the framing choice, so the
-                            grid shows what the storefront will crop to. */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={image.url}
-                          alt={image.alt}
+                        {/* The thumbnail is square, so it previews the CARD
+                            area (203×204) rather than the PDP window — this
+                            grid is the closest thing on the screen to the shop
+                            grid. Wrapped because a zoomed photo overflows and
+                            an <img> cannot clip itself. */}
+                        <div
                           style={{
                             width: "100%",
                             aspectRatio: "1",
-                            objectFit: "cover",
-                            objectPosition: `${image.focalX}% ${image.focalY}%`,
+                            overflow: "hidden",
                             borderRadius: 8,
                             border: "1px solid var(--p-color-border)",
                           }}
-                        />
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={image.url}
+                            alt={image.alt}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "block",
+                              ...spotlightStyle(
+                                image.card ?? cardFallback(image),
+                              ),
+                            }}
+                          />
+                        </div>
                         <Button
                           size="micro"
                           onClick={() => setFramingIndex(index)}
@@ -1038,52 +1184,107 @@ export function ProductForm({ initial }: { initial: ProductFormInitial }) {
         </Layout.Section>
       </Layout>
 
-      {/* 取景框 — opened per image from the Media card. It holds the PDP
-          photo box at its true 398×250, so what the owner leaves inside the
-          frame is literally what the product page shows. */}
+      {/* 取景框 — opened per image from the Media card, and by the uploader
+          itself the moment a photo arrives. It holds each storefront window
+          at its TRUE size, so what the owner leaves inside a frame is
+          literally what that box will show.
+
+          Two frames, because there are two windows and they are different
+          shapes: the PDP viewer (398×250) and the shop card photo (203×204).
+          One choice cannot serve both — a spotlight tight enough for the wide
+          hero crops the square card past its subject — which is the whole
+          reason 0009 stores two areas per photo. */}
       <Modal
         open={framingIndex !== null}
         onClose={() => setFramingIndex(null)}
         title={t("form.media.frame.title")}
+        size="large"
         primaryAction={{
           content: t("form.media.frame.done"),
-          onAction: () => setFramingIndex(null),
+          // Confirming is what marks the photo framed; that flag is what
+          // stops the Media card asking, so it is set here and nowhere else.
+          onAction: () => {
+            updateFramedImage((entry) => ({ ...entry, framed: true }));
+            setFramingIndex(null);
+          },
         }}
         secondaryActions={[
           {
             content: t("form.media.frame.reset"),
             onAction: () =>
-              setImages((current) =>
-                current.map((entry, entryIndex) =>
-                  entryIndex === framingIndex
-                    ? { ...entry, focalX: 50, focalY: 50 }
-                    : entry,
-                ),
-              ),
+              updateFramedImage((entry) => ({
+                ...entry,
+                spotlight: { ...CENTRE },
+                card: null,
+              })),
           },
         ]}
       >
-        <Modal.Section>
-          {framingIndex !== null && images[framingIndex] ? (
-            <ImageFramer
-              url={images[framingIndex].url}
-              alt={images[framingIndex].alt}
-              focalX={images[framingIndex].focalX}
-              focalY={images[framingIndex].focalY}
-              hint={t("form.media.frame.hint")}
-              fitsHint={t("form.media.frame.fits")}
-              onChange={(focalX, focalY) =>
-                setImages((current) =>
-                  current.map((entry, entryIndex) =>
-                    entryIndex === framingIndex
-                      ? { ...entry, focalX, focalY }
-                      : entry,
-                  ),
-                )
-              }
-            />
-          ) : null}
-        </Modal.Section>
+        {framing ? (
+          <>
+            <Modal.Section>
+              <BlockStack gap="200">
+                <Text as="h3" variant="headingSm">
+                  {t("form.media.frame.pdp")}
+                </Text>
+                <Text as="p" tone="subdued" variant="bodySm">
+                  {t("form.media.frame.pdp.help")}
+                </Text>
+                <ImageFramer
+                  url={framing.url}
+                  alt={framing.alt}
+                  box={PDP_VIEWER_BOX}
+                  area={framing.spotlight}
+                  hint={t("form.media.frame.hint")}
+                  fitsHint={t("form.media.frame.fits")}
+                  zoomLabel={t("form.media.frame.zoom")}
+                  onChange={(spotlight) =>
+                    updateFramedImage((entry) => ({ ...entry, spotlight }))
+                  }
+                />
+              </BlockStack>
+            </Modal.Section>
+            <Modal.Section>
+              <BlockStack gap="200">
+                <Text as="h3" variant="headingSm">
+                  {t("form.media.frame.card")}
+                </Text>
+                <Text as="p" tone="subdued" variant="bodySm">
+                  {t("form.media.frame.card.help")}
+                </Text>
+                {/* Following the spotlight is the card's stored default (a
+                    null card area), so the checkbox writes null rather than
+                    copying numbers across — untick, frame, retick and the
+                    card is genuinely back to following, not frozen at
+                    whatever the spotlight happened to be. */}
+                <Checkbox
+                  label={t("form.media.frame.card.follow")}
+                  checked={framing.card === null}
+                  onChange={(follows) =>
+                    updateFramedImage((entry) => ({
+                      ...entry,
+                      card: follows ? null : cardFallback(entry),
+                    }))
+                  }
+                />
+                {framing.card !== null ? (
+                  <ImageFramer
+                    url={framing.url}
+                    alt={framing.alt}
+                    box={SHOP_CARD_BOX}
+                    area={framing.card}
+                    hint={t("form.media.frame.hint")}
+                    fitsHint={t("form.media.frame.fits")}
+                    zoomLabel={t("form.media.frame.zoom")}
+                    onChange={(card) =>
+                      updateFramedImage((entry) => ({ ...entry, card }))
+                    }
+                  />
+                ) : null}
+              </BlockStack>
+            </Modal.Section>
+          </>
+        ) : null}
       </Modal>
 
       <Modal

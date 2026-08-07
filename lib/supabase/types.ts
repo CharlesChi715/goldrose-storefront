@@ -28,7 +28,12 @@ export type ProductRow = {
   hs_code: string | null;
   seo_title: string | null;
   seo_description: string | null;
-  best_for: string;
+  /**
+   * Shop filter facets — slugs from `lib/catalog/facets.ts`, any number of
+   * them across Collections/Occasion/Recipient (migration 0009). Validate
+   * with `assertBestFor()` before writing; the column has no CHECK.
+   */
+  best_for: string[];
   badge: string;
   details: string[];
   option_names: string[];
@@ -52,6 +57,27 @@ export type ProductImageRow = {
    */
   focal_x: number;
   focal_y: number;
+  /**
+   * Spotlight zoom percentage (100-400) over the cover-fit scale, applied
+   * about the focal point in the PDP viewer window only (migration 0009).
+   * 100 is the pre-0009 crop.
+   */
+  focal_zoom: number;
+  /**
+   * The shop card's own area, framed against the card's 203x204 photo box
+   * rather than the PDP window. Null means never framed for the card, which
+   * the storefront draws as the focal point at no zoom — the card's
+   * behaviour before 0009.
+   */
+  card_focal_x: number | null;
+  card_focal_y: number | null;
+  card_zoom: number | null;
+  /**
+   * True once an admin has confirmed this photo's areas in the Media card.
+   * Distinct from the values being 50/50/100, which is also what an unframed
+   * photo reads as — this is what lets the admin keep asking.
+   */
+  framed: boolean;
 };
 
 export type ProductVariantRow = {
@@ -442,6 +468,12 @@ export type CatalogImage = {
   /** Crop focus for every cover-fitted box; see ProductImageRow. */
   focal_x: number;
   focal_y: number;
+  /** Spotlight zoom for the PDP viewer window; see ProductImageRow. */
+  focal_zoom: number;
+  /** The shop card's own area; null = inherit the focal point at no zoom. */
+  card_focal_x: number | null;
+  card_focal_y: number | null;
+  card_zoom: number | null;
 };
 
 export type CatalogVariant = {
@@ -451,7 +483,14 @@ export type CatalogVariant = {
   position: number;
   price_cents: number;
   compare_at_price_cents: number | null;
+  /** Can be bought at all — true for sell-when-out-of-stock variants. */
   in_stock: boolean;
+  /**
+   * Has units on hand right now (untracked variants count as yes). Paired
+   * with `in_stock` it separates a pre-order from a shelf item without ever
+   * exposing a stock COUNT (§7.2, migration 0009).
+   */
+  stocked: boolean;
 };
 
 /** One row of the catalog_products view (§6.3) — safe columns only. */
@@ -461,7 +500,8 @@ export type CatalogProduct = {
   title: string;
   short_name: string;
   description: string;
-  best_for: string;
+  /** Shop filter facets; see ProductRow.best_for. */
+  best_for: string[];
   badge: string;
   details: string[];
   tags: string[];

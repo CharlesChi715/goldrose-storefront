@@ -10,8 +10,12 @@
  * four pagination dots. Frame 2380:399 deleted those dots and gave the second
  * card real, distinct content ("Enchanted Rose with LED Light", $119.00, its
  * own photo), so the rail is now the design's two actual cards with no dots —
- * the peeking second card is the affordance, exactly as A-3 does it. At rest
- * the band is pixel-identical to the frame.
+ * the peeking second card is the affordance, exactly as A-3 does it.
+ *
+ * 2026-08-07: the band is NO LONGER pixel-identical to the frame. The owner
+ * asked for both cards at one size, so card 2 now draws into card 1's box —
+ * see the PHOTO_H/CONTENT_H note below. The home pixel baseline was rebuilt
+ * to match.
  *
  * ⚠️ MOCKED DATA: both cards are still the design's placeholders rather than
  * catalogue products (OQ-3) — but their titles, prices, captions, photos and
@@ -26,7 +30,7 @@
 import { abs } from "@/lib/figma-layout";
 import { Carousel, type RailTiming } from "@/components/home/Carousel";
 import { playfair, notoSC } from "@/lib/fonts";
-import { fileUrl } from "@/lib/files-url";
+import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /** Card 2380:406 is 250 wide; the next card starts at x=285, so the pitch is 267. */
@@ -35,45 +39,58 @@ const CARD_H = 366;
 const PITCH = 267;
 
 /**
- * One card's GEOMETRY, verbatim from the design. The two cards differ in box
- * size, vertical offset within the rail and photo treatment, so both carry their
- * own values; the content block's internal rhythm (12/57/75/108) is shared.
+ * Every card in the rail draws into the SAME box — card 2380:406's. These are
+ * module constants rather than per-card fields precisely so that a card cannot
+ * be given its own size: the `Card` shape below carries no box to override.
  *
- * Copy and photos are NOT here — they come from the registry through `c`, so a
- * teammate can retitle or re-shoot a card without touching these numbers.
+ * The frame drew card 2 (2380:415) as a 184×349 box sitting 17px lower than
+ * card 1, which reads as a rendering fault rather than a deliberate stagger,
+ * so the owner asked for one uniform card size (2026-08-07). This is the one
+ * place the rail deviates from the frame; a Figma re-sync must NOT restore the
+ * smaller box.
+ */
+const PHOTO_H = 240;
+const CONTENT_H = CARD_H - PHOTO_H;
+
+/**
+ * Card 2's photo needs a bleed box, for a reason that is not obvious from the
+ * frame: 2380-416.png is a 368×444 canvas (184×222 CSS at 2x) whose right 21%
+ * is TRANSPARENT padding Figma exported along with the node — only the left
+ * 291px carry the rose. Drawn at its window's own size, that padding lets the
+ * window's #F3C6D1 backing through as a pink strip down the card's right edge.
+ * The frame has the same strip, just narrower, so widening the card would have
+ * widened the defect.
+ *
+ * So the element is scaled up until its OPAQUE part alone covers the window,
+ * and the window clips the overflow — the same trick card 1 uses for its
+ * bleeding photo. Derived rather than hard-coded so re-exporting the asset at
+ * a different size only needs these three measurements checked.
+ */
+const LED_CANVAS_W = 184;
+const LED_CANVAS_H = 222;
+/** The rose occupies the left 291 of the canvas's 368 device pixels. */
+const LED_OPAQUE_FRAC = 291 / 368;
+const LED_SCALE = CARD_W / (LED_CANVAS_W * LED_OPAQUE_FRAC);
+/** Ceil so rounding can never leave a sub-pixel sliver of the pink backing. */
+const LED_W = Math.ceil(LED_CANVAS_W * LED_SCALE);
+const LED_H = Math.ceil(LED_CANVAS_H * LED_SCALE);
+/** Portrait photo into a landscape window: centre the crop vertically. */
+const LED_TOP = Math.round((PHOTO_H - LED_H) / 2);
+
+/**
+ * All that differs between the two cards once the box is uniform and the copy
+ * comes from the registry: how wide the price node is, and whether it is
+ * centred in it. The content block's internal rhythm (12/57/75/108) is shared.
  */
 type Card = {
-  /** Cell-relative offset — card 2 sits 17px lower than card 1. */
-  top: number;
-  width: number;
-  height: number;
-  /** Height of the photo window; the content block starts right below it. */
-  photoH: number;
-  contentH: number;
   priceW: number;
   /** Card 1's price node is CENTER-aligned in its 45px box; card 2's is LEFT. */
   priceCentered: boolean;
 };
 
 const CARDS: readonly Card[] = [
-  {
-    top: 0,
-    width: CARD_W,
-    height: CARD_H,
-    photoH: 240,
-    contentH: 126,
-    priceW: 45,
-    priceCentered: true,
-  },
-  {
-    top: 17,
-    width: 184,
-    height: 349,
-    photoH: 222,
-    contentH: 160,
-    priceW: 53,
-    priceCentered: false,
-  },
+  { priceW: 45, priceCentered: true },
+  { priceW: 53, priceCentered: false },
 ];
 
 /** The editable strings of one card, picked out of the `featured` section. */
@@ -130,7 +147,7 @@ function Content({
   return (
     <div
       style={{
-        ...abs(0, card.photoH, card.width, card.contentH),
+        ...abs(0, PHOTO_H, CARD_W, CONTENT_H),
         overflow: "hidden",
       }}
     >
@@ -231,7 +248,7 @@ export function BestSellersRail({
           <div
             className="gr-card-zoom"
             style={{
-              ...abs(0, card.top, card.width, card.height),
+              ...abs(0, 0, CARD_W, CARD_H),
               background: "#FFF6EC",
               borderRadius: 10,
               boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -241,46 +258,39 @@ export function BestSellersRail({
             {/* photo window: rounded top corners, clipping the photo */}
             <div
               style={{
-                ...abs(0, 0, card.width, card.photoH),
+                ...abs(0, 0, CARD_W, PHOTO_H),
                 background: "#F3C6D1",
                 borderRadius: i === 0 ? "15px 15px 0 0" : 0,
                 overflow: "hidden",
               }}
             >
-              {i === 0 ? (
-                // 2380:414 bleeds 1px left / 7px above its clipping frame
-                // (design values); maxWidth none so preflight can't squash
-                // 252px to 250px.
-                <img
-                  className="gr-photo"
-                  data-el={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
-                  src={fileUrl(copy.photo)}
-                  alt={copy.alt}
-                  width={252}
-                  height={271}
-                  style={{
-                    ...abs(-1, -7, 252, 271),
-                    display: "block",
-                    objectFit: "cover",
-                    borderRadius: 22,
-                    maxWidth: "none",
-                  }}
-                />
-              ) : (
-                // 2380:416 · STRETCH fill, so the photo fills the window exactly
-                <img
-                  className="gr-photo"
-                  data-el={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
-                  src={fileUrl(copy.photo)}
-                  alt={copy.alt}
-                  width={card.width}
-                  height={card.photoH}
-                  style={{
-                    ...abs(0, 0, card.width, card.photoH),
-                    display: "block",
-                  }}
-                />
-              )}
+              {/* Both photos sit in a bleed box measured for THAT exact file —
+                  card 1's 1px/7px overhang, and card 2's LED_* scale-up around
+                  its transparent padding. Neither means anything for a photo
+                  somebody uploads, so HomePhoto keeps the measurements for the
+                  design's own picture and falls back to a plain cover fill of
+                  the 250×240 window once a card is given a different one. */}
+              <HomePhoto
+                section="featured"
+                field={`card_${i + 1}_photo`}
+                value={copy.photo}
+                alt={copy.alt}
+                box={{ w: CARD_W, h: PHOTO_H }}
+                design={
+                  i === 0
+                    ? {
+                        x: -1,
+                        y: -7,
+                        w: 252,
+                        h: 271,
+                        objectFit: "cover",
+                        borderRadius: 22,
+                      }
+                    : { x: 0, y: LED_TOP, w: LED_W, h: LED_H }
+                }
+                dataEl={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
+                className="gr-photo"
+              />
             </div>
             <Content card={card} copy={copy} n={i + 1} />
           </div>

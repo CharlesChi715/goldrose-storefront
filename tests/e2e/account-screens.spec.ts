@@ -136,3 +136,50 @@ test("the keepsake card renders its mock milestone", async ({ page }) => {
   await expect(page.getByText("Share Your Keepsake Card")).toBeVisible();
   await expect(page.getByText("The 4th recipient")).toBeVisible();
 });
+
+/* ---------- /account/addresses — ADDRESS-BOOK 2118:247 (08-07) ---------- */
+
+test("the address book renders its three mock addresses", async ({ page }) => {
+  await page.goto("/account/addresses");
+  await expect(
+    page.getByRole("heading", { name: "Address Book" }),
+  ).toBeVisible();
+  await expect(page.getByText("Jessica Chen")).toBeVisible();
+  await expect(page.getByText("Emma Wilson")).toBeVisible();
+  await expect(page.getByText("Sophia Bennett")).toBeVisible();
+  // Only the first card carries the Default badge.
+  await expect(page.getByText("Default", { exact: true })).toHaveCount(1);
+  // The 08-07 frame drops this screen's bottom-nav band.
+  await expect(page.getByRole("link", { name: "Shop" })).toHaveCount(0);
+});
+
+test("Add New Address opens the sheet, Escape discards it", async ({
+  page,
+}) => {
+  await page.goto("/account/addresses");
+  await page.getByRole("button", { name: "Add New Address" }).click();
+  const sheet = page.getByRole("dialog", { name: "Add New Address" });
+  await expect(sheet).toBeVisible();
+  // Typed input is discarded on close — nothing persists (no backend).
+  await page.getByLabel("Full name").fill("Ada Lovelace");
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
+  await page.getByRole("button", { name: "Add New Address" }).click();
+  await expect(page.getByLabel("Full name")).toHaveValue("");
+});
+
+test("a card's Edit opens the same sheet under the edit title", async ({
+  page,
+}) => {
+  await page.goto("/account/addresses");
+  await page
+    .getByRole("button", { name: "Edit address for Emma Wilson" })
+    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Edit Your Address" }),
+  ).toBeVisible();
+  // One sheet serves both frames, so the same fields are present.
+  await expect(page.getByLabel("Street address")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
