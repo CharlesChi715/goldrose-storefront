@@ -124,6 +124,19 @@ type PhotoTarget = { section: SectionView; field: FieldView } | null;
 const INTRO_KEY = "goldrose-admin-home-intro-dismissed";
 
 /**
+ * How far above a section the page must stop when jumping to it.
+ *
+ * The admin's top bar (`.Polaris-Frame__TopBar`) is 56px and `position: fixed`,
+ * so it is not part of the scrollable flow: landing a section at viewport top
+ * lands its first line UNDER the bar. Declared as `scroll-margin-top` on the
+ * anchor rather than as arithmetic at the call site, because it then also
+ * applies to a plain `#home-section-…` link — a pasted URL, a restored hash, a
+ * keyboard activation — and not only to the section map's own scroll.
+ */
+const ADMIN_TOP_BAR = 56;
+const JUMP_CLEARANCE = ADMIN_TOP_BAR + 16;
+
+/**
  * The preview's width range, in CSS pixels — the width a website actually sees,
  * which is not the phone's physical size or its megapixel screen width.
  *
@@ -793,6 +806,7 @@ export function HomeSectionsEditor({
             <div
               id={`home-section-${section.id}`}
               data-home-section={section.id}
+              style={{ scrollMarginTop: JUMP_CLEARANCE }}
             >
               <Card>
                 <BlockStack gap="400">

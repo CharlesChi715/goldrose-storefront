@@ -85,9 +85,19 @@ test("the section map is the page drawn to scale, and jumps where it points", as
     .boundingBox();
   expect(Math.abs(strip!.y - craft!.y)).toBeLessThan(1.5);
 
-  // And it is navigation, not decoration.
+  // And it is navigation, not decoration — landing the section CLEAR of the
+  // admin's fixed 56px top bar. `block: "start"` alone parks the section's
+  // first line underneath it, which reads as having jumped slightly too far.
   await map.locator('[data-home-map-row="story"]').click();
-  await expect(page.locator('[data-home-section="story"]')).toBeInViewport();
+  const anchor = page.locator('[data-home-section="story"]');
+  await expect(anchor).toBeInViewport();
+  const bar = (await page.locator(".Polaris-Frame__TopBar").boundingBox()) as {
+    y: number;
+    height: number;
+  };
+  await expect
+    .poll(async () => (await anchor.boundingBox())!.y)
+    .toBeGreaterThanOrEqual(bar.y + bar.height);
 });
 
 test("editing a section heading reaches the live home page, and resets", async ({

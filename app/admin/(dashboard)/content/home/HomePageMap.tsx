@@ -34,7 +34,7 @@
  *   genuinely have no area left to point at.
  */
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Badge, BlockStack, InlineStack, Text } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
 
@@ -79,6 +79,38 @@ const LINE = "#e3e3e3";
 const ACCENT = "#005bd3";
 
 /**
+ * How the hover response moves. Short enough to feel like the row answering the
+ * pointer rather than playing an animation at it, and the nudge is HORIZONTAL —
+ * the row leans the 3px towards its own band on the map. Nothing may move
+ * vertically here: the rows sit on their bands' exact top edges, and that
+ * agreement is the only thing the map is claiming.
+ */
+const EASE = "120ms cubic-bezier(0.4, 0, 0.2, 1)";
+const NUDGE = 3;
+
+/**
+ * Whether the viewer has asked their system for reduced motion.
+ *
+ * Subscribed rather than read once, so turning the setting on takes effect
+ * without a reload. The server snapshot says "reduced": it cannot know, and
+ * assuming stillness means nothing can animate in the instant before hydration
+ * tells us otherwise.
+ *
+ * @returns True when transitions and the nudge should be dropped.
+ */
+function useStillness(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+      query.addEventListener("change", onChange);
+      return () => query.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => true,
+  );
+}
+
+/**
  * Scroll a section's editor card into view.
  *
  * The anchor is kept on the `<a>` as a real href so the row behaves like a
@@ -113,6 +145,7 @@ export function HomePageMap({
   // its link. Focus sets it too, which is what makes the pairing usable from
   // the keyboard rather than only under a mouse.
   const [active, setActive] = useState<string | null>(null);
+  const still = useStillness();
 
   const scale = Math.min(MAP_HEIGHT / frameHeight, MAP_MAX_WIDTH / STAGE_WIDTH);
   const mapWidth = STAGE_WIDTH * scale;
@@ -168,7 +201,19 @@ export function HomePageMap({
           border: `1px solid ${lit ? ACCENT : LINE}`,
           borderRadius: 8,
           background: lit ? "#f2f7fe" : "#ffffff",
-          boxShadow: lit ? `inset 0 0 0 1px ${ACCENT}` : "none",
+          // Two shadows doing different jobs: the inset one thickens the border
+          // to the accent without changing the box's size, the outer one lifts
+          // the row off the card. Both fade from "none"'s transparent, so the
+          // lift arrives with the colour rather than snapping in ahead of it.
+          boxShadow: lit
+            ? `inset 0 0 0 1px ${ACCENT}, 0 1px 4px rgba(0, 0, 0, 0.10)`
+            : "inset 0 0 0 1px transparent, 0 1px 4px rgba(0, 0, 0, 0)",
+          // The lean towards its band. A transform, so it cannot disturb the
+          // row's position — the alignment with the map survives the motion.
+          transform: lit && !still ? `translateX(-${NUDGE}px)` : "none",
+          transition: still
+            ? "none"
+            : `transform ${EASE}, background-color ${EASE}, border-color ${EASE}, box-shadow ${EASE}`,
           textDecoration: "none",
           color: "inherit",
           overflow: "hidden",
@@ -273,9 +318,10 @@ export function HomePageMap({
                   background:
                     active === section.id
                       ? "rgba(0,91,211,0.28)"
-                      : "transparent",
+                      : "rgba(0,91,211,0)",
                   borderBottom: `1px dashed rgba(0,0,0,0.28)`,
                   pointerEvents: "none",
+                  transition: still ? "none" : `background-color ${EASE}`,
                 }}
               />
             ))}
@@ -303,14 +349,19 @@ export function HomePageMap({
                   background:
                     active === section.id
                       ? "rgba(0,91,211,0.28)"
-                      : "transparent",
-                  outline:
-                    active === section.id ? `1px solid ${ACCENT}` : "none",
+                      : "rgba(0,91,211,0)",
+                  // Always outlined, only the colour changes: `none` → `1px
+                  // solid` is not a transition the browser can interpolate, so
+                  // the band would flash rather than answer the pointer.
+                  outline: `1px solid ${active === section.id ? ACCENT : "transparent"}`,
                   outlineOffset: -1,
                   borderBottom:
                     index === bands.length - 1
                       ? "none"
                       : `1px dashed rgba(0,0,0,0.28)`,
+                  transition: still
+                    ? "none"
+                    : `background-color ${EASE}, outline-color ${EASE}`,
                 }}
               />
             ))}
