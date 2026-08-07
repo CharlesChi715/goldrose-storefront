@@ -5616,3 +5616,38 @@ Tooling only; lives in `~/Documents/bin`, outside this repo.
   least be visible.
 - **Verified:** `bash -n` on both, both resolve on `PATH`, guard clauses
   return 1 with usage text. Not yet run end to end.
+
+## 2026-08-07 — PDP strapline wraps to two lines (`worktree-pdp-subtitle-wrap`)
+
+The product page's strapline (the first three `details` bullets) was a
+single `white-space: nowrap` line that truncated with an ellipsis. Real
+catalog copy overflows it — "Genuine preserved rose · Rich ruby-red finish ·
+Gold-trimmed petal edges" is 71 characters against room for roughly 59 — so
+the box now wraps to two lines and never shows an ellipsis. A third line is
+clipped whole by the fixed height rather than ellipsized.
+
+- `app/products/[slug]/page.tsx` — strapline box 398×31.466, `white-space:
+  normal`, `overflow: hidden`, no `text-overflow`. The extra 16px pushes the
+  rating row (100.51 → 116.51), review count (99 → 115), price (122 → 138),
+  compare-at (131.5 → 147.5) and the discount pill (128.5 → 144.5) down inside
+  the info card, which grows 166 → 182. Every section below moves 16px too
+  (541→557, 706→722, 989→1005, 1192→1208, 1360→1376) and the stage is
+  1616 → 1632. The original vertical rhythm is preserved exactly (10.0px above
+  the stars, 8.5px above the price).
+- `components/pdp/PdpOverlays.tsx` — the three page-absolute hit targets follow:
+  rating row 468 → 484, ratings summary 757 → 773, unboxing "View All" 1205 → 1221.
+- `tests/e2e/__screenshots__/product-detail-masked-darwin.png` re-recorded; the
+  home and shop baselines are byte-identical.
+
+Verified: `tsc --noEmit` clean, lint clean (2 pre-existing warnings in
+`account-chrome.tsx`), 91 unit tests, 116 e2e tests incl. all three pixel
+baselines. A throwaway Playwright check with the long strapline seeded
+confirmed 31.45px rendered height and `scrollHeight === clientHeight` (nothing
+cut off).
+
+⚠️ Ready-for-dev frame `1523:3971` still says 430×1616. This is a deliberate
+departure from the frame; Figma needs the same 16px change.
+
+Side note: the worktree branched from `origin/main`, which is behind local
+`main` and still carries the duplicate `Carousel` import that b0b3a93 repaired.
+Rebased onto local `main` before working.

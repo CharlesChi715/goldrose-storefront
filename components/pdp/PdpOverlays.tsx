@@ -1193,12 +1193,14 @@ export function PdpOverlays({
           />
         )}
       />
-      {/* Rating row (rel 0,98 in the info card at 16,375) → reviews drawer */}
+      {/* Rating row (rel 0,114 in the info card at 16,375) → reviews drawer.
+          The two-line strapline above it pushed this row, and everything
+          further down the page, 16px lower than the frame (2026-08-07). */}
       <button
         type="button"
         aria-label="Open reviews"
         onClick={() => setOpen("reviews")}
-        style={{ ...RESET, ...abs(16, 468, 200, 28) }}
+        style={{ ...RESET, ...abs(16, 484, 200, 28) }}
       />
       {/* Ratings summary block inside "10 · Reviews" → the same drawer. The
           prototype gives the reviews sheet TWO entries: the rating row above
@@ -1207,14 +1209,14 @@ export function PdpOverlays({
         type="button"
         aria-label="Open reviews from the ratings summary"
         onClick={() => setOpen("reviews")}
-        style={{ ...RESET, ...abs(32, 757, 366, 120) }}
+        style={{ ...RESET, ...abs(32, 773, 366, 120) }}
       />
-      {/* Unboxing "View All ›" (section at 15,1192) → unboxing gallery */}
+      {/* Unboxing "View All ›" (section at 15,1208) → unboxing gallery */}
       <button
         type="button"
         aria-label="View all unboxing highlights"
         onClick={() => setOpen("unboxing")}
-        style={{ ...RESET, ...abs(337, 1205, 70, 24) }}
+        style={{ ...RESET, ...abs(337, 1221, 70, 24) }}
       />
 
       {mounted && open === "reviews"
