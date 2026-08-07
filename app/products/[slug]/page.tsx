@@ -13,6 +13,10 @@
  * adds 16px, so the info card is 182 tall (frame: 166), every section below it
  * sits 16px lower than the frame, and the stage is 1632 (frame: 1616). The
  * frame itself still says 1616 — Figma needs the same change.
+ * Owner ruled on it (2026-08-07): "just make it suit the content. if content
+ * exceeds, larger is fine." That is a standing rule, not a one-off — where
+ * real catalog copy will not fit a frame's box, the box grows; truncating to
+ * "…" is not an acceptable way to make it fit.
  * AI-TAG(AI-036): OWNER-TODO — get frame 1523:3971 changed to match. See
  * /agent-delivery/sessions/branch-consolidation-08-07.md.
  *

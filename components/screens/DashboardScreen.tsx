@@ -19,16 +19,23 @@
  * /account/logout.
  *
  * Ready-for-dev 1523:2536 is the canonical shopping frame: no account-type
- * toggle, three quick tiles (My Orders / Gift Reminders / Addresses), and a
- * 165px service card ending with Manage Addresses. The business variant keeps
- * its separate 07-29 layout untouched.
+ * toggle and a 165px service card ending with Manage Addresses. The business
+ * variant keeps its separate 07-29 layout untouched.
+ *
+ * **2026-08-07 — the three quick tiles are gone.** The delivery deletes the
+ * whole ACCOUNT-ACTION-SHORTCUTS band (My Orders / Gift Reminders /
+ * Addresses) from 1523:2536 and lifts the service card into its place, from
+ * y515 to y388 (and 1px left). Every destination the band carried is still
+ * reachable from the service rows below it, so nothing is stranded. The band
+ * also carried this screen's `ACCOUNT-ACTION-SHORTCUT` dwell tags, which go
+ * with it; `ACCOUNT-INFO-SERVICE-CARD` still reports.
  *
  * Wired: order tracking, order list/details, gift reminders, customer care,
- * and Account & Privacy. Addresses and business-side tiles remain inert until
- * their destinations are Ready-for-dev (route-table rule; the ADDRESS-BOOK
- * section 2118:246 is not Ready-for-dev). The shopping frame uses the ELDREVE
- * wordmark — the brand itself (DQ-34) — while keeping live customer/order
- * data in the designated boxes.
+ * Account & Privacy, and — new with this delivery — Manage Addresses, now
+ * that ADDRESS-BOOK (2118:247) is built at /account/addresses. Business-side
+ * tiles remain inert until their destinations are Ready-for-dev (route-table
+ * rule). The shopping frame uses the ELDREVE wordmark — the brand itself
+ * (DQ-34) — while keeping live customer/order data in the designated boxes.
  */
 
 import Link from "next/link";
@@ -208,42 +215,15 @@ function Dashboard({
     .toUpperCase();
   const order = recentOrder === undefined ? MOCK_ORDER : recentOrder;
   const recentY = shopping ? 161 : 218;
-  const shortcutY = shopping ? 388 : 448;
-  const serviceY = shopping ? 515 : 578;
+  const shortcutY = 448; // business only — the shopping band was deleted 08-07
+  // The 08-07 frame lifts the service card into the deleted band's place.
+  const serviceY = shopping ? 388 : 578;
+  const serviceX = shopping ? 15 : 16;
 
-  // Shopping: the Ready-for-dev frame has three evenly spaced tiles.
-  // Business: the 07-29 four-tile layout remains untouched.
+  // Shopping: the 08-07 frame has no tiles at all — the ACCOUNT-ACTION-
+  // SHORTCUTS band was deleted. Business: the 07-29 four-tile layout remains.
   const tiles: Tile[] = shopping
-    ? [
-        {
-          x: 16,
-          icon: "1523-2560",
-          ink: [24, 24],
-          title: "My Orders",
-          text: "View all orders",
-          href: "/account/orders",
-          figmaNode: "1523:2559",
-        },
-        {
-          x: 167,
-          icon: "1523-2564",
-          ink: [22, 22],
-          title: "Gift Reminders",
-          text: "3 upcoming",
-          href: "/account/reminders",
-          titleX: 0,
-          titleW: 94,
-          figmaNode: "1523:2563",
-        },
-        {
-          x: 318,
-          icon: "1523-2572",
-          ink: [19, 19],
-          title: "Addresses",
-          text: "Manage delivery",
-          figmaNode: "1523:2571",
-        },
-      ]
+    ? []
     : [
         {
           x: 16,
@@ -295,6 +275,7 @@ function Dashboard({
         {
           title: "Manage Addresses",
           value: "Address Management  ›",
+          href: "/account/addresses",
         },
       ]
     : [
@@ -670,11 +651,14 @@ function Dashboard({
       <div
         data-el={shopping ? "ACCOUNT-INFO-SERVICE-CARD" : undefined}
         data-figma-node={shopping ? "1523:2575" : undefined}
-        style={card(16, serviceY, 398, shopping ? 165 : 166)}
+        style={card(serviceX, serviceY, 398, shopping ? 165 : 166)}
       />
       {rows.map((row, i) => {
-        const y = shopping ? [526, 568, 609, 644][i] : [589, 630, 671, 712][i];
-        const separators = shopping ? [555, 597, 638] : [618, 659, 700];
+        // Shopping ys are the 08-07 frame's, i.e. the old set less the 127px
+        // the deleted tile band freed. The frame draws its last separator 2px
+        // right of the other two; one x is kept, matching the majority.
+        const y = shopping ? [399, 441, 482, 517][i] : [589, 630, 671, 712][i];
+        const separators = shopping ? [428, 470, 511] : [618, 659, 700];
         const body = (
           <>
             <span
@@ -696,17 +680,17 @@ function Dashboard({
             {row.href ? (
               <Link
                 href={row.href}
-                style={{ ...abs(16, y, 398, 30), display: "block" }}
+                style={{ ...abs(serviceX, y, 398, 30), display: "block" }}
               >
                 {body}
               </Link>
             ) : (
-              <div style={{ ...abs(16, y, 398, 30) }}>{body}</div>
+              <div style={{ ...abs(serviceX, y, 398, 30) }}>{body}</div>
             )}
             {i < 3 ? (
               <div
                 style={{
-                  ...abs(30, separators[i], 370, 1),
+                  ...abs(serviceX + 14, separators[i], 370, 1),
                   background: SAND,
                 }}
               />

@@ -2,7 +2,13 @@
 /**
  * ROLE OF THIS FILE
  * /story — pixel-exact implementation of MESTORY-OUR-STORY-IMAGE-LED-PAGE
- * (1573:106, 430×1276, 07-29 delivery). The brand-story page the homepage's
+ * (1573:106, 430×1276, 07-29 delivery).
+ *
+ * AI-TAG(AI-038): OWNER-DECISION — frame 1573:106 no longer exists in the
+ * Figma file; its replacement (OUR-STORY-LONG-PAGE 2274:275, 430×5807) is a
+ * different page and is not Ready-for-dev, so this screen is currently
+ * orphaned from the design.
+ * See /agent-delivery/sessions/figma-sync-addresses-08-07-worktree-figma-sync.md. The brand-story page the homepage's
  * H-34 story card and the menu drawer's OUR STORY row have waited for since
  * 07-25. "Image-led" is aspirational for now: the hero and the two memory
  * cards ship as the design's own #EDE0D1 placeholder blocks (no imagery

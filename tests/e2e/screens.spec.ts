@@ -362,6 +362,37 @@ test.describe("the PDP hero carousel", () => {
       page.getByRole("dialog", { name: "Product photos" }),
     ).toHaveCount(0);
   });
+
+  /*
+   * Until 2026-08-07 the edge damping was applied to the value the release
+   * tested, so a swipe on the first or last slide needed three times the
+   * travel and normally sprang back. Auto-play parks a rail on any slide, so
+   * that read as "the carousel isn't swipeable". The wrap must now commit on
+   * an ordinary swipe from either end.
+   */
+  test("a short swipe still advances at the wrap-around edges", async ({
+    page,
+  }) => {
+    await page.goto("/products/premium-gold-rose-gift-bundle");
+    const last = (await dots(page).count()) - 1;
+    await dots(page).nth(last).click();
+    await expect.poll(() => activeDot(page)).toBe(last);
+
+    // 60px — comfortably over the 40px threshold, well under the 120px the
+    // damped comparison used to demand.
+    await page.mouse.move(300, 220);
+    await page.mouse.down();
+    for (const x of [280, 240]) await page.mouse.move(x, 220);
+    await page.mouse.up();
+    await expect.poll(() => activeDot(page)).toBe(0);
+
+    // ...and backwards off the first slide, which wraps to the last.
+    await page.mouse.move(150, 220);
+    await page.mouse.down();
+    for (const x of [170, 210]) await page.mouse.move(x, 220);
+    await page.mouse.up();
+    await expect.poll(() => activeDot(page)).toBe(last);
+  });
 });
 
 test("a shop search that matches nothing shows no cards, not the whole catalog", async ({

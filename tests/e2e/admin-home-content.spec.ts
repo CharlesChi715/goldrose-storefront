@@ -41,14 +41,18 @@ test("every homepage section is listed, in page order", async ({ page }) => {
     "Promo bar",
     "Hero",
     "Featured Rose Gifts",
-    "Ready to Ship & Real Rose Promise",
+    // The Real Rose Promise half of this band was deleted by the design team
+    // on 2026-08-07, taking its five editable fields with it.
+    "Ready to Ship",
     "Shop by Occasion",
     "Shop by Recipient & Reviews",
     "Craft, Workshop & Patents",
     "Story, FAQ, Gift card, Newsletter & Footer",
   ]) {
+    // Level 2 is the section heading; a field group inside it can carry the
+    // same words (A-3's sole remaining group is also "Ready to Ship").
     await expect(
-      page.getByRole("heading", { name: title, exact: true }),
+      page.getByRole("heading", { name: title, exact: true, level: 2 }),
     ).toBeVisible();
   }
   // Figma-baked labels are listed but not typeable, so the screen is a
@@ -103,7 +107,10 @@ test("hiding a section removes its band and shortens the page", async ({
   page,
 }) => {
   const fullHeight = await stageHeight(page);
-  expect(fullHeight).toBe(5193);
+  // The imported stage is 5193; A-3's Real Rose Promise strip was deleted on
+  // 2026-08-07 and its 136px comes off permanently (band.trim), so nothing
+  // hidden still renders 5057.
+  expect(fullHeight).toBe(5193 - 136);
 
   await openEditor(page);
   // "Craft, Workshop & Patents" is the A-9 band: 991px tall.

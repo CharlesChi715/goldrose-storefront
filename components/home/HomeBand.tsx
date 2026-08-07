@@ -11,9 +11,18 @@
  * - shift 0 → render the children bare, so the untouched page produces exactly
  *   the DOM it produced before this feature existed (that is what keeps
  *   tests/e2e/pixels.spec.ts byte-identical);
- * - otherwise → one `position: absolute; inset: 0` box, which shares the
- *   stage's own origin so every child keeps its coordinate, moved by
- *   `translateY`.
+ * - otherwise → one zero-sized box at the stage's own origin, so every child
+ *   keeps its coordinate, moved by `translateY`.
+ *
+ * The wrapper is **0×0 on purpose**. It used to be `inset: 0`, which is the
+ * same origin but also a full-stage rectangle — and a transparent full-stage
+ * rectangle swallows every pointer event meant for the bands underneath it.
+ * That stayed invisible while the only way to get a wrapper was to hide a
+ * section, and surfaced on 2026-08-07 when A-3's trim gave four bands a
+ * permanent shift: the homepage carousels stopped responding to swipes
+ * because the finger was landing on the wrapper. A zero-sized box provides
+ * the identical coordinate origin (children are positioned against its
+ * padding box, at 0,0) while hit-testing reaches only the children.
  */
 
 import type { ReactNode } from "react";
@@ -41,7 +50,10 @@ export function HomeBand({
     <div
       style={{
         position: "absolute",
-        inset: 0,
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
         transform: `translateY(${shift}px)`,
       }}
     >

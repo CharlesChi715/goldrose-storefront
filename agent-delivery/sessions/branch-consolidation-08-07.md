@@ -46,6 +46,20 @@ a taller box.
 
 Landed in `e30f9b8`, merged as `964ba65`.
 
+**ANSWERED (Charles, 2026-08-07):** "just make it suit the content. if content
+exceeds, larger is fine."
+
+So the box sizes to the copy, and growing the frame is the accepted outcome —
+the build is right and Figma is the side that moves. This is a **standing
+rule, not a one-off ruling on 16px**: wherever real catalog copy will not fit
+a frame's box, the box grows rather than the copy being cut. Truncation to
+"…" is not an acceptable way to make content fit.
+
+Still to do before this closes: the design team applies it to frame
+`1523:3971` (430×1616 → 430×1632). Until then each Figma sync reads `1616`
+and will try to pull the page back to a truncating layout, so the departure
+stays recorded in the file header.
+
 Location: [`app/products/[slug]/page.tsx`](<../../app/products/[slug]/page.tsx>)
 
 ---

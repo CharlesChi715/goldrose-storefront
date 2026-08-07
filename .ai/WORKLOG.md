@@ -5883,3 +5883,90 @@ is how three entries got duplicated in the first place.
   (`2026-06-30 16:52`, `2026-07-15 15:21`) turned out to be **different
   content that happens to share a timestamp** and were left alone — the md5
   check is the only reason they survived.
+
+## 2026-08-07 20:42 AEST
+
+- **Deleted the `2026-07-25-figma-naming-guide` delivery batch** from
+  `team-deliveries/originals/` — `Figma_UI_Naming_Guide_GoldRose.xlsx` (a
+  translated spreadsheet) and its `batch.md`. Charles's ruling: the guide is a
+  translation, the adopted naming rules were regenerated into `docs/ixd/naming/`
+  on 2026-07-31, so the source is dead weight.
+- **This is a deliberate exception to `team-deliveries/originals/README.md`**,
+  which says deliveries are never deleted because they are the authority on
+  wording disputes. Git history holds the bytes (`c53435d` and later), the same
+  reasoning the 08-07 stale sweep used for `archive/`. One side effect: the
+  batch's sha256 is gone from the pre-parse duplicate check, so a re-delivery of
+  that spreadsheet would read as new rather than as a duplicate.
+- **Closed `AI-005`** (was: is that spreadsheet an incoming delivery or a
+  generated export?) — the deletion moots it. Charles closed it via
+  `agent-inbox:close`; the record is in `agent-delivery/archive/`. Its "Affected
+  place" line was rewritten first so the archived record does not point at a
+  path that no longer exists.
+- **Repointed the one live reference**, `docs/ixd/README.md`, from "its raw
+  source stays in …" to a note that it was deleted as superseded. The two
+  remaining mentions are dated WORKLOG entries and were left as history.
+## 2026-08-07 — Figma sync: address book, two design deletions, two carousel fixes
+
+Branch `worktree-figma-sync`. Delivery was 3 added / 40 "modified" / 1 removed
+frames; frame-by-frame diffing put the real changed count at 29 (11 flipped their
+hash on prototype/dev-status metadata only). Six read-only agents then compared
+each of the 29 against the repo: 56 still-old, 5 already-done, 5 diverged,
+11 not built.
+
+- Built `/account/addresses` (ADDRESS-BOOK 2118:247) + the add/edit bottom sheet
+  (2134:299 / 2610:373 collapse to one component with a `mode` prop). Last
+  Ready-for-dev frame with no route; `figma:unbuilt` is now empty.
+- Applied two design deletions: the `/account` three-tile shortcut band, and the
+  homepage Real Rose Promise strip (band 463 -> 327, stage 5193 -> 5057) via a
+  new `band.trim` so no later band's imported coordinates moved.
+- Fixed two interaction bugs found while checking a "carousel not swipeable"
+  report: (1) Carousel applied EDGE_RESISTANCE damping to the value tested
+  against the swipe-commit threshold, so edge swipes needed 3x travel;
+  (2) HomeBand's shift wrapper was `inset: 0`, a full-stage transparent box
+  that swallowed pointer events — latent since it was written, live only once
+  the trim gave four bands a permanent shift. Both covered by real-input tests.
+- Filed AI-037 (Figma still ships GoldRose/VELORIA the repo renamed — do not
+  import verbatim), AI-038 (`/story` descends from a deleted frame),
+  AI-039 (address book has no backend).
+- Deliberately did NOT run `figma:baseline`: 28 changed frames remain unbuilt.
+
+## 2026-08-07 21:15 AEST — search fix + figma sync merged, and an AI-nnn collision
+
+- **`worktree-fix-search-close-button`** was a third empty branch today — no
+  commits, the change uncommitted in its worktree. Committed, then merged:
+  `type="search"` makes WebKit draw its own clear ×, which sat beside the
+  frame's own affordance (1523:3270).
+- **`worktree-figma-sync`** had 17 files uncommitted (address book route +
+  sheet, two design deletions, two carousel fixes). Committed and merged.
+- **⚠️ AI-036 was claimed twice.** That session filed AI-036/037/038 while
+  AI-036 was already taken on `main` by a different matter from a parallel
+  session. Same root cause as the `0009` migration clash: `AI-nnn` is
+  allocated "highest existing + 1", which is correct for one session and racy
+  for several. Theirs renumbered to **037/038/039** across all seven places —
+  INBOX rows, session-file headings, three in-place `AI-TAG` comments,
+  `SUMMARY.md` and their worklog entry.
+- **The union driver earned itself on real work.** `.ai/WORKLOG.md`
+  auto-merged despite both sides appending — previously a guaranteed conflict.
+  `agent-delivery/INBOX.md` conflicted normally, which is the point of
+  excluding it: the branch was 20 commits behind and still carried AI-002,
+  AI-003 and AI-005, closed and archived on `main` in the meantime. The 3-way
+  merge correctly kept them deleted. Union there would have resurrected all
+  three, silently.
+- **Fixed in passing:** `main`'s AI-035 row carried a stray backtick
+  (`` eldreve.`com ``, 7 backticks on the line). It predates this merge; the
+  branch's copy was clean, so the resolution took that one.
+- **AI-036 answered** (Charles): "just make it suit the content. if content
+  exceeds, larger is fine." Recorded as a standing rule — where real catalog
+  copy will not fit a frame's box the box grows, and truncation to "…" is not
+  an acceptable fit. Marked ANSWERED; stays open until the design team applies
+  it to frame `1523:3971`.
+- **Verified:** inbox in sync (26 matters), migrations ok, typecheck clean,
+  lint clean, format clean, 136 unit tests, 134 e2e including the updated
+  home pixel baseline.
+- **⚠️ Found, not fixed:** the e2e suite sends real email. `playwright.config.ts`
+  blanks the PayPal and Supabase variables but not `RESEND_API_KEY`, so every
+  run hits the live Resend account — this run exhausted the **daily** quota
+  (429). `lib/email.ts` already falls back to a console log when the key is
+  unset, so the fix is one line in the config's `env` block. Resend is also
+  Supabase's SMTP for customer sign-in, so tests are competing with real
+  auth mail.

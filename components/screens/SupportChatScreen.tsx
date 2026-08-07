@@ -118,6 +118,9 @@ export function SupportChatScreen() {
         src="/eldreve/screens/1523-1524.png"
         style={abs(13, 17, 40, 43)}
       />
+      {/* AI-TAG(AI-037): OWNER-DECISION — the Figma frame still says
+          "GoldRose Support" (now "MORI"); this ELDREVE name must survive any
+          re-import. See /agent-delivery/sessions/figma-sync-addresses-08-07-worktree-figma-sync.md. */}
       <div
         className={playfair.className}
         style={{ ...abs(80, 17, 270), ...txt(22, 28, INK), fontWeight: 500 }}
