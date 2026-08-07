@@ -118,7 +118,10 @@ Open linked resources only when the task needs them.
   `price_cents` and stock and never stored. Slugs are globally unique so the
   group is recovered from the value; a duplicate throws at import. Selection
   lives in the URL (`?f=jewel,anniversary`, noindexed) so the grid, the count
-  and the pager cannot disagree — OR inside a heading, AND across headings. The
+  and the pager cannot disagree — OR inside a heading, AND across headings.
+  Headings multi-select except **Price, which takes one band at a time and
+  swaps** (owner, 2026-08-07); the rule is a `select` field on the group, so a
+  hand-typed URL is narrowed to one band too. The
   admin's "Best for" text box became a grouped multi-select. ⚠️ The frames'
   two fixed active-filter chips ("Ruby Red", "Gift Sets") are gone: an
   unfiltered shop now correctly shows none, which is the only pixel change

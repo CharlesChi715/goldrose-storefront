@@ -188,3 +188,49 @@ test("filters ride along with search, and junk in the URL is ignored", async ({
     page.getByRole("button", { name: /^Remove filter/ }),
   ).toHaveCount(0);
 });
+
+test("Price takes one band at a time and swaps; other headings do not", async ({
+  page,
+}) => {
+  await page.goto("/shop");
+  await openDrawer(page);
+
+  await chip(page, "Under \\$100").click();
+  await expect(chip(page, "Under \\$100")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
+  // A second band replaces the first rather than joining it (owner ruling).
+  await chip(page, "\\$300\\+").click();
+  await expect(chip(page, "\\$300\\+")).toHaveAttribute("aria-pressed", "true");
+  await expect(chip(page, "Under \\$100")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+
+  // Tapping the lit band clears it, so "any price" is still reachable.
+  await chip(page, "\\$300\\+").click();
+  await expect(chip(page, "\\$300\\+")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+
+  // Availability is unaffected — two of its chips light together.
+  await chip(page, "In Stock").click();
+  await chip(page, "Pre-Order").click();
+  await expect(chip(page, "In Stock")).toHaveAttribute("aria-pressed", "true");
+  await expect(chip(page, "Pre-Order")).toHaveAttribute("aria-pressed", "true");
+});
+
+test("a URL carrying two price bands is narrowed to one", async ({ page }) => {
+  await page.goto("/shop?f=under-100,300-plus");
+  // The drawer has no way to draw or undo two bands, so the page must not be
+  // in that state: the first in drawer order survives.
+  await expect(
+    page.getByRole("button", { name: "Remove filter Under $100" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Remove filter $300+" }),
+  ).toHaveCount(0);
+});

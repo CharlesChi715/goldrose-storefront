@@ -49,6 +49,16 @@ export type FacetGroupKey =
  */
 export type FacetSource = "best_for" | "derived";
 
+/**
+ * How many chips a heading may have lit at once.
+ *
+ * `many` is the default and the useful one: "Birthday or Wedding" is a real
+ * thing to ask for. `one` is the owner's ruling for Price (2026-08-07) — a
+ * product has a single price, so overlapping bands read as a mistake rather
+ * than a wider search. Picking a second band swaps the first out.
+ */
+export type FacetSelect = "one" | "many";
+
 /** One chip: a globally unique slug, its wording, and the group it sits in. */
 export type Facet = {
   readonly slug: string;
@@ -65,6 +75,7 @@ export type FacetGroup = {
   readonly title: string;
   readonly titleZh: string;
   readonly source: FacetSource;
+  readonly select: FacetSelect;
   readonly facets: readonly Facet[];
 };
 
@@ -94,6 +105,7 @@ export const FACET_GROUPS: readonly FacetGroup[] = [
     title: "Collections",
     titleZh: "系列",
     source: "best_for",
+    select: "many",
     facets: [
       {
         slug: "jewel",
@@ -120,6 +132,7 @@ export const FACET_GROUPS: readonly FacetGroup[] = [
     title: "Occasion",
     titleZh: "场合",
     source: "best_for",
+    select: "many",
     facets: [
       {
         slug: "anniversary",
@@ -147,6 +160,7 @@ export const FACET_GROUPS: readonly FacetGroup[] = [
     title: "Recipient",
     titleZh: "送礼对象",
     source: "best_for",
+    select: "many",
     facets: [
       { slug: "wife", label: "Wife", labelZh: "妻子", group: "recipient" },
       {
@@ -169,6 +183,8 @@ export const FACET_GROUPS: readonly FacetGroup[] = [
     title: "Price",
     titleZh: "价格",
     source: "derived",
+    // One band at a time (owner, 2026-08-07) — see FacetSelect.
+    select: "one",
     facets: [
       {
         slug: "under-100",
@@ -201,6 +217,7 @@ export const FACET_GROUPS: readonly FacetGroup[] = [
     title: "Availability",
     titleZh: "库存状态",
     source: "derived",
+    select: "many",
     facets: [
       {
         slug: "in-stock",
@@ -276,6 +293,71 @@ export const BEST_FOR_GROUPS: readonly FacetGroup[] = FACET_GROUPS.filter(
   (group) => group.source === "best_for",
 );
 
+const GROUP_BY_KEY = new Map<FacetGroupKey, FacetGroup>(
+  FACET_GROUPS.map((group) => [group.key, group]),
+);
+
+/** Every slug in drawer order — the canonical order for a selection. */
+const ALL_SLUGS: readonly string[] = FACET_GROUPS.flatMap((group) =>
+  group.facets.map((facet) => facet.slug),
+);
+
+/**
+ * Put a selection into drawer order and drop repeats, so one set of chips has
+ * exactly one URL however it was tapped.
+ */
+function orderFacets(slugs: Iterable<string>): string[] {
+  const wanted = new Set(slugs);
+  return ALL_SLUGS.filter((slug) => wanted.has(slug));
+}
+
+/**
+ * Enforce each heading's `select` rule on a selection.
+ *
+ * Applied to anything that reaches the shop, not just taps: a hand-typed
+ * `?f=under-100,300-plus` must not put the page into a state the drawer has no
+ * way to draw or undo. The FIRST chip in drawer order wins, so the outcome
+ * does not depend on how the string was ordered.
+ */
+function enforceSelect(slugs: readonly string[]): string[] {
+  const taken = new Set<FacetGroupKey>();
+  return slugs.filter((slug) => {
+    const facet = BY_SLUG.get(slug);
+    if (!facet) return false;
+    if (GROUP_BY_KEY.get(facet.group)?.select !== "one") return true;
+    if (taken.has(facet.group)) return false;
+    taken.add(facet.group);
+    return true;
+  });
+}
+
+/**
+ * Turn one chip on or off, honouring its heading's `select` rule.
+ *
+ * The rule lives here rather than in the drawer so that every route into a
+ * selection — a tap, a chip's ×, a pasted URL — obeys the same one.
+ *
+ * @param selected - The current selection.
+ * @param slug - The chip that was tapped.
+ * @returns The new selection, in drawer order. A lit chip always turns off;
+ *   an unlit one in a `select: "one"` heading replaces that heading's pick.
+ */
+export function toggleFacet(
+  selected: readonly string[],
+  slug: string,
+): string[] {
+  const facet = BY_SLUG.get(slug);
+  if (!facet) return orderFacets(selected);
+  if (selected.includes(slug)) {
+    return orderFacets(selected.filter((item) => item !== slug));
+  }
+  const single = GROUP_BY_KEY.get(facet.group)?.select === "one";
+  const kept = single
+    ? selected.filter((item) => BY_SLUG.get(item)?.group !== facet.group)
+    : selected;
+  return orderFacets([...kept, slug]);
+}
+
 /* ---------- Lookups ---------- */
 
 /**
@@ -336,22 +418,15 @@ export function assertBestFor(values: readonly string[]): string[] {
  *
  * Unknown slugs are DROPPED here rather than thrown: the string comes from a
  * URL a stranger can type, and a stale bookmark from a retired chip should
- * show a wider shop, not an error page.
+ * show a wider shop, not an error page. A second chip from a `select: "one"`
+ * heading is dropped the same way, so no URL can hold two price bands.
  *
  * @param raw - The raw `?f=` value, e.g. "jewel,anniversary" (or undefined).
- * @returns Recognised slugs, de-duplicated, in drawer order.
+ * @returns Recognised slugs, de-duplicated, in drawer order, `select`-legal.
  */
 export function parseFacetParam(raw: string | undefined): string[] {
   if (!raw) return [];
-  const wanted = new Set(
-    raw
-      .split(",")
-      .map((part) => part.trim())
-      .filter((part) => BY_SLUG.has(part)),
-  );
-  return FACET_GROUPS.flatMap((group) => group.facets)
-    .filter((facet) => wanted.has(facet.slug))
-    .map((facet) => facet.slug);
+  return enforceSelect(orderFacets(raw.split(",").map((part) => part.trim())));
 }
 
 /* ---------- Matching ---------- */

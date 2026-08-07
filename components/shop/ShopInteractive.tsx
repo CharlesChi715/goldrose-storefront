@@ -21,9 +21,10 @@
  *   sliced, so it holds across pages rather than within one.
  * - The filter drawer is REAL since 2026-08-07. Collections/Occasion/Recipient
  *   match `products.best_for` (migration 0009); Price and Availability are
- *   computed from the catalog's own price and stock. Every chip multi-selects,
- *   and the vocabulary — slugs, wording, and what each derived chip means —
- *   comes from lib/catalog/facets.ts, never from this file.
+ *   computed from the catalog's own price and stock. Chips multi-select except
+ *   under Price, which takes one band at a time and swaps (owner, 2026-08-07).
+ *   The vocabulary — slugs, wording, what each derived chip means, and how
+ *   many may be lit — comes from lib/catalog/facets.ts, never from this file.
  * - The selection lives in the URL (`?f=jewel,anniversary`), not in state
  *   here: the server owns the grid, the count and the pager, so the three
  *   cannot disagree, and a filtered shop is a link a shopper can send.
@@ -50,6 +51,7 @@ import {
 import {
   facetLabel,
   matchesFacets,
+  toggleFacet,
   type FacetSubject,
 } from "@/lib/catalog/facets.ts";
 import { abs, txt } from "@/lib/figma-layout";
@@ -689,15 +691,12 @@ export function ShopInteractive({
                     key={chip.slug}
                     type="button"
                     aria-pressed={on}
-                    // Multi-select: chips within a heading are alternatives
-                    // (OR), so "Birthday or Wedding" has to be expressible.
-                    // Tapping a lit chip is how it goes out again.
+                    // The heading's own rule decides what a tap does — most
+                    // are multi-select ("Birthday or Wedding"), Price takes
+                    // one band at a time and swaps. That rule lives in
+                    // lib/catalog/facets.ts so a pasted URL obeys it too.
                     onClick={() =>
-                      setPending((current) =>
-                        current.includes(chip.slug)
-                          ? current.filter((slug) => slug !== chip.slug)
-                          : [...current, chip.slug],
-                      )
+                      setPending((current) => toggleFacet(current, chip.slug))
                     }
                     style={{
                       ...abs(chip.x - 16, row.y - 356 + 28, chip.w, 32),

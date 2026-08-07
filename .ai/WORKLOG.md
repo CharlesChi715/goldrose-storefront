@@ -5781,6 +5781,17 @@ rendered. It is now `text[]` holding facet slugs, unbounded per product.
   admin -> storefront round trip in `admin-products.spec.ts`. Green: 126 e2e,
   112 unit.
 
-Open: push `0009` to hosted (owner call — it drops the three blurbs), then
-re-pick each product's facets in the admin, since the migration starts every
-row empty.
+### Follow-up the same day — Price is single-choice
+
+Owner ruling: a product has one price, so overlapping bands read as a mistake
+rather than a wider search. Headings now carry a `select: "one" | "many"`
+field; Price is the only `one`. Picking a second band swaps the first, tapping
+the lit band clears it, and `parseFacetParam` narrows a hand-typed
+`?f=under-100,300-plus` to one band so no URL can reach a state the drawer
+cannot draw or undo. The rule lives in the registry, not the component, so
+taps, the chip ×, and pasted URLs all obey the same one. 118 unit, 128 e2e.
+
+Open: push `0009` to hosted — `supabase db push` is blocked for the agent by
+the permission classifier, so the owner runs it. Values that are already chip
+names carry across (both hosted rows say "Classic Collection" -> `classic`);
+everything else starts empty and is re-picked in the admin.

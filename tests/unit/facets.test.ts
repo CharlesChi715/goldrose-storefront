@@ -22,6 +22,7 @@ import {
   facetSubject,
   matchesFacets,
   parseFacetParam,
+  toggleFacet,
   type FacetSubject,
 } from "../../lib/catalog/facets.ts";
 import type { CatalogProduct } from "../../lib/supabase/types.ts";
@@ -101,6 +102,53 @@ test("parseFacetParam drops junk instead of throwing — the URL is public", () 
   assert.deepEqual(parseFacetParam("jewel,<script>,ex-wife"), ["jewel"]);
   assert.deepEqual(parseFacetParam(undefined), []);
   assert.deepEqual(parseFacetParam(""), []);
+});
+
+test("parseFacetParam refuses two price bands, whatever the URL says", () => {
+  // A hand-typed URL must not reach a state the drawer cannot draw or undo.
+  // First in DRAWER order wins, so the answer does not depend on the string's.
+  assert.deepEqual(parseFacetParam("under-100,300-plus"), ["under-100"]);
+  assert.deepEqual(parseFacetParam("300-plus,under-100"), ["under-100"]);
+  // Multi-select headings are untouched by that rule.
+  assert.deepEqual(parseFacetParam("in-stock,pre-order"), [
+    "in-stock",
+    "pre-order",
+  ]);
+});
+
+/* ---------- toggleFacet ---------- */
+
+test("toggleFacet lights and unlights a multi-select chip", () => {
+  assert.deepEqual(toggleFacet([], "birthday"), ["birthday"]);
+  assert.deepEqual(toggleFacet(["birthday", "wedding"], "wedding"), [
+    "birthday",
+  ]);
+});
+
+test("a second price band SWAPS the first rather than joining it", () => {
+  assert.deepEqual(toggleFacet(["under-100"], "300-plus"), ["300-plus"]);
+  // ...and only within Price: the other headings keep their picks.
+  assert.deepEqual(toggleFacet(["jewel", "wife", "under-100"], "200-299"), [
+    "jewel",
+    "wife",
+    "200-299",
+  ]);
+});
+
+test("tapping the lit price band clears it, so 'any price' stays reachable", () => {
+  assert.deepEqual(toggleFacet(["under-100"], "under-100"), []);
+});
+
+test("toggleFacet returns drawer order, so one set of chips is one URL", () => {
+  const tappedBackwards = ["girlfriend", "wedding", "jewel"].reduce<string[]>(
+    toggleFacet,
+    [],
+  );
+  assert.deepEqual(tappedBackwards, ["jewel", "wedding", "girlfriend"]);
+});
+
+test("toggleFacet ignores a slug that is not in the vocabulary", () => {
+  assert.deepEqual(toggleFacet(["jewel"], "husband"), ["jewel"]);
 });
 
 /* ---------- matchesFacets ---------- */
