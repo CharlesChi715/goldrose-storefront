@@ -136,3 +136,83 @@ test("hiding a section removes its band and shortens the page", async ({
   expect(await stageHeight(page)).toBe(fullHeight);
   await expect(page.getByText("Inside the ELDREVE Workshop")).toBeVisible();
 });
+
+/* --- The per-section live previews (2026-08-08) ------------------------- */
+
+test("every section opens with a live preview of itself", async ({ page }) => {
+  await openEditor(page);
+  // One frame per section, each pointed at that section's own route — the
+  // screen's promise is that what you are editing is on screen before the
+  // first input.
+  for (const id of [
+    "promo",
+    "hero",
+    "featured",
+    "ready",
+    "occasion",
+    "recipient",
+    "craft",
+    "story",
+  ]) {
+    await expect(
+      page.locator(`[data-home-section="${id}"] iframe`),
+    ).toHaveAttribute("src", new RegExp(`^/preview/home/${id}\\?`));
+  }
+  // The rail speed has nothing of its own on the page, so its frame borrows
+  // the Featured band — a still picture of a speed would be worthless.
+  await expect(
+    page.locator('[data-home-section="motion"] iframe'),
+  ).toHaveAttribute("src", /^\/preview\/home\/motion\?/);
+});
+
+test("the standalone preview is the band alone — no promo bar, header or tab bar", async ({
+  page,
+}) => {
+  await adminLogin(page);
+  await page.goto("/preview/home/craft", { waitUntil: "networkidle" });
+
+  // The band is there, at exactly its own height: A-9 is 991 design pixels.
+  await expect(page.getByText("Inside the ELDREVE Workshop")).toBeVisible();
+  const height = await page
+    .locator(".figv-stage")
+    .evaluate((el) => parseFloat(getComputedStyle(el).height));
+  expect(height).toBe(991);
+
+  // ...and nothing else is: no bottom tab bar, and none of the bands that sit
+  // above or below it on the page.
+  await expect(page.locator(".figv-navstage")).toHaveCount(0);
+  await expect(page.getByText("Featured Rose Gifts")).toHaveCount(0);
+  await expect(page.getByText("Frequently Asked Questions")).toHaveCount(0);
+});
+
+test("each width slider is the section's own, and Match reconciles it", async ({
+  page,
+}) => {
+  await openEditor(page);
+  const craft = page.locator('[data-home-section="craft"]');
+  const story = page.locator('[data-home-section="story"]');
+  const widthOf = (frame: ReturnType<Page["locator"]>) =>
+    frame.evaluate((el) => (el as HTMLIFrameElement).style.width);
+
+  // Everything starts at the design's own 430, so nothing offers to sync.
+  await expect(
+    craft.getByRole("button", { name: "Match the main preview" }),
+  ).toHaveCount(0);
+
+  // Move the PAGE-WIDE preview to a narrow phone. The sections do not follow —
+  // that is the point of separate sliders — but each now offers to.
+  await page.locator("input[type=range]").first().fill("360");
+  await expect(page.locator('iframe[src^="/?adminPreview"]')).toHaveCSS(
+    "width",
+    "360px",
+  );
+  await expect(await widthOf(craft.locator("iframe"))).toBe("430px");
+
+  await craft.getByRole("button", { name: "Match the main preview" }).click();
+  await expect(craft.locator("iframe")).toHaveCSS("width", "360px");
+  await expect(
+    craft.getByRole("button", { name: "Match the main preview" }),
+  ).toHaveCount(0);
+  // One section's slider never moves another's.
+  await expect(story.locator("iframe")).toHaveCSS("width", "430px");
+});

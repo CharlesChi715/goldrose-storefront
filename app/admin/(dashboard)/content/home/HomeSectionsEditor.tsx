@@ -61,6 +61,7 @@ import {
 } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
+import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
   resetHomePageAction,
@@ -108,6 +109,12 @@ export type SectionView = {
   blurbZh: string;
   hideable: boolean;
   visible: boolean;
+  /**
+   * What this section's own live preview shows, or null when it has nothing to
+   * show. `borrowed` marks a section that has no band of its own and is being
+   * illustrated with another one — see lib/home-content/preview.ts.
+   */
+  preview: { height: number; borrowed: boolean } | null;
   fields: FieldView[];
 };
 
@@ -251,6 +258,16 @@ export function HomeSectionsEditor({
   // Which phone width the preview is standing in for. Session-local: it is a
   // way of looking at the page, not a setting that belongs to the store.
   const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
+  // Per-section preview widths, by section id. Absent means "still at the
+  // design width" — kept sparse so nothing has to be seeded when a section is
+  // added, and so "everything agrees" is the state you get by doing nothing.
+  const [sectionWidths, setSectionWidths] = useState<Record<string, number>>(
+    {},
+  );
+
+  /** The width one section's own preview is set to. */
+  const widthOf = (sectionId: string): number =>
+    sectionWidths[sectionId] ?? DESIGN_WIDTH;
 
   /** The live value of a field: the local draft if touched, else what is saved. */
   const valueOf = (section: SectionView, field: FieldView): string =>
@@ -796,6 +813,28 @@ export function HomeSectionsEditor({
             >
               <Card>
                 <BlockStack gap="400">
+                  {/* The section's own preview opens the section, so what you
+                      are editing is on screen before the first input. */}
+                  {section.preview ? (
+                    <SectionPreview
+                      sectionId={section.id}
+                      bandHeight={section.preview.height}
+                      borrowed={section.preview.borrowed}
+                      hidden={section.hideable && !section.visible}
+                      width={widthOf(section.id)}
+                      mainWidth={previewWidth}
+                      min={PREVIEW_MIN_WIDTH}
+                      max={PREVIEW_MAX_WIDTH}
+                      nonce={previewNonce}
+                      onWidthChange={(next) =>
+                        setSectionWidths((current) => ({
+                          ...current,
+                          [section.id]: next,
+                        }))
+                      }
+                    />
+                  ) : null}
+
                   <InlineStack
                     align="space-between"
                     blockAlign="center"

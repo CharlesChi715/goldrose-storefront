@@ -80,7 +80,14 @@ export function Beacon() {
     if (
       !pathname ||
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/api")
+      pathname.startsWith("/api") ||
+      // Admin previews are the storefront rendered INSIDE the admin: the
+      // standalone section preview at /preview/home/*, and the whole home page
+      // framed with ?adminPreview=. A teammate proof-reading copy is not a
+      // visit, and counting them would put fake traffic — and fake dwell time
+      // — in the owner's own analytics.
+      pathname.startsWith("/preview/") ||
+      new URLSearchParams(window.location.search).has("adminPreview")
     ) {
       return;
     }

@@ -765,6 +765,17 @@ const en = {
     "Drag to see the page on a smaller or larger phone — from the narrowest still in use to the widest sold today. The page scales as a whole, so a narrow phone makes everything smaller rather than re-wrapping the text.",
   "home.previewWidthReset": "Back to design width",
 
+  // Content → Home page · the per-section preview
+  "home.sectionPreview": "This section on its own",
+  "home.sectionPreviewHelp":
+    "Only this band of the home page — no header and no tab bar — at its own size. It refreshes when you save.",
+  "home.sectionPreviewHidden":
+    "This section is switched off, so it is not on the live page right now. The preview shows what turning it back on would put there.",
+  "home.sectionPreviewBorrowed":
+    "Shown on the Best Sellers band, because this speed has nothing of its own on the page — watch the cards move.",
+  "home.previewSync": "Match the main preview",
+  "home.previewOpen": "Open in a new tab",
+
   // Content → Home page · photos
   "home.photo.title": "Change photo",
   "home.photo.change": "Change photo",
@@ -1502,6 +1513,17 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.previewWidthHelp":
     "拖动可查看页面在更小或更大手机上的效果——从目前仍在使用的最窄机型，到当前在售的最宽机型。页面整体等比缩放，因此宽度变窄只会让所有内容变小，文字不会重新换行。",
   "home.previewWidthReset": "恢复设计宽度",
+
+  // 内容 → 首页 · 单个板块预览
+  "home.sectionPreview": "单独预览本板块",
+  "home.sectionPreviewHelp":
+    "只显示首页的这一段——没有顶部导航，也没有底部标签栏——并保持其原始高度。保存后会自动刷新。",
+  "home.sectionPreviewHidden":
+    "本板块已隐藏，目前不会出现在线上页面。此预览显示的是重新开启后的效果。",
+  "home.sectionPreviewBorrowed":
+    "以「热销」板块演示：该速度本身在页面上没有对应内容，请观察卡片的滚动。",
+  "home.previewSync": "与主预览宽度一致",
+  "home.previewOpen": "在新标签页中打开",
 
   // 内容 → 首页 · 图片
   "home.photo.title": "更换图片",

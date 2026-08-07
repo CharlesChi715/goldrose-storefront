@@ -19,13 +19,7 @@ import type { Metadata } from "next";
 import { ScaleFrame, PromoBar, HomeHeader } from "@/components/chrome";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
 import { playfair } from "@/lib/fonts";
-import { A1 } from "@/components/home/A1";
-import { A2 } from "@/components/home/A2";
-import { A3 } from "@/components/home/A3";
-import { A5 } from "@/components/home/A5";
-import { A6 } from "@/components/home/A6";
-import { A9 } from "@/components/home/A9";
-import { A11 } from "@/components/home/A11";
+import { homeBand } from "@/components/home/bands";
 import { HomeBand } from "@/components/home/HomeBand";
 import { railTiming } from "@/lib/home-content/rail-timing";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
@@ -70,7 +64,10 @@ export default async function HomePage() {
   // (§7.9). getHomeContent never throws: with no DB it returns the design.
   const { text, visible, layout, overridden } = await getHomeContent();
   // One timing for all four card rails, so they never drift apart (§9.8).
-  const timing = railTiming(text.motion.rail_cycle_ms, text.motion.rail_glide_ms);
+  const timing = railTiming(
+    text.motion.rail_cycle_ms,
+    text.motion.rail_glide_ms,
+  );
   const base = siteBaseUrl();
   const structuredData = [
     {
@@ -137,26 +134,29 @@ export default async function HomePage() {
           A-5 @1868, A-6 @2344, A-9 @3133, A-11 @4124. HomeBand is a no-op
           while every section is visible, which is what keeps the untouched
           page byte-identical to the import. */}
+        {/* The band CONTENT comes from components/home/bands.tsx so that the
+          admin's per-section preview mounts the very same tree — see that
+          file. What stays here is where each band sits. */}
         <HomeBand shift={layout.shift.hero} hidden={!visible.hero}>
-          <A1 c={text.hero} />
+          {homeBand("hero", text, timing)}
         </HomeBand>
         <HomeBand shift={layout.shift.featured} hidden={!visible.featured}>
-          <A2 timing={timing} c={text.featured} />
+          {homeBand("featured", text, timing)}
         </HomeBand>
         <HomeBand shift={layout.shift.ready} hidden={!visible.ready}>
-          <A3 c={text.ready} />
+          {homeBand("ready", text, timing)}
         </HomeBand>
         <HomeBand shift={layout.shift.occasion} hidden={!visible.occasion}>
-          <A5 timing={timing} c={text.occasion} />
+          {homeBand("occasion", text, timing)}
         </HomeBand>
         <HomeBand shift={layout.shift.recipient} hidden={!visible.recipient}>
-          <A6 timing={timing} c={text.recipient} />
+          {homeBand("recipient", text, timing)}
         </HomeBand>
         <HomeBand shift={layout.shift.craft} hidden={!visible.craft}>
-          <A9 c={text.craft} />
+          {homeBand("craft", text, timing)}
         </HomeBand>
         <HomeBand shift={layout.shift.story} hidden={!visible.story}>
-          <A11 c={text.story} />
+          {homeBand("story", text, timing)}
         </HomeBand>
         {/* Header last: A-1's opaque module background covers y32-98, and the
           header (chrome, not part of any module) must paint above it. */}
