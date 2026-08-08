@@ -6593,3 +6593,47 @@ Housekeeping after the day's merges. 20 branches and 12 worktrees removed;
   identical machine-verified quality; tooled arm 7m16s vs 12m29s (−42%),
   zero defect round-trips vs one. Divergence exposed the missing
   body-conformance rule, now written. New skill: /feature-new.
+
+## 2026-08-09 — the section editor is pinned to the right of its preview
+
+**Branch:** `worktree-admin-home-customization` (merged to main earlier today)
+
+Charles found the editor opening BELOW the preview and half out of sight, and
+asked for it on the right of each section's live preview. Measured first rather
+than guessed: the card tracks the viewport minus the nav, and the row needs
+472 (window) + 16 (gap) + 280 (editor) = 768px to seat both.
+
+```
+viewport   card    docked beside?
+  1440      950    yes
+  1100      811    yes
+  1000      711    NO — wrapped below   ← Charles's window, app panel taking half the screen
+   820      531    NO
+```
+
+So below about a 1060px viewport there is genuinely no room for a 430px phone
+preview and a 300px editor side by side. The window cannot give ground — its
+width IS the phone's viewport — so the choice was: below (what it did), overlap
+the preview, or shrink the preview. The owner picked overlap.
+
+Done with one CSS rule rather than a breakpoint or a measurement:
+`left: min(488px, calc(100% - 324px))` on an absolutely positioned panel.
+`488px` is the preview's width plus the gap, so a roomy card docks it exactly
+where a flex column would; `100% - 324px` takes over on a narrow card, sliding
+it left until it is back inside. Verified: 1440 → 37px gap, zero overlap;
+1000 → sits right, overlapping the preview's last 107px; never below, never
+outside the card.
+
+Two things this deliberately avoids. A container query would have been tidier
+and is unusable: `container-type` implies layout containment, which makes the
+element a containing block for FIXED descendants — and the picker's overlay is
+`position: fixed` inside this subtree, so every highlight would silently re-base
+onto the card. And taking the panel out of flow means nothing stops it spilling
+over the fields below, so it is capped at the row's own height (436 = the 360
+window + its header, gap and padding) and scrolls inside that.
+
+**Also this session:** `npx playwright install chromium` — the browser cache had
+gone missing mid-session, which presents as all 155 e2e tests failing at 0ms.
+Not a code failure; worth recognising quickly next time.
+
+**Verified:** 166 unit, 155 e2e including the three pixel baselines.

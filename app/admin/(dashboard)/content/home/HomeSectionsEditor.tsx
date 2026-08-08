@@ -182,6 +182,17 @@ const JUMP_CLEARANCE = ADMIN_TOP_BAR + 16;
  */
 const PREVIEW_MIN_WIDTH = 320;
 const PREVIEW_MAX_WIDTH = 440;
+
+/**
+ * How tall a section's preview row stands, in admin pixels.
+ *
+ * The editor that opens beside a preview is taken out of flow so it cannot push
+ * the fields below it down the page — which means nothing stops it spilling
+ * over them either, so it is capped at the row it belongs to and scrolls inside
+ * that. 436 is SectionPreview's own arithmetic: the 360px window, its 24px
+ * header row, the 6px stack gap and the 8px padding at each end of its Box.
+ */
+const PREVIEW_ROW_HEIGHT = 436;
 /** The frame's own canvas width — where the slider starts and resets to. */
 const DESIGN_WIDTH = 430;
 
@@ -1073,16 +1084,22 @@ export function HomeSectionsEditor({
 
                   {/* The section's own preview opens the section, so what you
                       are editing is on screen before the first input — and the
-                      editor for whatever you point at opens beside it, never
-                      over it. `wrap` is the honest fallback on a narrow window:
-                      with no room to sit beside, it sits below. */}
+                      editor for whatever you point at opens to the RIGHT of
+                      that preview (owner, 2026-08-09).
+                      `position: relative` so the editor can be anchored to it,
+                      and note it is `relative` rather than anything that
+                      establishes a containing block for FIXED descendants: the
+                      picker's overlay is `position: fixed` and lives inside
+                      this subtree, so a `transform`, `filter` or
+                      `container-type` here would silently re-base every
+                      highlight onto this card. */}
                   {section.preview ? (
                     <div
                       style={{
                         display: "flex",
-                        flexWrap: "wrap",
                         alignItems: "flex-start",
                         gap: 16,
+                        position: "relative",
                       }}
                     >
                       <div
@@ -1114,7 +1131,32 @@ export function HomeSectionsEditor({
                         />
                       </div>
                       {pickedSection === section.id ? (
-                        <div style={{ flex: "1 1 300px", minWidth: 280 }}>
+                        /* PINNED TO THE PREVIEW'S RIGHT EDGE, at every width.
+                           `left` is one rule doing two jobs: `488px` is the
+                           preview's own width plus the gap, so on a roomy
+                           screen the editor sits beside it exactly as a docked
+                           column would; `100% - 324px` takes over once the card
+                           is too narrow for that, sliding the editor left until
+                           it is back inside the card and letting it overlap the
+                           preview's right-hand side rather than fall below it.
+                           Below about a 1060px viewport there is no third
+                           option: a 430px phone and a 300px editor do not both
+                           fit, and the owner would rather cover part of the
+                           preview than hunt for the editor underneath it.
+                           Out of flow, so it cannot push the fields down; the
+                           height cap keeps it from spilling over them instead. */
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: "min(488px, calc(100% - 324px))",
+                            width: 320,
+                            maxWidth: "100%",
+                            maxHeight: PREVIEW_ROW_HEIGHT,
+                            overflowY: "auto",
+                            zIndex: 6,
+                          }}
+                        >
                           <EditorPanel
                             picked={picked}
                             valueOf={valueOf}

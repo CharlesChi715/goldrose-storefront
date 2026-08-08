@@ -195,7 +195,11 @@ Open linked resources only when the task needs them.
   always on, and the "outline everything editable" half follows the pointer, so
   the window you are in shows what it owns and the eight you are not stay clean
   enough to judge the design by. A click opens that field in an editor docked
-  beside that window, joined by a curve. (The switch existed only while arming
+  **to the right of** that window, joined by a curve — pinned there at every
+  width, sliding left to overlap the preview's right edge rather than dropping
+  below it once the card is too narrow to hold both (owner, 2026-08-09; below a
+  ~1060px viewport a 430px phone and a 300px editor do not both fit).
+  (The switch existed only while arming
   installed the capture layer that broke scrolling; with the layer gone it
   guarded nothing and merely hid the feature. A press that moves more than 5px
   is a drag, not a pick, so a window can still be dragged to scroll.)
