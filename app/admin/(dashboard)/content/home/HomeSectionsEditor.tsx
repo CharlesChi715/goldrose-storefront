@@ -356,51 +356,77 @@ export function HomeSectionsEditor({
    * cursor is worse than a connector that stretches, so the panel anchors where
    * the element was when it was picked and the curve does the following.
    */
+  /**
+   * The panel's own rectangle (what the connector aims at) and where it sits.
+   *
+   * `top` is decided ONCE per selection and then left alone. It used to follow
+   * the selection every frame, which is unusable on anything inside a rail: the
+   * carousels advance every 4.2 seconds with a 900ms glide, so the panel chased
+   * the card away while somebody was typing in it. A form that moves under the
+   * cursor is worse than a connector that stretches.
+   *
+   * And it is measured on CHANGE, not on a frame loop. Two rAF loops each
+   * publishing 60 times a second, whose inputs are each other's outputs, is
+   * what React reports as "maximum update depth exceeded" — typing one
+   * character was enough to tip it over. Since the panel is frozen in place,
+   * its rectangle only moves when its own content resizes or the admin
+   * scrolls, and those say so for themselves.
+   */
   const [panel, setPanel] = useState<{ rect: Rect; top: number } | null>(null);
   const selectedKey = picked[0]?.key ?? null;
 
   useEffect(() => {
-    if (selectedKey === null) return;
-    let raf = 0;
-    // Local to this effect, so a new selection re-freezes by construction.
+    if (selectedKey === null) {
+      return;
+    }
+    // Decided once, from wherever the element was when it was picked.
     let frozenTop: number | null = null;
-    const track = () => {
+
+    const measure = () => {
       const node = panelRef.current;
       const column = node?.parentElement;
       const iframe = previewFrame.current;
-      if (node && column && iframe) {
-        const columnTop = column.getBoundingClientRect().top;
-        if (frozenTop === null) {
-          const element = iframe.contentDocument?.querySelector(
-            `[data-field~="${selectedKey}"]`,
-          );
-          const rect = element ? visibleRect(element, iframe) : null;
-          if (rect) frozenTop = Math.max(0, rect.y - columnTop);
-        }
-        const box = node.getBoundingClientRect();
-        const next = {
-          rect: { x: box.x, y: box.y, w: box.width, h: box.height },
-          top: frozenTop ?? 0,
-        };
-        // Publish only real movement. This loop and the picker's feed each
-        // other — the connector aims at this rect — so setting state every
-        // frame regardless is what React reports as "maximum update depth
-        // exceeded", not merely a waste.
-        setPanel((current) =>
-          current &&
-          Math.abs(current.rect.x - next.rect.x) < 0.5 &&
-          Math.abs(current.rect.y - next.rect.y) < 0.5 &&
-          Math.abs(current.rect.w - next.rect.w) < 0.5 &&
-          Math.abs(current.rect.h - next.rect.h) < 0.5 &&
-          Math.abs(current.top - next.top) < 0.5
-            ? current
-            : next,
+      if (!node || !column) return;
+      const columnTop = column.getBoundingClientRect().top;
+      if (frozenTop === null && iframe) {
+        const element = iframe.contentDocument?.querySelector(
+          `[data-field~="${selectedKey}"]`,
         );
+        const rect = element ? visibleRect(element, iframe) : null;
+        if (rect) frozenTop = Math.max(0, rect.y - columnTop);
       }
-      raf = requestAnimationFrame(track);
+      const box = node.getBoundingClientRect();
+      const next = {
+        rect: { x: box.x, y: box.y, w: box.width, h: box.height },
+        top: frozenTop ?? 0,
+      };
+      setPanel((current) =>
+        current &&
+        Math.abs(current.rect.x - next.rect.x) < 0.5 &&
+        Math.abs(current.rect.y - next.rect.y) < 0.5 &&
+        Math.abs(current.rect.w - next.rect.w) < 0.5 &&
+        Math.abs(current.rect.h - next.rect.h) < 0.5 &&
+        Math.abs(current.top - next.top) < 0.5
+          ? current
+          : next,
+      );
     };
-    raf = requestAnimationFrame(track);
-    return () => cancelAnimationFrame(raf);
+
+    // The element may not be measurable on the first pass — the frame can still
+    // be settling — so try again on the next frame, once, rather than forever.
+    measure();
+    const retry = requestAnimationFrame(measure);
+
+    const observer = new ResizeObserver(measure);
+    if (panelRef.current) observer.observe(panelRef.current);
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure, { passive: true });
+    return () => {
+      cancelAnimationFrame(retry);
+      observer.disconnect();
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
   }, [selectedKey]);
 
   const panelRect = picked.length > 0 ? (panel?.rect ?? null) : null;

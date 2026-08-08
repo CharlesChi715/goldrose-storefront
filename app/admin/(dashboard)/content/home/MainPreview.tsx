@@ -109,7 +109,22 @@ export function MainPreview({
       const frame = iframeRef?.current?.contentWindow;
       if (!frame) return;
       event.preventDefault();
-      frame.scrollBy({ top: event.deltaY, left: event.deltaX });
+      // `deltaY` is only in PIXELS when deltaMode is 0. A mouse wheel usually
+      // reports LINES (deltaMode 1, ~3 per notch), which is why forwarding the
+      // raw number felt like treacle next to a normal scroll — three pixels a
+      // notch instead of fifty. Converted here rather than scaled by a fudge
+      // factor, so it tracks the platform.
+      const LINE = 16;
+      const unit =
+        event.deltaMode === 1
+          ? LINE
+          : event.deltaMode === 2
+            ? node.clientHeight || LINE * 20
+            : 1;
+      frame.scrollBy({
+        top: event.deltaY * unit,
+        left: event.deltaX * unit,
+      });
     };
     node.addEventListener("wheel", onWheel, { passive: false });
     return () => node.removeEventListener("wheel", onWheel);
