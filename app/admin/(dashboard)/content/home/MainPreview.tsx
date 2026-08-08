@@ -29,7 +29,7 @@
  * still fit its box" — that is what the per-field character budgets are for.
  */
 
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import {
   BlockStack,
   Box,
@@ -69,6 +69,8 @@ export function MainPreview({
   onWidthSettled,
   iframeRef,
   capture,
+  armed = false,
+  onToggleArm,
 }: {
   designWidth: number;
   min: number;
@@ -80,9 +82,38 @@ export function MainPreview({
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
   /** Present only while the picker is armed. */
   capture?: CaptureHandlers | null;
+  /** Whether point-and-edit is on. */
+  armed?: boolean;
+  /** Omit to hide the picker control entirely. */
+  onToggleArm?: () => void;
 }) {
   const t = useAdminT();
   const [width, setWidth] = useState(designWidth);
+  const captureRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * While the picker is armed, its capture layer swallows the wheel — so the
+   * preview could not be scrolled, and only the top 620px of a 5,000px page was
+   * ever reachable to point at. The layer forwards the wheel into the frame
+   * instead.
+   *
+   * A native listener rather than React's `onWheel`, because React registers
+   * wheel handlers passively at the root and a passive listener cannot
+   * `preventDefault()` — without which the admin page scrolls away underneath
+   * at the same time.
+   */
+  useEffect(() => {
+    const node = captureRef.current;
+    if (!node || !capture) return;
+    const onWheel = (event: WheelEvent) => {
+      const frame = iframeRef?.current?.contentWindow;
+      if (!frame) return;
+      event.preventDefault();
+      frame.scrollBy({ top: event.deltaY, left: event.deltaX });
+    };
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => node.removeEventListener("wheel", onWheel);
+  }, [capture, iframeRef]);
 
   /** Move the frame now; tell the editor when it can afford to listen. */
   function change(next: number) {
@@ -93,16 +124,29 @@ export function MainPreview({
   return (
     <Card>
       <BlockStack gap="200">
-        <InlineStack align="space-between" blockAlign="center">
+        <InlineStack align="space-between" blockAlign="center" gap="200">
           <Text as="h2" variant="headingSm">
             {t("home.livePreview")}
           </Text>
-          <Button variant="plain" onClick={onRefresh}>
-            {t("home.refreshPreview")}
-          </Button>
+          <InlineStack gap="300" blockAlign="center">
+            <Button variant="plain" onClick={onRefresh}>
+              {t("home.refreshPreview")}
+            </Button>
+            {/* The picker lives HERE rather than in a card of its own: it acts
+                on this frame and nothing else, and a control sitting apart from
+                the thing it changes has to be explained before it can be used. */}
+            {onToggleArm ? (
+              <Button
+                variant={armed ? "primary" : "secondary"}
+                onClick={onToggleArm}
+              >
+                {armed ? t("home.picker.disarm") : t("home.picker.arm")}
+              </Button>
+            ) : null}
+          </InlineStack>
         </InlineStack>
         <Text as="p" variant="bodySm" tone="subdued">
-          {t("home.livePreviewHelp")}
+          {armed ? t("home.picker.armed") : t("home.livePreviewHelp")}
         </Text>
 
         <RangeSlider
@@ -189,6 +233,7 @@ export function MainPreview({
               into the frame's own coordinates instead. */}
             {capture ? (
               <div
+                ref={captureRef}
                 data-home-picker-capture
                 onPointerMove={capture.onPointerMove}
                 onPointerLeave={capture.onPointerLeave}

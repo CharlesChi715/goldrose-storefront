@@ -75,7 +75,7 @@ import { Overlay } from "./picker/Overlay";
 import { usePicker } from "./picker/usePicker";
 import { indexByField } from "./picker/fieldIndex";
 import { patchField, whenPatchable } from "./picker/patch";
-import type { Rect } from "./picker/geometry";
+import { visibleRect, type Rect } from "./picker/geometry";
 import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
@@ -346,25 +346,44 @@ export function HomeSectionsEditor({
    * render time — reading a ref during render is exactly the thing React cannot
    * keep consistent, and here it would also be a frame stale.
    */
-  const [panel, setPanel] = useState<{ rect: Rect; columnTop: number } | null>(
-    null,
-  );
+  /**
+   * The panel's own rectangle (what the connector aims at) and where it sits.
+   *
+   * `top` is decided ONCE per selection and then left alone. It used to follow
+   * the selection every frame, which is unusable on anything inside a rail: the
+   * carousels advance every 4.2 seconds with a 900ms glide, so the panel chased
+   * the card away while somebody was typing in it. A form that moves under the
+   * cursor is worse than a connector that stretches, so the panel anchors where
+   * the element was when it was picked and the curve does the following.
+   */
+  const [panel, setPanel] = useState<{ rect: Rect; top: number } | null>(null);
+  const selectedKey = picked[0]?.key ?? null;
 
   useEffect(() => {
-    if (picked.length === 0) return;
+    if (selectedKey === null) return;
     let raf = 0;
+    // Local to this effect, so a new selection re-freezes by construction.
+    let frozenTop: number | null = null;
     const track = () => {
       const node = panelRef.current;
       const column = node?.parentElement;
-      if (node && column) {
+      const iframe = previewFrame.current;
+      if (node && column && iframe) {
+        const columnTop = column.getBoundingClientRect().top;
+        if (frozenTop === null) {
+          const element = iframe.contentDocument?.querySelector(
+            `[data-field~="${selectedKey}"]`,
+          );
+          const rect = element ? visibleRect(element, iframe) : null;
+          if (rect) frozenTop = Math.max(0, rect.y - columnTop);
+        }
         const box = node.getBoundingClientRect();
         const next = {
           rect: { x: box.x, y: box.y, w: box.width, h: box.height },
-          columnTop: column.getBoundingClientRect().top,
+          top: frozenTop ?? 0,
         };
         // Publish only real movement. This loop and the picker's feed each
-        // other — the panel's position depends on the selection's rect, and its
-        // own rect is what the connector aims at — so setting state on every
+        // other — the connector aims at this rect — so setting state every
         // frame regardless is what React reports as "maximum update depth
         // exceeded", not merely a waste.
         setPanel((current) =>
@@ -373,7 +392,7 @@ export function HomeSectionsEditor({
           Math.abs(current.rect.y - next.rect.y) < 0.5 &&
           Math.abs(current.rect.w - next.rect.w) < 0.5 &&
           Math.abs(current.rect.h - next.rect.h) < 0.5 &&
-          Math.abs(current.columnTop - next.columnTop) < 0.5
+          Math.abs(current.top - next.top) < 0.5
             ? current
             : next,
         );
@@ -382,15 +401,10 @@ export function HomeSectionsEditor({
     };
     raf = requestAnimationFrame(track);
     return () => cancelAnimationFrame(raf);
-  }, [picked.length]);
+  }, [selectedKey]);
 
   const panelRect = picked.length > 0 ? (panel?.rect ?? null) : null;
-  // Both numbers are viewport-relative; the panel is positioned inside the
-  // column, so the column's own top comes off. Derived at render from two
-  // measured values rather than read back off a ref.
-  const anchorTop = pickerView.selected[0]?.y ?? null;
-  const panelTop =
-    anchorTop !== null && panel ? Math.max(0, anchorTop - panel.columnTop) : 0;
+  const panelTop = panel?.top ?? 0;
   // Each section's own preview width is deliberately NOT here: it lives in the
   // SectionPreview that owns it, so dragging one slider does not re-render this
   // screen's ~180 fields on every pixel. See that file for the measurements.
@@ -905,26 +919,6 @@ export function HomeSectionsEditor({
               </BlockStack>
             </Card>
 
-            {/* Point-and-edit. One control, not two: arming it outlines
-                everything editable AND lets you point at one, because those are
-                the same mode at rest and in use. */}
-            <Card>
-              <InlineStack align="space-between" blockAlign="center" gap="200">
-                <Text as="span" variant="bodySm" tone="subdued">
-                  {armed ? t("home.picker.armed") : t("home.picker.hint")}
-                </Text>
-                <Button
-                  variant={armed ? "primary" : "secondary"}
-                  onClick={() => {
-                    setArmed((on) => !on);
-                    setPicked([]);
-                  }}
-                >
-                  {armed ? t("home.picker.disarm") : t("home.picker.arm")}
-                </Button>
-              </InlineStack>
-            </Card>
-
             {/* The page itself, at whatever phone width the owner picks.
                 Its own component so that dragging its slider re-renders one
                 card rather than this screen's ~180 fields — see MainPreview.
@@ -959,6 +953,11 @@ export function HomeSectionsEditor({
                   onRefresh={() => setPreviewNonce((n) => n + 1)}
                   onWidthSettled={setPreviewWidth}
                   iframeRef={previewFrame}
+                  armed={armed}
+                  onToggleArm={() => {
+                    setArmed((on) => !on);
+                    setPicked([]);
+                  }}
                   capture={
                     armed
                       ? { onPointerMove, onPointerLeave, onClick: pick }
