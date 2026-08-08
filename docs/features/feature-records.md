@@ -50,9 +50,9 @@ Dated 2026-08-08:
 4. [x] After each `git mv` out of `backend/`: repo-wide
        `grep -rn "features/backend" --include="*.md" .` and fix referrers —
        SUMMARY.md's links are outside check's scope.
-5. [ ] Seal: `"features:check"` npm script + CI step beside `check:migrations`.
-6. [ ] `roadmap --write` / `--verify` splicing README's marker block; retire
-       the "not built yet" interim line when it lands.
+5. [x] Seal: `"features:check"` npm script + CI step beside `check:migrations`.
+6. [x] `roadmap --sync` splicing README's marker block, with roadmap
+       freshness enforced as a `check` rule; interim line retired.
 
 ## Open questions
 
