@@ -151,24 +151,30 @@ Open linked resources only when the task needs them.
   **Colours were declined** — the owner ruled appearance stays with the design
   team, and the brand gold and ink are painted into the exported ornament SVGs,
   so a token change would leave a half-recoloured page.
-- **Every section previews itself (2026-08-08,
-  `worktree-admin-home-section-previews`).** Content → Home page opens each
-  section with a frame showing that band and nothing else — new storefront
-  route `/preview/home/[section]`, admin-only via `requireAdmin()`, which draws
-  one band on a stage its own height with no promo bar, header or tab bar. It
-  is deliberately NOT under `/admin/*`: Polaris' stylesheet would change the
-  CSS a pixel-exact band renders in. `components/home/bands.tsx` states the
-  section → component mapping once and the homepage reads it too, so a preview
-  cannot drift from the page; `lib/home-content/preview.ts` holds the geometry
-  (`promo` stated because it is chrome, `motion` borrowing the Featured band
-  because a rail speed needs something moving). Each frame has its own width
-  slider plus **"Match the main preview"**, and the band is zoomed out so the
-  whole of it fits. Also fixed: the Beacon was counting admin previews as real
-  visits — `/preview/*` and any framed document are skipped (latched, so a click
-  inside the preview cannot re-arm it), `/api/beacon` refuses `/preview/` too,
-  and `/preview` is disallowed in robots.txt. `?adminPreview` is deliberately
-  **not** a test: on its own it would be an analytics kill switch anyone could
-  type into the URL bar.
+- **Every section previews itself, as a window on the real page (2026-08-08,
+  `worktree-admin-home-customization`).** Content → Home page opens each section
+  with the SAME document the page-wide preview shows — `/` in an iframe, at the
+  same scale — in a shorter window (360 vs 620) held still over that section's
+  band. There is no second rendering path, so a section preview cannot disagree
+  with the live page about anything. The lock is **structural**: the window's
+  only child is a rail exactly one band tall that clips the ~5,000px page, so
+  the browser's own scroll range is the band and there is no scroll listener to
+  fight. Slack is 48 **design** px each end, so the peek is the same amount of
+  page at every width; `overscroll-behavior: contain` stops the gesture reaching
+  the editor behind. One width slider now drives every window (a frame at
+  another width is at another scale), so the per-section sliders and "Match the
+  main preview" are gone, as is the zoom-to-fit that put Craft and Story on
+  screen at 39%. Geometry in [`lib/home-content/preview.ts`](lib/home-content/preview.ts),
+  unit-tested. ⚠️ **Cost, accepted by the owner:** the standalone
+  `/preview/home/[section]` route is deleted, so a switched-off section can no
+  longer be previewed without switching it on — and the switch publishes
+  immediately. The card says so instead of showing the wrong band.
+  With the route went its robots rule, its `/api/beacon` guard and the
+  `/preview/*` arm of the Beacon test, which is now the single durable rule
+  "is this document framed" — no latch needed, since being framed cannot be
+  destroyed by a click the way a URL can. `?adminPreview` stays on the iframes
+  as a readable marker but is deliberately **not** the test: on its own it would
+  be an analytics kill switch anyone could type into the URL bar.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one

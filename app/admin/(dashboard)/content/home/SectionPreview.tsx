@@ -2,33 +2,45 @@
 
 /**
  * ROLE OF THIS FILE
- * The live preview that opens every section on Content → Home page: this band
- * of the home page and nothing else, on its own width slider.
+ * The live preview that opens every section on Content → Home page: the real
+ * home page, at the size the page-wide preview shows it, held still over this
+ * one band.
  *
- * WHY EACH SECTION GETS ITS OWN
- * The page-wide preview at the top of the screen is the honest one — it shows
- * the bands in order, at their real spacing. It is also 5000 pixels long, so a
- * teammate editing the Craft copy has to scroll a phone-sized window to find
- * the band they are typing into, and then scroll it again after every save.
- * The section preview removes that entirely: the band is already at the top of
- * its own frame, because `/preview/home/[section]` slides it there.
+ * WHY IT IS A WINDOW AND NO LONGER A PICTURE OF A BAND
+ * It used to load a route that drew one band alone and then shrank it until the
+ * whole band fitted — which put Craft and Story on screen at 39%. Type at 39%
+ * is not type you can judge, so the preview answered a question nobody had
+ * ("what shape is this band?") and refused the one everybody has ("does my
+ * wording look right?"). It is now the same document the page-wide preview
+ * loads, at the same scale, in a shorter window: what you see is what a visitor
+ * sees, including the seam where this band meets the ones around it.
  *
- * WHY EACH SLIDER IS SEPARATE, AND WHY THERE IS A SYNC BUTTON
- * The widths are independent because the question is per band: a hero photo is
- * judged at the narrowest phone, a FAQ list at the widest. But independent
- * controls drift, and nine sections silently sitting at nine widths is a
- * screen that lies about what the page looks like. "Match the main preview"
- * pulls one section back onto the width the page-wide preview is using. It is
- * always present and disabled when the two already agree, rather than mounting
- * when they differ: this row sits directly above the frame, so a control that
- * appears mid-drag moves the thing you are looking at.
+ * WHY YOU CANNOT SCROLL OUT OF THE SECTION
+ * The lock is structural, not policed. Three boxes:
  *
- * The frame reloads on save (the parent's nonce) or on demand (Refresh). It
- * cannot show unsaved typing — the preview is the server rendering the stored
- * content, which is the same thing the live page renders — so it says so, in
- * visible text, for as long as the section has an unsaved edit. A teammate who
- * types a new headline, looks up and sees the old one has every reason to
- * conclude the preview is broken.
+ *   window   overflow-y: auto, a fixed height — the thing you scroll
+ *   └ rail   exactly one band tall (plus slack), overflow: hidden
+ *     └ film the whole 5000px page, absolutely positioned, pulled up by filmTop
+ *
+ * Because the rail clips, the film's thousands of pixels never reach the
+ * window's scrollable overflow: the window's scroll range IS the rail's height
+ * minus its own, which is one band. The browser then refuses to scroll past
+ * either end by itself. There is no scroll listener, so there is nothing to
+ * lose a race with, nothing to snap back, and a hard trackpad fling stops dead
+ * at the seam instead of bouncing. `overscrollBehavior: "contain"` keeps that
+ * gesture from carrying on into the ~26,000px editor behind it, which is the
+ * one way "you cannot leave the section" could still have been false.
+ *
+ * The film takes `pointerEvents: "none"` for two reasons at once: the wheel
+ * then belongs to the window rather than to a document that cannot scroll, and
+ * the page's own links cannot navigate the frame off `/` — which every number
+ * here assumes.
+ *
+ * WHAT IT CANNOT SHOW
+ * A switched-off section is not on the page: `HomeBand` draws nothing and
+ * `homeLayout` closes the gap, so the offset it used to hold now belongs to the
+ * next band. There is no honest window onto it, so the card says so instead of
+ * showing the wrong section under the right name.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -37,68 +49,87 @@ import {
   Box,
   Button,
   InlineStack,
-  RangeSlider,
   Text,
   Tooltip,
 } from "@shopify/polaris";
+import { homePreviewWindow } from "@/lib/home-content/preview";
 import { useAdminT } from "../../../PolarisShell";
 
-/** The design's own canvas width — every preview's starting point. */
+/** The design's own canvas width — the width every scale is measured against. */
 const DESIGN_WIDTH = 430;
 
 /**
- * The height a section preview is fitted into, in admin pixels.
+ * How tall a section's window is, in admin pixels.
  *
- * The band is not cropped to this: it is ZOOMED OUT until the whole of it fits
- * (see the zoom maths below). A cropped preview answers "what is at the top of
- * this band", which is the one question you did not need to ask — you already
- * know which section you clicked. The whole band answers "did my heading land,
- * and does the section still hang together", which is the reason to look.
- *
- * The value is deliberately much smaller than the tallest band (Story is 1010
- * stage pixels): nine full-height previews turned the editor into a page of
- * previews with the fields buried between them. At 400 the zoom lands between
- * 40% (Story, Craft) and 100% (the short bands), and "Open in a new tab" is
- * there when small is too small to read.
+ * Deliberately shorter than the page-wide preview's 620: this one answers "how
+ * does this band read", which does not need a phone's whole screen, and nine
+ * full-height frames would bury the fields between them. At 360 it is 58% of
+ * the main preview — far enough apart to read as a decision rather than as a
+ * rendering accident — and still taller than both short bands, so the promo
+ * strip and Ready to Ship need no scrolling at all.
  */
-const FIT_HEIGHT = 400;
+const WINDOW_HEIGHT = 360;
 
 /**
- * One section's standalone live preview, with its own width control.
+ * How far past the band you may scroll, in DESIGN pixels.
  *
- * @param props.sectionId - The section to preview; also the URL segment.
- * @param props.bandHeight - The band's height in stage pixels, used to give the
- *   frame the exact aspect ratio the band has on the page.
- * @param props.borrowed - True when this section has nothing of its own on the
- *   page and the frame is standing in with another band (the rail speed).
- * @param props.hidden - True when the owner has switched this section off.
+ * Stated in design pixels rather than admin ones so that the amount of PAGE you
+ * can peek at is the same whatever width the slider is on — otherwise the lock
+ * would quietly loosen as the phone got narrower.
+ *
+ * 48 because the thing you cannot judge from inside a band is where it meets
+ * its neighbour: 48 design pixels is about a line and a half of body copy, so
+ * the seam, the next band's background and its top edge are all plainly there,
+ * and it is never enough to read the neighbour and mistake it for this section.
+ * Two slacks come to 96, which is 29% of the shortest real band (Ready to Ship,
+ * 327) — a peek rather than a second section. It is also 1.5× the promo strip's
+ * own height and a multiple of 8, so nothing lands on a half pixel at 2×.
+ */
+const SLACK = 48;
+
+/**
+ * One section's live preview: the home page, held over this band.
+ *
+ * @param props.sectionId - The section this card opens.
+ * @param props.y - The band's first pixel on the live stage, in design pixels.
+ * @param props.h - The band's drawn height, in design pixels.
+ * @param props.onPage - False when that band is not on the live page, so there
+ *   is nothing to hold a window over.
+ * @param props.borrowed - True when this section has nothing of its own and the
+ *   window is held over another section's band (the rail speed).
+ * @param props.hidden - True when the owner has switched THIS section off.
  * @param props.stale - True when this section has an unsaved edit, so the frame
  *   is showing something older than what the fields below it say.
- * @param props.mainWidth - The width the page-wide preview is set to.
- * @param props.min - Narrowest selectable width, shared with the main preview.
- * @param props.max - Widest selectable width, shared with the main preview.
+ * @param props.width - The width the page-wide preview is set to; the section
+ *   previews follow it, because a frame at another width is at another scale.
+ * @param props.maxWidth - The widest selectable width, used to reserve the row.
+ * @param props.frameHeight - The live stage height, from `homeLayout()`.
  * @param props.nonce - Bumped by the parent after every save, to reload.
- * @returns The preview card that opens the section.
+ * @returns The preview that opens the section.
  */
 export function SectionPreview({
   sectionId,
-  bandHeight,
+  y,
+  h,
+  onPage,
   borrowed,
   hidden,
   stale,
-  mainWidth,
-  min,
-  max,
+  width,
+  maxWidth,
+  frameHeight,
   nonce,
 }: {
   sectionId: string;
-  bandHeight: number;
+  y: number;
+  h: number;
+  onPage: boolean;
   borrowed: boolean;
   hidden: boolean;
   stale: boolean;
-  mainWidth: number;
-  min: number;
-  max: number;
+  width: number;
+  maxWidth: number;
+  frameHeight: number;
   nonce: number;
 }) {
   const t = useAdminT();
@@ -111,17 +142,13 @@ export function SectionPreview({
    * before it does.
    *
    * Nine of these sit on a ~26,000px page and the last is 25,000px down, so
-   * mounting them all would open the screen with nine `force-dynamic`
-   * storefront renders at once, each reading `site_content` in full and pulling
-   * the band's real artwork — and would do it AGAIN on every save, because a
-   * save re-keys every frame. That is a slow screen anywhere and an unusable
-   * one from China.
-   *
-   * `loading="lazy"` is on the iframe too, but it is only a hint: a plain lazy
-   * iframe 30,000px down a test page was fetched immediately by the browser
-   * this was checked in. This observer is the part that actually holds. Once a
-   * frame has been reached it stays mounted, so scrolling back and forth does
-   * not re-fetch, and a save still refreshes what the owner can see.
+   * mounting them all would open the screen with nine copies of the home page
+   * at once, and would do it AGAIN on every save, because a save re-keys every
+   * frame. `loading="lazy"` is on the iframe too, but it is only a hint: a
+   * plain lazy iframe 30,000px down a test page was fetched immediately by the
+   * browser this was checked in. This observer is the part that actually holds.
+   * Once a frame has been reached it stays mounted, so scrolling back and forth
+   * does not re-fetch, and a save still refreshes what the owner can see.
    */
   const stageRef = useRef<HTMLDivElement>(null);
   const [reached, setReached] = useState(false);
@@ -141,263 +168,207 @@ export function SectionPreview({
     observer.observe(node);
     return () => observer.disconnect();
   }, [reached]);
+
+  const scale = width / DESIGN_WIDTH;
+  const { railHeight, filmTop, range, parkAt } = homePreviewWindow(
+    { y, h },
+    frameHeight,
+    scale,
+    WINDOW_HEIGHT,
+    SLACK,
+  );
+
   /**
-   * This section's width lives HERE, not in the editor above.
+   * Open the window on the band itself, with the slack above it out of sight.
    *
-   * It was in the parent, one map for all nine sections, which is the tidier
-   * place for it right up until you drag: a slider pixel became a re-render of
-   * the whole screen — nine frames and ~180 Polaris fields — and cost 27ms on
-   * top of a 14ms frame. Measured on this machine: 41ms per frame while
-   * dragging, against 13.9ms for the transform on its own, which is to say the
-   * transform was free and every millisecond of the stutter was React.
-   *
-   * Held locally, a drag re-renders this one card. The cost: a section filtered
-   * out by the search box unmounts and comes back at the design width. That is
-   * a way of looking at one band, not a setting, and "Match the main preview"
-   * puts it back in a click.
+   * Set once per geometry rather than on every scroll: this is where the window
+   * OPENS, not a rule about where it may stay. Re-running it when the width or
+   * the reload key changes keeps the band under the eye after a save, which is
+   * the moment a teammate is looking hardest.
    */
-  const [width, setWidth] = useState(DESIGN_WIDTH);
+  const windowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = windowRef.current;
+    if (node) node.scrollTop = parkAt;
+  }, [parkAt, key, reached]);
 
-  // The route scales the 430-wide stage to the frame's width, so the frame's
-  // natural height is the band's height at the same scale. Never stretched: a
-  // wrong height would crop or letterbox the band.
-  const fullHeight = Math.round((bandHeight * width) / DESIGN_WIDTH);
-
-  /* --- The geometry, and why the slider is smooth ------------------------
-     Three sizes, and only the middle one changes while you drag.
-
-     1. THE STAGE is fixed. It reserves the room the widest setting needs, so
-        the admin document's height never changes mid-drag. That is what stops
-        the page scrollbar flashing: this page is ~26,000px tall, so a box that
-        grows and shrinks by 100px re-computes the scroll thumb on every frame
-        of the drag, and the strip strobes. Reserve the space and it is still.
-
-     2. THE FRAME BOX resizes. It is the phone's own outline, so it has to —
-        but it sits INSIDE the fixed stage and holds a single absolutely
-        positioned child, so resizing it reflows nothing but itself.
-
-     3. THE IFRAME NEVER RESIZES. It is laid out at the design's own 430 and
-        the slider's width is applied as an outer `scale()`, which the browser
-        composites instead of re-laying out.
-
-     That last one is not an approximation. ScaleFrame already renders a FIXED
-     430-wide stage and scales it by `min(100vw, 480px) / 430`, so an iframe
-     430 wide scaled by w/430 composes to exactly the transform an iframe w
-     wide would have applied itself — and nothing in the previewed tree keys
-     off viewport width (globals.css has only `hover`/`pointer` and
-     `prefers-reduced-motion` queries). Before this, every pixel of slider
-     travel re-laid out a 991px document with twenty images inside it.
-     --------------------------------------------------------------------- */
-
-  // Fitted against the WIDEST setting, so the stage it reserves is the biggest
-  // the frame will ever be and the reservation is never wrong.
-  const widestHeight = (bandHeight * max) / DESIGN_WIDTH;
-  const zoom = Math.min(1, FIT_HEIGHT / widestHeight);
-  const stageWidth = Math.round(max * zoom);
-  const stageHeight = Math.round(widestHeight * zoom);
-
-  // What the band is drawn at right now, against its 430-wide design. One
-  // number: the fit zoom and the slider's width both feed it, which is why it
-  // moves when the slider does.
-  const scale = (zoom * width) / DESIGN_WIDTH;
-  const boxWidth = Math.round(width * zoom);
-  const boxHeight = Math.round(fullHeight * zoom);
-  const shownAt = Math.round(scale * 100);
-  // Centred by arithmetic, not by `justify-content: center`, so the offset is
+  // Centred by arithmetic rather than by `justify-content`, so the offset is
   // always a whole pixel. Flex halves the free space, and the free space is odd
-  // on about half the slider's positions — which puts the box's left edge, its
-  // 1px border and the band's flush-left content on a half CSS pixel, a whole
-  // device pixel at 2×. Alternating between the two on every step of a drag is
-  // a shimmer down the left edge of the frame.
-  const boxLeft = Math.round((stageWidth - boxWidth) / 2);
-  const boxTop = Math.round((stageHeight - boxHeight) / 2);
+  // at about half the slider's positions — which would put the box's left edge,
+  // its 1px border and the band's flush-left content on a half CSS pixel, and
+  // alternating between the two on every step of a drag is a shimmer.
+  const boxLeft = Math.round((maxWidth - width) / 2);
 
   return (
     <Box background="bg-surface-secondary" borderRadius="200" padding="200">
-      {/* Every row here earns its height: the block repeats eight times, so a
-          line of prose that reads well once is 8 lines of scrolling on the
-          screen. The explanation lives in the title's tooltip and the help text
-          below the slider instead. */}
+      {/* Every row here earns its height: the block repeats nine times, so a
+          line of prose that reads well once is nine lines of scrolling on the
+          screen. The explanation lives in the title's tooltip instead. */}
       <BlockStack gap="150">
         <InlineStack align="space-between" blockAlign="center" gap="200">
-          <InlineStack gap="200" blockAlign="center">
-            <Tooltip content={t("home.sectionPreviewHelp")}>
-              <Text
-                as="h3"
-                variant="bodySm"
-                fontWeight="semibold"
-                tone="subdued"
-              >
-                {t("home.sectionPreview")}
-              </Text>
-            </Tooltip>
-            {/* Said out loud, because small type that nobody asked for reads
-                as a rendering fault rather than a deliberate zoom. Always
-                rendered — at zoom 1 it crosses 100% mid-track, and a label that
-                appears is a row that grows, directly above the frame. */}
-            <Tooltip content={t("home.previewZoomed")}>
-              <Text as="span" variant="bodySm" tone="subdued">
-                {`${shownAt}%`}
-              </Text>
-            </Tooltip>
-          </InlineStack>
-          <InlineStack gap="300" blockAlign="center">
-            {/* Disabled rather than unmounted when the two already agree, for
-                the same reason as the reset button below: this row sits above
-                the frame, so a control that mounts mid-drag moves it. */}
-            <Button
-              variant="plain"
-              disabled={width === mainWidth}
-              onClick={() => setWidth(mainWidth)}
-            >
-              {t("home.previewSync")}
-            </Button>
-            <Button
-              variant="plain"
-              onClick={() => setRefreshed((count) => count + 1)}
-            >
-              {t("home.refreshPreview")}
-            </Button>
-            <Button
-              variant="plain"
-              url={`/preview/home/${sectionId}`}
-              target="_blank"
-            >
-              {t("home.previewOpen")}
-            </Button>
-          </InlineStack>
+          <Tooltip content={t("home.sectionPreviewHelp")}>
+            <Text as="h3" variant="bodySm" fontWeight="semibold" tone="subdued">
+              {t("home.sectionPreview")}
+            </Text>
+          </Tooltip>
+          <Button
+            variant="plain"
+            onClick={() => setRefreshed((count) => count + 1)}
+          >
+            {t("home.refreshPreview")}
+          </Button>
         </InlineStack>
 
-        {/* Only the two exceptional states get a line of their own. */}
-        {borrowed ? (
+        {/* Only the exceptional states get a line of their own. */}
+        {borrowed && onPage ? (
           <Text as="p" variant="bodySm" tone="subdued">
             {t("home.sectionPreviewBorrowed")}
           </Text>
         ) : null}
-        {hidden ? (
-          <Text as="p" variant="bodySm" tone="caution">
-            {t("home.sectionPreviewHidden")}
-          </Text>
-        ) : null}
-        {stale ? (
+        {stale && onPage ? (
           <Text as="p" variant="bodySm" tone="caution">
             {t("home.sectionPreviewStale")}
           </Text>
         ) : null}
 
-        {/* 1 · The stage: fixed size, so the page below never moves — and what
-            the observer watches, which is why it is rendered even while the
-            frame inside it is not. */}
+        {/* 1 · The stage: a constant size, so nothing below it moves. Its
+            height no longer depends on the width at all, so dragging the
+            page-wide slider cannot change this ~26,000px document's height —
+            what the old fit-against-the-widest reservation existed to protect
+            now holds by construction. It is also what the observer watches,
+            which is why it is rendered while the frame inside it is not. */}
         <div
           ref={stageRef}
           style={{
             position: "relative",
-            width: stageWidth,
-            height: stageHeight,
+            width: maxWidth,
+            height: WINDOW_HEIGHT,
             maxWidth: "100%",
             margin: "0 auto",
           }}
         >
-          {/* 2 · The frame box — the phone's own outline, so it resizes. The
-              border and the rounded corner live HERE rather than on the iframe:
-              a scaled iframe scales its own border too, so at 40% the outline
-              would thin to a hairline and the corner would tighten. Placed at a
-              rounded offset rather than centred by flex — see boxLeft. */}
-          <div
-            style={{
-              position: "absolute",
-              left: boxLeft,
-              top: boxTop,
-              width: boxWidth,
-              height: boxHeight,
-              overflow: "hidden",
-              border: "1px solid #e3e3e3",
-              borderRadius: 8,
-              background: "#FFF6EC",
-            }}
-          >
-            {/* 3 · The frame itself, at the design's own width forever —
-                mounted only once this section has been reached. Until then the
-                box shows the page's own cream, already the right size and in
-                the right place, so nothing moves when it arrives. */}
-            {reached ? (
-              <iframe
-                key={key}
-                src={`/preview/home/${sectionId}?n=${key}`}
-                title={`${t("home.sectionPreview")} — ${sectionId}`}
-                // Belt to the observer's braces; see the note on `reached`.
-                loading="lazy"
+          {onPage ? (
+            /* 2 · The window — the phone's own outline, and the only thing
+               that scrolls.
+               `outline` rather than `border`, which is not decoration but
+               arithmetic: this app sets `box-sizing: border-box`, so a 1px
+               border would come out of the CONTENT box and leave a 430-wide
+               window showing 428 pixels of a page scaled to 430 — the right
+               edge quietly clipped, on the one screen whose whole job is to be
+               exact. An outline is painted outside the box and takes no layout
+               space at all, so the viewport stays the width it claims. It is
+               also on this box rather than on the film, because a scaled iframe
+               would scale its own border too. */
+            <div
+              ref={windowRef}
+              tabIndex={0}
+              role="group"
+              aria-label={`${t("home.sectionPreview")} — ${sectionId}`}
+              style={{
+                position: "absolute",
+                left: boxLeft,
+                top: 0,
+                width,
+                height: WINDOW_HEIGHT,
+                // Inert when the band already fits: a window with nowhere to go
+                // should not answer the wheel at all.
+                overflowY: range > 0 ? "auto" : "hidden",
+                overflowX: "hidden",
+                // Without this, hitting either end hands the gesture to the
+                // editor behind — and "constrained to the section" would be
+                // false in the one way that matters.
+                overscrollBehavior: "contain",
+                // The window's width IS the phone's viewport width, so a
+                // scrollbar taking layout space inside it would narrow the page
+                // being judged. Modern Chrome and Firefox honour this; Safari
+                // overlays its scrollbar and takes no space either way.
+                scrollbarWidth: "none",
+                outline: "1px solid #e3e3e3",
+                borderRadius: 8,
+                background: "#FFF6EC",
+              }}
+            >
+              {/* 3 · The rail: exactly one band tall, and clipping. This is
+                  the whole lock — see the file header. */}
+              <div
                 style={{
-                  display: "block",
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: DESIGN_WIDTH,
-                  height: bandHeight,
-                  border: 0,
-                  // Top left, so the scaled frame lands in the box's corner
-                  // rather than being scaled about its centre and cropped on
-                  // all sides.
-                  transformOrigin: "top left",
-                  transform: `scale(${scale})`,
-                  // No `will-change` here on purpose. It was the obvious thing to
-                  // add and it buys nothing: sweeping an iframe's transform by
-                  // hand costs 13.89ms per frame against a 13.86ms idle frame, so
-                  // the browser already composites this. A standing promotion
-                  // hint on nine cross-document iframes, on a 26,000px page, is a
-                  // real cost against Chromium's layer budget — and when that
-                  // budget is exceeded it de-promotes silently, which would take
-                  // the actual fix down with it.
+                  position: "relative",
+                  height: railHeight,
+                  overflow: "hidden",
                 }}
-              />
-            ) : null}
-          </div>
-        </div>
-
-        {/* The width control is one row: the label carries the number and the
-            reset, and the min/max ends sit on the track rather than above it.
-            `labelHidden` would have been shorter still, but a bare slider under
-            a phone-shaped frame reads as a carousel position, not a width. */}
-        <RangeSlider
-          label={
-            <InlineStack gap="200" blockAlign="center">
-              <Text as="span" variant="bodySm" tone="subdued">
-                {t("home.previewWidth")}
-              </Text>
-              <Text as="span" variant="bodySm" fontWeight="semibold">
-                {`${width} px`}
-              </Text>
-              {/* Always rendered, disabled at the design width, rather than
-                  mounted on demand. A button that appears is a row that grows,
-                  and this row is directly above the frame: mounting it mid-drag
-                  stepped the whole page 4px the moment you left 430. */}
-              <Button
-                variant="plain"
-                disabled={width === DESIGN_WIDTH}
-                onClick={() => setWidth(DESIGN_WIDTH)}
               >
-                {t("home.previewWidthReset")}
-              </Button>
-            </InlineStack>
-          }
-          min={min}
-          max={max}
-          step={1}
-          value={width}
-          prefix={
-            <Text as="span" variant="bodySm" tone="subdued">
-              {min}
-            </Text>
-          }
-          suffix={
-            <Text as="span" variant="bodySm" tone="subdued">
-              {max}
-            </Text>
-          }
-          onChange={(next) =>
-            setWidth(typeof next === "number" ? next : next[0])
-          }
-        />
+                {/* 4 · The film: the whole page, at the design's own width
+                    forever, pulled up so this band is the part on show.
+                    Mounted only once the card has been reached; until then the
+                    window shows the page's own cream, already the right size
+                    and place, so nothing moves when it arrives. */}
+                {reached ? (
+                  <iframe
+                    key={key}
+                    src={`/?adminPreview=${key}`}
+                    title={`${t("home.sectionPreview")} — ${sectionId}`}
+                    // Belt to the observer's braces; see the note on `reached`.
+                    loading="lazy"
+                    style={{
+                      display: "block",
+                      position: "absolute",
+                      top: filmTop,
+                      left: 0,
+                      width: DESIGN_WIDTH,
+                      height: frameHeight,
+                      border: 0,
+                      // The wheel belongs to the window, and the page's links
+                      // cannot navigate this frame off `/`.
+                      pointerEvents: "none",
+                      // Top left, so the scaled film lands in the rail's corner
+                      // rather than being scaled about its centre.
+                      transformOrigin: "top left",
+                      transform: `scale(${scale})`,
+                      // No `will-change` on purpose. Sweeping an iframe's
+                      // transform by hand costs 13.89ms per frame against a
+                      // 13.86ms idle frame, so the browser already composites
+                      // this — while a standing promotion hint on nine
+                      // cross-document iframes is a real cost against
+                      // Chromium's layer budget, which de-promotes silently
+                      // when exceeded and would take the actual fix with it.
+                    }}
+                  />
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            /* Nothing to hold a window over. The box keeps its shape so the
+               card does not collapse and the sentence lands where the picture
+               was. Dashed, because an empty solid frame reads as a preview that
+               failed to load. */
+            <div
+              style={{
+                position: "absolute",
+                left: boxLeft,
+                top: 0,
+                width,
+                height: WINDOW_HEIGHT,
+                // Outlined rather than bordered for the same reason as the
+                // window above, so the two boxes are exactly the same size and
+                // the card does not change shape when a section is switched off.
+                outline: "1px dashed #babec3",
+                borderRadius: 8,
+                background: "#FFF6EC",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 24,
+                textAlign: "center",
+              }}
+            >
+              <Text as="p" variant="bodySm" tone="subdued">
+                {hidden
+                  ? t("home.sectionPreviewHidden")
+                  : t("home.sectionPreviewLenderHidden")}
+              </Text>
+            </div>
+          )}
+        </div>
       </BlockStack>
     </Box>
   );

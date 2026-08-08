@@ -774,21 +774,19 @@ const en = {
   "home.previewWidthReset": "Back to design width",
 
   // Content → Home page · the per-section preview
-  "home.sectionPreview": "This section on its own",
+  "home.sectionPreview": "This section on the page",
   "home.sectionPreviewHelp":
-    "Only this band of the home page — no header, no tab bar. It refreshes when you save; open it in a new tab to see it full size.",
+    "The real home page at the width set above, held on this section. Scroll inside it to see a little above and below; it will not go further. It refreshes when you save.",
   "home.sectionPreviewHidden":
-    "This section is switched off, so it is not on the live page right now. The preview shows what turning it back on would put there.",
+    "This section is switched off, so it is not on the live page and there is nothing to show here. Switch it on to preview it.",
   // Names the band the way the section list names it, not the way the design
   // team says it in conversation: a teammate has to be able to scroll to it.
   "home.sectionPreviewBorrowed":
     "Shown on the Featured Rose Gifts band (the Best Sellers rail), because this speed has nothing of its own on the page — watch the cards move.",
+  "home.sectionPreviewLenderHidden":
+    "This speed is shown on the Featured Rose Gifts band, and that band is switched off — so there is nothing moving to show.",
   "home.sectionPreviewStale":
     "Showing the saved version — save your changes to see them here.",
-  "home.previewZoomed":
-    "Zoomed out so the whole band fits. Open it in a new tab to read it at full size.",
-  "home.previewSync": "Match the main preview",
-  "home.previewOpen": "Open in a new tab",
 
   // Content → Home page · photos
   "home.photo.title": "Change photo",
@@ -1537,19 +1535,17 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.previewWidthReset": "恢复设计宽度",
 
   // 内容 → 首页 · 单个板块预览
-  "home.sectionPreview": "单独预览本板块",
+  "home.sectionPreview": "本板块在页面中的位置",
   "home.sectionPreviewHelp":
-    "只显示首页的这一段——没有顶部导航，也没有底部标签栏。保存后会自动刷新；如需完整尺寸，请在新标签页中打开。",
+    "按上方所选宽度显示的真实首页，并固定在本板块上。可在框内小幅上下滚动，查看紧邻的上下边界，但不会超出本板块。保存后会自动刷新。",
   "home.sectionPreviewHidden":
-    "本板块已隐藏，目前不会出现在线上页面。此预览显示的是重新开启后的效果。",
+    "本板块已隐藏，不会出现在线上页面，因此这里没有可显示的内容。重新开启后即可预览。",
   "home.sectionPreviewBorrowed":
     "以「精选玫瑰礼物」板块的畅销榜滑动栏演示：该速度本身在页面上没有对应内容，请观察卡片的滚动。",
+  "home.sectionPreviewLenderHidden":
+    "该速度以「精选玫瑰礼物」板块演示，而该板块已隐藏——因此没有可显示的滚动效果。",
   "home.sectionPreviewStale":
     "当前显示的是已保存的版本——保存后即可在此看到你的修改。",
-  "home.previewZoomed":
-    "已缩小以完整显示整段。如需按原尺寸阅读，请在新标签页中打开。",
-  "home.previewSync": "与主预览宽度一致",
-  "home.previewOpen": "在新标签页中打开",
 
   // 内容 → 首页 · 图片
   "home.photo.title": "更换图片",

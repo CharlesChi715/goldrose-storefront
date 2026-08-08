@@ -2,19 +2,21 @@
  * ROLE OF THIS FILE
  * Which component draws which homepage band — stated once.
  *
- * The homepage (`app/page.tsx`) and the standalone section preview
- * (`app/preview/home/[section]/page.tsx`) both have to answer "what does the
- * `craft` section look like?", and they must never answer it differently: a
- * preview that renders its own idea of a band is a preview of nothing. So the
- * mapping lives here and both call it, which makes the preview the same JSX
- * tree the live page mounts — same components, same props, same DOM.
+ * `app/page.tsx` is the only caller, and this exists so that its stack is one
+ * uniform list — `homeBand(id, text, timing)` seven times — rather than seven
+ * bespoke call sites with different props. Hiding and shifting then apply the
+ * same way to every band, which is the property the whole re-stacking rests on.
+ *
+ * It had a second caller until 2026-08-08: a route that drew one band on its
+ * own for the admin's section previews. Those previews are now windows onto the
+ * real page, so the question "does the preview draw the same tree as the live
+ * page?" cannot be answered wrongly any more — it is literally the same
+ * document.
  *
  * POSITIONING IS NOT HERE ON PURPOSE
  * This returns the band's content only. Where it sits — the `HomeBand` wrapper
- * and its shift — differs between the two callers (the page re-stacks around
- * hidden sections; the preview slides one band to the top), so each applies its
- * own. Keeping the two concerns apart is what lets the untouched homepage still
- * render byte-identical DOM.
+ * and its shift — is the page's business, and keeping the two concerns apart is
+ * what lets the untouched homepage still render byte-identical DOM.
  */
 
 import type { ReactNode } from "react";

@@ -779,37 +779,62 @@ different shape from the flat slot list.
   point at.
 - **Links are validated before they reach an anchor** (`isSafeHref`): in-site
   paths, fragments, and `http(s)` / `mailto:` / `tel:` only.
-- **Two live previews.** The screen opens with the whole page in a phone-shaped
-  window, and every section opens with just its own band, zoomed out to fit so
-  the whole band is visible at once. A section preview is
-  `/preview/home/[section]`: one band on a stage exactly its own height, no
-  promo bar, header or tab bar. It is a **storefront** route rather than an
-  admin one so that it inherits the same global CSS and fonts the live page
-  does — Polaris' stylesheet would make it a preview of something slightly
-  else — and it is gated by `requireAdmin()`, which is the whole guard, because
-  it deliberately renders a section even when the owner has **hidden** it.
-  `components/home/bands.tsx` states the section → component mapping once and
-  `app/page.tsx` reads it too, so a preview cannot drift from the page. Sections
-  with nothing of their own to show borrow a band and say so, naming it the way
-  the section list names it: the rail speed is demonstrated on the Featured Rose
-  Gifts band, because a still picture of a speed is worthless. A frame is the
-  server rendering **saved** content, so a section with an unsaved edit says so
-  in visible text — it sits above the inputs, and a teammate who types a new
-  heading, looks up and sees the old one concludes the preview is broken.
-- **What the preview width can and cannot tell you.** Each frame has its own
-  phone-width slider (320–440) plus "Match the main preview". ScaleFrame scales
-  the whole 430 stage as ONE, so a narrower phone shrinks everything rather than
-  re-wrapping a line: the slider answers "is this legible on a small phone", not
-  "does this copy fit its box" — that is what the character budgets are for.
-  Two consequences follow for anyone changing this screen. Section frames are
-  laid out at the design's own 430 and the width applied as an outer `scale()`,
-  which composes to exactly the same transform while the iframe never re-lays
-  out; and each slider's live value belongs to the component that owns it,
-  because on a screen of ~180 fields a slider pixel held in the parent is a
-  full re-render. The frame also sits in a stage reserved for the widest
-  setting, so a drag never changes the document's height — this page is
-  ~26,000px tall, and a height that moves re-computes the scroll thumb on every
-  frame.
+- **Every preview is the same page.** The screen opens with the whole home page
+  in a phone-shaped window (620 tall), and every section opens with the SAME
+  document — `/` in an iframe — in a shorter window (360) held still over that
+  section's band. There is no second rendering path and no preview route: a
+  section preview cannot disagree with the live page about anything, because it
+  IS the live page. It replaced a route that drew one band alone and zoomed it
+  out to fit, which put Craft and Story on screen at 39% — a size at which the
+  one question a teammate actually has ("does my wording look right?") cannot be
+  answered.
+- **The lock is structural, not policed** (`SectionPreview.tsx`). Three boxes:
+  the **window** scrolls (`overflow-y: auto`, fixed height); its only child, the
+  **rail**, is exactly one band tall and `overflow: hidden`; the **film** is the
+  whole ~5,000px page, absolutely positioned inside the rail and pulled up so
+  the band is the part on show. Because the rail clips, the film never reaches
+  the window's scrollable overflow, so the window's scroll range *is* one band
+  and the browser refuses to leave it by itself. No scroll listener means
+  nothing to lose a race with and no snap-back on a fling;
+  `overscroll-behavior: contain` stops a gesture that reaches the end from
+  carrying on into the ~26,000px editor behind. The film takes
+  `pointer-events: none` so the wheel belongs to the window and the page's own
+  links cannot navigate the frame off `/`.
+- **The slack is 48 DESIGN pixels** at each end — stated in design pixels so the
+  amount of *page* you can peek at does not change with the width. It is enough
+  to show the seam where a band meets its neighbour (the one thing a
+  band-shaped preview could never show) and never enough to read the neighbour
+  and mistake it for this section. The window opens scrolled to the band's own
+  first pixel, so the slack above is somewhere to scroll *up* into.
+- **One width control for the screen.** The page-wide preview's slider (320–440)
+  drives every section window, because a frame at a different width is at a
+  different scale and would no longer be showing what the main preview shows —
+  so the per-section sliders and "Match the main preview" are gone. ScaleFrame
+  scales the whole 430 stage as ONE, so a narrower phone shrinks everything
+  rather than re-wrapping a line: the slider answers "is this legible on a small
+  phone", not "does this copy fit its box" — that is what the character budgets
+  are for. Films are laid out at the design's own 430 with the width applied as
+  an outer `scale()`, so no framed document ever re-lays out; and every section
+  window is a constant 360 tall at every width, so a drag cannot change the
+  document's height — on a ~26,000px page a height that moves re-computes the
+  scroll thumb on every frame. The window is **outlined rather than bordered**:
+  this app is `box-sizing: border-box`, so a border would come out of the
+  content box and show 428 pixels of a page scaled to 430.
+- **A switched-off section shows no window, and says why.** A hidden band is not
+  merely invisible — `HomeBand` draws nothing and `homeLayout` closes the gap,
+  so the offset it used to hold now belongs to the NEXT band, and a window
+  opened there would show a teammate the wrong section under the right name.
+  `onPage` is decided on the band actually shown rather than on the section id,
+  which is why hiding Featured also demotes the rail-speed section that borrows
+  it. **The cost, stated plainly:** you can no longer look at a switched-off
+  section without switching it on, and the switch publishes immediately.
+- **Sections with nothing of their own borrow a band and say so**, naming it the
+  way the section list names it: the rail speed is shown on the Featured Rose
+  Gifts band, because a still picture of a speed is worthless — and at 100% it
+  now moves at a speed you can actually judge. A frame is the server rendering
+  **saved** content, so a section with an unsaved edit says so in visible text:
+  a teammate who types a new heading, looks up and sees the old one concludes
+  the preview is broken.
 
 ### 9.9 Analytics (`/admin/analytics`) — clone
 

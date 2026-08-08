@@ -70,59 +70,48 @@ function getSessionId(): string | null {
 
 /**
  * Whether this document is the admin looking at the storefront, rather than a
- * visitor browsing it — LATCHED, because the evidence is destroyed by the
- * first click.
+ * visitor browsing it.
  *
  * The pathname guard at the call site cannot catch this: inside Content → Home
  * page the pathname IS `/`, because the page genuinely is the home page — it is
- * simply rendered in an `<iframe>` so the owner can see their own edits.
- * Untreated, opening that one editor writes home-page views and a stream of
- * engagement updates for a visit nobody made, and an owner proof-reading copy
- * for twenty minutes lands in the same dwell numbers the shop is judged on.
+ * simply rendered in an `<iframe>`, eleven times over (the section map, the
+ * page-wide preview, and one window per section), so the owner can see their
+ * own edits. Untreated, opening that one editor writes home-page views and a
+ * stream of engagement updates for a visit nobody made, and an owner
+ * proof-reading copy for twenty minutes lands in the same dwell numbers the
+ * shop is judged on.
  *
- * TWO TESTS, ONE PER KIND OF PREVIEW
- * `/preview/home/*` renders a single band in its own document — admin-only
- * (`requireAdmin()` 404s everyone else) and meant to work in its own tab, so
- * being framed is not something it can be asked to prove.
- * Everything else is framed: the whole-page preview and the section map both
- * embed `/` inside the admin. Nothing legitimately embeds this storefront, so
- * "inside a frame" is never a real visit — and stating it that broadly is what
- * makes the guard survive the NEXT preview someone adds.
+ * ONE TEST: IS THIS DOCUMENT FRAMED
+ * Nothing legitimately embeds this storefront, so "inside a frame" is never a
+ * real visit. Stating it that broadly rather than enumerating today's previews
+ * is the point: it is why this guard already covered the section windows before
+ * they existed, and why it will cover the next preview somebody adds.
  *
- * WHY `?adminPreview` IS NOT ONE OF THE TESTS
- * The admin's iframes carry that marker and it stays, as the declaration of
- * intent that makes the src readable. But it must never be sufficient on its
- * own: it would be a kill switch for our own analytics that anyone can type.
- * `https://eldreve.com/?adminPreview=1` would make that visitor invisible — no
- * page view, no dwell, no campaign attribution — and with the latch below, for
- * their whole visit rather than one page. It is exactly the URL a teammate gets
- * from "open frame in a new tab" and might paste to a boss or a supplier. The
- * frame test already covers every document the marker appears in, so dropping
- * it as a test costs the feature nothing and takes it away from the open web.
+ * It also needs no latch. Being framed is a property of the browsing context,
+ * not of the URL, so it cannot be destroyed by a click the way a query
+ * parameter or a pathname can — it stays true across every client-side
+ * navigation in this document, by construction.
  *
- * WHY IT LATCHES
- * A preview's links are real: a tap on the bottom nav client-navigates to
- * `/shop`, and `/preview/…` is no longer the pathname. Re-testing per
- * navigation would arm the beacon for the rest of that document's life. The
- * flag is module scope, so it survives every client-side navigation in this
- * document and dies with it.
+ * WHY `?adminPreview` IS NOT THE TEST
+ * The admin's iframes carry that marker, and it stays as the declaration of
+ * intent that makes the `src` readable. But it must never be what decides,
+ * because it would then be a kill switch for our own analytics that anyone can
+ * type: `https://eldreve.com/?adminPreview=1` would make that visitor invisible
+ * — no page view, no dwell, no campaign attribution. The frame test already
+ * covers every document the marker appears in, so leaving it out of the
+ * decision costs the feature nothing and keeps it off the open web.
  *
- * @returns True once this document has been identified as a preview.
+ * @returns True when this page view must not be recorded.
  */
 function isAdminPreview(): boolean {
-  if (previewLatch) return true;
   try {
-    previewLatch =
-      window.location.pathname.startsWith("/preview/") ||
-      window.self !== window.top;
+    return window.self !== window.top;
   } catch {
     // Reaching `window.top` across origins can throw. Not being able to see the
     // top window is itself proof this document is framed.
-    previewLatch = true;
+    return true;
   }
-  return previewLatch;
 }
-let previewLatch = false;
 
 export function Beacon() {
   // 1. Next.js updates the router state
@@ -138,9 +127,9 @@ export function Beacon() {
       !pathname ||
       pathname.startsWith("/admin") ||
       pathname.startsWith("/api") ||
-      // Admin previews are the storefront rendered INSIDE the admin: the
-      // standalone section preview at /preview/home/*, and the whole home page
-      // and its section map, both framed. A teammate proof-reading copy is not
+      // Admin previews are the storefront rendered INSIDE the admin — the
+      // section map, the page-wide preview and every section's own window, all
+      // of them frames of this same page. A teammate proof-reading copy is not
       // a visit, and counting them would put fake traffic — and fake dwell
       // time — in the owner's own analytics.
       isAdminPreview()

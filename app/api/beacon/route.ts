@@ -33,10 +33,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  // Never track the admin, or its section previews (§9.8.1), even if a client
-  // posts them. The browser already skips both; this is the copy of the rule
-  // that holds, because the endpoint is reachable without our own page.
-  if (parsed.path.startsWith("/admin") || parsed.path.startsWith("/preview/")) {
+  // Never track the admin, even if a client posts it. The browser already skips
+  // it; this is the copy of the rule that holds, because the endpoint is
+  // reachable without our own page.
+  if (parsed.path.startsWith("/admin")) {
     return NextResponse.json({ ok: true });
   }
 

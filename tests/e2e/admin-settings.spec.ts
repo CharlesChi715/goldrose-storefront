@@ -198,9 +198,6 @@ test("robots blocks /admin + /checkout and follows the AI-crawler toggle", async
   let robots = await (await request.get("/robots.txt")).text();
   expect(robots).toContain("Disallow: /admin");
   expect(robots).toContain("Disallow: /checkout");
-  // The admin's section previews (§9.8.1) live in the storefront tree but only
-  // ever answer 404 to a crawler.
-  expect(robots).toContain("Disallow: /preview");
   expect(robots).toMatch(/User-Agent: GPTBot\nAllow: \//i);
 
   // Toggle AI crawlers off → GPTBot fully disallowed.

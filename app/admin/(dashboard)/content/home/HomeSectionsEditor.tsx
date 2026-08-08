@@ -113,11 +113,13 @@ export type SectionView = {
   /** Its span on the live stage, for the section map; null when it has none. */
   band: { top: number; height: number } | null;
   /**
-   * What this section's own live preview shows, or null when it has nothing to
-   * show. `borrowed` marks a section that has no band of its own and is being
-   * illustrated with another one — see lib/home-content/preview.ts.
+   * The rectangle of the LIVE page this section's preview window is held over,
+   * or null when the section has nothing to show at all. `borrowed` marks a
+   * section that has no band of its own and is being illustrated with another
+   * one; `onPage` is false when that band is switched off, so there is nothing
+   * to hold a window over — see lib/home-content/preview.ts.
    */
-  preview: { height: number; borrowed: boolean } | null;
+  preview: { y: number; h: number; onPage: boolean; borrowed: boolean } | null;
   fields: FieldView[];
 };
 
@@ -760,13 +762,15 @@ export function HomeSectionsEditor({
                   {section.preview ? (
                     <SectionPreview
                       sectionId={section.id}
-                      bandHeight={section.preview.height}
+                      y={section.preview.y}
+                      h={section.preview.h}
+                      onPage={section.preview.onPage}
                       borrowed={section.preview.borrowed}
                       hidden={section.hideable && !section.visible}
                       stale={dirtySections.has(section.id)}
-                      mainWidth={previewWidth}
-                      min={PREVIEW_MIN_WIDTH}
-                      max={PREVIEW_MAX_WIDTH}
+                      width={previewWidth}
+                      maxWidth={PREVIEW_MAX_WIDTH}
+                      frameHeight={frameHeight}
                       nonce={previewNonce}
                     />
                   ) : null}

@@ -212,23 +212,38 @@ test("hiding a section removes its band and shortens the page", async ({
 
 /* --- The per-section live previews (2026-08-08) ------------------------- */
 
-test("every section opens with a live preview of itself, fetched when reached", async ({
+/** The window element for one section — the box that scrolls. */
+function windowOf(page: Page, id: string) {
+  return page.locator(`[data-home-section="${id}"] [role="group"]`);
+}
+
+/** Bring a section's card to the top of the viewport so its frame mounts. */
+async function reach(page: Page, id: string) {
+  // `block: "start"` rather than scrollIntoViewIfNeeded: a section card is
+  // taller than the viewport, so "if needed" is satisfied by any sliver of it
+  // showing while the preview at its top is still far below.
+  await page
+    .locator(`[data-home-section="${id}"]`)
+    .evaluate((el) => el.scrollIntoView({ block: "start" }));
+}
+
+test("every section opens with a window on the real page, fetched when reached", async ({
   page,
 }) => {
   await openEditor(page);
 
-  // Nothing far down the page has been fetched yet. Each frame is a
-  // force-dynamic storefront render that reads site_content in full, and a save
-  // re-keys every one of them — mounting all nine on open would make this
-  // screen nine of those, twice over, for someone on a slow link. `loading`
-  // alone is only a hint, so the frame is mounted on intersection.
+  // Nothing far down the page has been fetched yet. Each frame is a whole copy
+  // of the home page and a save re-keys every one of them, so mounting all nine
+  // on open would make this screen nine home pages, twice over, for someone on
+  // a slow link. `loading` alone is only a hint, so the frame is mounted on
+  // intersection.
   await expect(page.locator('[data-home-section="story"] iframe')).toHaveCount(
     0,
   );
 
-  // One frame per section, each pointed at that section's own route — the
-  // screen's promise is that what you are editing is on screen before the
-  // first input.
+  // Every window is the SAME document the page-wide preview shows. That is the
+  // whole point of the redesign: a section preview is not a re-rendering of a
+  // band, so it cannot disagree with the live page about anything.
   for (const id of [
     "promo",
     "hero",
@@ -238,147 +253,148 @@ test("every section opens with a live preview of itself, fetched when reached", 
     "recipient",
     "craft",
     "story",
-    // The rail speed has nothing of its own on the page, so its frame borrows
-    // the Featured band — a still picture of a speed would be worthless.
+    // The rail speed has nothing of its own on the page, so its window is held
+    // over the Featured band — a still picture of a speed would be worthless.
     "motion",
   ]) {
-    const section = page.locator(`[data-home-section="${id}"]`);
-    // `block: "start"` rather than scrollIntoViewIfNeeded: a section card is
-    // taller than the viewport, so "if needed" is satisfied by any sliver of it
-    // showing while the preview stage at its top is still far below.
-    await section.evaluate((el) => el.scrollIntoView({ block: "start" }));
-    await expect(section.locator("iframe")).toHaveAttribute(
-      "src",
-      new RegExp(`^/preview/home/${id}\\?`),
-    );
+    await reach(page, id);
+    await expect(
+      page.locator(`[data-home-section="${id}"] iframe`),
+    ).toHaveAttribute("src", /^\/\?adminPreview=/);
   }
 });
 
-test("the standalone preview is the band alone — no promo bar, header or tab bar", async ({
+test("a section's window cannot be scrolled out of its own section", async ({
   page,
 }) => {
-  await adminLogin(page);
-  await page.goto("/preview/home/craft", { waitUntil: "networkidle" });
+  await openEditor(page);
+  await reach(page, "craft");
+  const craft = windowOf(page, "craft");
+  await expect(craft).toHaveCount(1);
+  // The window exists from the first render; the film inside it does not, and
+  // waiting for the WINDOW is not waiting for the film. `reach()` only asks the
+  // browser to scroll — the IntersectionObserver then has to fire and React has
+  // to re-render before there is an iframe to measure.
+  await expect(page.locator('[data-home-section="craft"] iframe')).toHaveCount(
+    1,
+  );
 
-  // The band is there, at exactly its own height: A-9 is 991 design pixels.
-  await expect(page.getByText("Inside the ELDREVE Workshop")).toBeVisible();
-  const height = await page
-    .locator(".figv-stage")
-    .evaluate((el) => parseFloat(getComputedStyle(el).height));
-  expect(height).toBe(991);
+  // THE PROMISE THIS FEATURE MAKES. The lock is structural rather than policed:
+  // the window's only child is a rail exactly one band tall that CLIPS the
+  // 5000px page inside it, so the browser's own scroll range is the band. There
+  // is no scroll handler, which is why a fling cannot outrun it.
+  const measured = await craft.evaluate((el) => {
+    const before = el.scrollTop;
+    el.scrollTop = 999999;
+    const atBottom = el.scrollTop;
+    el.scrollTop = -999999;
+    const atTop = el.scrollTop;
+    return {
+      before,
+      atBottom,
+      atTop,
+      range: el.scrollHeight - el.clientHeight,
+      clientHeight: el.clientHeight,
+      railHeight: (el.firstElementChild as HTMLElement).offsetHeight,
+      frameHeight: (el.querySelector("iframe") as HTMLElement).offsetHeight,
+    };
+  });
 
-  // ...and nothing else is: no bottom tab bar, and none of the bands that sit
-  // above or below it on the page.
-  await expect(page.locator(".figv-navstage")).toHaveCount(0);
-  await expect(page.getByText("Featured Rose Gifts")).toHaveCount(0);
-  await expect(page.getByText("Frequently Asked Questions")).toHaveCount(0);
+  // Craft is 991 design pixels; at the design width the window reveals it plus
+  // 48 above and 48 below, and shows 360 of that at a time.
+  expect(measured.clientHeight).toBe(360);
+  expect(measured.railHeight).toBe(991 + 48 + 48);
+  expect(measured.range).toBe(measured.railHeight - 360);
+  // Asking to go far past either end lands exactly on the end. Note the frame
+  // inside is the WHOLE page — an unclipped scroller would have run to 5057.
+  expect(measured.frameHeight).toBeGreaterThan(5000);
+  expect(measured.atBottom).toBe(measured.range);
+  expect(measured.atTop).toBe(0);
+
+  // And it opens on the band itself, with the slack above out of sight, so the
+  // first thing you see is the thing you clicked.
+  expect(measured.before).toBe(48);
 });
 
-test("the standalone preview is admin-only", async ({ browser }) => {
-  // This route lives in the STOREFRONT tree, and proxy.ts matches only /admin
-  // and /api/admin — so one `await requireAdmin()` in the page is the entire
-  // gate on something that deliberately renders sections the owner has HIDDEN,
-  // i.e. copy the live site does not show. Every other test here signs in
-  // first, so deleting that line would leave the whole suite green.
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  const response = await page.goto("/preview/home/craft");
-  expect(response?.status()).toBe(404);
-  await expect(page.getByText("Inside the ELDREVE Workshop")).toHaveCount(0);
-  await context.close();
+test("a section that fits whole does not scroll at all", async ({ page }) => {
+  await openEditor(page);
+  await reach(page, "promo");
+  const promo = windowOf(page, "promo");
+  // The promo strip is 32 design pixels. There is nothing to scroll through, so
+  // the window is inert rather than jiggling by a few pixels — and it shows the
+  // strip against the header beneath it, which is the only way to judge it.
+  const range = await promo.evaluate((el) => el.scrollHeight - el.clientHeight);
+  expect(range).toBe(0);
+  await expect(promo).toHaveCSS("overflow-y", "hidden");
 });
 
-test("each width slider is the section's own, and Match reconciles it", async ({
+test("one width slider drives every window, and placement stays whole-pixel", async ({
+  page,
+}) => {
+  await openEditor(page);
+  await reach(page, "ready");
+  const ready = windowOf(page, "ready");
+  await expect(ready).toHaveCount(1);
+
+  // There is ONE width control on this screen now. A section frame at a
+  // different width would be at a different scale, and would no longer be
+  // showing what the page-wide preview shows — so the sliders that could
+  // disagree, and the button that reconciled them, are gone.
+  await expect(
+    page.locator('[data-home-section="ready"] input[type=range]'),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Match the main preview" }),
+  ).toHaveCount(0);
+
+  await page.locator("input[type=range]").first().fill("360");
+  await expect(ready).toHaveCSS("width", "360px");
+
+  // The room reserved for the frame does NOT change with the width — the stage
+  // is a constant height now, so a drag cannot re-compute this ~26,000px page's
+  // scroll thumb. And the box sits at a WHOLE-pixel offset at every setting:
+  // centring by halving odd free space would put its 1px border and the band's
+  // flush-left content on a half CSS pixel, and alternating between the two on
+  // every step of a drag is a shimmer down the left edge.
+  for (const w of ["440", "437", "430", "421", "377", "320"]) {
+    await page.locator("input[type=range]").first().fill(w);
+    const box = await ready.evaluate((el) => ({
+      left: (el as HTMLElement).offsetLeft,
+      top: (el as HTMLElement).offsetTop,
+      stage: (el.parentElement as HTMLElement).offsetHeight,
+    }));
+    expect(Number.isInteger(box.left)).toBe(true);
+    expect(Number.isInteger(box.top)).toBe(true);
+    expect(box.stage).toBe(360);
+  }
+});
+
+test("a switched-off section says so rather than showing the wrong band", async ({
   page,
 }) => {
   await openEditor(page);
   const craft = page.locator('[data-home-section="craft"]');
-  const story = page.locator('[data-home-section="story"]');
-  // The frames mount on intersection, so bring both into view before measuring
-  // them. Once reached they stay mounted, which is what lets the rest of this
-  // test scroll freely.
-  await craft.evaluate((el) => el.scrollIntoView({ block: "start" }));
-  await story.evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await reach(page, "craft");
   await expect(craft.locator("iframe")).toHaveCount(1);
-  await expect(story.locator("iframe")).toHaveCount(1);
 
-  /**
-   * The width of the BOX around a section's frame — what the eye actually
-   * lands on, and the only honest measure here.
-   *
-   * Not the iframe's own width: that is pinned to the design's 430 forever and
-   * the slider is applied as a transform, so the iframe's width says nothing
-   * about what the control did. An earlier version of this test asserted
-   * exactly that and passed straight through a bug where the visible box came
-   * out identical at 320 and at 440 — the slider looked live and moved
-   * nothing.
-   */
-  const boxWidth = (section: ReturnType<Page["locator"]>) =>
-    section
-      .locator("iframe")
-      .evaluate((el) => (el.parentElement as HTMLElement).offsetWidth);
+  await craft.getByRole("button", { name: "Hide section" }).click();
+  await expect(page.getByText("Home page updated").first()).toBeVisible();
 
-  // Everything starts at the design's own 430, so there is nothing to sync.
-  // The control is present but dead rather than absent: it sits in the row
-  // directly above the frame, and a button that mounts mid-drag moves it.
-  const match = craft.getByRole("button", { name: "Match the main preview" });
-  await expect(match).toBeDisabled();
-  const craftAtDesign = await boxWidth(craft);
-  const storyAtDesign = await boxWidth(story);
-
-  // Move the PAGE-WIDE preview to a narrow phone. The sections do not follow —
-  // that is the point of separate sliders — but each now offers to.
-  await page.locator("input[type=range]").first().fill("360");
-  // By title, not by `src`: the section map above is ALSO an `?adminPreview`
-  // iframe of `/`, so matching on the src alone finds two elements and the
-  // locator is ambiguous. The map is the only other one, and it is inert —
-  // aria-hidden, tabindex -1, pinned at the design width.
-  await expect(page.locator('iframe[title="Live preview"]')).toHaveCSS(
-    "width",
-    "360px",
-  );
-  expect(await boxWidth(craft)).toBe(craftAtDesign);
-  await expect(match).toBeEnabled();
-
-  await match.click();
-  await expect(match).toBeDisabled();
-  const craftMatched = await boxWidth(craft);
-  expect(craftMatched).toBeLessThan(craftAtDesign);
-  // One section's slider never moves another's.
-  expect(await boxWidth(story)).toBe(storyAtDesign);
-
-  // Dragging further still shrinks it — and the room reserved for the frame
-  // does NOT change, which is what stops this ~26,000px page re-computing its
-  // scroll thumb on every frame of a drag.
-  const stageBefore = await craft
-    .locator("iframe")
-    .evaluate(
-      (el) => (el.parentElement!.parentElement as HTMLElement).offsetHeight,
-    );
-  await craft.locator("input[type=range]").fill("320");
-  expect(await boxWidth(craft)).toBeLessThan(craftMatched);
-  const stageAfter = await craft
-    .locator("iframe")
-    .evaluate(
-      (el) => (el.parentElement!.parentElement as HTMLElement).offsetHeight,
-    );
-  expect(stageAfter).toBe(stageBefore);
-
-  // And the frame sits at a WHOLE-pixel offset inside that stage at every
-  // setting. Centring it with `justify-content: center` halves the free space,
-  // which is odd at about half the slider's positions — putting the box's 1px
-  // border and the band's flush-left content on a half CSS pixel, a whole
-  // device pixel at 2×. Alternating between the two on every step of a drag is
-  // a shimmer down the left edge, so the offset is rounded instead.
-  const ready = page.locator('[data-home-section="ready"]');
-  await ready.evaluate((el) => el.scrollIntoView({ block: "start" }));
-  await expect(ready.locator("iframe")).toHaveCount(1);
-  for (const w of ["440", "437", "430", "421", "377", "320"]) {
-    await ready.locator("input[type=range]").fill(w);
-    const offset = await ready.locator("iframe").evaluate((el) => {
-      const box = el.parentElement as HTMLElement;
-      return [box.offsetLeft, box.offsetTop];
-    });
-    expect(offset.every(Number.isInteger)).toBe(true);
+  try {
+    // A hidden band is not merely invisible: homeLayout closes the gap, so the
+    // offset it used to hold now belongs to the NEXT band. Opening a window
+    // there anyway would show a teammate the wrong section under this section's
+    // name, so no window is opened at all.
+    await reach(page, "craft");
+    await expect(craft.locator("iframe")).toHaveCount(0);
+    await expect(
+      craft.getByText("Switch it on to preview it", { exact: false }),
+    ).toBeVisible();
+  } finally {
+    await page
+      .locator('[data-home-section="craft"]')
+      .getByRole("button", { name: "Show section" })
+      .click();
+    await expect(page.getByText("Home page updated").first()).toBeVisible();
   }
 });

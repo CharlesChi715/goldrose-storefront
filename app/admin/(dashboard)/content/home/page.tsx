@@ -22,7 +22,7 @@ import {
   slotKey,
   type HomeSectionId,
 } from "@/lib/home-content";
-import { homePreviewBand } from "@/lib/home-content/preview";
+import { homePreviewTarget } from "@/lib/home-content/preview";
 import {
   HomeSectionsEditor,
   type LibraryItem,
@@ -30,17 +30,32 @@ import {
 } from "./HomeSectionsEditor";
 
 /**
- * What a section's own preview frame should show, or null when the section has
- * nothing to show. `borrowed` is true when the frame stands in with a different
- * band — see lib/home-content/preview.ts.
+ * Which rectangle of the live page a section's preview window is held over, or
+ * null when the section has nothing to show at all.
+ *
+ * `borrowed` is true when the window is held over a DIFFERENT section's band,
+ * and `onPage` is false when that band is not on the live page — both decided
+ * in lib/home-content/preview.ts, on the band actually shown rather than on the
+ * id asked for.
  *
  * @param sectionId - The section being listed.
- * @returns The frame's band height and whether it is a stand-in.
+ * @param visible - Show/hide state per section.
+ * @param shift - Per-band offsets from `homeLayout()`.
+ * @returns The live rectangle for the window, and how to label it.
  */
-function previewOf(sectionId: string): SectionView["preview"] {
-  const band = homePreviewBand(sectionId);
-  if (!band) return null;
-  return { height: band.h, borrowed: band.from !== sectionId };
+function previewOf(
+  sectionId: string,
+  visible: Partial<Record<HomeSectionId, boolean>>,
+  shift: Readonly<Record<HomeSectionId, number>>,
+): SectionView["preview"] {
+  const target = homePreviewTarget(sectionId, visible, shift);
+  if (!target) return null;
+  return {
+    y: target.y,
+    h: target.h,
+    onPage: target.onPage,
+    borrowed: target.from !== sectionId,
+  };
 }
 
 export default async function HomeContentPage() {
@@ -68,9 +83,9 @@ export default async function HomeContentPage() {
           }
         : null,
     // Resolved server-side for the same reason, and like `max`: the band
-    // geometry is registry data, and the client only needs the one number that
-    // sizes this section's own preview frame.
-    preview: previewOf(section.id),
+    // geometry is registry data, and the window the client opens must be over
+    // the same rectangle the live page draws.
+    preview: previewOf(section.id, visible, layout.shift),
     fields: section.fields.map((field) => ({
       id: field.id,
       label: field.label,
