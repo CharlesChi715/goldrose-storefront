@@ -93,7 +93,7 @@ pages come later, if ever.
 - [x] Me section: signed-in customers see a delivery-status pill per order —
       Preparing / Shipped via <carrier> + Track link / Cancelled.
 - [ ] Human acceptance: owner fulfills a sandbox order with a real UPS
-      number, receives the email, link opens UPS tracking (UAT → DONE).
+      number, receives the email, link opens UPS tracking (UAT → ACCEPTED).
 
 ## Plan
 

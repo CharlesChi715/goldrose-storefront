@@ -51,7 +51,7 @@ Move the account name to a **dedicated `utm_acc=` query tag** (`...?utm_source=t
 - [x] Admin Analytics groups sales/commission figures by posting account.
 - [x] The empty-account label in Analytics says `utm_acc` in both EN and 中文.
 - [x] Owner's link recipe in TESTER-GUIDE reads `...&utm_acc=amy` with the click-test tip.
-- [ ] Owner builds one real `utm_acc` link, clicks it, and sees the account appear in Analytics (human acceptance → VERIFIED).
+- [ ] Owner builds one real `utm_acc` link, clicks it, and sees the account appear in Analytics (human acceptance → ACCEPTED).
 
 ## Plan
 
@@ -69,7 +69,7 @@ All done 2026-07-24 (tag named `utm_acc`):
 
 ## Blockers and dependencies
 
-None. The only step left is human acceptance (owner click-test), which is the UAT → VERIFIED gate, not a blocker.
+None. The only step left is human acceptance (owner click-test), which is the UAT → ACCEPTED gate, not a blocker.
 
 ## Verification evidence
 

@@ -68,7 +68,7 @@ our email provider; Broadcasts gives hosted unsubscribe handling for free.
 - [ ] Test pins that every customer row has an email (the boss's
       "register must need email" rule).
 - [ ] Human acceptance: owner sends a test Broadcast to himself from the
-      Resend dashboard and unsubscribes from it (UAT → VERIFIED).
+      Resend dashboard and unsubscribes from it (UAT → ACCEPTED).
 
 ## Plan
 

@@ -2,7 +2,7 @@
 id: region-alignment
 area: backend
 
-delivery: verified
+delivery: accepted
 rollout: test-deployment
 statusChangedAt: 2026-07-26
 

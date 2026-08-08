@@ -27,13 +27,13 @@ this folder; front matter per [`TEMPLATE.md`](TEMPLATE.md).
 
 Two status axes, fixed vocabulary:
 
-**delivery** — `backlog → ready → in-progress → uat → verified` (+ `dropped`, exit from any state)
+**delivery** — `backlog → ready → in-progress → uat → accepted` (+ `dropped`, exit from any state)
 
 - BACKLOG — on the roadmap, approach not chosen yet (raw ideas stay in ideas.md; a record is born BACKLOG)
 - READY — approach chosen (options + pros/cons recorded)
 - IN PROGRESS — being built
 - UAT (user acceptance testing) — deployed, **awaiting human verification** (a queue, not an activity; automated tests were already green to land)
-- VERIFIED (formerly DONE) — **works on the deployed site, verified by a human** (owner/Charles clicked through it); requires `verification.human` evidence
+- ACCEPTED — **works on the deployed site, checked and signed off by a human** (owner/Charles clicked through it); requires `verification.human` evidence
 - DROPPED — considered and rejected; keep the node, the "why not" is the value
 
 **rollout** — `not-deployed | local-only | test-deployment | dormant | live` —
@@ -83,7 +83,7 @@ matter stays authoritative.
 | [backend/engagement-tracking](backend/engagement-tracking.md) — page/section dwell | in-progress | test-deployment |
 | [backend/order-tracking](backend/order-tracking.md) — carrier links on fulfilment | uat         | test-deployment |
 | [posting-account-attribution](posting-account-attribution.md) — per-poster commission tags | uat         | test-deployment |
-| [backend/region-alignment](backend/region-alignment.md) — pin compute to the DB region | verified    | test-deployment |
+| [backend/region-alignment](backend/region-alignment.md) — pin compute to the DB region | accepted    | test-deployment |
 | [product-content-pipeline](product-content-pipeline.md) — admin editing + 120-SKU import | backlog     | not-deployed    |
 | [tiktok-analytics](tiktok-analytics.md) — read-only TikTok Business API | backlog     | not-deployed    |
 | [backend/promotion-emails](backend/promotion-emails.md) — marketing consent + campaigns | backlog     | not-deployed    |
@@ -91,5 +91,5 @@ matter stays authoritative.
 
 Status meter vocabulary, kept for the rebuild:
 
-`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ UAT · ●●●● VERIFIED · ✕ DROPPED`
+`○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ UAT · ●●●● ACCEPTED · ✕ DROPPED`
 

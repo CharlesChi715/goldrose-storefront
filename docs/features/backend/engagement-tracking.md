@@ -132,7 +132,7 @@ consent-wording review that gates launch rather than opening that question now.
       existing session/conversion reports are numerically unchanged.
 - [ ] Admin analytics still renders with no measurable slowdown at seeded volume.
 - [ ] Owner opens the test deployment, reads one homepage band for ~30 s, and
-      sees that band top the Section attention card. *(gates UAT → VERIFIED)*
+      sees that band top the Section attention card. *(gates UAT → ACCEPTED)*
 
 ## Plan
 

@@ -266,7 +266,7 @@ Vercel and is parsed there, because validating a row needs the database.
 - [ ] The service-role key never reaches the browser.
 - [ ] Storefront reflects an import without a redeploy.
 - [ ] Human acceptance: teammate/owner imports real content and sees the
-      storefront pages update (gates UAT → VERIFIED).
+      storefront pages update (gates UAT → ACCEPTED).
 
 ## Plan
 
