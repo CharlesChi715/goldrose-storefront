@@ -771,8 +771,12 @@ const en = {
     "Only this band of the home page — no header, no tab bar. It refreshes when you save; open it in a new tab to see it full size.",
   "home.sectionPreviewHidden":
     "This section is switched off, so it is not on the live page right now. The preview shows what turning it back on would put there.",
+  // Names the band the way the section list names it, not the way the design
+  // team says it in conversation: a teammate has to be able to scroll to it.
   "home.sectionPreviewBorrowed":
-    "Shown on the Best Sellers band, because this speed has nothing of its own on the page — watch the cards move.",
+    "Shown on the Featured Rose Gifts band (the Best Sellers rail), because this speed has nothing of its own on the page — watch the cards move.",
+  "home.sectionPreviewStale":
+    "Showing the saved version — save your changes to see them here.",
   "home.previewZoomed":
     "Zoomed out so the whole band fits. Open it in a new tab to read it at full size.",
   "home.previewSync": "Match the main preview",
@@ -1523,7 +1527,9 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.sectionPreviewHidden":
     "本板块已隐藏，目前不会出现在线上页面。此预览显示的是重新开启后的效果。",
   "home.sectionPreviewBorrowed":
-    "以「热销」板块演示：该速度本身在页面上没有对应内容，请观察卡片的滚动。",
+    "以「精选玫瑰礼物」板块的畅销榜滑动栏演示：该速度本身在页面上没有对应内容，请观察卡片的滚动。",
+  "home.sectionPreviewStale":
+    "当前显示的是已保存的版本——保存后即可在此看到你的修改。",
   "home.previewZoomed":
     "已缩小以完整显示整段。如需按原尺寸阅读，请在新标签页中打开。",
   "home.previewSync": "与主预览宽度一致",

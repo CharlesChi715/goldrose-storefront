@@ -68,6 +68,14 @@ test("editing a section heading reaches the live home page, and resets", async (
 
   await openEditor(page);
   await page.getByLabel("Section title").first().fill("Our Favourite Gifts");
+  // The frame sits ABOVE the fields and is the server rendering saved content,
+  // so while an edit is unsaved it has to say so — otherwise a teammate types a
+  // heading, looks up at the old one, and concludes the preview is broken.
+  await expect(
+    page
+      .locator('[data-home-section="featured"]')
+      .getByText("Showing the saved version"),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Home page updated").first()).toBeVisible();
 
@@ -139,8 +147,20 @@ test("hiding a section removes its band and shortens the page", async ({
 
 /* --- The per-section live previews (2026-08-08) ------------------------- */
 
-test("every section opens with a live preview of itself", async ({ page }) => {
+test("every section opens with a live preview of itself, fetched when reached", async ({
+  page,
+}) => {
   await openEditor(page);
+
+  // Nothing far down the page has been fetched yet. Each frame is a
+  // force-dynamic storefront render that reads site_content in full, and a save
+  // re-keys every one of them — mounting all nine on open would make this
+  // screen nine of those, twice over, for someone on a slow link. `loading`
+  // alone is only a hint, so the frame is mounted on intersection.
+  await expect(page.locator('[data-home-section="story"] iframe')).toHaveCount(
+    0,
+  );
+
   // One frame per section, each pointed at that section's own route — the
   // screen's promise is that what you are editing is on screen before the
   // first input.
@@ -153,16 +173,20 @@ test("every section opens with a live preview of itself", async ({ page }) => {
     "recipient",
     "craft",
     "story",
+    // The rail speed has nothing of its own on the page, so its frame borrows
+    // the Featured band — a still picture of a speed would be worthless.
+    "motion",
   ]) {
-    await expect(
-      page.locator(`[data-home-section="${id}"] iframe`),
-    ).toHaveAttribute("src", new RegExp(`^/preview/home/${id}\\?`));
+    const section = page.locator(`[data-home-section="${id}"]`);
+    // `block: "start"` rather than scrollIntoViewIfNeeded: a section card is
+    // taller than the viewport, so "if needed" is satisfied by any sliver of it
+    // showing while the preview stage at its top is still far below.
+    await section.evaluate((el) => el.scrollIntoView({ block: "start" }));
+    await expect(section.locator("iframe")).toHaveAttribute(
+      "src",
+      new RegExp(`^/preview/home/${id}\\?`),
+    );
   }
-  // The rail speed has nothing of its own on the page, so its frame borrows
-  // the Featured band — a still picture of a speed would be worthless.
-  await expect(
-    page.locator('[data-home-section="motion"] iframe'),
-  ).toHaveAttribute("src", /^\/preview\/home\/motion\?/);
 });
 
 test("the standalone preview is the band alone — no promo bar, header or tab bar", async ({
@@ -185,12 +209,33 @@ test("the standalone preview is the band alone — no promo bar, header or tab b
   await expect(page.getByText("Frequently Asked Questions")).toHaveCount(0);
 });
 
+test("the standalone preview is admin-only", async ({ browser }) => {
+  // This route lives in the STOREFRONT tree, and proxy.ts matches only /admin
+  // and /api/admin — so one `await requireAdmin()` in the page is the entire
+  // gate on something that deliberately renders sections the owner has HIDDEN,
+  // i.e. copy the live site does not show. Every other test here signs in
+  // first, so deleting that line would leave the whole suite green.
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const response = await page.goto("/preview/home/craft");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByText("Inside the ELDREVE Workshop")).toHaveCount(0);
+  await context.close();
+});
+
 test("each width slider is the section's own, and Match reconciles it", async ({
   page,
 }) => {
   await openEditor(page);
   const craft = page.locator('[data-home-section="craft"]');
   const story = page.locator('[data-home-section="story"]');
+  // The frames mount on intersection, so bring both into view before measuring
+  // them. Once reached they stay mounted, which is what lets the rest of this
+  // test scroll freely.
+  await craft.evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await story.evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await expect(craft.locator("iframe")).toHaveCount(1);
+  await expect(story.locator("iframe")).toHaveCount(1);
 
   /**
    * The width of the BOX around a section's frame — what the eye actually
@@ -257,6 +302,8 @@ test("each width slider is the section's own, and Match reconciles it", async ({
   // device pixel at 2×. Alternating between the two on every step of a drag is
   // a shimmer down the left edge, so the offset is rounded instead.
   const ready = page.locator('[data-home-section="ready"]');
+  await ready.evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await expect(ready.locator("iframe")).toHaveCount(1);
   for (const w of ["440", "437", "430", "421", "377", "320"]) {
     await ready.locator("input[type=range]").fill(w);
     const offset = await ready.locator("iframe").evaluate((el) => {

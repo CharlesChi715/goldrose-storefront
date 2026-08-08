@@ -16,18 +16,22 @@
  * WHY EACH SLIDER IS SEPARATE, AND WHY THERE IS A SYNC BUTTON
  * The widths are independent because the question is per band: a hero photo is
  * judged at the narrowest phone, a FAQ list at the widest. But independent
- * controls drift, and eight sections silently sitting at eight widths is a
+ * controls drift, and nine sections silently sitting at nine widths is a
  * screen that lies about what the page looks like. "Match the main preview"
- * pulls one section back onto the width the page-wide preview is using, and it
- * only appears when the two actually differ — so a screen where everything
- * agrees shows no buttons at all.
+ * pulls one section back onto the width the page-wide preview is using. It is
+ * always present and disabled when the two already agree, rather than mounting
+ * when they differ: this row sits directly above the frame, so a control that
+ * appears mid-drag moves the thing you are looking at.
  *
  * The frame reloads on save (the parent's nonce) or on demand (Refresh). It
- * cannot show unsaved typing: the preview is the server rendering the stored
- * content, which is the same thing the live page renders.
+ * cannot show unsaved typing — the preview is the server rendering the stored
+ * content, which is the same thing the live page renders — so it says so, in
+ * visible text, for as long as the section has an unsaved edit. A teammate who
+ * types a new headline, looks up and sees the old one has every reason to
+ * conclude the preview is broken.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BlockStack,
   Box,
@@ -52,7 +56,7 @@ const DESIGN_WIDTH = 430;
  * and does the section still hang together", which is the reason to look.
  *
  * The value is deliberately much smaller than the tallest band (Story is 1010
- * stage pixels): eight full-height previews turned the editor into a page of
+ * stage pixels): nine full-height previews turned the editor into a page of
  * previews with the fields buried between them. At 400 the zoom lands between
  * 40% (Story, Craft) and 100% (the short bands), and "Open in a new tab" is
  * there when small is too small to read.
@@ -68,6 +72,8 @@ const FIT_HEIGHT = 400;
  * @param props.borrowed - True when this section has nothing of its own on the
  *   page and the frame is standing in with another band (the rail speed).
  * @param props.hidden - True when the owner has switched this section off.
+ * @param props.stale - True when this section has an unsaved edit, so the frame
+ *   is showing something older than what the fields below it say.
  * @param props.mainWidth - The width the page-wide preview is set to.
  * @param props.min - Narrowest selectable width, shared with the main preview.
  * @param props.max - Widest selectable width, shared with the main preview.
@@ -79,6 +85,7 @@ export function SectionPreview({
   bandHeight,
   borrowed,
   hidden,
+  stale,
   mainWidth,
   min,
   max,
@@ -88,15 +95,52 @@ export function SectionPreview({
   bandHeight: number;
   borrowed: boolean;
   hidden: boolean;
+  stale: boolean;
   mainWidth: number;
   min: number;
   max: number;
   nonce: number;
 }) {
   const t = useAdminT();
-  // Reloading this one frame without disturbing the other seven.
+  // Reloading this one frame without disturbing the other eight.
   const [refreshed, setRefreshed] = useState(0);
   const key = `${nonce}-${refreshed}`;
+
+  /**
+   * Whether this frame has come near the viewport yet — nothing is fetched
+   * before it does.
+   *
+   * Nine of these sit on a ~26,000px page and the last is 25,000px down, so
+   * mounting them all would open the screen with nine `force-dynamic`
+   * storefront renders at once, each reading `site_content` in full and pulling
+   * the band's real artwork — and would do it AGAIN on every save, because a
+   * save re-keys every frame. That is a slow screen anywhere and an unusable
+   * one from China.
+   *
+   * `loading="lazy"` is on the iframe too, but it is only a hint: a plain lazy
+   * iframe 30,000px down a test page was fetched immediately by the browser
+   * this was checked in. This observer is the part that actually holds. Once a
+   * frame has been reached it stays mounted, so scrolling back and forth does
+   * not re-fetch, and a save still refreshes what the owner can see.
+   */
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [reached, setReached] = useState(false);
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node || reached) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setReached(true);
+          observer.disconnect();
+        }
+      },
+      // Loaded a screenful early, so it is there by the time you arrive.
+      { rootMargin: "800px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [reached]);
   /**
    * This section's width lives HERE, not in the editor above.
    *
@@ -235,9 +279,17 @@ export function SectionPreview({
             {t("home.sectionPreviewHidden")}
           </Text>
         ) : null}
+        {stale ? (
+          <Text as="p" variant="bodySm" tone="caution">
+            {t("home.sectionPreviewStale")}
+          </Text>
+        ) : null}
 
-        {/* 1 · The stage: fixed size, so the page below never moves. */}
+        {/* 1 · The stage: fixed size, so the page below never moves — and what
+            the observer watches, which is why it is rendered even while the
+            frame inside it is not. */}
         <div
+          ref={stageRef}
           style={{
             position: "relative",
             width: stageWidth,
@@ -264,34 +316,41 @@ export function SectionPreview({
               background: "#FFF6EC",
             }}
           >
-            {/* 3 · The frame itself, at the design's own width forever. */}
-            <iframe
-              key={key}
-              src={`/preview/home/${sectionId}?n=${key}`}
-              title={`${t("home.sectionPreview")} — ${sectionId}`}
-              style={{
-                display: "block",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: DESIGN_WIDTH,
-                height: bandHeight,
-                border: 0,
-                // Top left, so the scaled frame lands in the box's corner
-                // rather than being scaled about its centre and cropped on
-                // all sides.
-                transformOrigin: "top left",
-                transform: `scale(${scale})`,
-                // No `will-change` here on purpose. It was the obvious thing to
-                // add and it buys nothing: sweeping an iframe's transform by
-                // hand costs 13.89ms per frame against a 13.86ms idle frame, so
-                // the browser already composites this. A standing promotion
-                // hint on nine cross-document iframes, on a 26,000px page, is a
-                // real cost against Chromium's layer budget — and when that
-                // budget is exceeded it de-promotes silently, which would take
-                // the actual fix down with it.
-              }}
-            />
+            {/* 3 · The frame itself, at the design's own width forever —
+                mounted only once this section has been reached. Until then the
+                box shows the page's own cream, already the right size and in
+                the right place, so nothing moves when it arrives. */}
+            {reached ? (
+              <iframe
+                key={key}
+                src={`/preview/home/${sectionId}?n=${key}`}
+                title={`${t("home.sectionPreview")} — ${sectionId}`}
+                // Belt to the observer's braces; see the note on `reached`.
+                loading="lazy"
+                style={{
+                  display: "block",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: DESIGN_WIDTH,
+                  height: bandHeight,
+                  border: 0,
+                  // Top left, so the scaled frame lands in the box's corner
+                  // rather than being scaled about its centre and cropped on
+                  // all sides.
+                  transformOrigin: "top left",
+                  transform: `scale(${scale})`,
+                  // No `will-change` here on purpose. It was the obvious thing to
+                  // add and it buys nothing: sweeping an iframe's transform by
+                  // hand costs 13.89ms per frame against a 13.86ms idle frame, so
+                  // the browser already composites this. A standing promotion
+                  // hint on nine cross-document iframes, on a 26,000px page, is a
+                  // real cost against Chromium's layer budget — and when that
+                  // budget is exceeded it de-promotes silently, which would take
+                  // the actual fix down with it.
+                }}
+              />
+            ) : null}
           </div>
         </div>
 

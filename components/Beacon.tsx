@@ -77,6 +77,17 @@ function getSessionId(): string | null {
  * flag is module scope, so it survives every client-side navigation in this
  * document and dies with it.
  *
+ * WHY `adminPreview` ALSO HAS TO BE IN A FRAME
+ * On its own, that parameter is a kill switch for our own analytics that
+ * anyone can type: `https://eldreve.com/?adminPreview=1` would make the
+ * visitor invisible — no page view, no dwell, no campaign attribution — and
+ * with the latch above, for their whole visit rather than one page. It is
+ * exactly the URL a teammate gets from "open frame in a new tab" and might
+ * paste to a boss or a supplier. Both previews are always iframes inside the
+ * admin, so requiring a framed document costs the feature nothing and takes
+ * the parameter away from the open web. `/preview/*` needs no such test: it
+ * 404s for everyone but an admin, and it is meant to work in its own tab.
+ *
  * @returns True once this document has been identified as a preview.
  */
 function isAdminPreview(): boolean {
@@ -84,7 +95,8 @@ function isAdminPreview(): boolean {
   try {
     previewLatch =
       window.location.pathname.startsWith("/preview/") ||
-      new URLSearchParams(window.location.search).has("adminPreview");
+      (window.self !== window.top &&
+        new URLSearchParams(window.location.search).has("adminPreview"));
   } catch {
     previewLatch = false;
   }

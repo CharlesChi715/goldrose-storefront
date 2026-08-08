@@ -780,8 +780,12 @@ different shape from the flat slot list.
   it deliberately renders a section even when the owner has **hidden** it.
   `components/home/bands.tsx` states the section → component mapping once and
   `app/page.tsx` reads it too, so a preview cannot drift from the page. Sections
-  with nothing of their own to show borrow a band and say so: the rail speed is
-  demonstrated on Best Sellers, because a still picture of a speed is worthless.
+  with nothing of their own to show borrow a band and say so, naming it the way
+  the section list names it: the rail speed is demonstrated on the Featured Rose
+  Gifts band, because a still picture of a speed is worthless. A frame is the
+  server rendering **saved** content, so a section with an unsaved edit says so
+  in visible text — it sits above the inputs, and a teammate who types a new
+  heading, looks up and sees the old one concludes the preview is broken.
 - **What the preview width can and cannot tell you.** Each frame has its own
   phone-width slider (320–440) plus "Match the main preview". ScaleFrame scales
   the whole 430 stage as ONE, so a narrower phone shrinks everything rather than

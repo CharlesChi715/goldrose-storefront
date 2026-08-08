@@ -576,6 +576,14 @@ export function HomeSectionsEditor({
   }
 
   const dirtyCount = edits.length;
+  // Which sections have an unsaved edit. The preview frames are the server
+  // rendering SAVED content, so each one says so while its own fields differ —
+  // the frame sits above the inputs, and a teammate who types a new headline,
+  // looks up and sees the old one concludes the preview is broken.
+  const dirtySections = useMemo(
+    () => new Set(edits.map((edit) => edit.section)),
+    [edits],
+  );
 
   return (
     <Page
@@ -741,6 +749,7 @@ export function HomeSectionsEditor({
                       bandHeight={section.preview.height}
                       borrowed={section.preview.borrowed}
                       hidden={section.hideable && !section.visible}
+                      stale={dirtySections.has(section.id)}
                       mainWidth={previewWidth}
                       min={PREVIEW_MIN_WIDTH}
                       max={PREVIEW_MAX_WIDTH}

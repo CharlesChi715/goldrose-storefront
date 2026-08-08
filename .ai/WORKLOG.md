@@ -6123,3 +6123,45 @@ Same branch, commits `c94cc5b`, `17a15b6` and the docs pass.
   control can and cannot show, and its stale "Four field kinds" is corrected to
   seven (`image`/`number` arrived on the parent branch undocumented).
   `/preview` added to robots.txt's blocked paths, with a test.
+
+## 2026-08-08 — Section previews: review pass before merge
+
+A read-only review fan-out (14 agents, 5 lenses, adversarially refuted) over
+`worktree-admin-home-customization...HEAD` found **no blockers** and six items
+worth doing. All six are done, in `a87e707` and the follow-up:
+
+- **A public analytics kill switch, made worse by my own fix.** `?adminPreview`
+  suppressed the visitor beacon for anyone who typed it, and the latch I added
+  extended that from one page to the whole visit. It now also requires a framed
+  document — both previews are always iframes inside the admin, so nothing
+  intended changes — and `POST /api/beacon` refuses `/preview/*` server-side.
+- **Nine previews are no longer fetched on open.** Each is a `force-dynamic`
+  render reading `site_content` in full, and a save re-keys all of them, so
+  opening the screen cost nine of those and every save cost nine more. Frames
+  now mount on intersection. ⚠️ `loading="lazy"` alone is NOT enough: a control
+  iframe 30,000px down was fetched immediately by the browser this was checked
+  in. Nor could the observer be verified there — the Browser pane runs with
+  `document.visibilityState === "hidden"`, and Chrome delivers no
+  IntersectionObserver callbacks at all in a hidden document, not even for
+  `body`. Verified in Playwright instead, which is the tool for it.
+- **A section with unsaved edits now says so** in the frame's own card. The
+  preview is the server rendering SAVED content and it sits above the inputs.
+- **Three names for one band.** `home.sectionPreviewBorrowed` said "Best
+  Sellers" / 「热销」 while the section card is "Featured Rose Gifts" /
+  「精选玫瑰礼物」 and the motion blurb says 「畅销榜」. Now named the way the
+  screen names it, in both languages.
+- The file header still described the sync button as mounting on demand, and
+  said "eight sections". Both corrected — the same class of stale prose the
+  docs pass caught in SUMMARY.
+- `/preview/home/craft` signed out → 404 is now pinned by a test. `proxy.ts`
+  matches only `/admin`, so one `requireAdmin()` was the entire gate on a route
+  that renders hidden copy, and every other test signs in first — deleting it
+  would have left the suite green.
+
+Deliberately not done, so it is not re-raised: `React.memo` on SectionPreview (a
+keystroke is one event, not 60/sec), a `never` exhaustiveness check on
+`homeBand()` (adding a band breaks `homeLayout` first), de-duplicating the
+three `430` constants (each carries its own explanation), and rendering
+`HomeHeader` in the hero preview (its strip covers only empty cream — checked).
+
+138 e2e and 142 unit tests pass.
