@@ -1,27 +1,16 @@
 ---
-id: card-payments
-area: frontend
-
 delivery: ready
 rollout: not-deployed
 statusChangedAt: 2026-07-26
-
 priority: p0
-owner: charles
-target: v1-launch
-qualifier: owner must enable Advanced Checkout first
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# Card payments — Visa/Mastercard on our own checkout page
+# card-payments
 
 ## Context
+
+Take Visa and Mastercard on our own checkout page, instead of sending every
+card buyer into PayPal's window.
 
 - Owner ask (2026-07-26): "just start build: Visa, PayPal, Mastercard".
   `SUMMARY.md` has listed those three as the US launch requirement for a while,

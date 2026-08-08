@@ -44,7 +44,7 @@ way — a link, not a live `<input>` — because:
 
 - there is no newsletter subscribe endpoint in the repo, and
 - promotion-email consent is an unstarted feature
-  ([`promotion-emails.md`](../../docs/features/backend/promotion-emails.md)),
+  ([`promotion-emails.md`](../../docs/features/promotion-emails.md)),
   so an address captured here would have nowhere lawful to go.
 
 A real field that silently discards what a visitor types is worse than a field

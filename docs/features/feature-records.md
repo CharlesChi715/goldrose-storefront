@@ -40,9 +40,9 @@ Dated 2026-08-08:
 1. [x] `new` — scaffold born-backlog records (usage/kebab/collision guards).
 2. [x] `check` — links, key vocabulary and order, presence tiers, evidence
        gate, H1 = id, comment survival; collector report, exit 1 on any.
-3. [ ] Migrate the 9 legacy records on a branch, file by file, re-running
+3. [x] Migrate the 9 legacy records on a branch, file by file, re-running
        `check` between files until `all rules pass`.
-4. [ ] After each `git mv` out of `backend/`: repo-wide
+4. [x] After each `git mv` out of `backend/`: repo-wide
        `grep -rn "features/backend" --include="*.md" .` and fix referrers —
        SUMMARY.md's links are outside check's scope.
 5. [ ] Seal: `"features:check"` npm script + CI step beside `check:migrations`.
@@ -54,9 +54,13 @@ Dated 2026-08-08:
 - OQ-1: should `tags:` return for journey grouping (e.g. the four checkout
   records), and if so is its vocabulary a closed list (like
   `lib/catalog/facets.ts`) or free-form? Until then the roadmap lists flat.
-- OQ-2: rollout truth — five legacy records claim `test-deployment` from
-  before the 2026-08-07 go-live; each needs a per-file truth judgment during
-  migration (check verifies vocabulary, never facts).
+- ~~OQ-2~~ answered 2026-08-08 during the migration: four legacy records
+  (`posting-account-attribution`, `engagement-tracking`, `order-tracking`,
+  `region-alignment`) moved `test-deployment` → `live` — their code ships in
+  the eldreve.com production deployment, and rollout states where code runs,
+  not whether anyone has exercised it yet. Each records the judgment in its
+  own Context. `paypal-wallet` stays `test-deployment`: its code is live but
+  runs against PayPal sandbox, which is the state the value names.
 
 ## Related links
 

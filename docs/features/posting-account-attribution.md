@@ -1,17 +1,8 @@
 ---
-id: posting-account-attribution
-area: backend
-
 delivery: uat
-rollout: test-deployment
-priority: p1
-target: v1-launch
-owner: charles
+rollout: live
 statusChangedAt: 2026-07-24
-
-dependsOn: []
-blockedBy: []
-
+priority: p1
 verification:
   automated:
     - tests/unit/channel-attribution.test.ts
@@ -19,7 +10,7 @@ verification:
   human: null
 ---
 
-# Posting-account attribution — link tag for commissions
+# posting-account-attribution
 
 > Naming note: drafted as `acct=`; owner chose **`utm_acc`** at implementation
 > time (2026-07-24) — same family look as the other tags, still not a standard
@@ -30,6 +21,9 @@ verification:
 - Owner pays commission by which posting account (e.g. TikTok account "amy") brought the buyer.
 - Built 2026-07-23: account name travels in the marketing link's `utm_content` tag; read only by our own beacon (`components/Beacon.tsx`) via `accountOf()` (`lib/admin/channels.ts`).
 - Pre-launch, zero real traffic — switching the tag is free today, expensive after launch.
+- Rollout judged 2026-08-08 (record migration, OQ-2): the tag capture ships in
+  the eldreve.com production deployment, so rollout is `live`; no campaign has
+  run yet, so no real `utm_acc` traffic has been observed.
 
 ## Decision
 

@@ -1,22 +1,15 @@
 ---
-id: product-content-pipeline
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-07-24
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# Product content pipeline — admin editing + 120-SKU bulk import
+# product-content-pipeline
 
 ## Context
+
+Edit product content in the admin instead of in Figma, and bulk-import the
+120-SKU catalogue rather than entering it product by product.
 
 - Teammate ask (relayed 2026-07-24, verbatim): 页面内容大部分都不对，只是定了框架；
   shop 页和商品详情页有 120 种 SKU，在 Figma 里逐个改太麻烦。可不可以在工作台改

@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Turns raw `page_views` engagement columns into the three admin reports
- * promised by docs/features/backend/engagement-tracking.md: time on page,
+ * promised by docs/features/engagement-tracking.md: time on page,
  * section attention, and drop-off. Pure functions over rows already filtered
  * to a date range, so `lib/admin/analytics.ts` stays the orchestrator and this
  * stays unit-testable.

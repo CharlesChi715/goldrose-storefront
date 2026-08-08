@@ -1,22 +1,14 @@
 ---
-id: tiktok-analytics
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-08-04
-
-dependsOn: [posting-account-attribution]
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# TikTok analytics — read our own metrics through the API
+# tiktok-analytics
 
 ## Context
+
+Read our own TikTok metrics through the API instead of the Business Suite UI.
 
 - Owner's idea (`docs/ideas.md`, line 81, verbatim): *"tiktok 数据分析"*. Related
   lines in the same file: content will be published to Facebook / TikTok / IG,
@@ -343,7 +335,7 @@ Nothing built; no evidence. Front matter stays BACKLOG until OQ-1 is answered.
 
 - [posting-account-attribution.md](posting-account-attribution.md) — the
   `utm_acc` decision and the beacon's UTM capture this would join against.
-- [backend/engagement-tracking.md](backend/engagement-tracking.md) — on-site
+- [engagement-tracking.md](engagement-tracking.md) — on-site
   dwell data, the other half of any "which video drove engagement" question.
 - **Authoritative:** the scope picker in the portal's Create-New-App dialog
   (`business-api.tiktok.com`, read 2026-08-04) — the only complete inventory of
@@ -663,7 +655,7 @@ Campaign、Ad、Audience、Creative、Measurement、Reporting、BC，外加
 
 - [posting-account-attribution.md](posting-account-attribution.md) —— `utm_acc`
   的决定，以及本功能要关联的那份埋点 UTM 采集。
-- [backend/engagement-tracking.md](backend/engagement-tracking.md) —— 站内停留
+- [engagement-tracking.md](engagement-tracking.md) —— 站内停留
   数据，是"哪条视频带来了互动"这个问题的另一半。
 - **权威来源：** 平台"新建 App"对话框里的 scope 选择器
   （`business-api.tiktok.com`，2026-08-04 读取）—— 关于平台到底授予什么，这是唯一

@@ -1,19 +1,8 @@
 ---
-id: order-tracking
-area: backend
-
 delivery: uat
-rollout: test-deployment
+rollout: live
 statusChangedAt: 2026-07-25
-
 priority: p1
-owner: charles
-target: v1-launch
-qualifier: "owner must verify a real carrier link"
-
-dependsOn: []
-blockedBy: []
-
 verification:
   automated:
     - "tests/unit/carriers.test.ts (7 tests — URL templates, encoding, labels)"
@@ -21,9 +10,12 @@ verification:
   human: null
 ---
 
-# Order tracking (UPS) — carrier tracking & customer surfaces
+# order-tracking
 
 ## Context
+
+Carrier tracking (UPS first) on the order, in the confirmation email, and on
+the customer's own order surfaces.
 
 - Boss (ideas.md 2026-07-25, verbatim): "UPS/" and "send the order tracking
   email." — he plans to ship from US stock via UPS and wants buyers to get a
@@ -52,6 +44,10 @@ verification:
      surface is the email itself (`/orders` is a guest lookup, no status).
   4. **No live status** ("in transit / delivered") — link-out to the carrier
      only. Deferred (Option C).
+- Rollout judged 2026-08-08 (record migration, OQ-2): the carrier picker and
+  the tracking link ship in the eldreve.com production deployment, so rollout
+  is `live`; no real order has been fulfilled through it yet, which is exactly
+  what the open acceptance criterion below asks for.
 
 ## Decision
 
@@ -130,8 +126,8 @@ aggregator free tier or UPS Track API, post-ship).
 
 ## Related links
 
-- Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../../admin-design.md)
+- Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../admin-design.md)
 - Activation: owner items in
-  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
-- SKU rules behind the 0003 bundle: [Database.md](../../Database.md)
+  [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)
+- SKU rules behind the 0003 bundle: [Database.md](../Database.md)
 - Sibling ask, same boss note: [promotion-emails.md](promotion-emails.md)

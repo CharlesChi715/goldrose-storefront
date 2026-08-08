@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Unit tests for the admin engagement reports
- * (docs/features/backend/engagement-tracking.md). The rule that matters most
+ * (docs/features/engagement-tracking.md). The rule that matters most
  * here: a visit whose closing beacon never arrived has active_ms null, and
  * must be excluded rather than counted as a zero-second visit — otherwise
  * every dwell number is silently dragged toward zero.

@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Unit tests for the engagement measurement rules
- * (docs/features/backend/engagement-tracking.md). These pin the decisions that
+ * (docs/features/engagement-tracking.md). These pin the decisions that
  * make the numbers mean something: hidden tabs count zero, idle time is cut,
  * a short section can still win the viewport contest, and per-section time can
  * never exceed the page total.

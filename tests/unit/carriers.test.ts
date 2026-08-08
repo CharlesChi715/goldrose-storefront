@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Unit coverage for the carrier registry behind order tracking
- * (features/backend/order-tracking.md): tracking URLs build correctly per
+ * (features/order-tracking.md): tracking URLs build correctly per
  * carrier, unknown carriers and blank numbers refuse, and labels render
  * for known, legacy, and absent values. Runs under plain Node:
  * `npm run test:unit`.

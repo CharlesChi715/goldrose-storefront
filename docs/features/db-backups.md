@@ -1,22 +1,15 @@
 ---
-id: db-backups
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-07-25
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# DB backups — Supabase Free + nightly pg_dump→S3
+# db-backups
 
 ## Context
+
+Back the hosted database up ourselves: stay on Supabase Free and ship a
+nightly `pg_dump` → S3 pipeline.
 
 - Supabase's built-in daily backups are **Pro-only ($25/mo)**; we are on Free,
   so the hosted project (**LIVE data**, ref `cfvsvgbldnzkcjvbwnjp`) currently
@@ -103,6 +96,6 @@ None yet — BACKLOG.
 
 ## Related links
 
-- Origin + platform decision: [Database.md](../../Database.md) (now points back here)
+- Origin + platform decision: [Database.md](../Database.md) (now points back here)
 - Launch-time Pro upgrade sits with the owner activation work:
-  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
+  [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)

@@ -64,7 +64,7 @@ local cart.**
   on two devices usually means one rose.
 - The real payoff is abandoned-cart email, which is worthless before real
   traffic. Build it alongside
-  [`promotion-emails.md`](../../docs/features/backend/promotion-emails.md) —
+  [`promotion-emails.md`](../../docs/features/promotion-emails.md) —
   the cart table is the payload, the consent is the permission. Separately
   they are two half-projects.
 - `lib/cart/store.ts` stores only `{variantId, quantity}` — no prices, which

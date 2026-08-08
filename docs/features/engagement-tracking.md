@@ -1,18 +1,8 @@
 ---
-id: engagement-tracking
-area: backend
-
 delivery: in-progress
-rollout: test-deployment
-priority: p2
-owner: charles
-target: v1-launch
-qualifier: "4/7 home sections tagged; vocabulary sign-off pending"
+rollout: live
 statusChangedAt: 2026-08-04
-
-dependsOn: []
-blockedBy: []
-
+priority: p2
 verification:
   automated:
     - tests/unit/engagement.test.ts
@@ -21,9 +11,11 @@ verification:
   human: null
 ---
 
-# Engagement tracking — how long, and which sections
+# engagement-tracking
 
 ## Context
+
+Measure how long a visitor stays and which sections of the page hold them.
 
 - Owner's idea, 2026-06-28 (`docs/ideas.md`): *"Analytics about behavior of the
   viewer in this website."*
@@ -34,6 +26,9 @@ verification:
   2026-08-04 simplified-homepage import cut it from 11 and deleted A-4/A-7/A-8/A-10
   at source). Nobody knows which ones earn attention and which are scrolled past —
   so nobody can say what to cut, move up, or spend photography money on.
+- Rollout judged 2026-08-08 (record migration, OQ-2): the beacon ships in the
+  eldreve.com production deployment, so rollout is `live`; delivery stays
+  `in-progress` because only 4 of the 7 bands are tagged.
 
 ## Decision
 
@@ -155,7 +150,7 @@ Stage 2 is blocked on element naming, not on code. A-1, A-2, A-3 and A-11 carry
 bands need (`CRAFT`, `OCCASION`, …) is not yet defined and signed off. Tagging
 before a vocabulary exists means renaming across several files later.
 
-No feature-record id exists for element naming, so `dependsOn` stays empty and
+No feature record exists for element naming, so `blockedBy` stays absent and
 the dependency is recorded here in prose.
 
 ## Open questions
@@ -253,5 +248,5 @@ mechanism is complete and generic, coverage grows as tagging lands.
 
 ## Related links
 
-- [`docs/features/posting-account-attribution.md`](../posting-account-attribution.md) — the `utm_acc` tag on the same beacon
+- [`docs/features/posting-account-attribution.md`](posting-account-attribution.md) — the `utm_acc` tag on the same beacon
 - `components/Beacon.tsx`, `app/api/beacon/route.ts`, `lib/admin/analytics.ts`

@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * End-to-end proof that the engagement beacon works in a real browser
- * (docs/features/backend/engagement-tracking.md). The unit tests pin the
+ * (docs/features/engagement-tracking.md). The unit tests pin the
  * clock's arithmetic; only this can show that the DOM wiring actually fires —
  * IntersectionObserver picking up `data-el` sections, the visibility flush,
  * and one summary that addresses the row the arrival beacon created.

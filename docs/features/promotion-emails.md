@@ -1,22 +1,15 @@
 ---
-id: promotion-emails
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-07-25
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# Promotion emails — consent, list, campaigns
+# promotion-emails
 
 ## Context
+
+Marketing email to registered customers: consent capture, a subscriber list,
+and campaign sends.
 
 - Boss (ideas.md 2026-07-25, verbatim): "user register must need email" — and
   Charles asked how we could send registered users promotion emails.
@@ -97,7 +90,7 @@ None yet — BACKLOG.
 
 - Existing email module: `lib/email.ts` (§10.3 notifications)
 - Activation: owner items in
-  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
+  [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)
 - Sibling ask, same boss note: [order-tracking.md](order-tracking.md)
 - Post-ship marketing context: influencer campaign idea in
-  [ideas.md](../../ideas.md)
+  [ideas.md](../ideas.md)

@@ -1,14 +1,7 @@
 ---
-id: region-alignment
-area: backend
-
 delivery: accepted
-rollout: test-deployment
+rollout: live
 statusChangedAt: 2026-07-26
-
-dependsOn: []
-blockedBy: []
-
 verification:
   automated: []
   human:
@@ -18,7 +11,7 @@ verification:
     evidence: "curl -sI …/api/beacon shows x-vercel-id: syd1::pdx1 (see note below)"
 ---
 
-# Region alignment — put Vercel compute beside the Oregon database
+# region-alignment
 
 > **Done 2026-07-26** (commit `fe73e42`): `vercel.json` now pins `pdx1`;
 > both wrong region records are corrected. Verified live —
@@ -27,6 +20,11 @@ verification:
 
 ## Context
 
+Put the Vercel compute beside the Oregon database, so every query stops
+crossing the Pacific.
+
+- Rollout judged 2026-08-08 (record migration, OQ-2): the `pdx1` pin ships in
+  the eldreve.com production deployment, so rollout is `live`.
 - The Supabase primary (`cfvsvgbldnzkcjvbwnjp`) runs in **AWS `us-west-2`
   (Oregon)** — read it from `supabase/.temp/pooler-url`
   (`aws-1-us-west-2.pooler.supabase.com`). The `*.supabase.co` hostname

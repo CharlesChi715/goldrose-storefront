@@ -173,7 +173,7 @@ Open linked resources only when the task needs them.
   Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
   (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
   the rest waits on a signed-off section vocabulary
-  ([`engagement-tracking.md`](docs/features/backend/engagement-tracking.md)).
+  ([`engagement-tracking.md`](docs/features/engagement-tracking.md)).
 - **Product-handle rule** ([`product-handles.md`](docs/ixd/naming/product-handles.md)
   v2.1) is adopted and enforced: `lib/admin/product-handle.ts` derives handles,
   collisions throw (no `-2`), non-draft handles are frozen. ⚠️ Duplicate in the
@@ -309,7 +309,7 @@ Open linked resources only when the task needs them.
 5. Enter real shipping rates (OQ-2) — no placeholder rate may be live.
 6. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
    `CHECKOUT_SKIP_PAYMENT`, turn on [database
-   backups](docs/features/backend/db-backups.md).
+   backups](docs/features/db-backups.md).
 7. Owner enables live PayPal → **the site is open for real orders.**
 
 While live, in any order (nothing below blocks taking orders):
@@ -328,11 +328,11 @@ While live, in any order (nothing below blocks taking orders):
     marketing.
 
 Later: promotion email consent
-([`promotion-emails.md`](docs/features/backend/promotion-emails.md)), 120-SKU
+([`promotion-emails.md`](docs/features/promotion-emails.md)), 120-SKU
 imports ([`product-content-pipeline.md`](docs/features/product-content-pipeline.md)),
 supplier colors ([`supplier-color-charts.md`](docs/supplier-color-charts.md)),
 campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
-([`region-alignment.md`](docs/features/backend/region-alignment.md)).
+([`region-alignment.md`](docs/features/region-alignment.md)).
 
 ## Product decisions
 
