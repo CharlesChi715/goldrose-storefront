@@ -788,10 +788,12 @@ different shape from the flat slot list.
   out to fit, which put Craft and Story on screen at 39% — a size at which the
   one question a teammate actually has ("does my wording look right?") cannot be
   answered.
-- **You can edit by pointing at the page** (`content/home/picker/`). One toggle
-  arms every section's window at once; each then outlines what it owns, and a
-  click opens that field in an editor docked beside that window, joined to the
-  selection by a curve. `data-field` on the storefront's own nodes is the map
+- **You can edit by pointing at the page** (`content/home/picker/`). No switch:
+  pointing is always on, and hovering a section's window is what outlines the
+  fields it owns — so a preview nobody is working in stays a preview. A click
+  opens that field in an editor docked beside that window, joined to the
+  selection by a curve; a press that travels more than 5px is treated as a drag
+  so the window can still be scrolled by hand. `data-field` on the storefront's own nodes is the map
   from pixel to registry slot, and typing is written straight into every mounted
   preview (`patch.ts`) rather than re-rendering a route that reads
   `site_content` in full per keystroke. Three rules hold it together:

@@ -774,10 +774,6 @@ const en = {
   "home.previewWidthReset": "Back to design width",
 
   // Content → Home page · point-and-edit
-  "home.picker.arm": "Point at something to edit it",
-  "home.picker.disarm": "Done pointing",
-  "home.picker.armed":
-    "Every section's preview now outlines what you can change in it. Point at one and click it.",
   "home.picker.close": "Close",
   "home.picker.needsSave":
     "This one only changes the preview after you save — it is not something the page can show straight away.",
@@ -1555,16 +1551,12 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.previewWidthReset": "恢复设计宽度",
 
   // 内容 → 首页 · 指哪改哪
-  "home.picker.arm": "点选页面内容进行修改",
-  "home.picker.disarm": "结束点选",
-  "home.picker.armed":
-    "各板块预览中可修改的内容都已用虚线标出。指向其中一处并点击。",
   "home.picker.close": "关闭",
   "home.picker.needsSave":
     "此项需保存后才会在预览中生效——页面无法即时呈现这类改动。",
   "home.picker.artworkPicked": "该文字属于设计团队导出的图片，无法在此输入。",
   "home.picker.hint":
-    "更快的方式：在板块预览中点选要修改的内容。所有字段仍会完整列在下方。",
+    "更快的方式：将鼠标移到下方的板块预览上，可修改的内容会自动标出——点击其中一处即可在预览旁边编辑。所有字段仍会完整列出。",
 
   // 内容 → 首页 · 单个板块预览
   "home.sectionPreview": "本板块在页面中的位置",

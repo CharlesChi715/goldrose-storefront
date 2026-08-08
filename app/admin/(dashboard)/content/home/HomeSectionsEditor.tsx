@@ -320,13 +320,20 @@ export function HomeSectionsEditor({
    * The section windows never needed any of it: their film is
    * `pointer-events: none` inside a box that scrolls natively.
    *
-   * What stays HERE is only what must be shared: whether the picker is armed,
-   * and which single field is being edited. Two panels open at once would be
-   * two answers to "what am I changing", so picking in one card closes another.
+   * POINTING IS ALWAYS ON (owner, 2026-08-08). There was a screen-wide switch;
+   * it existed only because arming used to install a capture layer that broke
+   * scrolling, so it had to be something you could turn off again. With the
+   * layer gone it guarded nothing — a click on a window did nothing at all
+   * while disarmed — and its only real effect was hiding the feature. The
+   * "outline everything editable" half now follows the pointer instead, in
+   * SectionPreview, so the previews stay clean where you are not working.
+   *
+   * What stays HERE is only what must be shared: which single field is being
+   * edited. Two panels open at once would be two answers to "what am I
+   * changing", so picking in one card closes another.
    */
   const previewFrame = useRef<HTMLIFrameElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const [armed, setArmed] = useState(false);
   const [picked, setPicked] = useState<PickedField[]>([]);
   const selectedKey = picked[0]?.key ?? null;
   const pickedSection = picked[0]?.section.id ?? null;
@@ -952,29 +959,12 @@ export function HomeSectionsEditor({
             {/* Find a field · point at one · jump to a section */}
             <Card>
               <BlockStack gap="300">
-                {/* The picker's one toggle. It lives with the other two ways of
-                    finding a field rather than on any single preview, because
-                    it now arms EVERY section's window at once — a control
-                    attached to one card would have been a promise about that
-                    card. */}
-                <InlineStack
-                  align="space-between"
-                  blockAlign="center"
-                  gap="200"
-                >
-                  <Text as="span" variant="bodySm" tone="subdued">
-                    {armed ? t("home.picker.armed") : t("home.picker.hint")}
-                  </Text>
-                  <Button
-                    variant={armed ? "primary" : "secondary"}
-                    onClick={() => {
-                      setArmed((on) => !on);
-                      setPicked([]);
-                    }}
-                  >
-                    {armed ? t("home.picker.disarm") : t("home.picker.arm")}
-                  </Button>
-                </InlineStack>
+                {/* No toggle: pointing is always on. Said once here, because a
+                    feature with no control is a feature nobody finds unless the
+                    screen mentions it. */}
+                <Text as="span" variant="bodySm" tone="subdued">
+                  {t("home.picker.hint")}
+                </Text>
                 <Divider />
                 <TextField
                   label={t("home.search")}
@@ -1114,7 +1104,6 @@ export function HomeSectionsEditor({
                           maxWidth={PREVIEW_MAX_WIDTH}
                           frameHeight={frameHeight}
                           nonce={previewNonce}
-                          armed={armed}
                           scope={scopes.get(section.id) ?? null}
                           selectedKey={
                             pickedSection === section.id ? selectedKey : null

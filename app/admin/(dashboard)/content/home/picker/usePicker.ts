@@ -2,15 +2,23 @@
 
 /**
  * ROLE OF THIS FILE
- * The picker's state: armed or not, what the pointer is over, what is selected,
- * and where all of it currently sits on screen.
+ * The picker's state: what the pointer is over, what is selected, and where all
+ * of it currently sits on screen.
  *
- * ONE MODE, NOT TWO
- * Arming the picker outlines everything editable faintly and strengthens
- * whatever is under the pointer. The owner asked for both "show me everything
- * editable" and "let me point at one thing"; these are the same mode seen at
- * rest and in use, and a second toggle would be one more thing to explain on a
- * thirty-second edit.
+ * NO ARMING, AND NO SECOND MODE (owner, 2026-08-08)
+ * There was a screen-wide switch. It was necessary only while arming installed
+ * a transparent capture layer that swallowed the wheel — turning the picker on
+ * cost you the ability to scroll, so it had to be something you turned off
+ * again. With that layer gone the switch guarded nothing: a click on a section
+ * window did nothing whatever while disarmed, and its only real effect was
+ * hiding the feature from anybody who did not already know it was there.
+ *
+ * The owner asked for two things — "show me everything editable" and "let me
+ * point at one thing". Both survive without a control, because the first one
+ * follows the POINTER: the window you are in outlines what it owns, and the
+ * eight you are not stay clean, which is what lets a preview go on being a
+ * preview. `armed` below is therefore no longer a mode; it means "this window
+ * is the one being worked in".
  *
  * WHY THE POINTER NEVER REACHES THE PAGE
  * The preview's own links are real, and one click would navigate the frame off
@@ -41,10 +49,9 @@
  * They live at different heights in the tree ON PURPOSE, and splitting them is
  * what fixed the "Maximum update depth exceeded" crash (2026-08-08).
  *
- * The pointer handlers never change and never hold state, so the editor screen
- * can own them and hand them to the capture layer. The measurement publishes up
- * to sixty times a second, so it is owned by the leaf that draws it — nothing
- * else re-renders when it changes.
+ * The pointer handlers never change and never hold state, so the window can own
+ * them directly. The measurement publishes up to sixty times a second, so it is
+ * owned by the leaf that draws it — nothing else re-renders when it changes.
  *
  * That matters because the screen's root is a Polaris `Page`, and Polaris'
  * `ActionsMeasurer` re-measures the header's action buttons in a `useEffect`
@@ -81,7 +88,7 @@ export type PickerView = {
   panel: Rect | null;
 };
 
-/** Where the pointer is, shared between the capture layer and the frame loop. */
+/** Where the pointer is, shared between the window's handlers and the loop. */
 export type PointerRef = React.RefObject<{ x: number; y: number } | null>;
 
 const EMPTY: PickerView = { all: [], hover: null, selected: [], panel: null };
@@ -168,6 +175,22 @@ export function usePickerPointer({
   }, []);
 
   /**
+   * Where the press started, so a DRAG is not mistaken for a pick.
+   *
+   * This matters only since pointing stopped needing to be armed: the window
+   * is a scrolling box, and dragging inside one to move it still ends in a
+   * `click`. Without this, every attempt to drag the preview would open an
+   * editor for whatever happened to be under the finger when it stopped.
+   */
+  const pressed = useRef<{ x: number; y: number } | null>(null);
+  const onPointerDown = useCallback((event: React.PointerEvent) => {
+    pressed.current = { x: event.clientX, y: event.clientY };
+  }, []);
+
+  /** Beyond this a press is a drag, not a click. Below it, a steady hand. */
+  const DRAG_SLOP = 5;
+
+  /**
    * Resolve what was clicked from the CLICK'S OWN position, not from whatever
    * the last hover happened to land on.
    *
@@ -180,6 +203,14 @@ export function usePickerPointer({
       const iframe = iframeRef.current;
       const doc = iframe?.contentDocument;
       if (!iframe || !doc) return;
+      const from = pressed.current;
+      pressed.current = null;
+      if (
+        from &&
+        Math.hypot(event.clientX - from.x, event.clientY - from.y) > DRAG_SLOP
+      ) {
+        return; // They were scrolling the window, not choosing something in it.
+      }
       const client = { x: event.clientX, y: event.clientY };
       const hit = resolveTarget(
         doc,
@@ -193,7 +224,7 @@ export function usePickerPointer({
     [iframeRef, scope, onPick],
   );
 
-  return { pointer, onPointerMove, onPointerLeave, onClick };
+  return { pointer, onPointerDown, onPointerMove, onPointerLeave, onClick };
 }
 
 /**

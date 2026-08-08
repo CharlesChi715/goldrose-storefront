@@ -6388,3 +6388,36 @@ dialog shows the design photo un-framable with the reason, a chosen photo
 appears in every preview at once, and dragging the zoom writes
 `transform: scale(2.5)` into the section window live while the banner counts
 photo and framing as two unsaved changes.
+
+## 2026-08-08 — pointing is always on; the switch is gone
+
+**Branch:** `worktree-admin-home-customization`
+
+Charles asked to "just keep that pointing on". Agreed, and the reason for the
+switch had already evaporated: it existed only while arming installed the
+transparent capture layer that swallowed the wheel, so turning the picker on
+cost you the ability to scroll and had to be reversible. With the layer gone the
+switch guarded nothing — a click on a section window did nothing whatever while
+disarmed — and its only real effect was hiding the feature. Charles could not
+find it after it moved cards, which is the evidence.
+
+One refinement rather than a straight deletion: the owner's original ask was for
+BOTH "show me everything editable" and "point at one thing", and making the
+first one permanent would cover all nine previews in dashes — ruining the one
+thing a section preview is for. So that half now follows the pointer: the window
+you are in outlines what it owns, the eight you are not stay clean. `armed` in
+`usePickerView` stopped being a mode and now means "this is the window being
+worked in", which also makes the frame loop cheaper — one window measures, not
+every visible one.
+
+Added with it: a 5px drag guard. Pointing being always on means dragging a
+window to scroll it ends in a `click`, which would otherwise open an editor for
+whatever the finger stopped on.
+
+Retired `home.picker.arm` / `.disarm` / `.armed` in both languages; the hint now
+describes an affordance rather than a control.
+
+**Verified:** tsc clean, ESLint clean, 159 unit, 152 e2e — including a new test
+that a window is pointable with no switch AND that a drag does not pick, plus
+the three pixel baselines. Confirmed by eye: at rest a preview is just a
+preview; the pointer entering it reveals what is editable.

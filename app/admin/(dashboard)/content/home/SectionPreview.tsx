@@ -120,7 +120,6 @@ const SLACK = 48;
  * @param props.maxWidth - The widest selectable width, used to reserve the row.
  * @param props.frameHeight - The live stage height, from `homeLayout()`.
  * @param props.nonce - Bumped by the parent after every save, to reload.
- * @param props.armed - Whether the picker is on, screen-wide.
  * @param props.scope - The field keys this section owns; the window offers no
  *   others, however much of a neighbouring band peeks into the slack.
  * @param props.selectedKey - The field being edited, when it is one of ours.
@@ -142,7 +141,6 @@ export function SectionPreview({
   maxWidth,
   frameHeight,
   nonce,
-  armed = false,
   scope = null,
   selectedKey = null,
   panelRef,
@@ -160,7 +158,6 @@ export function SectionPreview({
   maxWidth: number;
   frameHeight: number;
   nonce: number;
-  armed?: boolean;
   scope?: FieldScope;
   selectedKey?: string | null;
   panelRef?: React.RefObject<HTMLDivElement | null>;
@@ -258,13 +255,29 @@ export function SectionPreview({
    * the storefront's links and needs no capture layer to stop it. Nothing calls
    * `preventDefault`, so the wheel is never taken off the browser: this window
    * scrolls natively, with momentum, chaining and touch intact.
+   *
+   * ALWAYS ON, NO ARMING (owner, 2026-08-08)
+   * There used to be a screen-wide switch. It existed when arming installed a
+   * transparent capture layer that had to swallow the wheel — turning that on
+   * cost you the ability to scroll, so it had to be something you turned off
+   * again. With the layer gone the switch guarded nothing: a click on this
+   * window did nothing whatever while disarmed, and the only thing it achieved
+   * was hiding the feature from anybody who did not know to look for it.
+   *
+   * What DID need a switch was the other half: outlining everything editable
+   * covers the preview in dashes, and this card's whole job is to show how the
+   * page actually looks. So that half follows the POINTER instead — the window
+   * you are working in shows its outlines, and the eight you are not stay
+   * clean. Both of the owner's original asks survive; neither needs a control.
    */
-  const { pointer, onPointerMove, onPointerLeave, onClick } = usePickerPointer({
-    iframeRef: frameRef,
-    scope,
-    onPick: onPick ?? (() => {}),
-  });
-  const pointing = armed && onPage && reached;
+  const { pointer, onPointerDown, onPointerMove, onPointerLeave, onClick } =
+    usePickerPointer({
+      iframeRef: frameRef,
+      scope,
+      onPick: onPick ?? (() => {}),
+    });
+  const [hovered, setHovered] = useState(false);
+  const pointing = onPage && reached;
 
   const scale = width / DESIGN_WIDTH;
   const { railHeight, filmTop, range, parkAt } = homePreviewWindow(
@@ -366,8 +379,13 @@ export function SectionPreview({
               {...(pointing
                 ? {
                     "data-home-picker-window": sectionId,
+                    onPointerEnter: () => setHovered(true),
+                    onPointerDown,
                     onPointerMove,
-                    onPointerLeave,
+                    onPointerLeave: () => {
+                      setHovered(false);
+                      onPointerLeave();
+                    },
                     onClick,
                   }
                 : null)}
@@ -530,9 +548,11 @@ export function SectionPreview({
         <PickerLayer
           iframeRef={frameRef}
           pointer={pointer}
-          // Measuring is worth doing only where somebody is looking. A card
-          // scrolled past keeps its selection but stops running a frame loop.
-          armed={pointing && onScreen}
+          // Measuring is worth doing only where somebody is looking — and now
+          // that means the ONE window under the pointer, not every window on
+          // screen. A card you are not in keeps its selection ring and runs no
+          // frame loop at all.
+          armed={pointing && onScreen && hovered}
           selectedKey={selectedKey}
           panelRef={panelRef}
           scope={scope}

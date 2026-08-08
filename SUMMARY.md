@@ -177,10 +177,15 @@ Open linked resources only when the task needs them.
   be an analytics kill switch anyone could type into the URL bar.
 - **You edit the home page by pointing at each section's own window (2026-08-08,
   `worktree-admin-home-customization`).** Every editable node on `/` carries a
-  `data-field` naming its registry slot. One toggle arms all nine section
-  windows; each outlines what it owns, and a click opens that field in an editor
-  docked beside that window, joined by a curve. Typing is written straight into
-  every mounted preview (`picker/patch.ts`), so a section window can never show
+  `data-field` naming its registry slot. **There is no switch** — pointing is
+  always on, and the "outline everything editable" half follows the pointer, so
+  the window you are in shows what it owns and the eight you are not stay clean
+  enough to judge the design by. A click opens that field in an editor docked
+  beside that window, joined by a curve. (The switch existed only while arming
+  installed the capture layer that broke scrolling; with the layer gone it
+  guarded nothing and merely hid the feature. A press that moves more than 5px
+  is a drag, not a pick, so a window can still be dragged to scroll.)
+  Typing is written straight into every mounted preview (`picker/patch.ts`), so a section window can never show
   something older than its own fields say; kinds that cannot honestly be faked
   (rail timings) still say "save to see this". Section cards went full-width to
   make room — the annotation gutter left 571px and the window is 430 of them,

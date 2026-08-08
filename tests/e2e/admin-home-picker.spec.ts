@@ -35,17 +35,18 @@ test.describe.configure({ mode: "serial" });
 /** The page-wide preview, told apart from the eight per-section windows. */
 const PREVIEW = 'iframe[title="Live preview"]';
 
-/** Open the editor and arm the picker for every section at once. */
-async function armed(page: Page) {
+/**
+ * Open the editor. Pointing needs no arming: there is no switch (owner,
+ * 2026-08-08), because the one that existed guarded nothing once the capture
+ * layer was gone. A window is pointable as soon as it has loaded.
+ */
+async function open(page: Page) {
   await adminLogin(page);
   await page.goto("/admin/content/home");
   await expect(page.getByRole("heading", { name: "Home page" })).toBeVisible();
-  await page
-    .getByRole("button", { name: "Point at something to edit it" })
-    .click();
   await expect(
-    page.getByRole("button", { name: "Done pointing" }),
-  ).toBeVisible();
+    page.getByRole("button", { name: /Point at something to edit it/ }),
+  ).toHaveCount(0);
 }
 
 /**
@@ -123,7 +124,7 @@ async function pointAt(page: Page, sectionId: string, key: string) {
 test("pointing in a section's window opens that field, in that card", async ({
   page,
 }) => {
-  await armed(page);
+  await open(page);
   await pointAt(page, "hero", "hero.title");
 
   // The editor docks INSIDE the card whose window was pointed at — that is what
@@ -137,7 +138,7 @@ test("pointing in a section's window opens that field, in that card", async ({
 test("typing reaches every preview showing that field, not just one", async ({
   page,
 }) => {
-  await armed(page);
+  await open(page);
   await pointAt(page, "hero", "hero.title");
 
   const panel = page.locator("#home-section-hero [data-home-editor-panel]");
@@ -162,7 +163,7 @@ test("typing reaches every preview showing that field, not just one", async ({
 test("a field you can point at is still listed, for anyone who cannot", async ({
   page,
 }) => {
-  await armed(page);
+  await open(page);
   const card = page.locator("#home-section-hero");
   await card.evaluate((el) =>
     el.scrollIntoView({ block: "start", behavior: "instant" }),
@@ -177,7 +178,7 @@ test("a field you can point at is still listed, for anyone who cannot", async ({
 });
 
 test("the page-wide preview scrolls at a normal speed", async ({ page }) => {
-  await armed(page);
+  await open(page);
 
   // No capture layer anywhere, armed or not: that is the structural half of the
   // guarantee, and the reason the wheel is never taken off the browser.
@@ -257,4 +258,34 @@ test("framing a replaced photo reaches the live page, and resets with it", async
     .click();
   await page.getByRole("button", { name: "Discard" }).click();
   await expect(page.getByText(/Unsaved changes/)).toHaveCount(0);
+});
+
+test("a window is pointable with no switch, and a drag does not pick", async ({
+  page,
+}) => {
+  await open(page);
+  const card = page.locator("#home-section-hero");
+  await card.evaluate((el) =>
+    el.scrollIntoView({ block: "start", behavior: "instant" }),
+  );
+  // Pointable straight away — nothing was armed.
+  const window = page.locator('[data-home-picker-window="hero"]');
+  await expect(window).toBeVisible();
+
+  // Dragging inside the window scrolls it, and a scroll still ends in a click.
+  // That click must not open an editor, or the preview could not be dragged.
+  const box = (await window.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 - 60, {
+    steps: 8,
+  });
+  await page.mouse.up();
+  await expect(page.locator("[data-home-editor-panel]")).toHaveCount(0);
+
+  // A plain click, from the same spot, does open one.
+  await pointAt(page, "hero", "hero.title");
+  await expect(
+    page.locator("#home-section-hero [data-home-editor-panel]"),
+  ).toBeVisible();
 });
