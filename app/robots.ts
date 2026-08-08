@@ -22,7 +22,11 @@ const AI_CRAWLERS = [
   "Bytespider",
 ];
 
-const BLOCKED_PATHS = ["/admin", "/checkout", "/api"];
+// `/preview` is the admin's own section previews (§9.8.1). It already 404s for
+// anyone who is not signed in and carries noindex, so this is not what protects
+// it — it is here so crawlers do not spend budget on a URL space that can only
+// ever answer 404, for the same reason /admin is listed.
+const BLOCKED_PATHS = ["/admin", "/checkout", "/api", "/preview"];
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   let allowAi = true;

@@ -54,14 +54,15 @@ import {
   Link as PolarisLink,
   Modal,
   Page,
-  RangeSlider,
   Text,
   TextField,
   Toast,
 } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
 import { HomePageMap } from "./HomePageMap";
+import { MainPreview } from "./MainPreview";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
+import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
   resetHomePageAction,
@@ -111,6 +112,12 @@ export type SectionView = {
   visible: boolean;
   /** Its span on the live stage, for the section map; null when it has none. */
   band: { top: number; height: number } | null;
+  /**
+   * What this section's own live preview shows, or null when it has nothing to
+   * show. `borrowed` marks a section that has no band of its own and is being
+   * illustrated with another one — see lib/home-content/preview.ts.
+   */
+  preview: { height: number; borrowed: boolean } | null;
   fields: FieldView[];
 };
 
@@ -270,6 +277,9 @@ export function HomeSectionsEditor({
   // Which phone width the preview is standing in for. Session-local: it is a
   // way of looking at the page, not a setting that belongs to the store.
   const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
+  // Each section's own preview width is deliberately NOT here: it lives in the
+  // SectionPreview that owns it, so dragging one slider does not re-render this
+  // screen's ~180 fields on every pixel. See that file for the measurements.
 
   /** The live value of a field: the local draft if touched, else what is saved. */
   const valueOf = (section: SectionView, field: FieldView): string =>
@@ -585,6 +595,14 @@ export function HomeSectionsEditor({
   }
 
   const dirtyCount = edits.length;
+  // Which sections have an unsaved edit. The preview frames are the server
+  // rendering SAVED content, so each one says so while its own fields differ —
+  // the frame sits above the inputs, and a teammate who types a new headline,
+  // looks up and sees the old one concludes the preview is broken.
+  const dirtySections = useMemo(
+    () => new Set(edits.map((edit) => edit.section)),
+    [edits],
+  );
 
   return (
     <Page
@@ -697,95 +715,17 @@ export function HomeSectionsEditor({
               </BlockStack>
             </Card>
 
-            {/* The page itself, at whatever phone width the owner picks. */}
-            <Card>
-              <BlockStack gap="200">
-                <InlineStack align="space-between" blockAlign="center">
-                  <Text as="h2" variant="headingSm">
-                    {t("home.livePreview")}
-                  </Text>
-                  <Button
-                    variant="plain"
-                    onClick={() => setPreviewNonce((n) => n + 1)}
-                  >
-                    {t("home.refreshPreview")}
-                  </Button>
-                </InlineStack>
-                <Text as="p" variant="bodySm" tone="subdued">
-                  {t("home.livePreviewHelp")}
-                </Text>
-
-                <RangeSlider
-                  label={
-                    <InlineStack gap="200" blockAlign="center">
-                      <Text as="span" variant="bodyMd">
-                        {t("home.previewWidth")}
-                      </Text>
-                      <Text as="span" variant="bodyMd" fontWeight="semibold">
-                        {`${previewWidth} px`}
-                      </Text>
-                      {previewWidth !== DESIGN_WIDTH ? (
-                        <Button
-                          variant="plain"
-                          onClick={() => setPreviewWidth(DESIGN_WIDTH)}
-                        >
-                          {t("home.previewWidthReset")}
-                        </Button>
-                      ) : null}
-                    </InlineStack>
-                  }
-                  min={PREVIEW_MIN_WIDTH}
-                  max={PREVIEW_MAX_WIDTH}
-                  step={1}
-                  value={previewWidth}
-                  output
-                  prefix={
-                    <Text as="span" variant="bodySm" tone="subdued">
-                      {PREVIEW_MIN_WIDTH}
-                    </Text>
-                  }
-                  suffix={
-                    <Text as="span" variant="bodySm" tone="subdued">
-                      {PREVIEW_MAX_WIDTH}
-                    </Text>
-                  }
-                  helpText={t("home.previewWidthHelp")}
-                  onChange={(next) =>
-                    setPreviewWidth(typeof next === "number" ? next : next[0])
-                  }
-                />
-
-                <Box
-                  background="bg-surface-secondary"
-                  borderRadius="200"
-                  padding="200"
-                >
-                  <iframe
-                    key={previewNonce}
-                    src={`/?adminPreview=${previewNonce}`}
-                    title={t("home.livePreview")}
-                    // This card sits below the fold, under the section map —
-                    // which is already a full render of the same page. Loading
-                    // it only when it is scrolled to means opening the screen
-                    // renders the home page once, not twice at the same moment.
-                    loading="lazy"
-                    style={{
-                      display: "block",
-                      // The whole point of the slider: this width IS the
-                      // viewport the storefront sees, so ScaleFrame scales the
-                      // 430 canvas against it exactly as a real phone would.
-                      width: previewWidth,
-                      height: 620,
-                      maxWidth: "100%",
-                      margin: "0 auto",
-                      border: "1px solid #e3e3e3",
-                      borderRadius: 8,
-                      background: "#FFF6EC",
-                    }}
-                  />
-                </Box>
-              </BlockStack>
-            </Card>
+            {/* The page itself, at whatever phone width the owner picks.
+                Its own component so that dragging its slider re-renders one
+                card rather than this screen's ~180 fields — see MainPreview. */}
+            <MainPreview
+              designWidth={DESIGN_WIDTH}
+              min={PREVIEW_MIN_WIDTH}
+              max={PREVIEW_MAX_WIDTH}
+              nonce={previewNonce}
+              onRefresh={() => setPreviewNonce((n) => n + 1)}
+              onWidthSettled={setPreviewWidth}
+            />
           </BlockStack>
         </Layout.Section>
 
@@ -815,6 +755,22 @@ export function HomeSectionsEditor({
             >
               <Card>
                 <BlockStack gap="400">
+                  {/* The section's own preview opens the section, so what you
+                      are editing is on screen before the first input. */}
+                  {section.preview ? (
+                    <SectionPreview
+                      sectionId={section.id}
+                      bandHeight={section.preview.height}
+                      borrowed={section.preview.borrowed}
+                      hidden={section.hideable && !section.visible}
+                      stale={dirtySections.has(section.id)}
+                      mainWidth={previewWidth}
+                      min={PREVIEW_MIN_WIDTH}
+                      max={PREVIEW_MAX_WIDTH}
+                      nonce={previewNonce}
+                    />
+                  ) : null}
+
                   <InlineStack
                     align="space-between"
                     blockAlign="center"

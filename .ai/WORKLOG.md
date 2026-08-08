@@ -6115,3 +6115,107 @@ subscribe hoisted out of render, live preview iframe set to load lazily.
 Pre-existing and NOT touched: 5 files fail `format:check` on the base branch
 (`app/page.tsx`, `A9.tsx`, `BestSellersRail.tsx`, `registry.ts`,
 `home-content.test.ts`).
+## 2026-08-08 — Per-section live previews on Content → Home page
+
+Branch `worktree-admin-home-section-previews` (from
+`worktree-admin-home-customization`), commit `7db6fbe`.
+
+- New storefront route `/preview/home/[section]`: one homepage band drawn on a
+  stage exactly its own height, slid up by its own y-offset, with no promo bar,
+  header or bottom tab bar. Admin-only via `requireAdmin()` — it renders a
+  section even when the owner has hidden it. Kept out of `/admin/*` on purpose:
+  Polaris' stylesheet would change the global CSS a pixel-exact band renders in.
+- `components/home/bands.tsx` states the section → component mapping once;
+  `app/page.tsx` now reads it too, so a preview cannot drift from the page.
+- `lib/home-content/preview.ts` holds the preview geometry: every band's own
+  `{y, h}`, `promo`'s stated (it is chrome, so the registry gives it no band),
+  and `motion` borrowing the Featured band — a rail speed needs something
+  moving to be judged, and the screen labels it as a stand-in.
+- Each section's frame carries its own 320–440 width slider, "Back to design
+  width", Refresh, "Open in a new tab", and **"Match the main preview"**, which
+  appears only when that section's width differs from the page-wide preview's.
+  Widths are session-local and sparse (absent = 430).
+- Fixed alongside: the Beacon was recording admin previews as real visits.
+  `/preview/*` and any page carrying `?adminPreview` are now skipped, so the
+  page-wide preview stops putting fake traffic and dwell time in the owner's
+  analytics.
+- Verified: 134 e2e (all three pixel baselines byte-identical) + 142 unit tests
+  pass. Three new tests cover the frames, the standalone render and the sync.
+  ⚠️ The suite reuses any server already on 3001, so a second worktree's dev
+  server silently invalidates a run — the first pass here failed four tests for
+  that reason alone.
+
+## 2026-08-08 — Section previews: smoothness, and the written record
+
+Same branch, commits `c94cc5b`, `17a15b6` and the docs pass.
+
+- **The flashing was the admin page's own scrollbar.** The preview box grew and
+  shrank with the slider on a ~26,000px document, so the scroll thumb was
+  recomputed every frame — ~100 distinct page heights across one 121-step drag.
+  The frame now sits in a stage reserved once for the widest setting: one
+  distinct height across the same drag.
+- **The jank was React, not the browser.** Sweeping an iframe's width by hand
+  cost 13.89ms/frame and its transform 13.89ms, against a 13.7ms idle frame —
+  both free. Both sliders' state lived on `HomeSectionsEditor` (~180 Polaris
+  fields), so a slider pixel cost 27–30ms of React. Each width now lives in the
+  component that owns it; `MainPreview` publishes upward in `startTransition`.
+  Section slider 41.0 → 13.9ms, page-wide 44.2 → 16.5ms.
+- Section frames are laid out at the design's own 430 and the width applied as
+  an outer `scale()` — ScaleFrame already scales a fixed 430 stage by
+  `min(100vw,480px)/430` and nothing in the previewed tree keys off viewport
+  width, so the composed transform is identical while the iframe never re-lays
+  out.
+- A diagnostic fan-out (48 agents) proposed a sub-pixel-rounding scrollbar
+  flicker; driven across all 121 widths under the pre-fix geometry the document
+  was **never** scrollable (0 flips, overflow 0.000), so it is not real here.
+  Its critique stage did find four residuals, all fixed: half-pixel box
+  centring (a left-edge shimmer on up to 120 of 120 steps), two controls still
+  mounting mid-drag, an unnecessary `will-change` on nine iframes, and a hole in
+  the Beacon guard where a click inside the whole-page preview dropped
+  `?adminPreview` and armed real analytics.
+- Docs: `admin-design.md` §9.8.1 now documents both previews and what the width
+  control can and cannot show, and its stale "Four field kinds" is corrected to
+  seven (`image`/`number` arrived on the parent branch undocumented).
+  `/preview` added to robots.txt's blocked paths, with a test.
+
+## 2026-08-08 — Section previews: review pass before merge
+
+A read-only review fan-out (14 agents, 5 lenses, adversarially refuted) over
+`worktree-admin-home-customization...HEAD` found **no blockers** and six items
+worth doing. All six are done, in `a87e707` and the follow-up:
+
+- **A public analytics kill switch, made worse by my own fix.** `?adminPreview`
+  suppressed the visitor beacon for anyone who typed it, and the latch I added
+  extended that from one page to the whole visit. It now also requires a framed
+  document — both previews are always iframes inside the admin, so nothing
+  intended changes — and `POST /api/beacon` refuses `/preview/*` server-side.
+- **Nine previews are no longer fetched on open.** Each is a `force-dynamic`
+  render reading `site_content` in full, and a save re-keys all of them, so
+  opening the screen cost nine of those and every save cost nine more. Frames
+  now mount on intersection. ⚠️ `loading="lazy"` alone is NOT enough: a control
+  iframe 30,000px down was fetched immediately by the browser this was checked
+  in. Nor could the observer be verified there — the Browser pane runs with
+  `document.visibilityState === "hidden"`, and Chrome delivers no
+  IntersectionObserver callbacks at all in a hidden document, not even for
+  `body`. Verified in Playwright instead, which is the tool for it.
+- **A section with unsaved edits now says so** in the frame's own card. The
+  preview is the server rendering SAVED content and it sits above the inputs.
+- **Three names for one band.** `home.sectionPreviewBorrowed` said "Best
+  Sellers" / 「热销」 while the section card is "Featured Rose Gifts" /
+  「精选玫瑰礼物」 and the motion blurb says 「畅销榜」. Now named the way the
+  screen names it, in both languages.
+- The file header still described the sync button as mounting on demand, and
+  said "eight sections". Both corrected — the same class of stale prose the
+  docs pass caught in SUMMARY.
+- `/preview/home/craft` signed out → 404 is now pinned by a test. `proxy.ts`
+  matches only `/admin`, so one `requireAdmin()` was the entire gate on a route
+  that renders hidden copy, and every other test signs in first — deleting it
+  would have left the suite green.
+
+Deliberately not done, so it is not re-raised: `React.memo` on SectionPreview (a
+keystroke is one event, not 60/sec), a `never` exhaustiveness check on
+`homeBand()` (adding a band breaks `homeLayout` first), de-duplicating the
+three `430` constants (each carries its own explanation), and rendering
+`HomeHeader` in the hero preview (its strip covers only empty cream — checked).
+
+138 e2e and 142 unit tests pass.

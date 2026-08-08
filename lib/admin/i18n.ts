@@ -773,6 +773,23 @@ const en = {
     "Drag to see the page on a smaller or larger phone — from the narrowest still in use to the widest sold today. The page scales as a whole, so a narrow phone makes everything smaller rather than re-wrapping the text.",
   "home.previewWidthReset": "Back to design width",
 
+  // Content → Home page · the per-section preview
+  "home.sectionPreview": "This section on its own",
+  "home.sectionPreviewHelp":
+    "Only this band of the home page — no header, no tab bar. It refreshes when you save; open it in a new tab to see it full size.",
+  "home.sectionPreviewHidden":
+    "This section is switched off, so it is not on the live page right now. The preview shows what turning it back on would put there.",
+  // Names the band the way the section list names it, not the way the design
+  // team says it in conversation: a teammate has to be able to scroll to it.
+  "home.sectionPreviewBorrowed":
+    "Shown on the Featured Rose Gifts band (the Best Sellers rail), because this speed has nothing of its own on the page — watch the cards move.",
+  "home.sectionPreviewStale":
+    "Showing the saved version — save your changes to see them here.",
+  "home.previewZoomed":
+    "Zoomed out so the whole band fits. Open it in a new tab to read it at full size.",
+  "home.previewSync": "Match the main preview",
+  "home.previewOpen": "Open in a new tab",
+
   // Content → Home page · photos
   "home.photo.title": "Change photo",
   "home.photo.change": "Change photo",
@@ -1518,6 +1535,21 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.previewWidthHelp":
     "拖动可查看页面在更小或更大手机上的效果——从目前仍在使用的最窄机型，到当前在售的最宽机型。页面整体等比缩放，因此宽度变窄只会让所有内容变小，文字不会重新换行。",
   "home.previewWidthReset": "恢复设计宽度",
+
+  // 内容 → 首页 · 单个板块预览
+  "home.sectionPreview": "单独预览本板块",
+  "home.sectionPreviewHelp":
+    "只显示首页的这一段——没有顶部导航，也没有底部标签栏。保存后会自动刷新；如需完整尺寸，请在新标签页中打开。",
+  "home.sectionPreviewHidden":
+    "本板块已隐藏，目前不会出现在线上页面。此预览显示的是重新开启后的效果。",
+  "home.sectionPreviewBorrowed":
+    "以「精选玫瑰礼物」板块的畅销榜滑动栏演示：该速度本身在页面上没有对应内容，请观察卡片的滚动。",
+  "home.sectionPreviewStale":
+    "当前显示的是已保存的版本——保存后即可在此看到你的修改。",
+  "home.previewZoomed":
+    "已缩小以完整显示整段。如需按原尺寸阅读，请在新标签页中打开。",
+  "home.previewSync": "与主预览宽度一致",
+  "home.previewOpen": "在新标签页中打开",
 
   // 内容 → 首页 · 图片
   "home.photo.title": "更换图片",

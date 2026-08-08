@@ -22,11 +22,26 @@ import {
   slotKey,
   type HomeSectionId,
 } from "@/lib/home-content";
+import { homePreviewBand } from "@/lib/home-content/preview";
 import {
   HomeSectionsEditor,
   type LibraryItem,
   type SectionView,
 } from "./HomeSectionsEditor";
+
+/**
+ * What a section's own preview frame should show, or null when the section has
+ * nothing to show. `borrowed` is true when the frame stands in with a different
+ * band — see lib/home-content/preview.ts.
+ *
+ * @param sectionId - The section being listed.
+ * @returns The frame's band height and whether it is a stand-in.
+ */
+function previewOf(sectionId: string): SectionView["preview"] {
+  const band = homePreviewBand(sectionId);
+  if (!band) return null;
+  return { height: band.h, borrowed: band.from !== sectionId };
+}
 
 export default async function HomeContentPage() {
   const { text, visible, layout, overridden } = await getHomeContent();
@@ -52,6 +67,10 @@ export default async function HomeContentPage() {
             height: section.band.h,
           }
         : null,
+    // Resolved server-side for the same reason, and like `max`: the band
+    // geometry is registry data, and the client only needs the one number that
+    // sizes this section's own preview frame.
+    preview: previewOf(section.id),
     fields: section.fields.map((field) => ({
       id: field.id,
       label: field.label,

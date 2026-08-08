@@ -77,13 +77,31 @@ Precision here is the whole feature — vague rules produce numbers nobody trust
 - **Also captured:** max scroll depth (%), and the last section reached.
 - **The shop's own staff are not visitors.** `/admin` and `/api` are skipped by
   pathname, but that is not enough: Content → Home page embeds the real home
-  page twice (the section map and the live preview), and inside those iframes
-  the pathname genuinely *is* `/`. Until 2026-08-08 one open of that editor
-  wrote 2 arrivals and 13 engagement updates, and a long editing session banked
-  as home-page dwell. `Beacon.tsx` now also skips any document carrying
-  `?adminPreview=` **or** rendered inside a frame — nothing legitimately embeds
-  this storefront, so "framed" is never a real visit. Covered by
-  `tests/e2e/admin-home-content.spec.ts`; the positive cases in
+  page three times over (the section map, the live preview, and one frame per
+  section), and inside those iframes the pathname genuinely *is* `/`. Until
+  2026-08-08 one open of that editor wrote 2 arrivals and 13 engagement updates,
+  and a long editing session banked as home-page dwell. `Beacon.tsx` now also
+  skips a document that is either at `/preview/*` — the admin-only single-band
+  route, which is meant to work in its own tab and so cannot be asked to prove
+  it is framed — **or** rendered inside a frame at all, since nothing
+  legitimately embeds this storefront. `/api/beacon` rejects `/preview/` a
+  second time server-side, because the endpoint is reachable without our page.
+
+  The test is **latched**: a preview's links are real, so one click
+  client-navigates away from `/preview/…` and a per-navigation test would arm
+  the beacon for the rest of that document's life. The flag is module scope, so
+  it dies with the document.
+
+  `?adminPreview=` stays on the admin's iframes as a readable declaration of
+  intent, but it is deliberately **not** one of the tests. On its own it would
+  be a kill switch for our own analytics that anyone can type:
+  `https://eldreve.com/?adminPreview=1` would make that visitor invisible — no
+  page view, no dwell, no campaign attribution — and with the latch, for their
+  whole visit rather than one page. It is exactly the URL a teammate gets from
+  "open frame in a new tab". The frame test already covers every document the
+  marker appears in, so dropping it as a test costs nothing.
+
+  Covered by `tests/e2e/admin-home-content.spec.ts`; the positive cases in
   `engagement-beacon.spec.ts` guard the other direction.
 - **Not captured:** clicks, mouse paths, keystrokes, form contents, screen
   recording. Out of scope on purpose (see Privacy).
