@@ -157,9 +157,11 @@ Open linked resources only when the task needs them.
   cannot drift from the page; `lib/home-content/preview.ts` holds the geometry
   (`promo` stated because it is chrome, `motion` borrowing the Featured band
   because a rail speed needs something moving). Each frame has its own width
-  slider plus **"Match the main preview"**, shown only when it differs. Also
-  fixed: the Beacon was counting admin previews as real visits — `/preview/*`
-  and `?adminPreview` are now skipped.
+  slider plus **"Match the main preview"**, and the band is zoomed out so the
+  whole of it fits. Also fixed: the Beacon was counting admin previews as real
+  visits — `/preview/*` and `?adminPreview` are now skipped (latched, so a click
+  inside the preview cannot re-arm it), and `/preview` is disallowed in
+  robots.txt.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one

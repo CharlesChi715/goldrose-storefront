@@ -6090,3 +6090,36 @@ Branch `worktree-admin-home-section-previews` (from
   ⚠️ The suite reuses any server already on 3001, so a second worktree's dev
   server silently invalidates a run — the first pass here failed four tests for
   that reason alone.
+
+## 2026-08-08 — Section previews: smoothness, and the written record
+
+Same branch, commits `c94cc5b`, `17a15b6` and the docs pass.
+
+- **The flashing was the admin page's own scrollbar.** The preview box grew and
+  shrank with the slider on a ~26,000px document, so the scroll thumb was
+  recomputed every frame — ~100 distinct page heights across one 121-step drag.
+  The frame now sits in a stage reserved once for the widest setting: one
+  distinct height across the same drag.
+- **The jank was React, not the browser.** Sweeping an iframe's width by hand
+  cost 13.89ms/frame and its transform 13.89ms, against a 13.7ms idle frame —
+  both free. Both sliders' state lived on `HomeSectionsEditor` (~180 Polaris
+  fields), so a slider pixel cost 27–30ms of React. Each width now lives in the
+  component that owns it; `MainPreview` publishes upward in `startTransition`.
+  Section slider 41.0 → 13.9ms, page-wide 44.2 → 16.5ms.
+- Section frames are laid out at the design's own 430 and the width applied as
+  an outer `scale()` — ScaleFrame already scales a fixed 430 stage by
+  `min(100vw,480px)/430` and nothing in the previewed tree keys off viewport
+  width, so the composed transform is identical while the iframe never re-lays
+  out.
+- A diagnostic fan-out (48 agents) proposed a sub-pixel-rounding scrollbar
+  flicker; driven across all 121 widths under the pre-fix geometry the document
+  was **never** scrollable (0 flips, overflow 0.000), so it is not real here.
+  Its critique stage did find four residuals, all fixed: half-pixel box
+  centring (a left-edge shimmer on up to 120 of 120 steps), two controls still
+  mounting mid-drag, an unnecessary `will-change` on nine iframes, and a hole in
+  the Beacon guard where a click inside the whole-page preview dropped
+  `?adminPreview` and armed real analytics.
+- Docs: `admin-design.md` §9.8.1 now documents both previews and what the width
+  control can and cannot show, and its stale "Four field kinds" is corrected to
+  seven (`image`/`number` arrived on the parent branch undocumented).
+  `/preview` added to robots.txt's blocked paths, with a test.

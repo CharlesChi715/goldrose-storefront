@@ -748,7 +748,9 @@ different shape from the flat slot list.
   was seeded and no migration was needed. This is the earlier note "future slots
   are new rows, not new code" taken one step further — new fields are new
   registry entries, and not even rows until someone edits them.
-- **Four field kinds.** `text` / `multiline` / `url` are typed in. `artwork` is
+- **Seven field kinds.** `text` / `multiline` / `url` are typed in; `image` is
+  a photo in a fixed design box, picked or uploaded through the photo dialog;
+  `number` is a bounded integer (the shared card-rail timing). `artwork` is
   wording baked into a Figma SVG (glyph strips, whole button chrome) — listed
   read-only with the reason, per §11. `managed` is data owned by another screen
   (catalogue, reviews) — listed read-only with a link to it. Listing all four
@@ -767,6 +769,33 @@ different shape from the flat slot list.
   not hideable.
 - **Links are validated before they reach an anchor** (`isSafeHref`): in-site
   paths, fragments, and `http(s)` / `mailto:` / `tel:` only.
+- **Two live previews.** The screen opens with the whole page in a phone-shaped
+  window, and every section opens with just its own band, zoomed out to fit so
+  the whole band is visible at once. A section preview is
+  `/preview/home/[section]`: one band on a stage exactly its own height, no
+  promo bar, header or tab bar. It is a **storefront** route rather than an
+  admin one so that it inherits the same global CSS and fonts the live page
+  does — Polaris' stylesheet would make it a preview of something slightly
+  else — and it is gated by `requireAdmin()`, which is the whole guard, because
+  it deliberately renders a section even when the owner has **hidden** it.
+  `components/home/bands.tsx` states the section → component mapping once and
+  `app/page.tsx` reads it too, so a preview cannot drift from the page. Sections
+  with nothing of their own to show borrow a band and say so: the rail speed is
+  demonstrated on Best Sellers, because a still picture of a speed is worthless.
+- **What the preview width can and cannot tell you.** Each frame has its own
+  phone-width slider (320–440) plus "Match the main preview". ScaleFrame scales
+  the whole 430 stage as ONE, so a narrower phone shrinks everything rather than
+  re-wrapping a line: the slider answers "is this legible on a small phone", not
+  "does this copy fit its box" — that is what the character budgets are for.
+  Two consequences follow for anyone changing this screen. Section frames are
+  laid out at the design's own 430 and the width applied as an outer `scale()`,
+  which composes to exactly the same transform while the iframe never re-lays
+  out; and each slider's live value belongs to the component that owns it,
+  because on a screen of ~180 fields a slider pixel held in the parent is a
+  full re-render. The frame also sits in a stage reserved for the widest
+  setting, so a drag never changes the document's height — this page is
+  ~26,000px tall, and a height that moves re-computes the scroll thumb on every
+  frame.
 
 ### 9.9 Analytics (`/admin/analytics`) — clone
 
