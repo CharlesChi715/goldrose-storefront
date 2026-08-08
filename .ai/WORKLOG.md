@@ -6088,3 +6088,30 @@ band lights up the other.
 
 Note: the e2e suite reuses whatever is on port 3001; another session's
 hosted-mode server was there, so the run needed a private port (3801).
+
+## 2026-08-08 — the admin's own previews were counting as customer visits
+
+Branch `worktree-home-page-map`, found while polishing the section map.
+
+`components/Beacon.tsx` skipped `/admin` by pathname, but Content → Home page
+embeds the real home page in two iframes, where the pathname genuinely is `/`.
+Measured on a dev server: opening that one screen produced **2 POST
+/api/beacon + 13 POST /api/beacon/engagement** — arrivals and dwell for visits
+nobody made, on the single page the shop is judged by, with the owner's long
+editing sessions banked as home-page engagement.
+
+- Skipped on two independent tests: the `?adminPreview=` marker the admin's
+  iframes already carry, and being framed at all (nothing legitimately embeds
+  this storefront). Either alone leaves a hole.
+- New e2e asserts no beacon fires while the editor is open, and only counts if
+  the iframes actually rendered, so it cannot pass for the wrong reason.
+- `engagement-beacon.spec.ts` and `admin-analytics.spec.ts` were run alongside
+  it: real visits still record. 13/13 e2e pass, 142 unit pass.
+
+Polish in the same commit: map strips made presentational (they duplicated
+every section link for screen readers and the tab order), `useSyncExternalStore`
+subscribe hoisted out of render, live preview iframe set to load lazily.
+
+Pre-existing and NOT touched: 5 files fail `format:check` on the base branch
+(`app/page.tsx`, `A9.tsx`, `BestSellersRail.tsx`, `registry.ts`,
+`home-content.test.ts`).

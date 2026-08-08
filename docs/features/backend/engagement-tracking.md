@@ -75,6 +75,16 @@ Precision here is the whole feature — vague rules produce numbers nobody trust
   fetch the arrival beacon uses) — at unload, `fetch` is unreliable on mobile
   Safari and `sendBeacon` is the documented survivor.
 - **Also captured:** max scroll depth (%), and the last section reached.
+- **The shop's own staff are not visitors.** `/admin` and `/api` are skipped by
+  pathname, but that is not enough: Content → Home page embeds the real home
+  page twice (the section map and the live preview), and inside those iframes
+  the pathname genuinely *is* `/`. Until 2026-08-08 one open of that editor
+  wrote 2 arrivals and 13 engagement updates, and a long editing session banked
+  as home-page dwell. `Beacon.tsx` now also skips any document carrying
+  `?adminPreview=` **or** rendered inside a frame — nothing legitimately embeds
+  this storefront, so "framed" is never a real visit. Covered by
+  `tests/e2e/admin-home-content.spec.ts`; the positive cases in
+  `engagement-beacon.spec.ts` guard the other direction.
 - **Not captured:** clicks, mouse paths, keystrokes, form contents, screen
   recording. Out of scope on purpose (see Privacy).
 
