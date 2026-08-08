@@ -73,6 +73,7 @@ import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import { EditorPanel, type PickedField } from "./picker/EditorPanel";
 import { Overlay } from "./picker/Overlay";
 import { usePicker } from "./picker/usePicker";
+import { indexByField } from "./picker/fieldIndex";
 import { patchField, whenPatchable } from "./picker/patch";
 import type { Rect } from "./picker/geometry";
 import { SectionPreview } from "./SectionPreview";
@@ -298,6 +299,19 @@ export function HomeSectionsEditor({
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [armed, setArmed] = useState(false);
   const [picked, setPicked] = useState<PickedField[]>([]);
+  /**
+   * Field keys the picker can reach by pointing, read off the live preview.
+   *
+   * This is what replaces the form list rather than merely sitting beside it:
+   * a field you can point at is not listed again below, so the list becomes
+   * exactly the things pointing cannot get you — a rail timing that lives in a
+   * `setInterval`, a photo description that is never drawn, a field in a band
+   * that is switched off.
+   *
+   * Empty until the frame has loaded, which is the right failure: before the
+   * preview exists, nothing is pointable and the full list stands.
+   */
+  const [reachable, setReachable] = useState<ReadonlySet<string>>(new Set());
 
   /** Resolve the keys a clicked element carries back to registry fields. */
   const pickKeys = useCallback(
@@ -518,6 +532,11 @@ export function HomeSectionsEditor({
       if (cancelled) return;
       const doc = frame.contentDocument;
       if (!doc) return;
+      // What the picker can currently reach. Read from the LIVE page rather
+      // than assumed from the registry, because reachability is a fact about
+      // what is rendered: a switched-off band draws nothing, so its fields
+      // correctly stay in the list below.
+      setReachable(new Set(indexByField(doc).keys()));
       for (const section of sections) {
         for (const field of section.fields) {
           const key = `${section.id}.${field.id}`;
@@ -540,6 +559,31 @@ export function HomeSectionsEditor({
       delete next[key];
       return next;
     });
+  }
+
+  /**
+   * The fields this section still needs to LIST, having handed the rest to the
+   * preview.
+   *
+   * A field the picker can reach is edited by pointing at it, so listing it
+   * again is the duplication this screen was meant to remove. What is left is
+   * genuinely unreachable: values with no element at all (rail timings, photo
+   * descriptions), and everything inside a band that is switched off — which is
+   * exactly when a list is the only way in.
+   *
+   * Searching suspends the rule. Typing a name is how somebody goes looking for
+   * one specific field, and answering "it is over there somewhere" would be
+   * useless.
+   *
+   * @param section - The section being rendered.
+   * @param fields - Its fields, already narrowed by search.
+   * @returns The fields to draw as form rows.
+   */
+  function listedIn(section: SectionView, fields: FieldView[]): FieldView[] {
+    if (filtering) return fields;
+    return fields.filter(
+      (field) => !reachable.has(`${section.id}.${field.id}`),
+    );
   }
 
   /** Fields grouped by their optional sub-heading, in registry order. */
@@ -1055,10 +1099,19 @@ export function HomeSectionsEditor({
                     </Banner>
                   ) : null}
 
+                  {/* What is left after the picker. A field you can point at is
+                      NOT repeated here — the preview is where it is edited.
+                      Searching overrides that, because search is how you go
+                      looking for one particular field by name. */}
+                  {listedIn(section, fields).length === 0 ? (
+                    <Text as="p" variant="bodySm" tone="subdued">
+                      {t("home.picker.allPointable")}
+                    </Text>
+                  ) : null}
                   {/* Keyed by position, not by label: a section may open a
                       group, break into per-card groups, and come back to the
                       first one, so labels are not unique within a section. */}
-                  {groupsOf(fields).map((group, index) => (
+                  {groupsOf(listedIn(section, fields)).map((group, index) => (
                     <BlockStack key={`${index}-${group.label ?? ""}`} gap="300">
                       {group.label ? (
                         <Text as="h3" variant="headingSm" tone="subdued">

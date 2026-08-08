@@ -63,6 +63,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
         style={{ ...abs(350, 1433, 80, 20), display: "block" }}
       >
         <img
+          data-field="ready.view_all_label"
           src="/eldreve/home/159-70.svg"
           alt="View all →"
           width={80}

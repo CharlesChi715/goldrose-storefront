@@ -231,6 +231,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
       ))}
       {/* 165:155 · craft crop 4 — the whole frame is served as one Figma SVG render */}
       <img
+        data-field="craft.step_4_photo"
         src="/eldreve/home/165-155.svg"
         alt={CRAFT_STEPS[3].alt}
         width={90}
@@ -314,6 +315,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
         style={{ ...abs(93, 380, 246, 38), display: "block" }}
       >
         <img
+          data-field="craft.cta_label"
           src="/eldreve/home/165-180.svg"
           alt="EXPLORE OUR CRAFT →"
           width={246}

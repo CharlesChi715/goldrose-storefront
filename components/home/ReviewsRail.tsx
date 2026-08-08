@@ -131,6 +131,7 @@ function ReviewCard({
         {copy.quote}
       </div>
       <img
+        data-field="recipient.reviews_stars"
         src="/eldreve/home/163-103.svg"
         alt="★★★★★"
         width={106}

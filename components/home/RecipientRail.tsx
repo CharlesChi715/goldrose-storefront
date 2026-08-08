@@ -221,6 +221,7 @@ export function RecipientRail({
               }}
             />
             <img
+              data-field="recipient.card_cta_label"
               src="/eldreve/home/191-154.svg"
               alt="SHOP WIFE GIFTS →"
               width={152}

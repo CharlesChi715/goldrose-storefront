@@ -258,6 +258,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
             node box, so the strip is drawn at natural size and centred rather
             than stretched to 190×33. */}
         <img
+          data-field="story.faq_view_all_label"
           src="/eldreve/home/2380-796.svg"
           alt="VIEW ALL FAQs →"
           width={190}

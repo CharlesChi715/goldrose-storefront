@@ -211,6 +211,7 @@ export function OccasionRail({
             />
             {/* 436:290/304/310 · CTA (rendered strip) */}
             <img
+              data-field="occasion.card_cta_label"
               src="/eldreve/home/191-154.svg"
               alt="SHOP WIFE GIFTS →"
               width={152}

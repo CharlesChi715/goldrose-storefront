@@ -55,8 +55,11 @@ test("every homepage section is listed, in page order", async ({ page }) => {
       page.getByRole("heading", { name: title, exact: true, level: 2 }),
     ).toBeVisible();
   }
-  // Figma-baked labels are listed but not typeable, so the screen is a
-  // complete inventory rather than a partial one with silent gaps.
+  // Figma-baked labels are still in the inventory and still not typeable —
+  // but since 2026-08-08 a field you can POINT at is not listed a second time,
+  // and this one is on the page. Searching suspends that rule, which is how
+  // somebody goes looking for one field by name.
+  await page.getByPlaceholder(/Search by label/).fill("“View all” label");
   await expect(page.getByLabel("“View all” label").first()).toBeDisabled();
 });
 
@@ -132,6 +135,10 @@ test("editing a section heading reaches the live home page, and resets", async (
   await expect(page.getByText("Featured Rose Gifts")).toBeVisible();
 
   await openEditor(page);
+  // "Section title" is drawn on the page, so it is edited by pointing at it and
+  // is not listed twice. Search brings it back as a row, which is the supported
+  // way to reach one field by name.
+  await page.getByPlaceholder(/Search by label/).fill("Section title");
   await page.getByLabel("Section title").first().fill("Our Favourite Gifts");
   // The frame sits ABOVE the fields and is the server rendering saved content,
   // so while an edit is unsaved it has to say so — otherwise a teammate types a
@@ -150,6 +157,7 @@ test("editing a section heading reaches the live home page, and resets", async (
 
   // Reset restores the design wording and removes the override row.
   await page.goto("/admin/content/home");
+  await page.getByPlaceholder(/Search by label/).fill("Section title");
   await page.getByLabel("Section title").first().scrollIntoViewIfNeeded();
   await page
     .getByRole("button", { name: "Reset", exact: true })
@@ -165,6 +173,8 @@ test("an unsafe link is refused before it can reach an anchor", async ({
   page,
 }) => {
   await openEditor(page);
+  // Reachable by pointing, so listed only while searching.
+  await page.getByPlaceholder(/Search by label/).fill("Button link");
   const link = page.getByLabel("Button link").first();
   await link.fill("javascript:alert(1)");
   // The inline error blocks Save, so the value can never be persisted.

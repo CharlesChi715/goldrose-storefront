@@ -191,6 +191,7 @@ function Content({ card, copy, n }: { card: Card; copy: CardCopy; n: number }) {
       {/* 2380:412 / 2380:421 cta — Figma-rendered strip */}
       <img
         data-el={`HOME-FEATURED-PRODUCT-CTA-${n}`}
+        data-field="featured.card_cta_label"
         src="/eldreve/home/376-182.svg"
         alt="View Product →"
         width={86}

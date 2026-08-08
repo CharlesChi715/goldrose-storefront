@@ -784,7 +784,9 @@ const en = {
   "home.picker.artworkPicked":
     "This wording is part of a picture the design team exported, so it cannot be typed here.",
   "home.picker.hint":
-    "Prefer a list? Every section below still holds all of its fields.",
+    "Everything on the page is edited by pointing at it. The lists below hold only what has nothing to point at.",
+  "home.picker.allPointable":
+    "Everything in this section is edited by pointing at it in the preview above.",
 
   // Content → Home page · the per-section preview
   "home.sectionPreview": "This section on the page",
@@ -1555,7 +1557,9 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.picker.needsSave":
     "此项需保存后才会在预览中生效——页面无法即时呈现这类改动。",
   "home.picker.artworkPicked": "该文字属于设计团队导出的图片，无法在此输入。",
-  "home.picker.hint": "更习惯用列表？下方每个板块仍保留全部字段。",
+  "home.picker.hint":
+    "页面上的内容都通过点选修改。下方列表只保留无法在页面上点选的字段。",
+  "home.picker.allPointable": "此板块的所有内容都可在上方预览中点选修改。",
 
   // 内容 → 首页 · 单个板块预览
   "home.sectionPreview": "本板块在页面中的位置",

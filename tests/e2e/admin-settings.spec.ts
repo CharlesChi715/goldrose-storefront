@@ -146,6 +146,10 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   // slogan moved to the homepage editor with the rest of the page's copy.
   await adminLogin(page);
   await page.goto("/admin/content/home");
+  // The slogan is drawn on the page, so it is edited by pointing at it and is
+  // no longer listed as a form row. Search brings every field back, which is
+  // the supported way to reach one by name.
+  await page.getByPlaceholder(/Search by label/).fill("Slogan");
   await page.getByLabel("Slogan").fill("FREE SHIPPING OVER $75 · ELDREVE");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Home page updated").first()).toBeVisible();
@@ -158,8 +162,11 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
     0,
   );
 
-  // Reset → the PNG returns (pixel-diff stays perfect).
+  // Reset → the PNG returns (pixel-diff stays perfect). Search again: the
+  // slogan is drawn on the page, so its row is only listed while searching —
+  // and leaving the override behind is what breaks the pixel baselines.
   await page.goto("/admin/content/home");
+  await page.getByPlaceholder(/Search by label/).fill("Slogan");
   await page.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(page.getByText("Home page updated").first()).toBeVisible();
   await page.goto("/shop");
