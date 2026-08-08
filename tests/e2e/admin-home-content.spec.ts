@@ -446,8 +446,18 @@ test("a switched-off section says so rather than showing the wrong band", async 
   await reach(page, "craft");
   await expect(craft.locator("iframe")).toHaveCount(1);
 
+  // Waiting on the BUTTON rather than on the toast, both here and in the
+  // restore below. "Home page updated" is already on screen from an earlier
+  // action in this serial file, so `getByText(...).first()` matches the stale
+  // one and resolves before the server action has done anything — which let an
+  // earlier version of this test end with Craft still hidden. The label comes
+  // from server state after `router.refresh()`, so it flips only once the save
+  // has actually landed. A leaked hide here does not fail this test: it fails
+  // the stage-height test above and the home pixel baseline, far from the cause.
   await craft.getByRole("button", { name: "Hide section" }).click();
-  await expect(page.getByText("Home page updated").first()).toBeVisible();
+  await expect(
+    craft.getByRole("button", { name: "Show section" }),
+  ).toBeVisible();
 
   try {
     // A hidden band is not merely invisible: homeLayout closes the gap, so the
@@ -460,10 +470,14 @@ test("a switched-off section says so rather than showing the wrong band", async 
       craft.getByText("Switch it on to preview it", { exact: false }),
     ).toBeVisible();
   } finally {
-    await page
-      .locator('[data-home-section="craft"]')
-      .getByRole("button", { name: "Show section" })
-      .click();
-    await expect(page.getByText("Home page updated").first()).toBeVisible();
+    await craft.getByRole("button", { name: "Show section" }).click();
+    await expect(
+      craft.getByRole("button", { name: "Hide section" }),
+    ).toBeVisible();
+    // And confirm the page itself really did get its band back, because that
+    // is the state the rest of this file and the pixel baseline depend on.
+    await expect(
+      page.locator('[data-home-section="craft"] iframe'),
+    ).toHaveCount(1);
   }
 });
