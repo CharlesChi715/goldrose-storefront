@@ -136,15 +136,7 @@ function copyOf(c: HomeText["featured"]): readonly CardCopy[] {
  * unique in the DOM. Built at runtime, so the static naming test skips them,
  * exactly as it does for Carousel's own `name`-derived names.
  */
-function Content({
-  card,
-  copy,
-  n,
-}: {
-  card: Card;
-  copy: CardCopy;
-  n: number;
-}) {
+function Content({ card, copy, n }: { card: Card; copy: CardCopy; n: number }) {
   return (
     <div
       style={{
@@ -153,6 +145,7 @@ function Content({
       }}
     >
       <div
+        data-field={`featured.card_${n}_title`}
         className={playfair.className}
         data-el={`HOME-FEATURED-PRODUCT-TITLE-${n}`}
         style={{
@@ -166,6 +159,7 @@ function Content({
         {copy.title}
       </div>
       <div
+        data-field={`featured.card_${n}_price`}
         className={notoSC.className}
         data-el={`HOME-FEATURED-PRODUCT-PRICE-${n}`}
         style={{
@@ -181,6 +175,7 @@ function Content({
         {copy.price}
       </div>
       <div
+        data-field={`featured.card_${n}_note`}
         className={notoSC.className}
         data-el={`HOME-FEATURED-PRODUCT-NOTE-${n}`}
         style={{
@@ -240,6 +235,7 @@ export function BestSellersRail({
       activeColor="#D4AF37"
       idleColor="#E5D9C9"
       href={c.rail_href}
+      hrefField="featured.rail_href"
       label="best seller"
       name="HOME-FEATURED"
       renderSlide={(i) => {

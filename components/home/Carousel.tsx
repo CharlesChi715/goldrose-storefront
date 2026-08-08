@@ -93,6 +93,10 @@ const EDGE_RESISTANCE = 3;
  * @param step - Distance the track travels per slide; defaults to `cellWidth`.
  * @param autoplayMs - Pause on each slide before advancing.
  * @param slideMs - Duration of the slide animation itself.
+ * @param hrefField - The registry slot `href` came from, e.g.
+ * `"featured.rail_href"`. Stamped as `data-field` on EVERY slide link, because
+ * one href genuinely owns them all — the admin's picker resolves a clicked slide
+ * to that one field and highlights every slide it governs.
  * @param renderSlide - Draws slide `i` inside its cell.
  * @returns The clipped track plus its dots.
  */
@@ -103,6 +107,7 @@ export function Carousel({
   activeColor,
   idleColor,
   href = "/placeholder",
+  hrefField,
   onActivate,
   radius,
   label,
@@ -119,6 +124,7 @@ export function Carousel({
   activeColor: string;
   idleColor: string;
   href?: string;
+  hrefField?: string;
   onActivate?: () => void;
   radius?: number;
   label: string;
@@ -271,6 +277,7 @@ export function Carousel({
               <Link
                 key={i}
                 data-el={el}
+                data-field={hrefField}
                 href={href}
                 aria-label={slideLabel}
                 tabIndex={focus}

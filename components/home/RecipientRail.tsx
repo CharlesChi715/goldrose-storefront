@@ -136,6 +136,7 @@ export function RecipientRail({
       activeColor="#C46E29"
       idleColor="#E0CCB2"
       href={c.card_href}
+      hrefField="recipient.card_href"
       label="recipient"
       renderSlide={(i) => {
         const card = CARDS[i];
@@ -179,6 +180,7 @@ export function RecipientRail({
               />
             </div>
             <div
+              data-field={`recipient.card_${i + 1}_title`}
               className={playfair.className}
               style={{
                 ...abs(12, card.title.y, 152),
@@ -193,6 +195,7 @@ export function RecipientRail({
               {titles[i]}
             </div>
             <div
+              data-field={`recipient.card_${i + 1}_copy`}
               className={card.copy.font}
               style={{
                 ...abs(card.copy.x, card.copy.y, card.copy.width),

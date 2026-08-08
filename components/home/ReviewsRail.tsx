@@ -84,7 +84,8 @@ function ReviewCard({
   quoteX,
   copy,
   verifiedLabel,
-}: Review & { copy: ReviewCopy; verifiedLabel: string }) {
+  n,
+}: Review & { copy: ReviewCopy; verifiedLabel: string; n: number }) {
   return (
     <div
       style={{
@@ -104,6 +105,7 @@ function ReviewCard({
         }}
       >
         <img
+          data-field={`recipient.review_${n}_photo`}
           src={fileUrl(copy.photo)}
           alt={copy.photoAlt}
           width={photoBox[2]}
@@ -116,6 +118,7 @@ function ReviewCard({
         />
       </div>
       <div
+        data-field={`recipient.review_${n}_quote`}
         className={playfair.className}
         style={{
           ...abs(quoteX, 72, 106),
@@ -147,6 +150,7 @@ function ReviewCard({
         style={{ ...abs(8, 109, 12, 12), display: "block" }}
       />
       <div
+        data-field="recipient.reviews_verified_label"
         className={notoSC.className}
         style={{
           ...abs(23, 109, 57),
@@ -195,12 +199,14 @@ export function ReviewsRail({
       activeColor="#C46E29"
       idleColor="#E0CCB2"
       href={c.reviews_href}
+      hrefField="recipient.reviews_href"
       label="review"
       renderSlide={(i) => (
         <ReviewCard
           {...REVIEWS[i]}
           copy={copies[i]}
           verifiedLabel={c.reviews_verified_label}
+          n={i + 1}
         />
       )}
     />

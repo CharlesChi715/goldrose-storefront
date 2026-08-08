@@ -89,6 +89,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
         />
         {/* 2380:768 story photo */}
         <img
+          data-field="story.story_photo"
           src={fileUrl(c.story_photo)}
           alt={c.story_photo_alt}
           width={204}
@@ -96,6 +97,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           style={{ ...abs(226, 0, 204, 259), display: "block" }}
         />
         <div
+          data-field="story.story_title"
           data-el="HOME-STORY-TITLE"
           className={playfair.className}
           style={{
@@ -110,6 +112,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           {c.story_title}
         </div>
         <div
+          data-field="story.story_body"
           data-el="HOME-STORY-BODY-TEXT"
           className={goudy.className}
           style={{
@@ -123,6 +126,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           {c.story_body}
         </div>
         <div
+          data-field="story.story_quote"
           className={playfair.className}
           style={{
             ...abs(26, 184, 170),
@@ -137,6 +141,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
         </div>
         {/* 2380:772 CTA · Read Our Story → 2274:275 (/story) */}
         <Link
+          data-field="story.story_cta_href"
           data-el="HOME-STORY-READ-BTN"
           href={c.story_cta_href}
           aria-label="Read our story"
@@ -149,6 +154,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           }}
         >
           <div
+            data-field="story.story_cta_label"
             className={goudy.className}
             style={{
               ...abs(5, 0, 110, 28),
@@ -183,6 +189,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           style={{ ...abs(168, 7, 100, 20), display: "block" }}
         />
         <div
+          data-field="story.faq_title"
           data-el="HOME-FAQ-TITLE"
           className={playfair.className}
           style={{
@@ -202,6 +209,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
         {/* FAQ rows — every row's prototype target is /care/chat */}
         {FAQ_ROWS.map(({ y }, i) => (
           <Link
+            data-field="story.faq_href"
             key={y}
             data-el={`HOME-FAQ-ROW-${i + 1}`}
             href={c.faq_href}
@@ -215,6 +223,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
             }}
           >
             <div
+              data-field={`story.faq_${i + 1}`}
               className={goudy.className}
               style={{
                 ...abs(14, 0, 315, 28),
@@ -240,6 +249,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
       {/* 2380:796 VIEW ALL FAQs — rendered strip; no prototype target of its
           own, so it follows the FAQ rows to the concierge chat. */}
       <Link
+        data-field="story.faq_href"
         data-el="HOME-FAQ-VIEW-ALL-LINK"
         href={c.faq_href}
         style={{ ...abs(131, 519, 190, 33), display: "block" }}
@@ -262,6 +272,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
 
       {/* 2380:775 · second story photo, beside the gift card */}
       <img
+        data-field="story.gift_photo"
         src={fileUrl(c.gift_photo)}
         alt={c.gift_photo_alt}
         width={204}
@@ -280,6 +291,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
         }}
       >
         <div
+          data-field="story.gift_title"
           data-el="HOME-GIFT-CTA-TITLE"
           className={playfair.className}
           style={{
@@ -296,6 +308,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           {c.gift_title}
         </div>
         <div
+          data-field="story.gift_body"
           data-el="HOME-GIFT-CTA-BODY-TEXT"
           className={notoSC.className}
           style={{
@@ -313,6 +326,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
         </div>
         {/* 2380:810 → 1523:1526 (/shop) */}
         <Link
+          data-field="story.gift_cta_href"
           data-el="HOME-GIFT-CTA-SHOP-BTN"
           href={c.gift_cta_href}
           style={{
@@ -323,6 +337,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           }}
         >
           <div
+            data-field="story.gift_cta_label"
             className={notoSC.className}
             style={{
               ...abs(29.5, 7.5, 86),
@@ -342,6 +357,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
       {/* ---- 2380:797 · newsletter strip ---- */}
       <div style={{ ...abs(25, 808, 391, 97) }}>
         <div
+          data-field="story.newsletter_title"
           data-el="HOME-NEWSLETTER-TITLE"
           className={playfair.className}
           style={{
@@ -357,6 +373,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
           {c.newsletter_title}
         </div>
         <div
+          data-field="story.newsletter_body"
           data-el="HOME-NEWSLETTER-BODY-TEXT"
           className={notoSC.className}
           style={{
@@ -381,6 +398,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
             wired; the field is display-only. See
             /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md. */}
         <Link
+          data-field="story.newsletter_href"
           data-el="HOME-NEWSLETTER-JOIN-BTN"
           href={c.newsletter_href}
           aria-label="Join the ELDREVE mailing list"
@@ -395,6 +413,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
             }}
           >
             <div
+              data-field="story.newsletter_placeholder"
               className={notoSC.className}
               style={{
                 ...abs(30.5, 15.5, 63),
@@ -416,6 +435,7 @@ export function A11({ c }: { c: HomeText["story"] }) {
             }}
           >
             <div
+              data-field="story.newsletter_button"
               className={notoSC.className}
               style={{
                 ...abs(19, 15, 24),
@@ -438,6 +458,10 @@ export function A11({ c }: { c: HomeText["story"] }) {
         <Link
           key={l.x}
           data-el={`HOME-FOOTER-LINK-${i + 1}`}
+          // TWO fields on one element, space separated: this box is both the
+          // word you see and the place it goes, and a destination has no pixels
+          // of its own to be picked by. Most-visible first.
+          data-field={`story.footer_${i + 1}_label story.footer_${i + 1}_href`}
           href={footer[i].href}
           className={notoSC.className}
           style={{

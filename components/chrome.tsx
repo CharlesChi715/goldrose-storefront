@@ -135,6 +135,7 @@ export function PromoBar({
       {isDefault || !slogan ? (
         // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
         <img
+          data-field="promo.slogan"
           src={brown ? "/eldreve/home/549-95.svg" : "/eldreve/glyph-promo.png"}
           alt={
             slogan ??
@@ -151,6 +152,10 @@ export function PromoBar({
         // Owner-edited → real text in the same box; minor glyph drift
         // accepted (the admin shows the caveat inline, §11).
         <div
+          // Tagged on BOTH branches: the promo bar swaps element type when the
+          // owner edits it (Figma's own pixels → live text), so the picker must
+          // find the slot whichever one is currently on the page.
+          data-field="promo.slogan"
           className={inter.className}
           style={{
             ...(brown ? abs(39, 6, 352, 20) : abs(36, 6, 358, 20)),

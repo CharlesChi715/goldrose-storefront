@@ -57,7 +57,6 @@ const CRAFT_STEPS = [
   },
 ];
 
-
 // Six workshop gallery crops (2380:692…2380:702), coords relative to the lower
 // frame (0,3571); each shows an offset window into the same 430×913 source.
 const WORKSHOP_CROPS = [
@@ -128,7 +127,11 @@ const CERTIFICATES = [
 export function A9({ c }: { c: HomeText["craft"] }) {
   // Steps 01–03 only: step 04's tile is one Figma SVG, not a photo.
   const CRAFT_PHOTOS = [c.step_1_photo, c.step_2_photo, c.step_3_photo];
-  const CRAFT_ALTS = [c.step_1_photo_alt, c.step_2_photo_alt, c.step_3_photo_alt];
+  const CRAFT_ALTS = [
+    c.step_1_photo_alt,
+    c.step_2_photo_alt,
+    c.step_3_photo_alt,
+  ];
   const steps = [
     { title: c.step_1_title, copy: c.step_1_copy },
     { title: c.step_2_title, copy: c.step_2_copy },
@@ -154,6 +157,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
     >
       {/* 165:137 · eyebrow */}
       <div
+        data-field="craft.eyebrow"
         className={notoSC.className}
         style={{
           ...abs(24, 20, 382),
@@ -170,6 +174,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
 
       {/* 165:138 · title */}
       <div
+        data-field="craft.title"
         className={playfair.className}
         style={{
           ...abs(24, 44, 382),
@@ -186,6 +191,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
 
       {/* 165:139 · intro */}
       <div
+        data-field="craft.intro"
         className={goudy.className}
         style={{
           ...abs(50, 118, 330),
@@ -254,6 +260,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
       {/* 165:143/148/153/158 · step titles */}
       {CRAFT_STEPS.map((s, i) => (
         <div
+          data-field={`craft.step_${i + 1}_title`}
           key={s.num}
           className={playfair.className}
           style={{
@@ -279,6 +286,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
       {/* 165:144/149/154/159 · step copy (vertically centered 82×42 boxes) */}
       {CRAFT_STEPS.map((s, i) => (
         <div
+          data-field={`craft.step_${i + 1}_copy`}
           key={s.num}
           className={goudy.className}
           style={{
@@ -300,6 +308,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
           prototype wires ON_CLICK → 1573:107 (/craft). Button chrome + label
           stay Figma's baked render; the Link only adds the hit area. */}
       <Link
+        data-field="craft.cta_href"
         href={c.cta_href}
         aria-label="Explore our craft"
         style={{ ...abs(93, 380, 246, 38), display: "block" }}
@@ -332,6 +341,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
 
         {/* 482:122 · workshop title */}
         <div
+          data-field="craft.workshop_title"
           className={playfair.className}
           style={{
             ...abs(20, 30, 390),
@@ -348,6 +358,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
 
         {/* 482:123 · workshop copy */}
         <div
+          data-field="craft.workshop_copy"
           className={goudy.className}
           style={{
             ...abs(50, 68, 330),
@@ -399,6 +410,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
 
         {/* 2380:704 · "— VERIFIED QUALITY —" heading above the panel */}
         <div
+          data-field="craft.verified_title"
           className={playfair.className}
           style={{
             ...abs(97, 345, 240, 44),
@@ -442,6 +454,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
                   }}
                 >
                   <img
+                    data-field={`craft.cert_${i + 1}_title`}
                     src="/eldreve/home/482-129.png"
                     alt={`${certs[i].title} certificate`}
                     width={430}
@@ -478,6 +491,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
                   {certs[i].title}
                 </div>
                 <div
+                  data-field={`craft.cert_${i + 1}_number`}
                   className={notoSC.className}
                   style={{
                     ...abs(0, 104, 69),

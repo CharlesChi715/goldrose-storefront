@@ -91,6 +91,7 @@ export function A6({
 
       {/* Title + intro (163:82, 163:83) */}
       <div
+        data-field="recipient.title"
         className={playfair.className}
         style={{
           ...abs(24, 2375, 382),
@@ -105,6 +106,7 @@ export function A6({
         {c.title}
       </div>
       <div
+        data-field="recipient.intro"
         className={goudy.className}
         style={{
           ...abs(52, 2411, 326),
@@ -130,6 +132,7 @@ export function A6({
           }}
         >
           <div
+            data-field={`recipient.chip_${i + 1}`}
             className={notoSC.className}
             style={{
               ...abs(chip.labelX - chip.x, 9.5, chip.labelW),
@@ -183,6 +186,7 @@ export function A6({
         style={{ ...abs(187.926, 2795, 58.149, 13.923), display: "block" }}
       />
       <div
+        data-field="recipient.reviews_title"
         className={playfair.className}
         style={{
           ...abs(26, 2816, 382),
@@ -197,6 +201,7 @@ export function A6({
         {c.reviews_title}
       </div>
       <div
+        data-field="recipient.reviews_intro"
         className={goudy.className}
         style={{
           ...abs(50, 2843, 330),
@@ -225,6 +230,7 @@ export function A6({
       {/* Button · Read Customer Stories (163:111) — live since 07-30; target
           from the Figma prototype link on 1523:1992 (ON_CLICK → 1573:106 /story) */}
       <Link
+        data-field="recipient.reviews_cta_href"
         href={c.reviews_cta_href}
         aria-label="Read customer stories"
         style={{
@@ -235,6 +241,7 @@ export function A6({
         }}
       >
         <div
+          data-field="recipient.reviews_cta_label"
           className={goudy.className}
           style={{
             ...abs(27, 6, 169),

@@ -54,10 +54,12 @@ export function HeroCarousel({ c }: { c: HomeText["hero"] }) {
       activeColor="#D4AF37"
       idleColor="#FFF6EC"
       href={c.photo_href}
+      hrefField="hero.photo_href"
       label="hero slide"
       name="HOME-HERO"
       renderSlide={(i) => (
         <img
+          data-field={`hero.photo_${i + 1}`}
           src={fileUrl(slides[i].photo)}
           alt={slides[i].alt}
           width={430}

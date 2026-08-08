@@ -132,6 +132,7 @@ export function OccasionRail({
       activeColor="#B27A38"
       idleColor="#E5D1B2"
       href={c.card_href}
+      hrefField="occasion.card_href"
       label="occasion"
       renderSlide={(i) => {
         const card = RECIPIENT_CARDS[i];
@@ -169,6 +170,7 @@ export function OccasionRail({
             </div>
             {/* 436:281/295/308 · title */}
             <div
+              data-field={`occasion.card_${i + 1}_title`}
               className={playfair.className}
               style={{
                 ...abs(12, card.title.y, 152),
@@ -184,6 +186,7 @@ export function OccasionRail({
             </div>
             {/* 436:282/296/309 · copy */}
             <div
+              data-field={`occasion.card_${i + 1}_copy`}
               className={card.copy.font}
               style={{
                 ...abs(card.copy.x, card.copy.y, card.copy.width),

@@ -56,6 +56,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:375 eyebrow — space runs kept via nbsp so HTML doesn't collapse them */}
       <div
         data-el="HOME-HERO-EYEBROW-TEXT"
+        data-field="hero.eyebrow"
         className={notoSC.className}
         style={{
           ...abs(115, 402, 200),
@@ -73,6 +74,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:376 hero title */}
       <div
         data-el="HOME-HERO-TITLE"
+        data-field="hero.title"
         className={playfair.className}
         style={{
           ...abs(34, 429, 362),
@@ -90,6 +92,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:377 hero subtitle */}
       <div
         data-el="HOME-HERO-SUBTITLE"
+        data-field="hero.subtitle"
         className={playfair.className}
         style={{
           ...abs(68, 517, 294),
@@ -107,6 +110,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:378 hero body — wraps naturally inside its 306px box */}
       <div
         data-el="HOME-HERO-BODY-TEXT"
+        data-field="hero.body"
         className={notoSC.className}
         style={{
           ...abs(62, 548, 306),
@@ -123,6 +127,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:379 CTA · Shop Gold-Dipped Roses */}
       <Link
         data-el="HOME-HERO-SHOP-BTN"
+        data-field="hero.cta_href"
         href={c.cta_href}
         style={{
           ...abs(32, 598, 366, 44),
@@ -133,6 +138,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       >
         <div
           data-el="HOME-HERO-SHOP-TEXT"
+          data-field="hero.cta_label"
           className={notoSC.className}
           style={{
             ...abs(79, 15, 181),
@@ -179,6 +185,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
           />
           <div
             data-el={`HOME-HERO-BENEFIT-TEXT-${i + 1}`}
+            data-field={`hero.benefit_${i + 1}`}
             className={notoSC.className}
             style={{
               ...abs(t.label.x, 30.5, t.label.w),

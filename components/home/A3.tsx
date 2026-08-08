@@ -42,6 +42,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
       {/* 2380:423 · Ready to Ship heading */}
       <div
         data-el="HOME-READY-TO-SHIP-TITLE"
+        data-field="ready.title"
         className={playfair.className}
         style={{
           ...abs(26, 1423, 230),
@@ -57,6 +58,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
       {/* 2380:424 · "View all →" (rendered glyph strip) */}
       <Link
         data-el="HOME-READY-TO-SHIP-VIEW-ALL-LINK"
+        data-field="ready.view_all_href"
         href={c.view_all_href}
         style={{ ...abs(350, 1433, 80, 20), display: "block" }}
       >
@@ -78,6 +80,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
         <Link
           key={row.y}
           data-el={`HOME-READY-TO-SHIP-PRODUCT-CARD-${i + 1}`}
+          data-field="ready.card_href"
           className="gr-card-zoom"
           href={c.card_href}
           style={{
@@ -118,6 +121,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
           </div>
           <div
             data-el={`HOME-READY-TO-SHIP-PRODUCT-TITLE-${i + 1}`}
+            data-field="ready.card_title"
             className={playfair.className}
             style={{
               ...abs(186, 12.5, 180),
@@ -133,6 +137,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
           {/* price/meta strip (rendered glyph strip) */}
           <img
             data-el={`HOME-READY-TO-SHIP-PRODUCT-META-${i + 1}`}
+            data-field="ready.card_meta"
             src="/eldreve/home/159-80.svg"
             alt="$69.00 · Ships in 1–2 business days · View Product →"
             width={180}

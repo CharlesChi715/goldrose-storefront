@@ -99,6 +99,11 @@ export function HomePhoto({
   return (
     <img
       data-el={dataEl}
+      // Stamped here rather than at each call site: this component already
+      // knows which registry slot it is drawing, so every photo routed through
+      // it is addressable by the admin's picker for free — and a new photo
+      // cannot be added without one.
+      data-field={`${section}.${field}`}
       className={className}
       src={fileUrl(value)}
       alt={alt}

@@ -66,6 +66,7 @@ export function A5({
 
       {/* 2380:456 · title */}
       <div
+        data-field="occasion.title"
         className={playfair.className}
         style={{
           ...abs(24, 31, 382),
@@ -82,6 +83,7 @@ export function A5({
 
       {/* 162:84 · intro */}
       <div
+        data-field="occasion.intro"
         className={notoSC.className}
         style={{
           ...abs(52, 67, 326),
@@ -103,6 +105,7 @@ export function A5({
       */}
       {/* 425:150 · Valentine's Day (selected) */}
       <Link
+        data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
           ...abs(12, 91, 118, 30),
@@ -119,6 +122,7 @@ export function A5({
           style={{ ...abs(14.75, 6, 16.5, 18), display: "block" }}
         />
         <div
+          data-field="occasion.chip_1"
           className={notoSC.className}
           style={{
             ...abs(37.25, 9.5, 64),
@@ -134,6 +138,7 @@ export function A5({
       </Link>
       {/* 162:103 · Mother's Day */}
       <Link
+        data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
           ...abs(135, 91, 86, 30),
@@ -145,6 +150,7 @@ export function A5({
         }}
       >
         <div
+          data-field="occasion.chip_2"
           className={notoSC.className}
           style={{
             ...abs(15.5, 9.5, 55),
@@ -160,6 +166,7 @@ export function A5({
       </Link>
       {/* 162:105 · Birthday */}
       <Link
+        data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
           ...abs(226, 91, 70, 30),
@@ -171,6 +178,7 @@ export function A5({
         }}
       >
         <div
+          data-field="occasion.chip_3"
           className={notoSC.className}
           style={{
             ...abs(16.5, 9.5, 37),
@@ -190,6 +198,7 @@ export function A5({
           node 2380:474. See
           /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md. */}
       <Link
+        data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
           ...abs(301, 91, 82, 30),
@@ -201,6 +210,7 @@ export function A5({
         }}
       >
         <div
+          data-field="occasion.chip_4"
           className={notoSC.className}
           style={{
             ...abs(19.5, 9.5, 43),
@@ -216,6 +226,7 @@ export function A5({
       </Link>
       {/* 2380:475 · Anniversary (clipped at the module's right edge) */}
       <Link
+        data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
           ...abs(388, 91, 86, 30),
@@ -227,6 +238,7 @@ export function A5({
         }}
       >
         <div
+          data-field="occasion.chip_5"
           className={notoSC.className}
           style={{
             ...abs(18, 9.5, 50),
@@ -249,7 +261,14 @@ export function A5({
         style={{ ...abs(479, 97, 12, 18), display: "block" }}
       />
 
-      {/* 162:95 · Occasion Card · Valentine's Day (off-canvas rail item) */}
+      {/* 162:95 · Occasion Card · Valentine's Day (off-canvas rail item)
+
+          Deliberately NOT given a `data-field`. It sits at x=464 inside a
+          430-wide `overflow: hidden` frame, so it is clipped away entirely —
+          tagging it would hand the admin's picker a sixth element for
+          `chips_href` whose highlight lands off-canvas, over the neighbouring
+          band. Dead content should be deleted rather than made addressable;
+          that is a design-team call, so for now it is only excluded. */}
       <Link
         href={c.chips_href}
         style={{

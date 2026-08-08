@@ -53,6 +53,7 @@ export function A2({
       {/* 157:58 section title */}
       <div
         data-el="HOME-FEATURED-TITLE"
+        data-field="featured.title"
         className={playfair.className}
         style={{
           ...abs(38, 62, 354),
@@ -70,6 +71,7 @@ export function A2({
       {/* 157:59 subtitle */}
       <div
         data-el="HOME-FEATURED-SUBTITLE"
+        data-field="featured.subtitle"
         className={notoSC.className}
         style={{
           ...abs(54, 112, 322),
@@ -87,6 +89,7 @@ export function A2({
       {/* 157:60 "Best Sellers" heading */}
       <div
         data-el="HOME-FEATURED-BESTSELLER-TITLE"
+        data-field="featured.rail_title"
         className={playfair.className}
         style={{
           ...abs(20, 176, 220),
@@ -103,10 +106,12 @@ export function A2({
       {/* 157:61 "View all  →" — Figma-rendered strip, links to /shop */}
       <Link
         data-el="HOME-FEATURED-VIEW-ALL-LINK"
+        data-field="featured.view_all_href"
         href={c.view_all_href}
         style={{ ...abs(328, 184, 82, 22), display: "block" }}
       >
         <img
+          data-field="featured.view_all_label"
           src="/eldreve/home/157-61.svg"
           alt="View all →"
           width={82}
