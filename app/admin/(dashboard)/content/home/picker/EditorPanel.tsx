@@ -6,9 +6,16 @@
  *
  * DOCKED, NOT FLOATING (owner, 2026-08-08)
  * A popover on the spot is nearer the finger but covers the very thing being
- * judged, which is the thing the owner opened it to look at. This sits in the
- * column beside the preview, aligned to the picked element's own height, and the
- * overlay draws a curve between the two so the pairing is never in doubt.
+ * judged, which is the thing the owner opened it to look at. This sits beside
+ * the section's own window, inside the same card, and the overlay draws a curve
+ * between the two so the pairing is never in doubt.
+ *
+ * IT NO LONGER CHASES THE ELEMENT'S HEIGHT
+ * It used to be absolutely positioned at the picked element's own `y`. That was
+ * arithmetic worth having against a 620px window on a 5,000px page; against a
+ * 360px window it buys at most a few hundred pixels of alignment and costs a
+ * measurement, a stored `top`, and a class of bugs where the panel sat below
+ * the fold. It is a plain flex sibling now, and the curve does the joining.
  *
  * IT SHOWS EVERY FIELD THE PICKED ELEMENT CARRIES
  * A footer link is both the word you see and the place it goes; a destination
@@ -49,7 +56,6 @@ export function EditorPanel({
   onClose,
   pending,
   panelRef,
-  top,
 }: {
   picked: PickedField[];
   valueOf: (section: SectionView, field: FieldView) => string;
@@ -61,8 +67,6 @@ export function EditorPanel({
   onClose: () => void;
   pending: boolean;
   panelRef: React.RefObject<HTMLDivElement | null>;
-  /** Where to sit, so the panel lines up with what it is editing. */
-  top: number;
 }) {
   const t = useAdminT();
   const zh = useAdminLang() === "zh";
@@ -71,19 +75,7 @@ export function EditorPanel({
   const first = picked[0];
 
   return (
-    <div
-      ref={panelRef}
-      data-home-editor-panel
-      style={{
-        position: "absolute",
-        left: 0,
-        // Follows the element down the preview, but never above its own column.
-        top: Math.max(0, top),
-        width: "100%",
-        transition: "top 160ms ease",
-        zIndex: 520,
-      }}
-    >
+    <div ref={panelRef} data-home-editor-panel>
       <Card>
         <BlockStack gap="300">
           <InlineStack align="space-between" blockAlign="center" gap="200">

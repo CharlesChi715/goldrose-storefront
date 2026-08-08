@@ -16,7 +16,12 @@
  * its own gets edited at all.
  */
 
-import { distanceTo, visibleRect, type Rect } from "./geometry";
+import {
+  distanceTo,
+  visibleRect,
+  type FrameView,
+  type Rect,
+} from "./geometry";
 
 /** One addressable thing on the page: an element and the slots it draws. */
 export type Target = {
@@ -29,6 +34,34 @@ export type Target = {
 export type Hit = Target & { rect: Rect };
 
 /**
+ * Which field keys a picker is allowed to offer, or null for all of them.
+ *
+ * Every preview frame renders the WHOLE home page, so a section's window is
+ * showing 176 tagged elements and drawing about twenty of them. Scope is what
+ * makes a card's window a window onto that card: it is filtered by the keys the
+ * section owns, not by the pixels it covers.
+ *
+ * That distinction is load-bearing rather than an optimisation. Each window
+ * shows its band plus 48px of slack at either end, so the neighbouring band
+ * peeks in — and a filter by geometry would let a click on that peek open a
+ * field belonging to a different card, in this card's editor. Filtering by key
+ * makes it unrepresentable. The nine-fold drop in per-frame measuring is the
+ * side benefit.
+ */
+export type FieldScope = ReadonlySet<string> | null;
+
+/**
+ * Whether a tagged element belongs to the picker asking about it.
+ *
+ * @param keys - The keys the element names.
+ * @param scope - The keys on offer, or null for every key on the page.
+ * @returns True when at least one of its keys is in scope.
+ */
+function inScope(keys: string[], scope: FieldScope): boolean {
+  return scope === null || keys.some((key) => scope.has(key));
+}
+
+/**
  * Split a `data-field` attribute into its keys.
  *
  * @param attr - The raw attribute value, or null.
@@ -39,27 +72,34 @@ export function parseFieldKeys(attr: string | null): string[] {
 }
 
 /**
- * Every tagged element in the preview, in document order.
+ * Every tagged element in the preview that is in scope, in document order.
  *
  * @param doc - The preview's document.
- * @returns One entry per tagged element.
+ * @param scope - The keys on offer, or null for every key on the page.
+ * @returns One entry per tagged element the caller may offer.
  */
-export function targetsIn(doc: Document): Target[] {
-  return [...doc.querySelectorAll("[data-field]")].map((element) => ({
-    element,
-    keys: parseFieldKeys(element.getAttribute("data-field")),
-  }));
+export function targetsIn(doc: Document, scope: FieldScope = null): Target[] {
+  const targets: Target[] = [];
+  for (const element of doc.querySelectorAll("[data-field]")) {
+    const keys = parseFieldKeys(element.getAttribute("data-field"));
+    if (inScope(keys, scope)) targets.push({ element, keys });
+  }
+  return targets;
 }
 
 /**
- * Group the page's elements by the field they draw.
+ * Group the page's in-scope elements by the field they draw.
  *
  * @param doc - The preview's document.
+ * @param scope - The keys on offer, or null for every key on the page.
  * @returns Field key → every element drawing it, in document order.
  */
-export function indexByField(doc: Document): Map<string, Element[]> {
+export function indexByField(
+  doc: Document,
+  scope: FieldScope = null,
+): Map<string, Element[]> {
   const index = new Map<string, Element[]>();
-  for (const { element, keys } of targetsIn(doc)) {
+  for (const { element, keys } of targetsIn(doc, scope)) {
     for (const key of keys) {
       const list = index.get(key);
       if (list) list.push(element);
@@ -86,6 +126,7 @@ export function indexByField(doc: Document): Map<string, Element[]> {
 export function stackAt(
   doc: Document,
   point: { x: number; y: number },
+  scope: FieldScope = null,
 ): Target[] {
   const seen = new Set<Element>();
   const found: Target[] = [];
@@ -95,10 +136,12 @@ export function stackAt(
     const tagged = node.closest("[data-field]");
     if (!tagged || seen.has(tagged)) continue;
     seen.add(tagged);
-    found.push({
-      element: tagged,
-      keys: parseFieldKeys(tagged.getAttribute("data-field")),
-    });
+    const keys = parseFieldKeys(tagged.getAttribute("data-field"));
+    // Out of scope is not "skip and keep looking under it": an element another
+    // card owns still covers this one, and offering whatever is beneath would
+    // hand the owner a field they cannot see. It is simply not a target here.
+    if (!inScope(keys, scope)) continue;
+    found.push({ element: tagged, keys });
   }
   return found;
 }
@@ -119,6 +162,8 @@ export function stackAt(
  * @param iframe - The frame, for measuring.
  * @param client - The pointer in admin-viewport coordinates.
  * @param point - The same pointer inside the frame.
+ * @param scope - The keys on offer, or null for every key on the page.
+ * @param seen - The frame measured once for this pass.
  * @param snap - How far to reach for a small target, in admin pixels.
  * @returns The target to highlight, or null when nothing is near.
  */
@@ -127,17 +172,23 @@ export function resolveTarget(
   iframe: HTMLIFrameElement,
   client: { x: number; y: number },
   point: { x: number; y: number },
+  scope: FieldScope = null,
+  seen?: FrameView,
   snap = 14,
 ): Hit | null {
-  for (const target of stackAt(doc, point)) {
-    const rect = visibleRect(target.element, iframe);
+  for (const target of stackAt(doc, point, scope)) {
+    const rect = visibleRect(target.element, iframe, seen);
     if (rect) return { ...target, rect };
   }
 
+  // The snap fallback walks every target again, so it is the expensive half of
+  // a frame — and it runs on exactly the frames where the pointer hit nothing.
+  // Scope is what keeps it affordable: about twenty candidates per card rather
+  // than the page's 176.
   let best: Hit | null = null;
   let bestDistance = snap;
-  for (const target of targetsIn(doc)) {
-    const rect = visibleRect(target.element, iframe);
+  for (const target of targetsIn(doc, scope)) {
+    const rect = visibleRect(target.element, iframe, seen);
     if (!rect) continue;
     const distance = distanceTo(rect, client.x, client.y);
     if (distance < bestDistance) {
@@ -154,16 +205,18 @@ export function resolveTarget(
  * @param index - The map from `indexByField`.
  * @param key - The field key.
  * @param iframe - The frame, for measuring.
+ * @param seen - The frame measured once for this pass.
  * @returns One rect per element of that field that is actually on show.
  */
 export function rectsOfField(
   index: Map<string, Element[]>,
   key: string,
   iframe: HTMLIFrameElement,
+  seen?: FrameView,
 ): Rect[] {
   const rects: Rect[] = [];
   for (const element of index.get(key) ?? []) {
-    const rect = visibleRect(element, iframe);
+    const rect = visibleRect(element, iframe, seen);
     if (rect) rects.push(rect);
   }
   return rects;

@@ -1,17 +1,24 @@
 /**
  * ROLE OF THIS FILE
  * Acceptance for point-and-edit on Content → Home page: arming the picker,
- * clicking a field in the live preview, typing into the panel that opens, and —
- * the part that actually broke — moving the preview while a field is selected.
+ * clicking something in a SECTION'S OWN window, and editing it in the panel
+ * that opens beside that window.
  *
  * WHY IT EXISTS
  * Nothing in the suite drove the picker until 2026-08-08. Every other home-page
  * test reaches a field through the search-and-list path, so a full green run
  * said nothing whatever about pointing, and two wrong diagnoses shipped behind
- * it. The failure is a React update loop, which does not show up as a wrong
- * pixel or a missing element — it throws. So these tests watch `pageerror`
- * rather than the DOM: an assertion on what is on screen would pass right up
- * until the error boundary swallowed the screen.
+ * it.
+ *
+ * THE SCROLL TEST IS THE POINT OF THE FILE
+ * Pointing used to live on the page-wide preview, which answers the pointer —
+ * so it needed a transparent layer to keep clicks off the storefront's real
+ * links, that layer swallowed the wheel, the scroll had to be re-issued
+ * programmatically, and the storefront's own `scroll-behavior: smooth` turned
+ * every wheel event into an eased animation the next event cancelled. Measured
+ * by hand: a gesture asking for 2,000px moved 118. "Preview scrolls at a normal
+ * speed" is therefore a real, checkable guarantee, and the last test here is the
+ * one that keeps it.
  *
  * NOTHING HERE IS SAVED
  * Every edit stays a local draft — Save is never pressed — so no `site_content`
@@ -25,136 +32,176 @@ import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
 test.use({ viewport: ADMIN_VIEWPORT });
 test.describe.configure({ mode: "serial" });
 
-/** The main live preview, told apart from the eight per-section windows. */
+/** The page-wide preview, told apart from the eight per-section windows. */
 const PREVIEW = 'iframe[title="Live preview"]';
 
-/**
- * Open the editor and arm the picker, with the preview loaded and pointable.
- *
- * The preview iframe is `loading="lazy"` — it is below the section map on
- * purpose — so it has to be scrolled to before anything inside it exists.
- *
- * @param page - The Playwright page.
- */
+/** Open the editor and arm the picker for every section at once. */
 async function armed(page: Page) {
   await adminLogin(page);
   await page.goto("/admin/content/home");
   await expect(page.getByRole("heading", { name: "Home page" })).toBeVisible();
-
-  const arm = page.getByRole("button", {
-    name: "Point at something to edit it",
-  });
-  await arm.scrollIntoViewIfNeeded();
-  // Lazy: reaching it is what loads the frame.
-  await expect(page.frameLocator(PREVIEW).locator(".figv-stage")).toBeVisible();
-  await arm.click();
+  await page
+    .getByRole("button", { name: "Point at something to edit it" })
+    .click();
   await expect(
     page.getByRole("button", { name: "Done pointing" }),
   ).toBeVisible();
 }
 
 /**
- * Click a field where it is drawn in the preview.
+ * Click a field where its own section's window is drawing it.
  *
- * The click has to land on the capture layer, not inside the frame — the
- * storefront's links are real and one click would navigate the preview away.
- * So this measures the element through the frame (Playwright reports iframe
- * content in main-frame coordinates, transforms included) and clicks that spot
- * on the layer covering it, which is exactly what a person does.
+ * Two things have to be true before a click means anything, and both are the
+ * test's job rather than the app's: the card must be on screen (the windows are
+ * lazily mounted), and the target must be inside the window's 360px view rather
+ * than merely somewhere in the 5,000px film behind it. So this scrolls the
+ * window by however much is missing, then clicks the middle of what is actually
+ * showing — which is exactly the click a person makes.
  *
  * @param page - The Playwright page.
+ * @param sectionId - The card to point in.
  * @param key - A `"<section>.<id>"` field key, as carried by `data-field`.
  */
-async function pointAt(page: Page, key: string) {
-  // The whole preview has to be on screen first. `page.mouse` works in viewport
-  // coordinates, so a target measured below the fold would be clicked at a
-  // clamped position — landing on nothing, and looking exactly like a picker
-  // that failed to resolve.
-  await page.locator(PREVIEW).scrollIntoViewIfNeeded();
-  const target = page.frameLocator(PREVIEW).locator(`[data-field~="${key}"]`);
+async function pointAt(page: Page, sectionId: string, key: string) {
+  const card = page.locator(`#home-section-${sectionId}`);
+  // INSTANT, explicitly. The admin loads the storefront's globals.css, which
+  // sets `html { scroll-behavior: smooth }` — so Playwright's own
+  // scrollIntoViewIfNeeded animates, and every coordinate measured afterwards
+  // is stale by the time the click lands. It fails as "the picker resolved
+  // nothing", which is a lie about the app.
+  await card.evaluate((el) =>
+    el.scrollIntoView({ block: "start", behavior: "instant" }),
+  );
+  const window = page.locator(`[data-home-picker-window="${sectionId}"]`);
+  await expect(window).toBeVisible();
+
+  const target = page
+    .frameLocator(`#home-section-${sectionId} iframe`)
+    .locator(`[data-field~="${key}"]`);
   await expect(target).toBeVisible();
-  const box = await target.boundingBox();
-  if (!box) throw new Error(`${key} has no box in the preview`);
-  const at = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-  const size = page.viewportSize();
-  if (size && (at.y < 0 || at.y > size.height)) {
-    throw new Error(
-      `${key} is drawn at y=${at.y}, outside the ${size.height}px viewport`,
-    );
-  }
+
+  // Bring it into the window's own view, in the window's own scroll.
+  const at = await page.evaluate(
+    ({ id, field }) => {
+      const win = document.querySelector<HTMLElement>(
+        `[data-home-picker-window="${id}"]`,
+      );
+      const frame = document.querySelector<HTMLIFrameElement>(
+        `#home-section-${id} iframe`,
+      );
+      const node = frame?.contentDocument?.querySelector(
+        `[data-field~="${field}"]`,
+      );
+      if (!win || !frame || !node) return null;
+      const scale = frame.getBoundingClientRect().width / frame.offsetWidth;
+      const inFilm = node.getBoundingClientRect();
+      const onAdmin = {
+        top: frame.getBoundingClientRect().top + scale * inFilm.top,
+        height: scale * inFilm.height,
+      };
+      const box = win.getBoundingClientRect();
+      // Centre it if it is not already wholly inside the window.
+      const wanted =
+        onAdmin.top + onAdmin.height / 2 - (box.top + box.height / 2);
+      win.scrollTop += wanted;
+      const after = node.getBoundingClientRect();
+      return {
+        x:
+          frame.getBoundingClientRect().left +
+          scale * (after.left + after.width / 2),
+        y:
+          frame.getBoundingClientRect().top +
+          scale * (after.top + after.height / 2),
+      };
+    },
+    { id: sectionId, field: key },
+  );
+  if (!at) throw new Error(`${key} is not in ${sectionId}'s window`);
   await page.mouse.click(at.x, at.y);
 }
 
-/** Every uncaught page error, so a React throw cannot pass as a pass. */
-function watchForThrows(page: Page): string[] {
-  const thrown: string[] = [];
-  page.on("pageerror", (error) => thrown.push(error.message));
-  return thrown;
-}
-
-test("pointing at a headline opens it, and typing reaches the preview", async ({
+test("pointing in a section's window opens that field, in that card", async ({
   page,
 }) => {
-  const thrown = watchForThrows(page);
   await armed(page);
+  await pointAt(page, "hero", "hero.title");
 
-  await pointAt(page, "hero.title");
-
-  // The panel opens on the field that was pointed at, badged with its own
-  // section — scoped to the panel, because the section map above names A-1 too.
-  const panel = page.locator("[data-home-editor-panel]");
+  // The editor docks INSIDE the card whose window was pointed at — that is what
+  // "beside the thing you are editing" means now that there are nine of them.
+  const panel = page.locator("#home-section-hero [data-home-editor-panel]");
   await expect(panel).toBeVisible();
   await expect(panel.getByText("A-1", { exact: true })).toBeVisible();
-  const headline = panel.getByRole("textbox", { name: /Headline/ });
-  await expect(headline).toBeVisible();
+  await expect(panel.getByRole("textbox", { name: /Headline/ })).toBeVisible();
+});
 
-  await headline.fill("Pointed At This");
-  // The preview is written into directly — that is the whole "live as you type"
-  // feature — so the page itself must show it without a save or a reload.
+test("typing reaches every preview showing that field, not just one", async ({
+  page,
+}) => {
+  await armed(page);
+  await pointAt(page, "hero", "hero.title");
+
+  const panel = page.locator("#home-section-hero [data-home-editor-panel]");
+  await panel
+    .getByRole("textbox", { name: /Headline/ })
+    .fill("Pointed At This");
+
+  // Its own section's window, which is the one being looked at...
+  await expect(
+    page
+      .frameLocator("#home-section-hero iframe")
+      .locator('[data-field~="hero.title"]'),
+  ).toHaveText("Pointed At This");
+  // ...and the page-wide preview above, which shows the same field. One of them
+  // still saying yesterday's wording is how a teammate concludes the preview is
+  // broken.
   await expect(
     page.frameLocator(PREVIEW).locator('[data-field~="hero.title"]'),
   ).toHaveText("Pointed At This");
-
-  expect(thrown).toEqual([]);
 });
 
-test("the screen survives the preview moving under a selected field", async ({
+test("a field you can point at is still listed, for anyone who cannot", async ({
   page,
 }) => {
-  const thrown = watchForThrows(page);
   await armed(page);
-  await pointAt(page, "hero.title");
-  const panel = page.locator("[data-home-editor-panel]");
-  await expect(panel.getByRole("textbox", { name: /Headline/ })).toBeVisible();
+  const card = page.locator("#home-section-hero");
+  await card.evaluate((el) =>
+    el.scrollIntoView({ block: "start", behavior: "instant" }),
+  );
 
-  // THE REGRESSION. While something is selected the picker re-measures every
-  // frame, and a moving page means every frame really is different — so this is
-  // the state that publishes sixty times a second. Typing was blamed for it
-  // because typing is one re-render; scrolling is sixty of them.
-  //
-  // The ticks run BACK TO BACK on purpose. An earlier version of this test put
-  // 50ms between them and passed against the very build that crashes by hand:
-  // the gap is long enough for React to settle and reset its nested-update
-  // count, so the storm never builds. A person spinning a wheel does not pause.
-  const layer = page.locator("[data-home-picker-capture]");
-  const box = await layer.boundingBox();
-  if (!box) throw new Error("the picker's capture layer is not on screen");
+  // The frames are aria-hidden and tabIndex=-1 on purpose, so pointing is a
+  // mouse shortcut and never the only way in. Between 2026-08-08 and the move
+  // to section windows it WAS the only way in for ~155 fields; this is the
+  // assertion that stops that coming back.
+  await expect(card.getByRole("textbox", { name: /Headline/ })).toBeVisible();
+  await expect(card.getByRole("textbox", { name: /Eyebrow/ })).toBeVisible();
+});
+
+test("the page-wide preview scrolls at a normal speed", async ({ page }) => {
+  await armed(page);
+
+  // No capture layer anywhere, armed or not: that is the structural half of the
+  // guarantee, and the reason the wheel is never taken off the browser.
+  await expect(page.locator("[data-home-picker-capture]")).toHaveCount(0);
+
+  const frame = page.locator(PREVIEW);
+  await frame.evaluate((el) =>
+    el.scrollIntoView({ block: "center", behavior: "instant" }),
+  );
+  const box = await frame.boundingBox();
+  if (!box) throw new Error("the page-wide preview is not on screen");
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  // Over the capture layer the wheel is swallowed and scrolls the PREVIEW.
-  for (let i = 0; i < 30; i++) await page.mouse.wheel(0, 100);
-  // Off it, the same gesture scrolls the ADMIN, which moves the selection just
-  // as surely. Both paths reach the picker's loop; only one was ever tried.
-  await page.mouse.move(box.x + box.width / 2, Math.max(1, box.y - 40));
-  for (let i = 0; i < 30; i++) await page.mouse.wheel(0, 100);
-  await page.waitForTimeout(500);
+  for (let i = 0; i < 10; i++) await page.mouse.wheel(0, 100);
+  await page.waitForTimeout(300);
 
-  // Editing must still work afterwards, which is the point of surviving.
-  await panel.getByRole("textbox", { name: /Headline/ }).fill("Still Alive");
-  await expect(
-    page.frameLocator(PREVIEW).locator('[data-field~="hero.title"]'),
-  ).toHaveText("Still Alive");
-
-  expect(thrown).toEqual([]);
-  // And the screen is still the screen, not the error boundary's apology.
-  await expect(page.getByRole("heading", { name: "Home page" })).toBeVisible();
+  const travelled = await page.evaluate(
+    (sel) =>
+      document.querySelector<HTMLIFrameElement>(sel)?.contentWindow?.scrollY ??
+      0,
+    PREVIEW,
+  );
+  // 1,000px was asked for. The threshold is set from measurement rather than
+  // taste: through the old capture layer, thirty back-to-back ticks of 100px
+  // moved the frame 664px — about a fifth of what was asked — so ten ticks
+  // landed near 220. Native scrolling delivers the lot.
+  expect(travelled).toBeGreaterThan(800);
 });

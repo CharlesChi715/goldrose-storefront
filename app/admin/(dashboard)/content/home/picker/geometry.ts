@@ -26,7 +26,13 @@
 export type Rect = { x: number; y: number; w: number; h: number };
 
 /** How the admin's own layout scales the iframe surface, and its border inset. */
-type Frame = { left: number; top: number; scale: number; bl: number; bt: number };
+type Frame = {
+  left: number;
+  top: number;
+  scale: number;
+  bl: number;
+  bt: number;
+};
 
 /**
  * Measure the iframe once per batch of conversions.
@@ -89,21 +95,89 @@ export function intersect(a: Rect, b: Rect): Rect | null {
 }
 
 /**
+ * A frame measured once: where it sits, and the box it is actually seen
+ * through.
+ *
+ * WHY THE CLIP IS NOT SIMPLY THE FRAME'S OWN CONTENT BOX
+ * It is, when the frame IS the window — the page-wide preview is a 620px-tall
+ * iframe scrolling its own document, so anything scrolled out of it is outside
+ * its content box and correctly disappears.
+ *
+ * A section window is the other way round. Its iframe is the whole ~5,000px
+ * page, laid out at full height and pulled upward, and the clipping is done by
+ * two boxes ON THE ADMIN SIDE: the rail (`overflow: clip`, exactly one band
+ * tall) and the window (`overflow: auto`). Neither is an ancestor of anything
+ * in the child document, so a walk that stops at the iframe's content box finds
+ * nothing clipping at all — and cheerfully reports rectangles for elements
+ * 3,000px above the window, which then get drawn over the form below it.
+ *
+ * WHY IT IS MEASURED ONCE PER PASS
+ * The old code re-derived all of this inside `visibleRect`, so a pass over 176
+ * targets measured the same iframe 176 times: 1,434 `getBoundingClientRect` and
+ * 1,657 `getComputedStyle` calls per animation frame, of which all but a handful
+ * were the same answer. Hoisting it is what makes an admin-side ancestor walk
+ * affordable at all.
+ */
+export type FrameView = {
+  frame: Frame;
+  /** The admin-viewport box the frame shows through; null when none of it does. */
+  clip: Rect | null;
+};
+
+/** A DOMRect in this file's own terms. */
+function rectOf(r: DOMRect): Rect {
+  return { x: r.x, y: r.y, w: r.width, h: r.height };
+}
+
+/**
+ * Measure a frame and everything on the admin side that clips it.
+ *
+ * @param iframe - The preview frame.
+ * @returns Its geometry and the box it is seen through, for a whole pass.
+ */
+export function measureFrame(iframe: HTMLIFrameElement): FrameView {
+  const frame = measure(iframe);
+  let clip: Rect | null = {
+    x: frame.left + frame.scale * frame.bl,
+    y: frame.top + frame.scale * frame.bt,
+    w: frame.scale * iframe.clientWidth,
+    h: frame.scale * iframe.clientHeight,
+  };
+  const view = iframe.ownerDocument.defaultView;
+  for (
+    let parent = view ? iframe.parentElement : null;
+    parent && clip;
+    parent = parent.parentElement
+  ) {
+    const style = view!.getComputedStyle(parent);
+    const clips =
+      style.overflow !== "visible" ||
+      style.overflowX !== "visible" ||
+      style.overflowY !== "visible";
+    if (clips) clip = intersect(clip, rectOf(parent.getBoundingClientRect()));
+  }
+  return { frame, clip };
+}
+
+/**
  * Where a node in the preview actually appears on the admin page, clipped by
  * everything that clips it — or null when none of it is on show.
  *
  * @param node - An element inside the iframe's document.
  * @param iframe - The frame it lives in.
+ * @param seen - The frame measured once for this pass; measured here if omitted.
  * @returns Its visible rectangle in admin-viewport coordinates, or null.
  */
 export function visibleRect(
   node: Element,
   iframe: HTMLIFrameElement,
+  seen?: FrameView,
 ): Rect | null {
   const doc = node.ownerDocument;
   const view = doc.defaultView;
   if (!view) return null;
-  const frame = measure(iframe);
+  const { frame, clip } = seen ?? measureFrame(iframe);
+  if (!clip) return null;
 
   let box: Rect | null = toAdmin(node.getBoundingClientRect(), frame);
 
@@ -124,14 +198,10 @@ export function visibleRect(
   }
   if (!box) return null;
 
-  // Finally the frame's own content box: a node scrolled out of the window is
-  // not on show either.
-  return intersect(box, {
-    x: frame.left + frame.scale * frame.bl,
-    y: frame.top + frame.scale * frame.bt,
-    w: frame.scale * iframe.clientWidth,
-    h: frame.scale * iframe.clientHeight,
-  });
+  // Finally the box the frame itself is seen through — its own content box, and
+  // on a section window the rail and window that clip it from the admin side.
+  // A node scrolled out of the window is not on show either.
+  return intersect(box, clip);
 }
 
 /**

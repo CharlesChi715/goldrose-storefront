@@ -6271,3 +6271,62 @@ it will actually read it.
 
 **Verified:** `tsc --noEmit` clean, ESLint clean, 153 unit tests, 148 e2e
 (including the three pixel baselines).
+
+## 2026-08-08 — point-and-edit moves into the section windows, and the preview scrolls again
+
+**Branch:** `worktree-admin-home-customization`
+
+Charles's call, after asking why armed scrolling in the live preview still felt
+wrong. Two questions were answered first, from measurement rather than reading.
+
+**Where edits go.** Typing writes nothing to any server: `setDraft` sets React
+state and writes into the preview DOM, and no keystroke path reaches a server
+action. Drafts die on reload with no unload guard. "Save changes" writes to
+`site_content`, which holds ONLY values that differ from the design default —
+with one exception found by the trace: the seed plants a `promo.slogan` row
+whose value equals its default. Show/hide, per-field reset and page reset save
+immediately. This worktree has no `.env.local`, so its dev server is in local
+mode against `.data/db.json`; the main checkout carries hosted keys, so the same
+screen there writes to the production content table.
+
+**Why scrolling felt wrong — three defects, one cause.** `MainPreview` called
+`frame.scrollBy({top})` with no `behavior`, which resolves to the framed
+document's computed `scroll-behavior` — and `app/globals.css:29` sets
+`html { scroll-behavior: smooth }` on the storefront. So every wheel event
+started a NEW eased scroll and cancelled the in-flight one. Measured in a real
+browser: a gesture asking for 2,000px moved **18.5px by the end of the gesture
+and 118.5px after settling**; with `behavior: "instant"`, exactly 2,000. The
+adversarial trace added two more: `preventDefault()` ran unconditionally, so the
+wheel never chained to the admin at either end, and only `wheel` was forwarded,
+so touch panned the admin instead of the frame. NOT the cause: frame rate.
+Armed and unarmed both held a solid 60fps (median 16.7ms, zero frames over 20ms).
+
+**What changed.** Pointing moved off the page-wide preview and onto each
+section's window, which needs no capture layer at all — its film is already
+`pointer-events: none` inside a natively scrolling box. So all three defects were
+deleted rather than fixed. Also: section cards went full-width so the editor can
+dock beside a 430px window (the annotated gutter left 125px); the full field list
+came back, because the frames are `aria-hidden`/`tabIndex={-1}` and pointing had
+quietly become the only way to reach ~155 fields; drafts are now written into
+every mounted frame, so `stale` narrowed to the one kind `patchField` refuses.
+
+**Two real bugs found and fixed on the way.**
+1. `visibleRect` clipped only by the child document's ancestors and the iframe's
+   own content box. A section window clips the iframe from the ADMIN side (rail
+   `overflow: clip`, window `overflow: auto`), so it reported rectangles for
+   elements thousands of pixels outside the window — drawn over the form below.
+   `measureFrame` now walks the frame's admin-side clipping ancestors, once per
+   pass rather than per element: the old code re-measured the same iframe 176
+   times a frame (1,434 `getBoundingClientRect` + 1,657 `getComputedStyle`).
+2. Registering a frame from a ref callback and applying drafts immediately
+   writes into the initial `about:blank`, whose `readyState` is already
+   "complete" — so `whenPatchable` resolves at once and the write is thrown away
+   with the document. Lazily-mounted section windows never got their drafts.
+   Fixed with a `load` listener per frame.
+
+**Verified:** tsc clean, ESLint clean, 153 unit, 150 e2e including the three
+pixel baselines and every existing section-window guarantee (cannot scroll out
+of its band, no wheel leak to the editor, focus ring, width slider). Driven by
+hand in a real browser: window scrolls natively, outlines land, the panel docks
+in the right card, typing reaches both the section window and the page-wide
+preview, 60fps with three windows armed, no crashes.

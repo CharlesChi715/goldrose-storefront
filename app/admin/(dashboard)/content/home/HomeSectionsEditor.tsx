@@ -2,28 +2,33 @@
 
 /**
  * ROLE OF THIS FILE
- * Client half of Content → Home page (§9.8): one annotated section per band of
- * the storefront home page, in page order, with every editable string, photo
- * and timing, its "Edited" state and one-click reset, plus the section's
- * show/hide switch — beside a live preview of the page itself.
+ * Client half of Content → Home page (§9.8): one card per band of the
+ * storefront home page, in page order — the band itself, live, with every
+ * editable string, photo and timing beneath it, its "Edited" state and
+ * one-click reset, and the section's show/hide switch.
  *
- * WHO THIS SCREEN IS FOR
- * Not only the owner. It is used by teammates who did not build the site and do
- * not have the Figma file open, so several choices here trade compactness for
- * being unmistakable:
- * - A LIVE PREVIEW sits beside the editor, on a width slider spanning the
- *   narrowest phone still in use to the widest sold today, so a teammate can
- *   see the page at the size a customer actually holds. Save, and it reloads.
- *   Be careful what you claim for it: ScaleFrame scales the whole 430 stage as
- *   ONE, so a narrower width shrinks everything rather than re-wrapping any
- *   text. It answers "is this legible on a small phone", NOT "does this copy
- *   still fit its box" — that is what the per-field character budgets are for.
- * - SEARCH spans every field on the page. With ~180 fields across 8 sections,
+ * THREE WAYS TO REACH A FIELD, AND WHY THERE ARE THREE
+ * - POINT AT IT in the section's own window. Armed from the card at the top of
+ *   the screen, every window outlines what it owns and a click opens that field
+ *   in an editor docked beside it. This is the fast path, and it is a MOUSE
+ *   path: the preview frames are `aria-hidden` and `tabIndex={-1}` on purpose,
+ *   so nothing here may be reachable only by pointing.
+ * - SEARCH across every field on the page. With ~180 of them across 8 sections,
  *   finding "the gold caption on the second best-seller card" by scrolling is
  *   worse than typing "caption".
- * - Fields the owner CANNOT type into are still listed with the reason, so the
- *   screen is a complete inventory of the page rather than a partial one with
- *   silent gaps (§11).
+ * - READ THE LIST under each card. It is the complete inventory — including the
+ *   fields the owner cannot type into, listed with the reason (§11) — and it is
+ *   what a keyboard and a screen reader have.
+ *
+ * WHERE POINTING HAPPENS, AND WHERE IT DOES NOT (owner, 2026-08-08)
+ * In the section windows; never in the page-wide preview above, which is
+ * read-only. That preview answers the pointer, so pointing at it needed a
+ * transparent capture layer, which swallowed the wheel, which meant re-issuing
+ * the scroll programmatically — and the storefront's own `scroll-behavior:
+ * smooth` then turned every wheel event into an eased animation cancelled by
+ * the next one. A gesture asking for 2,000px moved 118, and scroll chaining and
+ * touch were lost with it. The section windows never needed the layer: their
+ * film is `pointer-events: none` inside a box that scrolls natively.
  *
  * Three older decisions still hold:
  * - Edits are held locally and published by ONE "Save changes" action, because
@@ -71,11 +76,7 @@ import { HomePageMap } from "./HomePageMap";
 import { MainPreview } from "./MainPreview";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import { EditorPanel, type PickedField } from "./picker/EditorPanel";
-import { PickerLayer } from "./picker/PickerLayer";
-import { usePickerPointer } from "./picker/usePicker";
-import { indexByField } from "./picker/fieldIndex";
 import { patchField, whenPatchable } from "./picker/patch";
-import { visibleRect } from "./picker/geometry";
 import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
@@ -295,23 +296,27 @@ export function HomeSectionsEditor({
   const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
 
   /* --- Point-and-edit ---------------------------------------------------- */
+  /**
+   * Pointing happens in the SECTION WINDOWS, not here (owner, 2026-08-08).
+   *
+   * The page-wide preview above is read-only now. Pointing at it needed a
+   * transparent layer to keep clicks off the storefront's real links, and that
+   * layer had to swallow the wheel and re-issue the scroll — which the
+   * storefront's own `scroll-behavior: smooth` turned into an eased animation
+   * cancelled by the next wheel event. A gesture asking for 2,000px moved 118.
+   * The section windows never needed any of it: their film is
+   * `pointer-events: none` inside a box that scrolls natively.
+   *
+   * What stays HERE is only what must be shared: whether the picker is armed,
+   * and which single field is being edited. Two panels open at once would be
+   * two answers to "what am I changing", so picking in one card closes another.
+   */
   const previewFrame = useRef<HTMLIFrameElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [armed, setArmed] = useState(false);
   const [picked, setPicked] = useState<PickedField[]>([]);
-  /**
-   * Field keys the picker can reach by pointing, read off the live preview.
-   *
-   * This is what replaces the form list rather than merely sitting beside it:
-   * a field you can point at is not listed again below, so the list becomes
-   * exactly the things pointing cannot get you — a rail timing that lives in a
-   * `setInterval`, a photo description that is never drawn, a field in a band
-   * that is switched off.
-   *
-   * Empty until the frame has loaded, which is the right failure: before the
-   * preview exists, nothing is pointable and the full list stands.
-   */
-  const [reachable, setReachable] = useState<ReadonlySet<string>>(new Set());
+  const selectedKey = picked[0]?.key ?? null;
+  const pickedSection = picked[0]?.section.id ?? null;
 
   /** Resolve the keys a clicked element carries back to registry fields. */
   const pickKeys = useCallback(
@@ -329,73 +334,26 @@ export function HomeSectionsEditor({
     [sections],
   );
 
-  // Handlers only. What the picker MEASURES is deliberately not here: that
-  // state changes sixty times a second, and this component is the Polaris
-  // `Page` — see picker/PickerLayer.tsx for why the two must not meet.
-  const {
-    pointer,
-    onPointerMove,
-    onPointerLeave,
-    onClick: pick,
-  } = usePickerPointer(previewFrame, pickKeys);
-
   /**
-   * Where the docked editor is, and where it should sit.
+   * The keys each section owns, so its window can offer those and nothing else.
    *
-   * Both are measured in the same frame loop, because both move for the same
-   * reasons: the preview scrolls independently of the admin, the rails slide a
-   * card out from under the selection every 4.2 seconds, and the width slider
-   * re-lays-out at frame rate. `top` is stored rather than read from the ref at
-   * render time — reading a ref during render is exactly the thing React cannot
-   * keep consistent, and here it would also be a frame stale.
+   * Every frame renders the WHOLE page, and each window shows its band plus 48
+   * design pixels of slack — so a neighbouring band peeks in at both ends.
+   * Without this a click on that peek would open another section's field in
+   * this card's editor. Scoping by key rather than by pixels makes that
+   * unrepresentable, and incidentally cuts each window's measuring from the
+   * page's 176 tagged elements to its own ~20.
    */
-  /**
-   * Where the docked editor sits — and ONLY that.
-   *
-   * `top` is decided once per selection and then left alone. It used to follow
-   * the selection every frame, which is unusable on anything inside a rail: the
-   * carousels advance every 4.2 seconds with a 900ms glide, so the panel chased
-   * the card away while somebody was typing in it. A form that moves under the
-   * cursor is worse than a connector that stretches, so the panel anchors where
-   * the element was when it was picked and the curve does the following.
-   *
-   * The panel's own RECTANGLE — what the connector aims at — is not state here.
-   * It moves whenever the admin scrolls, so holding it on this component would
-   * re-render the Polaris `Page` at scroll rate, which is exactly the storm
-   * that killed this screen. PickerLayer measures it in the frame loop it is
-   * already running, and draws it without telling anybody.
-   */
-  const [panelTop, setPanelTop] = useState(0);
-  const selectedKey = picked[0]?.key ?? null;
-
-  useEffect(() => {
-    // Nothing picked means no panel is rendered, so the last value is simply
-    // unread until the next selection measures over it.
-    if (selectedKey === null) return;
-    const measure = () => {
-      const node = panelRef.current;
-      const column = node?.parentElement;
-      const iframe = previewFrame.current;
-      if (!node || !column || !iframe) return false;
-      const element = iframe.contentDocument?.querySelector(
-        `[data-field~="${selectedKey}"]`,
+  const scopes = useMemo(() => {
+    const bySection = new Map<string, ReadonlySet<string>>();
+    for (const section of sections) {
+      bySection.set(
+        section.id,
+        new Set(section.fields.map((field) => `${section.id}.${field.id}`)),
       );
-      const rect = element ? visibleRect(element, iframe) : null;
-      if (!rect) return false;
-      const columnTop = column.getBoundingClientRect().top;
-      setPanelTop(Math.max(0, rect.y - columnTop));
-      return true;
-    };
-
-    // The element may not be measurable on the first pass — the frame can still
-    // be settling — so try again on the next frame, once, rather than forever.
-    if (measure()) return;
-    const retry = requestAnimationFrame(() => measure());
-    return () => cancelAnimationFrame(retry);
-  }, [selectedKey]);
-  // Each section's own preview width is deliberately NOT here: it lives in the
-  // SectionPreview that owns it, so dragging one slider does not re-render this
-  // screen's ~180 fields on every pixel. See that file for the measurements.
+    }
+    return bySection;
+  }, [sections]);
 
   /** The live value of a field: the local draft if touched, else what is saved. */
   const valueOf = (section: SectionView, field: FieldView): string =>
@@ -503,56 +461,119 @@ export function HomeSectionsEditor({
   }
 
   /**
-   * Record a draft AND show it in the preview immediately.
+   * Every preview frame currently mounted — the page-wide one and up to nine
+   * section windows.
    *
-   * The write into the frame is the whole "live as you type" feature: the
-   * preview is a server-rendered page in a same-origin iframe, so the parent can
-   * set the text directly rather than re-rendering a route that reads
-   * `site_content` in full on every keystroke. Kinds that cannot honestly be
-   * faked — a rail timing resolved into a `setInterval`, a Figma-baked label —
-   * are refused by `patchField` and the panel says "save to see this" instead.
+   * A ref rather than state: frames come and go as cards are reached and as
+   * saves re-key them, and none of that should re-render ~180 fields. The
+   * screen only ever iterates this to write into documents.
    */
-  const setDraft = useCallback(
-    (key: string, next: string, field?: FieldView) => {
-      setDrafts((current) => ({ ...current, [key]: next }));
-      const doc = previewFrame.current?.contentDocument;
-      if (doc && field) patchField(doc, field, key, next);
-    },
-    [],
-  );
-
-  // A save remounts the frame, and the rails hydrate over server HTML. Writing
-  // into that window is a hydration mismatch, which React 19 resolves by
-  // re-rendering the subtree from its own props — silently reverting the edit.
-  // So after every reload, unsaved drafts are re-applied once it is safe.
+  const frames = useRef(new Set<HTMLIFrameElement>());
+  /** Read by callbacks that must stay stable; see `applyDrafts`. */
+  const draftsRef = useRef(drafts);
+  const sectionsRef = useRef(sections);
   useEffect(() => {
-    const frame = previewFrame.current;
-    const frameWindow = frame?.contentWindow;
+    draftsRef.current = drafts;
+    sectionsRef.current = sections;
+  }, [drafts, sections]);
+
+  /**
+   * Write every unsaved draft into a frame that has just finished loading.
+   *
+   * The rails are client components hydrating over server HTML, and a write
+   * landing between `load` and hydration is a mismatch React 19 resolves by
+   * re-rendering from its own props — silently reverting the edit. So each
+   * frame is written to only once `whenPatchable` says so.
+   *
+   * Stable on purpose: it reads the drafts through a ref so that handing it to
+   * nine section cards does not re-render them on every keystroke.
+   */
+  const applyDrafts = useCallback((frame: HTMLIFrameElement) => {
+    const frameWindow = frame.contentWindow;
     if (!frameWindow) return;
-    let cancelled = false;
     whenPatchable(frameWindow).then(() => {
-      if (cancelled) return;
       const doc = frame.contentDocument;
       if (!doc) return;
-      // What the picker can currently reach. Read from the LIVE page rather
-      // than assumed from the registry, because reachability is a fact about
-      // what is rendered: a switched-off band draws nothing, so its fields
-      // correctly stay in the list below.
-      setReachable(new Set(indexByField(doc).keys()));
-      for (const section of sections) {
+      for (const section of sectionsRef.current) {
         for (const field of section.fields) {
           const key = `${section.id}.${field.id}`;
-          const draft = drafts[key];
+          const draft = draftsRef.current[key];
           if (draft !== undefined) patchField(doc, field, key, draft);
         }
       }
     });
-    return () => {
-      cancelled = true;
-    };
-    // Only on reload: re-running per keystroke would fight the direct writes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previewNonce, sections]);
+  }, []);
+
+  /**
+   * Take a frame into the set, and write the unsaved drafts into it — now, and
+   * again every time it loads.
+   *
+   * The `load` listener is the load-bearing half, and leaving it out is a
+   * silent bug rather than a loud one. A ref callback fires when the ELEMENT
+   * attaches, which is before its document exists: at that moment
+   * `contentWindow.document` is the initial `about:blank`, whose `readyState`
+   * is ALREADY "complete", so `whenPatchable` resolves at once and the drafts
+   * are written into a document that is about to be thrown away. The nine
+   * section windows mount lazily, long after the drafts they need, so this is
+   * the only path by which they ever get them.
+   *
+   * Returning the cleanup means the caller's ref closure remembers which frame
+   * went, so this never has to identify it. Stable, so a card is not re-rendered
+   * for holding one.
+   */
+  const holdFrame = useCallback(
+    (frame: HTMLIFrameElement | null) => {
+      if (!frame) return;
+      const registry = frames.current;
+      registry.add(frame);
+      const onLoad = () => applyDrafts(frame);
+      frame.addEventListener("load", onLoad);
+      // In case it is already loaded — a re-registration, or a cached document.
+      applyDrafts(frame);
+      return () => {
+        frame.removeEventListener("load", onLoad);
+        registry.delete(frame);
+      };
+    },
+    [applyDrafts],
+  );
+
+  /**
+   * Record a draft AND show it in EVERY preview immediately.
+   *
+   * The write into the frames is the whole "live as you type" feature: each
+   * preview is a server-rendered page in a same-origin iframe, so the parent
+   * can set the text directly rather than re-rendering a route that reads
+   * `site_content` in full on every keystroke.
+   *
+   * All of them, not just the one being pointed at: the same field is often on
+   * screen twice — its own section's window and the page-wide preview above —
+   * and one of them showing yesterday's wording is how a teammate concludes the
+   * preview is broken. Kinds that cannot honestly be faked (a rail timing
+   * resolved into a `setInterval`, a Figma-baked label) are refused by
+   * `patchField`, and the card says "save to see this" instead.
+   */
+  const setDraft = useCallback(
+    (key: string, next: string, field?: FieldView) => {
+      setDrafts((current) => ({ ...current, [key]: next }));
+      if (!field) return;
+      for (const frame of frames.current) {
+        const doc = frame.contentDocument;
+        if (doc) patchField(doc, field, key, next);
+      }
+    },
+    [],
+  );
+
+  // The section windows register themselves through `holdFrame`. The page-wide
+  // preview takes a plain ref object instead (it hands the same ref to nothing
+  // else), so it is enrolled here — on the nonce, because a save re-keys it and
+  // the frame that comes back is a different element with an empty document.
+  useEffect(() => {
+    const frame = previewFrame.current;
+    if (!frame) return;
+    return holdFrame(frame);
+  }, [previewNonce, holdFrame]);
 
   /** Drop one field's local draft without touching what is saved. */
   function clearDraft(key: string) {
@@ -563,30 +584,17 @@ export function HomeSectionsEditor({
     });
   }
 
-  /**
-   * The fields this section still needs to LIST, having handed the rest to the
-   * preview.
+  /*
+   * EVERY FIELD IS LISTED, INCLUDING THE ONES YOU CAN POINT AT.
    *
-   * A field the picker can reach is edited by pointing at it, so listing it
-   * again is the duplication this screen was meant to remove. What is left is
-   * genuinely unreachable: values with no element at all (rail timings, photo
-   * descriptions), and everything inside a band that is switched off — which is
-   * exactly when a list is the only way in.
-   *
-   * Searching suspends the rule. Typing a name is how somebody goes looking for
-   * one specific field, and answering "it is over there somewhere" would be
-   * useless.
-   *
-   * @param section - The section being rendered.
-   * @param fields - Its fields, already narrowed by search.
-   * @returns The fields to draw as form rows.
+   * Between 2026-08-08 and the move to section windows, a field the picker
+   * could reach was struck from the list — which cut ~180 rows to 25 and read
+   * as a tidy win. It was not: the preview frames are `aria-hidden` and
+   * `tabIndex={-1}` on purpose, so those 155 fields became reachable only by
+   * pointing at them with a mouse, or by knowing a word to search for. Pointing
+   * is a shortcut for people who can use it; the list is the screen's actual
+   * inventory, and it is what a keyboard or a screen reader has.
    */
-  function listedIn(section: SectionView, fields: FieldView[]): FieldView[] {
-    if (filtering) return fields;
-    return fields.filter(
-      (field) => !reachable.has(`${section.id}.${field.id}`),
-    );
-  }
 
   /** Fields grouped by their optional sub-heading, in registry order. */
   function groupsOf(fields: FieldView[]) {
@@ -787,14 +795,32 @@ export function HomeSectionsEditor({
   }
 
   const dirtyCount = edits.length;
-  // Which sections have an unsaved edit. The preview frames are the server
-  // rendering SAVED content, so each one says so while its own fields differ —
-  // the frame sits above the inputs, and a teammate who types a new headline,
-  // looks up and sees the old one concludes the preview is broken.
-  const dirtySections = useMemo(
-    () => new Set(edits.map((edit) => edit.section)),
-    [edits],
-  );
+  /**
+   * Which sections are showing something OLDER than their fields say.
+   *
+   * Not simply "has an unsaved edit" any more: every draft is written straight
+   * into every mounted frame, so an edited headline is on screen in its own
+   * window before the keystroke finishes. What cannot be faked is a `number` —
+   * the rail timings are resolved server-side into a `setInterval` and a
+   * transition string React owns, so `patchField` refuses them and says so.
+   * Warning about the rest would be the screen calling its own preview stale
+   * while pointing at the new wording.
+   */
+  const staleSections = useMemo(() => {
+    const kindOf = new Map<string, FieldView["kind"]>();
+    for (const section of sections) {
+      for (const field of section.fields) {
+        kindOf.set(`${section.id}.${field.id}`, field.kind);
+      }
+    }
+    return new Set(
+      edits
+        .filter(
+          (edit) => kindOf.get(`${edit.section}.${edit.field}`) === "number",
+        )
+        .map((edit) => edit.section),
+    );
+  }, [edits, sections]);
 
   return (
     <Page
@@ -855,9 +881,33 @@ export function HomeSectionsEditor({
               </Banner>
             ) : null}
 
-            {/* Find a field · jump to a section */}
+            {/* Find a field · point at one · jump to a section */}
             <Card>
               <BlockStack gap="300">
+                {/* The picker's one toggle. It lives with the other two ways of
+                    finding a field rather than on any single preview, because
+                    it now arms EVERY section's window at once — a control
+                    attached to one card would have been a promise about that
+                    card. */}
+                <InlineStack
+                  align="space-between"
+                  blockAlign="center"
+                  gap="200"
+                >
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    {armed ? t("home.picker.armed") : t("home.picker.hint")}
+                  </Text>
+                  <Button
+                    variant={armed ? "primary" : "secondary"}
+                    onClick={() => {
+                      setArmed((on) => !on);
+                      setPicked([]);
+                    }}
+                  >
+                    {armed ? t("home.picker.disarm") : t("home.picker.arm")}
+                  </Button>
+                </InlineStack>
+                <Divider />
                 <TextField
                   label={t("home.search")}
                   value={query}
@@ -907,97 +957,20 @@ export function HomeSectionsEditor({
               </BlockStack>
             </Card>
 
-            {/* The page itself, at whatever phone width the owner picks.
-                Its own component so that dragging its slider re-renders one
-                card rather than this screen's ~180 fields — see MainPreview.
-                `relative` so the docked editor can sit in this column. */}
-            {/* Preview and editor sit SIDE BY SIDE, with the connector bowing
-                through the gap between them — the editor must never cover the
-                thing it is editing. `wrap` is the honest fallback on a narrow
-                window: there is no "beside" to dock to, so it stacks. */}
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "flex-start",
-                gap: 16,
-              }}
-            >
-              {/* Held to the widest phone plus the card's own padding. A
-                  Polaris Card is block-level and would otherwise take the whole
-                  row, leaving the editor nowhere to dock. */}
-              <div
-                style={{
-                  flex: "0 0 auto",
-                  width: PREVIEW_MAX_WIDTH + 80,
-                  maxWidth: "100%",
-                }}
-              >
-                <MainPreview
-                  designWidth={DESIGN_WIDTH}
-                  min={PREVIEW_MIN_WIDTH}
-                  max={PREVIEW_MAX_WIDTH}
-                  nonce={previewNonce}
-                  onRefresh={() => setPreviewNonce((n) => n + 1)}
-                  onWidthSettled={setPreviewWidth}
-                  iframeRef={previewFrame}
-                  armed={armed}
-                  onToggleArm={() => {
-                    setArmed((on) => !on);
-                    setPicked([]);
-                  }}
-                  capture={
-                    armed
-                      ? { onPointerMove, onPointerLeave, onClick: pick }
-                      : null
-                  }
-                />
-              </div>
-              {/* The editor's own column. It only takes space while something is
-                  picked, so the preview keeps the full width the rest of the
-                  time. */}
-              <div
-                style={{
-                  position: "relative",
-                  flex: picked.length > 0 ? "1 1 320px" : "0 0 0px",
-                  minWidth: picked.length > 0 ? 300 : 0,
-                  alignSelf: "stretch",
-                }}
-              >
-                <EditorPanel
-                  picked={picked}
-                  valueOf={valueOf}
-                  errorOf={(field, value) => {
-                    const reason = fieldError(field, value);
-                    return reason
-                      ? t(`home.bad.${reason}` as never)
-                      : undefined;
-                  }}
-                  dirtyOf={(key) => drafts[key] !== undefined}
-                  onChange={(key, next) => {
-                    const entry = picked.find((one) => one.key === key);
-                    setDraft(key, next, entry?.field);
-                  }}
-                  onOpenPhoto={(one) =>
-                    setPhoto({ section: one.section, field: one.field })
-                  }
-                  onReset={(one) => {
-                    if (!one.field.edited) {
-                      clearDraft(one.key);
-                      return;
-                    }
-                    run(async () => {
-                      await resetHomeFieldAction(one.section.id, one.field.id);
-                      clearDraft(one.key);
-                    }, t("home.saved"));
-                  }}
-                  onClose={() => setPicked([])}
-                  pending={pending}
-                  panelRef={panelRef}
-                  top={panelTop}
-                />
-              </div>
-            </div>
+            {/* The page itself, at whatever phone width the owner picks — and
+                READ-ONLY. Its own component so that dragging its slider
+                re-renders one card rather than this screen's ~180 fields.
+                Editing happens in the section windows below, each of which is
+                already open on the band it belongs to. */}
+            <MainPreview
+              designWidth={DESIGN_WIDTH}
+              min={PREVIEW_MIN_WIDTH}
+              max={PREVIEW_MAX_WIDTH}
+              nonce={previewNonce}
+              onRefresh={() => setPreviewNonce((n) => n + 1)}
+              onWidthSettled={setPreviewWidth}
+              iframeRef={previewFrame}
+            />
           </BlockStack>
         </Layout.Section>
 
@@ -1012,11 +985,13 @@ export function HomeSectionsEditor({
         ) : null}
 
         {filtered.map(({ section, fields }) => (
-          <Layout.AnnotatedSection
-            key={section.id}
-            title={zh ? section.titleZh : section.title}
-            description={zh ? section.blurbZh : section.blurb}
-          >
+          /* FULL WIDTH, not an annotated section (owner, 2026-08-08). The
+             annotation gutter left the card 571px, and the window is 430 of
+             them — 125px is not an editor. The window cannot give ground
+             either: its width IS the phone's viewport, and narrowing it would
+             make the one card whose job is to be exact start lying. So the
+             title and blurb moved inside, and the card took the whole row. */
+          <Layout.Section key={section.id}>
             {/* Plain wrapper because Polaris does not forward id/data-* to the
                 DOM: this is both the "jump to section" anchor target and the
                 handle the e2e suite uses to act on one section. */}
@@ -1027,22 +1002,104 @@ export function HomeSectionsEditor({
             >
               <Card>
                 <BlockStack gap="400">
+                  {/* Level 2, as Layout.AnnotatedSection rendered it — this is
+                      the heading the section map and the e2e suite both name. */}
+                  <BlockStack gap="100">
+                    <Text as="h2" variant="headingMd">
+                      {zh ? section.titleZh : section.title}
+                    </Text>
+                    <Text as="p" variant="bodySm" tone="subdued">
+                      {zh ? section.blurbZh : section.blurb}
+                    </Text>
+                  </BlockStack>
+
                   {/* The section's own preview opens the section, so what you
-                      are editing is on screen before the first input. */}
+                      are editing is on screen before the first input — and the
+                      editor for whatever you point at opens beside it, never
+                      over it. `wrap` is the honest fallback on a narrow window:
+                      with no room to sit beside, it sits below. */}
                   {section.preview ? (
-                    <SectionPreview
-                      sectionId={section.id}
-                      y={section.preview.y}
-                      h={section.preview.h}
-                      onPage={section.preview.onPage}
-                      borrowed={section.preview.borrowed}
-                      hidden={section.hideable && !section.visible}
-                      stale={dirtySections.has(section.id)}
-                      width={previewWidth}
-                      maxWidth={PREVIEW_MAX_WIDTH}
-                      frameHeight={frameHeight}
-                      nonce={previewNonce}
-                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "flex-start",
+                        gap: 16,
+                      }}
+                    >
+                      <div
+                        style={{
+                          flex: "0 0 auto",
+                          width: PREVIEW_MAX_WIDTH + 32,
+                          maxWidth: "100%",
+                        }}
+                      >
+                        <SectionPreview
+                          sectionId={section.id}
+                          y={section.preview.y}
+                          h={section.preview.h}
+                          onPage={section.preview.onPage}
+                          borrowed={section.preview.borrowed}
+                          hidden={section.hideable && !section.visible}
+                          stale={staleSections.has(section.id)}
+                          width={previewWidth}
+                          maxWidth={PREVIEW_MAX_WIDTH}
+                          frameHeight={frameHeight}
+                          nonce={previewNonce}
+                          armed={armed}
+                          scope={scopes.get(section.id) ?? null}
+                          selectedKey={
+                            pickedSection === section.id ? selectedKey : null
+                          }
+                          panelRef={panelRef}
+                          onPick={pickKeys}
+                          onFrame={holdFrame}
+                        />
+                      </div>
+                      {pickedSection === section.id ? (
+                        <div style={{ flex: "1 1 300px", minWidth: 280 }}>
+                          <EditorPanel
+                            picked={picked}
+                            valueOf={valueOf}
+                            errorOf={(field, value) => {
+                              const reason = fieldError(field, value);
+                              return reason
+                                ? t(`home.bad.${reason}` as never)
+                                : undefined;
+                            }}
+                            dirtyOf={(key) => drafts[key] !== undefined}
+                            onChange={(key, next) => {
+                              const entry = picked.find(
+                                (one) => one.key === key,
+                              );
+                              setDraft(key, next, entry?.field);
+                            }}
+                            onOpenPhoto={(one) =>
+                              setPhoto({
+                                section: one.section,
+                                field: one.field,
+                              })
+                            }
+                            onReset={(one) => {
+                              if (!one.field.edited) {
+                                clearDraft(one.key);
+                                return;
+                              }
+                              run(async () => {
+                                await resetHomeFieldAction(
+                                  one.section.id,
+                                  one.field.id,
+                                );
+                                clearDraft(one.key);
+                              }, t("home.saved"));
+                            }}
+                            onClose={() => setPicked([])}
+                            pending={pending}
+                            panelRef={panelRef}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
                   ) : null}
 
                   <InlineStack
@@ -1086,19 +1143,10 @@ export function HomeSectionsEditor({
                     </Banner>
                   ) : null}
 
-                  {/* What is left after the picker. A field you can point at is
-                      NOT repeated here — the preview is where it is edited.
-                      Searching overrides that, because search is how you go
-                      looking for one particular field by name. */}
-                  {listedIn(section, fields).length === 0 ? (
-                    <Text as="p" variant="bodySm" tone="subdued">
-                      {t("home.picker.allPointable")}
-                    </Text>
-                  ) : null}
                   {/* Keyed by position, not by label: a section may open a
                       group, break into per-card groups, and come back to the
                       first one, so labels are not unique within a section. */}
-                  {groupsOf(listedIn(section, fields)).map((group, index) => (
+                  {groupsOf(fields).map((group, index) => (
                     <BlockStack key={`${index}-${group.label ?? ""}`} gap="300">
                       {group.label ? (
                         <Text as="h3" variant="headingSm" tone="subdued">
@@ -1135,7 +1183,7 @@ export function HomeSectionsEditor({
                 </BlockStack>
               </Card>
             </div>
-          </Layout.AnnotatedSection>
+          </Layout.Section>
         ))}
       </Layout>
 
@@ -1202,16 +1250,8 @@ export function HomeSectionsEditor({
         </Modal.Section>
       </Modal>
 
-      {/* Drawn over everything, in viewport coordinates, because every rect it
-          holds came from getBoundingClientRect. Never takes the pointer. */}
-      <PickerLayer
-        iframeRef={previewFrame}
-        pointer={pointer}
-        armed={armed}
-        selectedKey={selectedKey}
-        panelRef={panelRef}
-      />
-
+      {/* No overlay here any more: each section window draws its own, from a
+          frame loop that lives in that card's leaf. See picker/PickerLayer. */}
       {toast ? (
         <Toast content={toast} onDismiss={() => setToast(null)} />
       ) : null}

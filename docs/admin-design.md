@@ -788,6 +788,38 @@ different shape from the flat slot list.
   out to fit, which put Craft and Story on screen at 39% — a size at which the
   one question a teammate actually has ("does my wording look right?") cannot be
   answered.
+- **You can edit by pointing at the page** (`content/home/picker/`). One toggle
+  arms every section's window at once; each then outlines what it owns, and a
+  click opens that field in an editor docked beside that window, joined to the
+  selection by a curve. `data-field` on the storefront's own nodes is the map
+  from pixel to registry slot, and typing is written straight into every mounted
+  preview (`patch.ts`) rather than re-rendering a route that reads
+  `site_content` in full per keystroke. Three rules hold it together:
+  - **A card offers only its own fields.** Every frame renders the whole page,
+    and every window shows 48 design px of the neighbouring band at each end, so
+    the filter is by *key ownership*, never by pixels — otherwise a click on the
+    peek would open another section's field in this card. It also cuts each
+    window's measuring from the page's 176 tagged elements to its own ~20.
+  - **Pointing is a mouse shortcut, never the only way in.** The frames are
+    `aria-hidden` and `tabIndex={-1}` on purpose, so every field stays listed
+    below its card, which is what a keyboard and a screen reader have.
+  - **The page-wide preview is read-only, and that is a scroll decision.** It
+    answers the pointer, so pointing at it needed a transparent capture layer,
+    which swallowed the wheel, which meant re-issuing the scroll
+    programmatically — and the storefront's own `scroll-behavior: smooth` turned
+    every wheel event into an eased animation the next one cancelled. Measured:
+    a gesture asking for 2,000px moved 118, scroll chaining at the ends was gone
+    and touch panned the admin instead. The section windows never needed the
+    layer, because their film is already inert (below), so the fix was to delete
+    it rather than tune it. `admin-home-picker.spec.ts` keeps the guarantee.
+- **The frame loop lives in a leaf** (`picker/PickerLayer.tsx`). The highlights
+  are re-measured every frame while a card is armed AND on screen, and that
+  state must never sit on the screen component: its root is a Polaris `Page`,
+  whose header re-measures its action buttons from a `useEffect` and `setState`s
+  inside it on *every* render — and cannot be talked out of it from outside,
+  since `Header` builds a fresh `actionGroups = []` per render. Sixty of those a
+  second is the nested-update storm React ends with "Maximum update depth
+  exceeded", which killed this screen whenever a page scrolled under a selection.
 - **The lock is structural, not policed** (`SectionPreview.tsx`). Three boxes:
   the **window** scrolls (`overflow-y: auto`, fixed height); its only child, the
   **rail**, is exactly one band tall and `overflow: clip`; the **film** is the

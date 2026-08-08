@@ -13,18 +13,29 @@
  * thirty-second edit.
  *
  * WHY THE POINTER NEVER REACHES THE PAGE
- * The preview's own links are real. One click and the frame navigates off `/`,
- * which invalidates every coordinate here and loses the preview. So while the
- * picker is armed a transparent layer covers the frame, and hit-testing is done
- * by translating the pointer into the frame's coordinates and asking the child
- * document what is there. Nothing is ever clicked inside the preview.
+ * The preview's own links are real, and one click would navigate the frame off
+ * `/` — losing the preview and invalidating every coordinate here. The section
+ * windows already prevent that structurally: the film is `pointer-events: none`
+ * inside a box that scrolls, so a click lands on the WINDOW and the storefront
+ * never sees it. Hit-testing translates that click into the frame's own
+ * coordinates and asks the child document what is there.
+ *
+ * That is also why nothing here calls `preventDefault`, and why this picker is
+ * hosted on the section windows rather than on the page-wide preview (owner,
+ * 2026-08-08). The page-wide preview answers the pointer, so pointing at it
+ * needed a transparent capture layer — which swallowed the wheel, so the scroll
+ * had to be re-issued programmatically, which the storefront's own
+ * `scroll-behavior: smooth` then turned into an eased animation restarted by
+ * every wheel event. A gesture asking for 2,000px travelled 118. Scroll
+ * chaining and touch went the same way. None of it is worked around here; the
+ * layer that caused it is simply not needed on a window whose film is inert.
  *
  * WHY IT RE-MEASURES ON A FRAME LOOP
  * A one-shot measurement is stale within a second on four of the seven bands.
  * The rails advance every 4.2s with a 900ms eased transition, the width slider
- * re-lays-out at frame rate, the frame scrolls independently of the admin, and
- * `scroll-behavior: smooth` animates any jump. While a highlight is on screen it
- * is re-measured every frame; when nothing is highlighted the loop stops.
+ * re-lays-out at frame rate, and the window scrolls over its own band. While a
+ * highlight is on screen it is re-measured every frame; when nothing is
+ * highlighted, or the card is off screen, the loop stops.
  *
  * WHY THE POINTER AND THE MEASUREMENT ARE TWO HOOKS
  * They live at different heights in the tree ON PURPOSE, and splitting them is
@@ -48,12 +59,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toFramePoint } from "./geometry";
+import { measureFrame, toFramePoint, visibleRect } from "./geometry";
 import {
   indexByField,
   rectsOfField,
   resolveTarget,
   targetsIn,
+  type FieldScope,
 } from "./fieldIndex";
 import type { Rect } from "./geometry";
 
@@ -117,20 +129,32 @@ function sameView(a: PickerView, b: PickerView): boolean {
 }
 
 /**
- * The picker's pointer: the handlers for the capture layer, and where it is.
+ * The picker's pointer: the handlers for the window, and where it is.
  *
  * Holds no state, so nothing re-renders as the pointer moves — the frame loop
- * reads the ref instead. Every value returned is stable for the life of the
- * screen.
+ * reads the ref instead. Every value returned is stable for as long as its
+ * inputs are.
+ *
+ * These go on the SECTION WINDOW, which is a scrolling box with the film inside
+ * it at `pointer-events: none`. That is the whole reason this needs no capture
+ * layer and no `preventDefault`: the pointer already cannot reach the
+ * storefront's links, so the wheel is never taken away from the browser and
+ * scrolling stays native — momentum, chaining at the ends, touch and all.
  *
  * @param iframeRef - The preview frame.
+ * @param scope - The keys this window may offer.
  * @param onPick - Called with the field keys of whatever the owner clicks.
- * @returns The pointer position, and the capture layer's handlers.
+ * @returns The pointer position, and the window's handlers.
  */
-export function usePickerPointer(
-  iframeRef: React.RefObject<HTMLIFrameElement | null>,
-  onPick: (keys: string[]) => void,
-) {
+export function usePickerPointer({
+  iframeRef,
+  scope,
+  onPick,
+}: {
+  iframeRef: React.RefObject<HTMLIFrameElement | null>;
+  scope: FieldScope;
+  onPick: (keys: string[]) => void;
+}) {
   // The live pointer, so the frame loop can re-resolve as the page moves under
   // a stationary cursor — a carousel slides a card out from under it every 4.2s.
   const pointer = useRef<{ x: number; y: number } | null>(null);
@@ -162,10 +186,11 @@ export function usePickerPointer(
         iframe,
         client,
         toFramePoint(client.x, client.y, iframe),
+        scope,
       );
       if (hit && hit.keys.length > 0) onPick(hit.keys);
     },
-    [iframeRef, onPick],
+    [iframeRef, scope, onPick],
   );
 
   return { pointer, onPointerMove, onPointerLeave, onClick };
@@ -180,18 +205,27 @@ export function usePickerPointer(
  *
  * @param iframeRef - The preview frame.
  * @param pointer - Where the pointer is, from `usePickerPointer`.
- * @param armed - Whether the picker is on.
+ * @param armed - Whether the picker is on AND this window is worth measuring.
  * @param selectedKey - The field currently being edited, if any.
  * @param panelRef - The docked editor, measured for the connector.
+ * @param scope - The keys this window may offer.
  * @returns The rectangles to draw.
  */
-export function usePickerView(
-  iframeRef: React.RefObject<HTMLIFrameElement | null>,
-  pointer: PointerRef,
-  armed: boolean,
-  selectedKey: string | null,
-  panelRef: React.RefObject<HTMLDivElement | null>,
-): PickerView {
+export function usePickerView({
+  iframeRef,
+  pointer,
+  armed,
+  selectedKey,
+  panelRef,
+  scope,
+}: {
+  iframeRef: React.RefObject<HTMLIFrameElement | null>;
+  pointer: PointerRef;
+  armed: boolean;
+  selectedKey: string | null;
+  panelRef: React.RefObject<HTMLDivElement | null>;
+  scope: FieldScope;
+}): PickerView {
   const [view, setView] = useState<PickerView>(EMPTY);
 
   const measure = useCallback((): PickerView => {
@@ -199,27 +233,27 @@ export function usePickerView(
     const doc = iframe?.contentDocument;
     if (!iframe || !doc) return EMPTY;
 
+    // Once for the whole pass. It carries the frame's own geometry AND the box
+    // it is seen through — which on a section window is the rail and window
+    // clipping it from the admin side, not its own content box.
+    const seen = measureFrame(iframe);
+
     const all = armed
-      ? targetsIn(doc)
-          .map((target) => {
-            const rect = rectsOfField(
-              new Map([[target.keys[0], [target.element]]]),
-              target.keys[0],
-              iframe,
-            );
-            return rect[0] ?? null;
-          })
+      ? targetsIn(doc, scope)
+          .map((target) => visibleRect(target.element, iframe, seen))
           .filter((rect): rect is Rect => rect !== null)
       : [];
 
     let hover: Rect | null = null;
     if (armed && pointer.current) {
       const point = toFramePoint(pointer.current.x, pointer.current.y, iframe);
-      hover = resolveTarget(doc, iframe, pointer.current, point)?.rect ?? null;
+      hover =
+        resolveTarget(doc, iframe, pointer.current, point, scope, seen)?.rect ??
+        null;
     }
 
     const selected = selectedKey
-      ? rectsOfField(indexByField(doc), selectedKey, iframe)
+      ? rectsOfField(indexByField(doc, scope), selectedKey, iframe, seen)
       : [];
 
     // The panel moves for the same reasons and on the same frames as the
@@ -233,7 +267,7 @@ export function usePickerView(
       : null;
 
     return { all, hover, selected, panel };
-  }, [iframeRef, pointer, armed, selectedKey, panelRef]);
+  }, [iframeRef, pointer, armed, selectedKey, panelRef, scope]);
 
   // Re-measure every frame while anything is on screen. Cheap relative to being
   // wrong: a highlight that lags the page it points at is worse than none.

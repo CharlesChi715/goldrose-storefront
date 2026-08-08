@@ -777,16 +777,14 @@ const en = {
   "home.picker.arm": "Point at something to edit it",
   "home.picker.disarm": "Done pointing",
   "home.picker.armed":
-    "Everything you can change is outlined. Point at one and click it.",
+    "Every section's preview now outlines what you can change in it. Point at one and click it.",
   "home.picker.close": "Close",
   "home.picker.needsSave":
     "This one only changes the preview after you save — it is not something the page can show straight away.",
   "home.picker.artworkPicked":
     "This wording is part of a picture the design team exported, so it cannot be typed here.",
   "home.picker.hint":
-    "Everything on the page is edited by pointing at it. The lists below hold only what has nothing to point at.",
-  "home.picker.allPointable":
-    "Everything in this section is edited by pointing at it in the preview above.",
+    "A quicker way in: point at a section's preview and click the thing you want to change. Every field is still listed below either way.",
 
   // Content → Home page · the per-section preview
   "home.sectionPreview": "This section on the page",
@@ -1552,14 +1550,14 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   // 内容 → 首页 · 指哪改哪
   "home.picker.arm": "点选页面内容进行修改",
   "home.picker.disarm": "结束点选",
-  "home.picker.armed": "所有可修改的内容都已用虚线标出。指向其中一处并点击。",
+  "home.picker.armed":
+    "各板块预览中可修改的内容都已用虚线标出。指向其中一处并点击。",
   "home.picker.close": "关闭",
   "home.picker.needsSave":
     "此项需保存后才会在预览中生效——页面无法即时呈现这类改动。",
   "home.picker.artworkPicked": "该文字属于设计团队导出的图片，无法在此输入。",
   "home.picker.hint":
-    "页面上的内容都通过点选修改。下方列表只保留无法在页面上点选的字段。",
-  "home.picker.allPointable": "此板块的所有内容都可在上方预览中点选修改。",
+    "更快的方式：在板块预览中点选要修改的内容。所有字段仍会完整列在下方。",
 
   // 内容 → 首页 · 单个板块预览
   "home.sectionPreview": "本板块在页面中的位置",

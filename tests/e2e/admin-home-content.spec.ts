@@ -135,19 +135,24 @@ test("editing a section heading reaches the live home page, and resets", async (
   await expect(page.getByText("Featured Rose Gifts")).toBeVisible();
 
   await openEditor(page);
-  // "Section title" is drawn on the page, so it is edited by pointing at it and
-  // is not listed twice. Search brings it back as a row, which is the supported
-  // way to reach one field by name.
   await page.getByPlaceholder(/Search by label/).fill("Section title");
   await page.getByLabel("Section title").first().fill("Our Favourite Gifts");
-  // The frame sits ABOVE the fields and is the server rendering saved content,
-  // so while an edit is unsaved it has to say so — otherwise a teammate types a
-  // heading, looks up at the old one, and concludes the preview is broken.
+  // The section's own window shows the new wording AS IT IS TYPED, before any
+  // save. Every draft is written straight into every mounted preview, so the
+  // frame above the fields cannot be showing something older than they say.
+  await expect(
+    page
+      .frameLocator("#home-section-featured iframe")
+      .locator('[data-field~="featured.title"]'),
+  ).toHaveText("Our Favourite Gifts");
+  // And it therefore does NOT claim to be stale. That warning survives only for
+  // the kinds `patchField` refuses — the rail timings, which are resolved
+  // server-side into a `setInterval` no DOM write can fake.
   await expect(
     page
       .locator('[data-home-section="featured"]')
       .getByText("Showing the saved version"),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Home page updated").first()).toBeVisible();
 

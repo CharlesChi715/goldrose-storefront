@@ -137,7 +137,12 @@ export function Overlay({
             strokeDasharray="4 3"
             opacity={0.8}
           />
-          <circle cx={anchor!.x + anchor!.w} cy={anchor!.y + anchor!.h / 2} r={3} fill={SELECTED} />
+          <circle
+            cx={anchor!.x + anchor!.w}
+            cy={anchor!.y + anchor!.h / 2}
+            r={3}
+            fill={SELECTED}
+          />
         </svg>
       ) : null}
     </div>

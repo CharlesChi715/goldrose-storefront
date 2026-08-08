@@ -51,7 +51,7 @@
  * showing the wrong section under the right name.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BlockStack,
   Box,
@@ -62,6 +62,9 @@ import {
 } from "@shopify/polaris";
 import { homePreviewWindow } from "@/lib/home-content/preview";
 import { useAdminT } from "../../../PolarisShell";
+import { PickerLayer } from "./picker/PickerLayer";
+import { usePickerPointer } from "./picker/usePicker";
+import type { FieldScope } from "./picker/fieldIndex";
 
 /** The design's own canvas width — the width every scale is measured against. */
 const DESIGN_WIDTH = 430;
@@ -117,6 +120,14 @@ const SLACK = 48;
  * @param props.maxWidth - The widest selectable width, used to reserve the row.
  * @param props.frameHeight - The live stage height, from `homeLayout()`.
  * @param props.nonce - Bumped by the parent after every save, to reload.
+ * @param props.armed - Whether the picker is on, screen-wide.
+ * @param props.scope - The field keys this section owns; the window offers no
+ *   others, however much of a neighbouring band peeks into the slack.
+ * @param props.selectedKey - The field being edited, when it is one of ours.
+ * @param props.panelRef - The docked editor beside this window, for the curve.
+ * @param props.onPick - Called with the keys of whatever is clicked.
+ * @param props.onFrame - Told about this card's frame as it mounts and goes, so
+ *   the screen can write drafts into it.
  * @returns The preview that opens the section.
  */
 export function SectionPreview({
@@ -131,6 +142,12 @@ export function SectionPreview({
   maxWidth,
   frameHeight,
   nonce,
+  armed = false,
+  scope = null,
+  selectedKey = null,
+  panelRef,
+  onPick,
+  onFrame,
 }: {
   sectionId: string;
   y: number;
@@ -143,6 +160,12 @@ export function SectionPreview({
   maxWidth: number;
   frameHeight: number;
   nonce: number;
+  armed?: boolean;
+  scope?: FieldScope;
+  selectedKey?: string | null;
+  panelRef?: React.RefObject<HTMLDivElement | null>;
+  onPick?: (keys: string[]) => void;
+  onFrame?: (frame: HTMLIFrameElement | null) => (() => void) | void;
 }) {
   const t = useAdminT();
   // Reloading this one frame without disturbing the other eight.
@@ -182,6 +205,66 @@ export function SectionPreview({
     observer.observe(node);
     return () => observer.disconnect();
   }, [reached]);
+
+  /**
+   * Whether this card is on screen NOW — which `reached` deliberately is not.
+   *
+   * `reached` latches, because a frame once fetched should stay. This does the
+   * opposite job: it decides whether the picker's frame loop is worth running,
+   * and there are up to nine of them down a ~26,000px page. Without it, arming
+   * would start nine loops for the one or two windows a person can actually
+   * see. No rootMargin: a card just off the edge is a card whose highlights
+   * nobody is looking at.
+   */
+  const [onScreen, setOnScreen] = useState(false);
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver((entries) => {
+      setOnScreen(entries.some((entry) => entry.isIntersecting));
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  /**
+   * This card's frame, told to the screen as it comes and goes.
+   *
+   * The screen writes drafts straight into every mounted preview — that is how
+   * typing shows up in the very window you pointed at — so it has to know which
+   * frames exist. A ref callback is the only thing that knows both, and React
+   * 19's cleanup form means the frame is dropped on the exact unmount rather
+   * than on a later null call.
+   */
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const holdFrame = useCallback(
+    (node: HTMLIFrameElement | null) => {
+      frameRef.current = node;
+      // The screen hands back its own release, so it never has to work out
+      // WHICH frame just went — this closure already knows.
+      const release = onFrame?.(node);
+      return () => {
+        if (frameRef.current === node) frameRef.current = null;
+        release?.();
+      };
+    },
+    [onFrame],
+  );
+
+  /**
+   * Pointing, on the WINDOW rather than on a layer over it.
+   *
+   * The film is already `pointer-events: none`, so a click here cannot reach
+   * the storefront's links and needs no capture layer to stop it. Nothing calls
+   * `preventDefault`, so the wheel is never taken off the browser: this window
+   * scrolls natively, with momentum, chaining and touch intact.
+   */
+  const { pointer, onPointerMove, onPointerLeave, onClick } = usePickerPointer({
+    iframeRef: frameRef,
+    scope,
+    onPick: onPick ?? (() => {}),
+  });
+  const pointing = armed && onPage && reached;
 
   const scale = width / DESIGN_WIDTH;
   const { railHeight, filmTop, range, parkAt } = homePreviewWindow(
@@ -280,6 +363,14 @@ export function SectionPreview({
               aria-label={`${t("home.sectionPreview")} — ${sectionId}`}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
+              {...(pointing
+                ? {
+                    "data-home-picker-window": sectionId,
+                    onPointerMove,
+                    onPointerLeave,
+                    onClick,
+                  }
+                : null)}
               style={{
                 position: "absolute",
                 left: boxLeft,
@@ -309,6 +400,8 @@ export function SectionPreview({
                 outlineOffset: focused ? 1 : 0,
                 borderRadius: 8,
                 background: "#FFF6EC",
+                // Says "this is pointable" without a second toggle to explain.
+                cursor: pointing ? "crosshair" : undefined,
               }}
             >
               {/* 3 · The rail: exactly one band tall, and clipping. This is
@@ -343,6 +436,7 @@ export function SectionPreview({
                 {reached ? (
                   <iframe
                     key={key}
+                    ref={holdFrame}
                     src={`/?adminPreview=${key}`}
                     title={`${t("home.sectionPreview")} — ${sectionId}`}
                     // Belt to the observer's braces; see the note on `reached`.
@@ -427,6 +521,23 @@ export function SectionPreview({
           )}
         </div>
       </BlockStack>
+
+      {/* Outside the BlockStack on purpose: it draws in fixed coordinates and
+          has no height, and a zero-height child of a gapped stack would still
+          take a gap — nine times down the page. Outside the window and the rail
+          too, so the clip that holds the band cannot clip the highlights. */}
+      {panelRef && (pointing || selectedKey !== null) ? (
+        <PickerLayer
+          iframeRef={frameRef}
+          pointer={pointer}
+          // Measuring is worth doing only where somebody is looking. A card
+          // scrolled past keeps its selection but stops running a frame loop.
+          armed={pointing && onScreen}
+          selectedKey={selectedKey}
+          panelRef={panelRef}
+          scope={scope}
+        />
+      ) : null}
     </Box>
   );
 }

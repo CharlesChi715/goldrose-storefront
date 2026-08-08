@@ -175,27 +175,40 @@ Open linked resources only when the task needs them.
   destroyed by a click the way a URL can. `?adminPreview` stays on the iframes
   as a readable marker but is deliberately **not** the test: on its own it would
   be an analytics kill switch anyone could type into the URL bar.
-- **You edit the home page by pointing at it (2026-08-08,
+- **You edit the home page by pointing at each section's own window (2026-08-08,
   `worktree-admin-home-customization`).** Every editable node on `/` carries a
-  `data-field` naming its registry slot, so arming the picker on Content → Home
-  page outlines the lot and a click opens that one field in an editor docked
-  beside the preview, joined to it by a curve. The pointer never reaches the
-  preview — the storefront's links are real and one click would navigate the
-  frame off `/` — so a transparent layer takes the click and the hit is resolved
-  by translating it into the frame's coordinates. Typing writes straight into
-  the frame's DOM (`picker/patch.ts`); kinds that cannot honestly be faked (rail
-  timings, Figma-baked labels) say "save to see this" instead. A field you can
-  point at is no longer listed below, which collapsed the form from ~180 rows to
-  25 — searching suspends the rule, since that is how somebody hunts one field.
-  ⚠️ **The rule that must not be broken:** the frame loop that measures those
-  rectangles lives in a LEAF (`picker/PickerLayer.tsx`), never on the screen
-  itself. Polaris' `Page` re-measures its header actions from a `useEffect` on
-  every render and `setState`s inside it, and it cannot be talked out of it from
-  outside — so a 60Hz publisher above it is a nested-update storm that killed
-  the screen with "Maximum update depth exceeded" whenever a page scrolled under
-  a selection. `tests/e2e/admin-home-picker.spec.ts` is the picker's first
-  driving coverage; it does not reproduce the storm in headless Chromium, so
-  that part is verified by hand in a real browser.
+  `data-field` naming its registry slot. One toggle arms all nine section
+  windows; each outlines what it owns, and a click opens that field in an editor
+  docked beside that window, joined by a curve. Typing is written straight into
+  every mounted preview (`picker/patch.ts`), so a section window can never show
+  something older than its own fields say; kinds that cannot honestly be faked
+  (rail timings) still say "save to see this". Section cards went full-width to
+  make room — the annotation gutter left 571px and the window is 430 of them,
+  and the window cannot narrow because its width IS the phone's viewport.
+  - **The page-wide preview is read-only, and that is what fixed the scroll.**
+    Pointing at it needed a capture layer over the frame (its links are real),
+    the layer swallowed the wheel, the scroll was re-issued programmatically,
+    and the storefront's own `scroll-behavior: smooth` turned each wheel event
+    into an eased animation the next one cancelled: **a gesture asking for
+    2,000px moved 118**, scroll chaining was gone and touch panned the admin.
+    The section windows never needed the layer — their film is
+    `pointer-events: none` inside a natively scrolling box — so the fix was to
+    delete it, not tune it.
+  - **A card offers only its own fields**, filtered by key ownership rather than
+    pixels: every window shows 48 design px of its neighbours, and a geometric
+    filter would let a click on that peek open another section's field.
+  - **Every field is still listed** under its card. An earlier pass struck
+    pointable fields from the list (~180 rows → 25); the frames are
+    `aria-hidden`/`tabIndex={-1}` on purpose, so that left ~155 fields reachable
+    only by mouse. Pointing is a shortcut; the list is the inventory.
+  - ⚠️ **The rule that must not be broken:** the frame loop lives in a LEAF
+    (`picker/PickerLayer.tsx`), never on the screen itself. Polaris' `Page`
+    re-measures its header actions from a `useEffect` on every render and
+    `setState`s inside it, and cannot be stopped from outside — so a 60Hz
+    publisher above it is the nested-update storm that killed this screen with
+    "Maximum update depth exceeded" whenever a page scrolled under a selection.
+  - Covered by `tests/e2e/admin-home-picker.spec.ts`, including a travel
+    threshold on the page-wide preview that the old capture layer would fail.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one
