@@ -39,13 +39,27 @@ const ID_RE = /^[a-z][a-z0-9-]*[a-z0-9]$/; // kebab-case, no leading/trailing hy
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // The closed key vocabulary (TEMPLATE.md illustrates it; this is the authority)
-const KEYS = ["delivery", "rollout", "statusChangedAt", "priority", "blockedBy", "verification"];
+const KEYS = [
+  "delivery",
+  "rollout",
+  "statusChangedAt",
+  "priority",
+  "blockedBy",
+  "verification",
+];
 const BANNED_KEYS = {
   id: "the filename is the id",
   area: "grouping is a generated view, never a stored key",
 };
 const CUT_KEYS = ["owner", "target", "qualifier", "dependsOn", "tags"]; // trimmed 2026-08-08
-const DELIVERY = ["backlog", "ready", "in-progress", "uat", "accepted", "dropped"];
+const DELIVERY = [
+  "backlog",
+  "ready",
+  "in-progress",
+  "uat",
+  "accepted",
+  "dropped",
+];
 const ROLLOUT = ["not-deployed", "test-deployment", "live"];
 const PRIORITY = ["p0", "p1", "p2"];
 const ACTIVE_STATES = ["ready", "in-progress", "uat"]; // (a) presence tier
@@ -160,10 +174,13 @@ function cmdNew(id) {
 
   const template = readFileSync(TEMPLATE_PATH, "utf8");
   if (!template.startsWith("---\n")) {
-    fail(`${TEMPLATE_PATH}: template must start with the \`---\` fence on line 1`, {
-      detail: `it starts with ${JSON.stringify(template.slice(0, 20))}…`,
-      hint: "move anything above the front matter below it — records inherit this file's shape",
-    });
+    fail(
+      `${TEMPLATE_PATH}: template must start with the \`---\` fence on line 1`,
+      {
+        detail: `it starts with ${JSON.stringify(template.slice(0, 20))}…`,
+        hint: "move anything above the front matter below it — records inherit this file's shape",
+      },
+    );
   }
   const fenceEnd = template.indexOf("\n---", 4);
   if (fenceEnd === -1) {
@@ -243,7 +260,9 @@ function cmdCheck() {
   // template guidance comments (body only) — may not survive past backlog
   const template = readFileSync(TEMPLATE_PATH, "utf8");
   const templateBody = template.slice(template.indexOf("\n---", 4) + 4);
-  const guidanceComments = [...templateBody.matchAll(/<!--[\s\S]*?-->/g)].map((m) => m[0]);
+  const guidanceComments = [...templateBody.matchAll(/<!--[\s\S]*?-->/g)].map(
+    (m) => m[0],
+  );
 
   for (const file of files) {
     const id = basename(file, ".md");
@@ -275,12 +294,31 @@ function cmdCheck() {
     // closed vocabulary: banned, cut, then unknown (with did-you-mean)
     for (const key of Object.keys(fm)) {
       if (key in BANNED_KEYS) {
-        report(file, `banned key "${key}"`, BANNED_KEYS[key], "delete the line — the information is derived, storing it again creates a second place to disagree");
+        report(
+          file,
+          `banned key "${key}"`,
+          BANNED_KEYS[key],
+          "delete the line — the information is derived, storing it again creates a second place to disagree",
+        );
       } else if (CUT_KEYS.includes(key)) {
-        report(file, `key "${key}" was cut from the vocabulary (2026-08-08)`, `its value here is "${fm[key]}"`, "delete the line; if the value states a fact still worth keeping, move it into the body prose first");
+        report(
+          file,
+          `key "${key}" was cut from the vocabulary (2026-08-08)`,
+          `its value here is "${fm[key]}"`,
+          "delete the line; if the value states a fact still worth keeping, move it into the body prose first",
+        );
       } else if (!KEYS.includes(key)) {
-        const best = KEYS.map((k) => ({ k, d: editDistance(k, key) })).sort((x, y) => x.d - y.d)[0];
-        report(file, `unknown key "${key}"`, `allowed keys: ${KEYS.join(", ")}`, best.d <= 2 ? `did you mean "${best.k}"?` : "delete the line, or propose the key in TEMPLATE.md first — the vocabulary is closed");
+        const best = KEYS.map((k) => ({ k, d: editDistance(k, key) })).sort(
+          (x, y) => x.d - y.d,
+        )[0];
+        report(
+          file,
+          `unknown key "${key}"`,
+          `allowed keys: ${KEYS.join(", ")}`,
+          best.d <= 2
+            ? `did you mean "${best.k}"?`
+            : "delete the line, or propose the key in TEMPLATE.md first — the vocabulary is closed",
+        );
       }
     }
 
@@ -306,47 +344,110 @@ function cmdCheck() {
 
     // (r) always-required keys, with valid values
     if (!fm.delivery) {
-      report(file, "missing required key \"delivery\"", undefined, `add \`delivery: <${DELIVERY.join("|")}>\` — judge the record's real stage`);
+      report(
+        file,
+        'missing required key "delivery"',
+        undefined,
+        `add \`delivery: <${DELIVERY.join("|")}>\` — judge the record's real stage`,
+      );
     } else if (!DELIVERY.includes(fm.delivery)) {
-      report(file, `delivery: "${fm.delivery}" is not in the vocabulary`, `allowed: ${DELIVERY.join("|")}`, "map the old value onto the current ladder (see TEMPLATE.md state glosses)");
+      report(
+        file,
+        `delivery: "${fm.delivery}" is not in the vocabulary`,
+        `allowed: ${DELIVERY.join("|")}`,
+        "map the old value onto the current ladder (see TEMPLATE.md state glosses)",
+      );
     }
     if (!fm.rollout) {
-      report(file, "missing required key \"rollout\"", undefined, `add \`rollout: <${ROLLOUT.join("|")}>\` — where does this code actually run?`);
+      report(
+        file,
+        'missing required key "rollout"',
+        undefined,
+        `add \`rollout: <${ROLLOUT.join("|")}>\` — where does this code actually run?`,
+      );
     } else if (!ROLLOUT.includes(fm.rollout)) {
-      report(file, `rollout: "${fm.rollout}" is not in the vocabulary`, `allowed: ${ROLLOUT.join("|")}`, "map the old value; note the site has been live since 2026-08-07 — judge what is true TODAY, not what was true when written");
+      report(
+        file,
+        `rollout: "${fm.rollout}" is not in the vocabulary`,
+        `allowed: ${ROLLOUT.join("|")}`,
+        "map the old value; note the site has been live since 2026-08-07 — judge what is true TODAY, not what was true when written",
+      );
     }
     if (!fm.statusChangedAt) {
-      report(file, "missing required key \"statusChangedAt\"", undefined, "add the date of the last delivery transition (YYYY-MM-DD); recover it from `git log` if unknown");
+      report(
+        file,
+        'missing required key "statusChangedAt"',
+        undefined,
+        "add the date of the last delivery transition (YYYY-MM-DD); recover it from `git log` if unknown",
+      );
     } else if (!DATE_RE.test(fm.statusChangedAt)) {
-      report(file, `statusChangedAt: "${fm.statusChangedAt}" is not a date`, "expected YYYY-MM-DD", "rewrite as an ISO date, e.g. 2026-08-08");
+      report(
+        file,
+        `statusChangedAt: "${fm.statusChangedAt}" is not a date`,
+        "expected YYYY-MM-DD",
+        "rewrite as an ISO date, e.g. 2026-08-08",
+      );
     }
 
     // (a) required while active; value must be in the enum whenever present
     if (ACTIVE_STATES.includes(fm.delivery) && !fm.priority) {
-      report(file, `missing "priority" while delivery is ${fm.delivery}`, "priority is required in ready/in-progress/uat", `add \`priority: <${PRIORITY.join("|")}>\``);
+      report(
+        file,
+        `missing "priority" while delivery is ${fm.delivery}`,
+        "priority is required in ready/in-progress/uat",
+        `add \`priority: <${PRIORITY.join("|")}>\``,
+      );
     }
     if (fm.priority && !PRIORITY.includes(fm.priority)) {
-      report(file, `priority: "${fm.priority}" is not in the vocabulary`, `allowed: ${PRIORITY.join("|")}`, "pick the nearest tier");
+      report(
+        file,
+        `priority: "${fm.priority}" is not in the vocabulary`,
+        `allowed: ${PRIORITY.join("|")}`,
+        "pick the nearest tier",
+      );
     }
 
     // (v) evidence gate: ACCEPTED requires populated verification.human
-    if (fm.delivery === "accepted" && (!/\bhuman:/.test(fmText) || /human:\s*null/.test(fmText)) ) {
-      report(file, "delivery is accepted but verification.human is empty", "accepted asserts a human signed off on the deployed site", "record by/date/environment/evidence (URL, commit SHA, or command output) under verification.human — or demote delivery to uat until someone actually verifies it");
+    if (
+      fm.delivery === "accepted" &&
+      (!/\bhuman:/.test(fmText) || /human:\s*null/.test(fmText))
+    ) {
+      report(
+        file,
+        "delivery is accepted but verification.human is empty",
+        "accepted asserts a human signed off on the deployed site",
+        "record by/date/environment/evidence (URL, commit SHA, or command output) under verification.human — or demote delivery to uat until someone actually verifies it",
+      );
     }
 
     // H1 = filename (one name everywhere)
     const h1 = text.match(/^# (.+)$/m);
     if (!h1) {
-      report(file, "no H1 heading", undefined, `add \`# ${id}\` right after the front matter`);
+      report(
+        file,
+        "no H1 heading",
+        undefined,
+        `add \`# ${id}\` right after the front matter`,
+      );
     } else if (h1[1] !== id) {
-      report(file, `H1 "${h1[1]}" does not equal the filename`, `expected \`# ${id}\``, "rename the H1; if the old title carries meaning the id does not, preserve it as the first Context sentence");
+      report(
+        file,
+        `H1 "${h1[1]}" does not equal the filename`,
+        `expected \`# ${id}\``,
+        "rename the H1; if the old title carries meaning the id does not, preserve it as the first Context sentence",
+      );
     }
 
     // template guidance comments must not survive past backlog
     if (fm.delivery && fm.delivery !== "backlog") {
       for (const c of guidanceComments) {
         if (text.includes(c)) {
-          report(file, "unfilled template guidance comment survives past backlog", c.split("\n")[0].slice(0, 60), "fill the section it belongs to and delete the comment — or delete the empty section if it has nothing to say");
+          report(
+            file,
+            "unfilled template guidance comment survives past backlog",
+            c.split("\n")[0].slice(0, 60),
+            "fill the section it belongs to and delete the comment — or delete the empty section if it has nothing to say",
+          );
         }
       }
     }
@@ -365,7 +466,12 @@ function cmdCheck() {
           best && best.d <= 3
             ? `nearest existing record is "${relative(dirname(file), best.f)}" — read it: if it is the intended target, update this link to it; if it is unrelated, delete the link`
             : "no similar record exists — the target was likely removed; delete the link, or restore the file if it is still needed";
-        report(file, `broken link "${target}"`, `resolves to ${resolved}, which does not exist`, hint);
+        report(
+          file,
+          `broken link "${target}"`,
+          `resolves to ${resolved}, which does not exist`,
+          hint,
+        );
       }
     }
   }
@@ -381,7 +487,10 @@ function cmdCheck() {
       `expected ${ROADMAP_BEGIN} … ${ROADMAP_END}`,
       "restore both marker comments under the Roadmap heading",
     );
-  } else if (readme.slice(begin + ROADMAP_BEGIN.length, end).trim() !== renderRoadmap().trim()) {
+  } else if (
+    readme.slice(begin + ROADMAP_BEGIN.length, end).trim() !==
+    renderRoadmap().trim()
+  ) {
     report(
       README_PATH,
       "roadmap block is stale",

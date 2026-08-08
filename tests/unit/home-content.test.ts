@@ -238,7 +238,10 @@ test("every photo field describes its design box and how it is fitted", () => {
       if (field.kind !== "image") continue;
       assert.ok(field.box, `${section.id}.${field.id} has no design box`);
       assert.ok(field.box!.w > 0 && field.box!.h > 0);
-      assert.ok(field.fit, `${section.id}.${field.id} does not say how it fits`);
+      assert.ok(
+        field.fit,
+        `${section.id}.${field.id} does not say how it fits`,
+      );
     }
   }
 });
