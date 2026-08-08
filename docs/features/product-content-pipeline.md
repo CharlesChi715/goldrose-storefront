@@ -1,22 +1,15 @@
 ---
-id: product-content-pipeline
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-07-24
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# Product content pipeline — admin editing + 120-SKU bulk import
+# product-content-pipeline
 
 ## Context
+
+Admin-editable product content plus a bulk import, so 120 SKUs of real copy and
+imagery reach the storefront without being retyped one form at a time.
 
 - Teammate ask (relayed 2026-07-24, verbatim): 页面内容大部分都不对，只是定了框架；
   shop 页和商品详情页有 120 种 SKU，在 Figma 里逐个改太麻烦。可不可以在工作台改
@@ -266,7 +259,7 @@ Vercel and is parsed there, because validating a row needs the database.
 - [ ] The service-role key never reaches the browser.
 - [ ] Storefront reflects an import without a redeploy.
 - [ ] Human acceptance: teammate/owner imports real content and sees the
-      storefront pages update (gates UAT → VERIFIED).
+      storefront pages update (gates UAT → ACCEPTED).
 
 ## Plan
 
@@ -351,10 +344,6 @@ token. **(b)** One per file — survives long uploads, one extra round trip each
 Cost is commented **private** (§7.2, never in `catalog_products`). Including it
 enables bulk margin edits; it also means cost leaves the admin in a downloadable
 file.
-
-## Verification evidence
-
-None yet — BACKLOG.
 
 ## Related links
 

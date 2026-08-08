@@ -122,7 +122,8 @@ const COLUMNS = 2;
  * were: first row top 408.5, row pitch 308 (716.5 − 408.5), card height 297,
  * 27 from the last row down to the pager (1656.5 − 1629.5), pager 32 tall,
  * then 133.5 of tail (1822 − 1688.5). Four rows plus a pager therefore
- * reproduces 1822 to the pixel; anything less simply ends sooner.
+ * reproduces 1822 to the pixel; anything less simply ends sooner — but never
+ * higher than DRAWER_FLOOR, which the overlays need under them.
  */
 const GRID_TOP = CARDS[0].y;
 const ROW_PITCH = CARDS[COLUMNS].y - CARDS[0].y;
@@ -132,6 +133,21 @@ const PAGER_H = 32;
 const TAIL = 133.5;
 /** Height reserved for the line that replaces the grid when nothing matches. */
 const EMPTY_H = 60;
+
+/**
+ * DRAWER_FLOOR — the canvas may shorten to fit its grid, but it may never end
+ * above the open filter drawer, because the drawer is drawn INSIDE the canvas
+ * and the canvas clips (ScaleFrame's stage is overflow:hidden, as a Figma
+ * frame is). Deriving the height from the rows alone had a hole in it: an
+ * empty result set ended the canvas at 602 and cut the drawer off mid-"Price",
+ * taking Availability, Reset and "Show N Results" with it — so the one
+ * selection that empties the shop was also the one a shopper could not undo.
+ * The number is the drawer's own bottom edge (abs(16, 356, 398, 472) in
+ * components/shop/ShopInteractive) plus the 28 its drop shadow needs below it
+ * (0 8px 20px), so the panel ends on the canvas rather than against its edge.
+ * The sort dropdown sits at 357 and is 190 tall, well inside this.
+ */
+const DRAWER_FLOOR = 356 + 472 + 28;
 
 /**
  * The frame draws five page buttons, 32 wide on a 44 pitch, running x=110 to
@@ -250,7 +266,13 @@ export default async function ShopPage({
   const gridBottom =
     rows > 0 ? GRID_TOP + (rows - 1) * ROW_PITCH + CARD_H : GRID_TOP + EMPTY_H;
   const pagerY = gridBottom + PAGER_GAP;
-  const height = gridBottom + (showPager ? PAGER_GAP + PAGER_H : 0) + TAIL;
+  // Math.max, not a branch on "is the grid empty": the rule is about what the
+  // canvas has to hold, so any future reason for a short canvas is covered too.
+  // A grid of even one row already reaches 839 and is untouched by this.
+  const height = Math.max(
+    gridBottom + (showPager ? PAGER_GAP + PAGER_H : 0) + TAIL,
+    DRAWER_FLOOR,
+  );
 
   // Page 1 keeps the bare /shop URL so the canonical page has no query
   // string; a search carries its ?q= across pages instead of dropping it.

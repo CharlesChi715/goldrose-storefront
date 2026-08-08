@@ -207,8 +207,14 @@ export default async function ProductDetailPage({
      found. The frame's own words survive ONLY where the catalog has no
      column behind them — the ABOUT slogan and the three shipping benefits,
      which are store policy rather than product data. */
-  // The gold pill: the frame says BEST SELLER, the catalog says what it is.
-  const badge = (product.badge ?? "").trim().toUpperCase();
+  /* The gold pill: the frame says BEST SELLER, the catalog says what it is.
+     A badge that lists several phrases ("Quick ship, Best seller") is a list,
+     not one long label, so each phrase gets its own pill — both the ASCII and
+     the full-width comma, since the admin is written in English and Chinese. */
+  const badges = (product.badge ?? "")
+    .split(/[,，]/)
+    .map((phrase) => phrase.trim().toUpperCase())
+    .filter(Boolean);
   // The frame's "Real Rose · Hand-Finished · Made to Last" strapline reads
   // exactly like the first detail bullets, so that is what fills it.
   const strapline = (product.details ?? []).slice(0, 3).join(" · ");
@@ -316,29 +322,38 @@ export default async function ProductDetailPage({
 
         {/* 04 · Product info */}
         <div style={{ ...abs(16, 375, 398, 182), background: "#FFFBF6" }}>
-          {/* The catalog's badge, in the frame's pill. A product with no
-              badge gets no pill rather than a borrowed one. */}
-          {badge ? (
+          {/* The catalog's badges, in the frame's pill. A product with no
+              badge gets no pill rather than a borrowed one.
+              The frame measured one pill at 91×21 around its own word,
+              BEST SELLER; a phrase wider than that grows its pill to the
+              right instead of losing its tail to an ellipsis. A lone pill
+              keeps the frame's 91 as a floor, so the design is untouched
+              wherever the catalog says what the frame said. Several pills
+              size to their own words — three of the frame's width would not
+              fit the 398 card. The 10px inset and the 4px text drop are the
+              frame's, kept as padding so each phrase sizes its own box. */}
+          {badges.length ? (
             <div
-              data-live-text
-              style={{
-                ...abs(0, 8, 91, 21),
-                background: "#D4AF37",
-                borderRadius: 99,
-              }}
+              style={{ ...abs(0, 8, undefined, 21), display: "flex", gap: 6 }}
             >
-              <div
-                style={{
-                  ...abs(10, 4, 71),
-                  ...txt(11, 13.312, "#FFF6EC"),
-                  fontWeight: 500,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {badge}
-              </div>
+              {badges.map((phrase) => (
+                <div
+                  key={phrase}
+                  data-live-text
+                  style={{
+                    height: 21,
+                    ...(badges.length === 1 ? { minWidth: 91 } : null),
+                    boxSizing: "border-box",
+                    padding: "4px 10px 0",
+                    background: "#D4AF37",
+                    borderRadius: 99,
+                    ...txt(11, 13.312, "#FFF6EC"),
+                    fontWeight: 500,
+                  }}
+                >
+                  {phrase}
+                </div>
+              ))}
             </div>
           ) : null}
           <div

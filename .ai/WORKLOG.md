@@ -6421,3 +6421,175 @@ describes an affordance rather than a control.
 that a window is pointable with no switch AND that a drag does not pick, plus
 the three pixel baselines. Confirmed by eye: at rest a preview is just a
 preview; the pointer entering it reveals what is editable.
+## 2026-08-07 — /shop: an empty result set no longer clips the filter drawer
+
+- Bug: with 0 matching products the shop canvas ended at 602 (grid replaced by
+  the 60px empty line), but the open filter drawer runs to 828 and is drawn
+  inside the canvas, which clips (`ScaleFrame` stage is `overflow: hidden`).
+  The panel was cut mid-"Price", losing Availability, Reset and
+  "Show N Results" — so the selection that empties the shop was the one a
+  shopper could not undo from the drawer.
+- Fix: `app/shop/page.tsx` floors the canvas at `DRAWER_FLOOR` (356 + 472 + 28
+  shadow room) via `Math.max`. Only ever fires on an empty grid — one card row
+  already reaches 839. The sort dropdown (357 + 190) was never at risk.
+- Test: `tests/e2e/shop-filters.spec.ts` gains a regression test comparing the
+  panel's bottom edge to the stage's, then driving Reset → Show to prove the
+  recovered controls work.
+- Verified: 136 unit + 135 e2e pass, including all three pixel baselines
+  (home/shop/PDP byte-identical — the floor never applies to a populated shop).
+
+## 2026-08-07 — Go-live posture recorded in SUMMARY.md
+
+Owner decision: open the site for real use and retire mock data gradually
+rather than in one pre-launch sweep. Updated SUMMARY.md only (it owns project
+state; no code changed):
+
+- Current phase: "Pre-launch testing" → "Going live, de-mocking gradually",
+  split into hard gates (money/identity — never gradual) and gradual items
+  (copy, imagery, placeholder screens).
+- Release gates: added the rule that a live placeholder must read as a
+  placeholder and may never assert a price, stock level, delivery date or
+  policy we cannot honour; CHECKOUT_SKIP_PAYMENT now "before the first real
+  order".
+- Release queue: split at go-live — items 1-7 clear before the first real
+  order (incl. pushing migrations 0009 then 0010, real shipping rates, removing
+  seeded reviews, backups on, owner enables live PayPal); items 8-11 run while
+  live.
+- OQ-2 marked a hard gate (a shipping rate is a charged price); OQ-3 marked
+  gradual, with price/stock true even while copy and photos stay placeholder.
+- Seeded demo reviews flagged as the one mock that is never safe live.
+
+## 2026-08-07 — dev pinned to hosted data; 0009/0010 pushed; 0011 written
+
+- **Dev may no longer run on the file adapter** (owner call, site going live).
+  New `scripts/require-hosted-dev.mjs` wired as `predev`: `npm run dev` exits 1
+  when any Supabase variable is blank, because a dev server backed by the
+  3-product seed looks like the live 2-product shop and is not. Local mode is
+  not deleted — it sleeps. The Playwright suite still runs in it (it blanks the
+  variables for its own `build && start` server, so `predev` never fires), and
+  `ALLOW_LOCAL_MODE=1 npm run dev` wakes it deliberately. Removed the
+  `goldrose-local-mode` launch entry and the temporary `goldrose-prod-3001`.
+  Documented in `.env.example` and SUMMARY.
+- **Hosted DB checked:** 2 products, not 3. `best_for` was still `text`, so
+  every Collection/Occasion/Recipient chip matched nothing on hosted —
+  `subject.bestFor.includes(slug)` is SUBSTRING matching on a string. This is
+  what the owner's 0-result `/shop` URL actually was.
+- **Pushed `0009` + `0010`** to cfvsvgbldnzkcjvbwnjp. `best_for` is now
+  `text[]`; both products converted `Classic Collection` → `{classic}` via the
+  migration's lookup table. Spotlight columns present.
+- **Found a live regression and wrote `0011` (NOT PUSHED — permission denied).**
+  `0009` added `stocked` to `catalog_products`; `0010`, authored against the
+  pre-0009 view, rebuilt it without that key. Order made `0010` last, so the
+  key is gone on hosted: "Ready to Ship" matches nothing, "Pre-Order" matches
+  everything sellable. `0011` restates the view with BOTH the spotlight image
+  fields and `stocked`. **Needs `supabase db push`.**
+- **Hardened `scripts/check-migrations.mjs`,** which had reported "ok". Two
+  misses: the body stopped at the first `from` — inside catalog_products that
+  is the images subquery, so the variants object was never read — and only
+  `table.column`/`as alias` shapes were collected, so a `jsonb_build_object`
+  key was invisible. Now reads to the statement's semicolon and collects quoted
+  keys. Verified it would have flagged `0010` dropping `stocked`.
+- Verified: 138 unit (2 new, 1 rewritten to the new contract), e2e filter spec
+  12/12, eslint clean.
+- Launch gates still open: `CHECKOUT_SKIP_PAYMENT=1` is set in `.env.local`;
+  hosted `product_reviews` is empty (nothing to remove); hosted products carry
+  only `{classic}`, so Occasion/Recipient chips return nothing until set in admin.
+
+### 2026-08-07 (cont.) — 0011 pushed and verified
+
+- `supabase db push` applied `0011`; hosted history is now 0001–0003, 0005–0011.
+- `catalog_products` carries both feature sets again: variants have `in_stock`
+  AND `stocked`, images have `card_focal_x/y` and `card_zoom`.
+- Behaviour checked by running `matchesFacets` against the real hosted values:
+  classic 2/2, jewel 0/2, in-stock 2/2, ready-to-ship 2/2, pre-order 0/2,
+  birthday 0/2. Before 0011 the last two were 0/2 and 2/2 — both wrong.
+- Remaining on hosted: products carry only `{classic}`, so Occasion and
+  Recipient chips return nothing until someone sets "Best for" per product.
+
+## 2026-08-07 23:55 AEST — three branches merged, and my migration checker was wrong
+
+`main` checked out in the working directory (the concurrent session had
+finished and left it clean) and three branches merged.
+
+- **`fix/nav-cart-login-redirect`** was already in from the previous pass. Its
+  only commit ahead of `main` was documentation — the redirect itself shipped
+  earlier as `ab559de`, and the branch's own write-back records the triage as
+  "no bug found". The name outlived the work.
+- **`fix/shop-drawer-and-hosted-guards`** — 5 commits, clean: the filter drawer
+  staying on the canvas when nothing matches, `0011`, a dev-server guard, and
+  two write-ups. Its new `scripts/require-hosted-dev.mjs` arrived unformatted
+  and would have turned CI red, so it was formatted in a follow-up commit.
+- **`fix/pdp-badge-truncation`** — 45 commits behind, one real conflict in
+  `app/products/[slug]/page.tsx`. Two independent changes had collided: the
+  branch's badge rework (one pill per phrase, the frame's 91 kept as a floor
+  for a lone pill) against today's info-card height. Resolved to the branch's
+  badge logic with **HEAD's 182** — taking the branch's stale `166` would have
+  silently reverted the owner's AI-036 ruling, and keeping HEAD's `{badge ?`
+  would not have compiled, because the rest of the file now reads `badges`.
+- **⚠️ The migration checker I added this evening was wrong, and it mattered.**
+  `0009` added a `'stocked'` key to `catalog_products`; `0010`, which recreates
+  the view last, dropped it — precisely the hazard the tool exists for — and
+  the tool reported "migrations ok". Two flaws: `viewDefinitions` cut the body
+  at the first `from`, which in this view is the one INSIDE the images
+  subquery, so everything after it was never read; and it collected only
+  `table.column` and `as alias` shapes, so a `jsonb_build_object` key was
+  invisible. The `fix/shop-drawer-and-hosted-guards` session found the real
+  regression, fixed both (read to the terminating semicolon, collect quoted
+  JSON keys) and wrote `0011` to restore `stocked`. Confirmed by replay: the
+  old logic reports nothing on that state, the fixed logic names `stocked`.
+  The lesson is not "avoid heuristics" — it is that the tool was tested against
+  synthetic fixtures and the duplicate-number case, never against this repo's
+  most complex real view, which is the one case that counted.
+- **Verified:** typecheck, lint (0 errors), format, `check:migrations`, inbox
+  in sync, 138 unit tests, and 135 e2e including every pixel baseline. The
+  badge rework moves no baseline: seeded products carry one badge, which keeps
+  the frame's 91px floor. The e2e ran in a throwaway detached worktree on port
+  3099 because a parallel session held 3001 for over ten minutes; the port
+  shift was never committed.
+
+## 2026-08-08 00:15 AEST — merged branches and worktrees deleted
+
+Housekeeping after the day's merges. 20 branches and 12 worktrees removed;
+**6.2 GB reclaimed**, 9.2 GB → 2.9 GB.
+
+- **Kept on purpose, all four:** the main checkout; `admin-home-customization`
+  and `home-page-map`, whose branches are NOT merged (and `home-page-map` also
+  holds 5 uncommitted files); and `agent-inbox-loop-close`, which is merged but
+  carries 3 uncommitted files including edits to `scripts/agent-inbox.mjs` and
+  the agent-delivery SKILL. Deleting any of them would have destroyed work.
+- **Every deletion was gated twice** — `git merge-base --is-ancestor <branch>
+  main` and a `git status --porcelain` emptiness check re-run immediately
+  before the removal, then `git branch -d` (lowercase), which refuses anything
+  unmerged. It duly refused `worktree-agent-inbox-loop-close`, still checked
+  out in a kept worktree.
+- **Five `git worktree remove` calls failed part-way** with "failed to delete",
+  leaving directories that git had already de-registered. Not corruption — the
+  bulk of each was gone (`figma-sync` 1339 MB → 5 MB) and the branches were
+  merged, so the orphans were removed directly after confirming they were no
+  longer in `git worktree list`. 299 MB.
+- **`git gc --prune=now`** cleared the dangling objects left by the day's
+  `merge-tree` dry-runs and the deleted branches: `.git` 146 → 137 MB, and
+  `git fsck` now reports nothing. The object store barely moved because every
+  deleted branch was merged — its commits are still reachable from `main`.
+- **Verified after:** `git fsck` clean, `main` intact at `2013a70`, 138 unit
+  tests, `check:migrations` ok, inbox in sync. GitHub already carries `main`
+  only.
+
+## 2026-08-08 — feature-records toolchain: built, sealed, migrated, measured
+
+- Rebuilt the features tooling as `scripts/features/cli.mjs`: `new` (born-backlog
+  scaffold), `check` (closed vocabulary, canonical key order, presence tiers,
+  evidence-gated ACCEPTED, H1 = id, template-comment survival, relative links
+  with did-you-mean, roadmap freshness — every error message/detail/hint),
+  `roadmap --sync` (generated README block). Sealed: `features:check` +
+  `features:roadmap` npm scripts, CI step beside check:migrations.
+- Scheme rulings recorded in docs/features/feature-records.md: flat directory,
+  id = filename = H1, closed key vocabulary (owner/target/qualifier/dependsOn/
+  tags cut), VERIFIED → ACCEPTED rename, template-conformance-on-edit.
+- Checkout split into records (checkout-screens / paypal-wallet /
+  shipping-rates + existing card-payments); all 9 legacy records migrated;
+  SUMMARY trimmed to pointers; `checked 13 records: all rules pass`.
+- A/B experiment (two worktrees, same rules, only enforcement differed):
+  identical machine-verified quality; tooled arm 7m16s vs 12m29s (−42%),
+  zero defect round-trips vs one. Divergence exposed the missing
+  body-conformance rule, now written. New skill: /feature-new.

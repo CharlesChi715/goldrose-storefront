@@ -39,6 +39,11 @@ const NO_ELEMENT = new Map<string, string>([
     "resolved server-side into a CSS transition string on a track React owns",
   ],
   [
+    "story.newsletter_welcome_text",
+    "the signed-IN half of the newsletter strip (NewsletterJoin's ACCOUNT-INFO card). It is tagged where it is drawn, but `/` renders signed out — and in local mode there is no Supabase to sign in to — so no pixel of it exists on this page to point at.",
+  ],
+  ["story.newsletter_welcome_greeting", "signed-in only — see above"],
+  [
     "hero.photo_1_alt",
     "alt text: read aloud, never drawn. Reached via its photo's editor.",
   ],

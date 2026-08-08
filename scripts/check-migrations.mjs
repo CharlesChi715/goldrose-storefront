@@ -53,11 +53,25 @@ export function parseMigrationName(name) {
  * The views a migration defines, with the column names each definition
  * exposes.
  *
- * This is a heuristic, not a SQL parser: it reads the `p.column` references
- * and `as alias` labels between `create view X as` and its `from`. That is
- * enough to catch a later definition dropping a column an earlier one added —
- * the failure mode that motivated this file — and it only ever produces
- * warnings, never a build failure, so a miss or a false positive is cheap.
+ * This is a heuristic, not a SQL parser: it reads the `p.column` references,
+ * the `as alias` labels, and the quoted keys of any `jsonb_build_object` in
+ * the statement. It only ever produces warnings, never a build failure, so a
+ * miss or a false positive is cheap.
+ *
+ * The names it collects are deliberately broader than the view's real column
+ * list — a `where p.status = 'active'` contributes `status`, which is not a
+ * column of the view. That costs nothing, because the check compares two
+ * definitions read the SAME way, and a name present in both cancels out.
+ *
+ * Two earlier limits let a real regression through on 2026-08-07, and both are
+ * fixed here. The body used to stop at the first `from`, which in
+ * `catalog_products` is the one INSIDE the images subquery — so everything
+ * after it, including the whole variants object, was never read. And only
+ * `table.column` and `as alias` shapes were collected, so `'stocked', (not
+ * v.track_quantity) …` — a key inside `jsonb_build_object` — was invisible.
+ * Between them, 0010 silently dropped the `stocked` key 0009 had added and
+ * this file reported "ok". The keys of a JSON payload are part of a view's
+ * contract exactly as its columns are; the storefront reads both.
  *
  * @param sql - The migration's full text.
  * @returns One entry per `create [or replace] view` found.
@@ -69,11 +83,15 @@ export function viewDefinitions(sql) {
   let match;
   while ((match = create.exec(sql)) !== null) {
     const rest = sql.slice(match.index + match[0].length);
-    // The select list ends at the first `from` on its own word boundary.
-    const body = rest.split(/\bfrom\b/i)[0] ?? "";
+    // The whole statement, subqueries included — the definition ends at its
+    // terminating semicolon, not at the first `from` it happens to contain.
+    const body = rest.split(/;/)[0] ?? "";
     const columns = new Set();
     for (const [, col] of body.matchAll(/\b\w+\.(\w+)/g)) columns.add(col);
     for (const [, alias] of body.matchAll(/\bas\s+(\w+)/gi)) columns.add(alias);
+    // `jsonb_build_object('key', value, …)` — a quoted word followed by a
+    // comma. Inside a view body that shape is a JSON key in practice.
+    for (const [, key] of body.matchAll(/'(\w+)'\s*,/g)) columns.add(key);
     out.push({ view: match[1], columns });
   }
   return out;

@@ -1,22 +1,16 @@
 ---
-id: tiktok-analytics
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-08-04
-
-dependsOn: [posting-account-attribution]
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# TikTok analytics — read our own metrics through the API
+# tiktok-analytics
 
 ## Context
+
+Read ELDREVE's own TikTok metrics through the API, to answer which video
+produced revenue on eldreve.com — a question TikTok's own Business Suite
+cannot see.
 
 - Owner's idea (`docs/ideas.md`, line 81, verbatim): *"tiktok 数据分析"*. Related
   lines in the same file: content will be published to Facebook / TikTok / IG,
@@ -46,6 +40,20 @@ Recorded for the eventual decision; nothing chosen yet.
 | Collector + `/admin/tiktok` dashboard | Full replacement for the analytics half of Business Suite                                            | Rebuilds what TikTok already gives free; still cannot reach LIVE, DMs or retention curves at any effort (see Tech details) | pending |
 
 ## Acceptance criteria
+
+Restored 2026-08-08 from the Chinese mirror, which had kept them after the
+English section was emptied.
+
+- [ ] An approved TikTok app authenticates the ELDREVE business account and
+      returns the video list.
+- [ ] One row per video per day lands in Supabase; re-running the same day is
+      idempotent (no duplicate rows).
+- [ ] Rows outlive TikTok's own 60-day analytics window — day 1's figures are
+      still in the table 90 days later.
+- [ ] A video arrived at via `?utm_source=tiktok&utm_content=<video_id>` joins
+      from `page_views` through to an order.
+- [ ] Human acceptance: Charles compares one video's archived figures against
+      Business Suite for the same day and they agree.
 
 ## Plan
 
@@ -335,15 +343,11 @@ return to identifying *which creative* a visitor arrived from.
   trade-off (organic reach vs. commercial tooling), not a technical one, and it
   may belong in SUMMARY.md "Product decisions" rather than here.
 
-## Verification evidence
-
-Nothing built; no evidence. Front matter stays BACKLOG until OQ-1 is answered.
-
 ## Related links
 
 - [posting-account-attribution.md](posting-account-attribution.md) — the
   `utm_acc` decision and the beacon's UTM capture this would join against.
-- [backend/engagement-tracking.md](backend/engagement-tracking.md) — on-site
+- [engagement-tracking.md](engagement-tracking.md) — on-site
   dwell data, the other half of any "which video drove engagement" question.
 - **Authoritative:** the scope picker in the portal's Create-New-App dialog
   (`business-api.tiktok.com`, read 2026-08-04) — the only complete inventory of
@@ -366,6 +370,9 @@ Nothing built; no evidence. Front matter stays BACKLOG until OQ-1 is answered.
 > 端点路径、字段名、文件路径、专有名词一律保留英文原文。
 
 ## 背景
+
+用 API 读取 ELDREVE 自己的 TikTok 数据，回答"哪条视频在 eldreve.com 上带来了
+收入"——这个问题 TikTok 自带的 Business Suite 看不到。
 
 - 老板的想法（`docs/ideas.md` 第 81 行，原文）：*"tiktok 数据分析"*。同一文件里
   相关的几行还提到：内容会发布到 Facebook / TikTok / IG，达人要在美国找。
@@ -655,15 +662,11 @@ Campaign、Ad、Audience、Creative、Measurement、Reporting、BC，外加
   工具），不是技术问题，而且它可能更应该写在 SUMMARY.md 的"Product decisions"里，
   而不是这里。
 
-## 验证证据
-
-什么都还没做，没有证据。在 OQ-1 有答案之前，front matter 保持 BACKLOG。
-
 ## 相关链接
 
 - [posting-account-attribution.md](posting-account-attribution.md) —— `utm_acc`
   的决定，以及本功能要关联的那份埋点 UTM 采集。
-- [backend/engagement-tracking.md](backend/engagement-tracking.md) —— 站内停留
+- [engagement-tracking.md](engagement-tracking.md) —— 站内停留
   数据，是"哪条视频带来了互动"这个问题的另一半。
 - **权威来源：** 平台"新建 App"对话框里的 scope 选择器
   （`business-api.tiktok.com`，2026-08-04 读取）—— 关于平台到底授予什么，这是唯一

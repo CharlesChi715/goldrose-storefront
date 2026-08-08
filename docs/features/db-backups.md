@@ -1,22 +1,15 @@
 ---
-id: db-backups
-area: backend
-
 delivery: backlog
 rollout: not-deployed
 statusChangedAt: 2026-07-25
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated: []
-  human: null
 ---
 
-# DB backups — Supabase Free + nightly pg_dump→S3
+# db-backups
 
 ## Context
+
+Nightly `pg_dump` of the hosted Supabase project to AWS S3, because Supabase's
+own daily backups are Pro-only and the live database has none today.
 
 - Supabase's built-in daily backups are **Pro-only ($25/mo)**; we are on Free,
   so the hosted project (**LIVE data**, ref `cfvsvgbldnzkcjvbwnjp`) currently
@@ -78,7 +71,7 @@ Scheduler (open):
       Supabase project) and the admin app reads it — documented as a runbook,
       repeated monthly.
 - [ ] Human acceptance: Charles completes one full restore drill and records
-      the evidence below.
+      the evidence in `verification.human` (the ACCEPTED gate).
 
 ## Plan
 
@@ -97,12 +90,8 @@ project's session-pooler connection string. Gotcha worth repeating: Supabase
 direct connections are IPv6-only — from GitHub-hosted runners the dump must go
 through the session pooler.
 
-## Verification evidence
-
-None yet — BACKLOG.
-
 ## Related links
 
-- Origin + platform decision: [Database.md](../../Database.md) (now points back here)
+- Origin + platform decision: [Database.md](../Database.md) (now points back here)
 - Launch-time Pro upgrade sits with the owner activation work:
-  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
+  [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)

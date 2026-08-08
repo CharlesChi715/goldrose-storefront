@@ -1,25 +1,11 @@
 ---
-id: posting-account-attribution
-area: backend
-
 delivery: uat
-rollout: test-deployment
-priority: p1
-target: v1-launch
-owner: charles
+rollout: live
 statusChangedAt: 2026-07-24
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated:
-    - tests/unit/channel-attribution.test.ts
-    - tests/e2e/admin-analytics.spec.ts
-  human: null
+priority: p1
 ---
 
-# Posting-account attribution — link tag for commissions
+# posting-account-attribution
 
 > Naming note: drafted as `acct=`; owner chose **`utm_acc`** at implementation
 > time (2026-07-24) — same family look as the other tags, still not a standard
@@ -27,7 +13,8 @@ verification:
 
 ## Context
 
-- Owner pays commission by which posting account (e.g. TikTok account "amy") brought the buyer.
+- A link tag that says which posting account brought the buyer, so the owner can
+  pay commission by it (e.g. TikTok account "amy").
 - Built 2026-07-23: account name travels in the marketing link's `utm_content` tag; read only by our own beacon (`components/Beacon.tsx`) via `accountOf()` (`lib/admin/channels.ts`).
 - Pre-launch, zero real traffic — switching the tag is free today, expensive after launch.
 
@@ -51,7 +38,7 @@ Move the account name to a **dedicated `utm_acc=` query tag** (`...?utm_source=t
 - [x] Admin Analytics groups sales/commission figures by posting account.
 - [x] The empty-account label in Analytics says `utm_acc` in both EN and 中文.
 - [x] Owner's link recipe in TESTER-GUIDE reads `...&utm_acc=amy` with the click-test tip.
-- [ ] Owner builds one real `utm_acc` link, clicks it, and sees the account appear in Analytics (human acceptance → VERIFIED).
+- [ ] Owner builds one real `utm_acc` link, clicks it, and sees the account appear in Analytics (human acceptance → ACCEPTED).
 
 ## Plan
 
@@ -65,16 +52,11 @@ All done 2026-07-24 (tag named `utm_acc`):
 | 4   | `lib/admin/i18n.ts`                                                                                        | ✅ `analytics.emptyAccount` EN + 中文 now say `utm_acc`                       |
 | 5   | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | ✅ Switched to `utm_acc`; new unit test pins "utm_content is ignored"         |
 | 6   | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md              | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
-| 7   | —                                                                                                          | ✅ Unit tests + analytics e2e spec green                                      |
+| 7   | —                                                                                                          | ✅ `tests/unit/channel-attribution.test.ts` + `tests/e2e/admin-analytics.spec.ts` green 2026-07-24 |
 
 ## Blockers and dependencies
 
-None. The only step left is human acceptance (owner click-test), which is the UAT → VERIFIED gate, not a blocker.
-
-## Verification evidence
-
-- Automated: `tests/unit/channel-attribution.test.ts` and `tests/e2e/admin-analytics.spec.ts` green on 2026-07-24 (includes the "utm_content is ignored" pin).
-- Human: pending — owner to click a real `utm_acc` link on the test deployment and confirm the account shows in Admin → Analytics. Record verifier, date, and environment here when done.
+None. The only step left is human acceptance (owner click-test), which is the UAT → ACCEPTED gate, not a blocker.
 
 ## Related links
 

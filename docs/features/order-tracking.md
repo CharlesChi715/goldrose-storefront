@@ -1,29 +1,18 @@
 ---
-id: order-tracking
-area: backend
-
 delivery: uat
-rollout: test-deployment
+rollout: live
 statusChangedAt: 2026-07-25
-
 priority: p1
-owner: charles
-target: v1-launch
-qualifier: "owner must verify a real carrier link"
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated:
-    - "tests/unit/carriers.test.ts (7 tests — URL templates, encoding, labels)"
-    - "tests/e2e/admin-orders.spec.ts — 'fulfill flow stores tracking' (Other/manual URL) + 'fulfill with the default UPS carrier auto-builds the tracking link'"
-  human: null
 ---
 
-# Order tracking (UPS) — carrier tracking & customer surfaces
+# order-tracking
 
 ## Context
+
+Carrier tracking (UPS first) on fulfilled orders, and the customer surfaces
+that show it: the shipping-confirmation email's link and a delivery-status
+pill on `/account`. Built and deployed; the owner has yet to verify a real
+carrier link, which is the ACCEPTED gate.
 
 - Boss (ideas.md 2026-07-25, verbatim): "UPS/" and "send the order tracking
   email." — he plans to ship from US stock via UPS and wants buyers to get a
@@ -93,7 +82,7 @@ pages come later, if ever.
 - [x] Me section: signed-in customers see a delivery-status pill per order —
       Preparing / Shipped via <carrier> + Track link / Cancelled.
 - [ ] Human acceptance: owner fulfills a sandbox order with a real UPS
-      number, receives the email, link opens UPS tracking (UAT → DONE).
+      number, receives the email, link opens UPS tracking (UAT → ACCEPTED).
 
 ## Plan
 
@@ -114,24 +103,27 @@ aggregator free tier or UPS Track API, post-ship).
 
 ## Blockers and dependencies
 
-- **Apply `0003_tracking_carrier_and_hardening.sql` on hosted Supabase
-  BEFORE deploying this code** — fulfill writes `tracking_carrier`, which
-  errors while the column doesn't exist. Additive + `if not exists`, safe to
-  run via the dashboard SQL editor.
-- The email half only becomes real once the owner sets `RESEND_API_KEY`
-  (an owner activation env-var task, not a feature id).
+- Both original blockers have cleared: `0003_tracking_carrier_and_hardening.sql`
+  is applied on hosted (fulfill needs `tracking_carrier` to exist before the
+  code deploys), and `RESEND_API_KEY` is set on Vercel Production, so the email
+  half is real there — previews still take the console-log fallback on purpose.
+- Nothing else blocks; the only step left is the owner's real-carrier check,
+  which is the UAT → ACCEPTED gate, not a blocker.
 
-## Verification evidence
+## Tech details
 
-- 2026-07-25 — built on worktree branch `worktree-order-tracking`:
-  `npm run test:unit` 35/35 green (7 new carrier tests), eslint + tsc clean,
-  full Playwright e2e suite green (57 tests incl. the two fulfill paths).
-  Awaiting merge to main + Vercel deploy + 0003 on hosted → then UAT.
+- Automated: `tests/unit/carriers.test.ts` (7 tests — URL templates, encoding,
+  labels) and `tests/e2e/admin-orders.spec.ts` ("fulfill flow stores tracking",
+  the Other/manual URL path, plus "fulfill with the default UPS carrier
+  auto-builds the tracking link").
+- 2026-07-25, on worktree branch `worktree-order-tracking`: `npm run test:unit`
+  35/35 green, eslint + tsc clean, full Playwright suite green (57 tests
+  including the two fulfill paths). Merged, deployed, `0003` applied since.
 
 ## Related links
 
-- Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../../admin-design.md)
+- Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../admin-design.md)
 - Activation: owner items in
-  [SUMMARY.md · Release queue](../../../SUMMARY.md#release-queue)
-- SKU rules behind the 0003 bundle: [Database.md](../../Database.md)
+  [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)
+- SKU rules behind the 0003 bundle: [Database.md](../Database.md)
 - Sibling ask, same boss note: [promotion-emails.md](promotion-emails.md)

@@ -1,67 +1,64 @@
-# Feature name
+---
+# VOCABULARY — every allowed key (unknown key = error; `id`/`area` are banned:
+# the filename is the id). Authority: the cli.mjs schema once `check` exists;
+# this block only illustrates it.
+# Presence: (r) always · (a) while ready/in-progress/uat · (v) at accepted · (o) optional
+#
+# delivery states: backlog = born here, approach not chosen · ready = approach
+# chosen, options recorded · in-progress = being built · uat = deployed,
+# awaiting human sign-off (a queue, not an activity) · accepted = a human
+# signed off on the deployed site (evidence required) · dropped = rejected;
+# keep the record, the why-not is the value.
+# rollout = where the code actually runs, independent of delivery.
+delivery: backlog # (r) backlog|ready|in-progress|uat|accepted|dropped
+rollout: not-deployed # (r) not-deployed|test-deployment|live
+statusChangedAt: 2026-08-08 # (r) date of last DELIVERY transition only
+priority: p2 # (a) p0|p1|p2
+blockedBy: [] # (o) record ids
+verification: # (v) ACCEPTED needs human.evidence = URL/SHA/command output
+  automated: []
+  human: null
+---
 
-<!-- Status lives ONLY in the front matter above — never write a status line in the body. -->
+<!-- Guidance comments (this one included) must be deleted as you fill each section; none may survive past backlog. -->
 
 ## Context
 
-<!-- Why this exists: the problem, who asked for it, what happens if we do nothing. -->
+<!-- In one sentence. -->
+
+
+
+<!-- For all the sections below, only generate on explicit demand. -->
 
 ## Decision
 
-<!-- What we chose, in one or two sentences. Required from READY. -->
+<!-- In one sentence. -->
+
+## Plan
+
+<!-- Numbers them: 1. 2. ... each in one sentence, if not current plan decided, skip it and move on to options field -->
 
 ## Options considered
 
-<!-- The "why not X" record — only put the dismissed options here. -->
+<!-- only put options really contemplated and discussed -->
 
 | Option | Pros | Cons | Verdict       |
 | ------ | ---- | ---- | ------------- |
 |        |      |      | ✅ **chosen** |
 |        |      |      | ❌            |
 
-## Acceptance criteria
-
-<!-- Testable checkboxes. The last one is usually the human acceptance that gates UAT → VERIFIED. -->
-
-- [ ]
-
-## Plan
-
-<!-- Work items. Historical record of intent — do NOT retro-edit after shipping; "Verification evidence" describes reality. -->
-
 ## Tech details
 
-<!-- OPTIONAL. What we learned about the TERRAIN while planning this: which APIs
-     or libraries we chose and why, platform constraints, and the traps that cost
-     us time to find. Reference material for whoever builds it.
-
-     Test for what belongs: whose fact is it?
-       - a fact about the PLATFORM ("background tabs throttle setInterval";
-         "IntersectionObserver reports geometry, not occlusion") — keep it, it
-         stays true no matter how we write our code.
-       - a fact about OUR CODE ("the handler lives in X.tsx, shaped like Y") —
-         leave it out, it rots at the first refactor. Post-ship description of
-         how the system works belongs in docs/admin-design.md.
-
-     Cite sources for non-obvious platform claims so they can be re-checked. -->
+<!-- Only asked for -->
 
 ## Blockers and dependencies
 
-<!-- Prose explanation only (the WHY). The ids themselves belong in dependsOn/blockedBy above — never list ids only here. -->
+<!-- In bullet points with one sentence each -->
 
 ## Open questions
 
-<!-- OPTIONAL. Choices still OURS to make — unlike "Blockers", which are someone
-     else's to clear. Number them OQ-1, OQ-2… (same convention as SUMMARY.md).
-     State the options and recommend one; do not write it as decided.
-     Every OQ must have an exit: it either graduates into "Decision" above (we
-     chose), or into SUMMARY.md "Product decisions" (it turned out to be a
-     cross-feature business call). Delete it from here when it exits. -->
-
-## Verification evidence
-
-<!-- Automated: which tests ran green, and when. Human: who verified, date, environment, what they saw. No evidence = not VERIFIED. -->
+<!-- Choices still OURS to make. Number them OQ-1, OQ-2… -->
 
 ## Related links
 
-<!-- Specs and learning docs. -->
+<!-- links in this repo, links of public URL, ... -->

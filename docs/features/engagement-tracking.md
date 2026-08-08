@@ -1,29 +1,17 @@
 ---
-id: engagement-tracking
-area: backend
-
 delivery: in-progress
-rollout: test-deployment
-priority: p2
-owner: charles
-target: v1-launch
-qualifier: "4/7 home sections tagged; vocabulary sign-off pending"
+rollout: live
 statusChangedAt: 2026-08-04
-
-dependsOn: []
-blockedBy: []
-
-verification:
-  automated:
-    - tests/unit/engagement.test.ts
-    - tests/unit/engagement-report.test.ts
-    - tests/e2e/engagement-beacon.spec.ts
-  human: null
+priority: p2
 ---
 
-# Engagement tracking — how long, and which sections
+# engagement-tracking
 
 ## Context
+
+How long a visitor stays and which page sections earn that time — measured by
+our own beacon. Shipped and running live; 3 of the homepage's 7 bands carry a
+`-SECTION` tag, so coverage, not the mechanism, is what remains.
 
 - Owner's idea, 2026-06-28 (`docs/ideas.md`): *"Analytics about behavior of the
   viewer in this website."*
@@ -158,7 +146,7 @@ consent-wording review that gates launch rather than opening that question now.
       existing session/conversion reports are numerically unchanged.
 - [ ] Admin analytics still renders with no measurable slowdown at seeded volume.
 - [ ] Owner opens the test deployment, reads one homepage band for ~30 s, and
-      sees that band top the Section attention card. *(gates UAT → VERIFIED)*
+      sees that band top the Section attention card. *(gates UAT → ACCEPTED)*
 
 ## Plan
 
@@ -175,14 +163,16 @@ and an e2e run asserting a timed visit surfaces on the admin card.
 
 ## Blockers and dependencies
 
-Stage 2 is blocked on element naming, not on code. A-1, A-2, A-3 and A-11 carry
-`data-el` today (`HOME-HERO/FEATURED/PROMISE/STORY-SECTION`); A-5, A-6, A-9,
+Stage 2 is blocked on element naming, not on code. A-1, A-2 and A-11 carry a
+section tag today (`HOME-HERO/FEATURED/STORY-SECTION` — `HOME-PROMISE-SECTION`
+went with the Real Rose Promise strip the design team deleted on 2026-08-07);
+A-3, A-5, A-6, A-9,
 `/shop` and `/products/[slug]` are untagged, and the SECTION vocabulary those
 bands need (`CRAFT`, `OCCASION`, …) is not yet defined and signed off. Tagging
 before a vocabulary exists means renaming across several files later.
 
-No feature-record id exists for element naming, so `dependsOn` stays empty and
-the dependency is recorded here in prose.
+No feature record exists for element naming, so the dependency is recorded here
+in prose rather than as a `blockedBy` id.
 
 ## Open questions
 
@@ -229,9 +219,9 @@ stage 2 is built, because it decides what every section number means.
 Charles: if we choose Biggest share of the viewport wins, what if the section is too small it doesnt     
   shares most of the screen even in the middle of screen? 
 
-## Verification evidence
+## Tech details
 
-**Automated — 2026-07-28, all green.**
+**Automated tests — 2026-07-28, all green.**
 
 - `tests/unit/engagement.test.ts` (15 tests): hidden tabs bank zero; idle past
   the 30 s cut is dropped and interaction restarts the clock; a section below
@@ -270,14 +260,14 @@ returned to its prior 734):
 This mattered because both beacon routes swallow their errors by design: a
 hosted failure would otherwise have been completely silent.
 
-**Not yet verified:** the deployed app. The code is still an uncommitted
-working tree, so nothing on Vercel records engagement yet and the owner
-acceptance criterion is untouched. Section coverage is limited to the three
-bands tagged today
-(`HOME-HERO-SECTION`, `HOME-FEATURED-SECTION`, `HOME-PROMISE-SECTION`) — the
+**Not yet verified:** the deployed app. The code merged to `main` (PR #11) and
+runs on the live site, but nobody has read a real visitor's engagement figures
+back off it, so the owner acceptance criterion is untouched. Section coverage
+is limited to the three bands tagged today (`HOME-HERO-SECTION`,
+`HOME-FEATURED-SECTION`, `HOME-STORY-SECTION`) — the
 mechanism is complete and generic, coverage grows as tagging lands.
 
 ## Related links
 
-- [`docs/features/posting-account-attribution.md`](../posting-account-attribution.md) — the `utm_acc` tag on the same beacon
+- [`docs/features/posting-account-attribution.md`](posting-account-attribution.md) — the `utm_acc` tag on the same beacon
 - `components/Beacon.tsx`, `app/api/beacon/route.ts`, `lib/admin/analytics.ts`

@@ -15,7 +15,7 @@ remains as the dev fallback.
 ## Backup plan
 
 Graduated (2026-07-25) to the feature record
-[features/backend/db-backups.md](features/backend/db-backups.md) — Supabase
+[features/db-backups.md](features/db-backups.md) — Supabase
 Free + nightly pg_dump→S3; decision, rejected options, and work items live
 there.
 

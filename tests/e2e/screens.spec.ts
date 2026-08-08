@@ -2,23 +2,79 @@
  * ROLE OF THIS FILE
  * Smoke cover for the screens imported from the Figma B/C frames: bag (B-1),
  * business partnerships + wholesale application (B-3/B-4), guest order
- * tracking (C-1) and the menu overlay (2345:271). These pages are static
- * design imports, so the checks are deliberately shallow — they prove the
- * route renders, the wired links point where the route table says, and the
- * placeholder controls stay inert. Pixel fidelity is the pixel-diff net's job.
+ * tracking (C-1) and the menu overlay (2345:271). Most of these pages are
+ * static design imports, so the checks are deliberately shallow — they prove
+ * the route renders, the wired links point where the route table says, and
+ * the placeholder controls stay inert. Pixel fidelity is the pixel-diff net's
+ * job. /bag is the exception since 2026-08-07: it reads the real cart, so its
+ * two states and its stepper are checked against real catalog values.
  */
 
 import { test, expect } from "@playwright/test";
 
-test("the bag screen renders and its checkout CTA reaches /checkout", async ({
+// The 2026-08-07 frames give /bag an empty state (2976:375) beside the one
+// with items (1523:3059), and the screen picks between them from the real
+// localStorage cart — so both states need cover, and the cart has to be
+// seeded to see the second. Same key and seeded variant as checkout.spec.ts.
+const CART_KEY = "goldrose-cart-v2";
+const SIGNATURE_VARIANT = "0a2b1a10-4b7e-4d7a-9d24-000000000101";
+
+test("an empty bag shows the empty frame, which leads to /shop", async ({
   page,
 }) => {
   await page.goto("/bag");
   await expect(page.getByText("Shopping Bag", { exact: true })).toBeVisible();
-  // The bag's line items are the design's placeholder rows for now; the CTA is
-  // the one thing that must really work.
+  await expect(
+    page.getByText("Something beautiful belongs here."),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /EXPLORE THE COLLECTION/i }).click();
+  await expect(page).toHaveURL(/\/shop$/);
+});
+
+test("a filled bag lists the real line and its CTA reaches /checkout", async ({
+  page,
+}) => {
+  await page.addInitScript(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      CART_KEY,
+      JSON.stringify([{ variantId: SIGNATURE_VARIANT, quantity: 1 }]),
+    ] as const,
+  );
+
+  await page.goto("/bag");
+  // The line is resolved against the DB catalog, not drawn from the frame.
+  await expect(page.getByText("Signature Rose").first()).toBeVisible();
+  await expect(page.getByText("$49.99").first()).toBeVisible();
+  await expect(page.getByText("Something beautiful belongs here.")).toHaveCount(
+    0,
+  );
+
   await page.getByRole("link", { name: /SECURE CHECKOUT/i }).click();
   await expect(page).toHaveURL(/\/checkout$/);
+});
+
+test("the bag's stepper and Remove drive the real cart", async ({ page }) => {
+  await page.addInitScript(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      CART_KEY,
+      JSON.stringify([{ variantId: SIGNATURE_VARIANT, quantity: 1 }]),
+    ] as const,
+  );
+
+  await page.goto("/bag");
+  await page.getByRole("button", { name: /^Add one / }).click();
+  // One line at $49.99 × 2 — the card shows the LINE total, not the unit price.
+  await expect(page.getByText("$99.98").first()).toBeVisible();
+
+  // `exact`, because Playwright matches an accessible name by SUBSTRING by
+  // default and the stepper's minus button is labelled "Remove one <product>".
+  // Without it the locator resolves to two buttons and the test cannot run.
+  await page.getByRole("button", { name: "Remove", exact: true }).click();
+  await expect(
+    page.getByText("Something beautiful belongs here."),
+  ).toBeVisible();
 });
 
 test("business partnerships links to the wholesale application", async ({

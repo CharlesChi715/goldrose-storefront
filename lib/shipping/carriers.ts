@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Carrier registry for order tracking (Level 1, link-out — see
- * docs/features/backend/order-tracking.md): maps each supported carrier id
+ * docs/features/order-tracking.md): maps each supported carrier id
  * to its display name and public tracking-URL template. fulfillOrder builds
  * the customer-facing link from here when the admin leaves the URL field
  * blank, so a hand-typed URL can no longer ship a dead link. UPS + USPS
