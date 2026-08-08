@@ -8,23 +8,16 @@ verification:
     by: charles
     date: 2026-07-26
     environment: production
-    evidence: "curl -sI …/api/beacon shows x-vercel-id: syd1::pdx1 (see note below)"
+    evidence: "commit fe73e42; curl -sI https://eldreve.com/api/beacon returns x-vercel-id: syd1::pdx1::… (edge::function region)"
 ---
 
 # region-alignment
 
-> **Done 2026-07-26** (commit `fe73e42`): `vercel.json` now pins `pdx1`;
-> both wrong region records are corrected. Verified live —
-> `curl -sI …/api/beacon` returns `x-vercel-id: syd1::pdx1::…` (edge::function
-> region). Only the EU-reads section below remains future work.
-
 ## Context
 
-Put the Vercel compute beside the Oregon database, so every query stops
-crossing the Pacific.
+Vercel's functions were pinned to Sydney while the database sits in Oregon;
+this record moves the compute beside the data.
 
-- Rollout judged 2026-08-08 (record migration, OQ-2): the `pdx1` pin ships in
-  the eldreve.com production deployment, so rollout is `live`.
 - The Supabase primary (`cfvsvgbldnzkcjvbwnjp`) runs in **AWS `us-west-2`
   (Oregon)** — read it from `supabase/.temp/pooler-url`
   (`aws-1-us-west-2.pooler.supabase.com`). The `*.supabase.co` hostname
@@ -42,14 +35,14 @@ crossing the Pacific.
 - Market is US-first (see `SUMMARY.md`), so today a US shopper's checkout
   round-trips US → Sydney → Oregon and back.
 
-## Fix (one line + doc corrections)
+## Decision
 
-1. In `vercel.json`, change `"regions": ["syd1"]` → `"regions": ["pdx1"]`
+1. `vercel.json` pins `"regions": ["pdx1"]` instead of `["syd1"]`
    (Portland = AWS `us-west-2`, same region as the database; fn→DB drops to
    ~1–5 ms).
-2. Correct the "database is in Sydney / ap-southeast-2" claims where they
-   mislead: commit `a62848e`'s message is wrong — messages can't be edited,
-   so the correction is recorded here. (The other stale claim lived in
+2. The "database is in Sydney / ap-southeast-2" claims are corrected wherever
+   they mislead: commit `a62848e`'s message is wrong — messages can't be
+   edited, so the correction is recorded here. (The other stale claim lived in
    `archive/BUILD-REPORT.md`, since deleted with the archive.)
 
 Trade-off: Sydney/China UAT feels ~180 ms slower per dynamic page (one
@@ -60,7 +53,7 @@ Caveat: on the Hobby plan Vercel ignores multi-entry `regions` values beyond
 one region and forces defaults for some features; a single region entry is
 valid on every tier, so `["pdx1"]` is safe regardless of plan.
 
-## Verification
+## Tech details
 
 - `curl -sI https://eldreve.com/api/beacon | grep x-vercel-id`
   on an uncached dynamic route should show `pdx1`.

@@ -8,7 +8,9 @@ statusChangedAt: 2026-08-04
 
 ## Context
 
-Read our own TikTok metrics through the API instead of the Business Suite UI.
+Read ELDREVE's own TikTok metrics through the API, to answer which video
+produced revenue on eldreve.com — a question TikTok's own Business Suite
+cannot see.
 
 - Owner's idea (`docs/ideas.md`, line 81, verbatim): *"tiktok 数据分析"*. Related
   lines in the same file: content will be published to Facebook / TikTok / IG,
@@ -38,6 +40,20 @@ Recorded for the eventual decision; nothing chosen yet.
 | Collector + `/admin/tiktok` dashboard | Full replacement for the analytics half of Business Suite                                            | Rebuilds what TikTok already gives free; still cannot reach LIVE, DMs or retention curves at any effort (see Tech details) | pending |
 
 ## Acceptance criteria
+
+Restored 2026-08-08 from the Chinese mirror, which had kept them after the
+English section was emptied.
+
+- [ ] An approved TikTok app authenticates the ELDREVE business account and
+      returns the video list.
+- [ ] One row per video per day lands in Supabase; re-running the same day is
+      idempotent (no duplicate rows).
+- [ ] Rows outlive TikTok's own 60-day analytics window — day 1's figures are
+      still in the table 90 days later.
+- [ ] A video arrived at via `?utm_source=tiktok&utm_content=<video_id>` joins
+      from `page_views` through to an order.
+- [ ] Human acceptance: Charles compares one video's archived figures against
+      Business Suite for the same day and they agree.
 
 ## Plan
 
@@ -327,10 +343,6 @@ return to identifying *which creative* a visitor arrived from.
   trade-off (organic reach vs. commercial tooling), not a technical one, and it
   may belong in SUMMARY.md "Product decisions" rather than here.
 
-## Verification evidence
-
-Nothing built; no evidence. Front matter stays BACKLOG until OQ-1 is answered.
-
 ## Related links
 
 - [posting-account-attribution.md](posting-account-attribution.md) — the
@@ -358,6 +370,9 @@ Nothing built; no evidence. Front matter stays BACKLOG until OQ-1 is answered.
 > 端点路径、字段名、文件路径、专有名词一律保留英文原文。
 
 ## 背景
+
+用 API 读取 ELDREVE 自己的 TikTok 数据，回答"哪条视频在 eldreve.com 上带来了
+收入"——这个问题 TikTok 自带的 Business Suite 看不到。
 
 - 老板的想法（`docs/ideas.md` 第 81 行，原文）：*"tiktok 数据分析"*。同一文件里
   相关的几行还提到：内容会发布到 Facebook / TikTok / IG，达人要在美国找。
@@ -646,10 +661,6 @@ Campaign、Ad、Audience、Creative、Measurement、Reporting、BC，外加
   真正的分发机制。*建议：* 上报老板决定。这是一个营销层面的取舍（自然流量 vs 商业
   工具），不是技术问题，而且它可能更应该写在 SUMMARY.md 的"Product decisions"里，
   而不是这里。
-
-## 验证证据
-
-什么都还没做，没有证据。在 OQ-1 有答案之前，front matter 保持 BACKLOG。
 
 ## 相关链接
 

@@ -8,8 +8,8 @@ statusChangedAt: 2026-07-25
 
 ## Context
 
-Marketing email to registered customers: consent capture, a subscriber list,
-and campaign sends.
+Marketing email to registered customers — the consent record, the list it
+builds, and the campaigns sent from it. Only transactional mail exists today.
 
 - Boss (ideas.md 2026-07-25, verbatim): "user register must need email" — and
   Charles asked how we could send registered users promotion emails.
@@ -81,10 +81,6 @@ No feature-id dependencies. Practically gated by the owner's Resend
 activation (`RESEND_API_KEY` + domain verification — owner activation
 env-var tasks). Campaign *content* (what to send, cadence) is the owner's call and
 out of scope here.
-
-## Verification evidence
-
-None yet — BACKLOG.
 
 ## Related links
 

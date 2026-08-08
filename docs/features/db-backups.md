@@ -8,8 +8,8 @@ statusChangedAt: 2026-07-25
 
 ## Context
 
-Back the hosted database up ourselves: stay on Supabase Free and ship a
-nightly `pg_dump` → S3 pipeline.
+Nightly `pg_dump` of the hosted Supabase project to AWS S3, because Supabase's
+own daily backups are Pro-only and the live database has none today.
 
 - Supabase's built-in daily backups are **Pro-only ($25/mo)**; we are on Free,
   so the hosted project (**LIVE data**, ref `cfvsvgbldnzkcjvbwnjp`) currently
@@ -71,7 +71,7 @@ Scheduler (open):
       Supabase project) and the admin app reads it — documented as a runbook,
       repeated monthly.
 - [ ] Human acceptance: Charles completes one full restore drill and records
-      the evidence below.
+      the evidence in `verification.human` (the ACCEPTED gate).
 
 ## Plan
 
@@ -89,10 +89,6 @@ None on other features. Needs an AWS account (Charles) and the hosted
 project's session-pooler connection string. Gotcha worth repeating: Supabase
 direct connections are IPv6-only — from GitHub-hosted runners the dump must go
 through the session pooler.
-
-## Verification evidence
-
-None yet — BACKLOG.
 
 ## Related links
 

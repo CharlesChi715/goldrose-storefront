@@ -9,8 +9,8 @@ priority: p0
 
 ## Context
 
-Take Visa and Mastercard on our own checkout page, instead of sending every
-card buyer into PayPal's window.
+Visa and Mastercard paid on our own checkout page, without the buyer leaving
+for PayPal's window.
 
 - Owner ask (2026-07-26): "just start build: Visa, PayPal, Mastercard".
   `SUMMARY.md` has listed those three as the US launch requirement for a while,
@@ -27,6 +27,9 @@ card buyer into PayPal's window.
   real money — it would drag us into PCI scope we have no reason to enter.
 - The provider question was tracked as **OQ-1** and had been open since
   2026-07-22. This record closes it.
+- No evidence exists yet because nothing is built. The PayPal *wallet* took a
+  real card-funded payment on 2026-07-15, which proves the account works; it
+  exercises none of this.
 
 ## Decision
 
@@ -102,11 +105,6 @@ Tracked as stages 0–7 (session task list, 2026-07-26):
   here** — wallet included, not just cards.
 - `PAYPAL_WEBHOOK_ID` must be set or signature verification fails closed and every
   delivery 401s.
-
-## Verification evidence
-
-None yet — nothing built. The PayPal *wallet* took a real card-funded payment on
-2026-07-15, which proves the account works; it does not exercise any of this.
 
 ## Related links
 

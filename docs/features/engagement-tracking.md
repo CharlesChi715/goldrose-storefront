@@ -3,19 +3,15 @@ delivery: in-progress
 rollout: live
 statusChangedAt: 2026-08-04
 priority: p2
-verification:
-  automated:
-    - tests/unit/engagement.test.ts
-    - tests/unit/engagement-report.test.ts
-    - tests/e2e/engagement-beacon.spec.ts
-  human: null
 ---
 
 # engagement-tracking
 
 ## Context
 
-Measure how long a visitor stays and which sections of the page hold them.
+How long a visitor stays and which page sections earn that time — measured by
+our own beacon. Shipped and running live; 3 of the homepage's 7 bands carry a
+`-SECTION` tag, so coverage, not the mechanism, is what remains.
 
 - Owner's idea, 2026-06-28 (`docs/ideas.md`): *"Analytics about behavior of the
   viewer in this website."*
@@ -26,9 +22,6 @@ Measure how long a visitor stays and which sections of the page hold them.
   2026-08-04 simplified-homepage import cut it from 11 and deleted A-4/A-7/A-8/A-10
   at source). Nobody knows which ones earn attention and which are scrolled past —
   so nobody can say what to cut, move up, or spend photography money on.
-- Rollout judged 2026-08-08 (record migration, OQ-2): the beacon ships in the
-  eldreve.com production deployment, so rollout is `live`; delivery stays
-  `in-progress` because only 4 of the 7 bands are tagged.
 
 ## Decision
 
@@ -144,14 +137,16 @@ and an e2e run asserting a timed visit surfaces on the admin card.
 
 ## Blockers and dependencies
 
-Stage 2 is blocked on element naming, not on code. A-1, A-2, A-3 and A-11 carry
-`data-el` today (`HOME-HERO/FEATURED/PROMISE/STORY-SECTION`); A-5, A-6, A-9,
+Stage 2 is blocked on element naming, not on code. A-1, A-2 and A-11 carry a
+section tag today (`HOME-HERO/FEATURED/STORY-SECTION` — `HOME-PROMISE-SECTION`
+went with the Real Rose Promise strip the design team deleted on 2026-08-07);
+A-3, A-5, A-6, A-9,
 `/shop` and `/products/[slug]` are untagged, and the SECTION vocabulary those
 bands need (`CRAFT`, `OCCASION`, …) is not yet defined and signed off. Tagging
 before a vocabulary exists means renaming across several files later.
 
-No feature record exists for element naming, so `blockedBy` stays absent and
-the dependency is recorded here in prose.
+No feature record exists for element naming, so the dependency is recorded here
+in prose rather than as a `blockedBy` id.
 
 ## Open questions
 
@@ -198,9 +193,9 @@ stage 2 is built, because it decides what every section number means.
 Charles: if we choose Biggest share of the viewport wins, what if the section is too small it doesnt     
   shares most of the screen even in the middle of screen? 
 
-## Verification evidence
+## Tech details
 
-**Automated — 2026-07-28, all green.**
+**Automated tests — 2026-07-28, all green.**
 
 - `tests/unit/engagement.test.ts` (15 tests): hidden tabs bank zero; idle past
   the 30 s cut is dropped and interaction restarts the clock; a section below
@@ -239,11 +234,11 @@ returned to its prior 734):
 This mattered because both beacon routes swallow their errors by design: a
 hosted failure would otherwise have been completely silent.
 
-**Not yet verified:** the deployed app. The code is still an uncommitted
-working tree, so nothing on Vercel records engagement yet and the owner
-acceptance criterion is untouched. Section coverage is limited to the three
-bands tagged today
-(`HOME-HERO-SECTION`, `HOME-FEATURED-SECTION`, `HOME-PROMISE-SECTION`) — the
+**Not yet verified:** the deployed app. The code merged to `main` (PR #11) and
+runs on the live site, but nobody has read a real visitor's engagement figures
+back off it, so the owner acceptance criterion is untouched. Section coverage
+is limited to the three bands tagged today (`HOME-HERO-SECTION`,
+`HOME-FEATURED-SECTION`, `HOME-STORY-SECTION`) — the
 mechanism is complete and generic, coverage grows as tagging lands.
 
 ## Related links

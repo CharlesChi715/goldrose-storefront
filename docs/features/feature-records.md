@@ -34,6 +34,11 @@ Dated 2026-08-08:
   codes 0/1/2; hints are agent playbooks (did-you-mean via edit distance).
 - Migration is check-driven: no codemod — the validator's report IS the SOP,
   and every rule written for it keeps guarding afterwards.
+- Records conform to the CURRENT template (owner, 2026-08-08, settling the
+  A/B-experiment divergence): when a record is migrated or materially edited,
+  legacy sections are folded into template sections or deleted — compact over
+  conservative. Mutability still protects untouched bodies; it never protects
+  a fossil through an edit.
 
 ## Plan
 
