@@ -175,6 +175,27 @@ Open linked resources only when the task needs them.
   destroyed by a click the way a URL can. `?adminPreview` stays on the iframes
   as a readable marker but is deliberately **not** the test: on its own it would
   be an analytics kill switch anyone could type into the URL bar.
+- **You edit the home page by pointing at it (2026-08-08,
+  `worktree-admin-home-customization`).** Every editable node on `/` carries a
+  `data-field` naming its registry slot, so arming the picker on Content → Home
+  page outlines the lot and a click opens that one field in an editor docked
+  beside the preview, joined to it by a curve. The pointer never reaches the
+  preview — the storefront's links are real and one click would navigate the
+  frame off `/` — so a transparent layer takes the click and the hit is resolved
+  by translating it into the frame's coordinates. Typing writes straight into
+  the frame's DOM (`picker/patch.ts`); kinds that cannot honestly be faked (rail
+  timings, Figma-baked labels) say "save to see this" instead. A field you can
+  point at is no longer listed below, which collapsed the form from ~180 rows to
+  25 — searching suspends the rule, since that is how somebody hunts one field.
+  ⚠️ **The rule that must not be broken:** the frame loop that measures those
+  rectangles lives in a LEAF (`picker/PickerLayer.tsx`), never on the screen
+  itself. Polaris' `Page` re-measures its header actions from a `useEffect` on
+  every render and `setState`s inside it, and it cannot be talked out of it from
+  outside — so a 60Hz publisher above it is a nested-update storm that killed
+  the screen with "Maximum update depth exceeded" whenever a page scrolled under
+  a selection. `tests/e2e/admin-home-picker.spec.ts` is the picker's first
+  driving coverage; it does not reproduce the storm in headless Chromium, so
+  that part is verified by hand in a real browser.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one

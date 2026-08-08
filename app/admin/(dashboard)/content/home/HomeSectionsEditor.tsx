@@ -71,11 +71,11 @@ import { HomePageMap } from "./HomePageMap";
 import { MainPreview } from "./MainPreview";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import { EditorPanel, type PickedField } from "./picker/EditorPanel";
-import { Overlay } from "./picker/Overlay";
-import { usePicker } from "./picker/usePicker";
+import { PickerLayer } from "./picker/PickerLayer";
+import { usePickerPointer } from "./picker/usePicker";
 import { indexByField } from "./picker/fieldIndex";
 import { patchField, whenPatchable } from "./picker/patch";
-import { visibleRect, type Rect } from "./picker/geometry";
+import { visibleRect } from "./picker/geometry";
 import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
@@ -329,12 +329,15 @@ export function HomeSectionsEditor({
     [sections],
   );
 
+  // Handlers only. What the picker MEASURES is deliberately not here: that
+  // state changes sixty times a second, and this component is the Polaris
+  // `Page` — see picker/PickerLayer.tsx for why the two must not meet.
   const {
-    view: pickerView,
+    pointer,
     onPointerMove,
     onPointerLeave,
     onClick: pick,
-  } = usePicker(previewFrame, armed, picked[0]?.key ?? null, pickKeys);
+  } = usePickerPointer(previewFrame, pickKeys);
 
   /**
    * Where the docked editor is, and where it should sit.
@@ -347,90 +350,49 @@ export function HomeSectionsEditor({
    * keep consistent, and here it would also be a frame stale.
    */
   /**
-   * The panel's own rectangle (what the connector aims at) and where it sits.
+   * Where the docked editor sits — and ONLY that.
    *
-   * `top` is decided ONCE per selection and then left alone. It used to follow
+   * `top` is decided once per selection and then left alone. It used to follow
    * the selection every frame, which is unusable on anything inside a rail: the
    * carousels advance every 4.2 seconds with a 900ms glide, so the panel chased
    * the card away while somebody was typing in it. A form that moves under the
    * cursor is worse than a connector that stretches, so the panel anchors where
    * the element was when it was picked and the curve does the following.
-   */
-  /**
-   * The panel's own rectangle (what the connector aims at) and where it sits.
    *
-   * `top` is decided ONCE per selection and then left alone. It used to follow
-   * the selection every frame, which is unusable on anything inside a rail: the
-   * carousels advance every 4.2 seconds with a 900ms glide, so the panel chased
-   * the card away while somebody was typing in it. A form that moves under the
-   * cursor is worse than a connector that stretches.
-   *
-   * And it is measured on CHANGE, not on a frame loop. Two rAF loops each
-   * publishing 60 times a second, whose inputs are each other's outputs, is
-   * what React reports as "maximum update depth exceeded" — typing one
-   * character was enough to tip it over. Since the panel is frozen in place,
-   * its rectangle only moves when its own content resizes or the admin
-   * scrolls, and those say so for themselves.
+   * The panel's own RECTANGLE — what the connector aims at — is not state here.
+   * It moves whenever the admin scrolls, so holding it on this component would
+   * re-render the Polaris `Page` at scroll rate, which is exactly the storm
+   * that killed this screen. PickerLayer measures it in the frame loop it is
+   * already running, and draws it without telling anybody.
    */
-  const [panel, setPanel] = useState<{ rect: Rect; top: number } | null>(null);
+  const [panelTop, setPanelTop] = useState(0);
   const selectedKey = picked[0]?.key ?? null;
 
   useEffect(() => {
-    if (selectedKey === null) {
-      return;
-    }
-    // Decided once, from wherever the element was when it was picked.
-    let frozenTop: number | null = null;
-
+    // Nothing picked means no panel is rendered, so the last value is simply
+    // unread until the next selection measures over it.
+    if (selectedKey === null) return;
     const measure = () => {
       const node = panelRef.current;
       const column = node?.parentElement;
       const iframe = previewFrame.current;
-      if (!node || !column) return;
-      const columnTop = column.getBoundingClientRect().top;
-      if (frozenTop === null && iframe) {
-        const element = iframe.contentDocument?.querySelector(
-          `[data-field~="${selectedKey}"]`,
-        );
-        const rect = element ? visibleRect(element, iframe) : null;
-        if (rect) frozenTop = Math.max(0, rect.y - columnTop);
-      }
-      const box = node.getBoundingClientRect();
-      const next = {
-        rect: { x: box.x, y: box.y, w: box.width, h: box.height },
-        top: frozenTop ?? 0,
-      };
-      setPanel((current) =>
-        current &&
-        Math.abs(current.rect.x - next.rect.x) < 0.5 &&
-        Math.abs(current.rect.y - next.rect.y) < 0.5 &&
-        Math.abs(current.rect.w - next.rect.w) < 0.5 &&
-        Math.abs(current.rect.h - next.rect.h) < 0.5 &&
-        Math.abs(current.top - next.top) < 0.5
-          ? current
-          : next,
+      if (!node || !column || !iframe) return false;
+      const element = iframe.contentDocument?.querySelector(
+        `[data-field~="${selectedKey}"]`,
       );
+      const rect = element ? visibleRect(element, iframe) : null;
+      if (!rect) return false;
+      const columnTop = column.getBoundingClientRect().top;
+      setPanelTop(Math.max(0, rect.y - columnTop));
+      return true;
     };
 
     // The element may not be measurable on the first pass — the frame can still
     // be settling — so try again on the next frame, once, rather than forever.
-    measure();
-    const retry = requestAnimationFrame(measure);
-
-    const observer = new ResizeObserver(measure);
-    if (panelRef.current) observer.observe(panelRef.current);
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener("resize", measure, { passive: true });
-    return () => {
-      cancelAnimationFrame(retry);
-      observer.disconnect();
-      window.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
-    };
+    if (measure()) return;
+    const retry = requestAnimationFrame(() => measure());
+    return () => cancelAnimationFrame(retry);
   }, [selectedKey]);
-
-  const panelRect = picked.length > 0 ? (panel?.rect ?? null) : null;
-  const panelTop = panel?.top ?? 0;
   // Each section's own preview width is deliberately NOT here: it lives in the
   // SectionPreview that owns it, so dragging one slider does not re-render this
   // screen's ~180 fields on every pixel. See that file for the measurements.
@@ -1242,12 +1204,12 @@ export function HomeSectionsEditor({
 
       {/* Drawn over everything, in viewport coordinates, because every rect it
           holds came from getBoundingClientRect. Never takes the pointer. */}
-      <Overlay
-        all={pickerView.all}
-        hover={pickerView.hover}
-        selected={pickerView.selected}
-        panel={panelRect}
+      <PickerLayer
+        iframeRef={previewFrame}
+        pointer={pointer}
         armed={armed}
+        selectedKey={selectedKey}
+        panelRef={panelRef}
       />
 
       {toast ? (

@@ -6219,3 +6219,55 @@ three `430` constants (each carries its own explanation), and rendering
 `HomeHeader` in the hero preview (its strip covers only empty cream — checked).
 
 138 e2e and 142 unit tests pass.
+
+## 2026-08-08 — the home-page picker's "Maximum update depth exceeded", diagnosed and fixed
+
+**Branch:** `worktree-admin-home-customization`
+
+The crash `77b2e30` claimed to fix, and `cf3af37` correctly recorded as still
+open, is fixed. Both earlier diagnoses were wrong about the mechanism, so this
+one was taken from a stack trace rather than from reasoning.
+
+**What it actually was.** The screen's root is a Polaris `Page`. Polaris'
+`ActionMenu → Actions → ActionsMeasurer` re-measures the header's action buttons
+in a `useEffect` and calls `setState` from inside that effect, and it re-runs on
+EVERY render of the `Page` — not only when our props change. It cannot be fixed
+from outside by memoising `secondaryActions`: `Page`'s own `Header` builds a
+fresh `actionGroups = []` default per render, so the measurer's dependencies
+change regardless. One re-measure per keystroke is invisible; sixty a second is
+a nested-update chain React ends by throwing.
+
+The 60Hz publisher was `usePicker`'s frame loop, which lived on the editor
+screen itself — i.e. on the `Page`. Anything that moved the preview under a
+selection (a scroll, a rail glide, the width slider) published a new view every
+frame, and each one re-rendered the `Page`.
+
+**Trigger, corrected.** Not typing. `arm → click a field → scroll` is enough,
+with nothing typed at all. Typing was blamed because typing is one re-render;
+scrolling is sixty.
+
+**Fix.** Split the hook: `usePickerPointer` keeps the (stateless, stable)
+capture handlers on the screen; `usePickerView` owns the measurement and is
+called only from `picker/PickerLayer.tsx`, a leaf that draws the overlay and
+nothing else. The docked panel's rectangle moved into the same loop, so the
+second measuring effect (ResizeObserver + window scroll) is gone and the screen
+now stores only the panel's frozen `top`. Net effect: the `Page` no longer
+re-renders on picker movement at all, which also stops re-rendering ~180 fields
+sixty times a second.
+
+**Coverage.** `tests/e2e/admin-home-picker.spec.ts` is the first test in the
+suite that drives the picker at all — the gap `cf3af37` identified. Honest
+limit: it does NOT reproduce the update storm in headless Chromium (wheel
+events, and even a scripted 150-frame glide, never trip React's counter there),
+so it is driving coverage, not a regression net for this specific loop. The fix
+was verified by hand in a real browser against the exact sequence that crashed:
+before, ten scroll ticks killed the screen every time; after, typing plus sixty
+ticks in both directions leaves it working, with rings, hover and the connector
+all still drawn.
+
+`picker/KNOWN-ISSUE.md` is deleted — the rule it protected is now stated in the
+headers of `usePicker.ts` and `PickerLayer.tsx`, where somebody about to break
+it will actually read it.
+
+**Verified:** `tsc --noEmit` clean, ESLint clean, 153 unit tests, 148 e2e
+(including the three pixel baselines).
