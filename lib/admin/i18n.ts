@@ -773,6 +773,19 @@ const en = {
     "Drag to see the page on a smaller or larger phone — from the narrowest still in use to the widest sold today. The page scales as a whole, so a narrow phone makes everything smaller rather than re-wrapping the text.",
   "home.previewWidthReset": "Back to design width",
 
+  // Content → Home page · point-and-edit
+  "home.picker.arm": "Point at something to edit it",
+  "home.picker.disarm": "Done pointing",
+  "home.picker.armed":
+    "Everything you can change is outlined. Point at one and click it.",
+  "home.picker.close": "Close",
+  "home.picker.needsSave":
+    "This one only changes the preview after you save — it is not something the page can show straight away.",
+  "home.picker.artworkPicked":
+    "This wording is part of a picture the design team exported, so it cannot be typed here.",
+  "home.picker.hint":
+    "Prefer a list? Every section below still holds all of its fields.",
+
   // Content → Home page · the per-section preview
   "home.sectionPreview": "This section on the page",
   "home.sectionPreviewHelp":
@@ -1533,6 +1546,16 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "home.previewWidthHelp":
     "拖动可查看页面在更小或更大手机上的效果——从目前仍在使用的最窄机型，到当前在售的最宽机型。页面整体等比缩放，因此宽度变窄只会让所有内容变小，文字不会重新换行。",
   "home.previewWidthReset": "恢复设计宽度",
+
+  // 内容 → 首页 · 指哪改哪
+  "home.picker.arm": "点选页面内容进行修改",
+  "home.picker.disarm": "结束点选",
+  "home.picker.armed": "所有可修改的内容都已用虚线标出。指向其中一处并点击。",
+  "home.picker.close": "关闭",
+  "home.picker.needsSave":
+    "此项需保存后才会在预览中生效——页面无法即时呈现这类改动。",
+  "home.picker.artworkPicked": "该文字属于设计团队导出的图片，无法在此输入。",
+  "home.picker.hint": "更习惯用列表？下方每个板块仍保留全部字段。",
 
   // 内容 → 首页 · 单个板块预览
   "home.sectionPreview": "本板块在页面中的位置",

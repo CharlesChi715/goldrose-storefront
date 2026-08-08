@@ -38,7 +38,15 @@
  *   the same button as copy edits made "Hide" look like it had not worked.
  */
 
-import { useMemo, useState, useSyncExternalStore, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   Badge,
@@ -62,6 +70,11 @@ import { useAdminLang, useAdminT } from "../../../PolarisShell";
 import { HomePageMap } from "./HomePageMap";
 import { MainPreview } from "./MainPreview";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
+import { EditorPanel, type PickedField } from "./picker/EditorPanel";
+import { Overlay } from "./picker/Overlay";
+import { usePicker } from "./picker/usePicker";
+import { patchField, whenPatchable } from "./picker/patch";
+import type { Rect } from "./picker/geometry";
 import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
@@ -279,6 +292,91 @@ export function HomeSectionsEditor({
   // Which phone width the preview is standing in for. Session-local: it is a
   // way of looking at the page, not a setting that belongs to the store.
   const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
+
+  /* --- Point-and-edit ---------------------------------------------------- */
+  const previewFrame = useRef<HTMLIFrameElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const [armed, setArmed] = useState(false);
+  const [picked, setPicked] = useState<PickedField[]>([]);
+
+  /** Resolve the keys a clicked element carries back to registry fields. */
+  const pickKeys = useCallback(
+    (keys: string[]) => {
+      const found: PickedField[] = [];
+      for (const key of keys) {
+        const [sectionId, ...rest] = key.split(".");
+        const fieldId = rest.join(".");
+        const section = sections.find((entry) => entry.id === sectionId);
+        const field = section?.fields.find((entry) => entry.id === fieldId);
+        if (section && field) found.push({ key, section, field });
+      }
+      setPicked(found);
+    },
+    [sections],
+  );
+
+  const {
+    view: pickerView,
+    onPointerMove,
+    onPointerLeave,
+    onClick: pick,
+  } = usePicker(previewFrame, armed, picked[0]?.key ?? null, pickKeys);
+
+  /**
+   * Where the docked editor is, and where it should sit.
+   *
+   * Both are measured in the same frame loop, because both move for the same
+   * reasons: the preview scrolls independently of the admin, the rails slide a
+   * card out from under the selection every 4.2 seconds, and the width slider
+   * re-lays-out at frame rate. `top` is stored rather than read from the ref at
+   * render time — reading a ref during render is exactly the thing React cannot
+   * keep consistent, and here it would also be a frame stale.
+   */
+  const [panel, setPanel] = useState<{ rect: Rect; columnTop: number } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (picked.length === 0) return;
+    let raf = 0;
+    const track = () => {
+      const node = panelRef.current;
+      const column = node?.parentElement;
+      if (node && column) {
+        const box = node.getBoundingClientRect();
+        const next = {
+          rect: { x: box.x, y: box.y, w: box.width, h: box.height },
+          columnTop: column.getBoundingClientRect().top,
+        };
+        // Publish only real movement. This loop and the picker's feed each
+        // other — the panel's position depends on the selection's rect, and its
+        // own rect is what the connector aims at — so setting state on every
+        // frame regardless is what React reports as "maximum update depth
+        // exceeded", not merely a waste.
+        setPanel((current) =>
+          current &&
+          Math.abs(current.rect.x - next.rect.x) < 0.5 &&
+          Math.abs(current.rect.y - next.rect.y) < 0.5 &&
+          Math.abs(current.rect.w - next.rect.w) < 0.5 &&
+          Math.abs(current.rect.h - next.rect.h) < 0.5 &&
+          Math.abs(current.columnTop - next.columnTop) < 0.5
+            ? current
+            : next,
+        );
+      }
+      raf = requestAnimationFrame(track);
+    };
+    raf = requestAnimationFrame(track);
+    return () => cancelAnimationFrame(raf);
+  }, [picked.length]);
+
+  const panelRect = picked.length > 0 ? (panel?.rect ?? null) : null;
+  // Both numbers are viewport-relative; the panel is positioned inside the
+  // column, so the column's own top comes off. Derived at render from two
+  // measured values rather than read back off a ref.
+  const anchorTop = pickerView.selected[0]?.y ?? null;
+  const panelTop =
+    anchorTop !== null && panel ? Math.max(0, anchorTop - panel.columnTop) : 0;
   // Each section's own preview width is deliberately NOT here: it lives in the
   // SectionPreview that owns it, so dragging one slider does not re-render this
   // screen's ~180 fields on every pixel. See that file for the measurements.
@@ -388,6 +486,53 @@ export function HomeSectionsEditor({
     }, t("home.saved"));
   }
 
+  /**
+   * Record a draft AND show it in the preview immediately.
+   *
+   * The write into the frame is the whole "live as you type" feature: the
+   * preview is a server-rendered page in a same-origin iframe, so the parent can
+   * set the text directly rather than re-rendering a route that reads
+   * `site_content` in full on every keystroke. Kinds that cannot honestly be
+   * faked — a rail timing resolved into a `setInterval`, a Figma-baked label —
+   * are refused by `patchField` and the panel says "save to see this" instead.
+   */
+  const setDraft = useCallback(
+    (key: string, next: string, field?: FieldView) => {
+      setDrafts((current) => ({ ...current, [key]: next }));
+      const doc = previewFrame.current?.contentDocument;
+      if (doc && field) patchField(doc, field, key, next);
+    },
+    [],
+  );
+
+  // A save remounts the frame, and the rails hydrate over server HTML. Writing
+  // into that window is a hydration mismatch, which React 19 resolves by
+  // re-rendering the subtree from its own props — silently reverting the edit.
+  // So after every reload, unsaved drafts are re-applied once it is safe.
+  useEffect(() => {
+    const frame = previewFrame.current;
+    const frameWindow = frame?.contentWindow;
+    if (!frameWindow) return;
+    let cancelled = false;
+    whenPatchable(frameWindow).then(() => {
+      if (cancelled) return;
+      const doc = frame.contentDocument;
+      if (!doc) return;
+      for (const section of sections) {
+        for (const field of section.fields) {
+          const key = `${section.id}.${field.id}`;
+          const draft = drafts[key];
+          if (draft !== undefined) patchField(doc, field, key, draft);
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // Only on reload: re-running per keystroke would fight the direct writes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewNonce, sections]);
+
   /** Drop one field's local draft without touching what is saved. */
   function clearDraft(key: string) {
     setDrafts((current) => {
@@ -464,8 +609,7 @@ export function HomeSectionsEditor({
     const dirty = drafts[key] !== undefined && drafts[key] !== field.value;
     const error = fieldError(field, value);
     const errorText = error ? t(`home.bad.${error}` as never) : undefined;
-    const set = (next: string) =>
-      setDrafts((current) => ({ ...current, [key]: next }));
+    const set = (next: string) => setDraft(key, next, field);
 
     /* --- Photo ---------------------------------------------------------- */
     if (field.kind === "image") {
@@ -717,17 +861,112 @@ export function HomeSectionsEditor({
               </BlockStack>
             </Card>
 
+            {/* Point-and-edit. One control, not two: arming it outlines
+                everything editable AND lets you point at one, because those are
+                the same mode at rest and in use. */}
+            <Card>
+              <InlineStack align="space-between" blockAlign="center" gap="200">
+                <Text as="span" variant="bodySm" tone="subdued">
+                  {armed ? t("home.picker.armed") : t("home.picker.hint")}
+                </Text>
+                <Button
+                  variant={armed ? "primary" : "secondary"}
+                  onClick={() => {
+                    setArmed((on) => !on);
+                    setPicked([]);
+                  }}
+                >
+                  {armed ? t("home.picker.disarm") : t("home.picker.arm")}
+                </Button>
+              </InlineStack>
+            </Card>
+
             {/* The page itself, at whatever phone width the owner picks.
                 Its own component so that dragging its slider re-renders one
-                card rather than this screen's ~180 fields — see MainPreview. */}
-            <MainPreview
-              designWidth={DESIGN_WIDTH}
-              min={PREVIEW_MIN_WIDTH}
-              max={PREVIEW_MAX_WIDTH}
-              nonce={previewNonce}
-              onRefresh={() => setPreviewNonce((n) => n + 1)}
-              onWidthSettled={setPreviewWidth}
-            />
+                card rather than this screen's ~180 fields — see MainPreview.
+                `relative` so the docked editor can sit in this column. */}
+            {/* Preview and editor sit SIDE BY SIDE, with the connector bowing
+                through the gap between them — the editor must never cover the
+                thing it is editing. `wrap` is the honest fallback on a narrow
+                window: there is no "beside" to dock to, so it stacks. */}
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "flex-start",
+                gap: 16,
+              }}
+            >
+              {/* Held to the widest phone plus the card's own padding. A
+                  Polaris Card is block-level and would otherwise take the whole
+                  row, leaving the editor nowhere to dock. */}
+              <div
+                style={{
+                  flex: "0 0 auto",
+                  width: PREVIEW_MAX_WIDTH + 80,
+                  maxWidth: "100%",
+                }}
+              >
+                <MainPreview
+                  designWidth={DESIGN_WIDTH}
+                  min={PREVIEW_MIN_WIDTH}
+                  max={PREVIEW_MAX_WIDTH}
+                  nonce={previewNonce}
+                  onRefresh={() => setPreviewNonce((n) => n + 1)}
+                  onWidthSettled={setPreviewWidth}
+                  iframeRef={previewFrame}
+                  capture={
+                    armed
+                      ? { onPointerMove, onPointerLeave, onClick: pick }
+                      : null
+                  }
+                />
+              </div>
+              {/* The editor's own column. It only takes space while something is
+                  picked, so the preview keeps the full width the rest of the
+                  time. */}
+              <div
+                style={{
+                  position: "relative",
+                  flex: picked.length > 0 ? "1 1 320px" : "0 0 0px",
+                  minWidth: picked.length > 0 ? 300 : 0,
+                  alignSelf: "stretch",
+                }}
+              >
+                <EditorPanel
+                  picked={picked}
+                  valueOf={valueOf}
+                  errorOf={(field, value) => {
+                    const reason = fieldError(field, value);
+                    return reason
+                      ? t(`home.bad.${reason}` as never)
+                      : undefined;
+                  }}
+                  dirtyOf={(key) => drafts[key] !== undefined}
+                  onChange={(key, next) => {
+                    const entry = picked.find((one) => one.key === key);
+                    setDraft(key, next, entry?.field);
+                  }}
+                  onOpenPhoto={(one) =>
+                    setPhoto({ section: one.section, field: one.field })
+                  }
+                  onReset={(one) => {
+                    if (!one.field.edited) {
+                      clearDraft(one.key);
+                      return;
+                    }
+                    run(async () => {
+                      await resetHomeFieldAction(one.section.id, one.field.id);
+                      clearDraft(one.key);
+                    }, t("home.saved"));
+                  }}
+                  onClose={() => setPicked([])}
+                  pending={pending}
+                  panelRef={panelRef}
+                  top={panelTop}
+                />
+              </div>
+            </div>
           </BlockStack>
         </Layout.Section>
 
@@ -922,6 +1161,16 @@ export function HomeSectionsEditor({
           </Text>
         </Modal.Section>
       </Modal>
+
+      {/* Drawn over everything, in viewport coordinates, because every rect it
+          holds came from getBoundingClientRect. Never takes the pointer. */}
+      <Overlay
+        all={pickerView.all}
+        hover={pickerView.hover}
+        selected={pickerView.selected}
+        panel={panelRect}
+        armed={armed}
+      />
 
       {toast ? (
         <Toast content={toast} onDismiss={() => setToast(null)} />

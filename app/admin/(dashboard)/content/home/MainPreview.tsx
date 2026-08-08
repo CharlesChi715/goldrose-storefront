@@ -53,6 +53,13 @@ import { useAdminT } from "../../../PolarisShell";
  * @param props.onWidthSettled - Publish the width the sections should match.
  * @returns The page-wide preview card.
  */
+/** The picker's pointer handlers, when it is armed. */
+export type CaptureHandlers = {
+  onPointerMove: (event: React.PointerEvent) => void;
+  onPointerLeave: () => void;
+  onClick: (event: React.MouseEvent) => void;
+};
+
 export function MainPreview({
   designWidth,
   min,
@@ -60,6 +67,8 @@ export function MainPreview({
   nonce,
   onRefresh,
   onWidthSettled,
+  iframeRef,
+  capture,
 }: {
   designWidth: number;
   min: number;
@@ -67,6 +76,10 @@ export function MainPreview({
   nonce: number;
   onRefresh: () => void;
   onWidthSettled: (width: number) => void;
+  /** Handed up so the picker can read the preview's own document. */
+  iframeRef?: React.RefObject<HTMLIFrameElement | null>;
+  /** Present only while the picker is armed. */
+  capture?: CaptureHandlers | null;
 }) {
   const t = useAdminT();
   const [width, setWidth] = useState(designWidth);
@@ -132,33 +145,63 @@ export function MainPreview({
         />
 
         <Box background="bg-surface-secondary" borderRadius="200" padding="200">
-          <iframe
-            key={nonce}
-            src={`/?adminPreview=${nonce}`}
-            title={t("home.livePreview")}
-            // This card sits below the section map, which is already a full
-            // render of the same page. Loading only on scroll means opening the
-            // screen builds the home page once rather than twice at the same
-            // moment. (The map has no such attribute on purpose: it is the
-            // thing above the fold, so it is the one that must be there.)
-            loading="lazy"
+          {/* `relative` so the capture layer can cover exactly the frame. */}
+          <div
             style={{
-              display: "block",
-              // The whole point of the slider: this width IS the viewport the
-              // storefront sees, so ScaleFrame scales the 430 canvas against it
-              // exactly as a real phone would. Unlike the per-section frames
-              // this one is a fixed-height WINDOW onto a 5000px page rather
-              // than a whole band, so it is laid out at the width rather than
-              // scaled to it — scaling would shrink the window too.
+              position: "relative",
               width,
-              height: 620,
               maxWidth: "100%",
               margin: "0 auto",
-              border: "1px solid #e3e3e3",
-              borderRadius: 8,
-              background: "#FFF6EC",
             }}
-          />
+          >
+            <iframe
+              ref={iframeRef}
+              key={nonce}
+              src={`/?adminPreview=${nonce}`}
+              title={t("home.livePreview")}
+              // This card sits below the section map, which is already a full
+              // render of the same page. Loading only on scroll means opening the
+              // screen builds the home page once rather than twice at the same
+              // moment. (The map has no such attribute on purpose: it is the
+              // thing above the fold, so it is the one that must be there.)
+              loading="lazy"
+              style={{
+                display: "block",
+                // The whole point of the slider: this width IS the viewport the
+                // storefront sees, so ScaleFrame scales the 430 canvas against it
+                // exactly as a real phone would. Unlike the per-section frames
+                // this one is a fixed-height WINDOW onto a 5000px page rather
+                // than a whole band, so it is laid out at the width rather than
+                // scaled to it — scaling would shrink the window too.
+                width,
+                height: 620,
+                maxWidth: "100%",
+                margin: "0 auto",
+                border: "1px solid #e3e3e3",
+                borderRadius: 8,
+                background: "#FFF6EC",
+              }}
+            />
+            {/* The picker's capture layer. It exists only while armed, and only
+              to keep the pointer OUT of the preview: the storefront's links are
+              real, and one click would navigate the frame off `/` and lose the
+              preview entirely. Hit-testing happens by translating the pointer
+              into the frame's own coordinates instead. */}
+            {capture ? (
+              <div
+                data-home-picker-capture
+                onPointerMove={capture.onPointerMove}
+                onPointerLeave={capture.onPointerLeave}
+                onClick={capture.onClick}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  cursor: "crosshair",
+                  zIndex: 2,
+                }}
+              />
+            ) : null}
+          </div>
         </Box>
       </BlockStack>
     </Card>
