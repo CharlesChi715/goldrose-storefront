@@ -52,7 +52,8 @@ Open linked resources only when the task needs them.
 - Until every hard gate is cleared, orders and analytics remain test data and
   no campaigns run.
 - **Built:** storefront, admin, accounts, catalog, checkout/order flow,
-  analytics, SEO/GEO baseline. PayPal Orders v2 wallet checkout works in sandbox.
+  analytics, SEO/GEO baseline. Payment state: [paypal-wallet](docs/features/paypal-wallet.md),
+  [card-payments](docs/features/card-payments.md).
 - **Customer sign-in is live end to end (2026-08-03).** `/account/signup` does
   real email validation → `signInWithOtp` → 6-digit code → consent-gated
   CONTINUE → `verifyOtp` → `/account`. The same email carries a one-tap link.
@@ -169,20 +170,10 @@ Open linked resources only when the task needs them.
   two fixed active-filter chips ("Ruby Red", "Gift Sets") are gone: an
   unfiltered shop now correctly shows none, which is the only pixel change
   (baseline updated; home and PDP byte-identical).
-- **Dwell tracking** is merged to `main` (PR #11) with schema `0005` live.
-  Coverage is partial: 4 of the home page's 7 bands carry `data-el="…-SECTION"`
-  (A-1/A-2/A-3/A-11; A-5/A-6/A-9 untagged);
-  the rest waits on a signed-off section vocabulary
-  ([`engagement-tracking.md`](docs/features/engagement-tracking.md)).
 - **Product-handle rule** ([`product-handles.md`](docs/ixd/naming/product-handles.md)
   v2.1) is adopted and enforced: `lib/admin/product-handle.ts` derives handles,
   collisions throw (no `-2`), non-draft handles are frozen. ⚠️ Duplicate in the
   Chinese admin (副本 prefix) now errors by design; `product_redirects` doesn't exist.
-- **Feature-roadmap generator** was torn down 2026-08-01; a from-scratch rebuild
-  (front matter only, no registry, no groups) is in progress. Its first piece,
-  `scripts/features/cli.mjs`, reached `main` 2026-08-06 but nothing calls it:
-  [`docs/features/README.md`](docs/features/README.md) still has no generated
-  block and there are no `features:*` scripts or CI check.
 - **`/bag` is real, and the homepage newsletter has two states (2026-08-07,
   `feat/figma-sync`).** A scoped sync of two areas Charles named; the other 40+
   changed frames (chiefly the homepage typography pass) are deliberately NOT
@@ -219,7 +210,8 @@ Open linked resources only when the task needs them.
   were publicly reachable. Verified by build, 80 unit and 111 e2e tests
   (incl. the three pixel baselines). A deleted asset is re-exported by the
   next `npm run figma:assets`. Kept on purpose: `scripts/features/cli.mjs`
-  (owner ruling — the generator rebuild still needs it).
+  (owner ruling; it has since become the features CLI —
+  [feature-records](docs/features/feature-records.md)).
 - **Next:** clear the hard gates (push `0009`+`0010`, owner activation/UAT,
   real shipping rates, live PayPal) → take real orders → keep replacing mock
   product content and placeholder screens while live; card integration after.
@@ -306,7 +298,8 @@ Open linked resources only when the task needs them.
    `cloudflared`/`ngrok` when webhook testing starts.
 4. Push migrations `0009` then `0010` to hosted (order is load-bearing — see
    Runtime and safety); an admin product save fails until both land.
-5. Enter real shipping rates (OQ-2) — no placeholder rate may be live.
+5. Enter real shipping rates ([shipping-rates](docs/features/shipping-rates.md),
+   OQ-2) — no placeholder rate may be live.
 6. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
    `CHECKOUT_SKIP_PAYMENT`, turn on [database
    backups](docs/features/db-backups.md).
@@ -337,11 +330,11 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 ## Product decisions
 
 - **OQ-1 — decided 2026-07-26:** use
-  [PayPal Advanced Cards](docs/features/card-payments.md) for Visa/Mastercard at
-  checkout. Card processing is not built; Stage 0 is owner onboarding.
-- **OQ-2 — open, and a hard gate:** rest-of-world shipping at `$19.95` is a
-  placeholder. A shipping rate is a price we charge, so it cannot go live mocked
-  — this must be answered before the first real order.
+  [PayPal Advanced Cards](docs/features/card-payments.md) for Visa/Mastercard
+  at checkout; that record owns the state and the onboarding stages.
+- **OQ-2 — open, and a hard gate:** real shipping rates must replace the
+  placeholder before the first real order — owned by
+  [shipping-rates](docs/features/shipping-rates.md).
 - **OQ-3 — open, gradual:** seed product details and some imagery are
   placeholders. `/shop` cards show real catalog photos, but they are supplier
   composites with English text baked in. Three products fill an eight-card grid,
@@ -412,7 +405,7 @@ Config at the root: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
 | Need                                                             | Open                                                                                                 |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Agent instructions and open messages (`npm run agent-inbox`)     | [`agent-delivery/`](agent-delivery/README.md)                                                        |
-| Feature status and roadmap (generator rebuild in progress)       | [`docs/features/README.md`](docs/features/README.md)                                                 |
+| Feature status — one record per feature, `check`-validated       | [`docs/features/README.md`](docs/features/README.md)                                                 |
 | Authoritative admin/product requirements (`§` references)        | [`docs/admin-design.md`](docs/admin-design.md)                                                       |
 | Figma imports, route decisions, interactions, design issues      | [`agent-delivery/sessions/`](agent-delivery/README.md) (per sync); [`docs/ixd/README.md`](docs/ixd/README.md) keeps the findings record |
 | Naming rules — Figma sections/frames, `data-el`, product handles | [`docs/ixd/naming/`](docs/ixd/naming/figma-route-rule.md)                                            |
