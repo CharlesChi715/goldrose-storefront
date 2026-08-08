@@ -100,6 +100,31 @@ test("the section map is the page drawn to scale, and jumps where it points", as
     .toBeGreaterThanOrEqual(bar.y + bar.height);
 });
 
+test("the previews of the home page are not recorded as visits", async ({
+  page,
+}) => {
+  // Both the section map and the live preview are the REAL home page in an
+  // iframe, so their pathname is `/` and the beacon's `/admin` guard does not
+  // apply to them. Before this was handled, opening this one screen wrote two
+  // home-page views plus a stream of engagement updates — analytics the shop
+  // is judged on, for visits nobody made.
+  const beacons: string[] = [];
+  page.on("request", (request) => {
+    const url = request.url();
+    if (url.includes("/api/beacon")) beacons.push(new URL(url).pathname);
+  });
+
+  await openEditor(page);
+  // The assertion is only worth anything if the previews actually rendered:
+  // a screen that failed to embed anything would pass it for the wrong reason.
+  await expect.poll(() => page.frames().length).toBeGreaterThan(1);
+  // A view posts on mount and engagement flushes on a timer, so give both room
+  // to have happened.
+  await page.waitForTimeout(2500);
+
+  expect(beacons).toEqual([]);
+});
+
 test("editing a section heading reaches the live home page, and resets", async ({
   page,
 }) => {

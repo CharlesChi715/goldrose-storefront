@@ -764,6 +764,11 @@ export function HomeSectionsEditor({
                     key={previewNonce}
                     src={`/?adminPreview=${previewNonce}`}
                     title={t("home.livePreview")}
+                    // This card sits below the fold, under the section map —
+                    // which is already a full render of the same page. Loading
+                    // it only when it is scrolled to means opening the screen
+                    // renders the home page once, not twice at the same moment.
+                    loading="lazy"
                     style={{
                       display: "block",
                       // The whole point of the slider: this width IS the

@@ -7,7 +7,8 @@
  * /api/beacon on every storefront page view. No cookies, no PII, no third
  * parties — the visitor id is a random localStorage value; the session id
  * lives in sessionStorage and rotates after 30 minutes of inactivity.
- * Renders nothing and skips /admin, /api, and checkout-success chrome.
+ * Renders nothing and skips /admin, /api, checkout-success chrome — and the
+ * admin's own previews of the storefront, which are real pages but not visits.
  */
 
 import { useEffect } from "react";
@@ -33,6 +34,37 @@ const SECTION_SELECTOR = '[data-el$="-SECTION"]';
 
 function randomId(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+}
+
+/**
+ * Whether this document is the admin looking at the storefront, rather than a
+ * visitor browsing it.
+ *
+ * The pathname guard below cannot catch this case: inside Content → Home page's
+ * preview and section map the pathname IS `/`, because the page genuinely is
+ * the home page — it is simply rendered in an `<iframe>` so the owner can see
+ * their own edits. Untreated, opening that one editor writes two home-page
+ * views and a stream of engagement updates for a visit nobody made, and the
+ * owner's long editing sessions land in the same numbers the shop is judged on.
+ *
+ * Two tests, because either alone leaves a hole. The query parameter is the
+ * explicit marker the admin's iframes already carry; the framing check is the
+ * backstop for any future embed that forgets it. Nothing legitimately embeds
+ * this storefront, so "inside a frame" is never a real visit.
+ *
+ * @returns True when this page view must not be recorded.
+ */
+function isEmbeddedPreview(): boolean {
+  try {
+    if (new URLSearchParams(window.location.search).has("adminPreview")) {
+      return true;
+    }
+    return window.self !== window.top;
+  } catch {
+    // Reaching `window.top` across origins can throw. Not being able to see the
+    // top window is itself proof this document is framed.
+    return true;
+  }
 }
 
 /** Anonymous visitor id (persistent) — also read by checkout (§8). */
@@ -80,7 +112,8 @@ export function Beacon() {
     if (
       !pathname ||
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/api")
+      pathname.startsWith("/api") ||
+      isEmbeddedPreview()
     ) {
       return;
     }

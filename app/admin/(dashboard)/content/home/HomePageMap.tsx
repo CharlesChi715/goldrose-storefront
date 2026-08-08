@@ -87,6 +87,7 @@ const ACCENT = "#005bd3";
  */
 const EASE = "120ms cubic-bezier(0.4, 0, 0.2, 1)";
 const NUDGE = 3;
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
 /**
  * Whether the viewer has asked their system for reduced motion.
@@ -99,15 +100,23 @@ const NUDGE = 3;
  * @returns True when transitions and the nudge should be dropped.
  */
 function useStillness(): boolean {
-  return useSyncExternalStore(
-    (onChange) => {
-      const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-      query.addEventListener("change", onChange);
-      return () => query.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => true,
-  );
+  return useSyncExternalStore(subscribeToMotion, readMotion, () => true);
+}
+
+/* Both hoisted to module scope on purpose: `useSyncExternalStore` re-subscribes
+   whenever the subscribe function's identity changes, so declaring these inline
+   would tear down and re-add the media-query listener on every single render. */
+
+/** @param onChange - React's callback to re-read the snapshot. */
+function subscribeToMotion(onChange: () => void): () => void {
+  const query = window.matchMedia(REDUCED_MOTION);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+/** @returns True when the system asks for reduced motion. */
+function readMotion(): boolean {
+  return window.matchMedia(REDUCED_MOTION).matches;
 }
 
 /**
@@ -172,9 +181,6 @@ export function HomePageMap({
   );
   /** The promo strip runs from the top of the stage to the first band. */
   const chromeHeight = bands.length > 0 ? bands[0].band.top * scale : mapHeight;
-
-  const name = (section: MapSection) =>
-    `${section.module} · ${zh ? section.titleZh : section.title}`;
 
   /** The row that stands for one section: badges, name, and its own state. */
   function row(section: MapSection, note: string | null) {
@@ -325,21 +331,22 @@ export function HomePageMap({
                 }}
               />
             ))}
+            {/* Presentational on purpose. Each strip goes exactly where its
+                link beside it goes, so exposing both would read every section
+                of the page twice to a screen reader and put seven duplicate
+                stops in the tab order. The strips stay clickable for a pointer
+                — a second way to reach the same place is a convenience for the
+                eye, not a second control. */}
             {bands.map((section, index) => (
-              <a
+              <div
                 key={section.id}
-                href={`#home-section-${section.id}`}
-                aria-label={name(section)}
+                aria-hidden
                 data-home-map-strip={section.id}
-                onClick={(event) => {
-                  event.preventDefault();
-                  jumpTo(section.id);
-                }}
+                onClick={() => jumpTo(section.id)}
                 onMouseEnter={() => setActive(section.id)}
                 onMouseLeave={() => setActive(null)}
-                onFocus={() => setActive(section.id)}
-                onBlur={() => setActive(null)}
                 style={{
+                  cursor: "pointer",
                   position: "absolute",
                   left: 0,
                   right: 0,
