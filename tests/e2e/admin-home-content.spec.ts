@@ -316,6 +316,75 @@ test("a section's window cannot be scrolled out of its own section", async ({
   expect(measured.before).toBe(48);
 });
 
+test("nothing but the window can scroll, so the film cannot drift under it", async ({
+  page,
+}) => {
+  await openEditor(page);
+  await reach(page, "craft");
+  await expect(page.locator('[data-home-section="craft"] iframe')).toHaveCount(
+    1,
+  );
+
+  // The window's clamp is only worth anything while the film stays put beneath
+  // it. `overflow: hidden` on the rail would clip identically AND make it a
+  // scroll container — one the user cannot move and the BROWSER can, by
+  // bringing something inside the framed page into view. The window would go on
+  // clamping to [0, range] over a film that had slid 1021px, and every position
+  // in it would be the wrong band under the right heading. `overflow: clip`
+  // leaves no scroll position to move, and the frame is shut to keyboard and to
+  // scrolling of its own so nothing asks for one.
+  const shut = await page
+    .locator('[data-home-section="craft"] [role="group"]')
+    .evaluate((el) => {
+      const rail = el.firstElementChild as HTMLElement;
+      const film = el.querySelector("iframe") as HTMLIFrameElement;
+      rail.scrollTop = 999999;
+      return {
+        railMoved: rail.scrollTop,
+        railOverflow: getComputedStyle(rail).overflow,
+        // Not asserted, recorded: a clipped box still REPORTS the extent of
+        // what it clips, so `scrollHeight` says ~2108 here. That is why the
+        // test asks whether it can be scrolled rather than whether it looks
+        // scrollable — the reported number is the same either way, and only
+        // one of the two answers is the guarantee.
+        railScrollHeight: rail.scrollHeight,
+        filmTabIndex: film.tabIndex,
+        filmScrolling: film.getAttribute("scrolling"),
+        filmAriaHidden: film.getAttribute("aria-hidden"),
+      };
+    });
+
+  // The behaviour, and the one property that guarantees it. With `hidden` here
+  // the first assertion would read 1021 instead of 0.
+  expect(shut.railMoved).toBe(0);
+  expect(shut.railOverflow).toContain("clip");
+  expect(shut.filmTabIndex).toBe(-1);
+  expect(shut.filmScrolling).toBe("no");
+  expect(shut.filmAriaHidden).not.toBeNull();
+});
+
+test("the window shows a focus ring when a keyboard reaches it", async ({
+  page,
+}) => {
+  await openEditor(page);
+  await reach(page, "craft");
+  const craft = windowOf(page, "craft");
+
+  // It is focusable on purpose — it scrolls, so a keyboard user must be able to
+  // reach and scroll it. But an inline `outline` beats the user agent's own
+  // focus style, so without saying it ourselves, tabbing onto this box would
+  // show nothing at all.
+  const resting = await craft.evaluate(
+    (el) => getComputedStyle(el).outlineWidth,
+  );
+  await craft.focus();
+  const focused = await craft.evaluate(
+    (el) => getComputedStyle(el).outlineWidth,
+  );
+  expect(resting).toBe("1px");
+  expect(focused).toBe("2px");
+});
+
 test("a section that fits whole does not scroll at all", async ({ page }) => {
   await openEditor(page);
   await reach(page, "promo");

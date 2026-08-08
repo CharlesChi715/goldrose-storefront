@@ -790,16 +790,26 @@ different shape from the flat slot list.
   answered.
 - **The lock is structural, not policed** (`SectionPreview.tsx`). Three boxes:
   the **window** scrolls (`overflow-y: auto`, fixed height); its only child, the
-  **rail**, is exactly one band tall and `overflow: hidden`; the **film** is the
+  **rail**, is exactly one band tall and `overflow: clip`; the **film** is the
   whole ~5,000px page, absolutely positioned inside the rail and pulled up so
   the band is the part on show. Because the rail clips, the film never reaches
   the window's scrollable overflow, so the window's scroll range *is* one band
   and the browser refuses to leave it by itself. No scroll listener means
   nothing to lose a race with and no snap-back on a fling;
   `overscroll-behavior: contain` stops a gesture that reaches the end from
-  carrying on into the ~26,000px editor behind. The film takes
-  `pointer-events: none` so the wheel belongs to the window and the page's own
-  links cannot navigate the frame off `/`.
+  carrying on into the ~26,000px editor behind.
+- **`clip` rather than `hidden` on the rail is load-bearing**, and it is the
+  easiest thing here to get wrong. `hidden` clips identically while *also*
+  making the box a scroll container — one the user cannot move and the browser
+  still can, whenever it brings something inside the framed page into view. The
+  rail is the film's containing block, so that hidden range is real (1021px for
+  Craft) and nothing resets it; the window would carry on clamping correctly
+  over a film that had slid, showing the wrong band under the right heading.
+  `clip` leaves no scroll position to move. For the same reason the frame is
+  shut: `pointer-events: none` puts the wheel on the window, `tabIndex={-1}`
+  keeps Tab out of 5,000px of storefront links (pointer-events does not affect
+  focus), and `scrolling="no"` stops the frame scrolling itself, since the
+  document is ~160px taller than the stage.
 - **The slack is 48 DESIGN pixels** at each end — stated in design pixels so the
   amount of *page* you can peek at does not change with the width. It is enough
   to show the seam where a band meets its neighbour (the one thing a

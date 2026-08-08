@@ -14,11 +14,14 @@
  * sweeping the same iframe's width, and separately its transform, by hand cost
  * 13.89ms, which is idle. It was all React.
  *
- * The live width therefore lives here, where a drag re-renders one card. The
- * sections' "Match the main preview" still needs to know it, so it is published
- * upward inside `startTransition` — React then treats the editor's re-render as
- * interruptible and drops the intermediate ones, and the drag stays at frame
- * rate while the sections learn the settled value.
+ * The live width therefore lives here, where a drag re-renders one card. Since
+ * 2026-08-08 this is the screen's ONLY width control — every section's window
+ * is held at whatever it says, because a section frame at another width is at
+ * another scale and would stop being a picture of what this preview shows. So
+ * the settled value is published upward inside `startTransition`: React then
+ * treats the editor's re-render as interruptible and drops the intermediate
+ * ones, and the drag stays at frame rate while the nine windows catch up at
+ * rest.
  *
  * Be careful what you claim for this control: ScaleFrame scales the whole 430
  * stage as ONE, so a narrower width shrinks everything rather than re-wrapping

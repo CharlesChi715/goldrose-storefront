@@ -19,7 +19,7 @@
  * The lock is structural, not policed. Three boxes:
  *
  *   window   overflow-y: auto, a fixed height — the thing you scroll
- *   └ rail   exactly one band tall (plus slack), overflow: hidden
+ *   └ rail   exactly one band tall (plus slack), overflow: CLIP
  *     └ film the whole 5000px page, absolutely positioned, pulled up by filmTop
  *
  * Because the rail clips, the film's thousands of pixels never reach the
@@ -31,10 +31,18 @@
  * gesture from carrying on into the ~26,000px editor behind it, which is the
  * one way "you cannot leave the section" could still have been false.
  *
- * The film takes `pointerEvents: "none"` for two reasons at once: the wheel
- * then belongs to the window rather than to a document that cannot scroll, and
- * the page's own links cannot navigate the frame off `/` — which every number
- * here assumes.
+ * `clip` and not `hidden` is load-bearing, and it is the subtle half of this
+ * design: `hidden` would clip just the same, while ALSO making the rail a
+ * scroll container that the user cannot move and the browser still can. See the
+ * note at the rail itself.
+ *
+ * THE FRAME IS SHUT: no pointer, no focus, no scrolling of its own.
+ * `pointerEvents: "none"` puts the wheel on the window rather than on a
+ * document that cannot scroll. It does NOT stop a keyboard, so `tabIndex={-1}`
+ * does — otherwise Tab walks out of the window into 5,000 pixels of storefront
+ * links, and a followed link would leave the frame showing a page that none of
+ * this arithmetic describes. `scrolling="no"` closes the last one: the document
+ * is taller than the stage, so the frame would otherwise scroll too.
  *
  * WHAT IT CANNOT SHOW
  * A switched-off section is not on the page: `HomeBand` draws nothing and
@@ -65,8 +73,12 @@ const DESIGN_WIDTH = 430;
  * does this band read", which does not need a phone's whole screen, and nine
  * full-height frames would bury the fields between them. At 360 it is 58% of
  * the main preview — far enough apart to read as a decision rather than as a
- * rendering accident — and still taller than both short bands, so the promo
- * strip and Ready to Ship need no scrolling at all.
+ * rendering accident.
+ *
+ * Only the promo strip fits whole and so never scrolls: at 32 design pixels
+ * plus both slacks it is 128, well inside 360. Every real band scrolls at the
+ * design width, including the shortest — Ready to Ship is 327, which with its
+ * slacks is 423 and leaves 63 pixels of travel.
  */
 const WINDOW_HEIGHT = 360;
 
@@ -136,6 +148,8 @@ export function SectionPreview({
   // Reloading this one frame without disturbing the other eight.
   const [refreshed, setRefreshed] = useState(0);
   const key = `${nonce}-${refreshed}`;
+  // Whether the window has keyboard focus, so it can show a ring — see below.
+  const [focused, setFocused] = useState(false);
 
   /**
    * Whether this frame has come near the viewport yet — nothing is fetched
@@ -264,6 +278,8 @@ export function SectionPreview({
               tabIndex={0}
               role="group"
               aria-label={`${t("home.sectionPreview")} — ${sectionId}`}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
               style={{
                 position: "absolute",
                 left: boxLeft,
@@ -283,18 +299,40 @@ export function SectionPreview({
                 // being judged. Modern Chrome and Firefox honour this; Safari
                 // overlays its scrollbar and takes no space either way.
                 scrollbarWidth: "none",
-                outline: "1px solid #e3e3e3",
+                // The phone's outline — and, when focused, the focus ring.
+                // An inline `outline` beats the user agent's own `:focus`
+                // style, so a keyboard user would otherwise tab onto a
+                // scrollable box with nothing at all to show they had arrived.
+                // Stated here rather than left to the browser because that is
+                // the property this box was already using for its edge.
+                outline: focused ? "2px solid #005bd3" : "1px solid #e3e3e3",
+                outlineOffset: focused ? 1 : 0,
                 borderRadius: 8,
                 background: "#FFF6EC",
               }}
             >
               {/* 3 · The rail: exactly one band tall, and clipping. This is
-                  the whole lock — see the file header. */}
+                  the whole lock — see the file header.
+
+                  `clip` RATHER THAN `hidden`, and the difference is the bug.
+                  `overflow: hidden` clips, but it also makes the box a scroll
+                  container — one the user cannot scroll and the BROWSER still
+                  can. This rail is the containing block of the film, so the
+                  film's 5,000 pixels are inside that box's scrollable overflow:
+                  1021px of travel, for Craft, that nothing here ever reads or
+                  resets. Anything that asks the browser to bring a descendant
+                  into view — tabbing into the framed page, find-in-page —
+                  scrolls it, and the window is then clamped to [0, range] over
+                  a film that has moved underneath it. The lock would still
+                  hold; it would simply be holding the wrong band, under this
+                  section's name.
+                  `overflow: clip` clips without a scroll box, so there is no
+                  scroll position for anything to move. */}
               <div
                 style={{
                   position: "relative",
                   height: railHeight,
-                  overflow: "hidden",
+                  overflow: "clip",
                 }}
               >
                 {/* 4 · The film: the whole page, at the design's own width
@@ -309,6 +347,25 @@ export function SectionPreview({
                     title={`${t("home.sectionPreview")} — ${sectionId}`}
                     // Belt to the observer's braces; see the note on `reached`.
                     loading="lazy"
+                    // NOT REACHABLE BY KEYBOARD, and not in the accessibility
+                    // tree — the same treatment HomePageMap gives its own frame.
+                    // `pointerEvents: none` stops the mouse but does nothing to
+                    // sequential focus: without this, Tab walks out of the
+                    // window into a 5,000px page of links, nine times over,
+                    // between a teammate and the fields they are editing. Every
+                    // number in this component also assumes the frame is still
+                    // showing `/`, and a focused link can be followed.
+                    // The page's own copy is not hidden from a screen reader by
+                    // this: it is in the editable fields directly below, which
+                    // is where it can be read AND changed.
+                    tabIndex={-1}
+                    aria-hidden
+                    // The document is ~160px taller than the stage (the legal
+                    // footer sits below it), so the frame would otherwise be a
+                    // scroll container of its own — a second box the browser
+                    // could move, and a scrollbar inside what is meant to be a
+                    // phone's viewport. Same reason HomePageMap sets it.
+                    scrolling="no"
                     style={{
                       display: "block",
                       position: "absolute",
@@ -317,8 +374,8 @@ export function SectionPreview({
                       width: DESIGN_WIDTH,
                       height: frameHeight,
                       border: 0,
-                      // The wheel belongs to the window, and the page's links
-                      // cannot navigate this frame off `/`.
+                      // The wheel belongs to the window rather than to a
+                      // document that cannot scroll.
                       pointerEvents: "none",
                       // Top left, so the scaled film lands in the rail's corner
                       // rather than being scaled about its centre.
