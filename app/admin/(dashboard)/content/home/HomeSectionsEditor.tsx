@@ -76,7 +76,12 @@ import { HomePageMap } from "./HomePageMap";
 import { MainPreview } from "./MainPreview";
 import { PhotoPicker, type LibraryItem } from "./PhotoPicker";
 import { EditorPanel, type PickedField } from "./picker/EditorPanel";
-import { patchField, whenPatchable } from "./picker/patch";
+import { patchField, patchFrame, whenPatchable } from "./picker/patch";
+import {
+  CENTRE,
+  formatFrame,
+  type SpotlightArea,
+} from "@/lib/home-content/frames";
 import { SectionPreview } from "./SectionPreview";
 import {
   resetHomeFieldAction,
@@ -266,10 +271,14 @@ function fileUrl(storedPath: string): string {
 export function HomeSectionsEditor({
   sections,
   library,
+  frames: savedFrames,
   frameHeight,
 }: {
   sections: SectionView[];
   library: LibraryItem[];
+  /** Saved framings, keyed `"<section>.<field>"` — a plain object so it can
+   *  cross the server/client boundary, which a Map cannot. */
+  frames: Record<string, SpotlightArea>;
   /** The live stage height, hidden bands already removed — the map's ruler. */
   frameHeight: number;
 }) {
@@ -281,6 +290,10 @@ export function HomeSectionsEditor({
   const [toast, setToast] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  /** Photo framings the owner has changed but not yet saved. */
+  const [frameDrafts, setFrameDrafts] = useState<Record<string, SpotlightArea>>(
+    {},
+  );
   const [photo, setPhoto] = useState<PhotoTarget>(null);
   const [query, setQuery] = useState("");
   const [onlyEdited, setOnlyEdited] = useState(false);
@@ -377,6 +390,31 @@ export function HomeSectionsEditor({
     [sections, drafts],
   );
 
+  /** The framing to draw a field with: the local draft, else what is saved. */
+  const frameDraft = useCallback(
+    (sectionId: string, fieldId: string): SpotlightArea =>
+      frameDrafts[`${sectionId}.${fieldId}`] ??
+      savedFrames[`${sectionId}.${fieldId}`] ??
+      CENTRE,
+    [frameDrafts, savedFrames],
+  );
+
+  /** Framings that differ from what is stored — compared as their stored form,
+   *  so a drag that lands back where it started is not an unsaved change. */
+  const frameEdits = useMemo(
+    () =>
+      Object.entries(frameDrafts)
+        .filter(
+          ([key, area]) =>
+            formatFrame(area) !== formatFrame(savedFrames[key] ?? CENTRE),
+        )
+        .map(([key, area]) => {
+          const [section, ...rest] = key.split(".");
+          return { section, field: rest.join("."), ...area };
+        }),
+    [frameDrafts, savedFrames],
+  );
+
   // A bad value would be rejected server-side anyway; blocking the save here
   // keeps the owner from losing a whole round of edits to one typo.
   const invalid = useMemo(
@@ -454,9 +492,11 @@ export function HomeSectionsEditor({
 
   function save() {
     const payload = edits;
+    const framing = frameEdits;
     run(async () => {
-      await saveHomeFieldsAction(payload);
+      await saveHomeFieldsAction(payload, framing);
       setDrafts({});
+      setFrameDrafts({});
     }, t("home.saved"));
   }
 
@@ -471,11 +511,13 @@ export function HomeSectionsEditor({
   const frames = useRef(new Set<HTMLIFrameElement>());
   /** Read by callbacks that must stay stable; see `applyDrafts`. */
   const draftsRef = useRef(drafts);
+  const frameDraftsRef = useRef(frameDrafts);
   const sectionsRef = useRef(sections);
   useEffect(() => {
     draftsRef.current = drafts;
+    frameDraftsRef.current = frameDrafts;
     sectionsRef.current = sections;
-  }, [drafts, sections]);
+  }, [drafts, frameDrafts, sections]);
 
   /**
    * Write every unsaved draft into a frame that has just finished loading.
@@ -499,6 +541,10 @@ export function HomeSectionsEditor({
           const key = `${section.id}.${field.id}`;
           const draft = draftsRef.current[key];
           if (draft !== undefined) patchField(doc, field, key, draft);
+          // After the photo, never before: framing acts on the element
+          // `patchPhoto` has just rewritten to a plain fill of its box.
+          const framing = frameDraftsRef.current[key];
+          if (framing !== undefined) patchFrame(doc, key, framing);
         }
       }
     });
@@ -564,6 +610,22 @@ export function HomeSectionsEditor({
     },
     [],
   );
+
+  /**
+   * Record a photo's framing AND show it in every preview immediately.
+   *
+   * Framing is a draft like everything else, published by the same Save. It
+   * has to be: a frame describes a photo, and until Save runs that photo is
+   * itself only a draft — storing the crop of a picture that is not on the
+   * page yet would be a promise about nothing.
+   */
+  const setFramed = useCallback((key: string, area: SpotlightArea) => {
+    setFrameDrafts((current) => ({ ...current, [key]: area }));
+    for (const frame of frames.current) {
+      const doc = frame.contentDocument;
+      if (doc) patchFrame(doc, key, area);
+    }
+  }, []);
 
   // The section windows register themselves through `holdFrame`. The page-wide
   // preview takes a plain ref object instead (it hands the same ref to nothing
@@ -794,7 +856,9 @@ export function HomeSectionsEditor({
     );
   }
 
-  const dirtyCount = edits.length;
+  // Framing counts as an unsaved change like any other, so the Save button
+  // lights up and the warning banner counts it.
+  const dirtyCount = edits.length + frameEdits.length;
   /**
    * Which sections are showing something OLDER than their fields say.
    *
@@ -868,7 +932,11 @@ export function HomeSectionsEditor({
                 title={`${t("home.unsaved")} (${dirtyCount})`}
                 action={{
                   content: t("home.discard"),
-                  onAction: () => setDrafts({}),
+                  onAction: () => {
+                    setDrafts({});
+                    setFrameDrafts({});
+                    setPreviewNonce((n) => n + 1);
+                  },
                 }}
               >
                 <p>{t("home.unsavedBody")}</p>
@@ -1200,11 +1268,22 @@ export function HomeSectionsEditor({
           box={photo.field.box}
           fit={photo.field.fit}
           library={library}
-          onChange={(path) =>
-            setDrafts((current) => ({
-              ...current,
-              [`${photo.section.id}.${photo.field.id}`]: path,
-            }))
+          frame={frameDraft(photo.section.id, photo.field.id)}
+          onChange={(path) => {
+            const key = `${photo.section.id}.${photo.field.id}`;
+            // Through setDraft, so the new photo appears in every preview at
+            // once. It used to call setDrafts directly and skip the patch, so
+            // a chosen photo did not show up until the next save — invisible
+            // while framing was invisible too, and glaring now that it is not.
+            setDraft(key, path, photo.field);
+            // A frame describes ONE picture. Carrying it onto the next photo
+            // would crop a different image by numbers chosen for the last one,
+            // which is worse than starting from the centre. Ordered after the
+            // photo: framing acts on the element `patchPhoto` just rewrote.
+            setFramed(key, CENTRE);
+          }}
+          onFrameChange={(area) =>
+            setFramed(`${photo.section.id}.${photo.field.id}`, area)
           }
           onClose={() => setPhoto(null)}
           onUploaded={() => router.refresh()}

@@ -17,6 +17,14 @@
 
 import { getStore } from "@/lib/supabase/store.ts";
 import type { SiteContentRow } from "@/lib/supabase/types.ts";
+import {
+  CENTRE,
+  FRAME_DEFAULT,
+  formatFrame,
+  frameKey,
+  parseFrame,
+  type SpotlightArea,
+} from "./frames.ts";
 import { homeLayout, type HomeLayout } from "./layout.ts";
 import {
   HOME_SECTIONS,
@@ -30,6 +38,7 @@ import {
 } from "./registry.ts";
 
 export * from "./registry.ts";
+export * from "./frames.ts";
 export { homeLayout, HOME_FRAME_HEIGHT, type HomeLayout } from "./layout.ts";
 
 /** The value stored in a visibility slot when a section is switched off. */
@@ -45,6 +54,14 @@ export type HomeContent = {
   readonly layout: HomeLayout;
   /** Slot keys the owner has edited — drives "Reset" and the §11 render rule. */
   readonly overridden: ReadonlySet<string>;
+  /**
+   * How each image field's photo is framed, keyed `"<section>.<field>"`.
+   *
+   * Total rather than sparse: every image field has an entry, defaulting to the
+   * centre crop, so a caller can never draw a photo by forgetting to look one
+   * up. Only non-centre framings are actually stored.
+   */
+  readonly frames: ReadonlyMap<string, SpotlightArea>;
 };
 
 /**
@@ -68,6 +85,7 @@ function resolve(stored: Map<string, string>): HomeContent {
   const text: Record<string, Record<string, string>> = {};
   const visible: Record<string, boolean> = {};
   const overridden = new Set<string>();
+  const frames = new Map<string, SpotlightArea>();
 
   for (const section of HOME_SECTIONS) {
     const fields: Record<string, string> = {};
@@ -79,6 +97,12 @@ function resolve(stored: Map<string, string>): HomeContent {
         fields[field.id] = override;
       } else {
         fields[field.id] = field.value;
+      }
+      if (field.kind === "image") {
+        frames.set(
+          `${section.id}.${field.id}`,
+          parseFrame(stored.get(frameKey(key))),
+        );
       }
     }
     text[section.id] = fields;
@@ -92,7 +116,24 @@ function resolve(stored: Map<string, string>): HomeContent {
     visible: visible as Record<HomeSectionId, boolean>,
     layout: homeLayout(visible as Record<HomeSectionId, boolean>),
     overridden,
+    frames,
   };
+}
+
+/**
+ * How one image field's photo is framed.
+ *
+ * @param content - The resolved homepage content.
+ * @param sectionId - The section that owns the field.
+ * @param fieldId - The image field's id.
+ * @returns Its framing; the centre crop when the field is unknown or unframed.
+ */
+export function frameOf(
+  content: HomeContent,
+  sectionId: string,
+  fieldId: string,
+): SpotlightArea {
+  return content.frames.get(`${sectionId}.${fieldId}`) ?? CENTRE;
 }
 
 /**
@@ -195,7 +236,38 @@ export async function saveHomeField(
 }
 
 /**
+ * Save how one image field's photo is framed. The centre crop is the design
+ * default, so choosing it deletes the row like any other value.
+ *
+ * @param sectionId - The section the field belongs to.
+ * @param fieldId - The image field's id.
+ * @param area - The framing the owner chose.
+ * @throws When the field is not an image field in the registry.
+ */
+export async function saveHomeImageFrame(
+  sectionId: string,
+  fieldId: string,
+  area: SpotlightArea,
+): Promise<void> {
+  const section = findSection(sectionId);
+  const field = section?.fields.find((entry) => entry.id === fieldId);
+  if (!section || !field || field.kind !== "image") {
+    throw new Error(`Not a home image field: ${sectionId}.${fieldId}`);
+  }
+  await writeSlot(
+    frameKey(slotKey(section.id, field)),
+    formatFrame(area),
+    FRAME_DEFAULT,
+    `${section.title} — ${field.label} framing`,
+  );
+}
+
+/**
  * Reset one homepage field to the design default by deleting its override.
+ *
+ * An image field's framing goes with it: the frame describes a photo, so
+ * keeping it after the photo has gone back to the design's would apply
+ * somebody's crop to a picture they never chose.
  *
  * @param sectionId - The section the field belongs to.
  * @param fieldId - The field id within that section.
@@ -207,9 +279,12 @@ export async function resetHomeField(
   const section = findSection(sectionId);
   const field = section?.fields.find((entry) => entry.id === fieldId);
   if (!section || !field) return;
-  await getStore().remove("site_content", {
-    key: slotKey(section.id, field),
-  });
+  const key = slotKey(section.id, field);
+  const store = getStore();
+  await store.remove("site_content", { key });
+  if (field.kind === "image") {
+    await store.remove("site_content", { key: frameKey(key) });
+  }
 }
 
 /**
@@ -246,8 +321,12 @@ export async function resetHomeSection(sectionId: string): Promise<void> {
   if (!section) return;
   const store = getStore();
   for (const field of section.fields) {
-    if (isEditable(field)) {
-      await store.remove("site_content", { key: slotKey(section.id, field) });
+    if (!isEditable(field)) continue;
+    const key = slotKey(section.id, field);
+    await store.remove("site_content", { key });
+    // Framing belongs to the photo it frames, so it is dropped with it.
+    if (field.kind === "image") {
+      await store.remove("site_content", { key: frameKey(key) });
     }
   }
   if (section.band) {

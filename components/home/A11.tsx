@@ -22,7 +22,8 @@
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
-import { fileUrl } from "@/lib/files-url";
+import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 const INK = "#291A13";
@@ -55,7 +56,13 @@ const FOOTER_LINKS = [
   { x: 287, y: 977, w: 39, h: 4 },
 ] as const;
 
-export function A11({ c }: { c: HomeText["story"] }) {
+export function A11({
+  c,
+  frames,
+}: {
+  c: HomeText["story"];
+  frames?: HomeFrames;
+}) {
   const faqs = [c.faq_1, c.faq_2, c.faq_3, c.faq_4];
   const footer = [
     { label: c.footer_1_label, href: c.footer_1_href },
@@ -87,15 +94,20 @@ export function A11({ c }: { c: HomeText["story"] }) {
           height={20}
           style={{ ...abs(57, 10, 88, 20), display: "block" }}
         />
-        {/* 2380:768 story photo */}
-        <img
-          data-field="story.story_photo"
-          src={fileUrl(c.story_photo)}
-          alt={c.story_photo_alt}
-          width={204}
-          height={259}
-          style={{ ...abs(226, 0, 204, 259), display: "block" }}
-        />
+        {/* 2380:768 story photo. The opening is its own box now, and clips:
+            the design's file is exactly 204×259 so it never overflowed, but a
+            framed replacement can be zoomed in and must be trimmed to fit. */}
+        <div style={{ ...abs(226, 0, 204, 259), overflow: "hidden" }}>
+          <HomePhoto
+            section="story"
+            field="story_photo"
+            value={c.story_photo}
+            alt={c.story_photo_alt}
+            box={{ w: 204, h: 259 }}
+            design={{ x: 0, y: 0, w: 204, h: 259 }}
+            frames={frames}
+          />
+        </div>
         <div
           data-field="story.story_title"
           data-el="HOME-STORY-TITLE"
@@ -271,15 +283,19 @@ export function A11({ c }: { c: HomeText["story"] }) {
         />
       </Link>
 
-      {/* 2380:775 · second story photo, beside the gift card */}
-      <img
-        data-field="story.gift_photo"
-        src={fileUrl(c.gift_photo)}
-        alt={c.gift_photo_alt}
-        width={204}
-        height={204}
-        style={{ ...abs(19, 570, 204, 204), display: "block" }}
-      />
+      {/* 2380:775 · second story photo, beside the gift card. Clipped for the
+          same reason as the one above. */}
+      <div style={{ ...abs(19, 570, 204, 204), overflow: "hidden" }}>
+        <HomePhoto
+          section="story"
+          field="gift_photo"
+          value={c.gift_photo}
+          alt={c.gift_photo_alt}
+          box={{ w: 204, h: 204 }}
+          design={{ x: 0, y: 0, w: 204, h: 204 }}
+          frames={frames}
+        />
+      </div>
 
       {/* ---- 2380:807 · "Give Them a Rose" gift card ---- */}
       <div

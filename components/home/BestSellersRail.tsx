@@ -32,6 +32,7 @@ import { Carousel } from "@/components/home/Carousel";
 import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { playfair, notoSC } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /** Card 2380:406 is 250 wide; the next card starts at x=285, so the pitch is 267. */
@@ -217,9 +218,11 @@ function Content({ card, copy, n }: { card: Card; copy: CardCopy; n: number }) {
 export function BestSellersRail({
   c,
   timing,
+  frames,
 }: {
   c: HomeText["featured"];
   timing: RailTiming;
+  frames?: HomeFrames;
 }) {
   const copies = copyOf(c);
   return (
@@ -288,6 +291,7 @@ export function BestSellersRail({
                 }
                 dataEl={`HOME-FEATURED-PRODUCT-IMG-${i + 1}`}
                 className="gr-photo"
+                frames={frames}
               />
             </div>
             <Content card={card} copy={copy} n={i + 1} />

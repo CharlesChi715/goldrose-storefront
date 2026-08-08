@@ -205,3 +205,56 @@ test("the page-wide preview scrolls at a normal speed", async ({ page }) => {
   // landed near 220. Native scrolling delivers the lot.
   expect(travelled).toBeGreaterThan(800);
 });
+
+test("framing a replaced photo reaches the live page, and resets with it", async ({
+  page,
+}) => {
+  await adminLogin(page);
+  await page.goto("/admin/content/home");
+  await expect(page.getByRole("heading", { name: "Home page" })).toBeVisible();
+
+  const card = page.locator("#home-section-featured");
+  await card.evaluate((el) =>
+    el.scrollIntoView({ block: "start", behavior: "instant" }),
+  );
+
+  // While the photo is still the design's own, there is nothing to frame: the
+  // page draws Figma's traced geometry and a frame would be a second answer.
+  await card.getByRole("button", { name: "Change photo" }).first().click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.locator('input[type="range"]')).toHaveCount(0);
+
+  // Choose one of our own, and the framer appears against the REAL box.
+  await dialog.locator("button img").first().click();
+  await card.getByRole("button", { name: "Change photo" }).first().click();
+  const zoom = page.getByRole("dialog").locator('input[type="range"]').first();
+  await expect(zoom).toBeVisible();
+  await zoom.focus();
+  for (let i = 0; i < 30; i++) await page.keyboard.press("ArrowRight");
+
+  // Live in the section's own window, before any save.
+  await expect
+    .poll(async () =>
+      page.evaluate(() => {
+        const frame = document.querySelector<HTMLIFrameElement>(
+          "#home-section-featured iframe",
+        );
+        const img = frame?.contentDocument?.querySelector<HTMLElement>(
+          '[data-field~="featured.card_1_photo"]',
+        );
+        return img?.style.transform ?? "";
+      }),
+    )
+    .toMatch(/scale\(/);
+
+  // The photo AND its framing are both unsaved changes.
+  await expect(page.getByText(/Unsaved changes \(2\)/)).toBeVisible();
+
+  // Put it all back, so this test leaves no override for pixels.spec.ts.
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Cancel" })
+    .click();
+  await page.getByRole("button", { name: "Discard" }).click();
+  await expect(page.getByText(/Unsaved changes/)).toHaveCount(0);
+});

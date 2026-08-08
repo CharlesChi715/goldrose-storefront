@@ -21,8 +21,10 @@ import {
   resetHomePage,
   resetHomeSection,
   saveHomeField,
+  saveHomeImageFrame,
   setHomeSectionVisible,
 } from "@/lib/home-content";
+import { MAX_ZOOM, NO_ZOOM } from "@/lib/images/spotlight";
 
 const Id = z.string().min(1).max(64);
 const Edit = z.object({
@@ -32,16 +34,49 @@ const Edit = z.object({
 });
 
 /**
+ * One photo's framing. Bounded here as well as at the store, because a server
+ * action is reachable without the screen and a stray zoom would ship a page
+ * scaled 40 times.
+ */
+const Frame = z.object({
+  section: Id,
+  field: Id,
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  zoom: z.number().min(NO_ZOOM).max(MAX_ZOOM),
+});
+
+/**
  * Save a batch of edited fields — the screen's single "Save changes" action.
  *
+ * Framing rides along with the fields rather than saving on its own: a frame
+ * describes a photo, and the photo it describes is itself an unsaved draft
+ * until this runs. Saving one without the other would crop a picture that is
+ * not on the page yet.
+ *
  * @param edits - One entry per changed field.
+ * @param frames - One entry per re-framed photo.
  */
 export async function saveHomeFieldsAction(
   edits: { section: string; field: string; value: string }[],
+  frames: {
+    section: string;
+    field: string;
+    x: number;
+    y: number;
+    zoom: number;
+  }[] = [],
 ): Promise<void> {
   await requireAdmin();
   for (const edit of z.array(Edit).max(200).parse(edits)) {
     await saveHomeField(edit.section, edit.field, edit.value);
+  }
+  for (const frame of z.array(Frame).max(50).parse(frames)) {
+    await saveHomeImageFrame(frame.section, frame.field, {
+      x: frame.x,
+      y: frame.y,
+      zoom: frame.zoom,
+    });
   }
   revalidateStorefront();
 }

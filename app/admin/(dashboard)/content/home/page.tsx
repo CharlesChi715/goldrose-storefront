@@ -59,7 +59,7 @@ function previewOf(
 }
 
 export default async function HomeContentPage() {
-  const { text, visible, layout, overridden } = await getHomeContent();
+  const { text, visible, layout, overridden, frames } = await getHomeContent();
   const resolved = text as unknown as Record<string, Record<string, string>>;
 
   const sections: SectionView[] = HOME_SECTION_LIST.map((section) => ({
@@ -127,6 +127,7 @@ export default async function HomeContentPage() {
     <HomeSectionsEditor
       sections={sections}
       library={library}
+      frames={Object.fromEntries(frames)}
       frameHeight={layout.frameHeight}
     />
   );

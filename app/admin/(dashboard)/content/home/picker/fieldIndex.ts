@@ -16,12 +16,7 @@
  * its own gets edited at all.
  */
 
-import {
-  distanceTo,
-  visibleRect,
-  type FrameView,
-  type Rect,
-} from "./geometry";
+import { distanceTo, visibleRect, type FrameView, type Rect } from "./geometry";
 
 /** One addressable thing on the page: an element and the slots it draws. */
 export type Target = {

@@ -16,7 +16,8 @@ import { Carousel } from "@/components/home/Carousel";
 import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC } from "@/lib/fonts";
-import { fileUrl } from "@/lib/files-url";
+import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /* Review cards 1–3 (nodes 163:99, 193:150, 193:155) — identical structure, so
@@ -85,7 +86,13 @@ function ReviewCard({
   copy,
   verifiedLabel,
   n,
-}: Review & { copy: ReviewCopy; verifiedLabel: string; n: number }) {
+  frames,
+}: Review & {
+  copy: ReviewCopy;
+  verifiedLabel: string;
+  n: number;
+  frames?: HomeFrames;
+}) {
   return (
     <div
       style={{
@@ -104,17 +111,24 @@ function ReviewCard({
           overflow: "hidden",
         }}
       >
-        <img
-          data-field={`recipient.review_${n}_photo`}
-          src={fileUrl(copy.photo)}
+        {/* The OPENING is 122×69 for all three; card 1's photo is a 132×170
+            bleed pulled up 55px behind it. HomePhoto keeps that traced
+            geometry for the design's own file and cover-fills the opening,
+            framed where the owner says, for anybody else's. */}
+        <HomePhoto
+          section="recipient"
+          field={`review_${n}_photo`}
+          value={copy.photo}
           alt={copy.photoAlt}
-          width={photoBox[2]}
-          height={photoBox[3]}
-          style={{
-            ...abs(photoBox[0], photoBox[1], photoBox[2], photoBox[3]),
-            display: "block",
+          box={{ w: 122, h: 69 }}
+          design={{
+            x: photoBox[0],
+            y: photoBox[1],
+            w: photoBox[2],
+            h: photoBox[3],
             objectFit: "cover",
           }}
+          frames={frames}
         />
       </div>
       <div
@@ -178,9 +192,11 @@ function ReviewCard({
 export function ReviewsRail({
   c,
   timing,
+  frames,
 }: {
   c: HomeText["recipient"];
   timing: RailTiming;
+  frames?: HomeFrames;
 }) {
   const copies = copyOf(c);
   return (
@@ -208,6 +224,7 @@ export function ReviewsRail({
           copy={copies[i]}
           verifiedLabel={c.reviews_verified_label}
           n={i + 1}
+          frames={frames}
         />
       )}
     />

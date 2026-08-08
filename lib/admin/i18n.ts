@@ -813,11 +813,18 @@ const en = {
     "Nothing uploaded yet. Anything you upload here also appears in Content → Files.",
   "home.photo.size": "Designed size:",
   "home.photo.fit.cover":
-    "Your photo is cropped to fill this box, so any shape works — the edges are trimmed.",
+    "Your photo is cropped to fill this box, so any shape works — frame it below to choose which part survives the trim.",
   "home.photo.fit.stretch":
-    "The design stretches this photo to fill its box, so a photo of a different shape will look squashed. Match the size above as closely as you can.",
+    "The design’s own file is exactly this shape and is drawn as-is. A photo of yours is cropped to fill the box instead of being squashed — frame it below to choose which part shows.",
   "home.photo.fit.window":
-    "The design shows one hand-picked part of a much larger picture here. Your own photo is cropped to fill the box instead, so any shape works.",
+    "The design shows one hand-picked part of a much larger picture here. Your own photo is cropped to fill the box instead — frame it below to pick your own part.",
+  "home.photo.frame.hint":
+    "This is the box at its real size. Drag the photo to choose which part shows, and pull the zoom to tighten in.",
+  "home.photo.frame.fits":
+    "This photo is already the right shape for the box, so there is nothing to pan — zoom in if you want a tighter crop.",
+  "home.photo.frame.zoom": "Zoom",
+  "home.photo.frame.designOnly":
+    "This is the design team's own photo, drawn exactly as they placed it. Choose a photo of your own to frame it yourself.",
   "home.photo.enterPath": "Or type a path instead",
   "home.photo.path": "Photo path",
   "home.photo.pathHelp":
@@ -1584,11 +1591,18 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
     "还没有上传过图片。在此上传的图片也会出现在「内容 → 文件」中。",
   "home.photo.size": "设计尺寸：",
   "home.photo.fit.cover":
-    "图片会裁切填满此区域，任何比例都可用——超出部分会被裁掉。",
+    "图片会裁切填满此区域，任何比例都可用——可在下方取景，选择保留哪一部分。",
   "home.photo.fit.stretch":
-    "设计稿会将图片拉伸填满，比例不同的图片会变形。请尽量贴近上方尺寸。",
+    "设计稿自带的图片比例正好，因此原样绘制。换成你自己的图片后会裁切填满而不会变形——可在下方取景。",
   "home.photo.fit.window":
-    "设计稿在此显示一张大图中人工选定的局部。换成你自己的图片后，会裁切填满该区域，任何比例都可用。",
+    "设计稿在此显示一张大图中人工选定的局部。换成你自己的图片后会裁切填满该区域——可在下方自行取景。",
+  "home.photo.frame.hint":
+    "这是该区域的真实尺寸。拖动图片选择显示哪一部分，拉动缩放可裁得更紧。",
+  "home.photo.frame.fits":
+    "这张图的比例已与该区域一致，无需拖动——如需更紧的构图可放大。",
+  "home.photo.frame.zoom": "缩放",
+  "home.photo.frame.designOnly":
+    "这是设计团队自己的图片，按其原始位置绘制。换成你自己的图片后即可自行取景。",
   "home.photo.enterPath": "或直接填写路径",
   "home.photo.path": "图片路径",
   "home.photo.pathHelp": "用于站内自带图片，例如 /eldreve/home/508-90.png",

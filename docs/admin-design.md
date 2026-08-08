@@ -812,6 +812,26 @@ different shape from the flat slot list.
     and touch panned the admin instead. The section windows never needed the
     layer, because their film is already inert (below), so the fix was to delete
     it rather than tune it. `admin-home-picker.spec.ts` keeps the guarantee.
+- **A replaced photo is framed, not just dropped in** (`lib/home-content/frames.ts`).
+  Every homepage box is a fixed design rectangle and nobody's photo is that
+  shape, so a replacement is cover-fitted — and used to trim to the centre with
+  no say in it, while the dialog previewed `object-fit: contain` and showed the
+  whole picture. The owner now picks a **spotlight area** (the same
+  point-plus-zoom a product photo stores, `lib/images/spotlight.ts`) against the
+  box at its true size, in the same `ImageFramer` the products screen uses.
+  - Stored in its own slot, `home.<section>.<field>.__frame` = `"x,y,zoom"`, so
+    there is no schema change and the "a row exists iff it differs from the
+    design" invariant is untouched: the centre crop stores nothing and emits
+    exactly the `cover` the page always drew. Every reset drops a photo's
+    framing with the photo.
+  - It is a draft, published by the same Save as everything else — a frame
+    describes a photo, and the photo is itself a draft until then.
+  - The design's OWN photo is never framed: `HomePhoto` draws Figma's traced
+    geometry while the value is the default, and a frame on top of that would
+    be a second answer to the same question.
+  - `stretch` slots (the four hero slides, the two story photos) cover a
+    replacement rather than squashing it (owner, 2026-08-08). Their design
+    render is unchanged; only somebody else's photo behaves differently.
 - **The frame loop lives in a leaf** (`picker/PickerLayer.tsx`). The highlights
   are re-measured every frame while a card is armed AND on screen, and that
   state must never sit on the screen component: its root is a Polaris `Page`,

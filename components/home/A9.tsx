@@ -17,6 +17,7 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 const GOLD = "#D4AF37";
@@ -124,7 +125,13 @@ const CERTIFICATES = [
   { x: 348, imgX: -341 },
 ];
 
-export function A9({ c }: { c: HomeText["craft"] }) {
+export function A9({
+  c,
+  frames,
+}: {
+  c: HomeText["craft"];
+  frames?: HomeFrames;
+}) {
   // Steps 01–03 only: step 04's tile is one Figma SVG, not a photo.
   const CRAFT_PHOTOS = [c.step_1_photo, c.step_2_photo, c.step_3_photo];
   const CRAFT_ALTS = [
@@ -226,6 +233,7 @@ export function A9({ c }: { c: HomeText["craft"] }) {
             alt={CRAFT_ALTS[i]}
             box={{ w: 90, h: 96 }}
             design={{ x: -s.x, y: -170, w: 430, h: 912.397 }}
+            frames={frames}
           />
         </div>
       ))}

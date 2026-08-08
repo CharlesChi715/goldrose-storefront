@@ -15,6 +15,7 @@ import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /**
@@ -100,9 +101,11 @@ const DOTS = [
 export function OccasionRail({
   c,
   timing,
+  frames,
 }: {
   c: HomeText["occasion"];
   timing: RailTiming;
+  frames?: HomeFrames;
 }) {
   const titles = [c.card_1_title, c.card_2_title, c.card_3_title];
   const copies = [c.card_1_copy, c.card_2_copy, c.card_3_copy];
@@ -166,6 +169,7 @@ export function OccasionRail({
                 alt={alts[i]}
                 box={{ w: 176, h: 156 }}
                 design={{ x: card.photo.x, y: -210.82, w: 546.1, h: 911.9 }}
+                frames={frames}
               />
             </div>
             {/* 436:281/295/308 · title */}

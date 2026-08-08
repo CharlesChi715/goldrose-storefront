@@ -23,11 +23,25 @@
  *
  * This is the same shape as the promo bar's `isDefault` switch (design SVG
  * until edited, live text afterwards) — see components/chrome.tsx.
+ *
+ * AND THE OWNER SAYS WHICH PART SURVIVES THE CROP
+ * `cover` alone trims to the centre, which is the tablecloth when the rose is
+ * off to one side. A replaced photo is therefore drawn through its FRAME — a
+ * spotlight area, the same point-plus-zoom a product photo already stores
+ * (lib/images/spotlight.ts) — chosen in the photo dialog against this exact
+ * box. An unframed photo's frame is the centre crop, which emits precisely the
+ * `cover` it always did, so nothing moves until somebody frames it.
+ *
+ * The design branch never takes a frame. Figma's traced offsets already say
+ * which part shows, and a frame on top of them would be two answers to one
+ * question — as well as a way to break the pixel baselines.
  */
 
 import { abs } from "@/lib/figma-layout";
 import { fileUrl } from "@/lib/files-url";
+import { frameFor, type HomeFrames } from "@/lib/home-content/frames";
 import { homeDefault } from "@/lib/home-content/registry";
+import { spotlightStyle } from "@/lib/images/spotlight";
 
 /** Figma's own placement of the design photo, relative to its opening. */
 export type PhotoDesign = {
@@ -51,6 +65,8 @@ export type PhotoDesign = {
  * @param alt - The resolved photo description.
  * @param box - The opening the photo is seen through, in stage pixels.
  * @param design - Figma's placement, used only while `value` is the default.
+ * @param frames - The page's framings; this component looks up its own. Ignored
+ *   while `value` is the design's own, and absent means the centre crop.
  * @param dataEl - Optional `data-el` name for the element-naming convention.
  * @param className - Optional class, e.g. the shared `gr-photo` zoom.
  * @returns The image, placed the design's way or the owner's way.
@@ -62,6 +78,7 @@ export function HomePhoto({
   alt,
   box,
   design,
+  frames,
   dataEl,
   className,
 }: {
@@ -71,6 +88,7 @@ export function HomePhoto({
   alt: string;
   box: { readonly w: number; readonly h: number };
   design: PhotoDesign;
+  frames?: HomeFrames;
   dataEl?: string;
   className?: string;
 }) {
@@ -91,8 +109,10 @@ export function HomePhoto({
     : {
         ...abs(0, 0, box.w, box.h),
         display: "block" as const,
-        objectFit: "cover" as const,
-        objectPosition: "center center",
+        // `cover` plus the owner's point, and a scale about that same point
+        // when they zoomed in. At the centre with no zoom this is exactly the
+        // `object-fit: cover` this branch has always emitted.
+        ...spotlightStyle(frameFor(frames, section, field)),
         maxWidth: "none" as const,
       };
 

@@ -209,6 +209,34 @@ Open linked resources only when the task needs them.
     "Maximum update depth exceeded" whenever a page scrolled under a selection.
   - Covered by `tests/e2e/admin-home-picker.spec.ts`, including a travel
     threshold on the page-wide preview that the old capture layer would fail.
+- **Replaced photos can be framed (2026-08-08,
+  `worktree-admin-home-customization`).** All 21 homepage photo slots were
+  centre-cropped with no say in it (`object-position: center center`), and the
+  dialog previewed with `object-fit: contain` — the whole photo, letterboxed —
+  so you approved one picture and published another. A replaced photo now
+  carries a **frame**: the same point-plus-zoom `SpotlightArea` a product photo
+  already stores (`lib/images/spotlight.ts`), chosen with the same
+  `ImageFramer`, which was already window-agnostic. The dialog shows the box at
+  its true size with the photo cover-fitted in it; what stays inside is what
+  ships. Framing is a draft like everything else and rides the same Save —
+  a frame describes a photo, and until Save that photo is a draft too.
+  - **No schema change.** The frame lives in its own `site_content` slot
+    (`home.<section>.<field>.__frame`, `"x,y,zoom"`), so the "a row exists iff
+    it differs from the design" invariant still holds: an unframed photo stores
+    nothing, emits exactly the `cover` it always did, and every reset drops
+    framing with the photo it describes. Not a registry field on purpose —
+    21 companions would have to be excluded from the list, the search, the
+    edited counts and the picker.
+  - **`stretch` slots now cover instead (owner ruling, option a).** The hero's
+    four slides and the two story photos stretched a replacement to the box.
+    The design's own file is exactly that shape; nobody else's is, and
+    "squashed" was never an intent. Their design render is untouched.
+  - ⚠️ **One pixel baseline moved, on purpose.** Routing the review photos
+    through `HomePhoto` applied its `maxWidth: none` rule, and review card 1's
+    132×170 bleed had been silently clamped to its 122px opening by Tailwind
+    preflight. It now renders at the width Figma traced. Its registry `box`
+    was also corrected 132×170 → 122×69 — that is the opening, and it is what
+    the framer frames against.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one

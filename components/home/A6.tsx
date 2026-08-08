@@ -20,6 +20,7 @@ import { ReviewsRail } from "@/components/home/ReviewsRail";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
 import type { RailTiming } from "@/lib/home-content/rail-timing";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /* Recipient filter chips (static, not clickable). "Wife" is the selected
@@ -70,9 +71,11 @@ const CHIPS = [
 export function A6({
   c,
   timing,
+  frames,
 }: {
   c: HomeText["recipient"];
   timing: RailTiming;
+  frames?: HomeFrames;
 }) {
   const chips = [c.chip_1, c.chip_2, c.chip_3, c.chip_4, c.chip_5];
   return (
@@ -155,7 +158,7 @@ export function A6({
       {/* 2380:526 / 2380:540 / 2380:554 · recipient cards — a swipeable rail
           since 2026-08-04 (H-22), on the same shared Carousel as A-5's
           structurally identical rail. */}
-      <RecipientRail c={c} timing={timing} />
+      <RecipientRail c={c} timing={timing} frames={frames} />
 
       {/* 2380:601 · dots 4 and 5 — the design draws five for three cards, so
           these two stay inert; RecipientRail wires the first three. */}
@@ -215,7 +218,7 @@ export function A6({
         {c.reviews_intro}
       </div>
 
-      <ReviewsRail c={c} timing={timing} />
+      <ReviewsRail c={c} timing={timing} frames={frames} />
 
       {/* 442:165 · the design's fourth review dot — there is no fourth review,
           so it stays static art rather than pointing at a missing slide. */}

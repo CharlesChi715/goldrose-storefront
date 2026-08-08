@@ -43,13 +43,7 @@
 
 /** How a field is edited — see FIELD KINDS in the file header. */
 export type HomeFieldKind =
-  | "text"
-  | "multiline"
-  | "url"
-  | "image"
-  | "number"
-  | "artwork"
-  | "managed";
+  "text" | "multiline" | "url" | "image" | "number" | "artwork" | "managed";
 
 /**
  * How a replacement photo is fitted into its design box — the single fact that
@@ -507,7 +501,8 @@ export const HOME_SECTIONS = [
         kind: "text",
         value: "Personalized gold-dipped rose",
         note: "Read aloud by screen readers and shown if the photo fails to load. Update it whenever you change the photo.",
-        noteZh: "供读屏软件朗读，图片加载失败时也会显示。更换图片时请一并修改。",
+        noteZh:
+          "供读屏软件朗读，图片加载失败时也会显示。更换图片时请一并修改。",
       },
       {
         id: "card_2_title",
@@ -570,7 +565,8 @@ export const HOME_SECTIONS = [
         kind: "text",
         value: "Enchanted gold rose under a glass dome with LED light",
         note: "Read aloud by screen readers and shown if the photo fails to load. Update it whenever you change the photo.",
-        noteZh: "供读屏软件朗读，图片加载失败时也会显示。更换图片时请一并修改。",
+        noteZh:
+          "供读屏软件朗读，图片加载失败时也会显示。更换图片时请一并修改。",
       },
     ],
   },
@@ -1242,11 +1238,15 @@ export const HOME_SECTIONS = [
         labelZh: "图片",
         kind: "image",
         value: "/eldreve/home/163-101.png",
-        box: { w: 132, h: 170 },
+        // The OPENING, not the design file. It read 132 × 170 — the size of
+        // the bleeding render behind it — which made the dialog state a box
+        // nothing is ever drawn into, and would have framed against the wrong
+        // shape. The design's own crop is kept by A-6's `design` geometry.
+        box: { w: 122, h: 69 },
         fit: "window",
-        note: "⚠️ The design shows only the MIDDLE of this photo — it is 132 × 170 pulled up by 55px behind a 122 × 69 opening. A normally cropped upload will show the wrong part; upload a tall photo whose subject sits in the middle.",
+        note: "The design shows only the middle of a taller photo here. Your own photo is cropped to fill this box — use “Frame the photo” to choose which part shows.",
         noteZh:
-          "⚠️ 设计稿只显示这张图的中间部分——132 × 170 的图上移 55px，透过 122 × 69 的开口显示。普通裁切的图会显示错误区域；请上传主体位于中部的竖图。",
+          "设计稿在此只显示一张竖图的中间部分。换成你自己的图片后会裁切填满此区域——可用“调整取景”选择显示哪一部分。",
       },
       {
         id: "review_1_photo_alt",
@@ -1268,7 +1268,8 @@ export const HOME_SECTIONS = [
         lines: 2,
         max: budget(106, 8.5),
         note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars.",
-        noteZh: "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
+        noteZh:
+          "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
       },
       {
         id: "review_2_photo",
@@ -1303,7 +1304,8 @@ export const HOME_SECTIONS = [
         lines: 2,
         max: budget(106, 8.5),
         note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars.",
-        noteZh: "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
+        noteZh:
+          "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
       },
       {
         id: "review_3_photo",

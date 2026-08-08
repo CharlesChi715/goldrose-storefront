@@ -62,7 +62,7 @@ export default async function HomePage() {
   }
   // Owner-editable copy, section visibility and the resulting band offsets
   // (§7.9). getHomeContent never throws: with no DB it returns the design.
-  const { text, visible, layout, overridden } = await getHomeContent();
+  const { text, visible, layout, overridden, frames } = await getHomeContent();
   // One timing for all four card rails, so they never drift apart (§9.8).
   const timing = railTiming(
     text.motion.rail_cycle_ms,
@@ -138,25 +138,25 @@ export default async function HomePage() {
           admin's per-section preview mounts the very same tree — see that
           file. What stays here is where each band sits. */}
         <HomeBand shift={layout.shift.hero} hidden={!visible.hero}>
-          {homeBand("hero", text, timing)}
+          {homeBand("hero", text, timing, frames)}
         </HomeBand>
         <HomeBand shift={layout.shift.featured} hidden={!visible.featured}>
-          {homeBand("featured", text, timing)}
+          {homeBand("featured", text, timing, frames)}
         </HomeBand>
         <HomeBand shift={layout.shift.ready} hidden={!visible.ready}>
-          {homeBand("ready", text, timing)}
+          {homeBand("ready", text, timing, frames)}
         </HomeBand>
         <HomeBand shift={layout.shift.occasion} hidden={!visible.occasion}>
-          {homeBand("occasion", text, timing)}
+          {homeBand("occasion", text, timing, frames)}
         </HomeBand>
         <HomeBand shift={layout.shift.recipient} hidden={!visible.recipient}>
-          {homeBand("recipient", text, timing)}
+          {homeBand("recipient", text, timing, frames)}
         </HomeBand>
         <HomeBand shift={layout.shift.craft} hidden={!visible.craft}>
-          {homeBand("craft", text, timing)}
+          {homeBand("craft", text, timing, frames)}
         </HomeBand>
         <HomeBand shift={layout.shift.story} hidden={!visible.story}>
-          {homeBand("story", text, timing)}
+          {homeBand("story", text, timing, frames)}
         </HomeBand>
         {/* Header last: A-1's opaque module background covers y32-98, and the
           header (chrome, not part of any module) must paint above it. */}

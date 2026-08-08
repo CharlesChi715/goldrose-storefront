@@ -34,6 +34,8 @@ import {
   TextField,
 } from "@shopify/polaris";
 import { useAdminLang, useAdminT } from "../../../PolarisShell";
+import { ImageFramer } from "../../products/ImageFramer";
+import type { SpotlightArea } from "@/lib/home-content/frames";
 import { uploadHomePhotoAction } from "./actions";
 
 /** One already-uploaded file, offered as a choice in the picker. */
@@ -52,6 +54,8 @@ export type LibraryItem = { path: string; url: string; name: string };
  * @param library - Files already uploaded, newest first.
  * @param onChange - Called with the chosen path.
  * @param onClose - Called when the dialog should close.
+ * @param frame - How the current photo is framed inside that box.
+ * @param onFrameChange - Called as the owner drags or zooms the framing.
  * @param onUploaded - Called after a successful upload so the page can refresh
  *   its library.
  */
@@ -64,7 +68,9 @@ export function PhotoPicker({
   box,
   fit,
   library,
+  frame,
   onChange,
+  onFrameChange,
   onClose,
   onUploaded,
 }: {
@@ -76,7 +82,9 @@ export function PhotoPicker({
   box: { w: number; h: number } | null;
   fit: "cover" | "stretch" | "window" | null;
   library: LibraryItem[];
+  frame: SpotlightArea;
   onChange: (path: string) => void;
+  onFrameChange: (area: SpotlightArea) => void;
   onClose: () => void;
   onUploaded: () => void;
 }) {
@@ -163,24 +171,53 @@ export function PhotoPicker({
                   <Badge tone="info">{t("home.edited")}</Badge>
                 )}
               </InlineStack>
-              <Box
-                background="bg-surface-secondary"
-                borderRadius="200"
-                padding="200"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={previewUrl}
-                  alt=""
-                  style={{
-                    display: "block",
-                    maxWidth: "100%",
-                    maxHeight: 180,
-                    margin: "0 auto",
-                    objectFit: "contain",
-                  }}
+              {/* THE FRAME, not a letterboxed thumbnail.
+                  This preview used to be `object-fit: contain` — the whole
+                  photo, shrunk to fit — while the page draws `cover` and
+                  trims. So the owner approved one picture and published a
+                  different one, and the only way to find out was to look at
+                  the live site. This is the box at its TRUE size with the
+                  photo cover-fitted inside it: what stays in is what shows.
+                  Drag to pan, pull the zoom to tighten in.
+                  Only for a REPLACED photo: while the value is still the
+                  design's own, the page draws Figma's traced geometry and a
+                  frame would be a second answer to the same question. */}
+              {box && value !== defaultValue ? (
+                <ImageFramer
+                  url={previewUrl}
+                  alt={label}
+                  box={box}
+                  area={frame}
+                  hint={t("home.photo.frame.hint")}
+                  fitsHint={t("home.photo.frame.fits")}
+                  zoomLabel={t("home.photo.frame.zoom")}
+                  onChange={onFrameChange}
                 />
-              </Box>
+              ) : (
+                <Box
+                  background="bg-surface-secondary"
+                  borderRadius="200"
+                  padding="200"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewUrl}
+                    alt=""
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      maxHeight: 180,
+                      margin: "0 auto",
+                      objectFit: "contain",
+                    }}
+                  />
+                </Box>
+              )}
+              {box && value !== defaultValue ? null : (
+                <Text as="p" variant="bodySm" tone="subdued">
+                  {t("home.photo.frame.designOnly")}
+                </Text>
+              )}
             </BlockStack>
           </Card>
 

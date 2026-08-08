@@ -18,6 +18,7 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { notoSC, playfair } from "@/lib/fonts";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 // The CTA arrow glyph (I2380:379;1523:389) as an exact render.
@@ -41,7 +42,13 @@ const TILES = [
   },
 ];
 
-export function A1({ c }: { c: HomeText["hero"] }) {
+export function A1({
+  c,
+  frames,
+}: {
+  c: HomeText["hero"];
+  frames?: HomeFrames;
+}) {
   const benefits = [c.benefit_1, c.benefit_2];
   return (
     // 2380:374 module frame — children below are positioned relative to it.
@@ -205,7 +212,7 @@ export function A1({ c }: { c: HomeText["hero"] }) {
       {/* 2380:386 hero photo window + 2380:394 dots — interactive per H-03.
           The window sits at the TOP of the band in this frame, directly under
           the header, with the dots overlaid on its lower edge. */}
-      <HeroCarousel c={c} />
+      <HeroCarousel c={c} frames={frames} />
     </div>
   );
 }

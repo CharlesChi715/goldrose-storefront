@@ -32,6 +32,8 @@
  * matters. Both are handled below.
  */
 
+import { spotlightStyle } from "@/lib/images/spotlight";
+import type { SpotlightArea } from "@/lib/home-content/frames";
 import type { FieldView } from "../HomeSectionsEditor";
 
 /** What a patch attempt did, so the caller can tell the owner the truth. */
@@ -210,6 +212,46 @@ export function patchField(
     element.textContent = value;
   }
   return "patched";
+}
+
+/**
+ * Show a new framing in the preview as the owner drags it.
+ *
+ * Only touches a photo that is ALREADY the owner's: `HomePhoto` draws Figma's
+ * traced geometry while the value is still the design's, and framing on top of
+ * that would be two answers to one question. `patchPhoto` has by then rewritten
+ * the element to a plain fill of its box, which is exactly what a spotlight
+ * area is expressed against — so this is a style write and nothing more.
+ *
+ * @param doc - The preview's document.
+ * @param key - The image field's `"<section>.<id>"` key.
+ * @param area - The framing to show.
+ * @returns What happened, in the same terms as `patchField`.
+ */
+export function patchFrame(
+  doc: Document,
+  key: string,
+  area: SpotlightArea,
+): PatchResult {
+  const elements = [...doc.querySelectorAll(`[data-field~="${key}"]`)];
+  if (elements.length === 0) return "no-target";
+  let touched = false;
+  for (const element of elements) {
+    const img =
+      element.tagName === "IMG"
+        ? (element as HTMLImageElement)
+        : element.querySelector("img");
+    // No stash means this photo is still the design's own, drawn by Figma's
+    // geometry — there is nothing for a frame to act on yet.
+    if (!img || !img.dataset.designGeometry) continue;
+    const style = spotlightStyle(area);
+    img.style.objectFit = style.objectFit as string;
+    img.style.objectPosition = style.objectPosition as string;
+    img.style.transform = (style.transform as string) ?? "";
+    img.style.transformOrigin = (style.transformOrigin as string) ?? "";
+    touched = true;
+  }
+  return touched ? "patched" : "needs-reload";
 }
 
 /**

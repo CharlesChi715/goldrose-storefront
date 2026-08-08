@@ -23,6 +23,7 @@ import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 /* 2380:439 / 2380:446 · the two Ready-to-Ship rows. Same card, same photo,
@@ -33,7 +34,13 @@ const ROWS = [
   { x: 25, y: 1577, w: 385 },
 ] as const;
 
-export function A3({ c }: { c: HomeText["ready"] }) {
+export function A3({
+  c,
+  frames,
+}: {
+  c: HomeText["ready"];
+  frames?: HomeFrames;
+}) {
   return (
     <>
       {/* 2380:422 · module background — decoration, deliberately unnamed */}
@@ -118,6 +125,7 @@ export function A3({ c }: { c: HomeText["ready"] }) {
               }}
               dataEl={`HOME-READY-TO-SHIP-PRODUCT-IMG-${i + 1}`}
               className="gr-photo"
+              frames={frames}
             />
           </div>
           <div

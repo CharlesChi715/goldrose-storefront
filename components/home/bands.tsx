@@ -3,7 +3,7 @@
  * Which component draws which homepage band — stated once.
  *
  * `app/page.tsx` is the only caller, and this exists so that its stack is one
- * uniform list — `homeBand(id, text, timing)` seven times — rather than seven
+ * uniform list — `homeBand(id, text, timing, frames)` seven times — rather than seven
  * bespoke call sites with different props. Hiding and shifting then apply the
  * same way to every band, which is the property the whole re-stacking rests on.
  *
@@ -21,6 +21,7 @@
 
 import type { ReactNode } from "react";
 import type { HomeSectionId, HomeText } from "@/lib/home-content";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { A1 } from "./A1";
 import { A2 } from "./A2";
@@ -36,6 +37,9 @@ import { A11 } from "./A11";
  * @param id - The section to draw.
  * @param text - Resolved copy for the whole page.
  * @param timing - The shared card-rail timing.
+ * @param frames - How each replaced photo is framed. Passed as one opaque map
+ *   and forwarded unchanged: `HomePhoto` knows which slot it is drawing, so no
+ *   band has to resolve a photo's framing on its behalf.
  * @returns The band's content, or null for sections that are not bands
  *   (`promo` is chrome; `motion` is a settings group).
  */
@@ -43,22 +47,23 @@ export function homeBand(
   id: HomeSectionId,
   text: HomeText,
   timing: RailTiming,
+  frames?: HomeFrames,
 ): ReactNode {
   switch (id) {
     case "hero":
-      return <A1 c={text.hero} />;
+      return <A1 c={text.hero} frames={frames} />;
     case "featured":
-      return <A2 timing={timing} c={text.featured} />;
+      return <A2 timing={timing} c={text.featured} frames={frames} />;
     case "ready":
-      return <A3 c={text.ready} />;
+      return <A3 c={text.ready} frames={frames} />;
     case "occasion":
-      return <A5 timing={timing} c={text.occasion} />;
+      return <A5 timing={timing} c={text.occasion} frames={frames} />;
     case "recipient":
-      return <A6 timing={timing} c={text.recipient} />;
+      return <A6 timing={timing} c={text.recipient} frames={frames} />;
     case "craft":
-      return <A9 c={text.craft} />;
+      return <A9 c={text.craft} frames={frames} />;
     case "story":
-      return <A11 c={text.story} />;
+      return <A11 c={text.story} frames={frames} />;
     default:
       return null;
   }

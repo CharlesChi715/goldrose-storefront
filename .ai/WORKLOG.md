@@ -6330,3 +6330,61 @@ of its band, no wheel leak to the editor, focus ring, width slider). Driven by
 hand in a real browser: window scrolls natively, outlines land, the panel docks
 in the right card, typing reaches both the section window and the page-wide
 preview, 60fps with three windows armed, no crashes.
+
+## 2026-08-08 — a cropper for homepage photos
+
+**Branch:** `worktree-admin-home-customization`
+
+Charles asked whether replaced homepage photos get a cropper. They did not, and
+the gap was worse than "no control": all 21 image slots were centre-cropped with
+`object-position: center center` hard-coded in `HomePhoto`, while the photo
+dialog previewed with `object-fit: contain` — the whole picture, letterboxed.
+So the owner approved one image and published a different one, discoverable only
+by looking at the live site. Six of the 21 (the four hero slides, the two story
+photos) did not even crop: they stretched a replacement to the box.
+
+**Built by reuse, not invention.** `lib/images/spotlight.ts` and
+`products/ImageFramer.tsx` already do exactly this for product photos, and the
+framer was already written window-agnostic ("there are two of them and they are
+different shapes"), so it took a `box` and an `area` unchanged. A homepage photo
+needs ONE area, not two: it appears in exactly one box.
+
+**Storage: no schema change.** A frame is metadata about an image field, not a
+field, so it lives in its own `site_content` slot —
+`home.<section>.<field>.__frame` holding `"x,y,zoom"`. Declaring 21 companion
+registry fields would have meant excluding them from the list, the search index,
+the per-section edited counts and the picker; a sibling key needs none of that.
+The invariant survives intact: the centre crop equals the design, so it stores
+no row and emits precisely the `cover` the page always drew, and every reset
+path drops a photo's framing along with the photo.
+
+**Owner ruling (option a):** the six `stretch` slots now cover-and-frame a
+replacement instead of squashing it. The design's own files are exactly the
+right shape — "squashed" was an artefact, never an intent — and their design
+render is untouched.
+
+**Two bugs found on the way.**
+1. `recipient.review_1_photo` declared `box: 132 × 170`, which is the size of
+   the bleeding render, not the 122 × 69 opening it shows through — its own note
+   said so. The dialog therefore stated a box nothing is drawn into, and the
+   framer would have framed the wrong shape. Corrected to the opening.
+2. Choosing a photo never patched the previews: the dialog called `setDrafts`
+   directly rather than `setDraft`, so a new photo did not appear until the next
+   save. Invisible while framing was invisible; glaring once the frame updated
+   live beside it. Now routed through `setDraft`.
+
+**One pixel baseline moved, deliberately.** Routing the review photos through
+`HomePhoto` applied its `maxWidth: "none"` rule — which exists precisely because
+"the design renders are wider than their opening on purpose". Review card 1's
+132px bleed had been silently clamped to its 122px opening by Tailwind
+preflight's `img { max-width: 100% }` all along, shifting the crop. It now
+renders at the width Figma traced, and `home-darwin.png` was re-baselined for
+that one region. The other two baselines are byte-identical.
+
+**Verified:** tsc clean, ESLint clean, 159 unit (6 new, one of which caught
+`Number("") === 0` letting `"50,,100"` parse as "pin the top edge"), 151 e2e
+including all three pixel baselines. Driven by hand in a real browser: the
+dialog shows the design photo un-framable with the reason, a chosen photo
+appears in every preview at once, and dragging the zoom writes
+`transform: scale(2.5)` into the section window live while the banner counts
+photo and framing as two unsaved changes.

@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
  * H-03 · the homepage hero carousel and its pagination dots (Figma 153:63 +
@@ -16,8 +15,8 @@
  */
 
 import { Carousel } from "@/components/home/Carousel";
-import { abs } from "@/lib/figma-layout";
-import { fileUrl } from "@/lib/files-url";
+import { HomePhoto } from "@/components/home/HomePhoto";
+import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
 // 549:97 — keep every indicator at the same visible size. The active slide is
@@ -34,9 +33,16 @@ const DOTS = [
  *
  * @param c - The resolved `hero` section copy, supplying the four slide photos,
  *   their descriptions and the destination they share.
+ * @param frames - The page's photo framings, forwarded to each slide.
  * @returns The clipped hero track and the four dots.
  */
-export function HeroCarousel({ c }: { c: HomeText["hero"] }) {
+export function HeroCarousel({
+  c,
+  frames,
+}: {
+  c: HomeText["hero"];
+  frames?: HomeFrames;
+}) {
   // One entry per dot: the dot row is hand-placed at Figma's own irregular
   // pitch, so the slide count stays pinned to it rather than to the data.
   const slides = [
@@ -57,14 +63,20 @@ export function HeroCarousel({ c }: { c: HomeText["hero"] }) {
       hrefField="hero.photo_href"
       label="hero slide"
       name="HOME-HERO"
+      /* Through HomePhoto so a replaced slide can be FRAMED. The design's own
+         render is a flat 430×317 with no object-fit — i.e. stretched to the
+         window, which is right only because that file is exactly that shape.
+         Somebody else's photo is cover-fitted and cropped where they say
+         (owner, 2026-08-08), rather than squashed to the hero's proportions. */
       renderSlide={(i) => (
-        <img
-          data-field={`hero.photo_${i + 1}`}
-          src={fileUrl(slides[i].photo)}
+        <HomePhoto
+          section="hero"
+          field={`photo_${i + 1}`}
+          value={slides[i].photo}
           alt={slides[i].alt}
-          width={430}
-          height={317}
-          style={{ ...abs(0, 0, 430, 317), display: "block" }}
+          box={{ w: 430, h: 317 }}
+          design={{ x: 0, y: 0, w: 430, h: 317 }}
+          frames={frames}
         />
       )}
     />
