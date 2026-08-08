@@ -1,181 +1,149 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
 /**
  * ROLE OF THIS FILE
- * B-1 · Shopping Bag (Figma frame 1523:3059 " Homepage-Shopping Bag ",
- * 430×1726; re-imported 2026-07-29 from the file-wide restyle delivery) —
- * the bag canvas above the tab bar: brand nav, member-benefit strip,
- * shipping meter, the single line-item card, gift add-ons, the rose story
- * panel, gift note, order summary (with the "safe pay" bar), concierge
- * card, FAQ rows and the sticky checkout bar. Geometry is unchanged from
- * the 07-27 frame; the 07-29 changes are the header (the brand logo is now
- * a back arrow, wired as BackButton) and the shipping panel going WHITE
- * per the restyle's card language.
- * The line item / totals / add-ons are the design's own placeholder data (the
- * real cart is client-side localStorage, wired in a follow-up); only the
- * checkout CTA, the product thumbnail/title and the back arrow go anywhere.
- * The frame's own bottom navigation (1523:3188) is dropped — <BottomNav>
- * renders it. (The frame is 2px shorter than its own content: the inner
- * 1523:3060 runs to 1728, so the source crops its nav band's last 2px.)
+ * B-1 · Shopping Bag — re-imported 2026-08-07 from the redesigned frames
+ * `1523:3059` (has items) and `2976:375` (empty). Both are 430×932; the page
+ * was 1726 before, because the delivery DELETED four of its six sections at
+ * source:
  *
- * Brand: the frame's header wordmark is an image reading "ELDREVE" — the
- * brand itself (DQ-34). Per the OrderConfirmedScreen precedent the live page
- * sets it as Playfair text at the image's box. The image still overhangs the
- * nav frame's top (6.4px now, was 4.5px) — the text render centres in the
- * same box, so the clip no longer crops any ink.
+ *   03 / Gift Services   the four add-on cards        — gone
+ *   04 / Product Story   "A Rose Made to Last" panel  — detached to a loose
+ *                        canvas frame (1523:3132), not Ready for dev
+ *   05 / Note + Summary  gift note, order summary,
+ *                        "safe pay" bar, payment marks, FAQ rows — gone
+ *
+ * What survives is 01 (header, benefits, shipping meter), 02 (the line-item
+ * card) and 06 (concierge + checkout bar). The line card's own geometry is
+ * untouched; it only moved up 5px. The member-benefit labels are new copy
+ * ("Secure Checkout / Gift-Ready Packaging / Fast Dispatch", exports
+ * 2978-434…436), and the shipping line lost its "· $0 remaining" suffix.
+ *
+ * LIVE CART, NOT PLACEHOLDER ROWS. The old build drew the design's own
+ * "Artisan Blue Rose" row because nothing was wired. The new delivery ships an
+ * explicit empty state, which only means anything against a real cart, so this
+ * screen now reads localStorage through useCart() — the same store /checkout
+ * prices — and shows the empty frame when there is nothing in it.
+ *
+ * HOW THE CANVAS IS SIZED. `02 / Product Card` is 544 tall and holds ONE
+ * 272px card at a 12px inset; a real bag can hold more, so each extra line
+ * adds one 284px pitch and pushes section 06 (and the canvas) down with it.
+ * At one line every coordinate is the frame's own. The canvas is the frame's
+ * 932 plus the 59px tab bar, which is how the old build sized it too (the
+ * frame's 10px tail is the gap before the bar) — the difference is that these
+ * frames no longer draw a nav band of their own.
+ *
+ * STILL THE DESIGN'S OWN WORDS, NOT OURS. Both of these predate this sync and
+ * are carried over verbatim rather than quietly reworded; see
+ * /agent-delivery/sessions/figma-sync-newsletter-bag-08-07-feat-figma-sync.md.
+ * AI-TAG(AI-041): OWNER-DECISION — the shipping card states COMPLIMENTARY
+ * SHIPPING UNLOCKED and same-day dispatch unconditionally, on an empty bag
+ * too. Real rates are OQ-2 and still unanswered, so this is a shipping
+ * promise the store cannot yet honour.
+ * AI-TAG(AI-042): PLACEHOLDER — "Move to Wishlist" has no feature behind it.
+ * Only "Remove" is wired; the other half is inert text. ASK AURI is likewise
+ * static, as it was before this sync.
+ *
+ * Brand: the header wordmark is an image reading "ELDREVE" — the brand itself
+ * (DQ-34) — set as Playfair text at the image's box, per the OrderConfirmed
+ * precedent. The concierge line says VELORIA in the frame; that is one of the
+ * three stale names AI-037 says must not be imported verbatim, so it reads
+ * ELDREVE here.
  */
 
-import { Fragment } from "react";
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
+import { ScaleFrame } from "@/components/chrome";
 import { abs } from "@/lib/figma-layout";
+import { fileUrl } from "@/lib/files-url";
 import { goudy, notoSC, playfair } from "@/lib/fonts";
+import { formatMoney } from "@/lib/money";
+import { useCart, type CartLineView } from "@/lib/cart/store";
+import type { CatalogProduct } from "@/lib/supabase/types.ts";
 
 const A = "/eldreve/screens";
 
-// 1523:3067 / 3068 / 3069 — member-benefit labels, glyph-led so each is
-// Figma's own SVG render placed at the TEXT node's box (x is card-relative).
-// The 07-29 delivery shipped no exports for these nodes; the 07-27 renders
-// (749-10x) are equivalent — same strings, boxes and #3B2F2F fill.
-const BENEFITS = [
-  { x: 10, w: 98, src: "749-104", alt: "▣  Member Rewards" },
-  { x: 164, w: 86, src: "749-105", alt: "✦  30-Day Returns" },
-  { x: 306, w: 82, src: "749-106", alt: "♔  Gift Concierge" },
-];
-
-// 1523:3083 / 3085 / 3087 — craft tag pills, card-relative. Each pill is
-// 62×24; only the label's inset and width differ.
-const TAGS = [
-  { x: 176, labelX: 15, labelW: 32, label: "LIMITED" },
-  { x: 244, labelX: 12, labelW: 38, label: "24K GOLD" },
-  { x: 312, labelX: 2, labelW: 58, label: "HANDCRAFTED" },
-];
-
-// 1523:3104 / 3111 / 3118 / 3125 — gift add-on cards. Identical 95×167
-// geometry; only x, art and copy differ.
-const GIFTS = [
-  {
-    x: 16,
-    src: "1523-3105",
-    alt: "Red and gold dipped roses on an acrylic stand",
-    name: "Acrylic Stand",
-    price: "+$20",
-  },
-  {
-    x: 117,
-    src: "1523-3112",
-    alt: "Gold dipped rose in a luxury gift box",
-    name: "Luxury Gift Box",
-    price: "+$25",
-  },
-  {
-    x: 218,
-    src: "1523-3119",
-    alt: "Blush preserved rose bouquet",
-    name: "Rose Bouquet",
-    price: "+$25",
-  },
-  {
-    x: 319,
-    src: "1523-3126",
-    alt: "Red rose gift set with certificate",
-    name: "Personal Card",
-    price: "+$5",
-  },
-];
-
-// 1523:3137 … 3140 — two-line glyph-led story rows, card-relative y. No
-// 07-29 exports for these nodes either; the 07-27 renders match the sheet
-// (same strings, 212×24 boxes, #3B2F2F).
-const STORY = [
-  {
-    y: 43,
-    src: "750-149",
-    alt: "✦ Symbolism — Love that endures beyond the moment",
-  },
-  {
-    y: 74,
-    src: "750-150",
-    alt: "◇ Rose finish — Deep sapphire preserved rose",
-  },
-  { y: 105, src: "750-151", alt: "⌁ Stem — Alloy core with 24K gold finish" },
-  {
-    y: 136,
-    src: "750-152",
-    alt: "♧ Presentation — Luxury box, care card and soft pouch",
-  },
-];
-
-// 1523:3149 / 3152 / 3155 — order-summary rows, card-relative.
-const SUMMARY = [
-  {
-    y: 43,
-    label: "Merchandise",
-    labelW: 72,
-    valueX: 337,
-    valueW: 45,
-    value: "$159.00",
-    valueColor: "#3B2F2F",
-  },
-  {
-    y: 73,
-    label: "Gift services",
-    labelW: 68,
-    valueX: 351,
-    valueW: 31,
-    value: "$0.00",
-    valueColor: "#3B2F2F",
-  },
-  {
-    y: 103,
-    label: "Shipping",
-    labelW: 51,
-    valueX: 292,
-    valueW: 90,
-    value: "Complimentary",
-    valueColor: "#09442E",
-  },
-];
-
-// 1523:3180 / 3181 / 3182 — FAQ rows, now component instances carrying a
-// bottom-only 1px inside stroke (t0r0b1l0).
-const FAQS = [
-  { y: 1432, q: "Rose care guide", w: 88 },
-  { y: 1484, q: "Shipping, returns & exchanges", w: 169 },
-  { y: 1536, q: "Frequently asked questions", w: 154 },
-];
-
-// The three FAQ ＋ instance exports are byte-identical, so one file serves
-// every row. Filename is the raw node id (";"/":" intact — this delivery's
-// downloader skipped the I753-103_151-55-style sanitising).
-const FAQ_PLUS = "I1523-3180_1523-415.svg";
-
+const INK = "#3B2F2F";
+const GREEN = "#09442E";
+const GOLD_INK = "#C88217";
+const CREAM = "#FFF6EC";
 const HAIRLINE_RING = "inset 0 0 0 1px #E5D9C9";
 
-export function BagScreen() {
+/** A 1×1 transparent GIF, so a product with no photo shows nothing at all
+ *  rather than the design's rose (the /checkout precedent). */
+const BLANK_PIXEL =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+/* ---------- the frame's own vertical arithmetic ---------- */
+
+/** `02 / Product Card` starts here; `01 / Header + Benefits` is 0…232. */
+const SECTION_TWO_TOP = 232;
+/** Height of `02` as drawn, holding one card inset 12px from its top. */
+const SECTION_TWO_HEIGHT = 544;
+/** Card top inside `02`, and the pitch each further line adds (272 + 12). */
+const CARD_INSET = 12;
+const CARD_PITCH = 284;
+/** `06 / Concierge + Checkout`: card at +0, sticky bar at +78, 146 tall. */
+const SECTION_SIX_HEIGHT = 146;
+const STICKY_OFFSET = 78;
+/** Cream tail the frame leaves below section 06 — the gap before the bar. */
+const FRAME_TAIL = 10;
+/** The viewport-fixed tab bar these frames no longer draw themselves. */
+const NAV_HEIGHT = 59;
+
+/** The frame's own height, 932, is what these add up to at one line. */
+function layoutFor(lineCount: number) {
+  const sectionTwo =
+    SECTION_TWO_HEIGHT + Math.max(0, lineCount - 1) * CARD_PITCH;
+  const sectionSixTop = SECTION_TWO_TOP + sectionTwo;
+  return {
+    sectionSixTop,
+    stickyTop: sectionSixTop + STICKY_OFFSET,
+    canvasHeight: sectionSixTop + SECTION_SIX_HEIGHT + FRAME_TAIL + NAV_HEIGHT,
+  };
+}
+
+/** The empty frame has no section 06 at all, so it is simply 932 + the bar. */
+const EMPTY_CANVAS_HEIGHT = 932 + NAV_HEIGHT;
+
+// 2978:434 / 435 / 436 — member-benefit labels. Each is glyph-led (▣ ✦ ♔),
+// so it is Figma's own SVG render placed at the TEXT node's box; the SVG is
+// cropped to its ink, hence objectFit:none at natural size. x is card-relative.
+const BENEFITS = [
+  { x: 10, w: 95, src: "2978-434", alt: "▣  Secure Checkout" },
+  { x: 152, w: 115, src: "2978-435", alt: "✦  Gift-Ready Packaging" },
+  { x: 314, w: 74, src: "2978-436", alt: "♔  Fast Dispatch" },
+];
+
+// 1523:3083 / 3085 / 3087 — craft-tag pills, card-relative. Identical 62×24
+// boxes; the design centres each label in its own pill.
+const TAG_SLOTS = [176, 244, 312];
+
+/* ---------- 01 · Header + Benefits (1523:3061 / 2976:377) ---------- */
+
+function HeaderAndBenefits() {
   return (
     <>
-      {/* ---------- 01 · Header + Benefits (1523:3061) ---------- */}
-
-      {/* 1523:3062 Brand Navigation — clips. The leading 40×42 image is no
-          longer the rose logo but the frame's back arrow (layer "返回 2"),
-          wired as the flow's BackButton; / is the fallback when the bag is
-          the first page of the visit. */}
-      <div style={{ ...abs(16, 20, 398, 42), overflow: "hidden" }}>
+      {/* 1523:3062 Brand Navigation — clips. The leading 40×42 image is the
+          frame's back arrow (layer "返回 2"), wired as the flow's BackButton;
+          / is the fallback when the bag is the first page of the visit. */}
+      <div style={{ ...abs(16, 15, 398, 42), overflow: "hidden" }}>
         <BackButton
           fallback="/"
           src={`${A}/1523-3063.png`}
           style={abs(0, 0, 40, 42)}
         />
-        {/* 1523:3064 wordmark box (nav-rel 122,−6.4 152×54.8): ELDREVE for
-            the frame's "ELDREVE" placeholder image — see the file header. */}
+        {/* 1523:3064 wordmark box (nav-rel 122,−6 152×54.84): ELDREVE for the
+            frame's "ELDREVE" placeholder image — see the file header. */}
         <div
           className={playfair.className}
           style={{
-            ...abs(122, -6.4, 152, 54.8),
+            ...abs(122, -6, 152, 54.84),
             fontSize: 26,
-            lineHeight: "54.8px",
+            lineHeight: "54.84px",
             fontWeight: 600,
-            color: "#3B2F2F",
+            color: INK,
             textAlign: "center",
             whiteSpace: "nowrap",
           }}
@@ -188,21 +156,21 @@ export function BagScreen() {
       <div
         className={playfair.className}
         style={{
-          ...abs(16, 68, 184),
+          ...abs(16, 63, 184),
           fontSize: 29,
           lineHeight: "38.66px",
           fontWeight: 600,
-          color: "#09442E",
+          color: GREEN,
           whiteSpace: "nowrap",
         }}
       >
         Shopping Bag
       </div>
 
-      {/* 1523:3066 Member Benefits strip — 72% pink so the labels stay opaque */}
+      {/* 2978:433 Member Benefits strip — 72% pink so the labels stay opaque */}
       <div
         style={{
-          ...abs(16, 113, 398, 42),
+          ...abs(16, 108, 398, 42),
           background: "rgba(247, 218, 225, 0.72)",
           borderRadius: 10,
           overflow: "hidden",
@@ -225,18 +193,17 @@ export function BagScreen() {
         ))}
       </div>
 
-      {/* 1523:3070 Complimentary Shipping panel — WHITE in the 07-29 restyle
-          (was cream); the card language moved every card to white. */}
+      {/* 1523:3070 Complimentary Shipping panel — see AI-041 in the header:
+          the promise is the design's, carried over unchanged. */}
       <div
         style={{
-          ...abs(16, 161, 398, 74),
+          ...abs(16, 156, 398, 74),
           background: "#FFFFFF",
           borderRadius: 12,
           boxShadow: HAIRLINE_RING,
           overflow: "hidden",
         }}
       >
-        {/* 1523:3071 — no 07-29 export; the 07-27 render matches (#09442E) */}
         <img
           src={`${A}/749-108.svg`}
           alt="●  COMPLIMENTARY SHIPPING UNLOCKED"
@@ -249,176 +216,260 @@ export function BagScreen() {
             objectPosition: "left center",
           }}
         />
+        {/* 1523:3072 — the 08-07 frame drops the old "· $0 remaining" tail */}
         <div
           className={notoSC.className}
           style={{
-            ...abs(12, 35, 264),
+            ...abs(12, 35, 185),
             fontSize: 10,
             lineHeight: "12px",
             fontWeight: 400,
-            color: "#3B2F2F",
+            color: INK,
             whiteSpace: "nowrap",
           }}
         >
-          {"Order by 4:00 PM for same-day dispatch  ·  $0 remaining"}
+          {"Order by 4:00 PM for same-day dispatch  "}
         </div>
-        {/* 1523:3073 shipping meter — already full width (nothing left to earn) */}
+        {/* 1523:3073 shipping meter — drawn full, as the design draws it */}
         <div
           style={{
             ...abs(12, 59, 374, 4),
-            background: "#09442E",
+            background: GREEN,
             borderRadius: 2,
           }}
         />
       </div>
+    </>
+  );
+}
 
-      {/* ---------- 02 · Product Card (1523:3074) ---------- */}
+/* ---------- 02 · Product Card (1523:3075), one per cart line ---------- */
 
-      {/* 1523:3075 Artisan Blue Rose card */}
-      <div
-        style={{
-          ...abs(16, 249, 398, 272),
-          background: "#FFFFFF",
-          borderRadius: 14,
-          boxShadow: `${HAIRLINE_RING}, 0 4px 12px rgba(59, 47, 47, 0.08)`,
-          overflow: "hidden",
-        }}
-      >
-        {/* 1523:3076 thumbnail → /shop until per-line product links are wired */}
-        <Link
-          href="/shop"
-          style={{ ...abs(14, 14, 148, 244), display: "block" }}
-        >
-          <img
-            src={`${A}/1523-3076.png`}
-            alt="Artisan Blue Rose — gold-trimmed blue preserved rose"
-            width={148}
-            height={244}
-            style={{
-              display: "block",
-              width: 148,
-              height: 244,
-              borderRadius: 10,
-            }}
-          />
-        </Link>
+function LineCard({
+  line,
+  top,
+  onChangeQuantity,
+  onRemove,
+}: {
+  line: CartLineView;
+  top: number;
+  onChangeQuantity: (variantId: string, amount: number) => void;
+  onRemove: (variantId: string) => void;
+}) {
+  const { product, variant, quantity } = line;
+  const image = product.images[0] ?? null;
+  const href = `/products/${product.handle}`;
 
-        {/* 1523:3079 title → /shop */}
-        <Link
-          href="/shop"
-          className={playfair.className}
-          style={{
-            ...abs(176, 16, 208),
-            display: "block",
-            fontSize: 22,
-            lineHeight: "29.33px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Artisan Blue Rose
-        </Link>
+  // The design's "Color · Deep sapphire ●" line, from the product's own
+  // option names. The trailing ● was a swatch for the mock colour; a real
+  // variant carries no colour value to paint, so it is dropped rather than
+  // guessed at.
+  const options = product.option_names
+    .map((name, i) =>
+      variant.option_values[i] ? `${name}  ·  ${variant.option_values[i]}` : "",
+    )
+    .filter(Boolean)
+    .join("     ");
 
-        {/* 1523:3080 colour line (ends in a ● swatch glyph) — no 07-29
-            export; the 07-27 render matches the sheet */}
+  // The design's "Presentation · Signature black gift box" sat on mock copy.
+  // Nothing in the catalog describes packaging, so the slot takes the
+  // product's first detail bullet, unlabelled, or stays empty.
+  const detail = product.details[0] ?? "";
+
+  const tags = product.tags.slice(0, TAG_SLOTS.length);
+  const compareAt = variant.compare_at_price_cents;
+  const wasTotal =
+    compareAt !== null && compareAt > variant.price_cents
+      ? compareAt * quantity
+      : null;
+
+  return (
+    <div
+      style={{
+        ...abs(16, top, 398, 272),
+        background: "#FFFFFF",
+        borderRadius: 14,
+        boxShadow: `${HAIRLINE_RING}, 0 4px 12px rgba(59, 47, 47, 0.08)`,
+        overflow: "hidden",
+      }}
+    >
+      {/* 1523:3076 thumbnail. objectFit:contain, not cover — the frame's
+          148×244 portrait box matches neither spotlight area authored on the
+          photo (the PDP's 398×250 nor the shop card's 203×204), so cropping
+          to it would use a focal point chosen for a different shape. */}
+      <Link href={href} style={{ ...abs(14, 14, 148, 244), display: "block" }}>
         <img
-          src={`${A}/750-99.svg`}
-          alt="Color  ·  Deep sapphire  ●"
-          width={152}
-          height={14}
+          data-live-text
+          src={image ? fileUrl(image.path) : BLANK_PIXEL}
+          alt={image?.alt ?? product.title}
+          width={148}
+          height={244}
           style={{
-            ...abs(176, 55, 152, 14),
             display: "block",
-            objectFit: "none",
-            objectPosition: "left center",
+            width: 148,
+            height: 244,
+            objectFit: "contain",
+            borderRadius: 10,
           }}
         />
+      </Link>
 
-        {/* 1523:3081 presentation line */}
+      {/* 1523:3079 title */}
+      <Link
+        href={href}
+        data-live-text
+        className={playfair.className}
+        style={{
+          ...abs(176, 16, 208),
+          display: "block",
+          fontSize: 22,
+          lineHeight: "29.33px",
+          fontWeight: 500,
+          color: INK,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {product.short_name}
+      </Link>
+
+      {/* 1523:3080 option line */}
+      <div
+        data-live-text
+        className={notoSC.className}
+        style={{
+          ...abs(176, 55, 208),
+          fontSize: 12,
+          lineHeight: "14.4px",
+          fontWeight: 400,
+          color: INK,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {options}
+      </div>
+
+      {/* 1523:3081 detail line */}
+      <div
+        data-live-text
+        className={notoSC.className}
+        style={{
+          ...abs(176, 84, 208),
+          fontSize: 11,
+          lineHeight: "13.2px",
+          fontWeight: 400,
+          color: INK,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {detail}
+      </div>
+
+      {/* 1523:3082 craft tags — the product's own tags, up to the three
+          pills the design draws; a product with no tags shows none. */}
+      {tags.map((tag, i) => (
         <div
-          className={notoSC.className}
+          key={tag}
+          data-live-text
           style={{
-            ...abs(176, 84, 208),
-            fontSize: 11,
-            lineHeight: "13.2px",
-            fontWeight: 400,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
+            ...abs(TAG_SLOTS[i]!, 112, 62, 24),
+            borderRadius: 12,
+            boxShadow: `inset 0 0 0 1px ${GOLD_INK}`,
+            overflow: "hidden",
           }}
         >
-          {"Presentation  ·  Signature black gift box"}
-        </div>
-
-        {/* 1523:3082 craft tags */}
-        {TAGS.map((t) => (
           <div
-            key={t.label}
+            className={notoSC.className}
             style={{
-              ...abs(t.x, 112, 62, 24),
-              borderRadius: 12,
-              boxShadow: "inset 0 0 0 1px #C88217",
-              overflow: "hidden",
+              ...abs(0, 7, 62),
+              fontSize: 8,
+              lineHeight: "9.6px",
+              fontWeight: 500,
+              color: GOLD_INK,
+              textAlign: "center",
+              whiteSpace: "nowrap",
             }}
           >
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(t.labelX, 7, t.labelW),
-                fontSize: 8,
-                lineHeight: "9.6px",
-                fontWeight: 500,
-                color: "#C88217",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {t.label}
-            </div>
+            {tag.toUpperCase()}
           </div>
-        ))}
+        </div>
+      ))}
 
-        {/* 1523:3090 price row */}
-        <div
+      {/* 1523:3090 price row. The frame hard-places the struck-through price
+          at x=271 because "$159.00" ends there; live prices are not all that
+          wide, so the two sit in a baseline-aligned row instead and the
+          strike-through follows the price however long it is. */}
+      <div
+        style={{
+          ...abs(176, 147, 208, 35),
+          display: "flex",
+          alignItems: "baseline",
+          gap: 8,
+        }}
+      >
+        <span
+          data-live-text
           className={playfair.className}
           style={{
-            ...abs(176, 146.5, 87),
             fontSize: 26,
             lineHeight: "34.66px",
             fontWeight: 500,
-            color: "#09442E",
+            color: GREEN,
             whiteSpace: "nowrap",
           }}
         >
-          $159.00
-        </div>
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(271, 157.5, 40),
-            fontSize: 11,
-            lineHeight: "13.2px",
-            fontWeight: 400,
-            color: "#736B66",
-            textDecoration: "line-through",
-            whiteSpace: "nowrap",
-          }}
-        >
-          $198.00
-        </div>
+          {formatMoney(line.lineTotal)}
+        </span>
+        {wasTotal !== null ? (
+          <span
+            data-live-text
+            className={notoSC.className}
+            style={{
+              fontSize: 11,
+              lineHeight: "13.2px",
+              fontWeight: 400,
+              color: "#736B66",
+              textDecoration: "line-through",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {formatMoney(wasTotal)}
+          </span>
+        ) : null}
+      </div>
 
-        {/* 1523:3093 quantity stepper (static — the cart is not wired here) */}
-        <div
+      {/* 1523:3093 quantity stepper — now real. The frame draws only the
+          glyphs, so each takes the half of the 132×36 box it sits in as its
+          hit area. */}
+      <div
+        style={{
+          ...abs(176, 198, 132, 36),
+          borderRadius: 8,
+          boxShadow: HAIRLINE_RING,
+          overflow: "hidden",
+        }}
+      >
+        <button
+          type="button"
+          aria-label={`Remove one ${product.short_name}`}
+          onClick={() => onChangeQuantity(variant.id, -1)}
           style={{
-            ...abs(176, 198, 132, 36),
-            borderRadius: 8,
-            boxShadow: HAIRLINE_RING,
-            overflow: "hidden",
+            ...abs(0, 0, 44, 36),
+            background: "transparent",
+            border: 0,
+            padding: 0,
+            cursor: "pointer",
           }}
         >
           {/* 1523:3094 is a U+2212 minus; Figma crops its SVG to the 9×2 bar */}
           <img
             src={`${A}/1523-3094.svg`}
-            alt="−"
+            alt=""
             width={11}
             height={22}
             style={{
@@ -428,513 +479,162 @@ export function BagScreen() {
               objectPosition: "left center",
             }}
           />
-          <div
-            className={notoSC.className}
-            style={{
-              ...abs(62, 9.5, 8),
-              fontSize: 14,
-              lineHeight: "16.8px",
-              fontWeight: 500,
-              color: "#3B2F2F",
-              whiteSpace: "nowrap",
-            }}
-          >
-            1
-          </div>
-          <div
-            className={notoSC.className}
-            style={{
-              ...abs(88, 7, 11),
-              fontSize: 18,
-              lineHeight: "21.6px",
-              fontWeight: 500,
-              color: "#3B2F2F",
-              whiteSpace: "nowrap",
-            }}
-          >
-            +
-          </div>
-        </div>
-
-        {/* 1523:3097 line-item actions (static) — the design pads the slash
-            with five spaces on each side */}
+        </button>
         <div
+          data-live-text
           className={notoSC.className}
           style={{
-            ...abs(176, 248, 208),
-            fontSize: 10,
-            lineHeight: "12px",
+            ...abs(44, 9.5, 44),
+            fontSize: 14,
+            lineHeight: "16.8px",
             fontWeight: 500,
-            color: "#C88217",
+            color: INK,
+            textAlign: "center",
             whiteSpace: "nowrap",
           }}
         >
-          {"Move to Wishlist     /     Remove"}
+          {quantity}
         </div>
+        <button
+          type="button"
+          aria-label={`Add one ${product.short_name}`}
+          onClick={() => onChangeQuantity(variant.id, 1)}
+          className={notoSC.className}
+          style={{
+            ...abs(88, 0, 44, 36),
+            background: "transparent",
+            border: 0,
+            padding: 0,
+            cursor: "pointer",
+            fontSize: 18,
+            lineHeight: "21.6px",
+            fontWeight: 500,
+            color: INK,
+            textAlign: "left",
+            textIndent: 0,
+            paddingLeft: 0,
+          }}
+        >
+          <span style={{ ...abs(0, 7, 11) }}>+</span>
+        </button>
       </div>
 
-      {/* ---------- 03 · Gift Services (1523:3098) ---------- */}
-
-      {/* 1523:3099 heading with its two em-dash rules */}
+      {/* 1523:3097 line-item actions. The design pads the slash with five
+          spaces on each side; only Remove does anything (AI-042). */}
       <div
         className={notoSC.className}
         style={{
-          ...abs(129, 535.5, 15),
-          fontSize: 16,
-          lineHeight: "19.2px",
-          fontWeight: 400,
-          color: "#C88217",
-          whiteSpace: "nowrap",
-        }}
-      >
-        —
-      </div>
-      <div
-        className={playfair.className}
-        style={{
-          ...abs(152, 530.5, 126),
-          fontSize: 22,
-          lineHeight: "29.33px",
+          ...abs(176, 248, 208),
+          fontSize: 10,
+          lineHeight: "12px",
           fontWeight: 500,
-          color: "#3B2F2F",
-          whiteSpace: "nowrap",
+          color: GOLD_INK,
+          whiteSpace: "pre",
         }}
       >
-        Gift Services
-      </div>
-      <div
-        className={notoSC.className}
-        style={{
-          ...abs(286, 535.5, 15),
-          fontSize: 16,
-          lineHeight: "19.2px",
-          fontWeight: 400,
-          color: "#C88217",
-          whiteSpace: "nowrap",
-        }}
-      >
-        —
-      </div>
-
-      {/* 1523:3103 gift add-on cards (ADD buttons are static placeholders) */}
-      {GIFTS.map((g) => (
-        <div
-          key={g.name}
+        <span>{"Move to Wishlist     /     "}</span>
+        <button
+          type="button"
+          onClick={() => onRemove(variant.id)}
           style={{
-            ...abs(g.x, 571, 95, 167),
-            background: "#FFFFFF",
-            borderRadius: 10,
-            boxShadow: HAIRLINE_RING,
-            overflow: "hidden",
+            background: "transparent",
+            border: 0,
+            padding: 0,
+            font: "inherit",
+            color: "inherit",
+            cursor: "pointer",
           }}
         >
-          <img
-            src={`${A}/${g.src}.png`}
-            alt={g.alt}
-            width={95}
-            height={96}
-            style={{ ...abs(0, 0, 95, 96), display: "block" }}
-          />
-          {/* Goudy 12/17.86 centred rows. The source mixes ALIGN-V CENTER
-              and TOP across the four cards (a file inconsistency); the 1px
-              difference is served uniformly as the CENTER placement. */}
-          <div
-            className={goudy.className}
-            style={{
-              ...abs(0, 96, 95, 20),
-              fontSize: 12,
-              lineHeight: "17.86px",
-              fontWeight: 500,
-              color: "#3B2F2F",
-              textAlign: "center",
-              whiteSpace: "nowrap",
-              paddingTop: 1,
-            }}
-          >
-            {g.name}
-          </div>
-          <div
-            className={goudy.className}
-            style={{
-              ...abs(0, 116, 95, 20),
-              fontSize: 12,
-              lineHeight: "17.86px",
-              fontWeight: 500,
-              color: "#09442E",
-              textAlign: "center",
-              whiteSpace: "nowrap",
-              paddingTop: 1,
-            }}
-          >
-            {g.price}
-          </div>
-          <div
-            style={{
-              ...abs(12, 136, 73, 25),
-              background: "#3B2F2F",
-              borderRadius: 7,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              className={notoSC.className}
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                top: 7,
-                fontSize: 9,
-                lineHeight: "10.8px",
-                fontWeight: 500,
-                color: "#FFFFFF",
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}
-            >
-              ADD
-            </div>
-          </div>
-        </div>
-      ))}
+          Remove
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      {/* ---------- 04 · Product Story (1523:3132) ---------- */}
+/* ---------- 02 · the empty bag (2976:390) ---------- */
 
-      {/* 1523:3133 Rose Craftsmanship panel — hairline ring only, no fill */}
+function EmptyBag() {
+  return (
+    <>
+      {/* 2978:444 — 329×139 box, centred both ways; the copy wraps itself */}
       <div
+        className={goudy.className}
         style={{
-          ...abs(16, 748, 398, 218),
-          borderRadius: 14,
-          boxShadow: HAIRLINE_RING,
-          overflow: "hidden",
+          ...abs(50, 398, 329, 139),
+          fontSize: 36,
+          lineHeight: "53.57px",
+          fontWeight: 500,
+          color: GREEN,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
         }}
       >
-        {/* 1523:3134 — the 07-29 frame reuses the product thumbnail's photo
-            here (same image hash as 1523:3076; the old close-up is gone) */}
-        <img
-          src={`${A}/1523-3134.png`}
-          alt="The Artisan Blue Rose"
-          width={148}
-          height={194}
-          style={{
-            ...abs(12, 12, 148, 194),
-            display: "block",
-            borderRadius: 10,
-          }}
-        />
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(174, 12, 212),
-            fontSize: 17,
-            lineHeight: "22.66px",
-            fontWeight: 500,
-            color: "#09442E",
-            whiteSpace: "nowrap",
-          }}
-        >
-          A Rose Made to Last
-        </div>
-        {STORY.map((s) => (
-          <img
-            key={s.src}
-            src={`${A}/${s.src}.svg`}
-            alt={s.alt}
-            width={212}
-            height={24}
-            style={{
-              ...abs(174, s.y, 212, 24),
-              display: "block",
-              objectFit: "none",
-              objectPosition: "left center",
-            }}
-          />
-        ))}
+        Something beautiful belongs here.
       </div>
 
-      {/* ---------- 05 · Note + Order Summary (1523:3141) ---------- */}
-
-      {/* The design paints the empty gift-note field in #8C8075; ::placeholder
-          cannot be styled inline, so a scoped rule (WholesaleScreen precedent). */}
-      <style>{`.b1-note::placeholder { color: #8C8075; opacity: 1; }`}</style>
-
-      {/* 1523:3142 Gift Note card */}
-      <div
+      {/* 2976:427 → /shop (the frame's own prototype target) */}
+      <Link
+        href="/shop"
         style={{
-          ...abs(16, 985, 398, 84),
-          background: "#FFFFFF",
-          borderRadius: 12,
-          boxShadow: HAIRLINE_RING,
-          overflow: "hidden",
+          ...abs(90, 599, 250, 48),
+          display: "block",
+          background: INK,
+          borderRadius: 10,
         }}
       >
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(12, 10, 65),
-            fontSize: 16,
-            lineHeight: "21.33px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Gift Note
-        </div>
-        {/* 1523:3144 note field — a real input; its ADD affordance is a static
-            placeholder (nothing to submit to yet) */}
-        <div
-          style={{
-            ...abs(12, 37, 374, 34),
-            borderRadius: 7,
-            boxShadow: HAIRLINE_RING,
-            overflow: "hidden",
-          }}
-        >
-          <input
-            type="text"
-            name="giftNote"
-            placeholder="Add a personal message"
-            aria-label="Gift note"
-            className={`${notoSC.className} b1-note`}
-            style={{
-              position: "absolute",
-              left: 10,
-              top: 0,
-              width: 318,
-              height: 34,
-              appearance: "none",
-              border: 0,
-              outline: "none",
-              background: "transparent",
-              padding: 0,
-              fontSize: 10,
-              // 34px (the box height), not the node's 12px: centring the line
-              // in the full-height field puts the placeholder's glyph box at
-              // the design's y offset while leaving room to type.
-              lineHeight: "34px",
-              fontWeight: 400,
-              color: "#3B2F2F",
-            }}
-          />
-          {/* 1523:3146 — no 07-29 export; the 07-27 render matches (#C88217) */}
-          <img
-            src={`${A}/752-99.svg`}
-            alt="ADD  →"
-            width={32}
-            height={11}
-            style={{
-              ...abs(334, 11.5, 32, 11),
-              display: "block",
-              objectFit: "none",
-              objectPosition: "left center",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* 1523:3147 Order Summary card */}
-      <div
-        style={{
-          ...abs(16, 1079, 398, 263),
-          background: "#FFFFFF",
-          borderRadius: 14,
-          boxShadow: HAIRLINE_RING,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(16, 12, 140),
-            fontSize: 19,
-            lineHeight: "25.33px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Order Summary
-        </div>
-
-        {SUMMARY.map((r) => (
-          <Fragment key={r.label}>
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(16, r.y + 5, r.labelW),
-                fontSize: 12,
-                lineHeight: "14.4px",
-                fontWeight: 400,
-                color: "#3B2F2F",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {r.label}
-            </div>
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(r.valueX, r.y + 5, r.valueW),
-                fontSize: 12,
-                lineHeight: "14.4px",
-                fontWeight: 500,
-                color: r.valueColor,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {r.value}
-            </div>
-          </Fragment>
-        ))}
-
-        {/* 1523:3158 divider */}
-        <div style={{ ...abs(16, 133, 366, 1), background: "#E5D9C9" }} />
-
-        {/* 1523:3159 total row */}
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(16, 144.5, 40),
-            fontSize: 17,
-            lineHeight: "22.66px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Total
-        </div>
-        <div
-          className={playfair.className}
-          style={{
-            ...abs(305, 140.5, 77),
-            fontSize: 23,
-            lineHeight: "30.66px",
-            fontWeight: 500,
-            color: "#3B2F2F",
-            whiteSpace: "nowrap",
-          }}
-        >
-          $159.00
-        </div>
-
-        {/* 1523:3162 savings note */}
         <div
           className={notoSC.className}
           style={{
-            ...abs(16, 178, 122),
-            fontSize: 11,
-            lineHeight: "13.2px",
+            ...abs(16, 16, 191),
+            fontSize: 13,
+            lineHeight: "15.6px",
             fontWeight: 500,
-            color: "#C88217",
+            letterSpacing: 1.1,
+            color: CREAM,
             whiteSpace: "nowrap",
           }}
         >
-          You saved $39.00 today
-        </div>
-
-        {/* 1523:3163 "safe pay" bar — a dark band between the savings note
-            and the payment marks (static art). The source layer is literally
-            named "Ask Auri" — a copy-paste artifact, not this card's button. */}
-        <div
-          style={{
-            ...abs(16, 197, 366, 34),
-            background: "#3B2F2F",
-            borderRadius: 8,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            className={notoSC.className}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 11.5,
-              fontSize: 9,
-              lineHeight: "10.8px",
-              fontWeight: 500,
-              color: "#FFFFFF",
-              textAlign: "center",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {"safe  pay"}
-          </div>
-        </div>
-
-        {/* 1523:3165 payment marks — brand wordmarks set as coloured text in
-            the design; the two glyph marks come from Figma's own renders */}
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(87, 237, 24),
-            fontSize: 11,
-            lineHeight: "13.2px",
-            fontWeight: 500,
-            color: "#1A4DB2",
-            whiteSpace: "nowrap",
-          }}
-        >
-          VISA
+          EXPLORE THE COLLECTION
         </div>
         <img
-          src={`${A}/1523-3167.svg`}
-          alt="●●"
-          width={24}
-          height={14}
+          src={`${A}/I1523-3187_1523-389.svg`}
+          alt=""
+          width={15}
+          height={18}
           style={{
-            ...abs(129, 237, 24, 14),
+            ...abs(219, 15, 15, 18),
             display: "block",
             objectFit: "none",
             objectPosition: "left center",
           }}
         />
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(171, 237, 36),
-            fontSize: 11,
-            lineHeight: "13.2px",
-            fontWeight: 500,
-            color: "#0D4D99",
-            whiteSpace: "nowrap",
-          }}
-        >
-          PayPal
-        </div>
-        {/* 1523:3169 —  Pay. Figma's SVG export silently drops the U+F8FF
-            Apple mark, so this is a crop of the frame render: fills the whole
-            box, no objectFit. No 07-29 crop was delivered; the 07-27 one
-            matches (ink on the same white card). */}
-        <img
-          src={`${A}/752-120.png`}
-          alt="Apple Pay"
-          width={33}
-          height={13}
-          style={{ ...abs(225, 237, 33, 13), display: "block" }}
-        />
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(276, 237, 35),
-            fontSize: 10,
-            lineHeight: "12px",
-            fontWeight: 500,
-            color: "#1A1A1A",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Klarna.
-        </div>
-      </div>
+      </Link>
+    </>
+  );
+}
 
-      {/* ---------- 06 · Concierge + Checkout + Nav (1523:3171) ---------- */}
+/* ---------- 06 · Concierge + Checkout (1523:3171) ---------- */
 
-      {/* 1523:3172 Auri concierge card (ASK AURI is a static placeholder) */}
+function ConciergeAndCheckout({
+  top,
+  stickyTop,
+  total,
+  saved,
+}: {
+  top: number;
+  stickyTop: number;
+  total: number;
+  saved: number;
+}) {
+  return (
+    <>
+      {/* 1523:3172 Auri concierge card (ASK AURI is static — see the header) */}
       <div
         style={{
-          ...abs(16, 1354, 398, 70),
+          ...abs(16, top, 398, 70),
           background: "#FFFFFF",
           borderRadius: 12,
           boxShadow: HAIRLINE_RING,
@@ -969,7 +669,7 @@ export function BagScreen() {
             fontSize: 15,
             lineHeight: "19.99px",
             fontWeight: 500,
-            color: "#3B2F2F",
+            color: INK,
             whiteSpace: "nowrap",
           }}
         >
@@ -982,7 +682,7 @@ export function BagScreen() {
             fontSize: 9,
             lineHeight: "10.8px",
             fontWeight: 400,
-            color: "#3B2F2F",
+            color: INK,
             whiteSpace: "nowrap",
           }}
         >
@@ -991,7 +691,7 @@ export function BagScreen() {
         <div
           style={{
             ...abs(302, 18, 86, 34),
-            background: "#3B2F2F",
+            background: INK,
             borderRadius: 8,
             overflow: "hidden",
           }}
@@ -1012,77 +712,45 @@ export function BagScreen() {
         </div>
       </div>
 
-      {/* 1523:3180 / 3181 / 3182 FAQ rows (static; the instances carry a
-          bottom-only inside hairline, drawn as the 1px strip) */}
-      {FAQS.map((f) => (
-        <Fragment key={f.y}>
-          <div
-            className={notoSC.className}
-            style={{
-              ...abs(32, f.y + 15, f.w),
-              fontSize: 12,
-              lineHeight: "14.4px",
-              fontWeight: 400,
-              color: "#3B2F2F",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {f.q}
-          </div>
-          <img
-            src={`${A}/${FAQ_PLUS}`}
-            alt="＋"
-            width={18}
-            height={22}
-            style={{
-              ...abs(380, f.y + 11, 18, 22),
-              display: "block",
-              objectFit: "none",
-              objectPosition: "left center",
-            }}
-          />
-          {/* bottom hairline (the instance's t0r0b1l0 stroke) */}
-          <div
-            style={{ ...abs(16, f.y + 43, 398, 1), background: "#E5D9C9" }}
-          />
-        </Fragment>
-      ))}
-
       {/* 1523:3183 sticky checkout bar */}
       <div
         style={{
-          ...abs(16, 1588, 398, 68),
-          background: "#FFF6EC",
+          ...abs(16, stickyTop, 398, 68),
+          background: CREAM,
           borderRadius: 12,
           overflow: "hidden",
         }}
       >
         <div
+          data-live-text
           className={playfair.className}
           style={{
-            ...abs(10, 11, 74),
+            ...abs(10, 11, 120),
             fontSize: 22,
             lineHeight: "29.33px",
             fontWeight: 500,
-            color: "#3B2F2F",
+            color: INK,
             whiteSpace: "nowrap",
           }}
         >
-          $159.00
+          {formatMoney(total)}
         </div>
-        <div
-          className={notoSC.className}
-          style={{
-            ...abs(10, 41, 68),
-            fontSize: 9,
-            lineHeight: "10.8px",
-            fontWeight: 500,
-            color: "#C88217",
-            whiteSpace: "nowrap",
-          }}
-        >
-          You save $39.00
-        </div>
+        {saved > 0 ? (
+          <div
+            data-live-text
+            className={notoSC.className}
+            style={{
+              ...abs(10, 41, 120),
+              fontSize: 9,
+              lineHeight: "10.8px",
+              fontWeight: 500,
+              color: GOLD_INK,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {`You save ${formatMoney(saved)}`}
+          </div>
+        ) : null}
 
         {/* 1523:3187 primary CTA → /checkout */}
         <Link
@@ -1090,32 +758,32 @@ export function BagScreen() {
           style={{
             ...abs(142, 10, 250, 48),
             display: "block",
-            background: "#3B2F2F",
+            background: INK,
             borderRadius: 10,
           }}
         >
           <div
             className={notoSC.className}
             style={{
-              ...abs(47, 17, 129),
-              fontSize: 12,
-              lineHeight: "14.4px",
+              ...abs(43, 16, 138),
+              fontSize: 13,
+              lineHeight: "15.6px",
               fontWeight: 500,
               letterSpacing: 1.1,
-              color: "#FFF6EC",
+              color: CREAM,
               whiteSpace: "nowrap",
             }}
           >
             SECURE CHECKOUT
           </div>
-          {/* the arrow is gold (#D4AF37) in the 07-29 export */}
+          {/* the arrow is gold (#D4AF37) in the export */}
           <img
             src={`${A}/I1523-3187_1523-389.svg`}
-            alt="→"
+            alt=""
             width={15}
             height={18}
             style={{
-              ...abs(188, 15, 15, 18),
+              ...abs(193, 15, 15, 18),
               display: "block",
               objectFit: "none",
               objectPosition: "left center",
@@ -1124,5 +792,59 @@ export function BagScreen() {
         </Link>
       </div>
     </>
+  );
+}
+
+/* ---------- the screen ---------- */
+
+export function BagScreen({ catalog }: { catalog: CatalogProduct[] }) {
+  const { lines, subtotal, hydrated, changeQuantity, remove } =
+    useCart(catalog);
+
+  // Before hydration localStorage is unreadable, so the frame renders with no
+  // cards rather than guessing — the /checkout precedent. Only once the store
+  // has actually answered does an empty result mean an empty bag.
+  const showEmpty = hydrated && lines.length === 0;
+  const { sectionSixTop, stickyTop, canvasHeight } = layoutFor(
+    Math.max(1, lines.length),
+  );
+
+  const saved = lines.reduce((sum, line) => {
+    const was = line.variant.compare_at_price_cents;
+    return was !== null && was > line.variant.price_cents
+      ? sum + (was - line.variant.price_cents) * line.quantity
+      : sum;
+  }, 0);
+
+  return (
+    <ScaleFrame
+      height={showEmpty ? EMPTY_CANVAS_HEIGHT : canvasHeight}
+      background={CREAM}
+      fontClass={notoSC.className}
+      navActive="Bag"
+    >
+      <HeaderAndBenefits />
+      {showEmpty ? (
+        <EmptyBag />
+      ) : (
+        <>
+          {lines.map((line, i) => (
+            <LineCard
+              key={line.variantId}
+              line={line}
+              top={SECTION_TWO_TOP + CARD_INSET + i * CARD_PITCH}
+              onChangeQuantity={changeQuantity}
+              onRemove={remove}
+            />
+          ))}
+          <ConciergeAndCheckout
+            top={sectionSixTop}
+            stickyTop={stickyTop}
+            total={subtotal}
+            saved={saved}
+          />
+        </>
+      )}
+    </ScaleFrame>
   );
 }

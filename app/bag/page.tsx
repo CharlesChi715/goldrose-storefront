@@ -1,21 +1,23 @@
 /**
  * ROLE OF THIS FILE
- * The shopping bag (`/bag`) — a pixel-exact import of the "B-1 · Shopping
- * Bag" frame (1523:3059, 430×1726, 07-29 restyle) from the ELDREVE file. The line
- * items are still the design's placeholder rows: the cart itself lives in
- * localStorage (lib/cart/store.ts) and wiring it into this layout is a
- * follow-up. The checkout CTA goes to the real /checkout.
+ * /bag — server half: loads the DB catalog (safe view) so the client screen
+ * can resolve the localStorage cart's variant ids into products and prices.
+ * The cart itself never stores prices, so this is what turns "two of variant
+ * X" into a line worth $158.00; the server re-prices everything again at
+ * checkout, so a tampered localStorage can never change what is charged.
  *
- * Canvas height is 1728 — the frame's nav band top (1669) + 59; the 07-29 frame
- * parks its own tab bar at y=1669; the real bar is viewport-fixed, so the
- * canvas is nav-start + 59 and the fixed bar lands exactly where the design
- * draws its own (same equivalence the 1750 canvas used before the polish).
+ * A dead or unreachable DB must degrade to the empty-bag frame, never a 500 —
+ * the /checkout precedent.
+ *
+ * The canvas height is the client's to decide (it grows with the number of
+ * lines), so BagScreen renders its own ScaleFrame — see that file's header.
  */
 
 import type { Metadata } from "next";
-import { ScaleFrame } from "@/components/chrome";
-import { notoSC } from "@/lib/fonts";
+import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { BagScreen } from "@/components/screens/BagScreen";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Shopping bag",
@@ -23,15 +25,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/bag" },
 };
 
-export default function BagPage() {
-  return (
-    <ScaleFrame
-      height={1728}
-      background="#FFF6EC"
-      fontClass={notoSC.className}
-      navActive="Bag"
-    >
-      <BagScreen />
-    </ScaleFrame>
-  );
+export default async function BagPage() {
+  let catalog: Awaited<ReturnType<typeof getCatalog>> = [];
+  try {
+    catalog = await getCatalog();
+  } catch {
+    // fall through with an empty catalog: every line resolves to nothing and
+    // the screen shows the empty-bag frame.
+  }
+  return <BagScreen catalog={catalog} />;
 }

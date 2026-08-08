@@ -17,11 +17,20 @@
  * is NOT in this band — it renders after the ScaleFrame, in
  * components/SiteLegalFooter.tsx, precisely so this fixed-height import stays
  * untouched by it. Nothing to do here.
+ *
+ * 2026-08-07 sync: the newsletter strip's email field is deleted at source and
+ * the control now has two states — see components/home/NewsletterJoin.tsx.
+ * NOT taken from that delivery: the homepage-wide typography pass, which also
+ * enlarges this strip's title and body (19→20, 10.5→13) and reflows the strip
+ * from 97px to 105px. That pass is deferred as a whole rather than applied one
+ * band at a time, so the strip keeps its 97px column and both control states
+ * are centred in it — the same centring the frames use, on the shorter box.
  */
 
 import Link from "next/link";
 import { abs } from "@/lib/figma-layout";
 import { playfair, notoSC, goudy } from "@/lib/fonts";
+import { NewsletterJoin } from "@/components/home/NewsletterJoin";
 import type { HomeText } from "@/lib/home-content/registry";
 
 const INK = "#291A13";
@@ -372,64 +381,19 @@ export function A11({ c }: { c: HomeText["story"] }) {
           {c.newsletter_body}
         </div>
 
-        {/* 2380:801 · the whole input+JOIN group is one prototype link to
-            1523:3315 (/account/signup) — the design does not collect the
-            address here, it hands off to the sign-up page. Rendered as a link
-            rather than a live <input> for exactly that reason.
-            AI-TAG(AI-025): AGENT-DECISION — no newsletter subscribe endpoint is
-            wired; the field is display-only. See
-            /agent-delivery/sessions/figma-sync-homepage-08-04-feat-figma-sync.md. */}
-        <Link
-          data-el="HOME-NEWSLETTER-JOIN-BTN"
+        {/* 2380:801 · the control, which the 08-07 delivery cut down to a
+            single JOIN pill for signed-out visitors and swapped for the
+            ACCOUNT-INFO welcome card (2974:359) for signed-in ones. The
+            122×42 email box that used to sit left of the button is gone at
+            source, so AI-025 — "the field collects nothing" — is now moot;
+            there is simply no field. Both states live in a client island so
+            this page stays statically rendered. */}
+        <NewsletterJoin
           href={c.newsletter_href}
-          aria-label="Join the ELDREVE mailing list"
-          style={{ ...abs(200, 27.5, 184, 42), display: "block" }}
-        >
-          <div
-            style={{
-              ...abs(0, 0, 122, 42),
-              background: "#FFF6EC",
-              boxShadow: "inset 0 0 0 1px #E5D9C9",
-              borderRadius: 4,
-            }}
-          >
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(30.5, 15.5, 63),
-                fontSize: 9.5,
-                lineHeight: "11.4px",
-                color: BROWN,
-                fontWeight: 400,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {c.newsletter_placeholder}
-            </div>
-          </div>
-          <div
-            style={{
-              ...abs(122, 0, 62, 42),
-              background: "#D4AF37",
-              borderRadius: 4,
-            }}
-          >
-            <div
-              className={notoSC.className}
-              style={{
-                ...abs(19, 15, 24),
-                fontSize: 10,
-                lineHeight: "12px",
-                color: "#FFF6EC",
-                fontWeight: 500,
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {c.newsletter_button}
-            </div>
-          </div>
-        </Link>
+          buttonLabel={c.newsletter_button}
+          welcomeText={c.newsletter_welcome_text}
+          greeting={c.newsletter_welcome_greeting}
+        />
       </div>
 
       {/* ---- 2380:849…2380:865 · footer link cloud ---- */}

@@ -183,7 +183,30 @@ Open linked resources only when the task needs them.
   `scripts/features/cli.mjs`, reached `main` 2026-08-06 but nothing calls it:
   [`docs/features/README.md`](docs/features/README.md) still has no generated
   block and there are no `features:*` scripts or CI check.
-- `/bag` items, tracking timeline, shipping choices and card fields are visual
+- **`/bag` is real, and the homepage newsletter has two states (2026-08-07,
+  `feat/figma-sync`).** A scoped sync of two areas Charles named; the other 40+
+  changed frames (chiefly the homepage typography pass) are deliberately NOT
+  imported and the baseline is **un-stamped** so the next sync still sees them.
+  - **`/bag` shrank 1726 → 932** because the delivery deleted four of its six
+    sections at source: gift services, the product-story panel (detached to a
+    loose canvas frame), the gift note, the order summary, the payment marks
+    and the FAQ rows. New member-benefit copy, and a second frame `2976:375`
+    giving the bag an **empty state** for the first time.
+  - That empty state only means something against a real cart, so `/bag` now
+    reads `useCart()` instead of drawing the design's "Artisan Blue Rose"
+    placeholder row: lines resolve against the DB catalog, and the stepper and
+    Remove mutate the cart — which **closes AI-017**. The canvas grows one
+    284px pitch per extra line. `/` and `/bag` both still prerender static.
+  - **The newsletter email field is gone at source.** Signed-out visitors get
+    the JOIN pill; signed-in ones get an ACCOUNT-INFO card naming them
+    (`2974:359`). Built as a client island on the `AccountTabArt` precedent so
+    `/` stays static — the card's copy reaches the browser only as an RSC prop.
+    `newsletter_placeholder` retired from the home-content registry; the card's
+    two strings are editable in its place. **AI-025 is moot** (no field left).
+  - ⚠️ Both frames promise complimentary shipping and same-day dispatch
+    unconditionally, on an empty bag too, while OQ-2 is unanswered (AI-041) —
+    a release-gate string, carried over verbatim rather than reworded.
+- Tracking timeline, shipping choices and card fields are still visual
   placeholders; the real cart enters through `/checkout`.
 - The [owner walkthrough](docs/admin-design.md#143-final-acceptance) is pending.
   The Shopify *store integration* is removed (no `lib/shopify/`, no `SHOPIFY_*`
@@ -298,9 +321,9 @@ While live, in any order (nothing below blocks taking orders):
 9. Replace mock product content (OQ-3) and third-party/dev imagery product by
    product; reconcile palettes and tabs. (Wordmarks are done — the ELDREVE
    rename landed 2026-08-05, see OQ-4.)
-10. Replace the remaining placeholder screens with working ones: `/bag` items,
-    tracking timeline, shipping choices, card fields, the 7 `/policies/*`
-    coming-soon pages.
+10. Replace the remaining placeholder screens with working ones: tracking
+    timeline, shipping choices, card fields, the 7 `/policies/*` coming-soon
+    pages. (`/bag` items are done — 2026-08-07.)
 11. Capture screenshots, cancel Shopify, revoke the Figma token, begin
     marketing.
 
