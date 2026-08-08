@@ -33,7 +33,9 @@
     "figma:routes": "node scripts/figma/cli.mjs routes",
     "figma:unbuilt": "node scripts/figma/cli.mjs unbuilt",
     "figma:baseline": "node scripts/figma/cli.mjs baseline",
-    "polish": "npm run format"
+    "polish": "npm run format",
+    "features:check": "node scripts/features/cli.mjs check",
+    "features:roadmap": "node scripts/features/cli.mjs roadmap --sync"
   },
   "dependencies": {
     "@shopify/polaris": "^13.9.5",

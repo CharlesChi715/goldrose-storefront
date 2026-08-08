@@ -50,6 +50,20 @@ const ROLLOUT = ["not-deployed", "test-deployment", "live"];
 const PRIORITY = ["p0", "p1", "p2"];
 const ACTIVE_STATES = ["ready", "in-progress", "uat"]; // (a) presence tier
 
+// Roadmap generation: the README block between these markers is ALWAYS
+// generated from record front matter — never hand-edited (check enforces it).
+const README_PATH = join(FEATURES_DIR, "README.md");
+const ROADMAP_BEGIN = "<!-- BEGIN features:roadmap -->";
+const ROADMAP_END = "<!-- END features:roadmap -->";
+const METER = {
+  backlog: "○○○○",
+  ready: "●○○○",
+  "in-progress": "●●○○",
+  uat: "●●●○",
+  accepted: "●●●●",
+  dropped: "✕",
+};
+
 // ── Error reporting — message / detail / hint (the PostgreSQL trio) ─────────
 // Exit codes: 0 = success · 1 = rule violation · 2 = CLI misuse.
 
@@ -77,6 +91,9 @@ function usage() {
   );
   console.error(
     "  check              validate all records; report every problem, exit 1 if any",
+  );
+  console.error(
+    "  roadmap [--sync]   print the status table; --sync splices it into README.md",
   );
   process.exit(2);
 }
@@ -352,6 +369,27 @@ function cmdCheck() {
       }
     }
   }
+  // roadmap freshness: the committed README block must equal what the
+  // front matter generates right now — the table can never silently lie
+  const readme = readFileSync(README_PATH, "utf8");
+  const begin = readme.indexOf(ROADMAP_BEGIN);
+  const end = readme.indexOf(ROADMAP_END);
+  if (begin === -1 || end === -1) {
+    report(
+      README_PATH,
+      "roadmap markers missing",
+      `expected ${ROADMAP_BEGIN} … ${ROADMAP_END}`,
+      "restore both marker comments under the Roadmap heading",
+    );
+  } else if (readme.slice(begin + ROADMAP_BEGIN.length, end).trim() !== renderRoadmap().trim()) {
+    report(
+      README_PATH,
+      "roadmap block is stale",
+      "the committed table differs from what record front matter generates",
+      "run `node scripts/features/cli.mjs roadmap --sync` and commit the result",
+    );
+  }
+
   for (const p of problems) console.error(p);
   if (problems.length) {
     console.error(`\n${problems.length} problem(s) in ${files.length} records`);
@@ -360,9 +398,68 @@ function cmdCheck() {
   console.log(`checked ${files.length} records: all rules pass`);
 }
 
+// ── roadmap: generate the README status table from record front matter ──────
+
+/**
+ * Render the roadmap table: one row per record, sorted by delivery stage
+ * (ladder order) then id, with the dot meter beside each delivery value.
+ * @returns {string} markdown table
+ */
+function renderRoadmap() {
+  const rows = recordFiles()
+    .map((f) => ({
+      id: basename(f, ".md"),
+      fm: parseFrontMatter(readFileSync(f, "utf8"), f),
+    }))
+    .sort(
+      (a, b) =>
+        DELIVERY.indexOf(a.fm.delivery) - DELIVERY.indexOf(b.fm.delivery) ||
+        a.id.localeCompare(b.id),
+    );
+  const lines = [
+    "| Record | Delivery | Rollout |",
+    "| ------ | -------- | ------- |",
+  ];
+  for (const { id, fm } of rows) {
+    lines.push(
+      `| [${id}](${id}.md) | ${METER[fm.delivery] ?? "?"} ${fm.delivery} | ${fm.rollout} |`,
+    );
+  }
+  return lines.join("\n");
+}
+
+/**
+ * Print the roadmap table, or with --sync splice it into README.md between
+ * the BEGIN/END markers (everything outside the markers is untouched).
+ * @param {string | undefined} flag "--sync" to write, otherwise print
+ */
+function cmdRoadmap(flag) {
+  const table = renderRoadmap();
+  if (flag !== "--sync") {
+    console.log(table);
+    return;
+  }
+  const readme = readFileSync(README_PATH, "utf8");
+  const begin = readme.indexOf(ROADMAP_BEGIN);
+  const end = readme.indexOf(ROADMAP_END);
+  if (begin === -1 || end === -1) {
+    fail(`${README_PATH}: roadmap markers missing`, {
+      detail: `expected ${ROADMAP_BEGIN} … ${ROADMAP_END}`,
+      hint: "restore both marker comments under the Roadmap heading",
+    });
+  }
+  const next =
+    readme.slice(0, begin + ROADMAP_BEGIN.length) +
+    `\n\n${table}\n\n` +
+    readme.slice(end);
+  writeFileSync(README_PATH, next);
+  console.log(`synced roadmap into ${README_PATH}`);
+}
+
 // ── dispatch ────────────────────────────────────────────────────────────────
 
 const [cmd, arg] = process.argv.slice(2); // argv[0] = node, argv[1] = script
 if (cmd === "new") cmdNew(arg);
 else if (cmd === "check") cmdCheck();
+else if (cmd === "roadmap") cmdRoadmap(arg);
 else usage();

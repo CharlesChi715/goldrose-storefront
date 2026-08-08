@@ -30,6 +30,9 @@ jobs:
       # Nothing else in this job reads a .sql file, so a migration-number
       # collision between two parallel branches passes every other step.
       - run: npm run check:migrations
+      # Feature records: front-matter vocabulary, roadmap freshness, links —
+      # a stale roadmap or invalid status is a red PR, not a quiet lie.
+      - run: npm run features:check
       - run: npm run test:unit
       # `next build` prerenders pages that read .data/db.json in local mode,
       # and that directory is gitignored — seed it first.

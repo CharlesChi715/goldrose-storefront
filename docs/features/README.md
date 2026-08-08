@@ -14,23 +14,39 @@ authority for keys, vocabulary, state meanings, and body sections;
   Context, delete each guidance comment you fulfil, and add the record's row
   to the Roadmap table below.
 
-Still being rebuilt after the 2026-08-01 teardown: `check` (validate every
-record's front matter, exit non-zero on violations — in progress) and the
-generated Roadmap block (`--write` / `--verify` for CI).
+- `node scripts/features/cli.mjs check` (`npm run features:check`, also in
+  CI) — validate every record: key vocabulary and order, presence tiers,
+  evidence-gated ACCEPTED, H1 = id, guidance-comment survival, relative
+  links, roadmap freshness. Reports every problem at once, exits non-zero.
+- `node scripts/features/cli.mjs roadmap --sync` (`npm run features:roadmap`)
+  — regenerate the Roadmap block below from record front matter; `check`
+  fails while the committed block is stale.
 
 ## Roadmap
 
-The block below is generated from record front matter by
-`node scripts/features/cli.mjs roadmap --write` (not built yet — until it
-lands, list records with `ls docs/features/`); never edit inside the markers.
-
-Status meter vocabulary, kept for the rebuild:
+Generated from record front matter — regenerate with
+`node scripts/features/cli.mjs roadmap --sync`; never edit inside the
+markers (`check` fails when the block is stale). Meter legend:
 
 `○○○○ BACKLOG · ●○○○ READY · ●●○○ IN PROGRESS · ●●●○ UAT · ●●●● ACCEPTED · ✕ DROPPED`
 
 <!-- BEGIN features:roadmap -->
 
-_Not generated yet._
+| Record | Delivery | Rollout |
+| ------ | -------- | ------- |
+| [db-backups](db-backups.md) | ○○○○ backlog | not-deployed |
+| [product-content-pipeline](product-content-pipeline.md) | ○○○○ backlog | not-deployed |
+| [promotion-emails](promotion-emails.md) | ○○○○ backlog | not-deployed |
+| [tiktok-analytics](tiktok-analytics.md) | ○○○○ backlog | not-deployed |
+| [card-payments](card-payments.md) | ●○○○ ready | not-deployed |
+| [shipping-rates](shipping-rates.md) | ●○○○ ready | not-deployed |
+| [engagement-tracking](engagement-tracking.md) | ●●○○ in-progress | live |
+| [feature-records](feature-records.md) | ●●○○ in-progress | not-deployed |
+| [checkout-screens](checkout-screens.md) | ●●●○ uat | live |
+| [order-tracking](order-tracking.md) | ●●●○ uat | live |
+| [paypal-wallet](paypal-wallet.md) | ●●●○ uat | test-deployment |
+| [posting-account-attribution](posting-account-attribution.md) | ●●●○ uat | live |
+| [region-alignment](region-alignment.md) | ●●●● accepted | live |
 
 <!-- END features:roadmap -->
 
