@@ -6148,3 +6148,22 @@ Housekeeping after the day's merges. 20 branches and 12 worktrees removed;
 - **Verified after:** `git fsck` clean, `main` intact at `2013a70`, 138 unit
   tests, `check:migrations` ok, inbox in sync. GitHub already carries `main`
   only.
+
+## 2026-08-08 — feature-records toolchain: built, sealed, migrated, measured
+
+- Rebuilt the features tooling as `scripts/features/cli.mjs`: `new` (born-backlog
+  scaffold), `check` (closed vocabulary, canonical key order, presence tiers,
+  evidence-gated ACCEPTED, H1 = id, template-comment survival, relative links
+  with did-you-mean, roadmap freshness — every error message/detail/hint),
+  `roadmap --sync` (generated README block). Sealed: `features:check` +
+  `features:roadmap` npm scripts, CI step beside check:migrations.
+- Scheme rulings recorded in docs/features/feature-records.md: flat directory,
+  id = filename = H1, closed key vocabulary (owner/target/qualifier/dependsOn/
+  tags cut), VERIFIED → ACCEPTED rename, template-conformance-on-edit.
+- Checkout split into records (checkout-screens / paypal-wallet /
+  shipping-rates + existing card-payments); all 9 legacy records migrated;
+  SUMMARY trimmed to pointers; `checked 13 records: all rules pass`.
+- A/B experiment (two worktrees, same rules, only enforcement differed):
+  identical machine-verified quality; tooled arm 7m16s vs 12m29s (−42%),
+  zero defect round-trips vs one. Divergence exposed the missing
+  body-conformance rule, now written. New skill: /feature-new.
