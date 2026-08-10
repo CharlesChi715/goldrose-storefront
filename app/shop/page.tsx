@@ -52,7 +52,7 @@ import { abs, txt } from "@/lib/figma-layout";
 import { fileUrl } from "@/lib/files-url";
 import { cardAreaOf } from "@/lib/images/spotlight";
 import { tenor } from "@/lib/fonts";
-import { getPromoSlogan } from "@/lib/content";
+import { getPromoBar } from "@/lib/home-content";
 import { formatMoney } from "@/lib/money";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 
@@ -251,12 +251,8 @@ export default async function ShopPage({
     failed = true;
   }
 
-  let promo = { text: "", isDefault: true };
-  try {
-    promo = await getPromoSlogan();
-  } catch {
-    // the frame's default slogan still renders
-  }
+  // Never throws; falls back to the design's single line.
+  const promo = await getPromoBar();
 
   // Real paging: how many products there are decides how many pages exist,
   // how many rows this page draws, and therefore how tall the canvas is.
@@ -325,7 +321,8 @@ export default async function ShopPage({
 
         <ShopHeader />
         <PromoBar
-          slogan={promo.text}
+          lines={promo.lines}
+          cycleMs={promo.cycleMs}
           isDefault={promo.isDefault}
           variant="brown"
         />

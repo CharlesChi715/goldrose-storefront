@@ -6897,3 +6897,100 @@ ALLOW_LOCAL_MODE=1 npm run dev --port 3450`), since this worktree has no
 every test navigated and waited. The suite was green and the feature was wrong.
 The bug was visible in thirty seconds of looking at the data the app had
 actually written.
+## 2026-08-10 — the promo bar plays several lines
+
+**Branch:** `claude/chrome-promo-autoplay-db5cc2` (worktree
+`chrome-promo-autoplay`)
+
+Charles asked for several lines in the chrome promo bar, auto-playing upward,
+editable in the admin.
+
+**The registry did most of the work.** Lines 2–5 and the hold are four `text`
+fields and one `number` in `HOME_SECTIONS`' promo section, so they arrive in
+Content → Home page with their labels, budgets, search, per-section counts,
+"only what I changed", validation and reset already attached — no migration, no
+seed, no admin code. That is the payoff of the "a row exists iff it differs from
+the design" invariant: a new field is not even a row until somebody types in it.
+
+**One line renders exactly the old markup.** The lines default to `""`, an empty
+line is not a slide, and `PromoBar` only reaches for the rotator at two or more.
+So the untouched design emits what it always did — all three pixel baselines
+pass untouched, on a change to the one strip that appears on every page.
+
+**§11 stayed per line, not per strip.** While the slogan is still the design's
+it is Figma's own render (the ✦ glyphs hit different fallback fonts); that is
+still true when it is slide 1 of a rotation, so the rotator takes ready-made
+slides rather than strings — the server builds each with the geometry it needs.
+It also keeps every line a *server* prop, which is what lets the admin picker
+keep writing into these nodes as the owner types (`picker/patch.ts`).
+
+**Wrap without a reverse sweep.** The track carries one clone of line 1 at the
+bottom; reaching it, the index jumps home with the transition switched off. The
+naive `index → 0` animates the whole strip *downward* once per cycle, which is
+the opposite of what was asked for.
+
+**Reduced motion keeps the rotation and drops the movement.** The card rails
+freeze for those visitors, and that is right for a rail you can still swipe.
+Freezing text would put lines 2–5 out of reach of exactly the people who cannot
+ask them to move on, so here the lines change in place. The strip also pauses
+under the pointer or a focused element (WCAG 2.2.2).
+
+**One resolver for three pages.** `/`, `/shop` and the PDP read the bar through
+`lib/home-content/promo.ts`, so they cannot disagree about it; the old
+`getPromoSlogan()` (one slot, one page at a time) is deleted.
+
+**Verified:** 171 unit tests (5 new, on the resolver), and — spec by spec, on a
+clean single server — `pixels` (all three baselines), `home-field-tags`,
+`admin-home-content`, `admin-home-picker` and `admin-settings`, the last
+including a new e2e that fills line 2 in the admin, watches the strip start
+moving on `/shop`, and reverts it.
+
+⚠️ **Not verified: one green full-suite run**, and the reason is the machine, not
+the code. The test server was repeatedly SIGKILLed mid-run (`Killed: 9`, macOS
+memory pressure), which presents as dozens of `ERR_CONNECTION_REFUSED` failures
+in unrelated specs. Two self-inflicted causes worth remembering next time:
+`rm -rf .next/cache` also deletes next/font's downloaded fonts, and a rebuild
+without network then ships fallback faces and quietly breaks every pixel
+baseline; and `reuseExistingServer` means a hand-started `next start` on :3001
+is served to the suite instead of its own build — at one point THREE
+`next-server` processes shared that port, so requests hit different builds at
+random. Kill every server and re-seed before trusting a run.
+
+## 2026-08-10 — the Home page header is pinned
+
+**Branch:** `claude/chrome-promo-autoplay-db5cc2`
+
+Charles asked for the bar carrying the screen title and the Save button to stay
+at the top of the viewport, so he can save from anywhere on the page.
+
+Done as CSS on the header the screen already has (`home-editor.css`), not as a
+second Save button — this screen's standing rule is that Save lives in one place
+so two buttons never mean the same thing. The screen is ~27,000px tall, so
+"scroll back to the top to save" was the actual cost.
+
+Two things it turned out to need:
+
+- **`position: sticky !important`.** Polaris' `Box` writes `position: relative`
+  as an INLINE style on the header wrapper, and no selector out-scores an inline
+  declaration. `top`, `z-index` and `background` are not set inline and win
+  normally. Measured before assuming: the rule applied but lost, which read as
+  "sticky doesn't work here".
+- **The jump clearance is now two bars, and it is measured.** Sections carry
+  `scroll-margin-top` so a jump does not land under the fixed 56px top bar; the
+  pinned header adds its own height, which is not a constant (the blurb wraps,
+  the actions wrap). It is measured with a ResizeObserver and written to a CSS
+  custom property **on the element** — never into React state, because `Page`
+  re-measures its header actions in an effect and `setState`s from it, and a
+  component above `Page` re-rendering on every resize is exactly the
+  nested-update storm that killed this screen once before.
+
+Verified at 1280 and 820: header parks at y=56 while scrolled 12,000px down with
+Save on screen, and a jump lands the section 16px below the pinned bar at both
+widths.
+
+**Also:** a full-suite failure turned out to be live experimentation on the
+shared local database — `home.promo.line_2` and `cycle_ms` had been saved
+through the admin on the preview server, so `/shop` legitimately drew two
+slogan images (the rotator's wrap clone) and a strict-mode locator failed.
+Removed the two rows; the suite's contract is that the local DB sits at the
+design defaults.

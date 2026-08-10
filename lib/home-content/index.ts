@@ -27,6 +27,11 @@ import {
 } from "./frames.ts";
 import { homeLayout, type HomeLayout } from "./layout.ts";
 import {
+  DESIGN_PROMO_BAR,
+  promoBarFrom,
+  type PromoBarContent,
+} from "./promo.ts";
+import {
   HOME_SECTIONS,
   fieldError,
   findSection,
@@ -39,6 +44,7 @@ import {
 
 export * from "./registry.ts";
 export * from "./frames.ts";
+export * from "./promo.ts";
 export { homeLayout, HOME_FRAME_HEIGHT, type HomeLayout } from "./layout.ts";
 
 /** The value stored in a visibility slot when a section is switched off. */
@@ -154,6 +160,22 @@ export async function getHomeContent(): Promise<HomeContent> {
     return resolve(stored);
   } catch {
     return resolve(new Map());
+  }
+}
+
+/**
+ * Read just the promo strip, for the pages that draw the chrome without the
+ * homepage's bands — /shop and /products/[slug]. Never throws: an unreachable
+ * store resolves to the design's single line, which is what the pixel-exact
+ * import renders.
+ *
+ * @returns The strip's lines, its §11 default flag, and its hold.
+ */
+export async function getPromoBar(): Promise<PromoBarContent> {
+  try {
+    return promoBarFrom(await getHomeContent());
+  } catch {
+    return DESIGN_PROMO_BAR;
   }
 }
 

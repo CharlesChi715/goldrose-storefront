@@ -767,6 +767,28 @@ different shape from the flat slot list.
   0 and the wrapper renders nothing, which is what keeps the home pixel
   baseline byte-identical. The promo bar is chrome, not a band: editable,
   not hideable.
+- **The header is pinned** (owner, 2026-08-10). Title, blurb and the View /
+  Reset whole page / Save actions stick under the admin's own 56px top bar, so
+  Save is reachable from any of the nine sections instead of only from the top
+  of a ~27,000px screen. Sticky positioning of Polaris' existing `Page` header —
+  no second Save button, which is the rule this screen already had. Two details
+  it needs: `position: sticky !important`, because Polaris writes
+  `position: relative` inline on that box; and "jump to a section" now clears the
+  pinned bar as well as the top bar, from a measured height written to a CSS
+  custom property rather than to React state (a component above `Page` that
+  re-renders on resize is the nested-update loop that broke this screen once).
+- **The promo bar takes several lines and plays them** (2026-08-10). Line 1 is
+  the slogan slot the bar has always had; lines 2–5 are new fields that default
+  to empty, plus one `number` for how long each line is held. An empty line is
+  not a slide, so one filled line renders exactly the markup it did before —
+  which is what keeps the three pixel baselines byte-identical — and two or more
+  turn the strip into a vertical track that carries each line upward as the next
+  arrives (`components/PromoRotator.tsx`). §11 stays per line: while the slogan
+  is still the design's it is Figma's own render, even as slide 1 of a rotation.
+  Visitors who have asked their device to reduce motion still see every line, in
+  turn, without the movement — freezing on line 1 would put the other lines out
+  of reach of exactly the people who cannot ask them to move on — and the strip
+  pauses under the pointer or a focused element (WCAG 2.2.2).
 - **The section list IS the page.** "Jump to a section" is the home page drawn
   small — one iframe of `/`, scaled to fit — with each section's link occupying
   exactly the vertical span of the band it opens, labelled with the share of the

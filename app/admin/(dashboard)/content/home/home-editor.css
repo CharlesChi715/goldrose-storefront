@@ -1,0 +1,49 @@
+/*
+ * ROLE OF THIS FILE
+ * Pinning the Home page screen's own header — title, blurb, View / Reset /
+ * Save — to the top of the viewport (owner, 2026-08-10).
+ *
+ * WHY CSS AND NOT A COMPONENT
+ * The bar is Polaris' `Page` header, and Save lives there precisely so the
+ * screen never shows two buttons meaning the same thing. This screen is
+ * ~27,000px tall, so on any section past the first the only way to save was to
+ * scroll back to the top. Sticky positioning is the whole fix: it changes where
+ * the existing header paints and nothing else — no second button, no state, and
+ * nothing above `Page` that could re-render it (see the picker's frame-loop
+ * rule in HomeSectionsEditor.tsx).
+ *
+ * THE SELECTOR
+ * `Page` renders its header as the first `Box` inside `.Polaris-Page`, so that
+ * is what has to become sticky — the header element itself is inside that Box's
+ * padding, and pinning it alone would leave the padding behind and let the
+ * cards scroll through the gap. The scope is a class this screen puts on
+ * `<body>` while it is mounted (see PINNED_CLASS in HomeSectionsEditor.tsx), so
+ * no other admin page is affected — and no wrapper element is added, which would
+ * have re-indented that file's entire JSX tree. If a Polaris upgrade ever
+ * changes this structure the rule simply stops matching and the header scrolls
+ * away as it used to — the screen still works.
+ */
+
+body.home-editor-pinned .Polaris-Page > .Polaris-Box:first-child {
+  /* `!important` is load-bearing, not laziness: Polaris' `Box` writes
+     `position: relative` as an INLINE style, and no selector out-scores an
+     inline declaration. This is the one property that has to beat it; `top`,
+     `z-index` and `background` are not set inline and win normally. */
+  position: sticky !important;
+  /* The admin's own top bar is `position: fixed` and 56px tall, so it is not
+     part of the scrollable flow — this has to clear it by hand. Kept in step
+     with ADMIN_TOP_BAR in HomeSectionsEditor.tsx. */
+  top: 56px;
+  /* Above the cards and the section previews; below the Polaris top bar (512)
+     and the picker's selection overlay (519), both of which must stay on top
+     of it. */
+  z-index: 100;
+  /* The header is transparent by default: over 27,000px of scrolling content it
+     has to paint the page's own background, or the cards read straight through
+     it. `--p-color-bg` is Polaris' page background — the same colour the body
+     already has. */
+  background: var(--p-color-bg, #f1f1f1);
+  /* Says "this is pinned, the page is moving underneath" — the same 1px shadow
+     Polaris gives its own raised surfaces. */
+  box-shadow: var(--p-shadow-100, 0 1px 0 0 rgba(26, 26, 26, 0.07));
+}

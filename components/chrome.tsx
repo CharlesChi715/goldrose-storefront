@@ -23,6 +23,8 @@ import { MenuButton } from "@/components/MenuButton";
 import { SearchButton } from "@/components/SearchButton";
 import { AccountTabArt } from "@/components/AccountTabArt";
 import { abs } from "@/lib/figma-layout";
+import { PromoRotator } from "@/components/PromoRotator";
+import { PROMO_CYCLE_MS, PROMO_SLIDE_MS } from "@/lib/home-content/promo";
 
 /* ---------- Inline SVG icons (Figma node renders, format=svg) ---------- */
 
@@ -113,17 +115,61 @@ export const ForwardIcon = ({ color = "#14142B" }: { color?: string } = {}) => (
  * glyphs hit different fallback fonts in browsers. `variant`: "green" is the
  * original PDP styling; "brown" is the 2026-07-25 redesign palette used by
  * the homepage and /shop.
+ *
+ * The owner may fill in further lines in the admin (Content → Home page →
+ * Promo bar). With one line this renders exactly the markup it always has —
+ * that is what keeps the pixel baselines byte-identical. With two or more it
+ * hands the same slides to PromoRotator, which plays them upward in turn.
  */
 export function PromoBar({
   slogan,
+  lines,
+  cycleMs = PROMO_CYCLE_MS,
   isDefault = true,
   variant = "green",
 }: {
+  /** Line 1. Ignored when `lines` is given — that array carries it. */
   slogan?: string;
+  /** Every line to play, in order, line 1 first. Blanks are dropped. */
+  lines?: readonly string[];
+  /** How long each line is held before the next slides up. */
+  cycleMs?: number;
   isDefault?: boolean;
   variant?: "green" | "brown";
 } = {}) {
   const brown = variant === "brown";
+  const all = (lines ?? (slogan === undefined ? [] : [slogan]))
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const first = all[0];
+
+  // Line 1 keeps the §11 rule: Figma's own render until the slogan is edited.
+  const firstSlide =
+    isDefault || !first ? (
+      // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
+      <img
+        data-field="promo.slogan"
+        src={brown ? "/eldreve/home/549-95.svg" : "/eldreve/glyph-promo.png"}
+        alt={
+          first ??
+          "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"
+        }
+        width={brown ? 352 : 358}
+        height={brown ? 10 : 20}
+        style={{
+          ...(brown ? abs(39, 11, 352, 10) : abs(36, 6, 358, 20)),
+          display: "block",
+        }}
+      />
+    ) : (
+      // Owner-edited → real text in the same box; minor glyph drift
+      // accepted (the admin shows the caveat inline, §11).
+      // Tagged on BOTH branches: the promo bar swaps element type when the
+      // owner edits it (Figma's own pixels → live text), so the picker must
+      // find the slot whichever one is currently on the page.
+      <PromoLine field="promo.slogan" brown={brown} text={first} />
+    );
+
   return (
     <>
       <div
@@ -132,48 +178,69 @@ export function PromoBar({
           background: brown ? "#3B2F2F" : "#06372E",
         }}
       />
-      {isDefault || !slogan ? (
-        // Default text → Figma's own rendered pixels: pixel-diff stays perfect (§11).
-        <img
-          data-field="promo.slogan"
-          src={brown ? "/eldreve/home/549-95.svg" : "/eldreve/glyph-promo.png"}
-          alt={
-            slogan ??
-            "✦ TIMELESS CRAFT · LOVE THAT NEVER FADES · 24K GOLD · FOREVER TREASURED ✦"
-          }
-          width={brown ? 352 : 358}
-          height={brown ? 10 : 20}
-          style={{
-            ...(brown ? abs(39, 11, 352, 10) : abs(36, 6, 358, 20)),
-            display: "block",
-          }}
-        />
+      {all.length < 2 ? (
+        firstSlide
       ) : (
-        // Owner-edited → real text in the same box; minor glyph drift
-        // accepted (the admin shows the caveat inline, §11).
-        <div
-          // Tagged on BOTH branches: the promo bar swaps element type when the
-          // owner edits it (Figma's own pixels → live text), so the picker must
-          // find the slot whichever one is currently on the page.
-          data-field="promo.slogan"
-          className={inter.className}
-          style={{
-            ...(brown ? abs(39, 6, 352, 20) : abs(36, 6, 358, 20)),
-            color: brown ? "#D4AF37" : "#FFFFFF",
-            fontSize: brown ? 8.5 : 11,
-            fontWeight: brown ? 500 : undefined,
-            lineHeight: "20px",
-            letterSpacing: brown ? 0 : 0.4,
-            textAlign: "center",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {slogan}
-        </div>
+        <PromoRotator
+          height={32}
+          cycleMs={cycleMs}
+          slideMs={PROMO_SLIDE_MS}
+          slides={[
+            firstSlide,
+            ...all
+              .slice(1)
+              .map((text, i) => (
+                <PromoLine
+                  key={i}
+                  field={`promo.line_${i + 2}`}
+                  brown={brown}
+                  text={text}
+                />
+              )),
+          ]}
+        />
       )}
     </>
+  );
+}
+
+/**
+ * One line of promo text, in the design's own text box.
+ *
+ * @param field - The registry slot this line draws, for the admin's picker.
+ * @param brown - The 2026-07-25 palette (homepage and /shop) rather than the
+ *   original green PDP styling.
+ * @param text - The line to show.
+ * @returns The positioned, clipped line.
+ */
+function PromoLine({
+  field,
+  brown,
+  text,
+}: {
+  field: string;
+  brown: boolean;
+  text: string;
+}) {
+  return (
+    <div
+      data-field={field}
+      className={inter.className}
+      style={{
+        ...(brown ? abs(39, 6, 352, 20) : abs(36, 6, 358, 20)),
+        color: brown ? "#D4AF37" : "#FFFFFF",
+        fontSize: brown ? 8.5 : 11,
+        fontWeight: brown ? 500 : undefined,
+        lineHeight: "20px",
+        letterSpacing: brown ? 0 : 0.4,
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      }}
+    >
+      {text}
+    </div>
   );
 }
 
