@@ -175,6 +175,59 @@ test("promo slogan: default PNG → edited text → reset PNG (§11)", async ({
   ).toBeVisible();
 });
 
+test("promo bar: a second line makes the strip play, then reverts", async ({
+  page,
+}) => {
+  // One line → the strip is the design's own single render, with nothing to
+  // rotate. That is the state every pixel baseline is taken in.
+  await page.goto("/shop");
+  await expect(page.locator('[data-el="PROMO-ROTATOR"]')).toHaveCount(0);
+
+  await adminLogin(page);
+  await page.goto("/admin/content/home");
+  await page.getByPlaceholder(/Search by label/).fill("Line 2");
+  await page.getByLabel(/Line 2/).fill("FREE GIFT WRAP");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Home page updated").first()).toBeVisible();
+
+  await page.goto("/shop");
+  const rotator = page.locator('[data-el="PROMO-ROTATOR"]');
+  await expect(rotator).toBeVisible();
+  // Line 1 is still the design's, so it is still Figma's own render — the §11
+  // rule is per line, not per strip.
+  await expect(
+    rotator.locator('img[src="/eldreve/home/549-95.svg"]').first(),
+  ).toBeVisible();
+  await expect(page.getByText("FREE GIFT WRAP").first()).toBeVisible();
+
+  // And it moves on its own. The suite runs with reduced motion, which drops
+  // the sliding but not the rotation — the lines still take their turn, which
+  // is the accommodation this bar makes (components/PromoRotator.tsx).
+  const track = rotator.locator("> div");
+  const parked = await track.evaluate(
+    (element) => getComputedStyle(element).transform,
+  );
+  await expect
+    .poll(
+      () => track.evaluate((element) => getComputedStyle(element).transform),
+      { timeout: 20_000 },
+    )
+    .not.toBe(parked);
+
+  // Revert, or the pixel baselines that run after this file see two lines.
+  await page.goto("/admin/content/home");
+  await page.getByPlaceholder(/Search by label/).fill("Line 2");
+  await page.getByLabel(/Line 2/).fill("");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Home page updated").first()).toBeVisible();
+
+  await page.goto("/shop");
+  await expect(page.locator('[data-el="PROMO-ROTATOR"]')).toHaveCount(0);
+  await expect(
+    page.locator('img[src="/eldreve/home/549-95.svg"]'),
+  ).toBeVisible();
+});
+
 test("sitemap, llms.txt and Product JSON-LD come from the database", async ({
   request,
 }) => {

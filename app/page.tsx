@@ -24,7 +24,7 @@ import { HomeBand } from "@/components/home/HomeBand";
 import { railTiming } from "@/lib/home-content/rail-timing";
 import { getCatalog } from "@/lib/supabase/catalog.ts";
 import { getSettingsMap, siteBaseUrl } from "@/lib/admin/settings";
-import { getHomeContent } from "@/lib/home-content";
+import { getHomeContent, promoBarFrom } from "@/lib/home-content";
 import { fileUrl } from "@/lib/files-url";
 
 // DB-backed data (promo slogan, JSON-LD, search listing) refreshes without a redeploy (§8).
@@ -62,7 +62,11 @@ export default async function HomePage() {
   }
   // Owner-editable copy, section visibility and the resulting band offsets
   // (§7.9). getHomeContent never throws: with no DB it returns the design.
-  const { text, visible, layout, overridden, frames } = await getHomeContent();
+  const content = await getHomeContent();
+  const { text, visible, layout, frames } = content;
+  // The promo strip's lines and hold, resolved the same way /shop and the PDP
+  // resolve them, so the three pages can never disagree about the bar.
+  const promo = promoBarFrom(content);
   // One timing for all four card rails, so they never drift apart (§9.8).
   const timing = railTiming(
     text.motion.rail_cycle_ms,
@@ -126,8 +130,9 @@ export default async function HomePage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <PromoBar
-          slogan={text.promo.slogan}
-          isDefault={!overridden.has("promo.slogan")}
+          lines={promo.lines}
+          cycleMs={promo.cycleMs}
+          isDefault={promo.isDefault}
           variant="brown"
         />
         {/* Band offsets are 2380:370's own: A-1 @32, A-2 @764, A-3 @1405,

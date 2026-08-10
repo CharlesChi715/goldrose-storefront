@@ -122,24 +122,6 @@ export async function resetContent(key: string): Promise<void> {
   }
 }
 
-/**
- * Read the promo-bar slogan slot driving the §11 PNG-vs-text rule. Never
- * throws — a missing slot or store error falls back to { text: "",
- * isDefault: true }, which serves the original PNG crop.
- *
- * @returns The slogan text and whether it still equals the default.
- */
-export async function getPromoSlogan(): Promise<{
-  text: string;
-  isDefault: boolean;
-}> {
-  try {
-    const slot = await getContentSlot("promo.slogan");
-    if (!slot) {
-      return { text: "", isDefault: true };
-    }
-    return { text: slot.text, isDefault: slot.isDefault };
-  } catch {
-    return { text: "", isDefault: true };
-  }
-}
+/* The promo bar used to be read from here, one slot at a time. It now has
+   several lines and a rotation speed, all of them registry fields, so the whole
+   strip resolves in lib/home-content/promo.ts — where the defaults live. */

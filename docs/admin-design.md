@@ -767,6 +767,18 @@ different shape from the flat slot list.
   0 and the wrapper renders nothing, which is what keeps the home pixel
   baseline byte-identical. The promo bar is chrome, not a band: editable,
   not hideable.
+- **The promo bar takes several lines and plays them** (2026-08-10). Line 1 is
+  the slogan slot the bar has always had; lines 2–5 are new fields that default
+  to empty, plus one `number` for how long each line is held. An empty line is
+  not a slide, so one filled line renders exactly the markup it did before —
+  which is what keeps the three pixel baselines byte-identical — and two or more
+  turn the strip into a vertical track that carries each line upward as the next
+  arrives (`components/PromoRotator.tsx`). §11 stays per line: while the slogan
+  is still the design's it is Figma's own render, even as slide 1 of a rotation.
+  Visitors who have asked their device to reduce motion still see every line, in
+  turn, without the movement — freezing on line 1 would put the other lines out
+  of reach of exactly the people who cannot ask them to move on — and the strip
+  pauses under the pointer or a focused element (WCAG 2.2.2).
 - **The section list IS the page.** "Jump to a section" is the home page drawn
   small — one iframe of `/`, scaled to fit — with each section's link occupying
   exactly the vertical span of the band it opens, labelled with the share of the

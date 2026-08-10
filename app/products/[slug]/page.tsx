@@ -51,7 +51,7 @@ import { abs, txt } from "@/lib/figma-layout";
 import { cormorant, inter, notoSC } from "@/lib/fonts";
 import { BuyButtons } from "@/components/BuyButtons";
 import { getCatalog, getCatalogProduct } from "@/lib/supabase/catalog.ts";
-import { getPromoSlogan } from "@/lib/content";
+import { getPromoBar } from "@/lib/home-content";
 import { listPublishedReviews, reviewStats } from "@/lib/reviews/db.ts";
 import { formatRelativeDay } from "@/lib/dates";
 import { fileUrl } from "@/lib/files-url";
@@ -162,16 +162,16 @@ export default async function ProductDetailPage({
 
   // Everything DB-backed degrades gracefully; the fixed design always renders.
   let catalogProduct: Awaited<ReturnType<typeof getCatalogProduct>> = null;
-  let promo = { text: "", isDefault: true };
   try {
     const catalog = await getCatalog();
     catalogProduct = catalog.find((entry) => entry.handle === slug) ?? null;
-    promo = await getPromoSlogan();
   } catch {
     catalogProduct = null;
   }
   if (!catalogProduct) notFound();
   const product = catalogProduct;
+  // Never throws; falls back to the design's single line.
+  const promo = await getPromoBar();
   // Real published reviews (pending/rejected never leave the server). An
   // empty table now reads as unrated rather than borrowing the frame's.
   let reviews: Awaited<ReturnType<typeof listPublishedReviews>> = [];
@@ -297,7 +297,8 @@ export default async function ProductDetailPage({
         fontClass={inter.className}
       >
         <PromoBar
-          slogan={promo.text}
+          lines={promo.lines}
+          cycleMs={promo.cycleMs}
           isDefault={promo.isDefault}
           variant="brown"
         />

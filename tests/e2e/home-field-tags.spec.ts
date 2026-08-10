@@ -39,6 +39,17 @@ const NO_ELEMENT = new Map<string, string>([
     "resolved server-side into a CSS transition string on a track React owns",
   ],
   [
+    "promo.cycle_ms",
+    "the promo strip's hold — resolved server-side into a setInterval, like the rail timings above",
+  ],
+  [
+    "promo.line_2",
+    "an optional promo line. It IS tagged where it is drawn, but it ships empty, and an empty line is not a slide — so on an untouched page there is no pixel of it to point at. Fill it in and the picker finds it.",
+  ],
+  ["promo.line_3", "an optional promo line — see promo.line_2"],
+  ["promo.line_4", "an optional promo line — see promo.line_2"],
+  ["promo.line_5", "an optional promo line — see promo.line_2"],
+  [
     "story.newsletter_welcome_text",
     "the signed-IN half of the newsletter strip (NewsletterJoin's ACCOUNT-INFO card). It is tagged where it is drawn, but `/` renders signed out — and in local mode there is no Supabase to sign in to — so no pixel of it exists on this page to point at.",
   ],

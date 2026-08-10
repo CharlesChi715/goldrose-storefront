@@ -6637,3 +6637,63 @@ gone missing mid-session, which presents as all 155 e2e tests failing at 0ms.
 Not a code failure; worth recognising quickly next time.
 
 **Verified:** 166 unit, 155 e2e including the three pixel baselines.
+
+## 2026-08-10 — the promo bar plays several lines
+
+**Branch:** `claude/chrome-promo-autoplay-db5cc2` (worktree
+`chrome-promo-autoplay`)
+
+Charles asked for several lines in the chrome promo bar, auto-playing upward,
+editable in the admin.
+
+**The registry did most of the work.** Lines 2–5 and the hold are four `text`
+fields and one `number` in `HOME_SECTIONS`' promo section, so they arrive in
+Content → Home page with their labels, budgets, search, per-section counts,
+"only what I changed", validation and reset already attached — no migration, no
+seed, no admin code. That is the payoff of the "a row exists iff it differs from
+the design" invariant: a new field is not even a row until somebody types in it.
+
+**One line renders exactly the old markup.** The lines default to `""`, an empty
+line is not a slide, and `PromoBar` only reaches for the rotator at two or more.
+So the untouched design emits what it always did — all three pixel baselines
+pass untouched, on a change to the one strip that appears on every page.
+
+**§11 stayed per line, not per strip.** While the slogan is still the design's
+it is Figma's own render (the ✦ glyphs hit different fallback fonts); that is
+still true when it is slide 1 of a rotation, so the rotator takes ready-made
+slides rather than strings — the server builds each with the geometry it needs.
+It also keeps every line a *server* prop, which is what lets the admin picker
+keep writing into these nodes as the owner types (`picker/patch.ts`).
+
+**Wrap without a reverse sweep.** The track carries one clone of line 1 at the
+bottom; reaching it, the index jumps home with the transition switched off. The
+naive `index → 0` animates the whole strip *downward* once per cycle, which is
+the opposite of what was asked for.
+
+**Reduced motion keeps the rotation and drops the movement.** The card rails
+freeze for those visitors, and that is right for a rail you can still swipe.
+Freezing text would put lines 2–5 out of reach of exactly the people who cannot
+ask them to move on, so here the lines change in place. The strip also pauses
+under the pointer or a focused element (WCAG 2.2.2).
+
+**One resolver for three pages.** `/`, `/shop` and the PDP read the bar through
+`lib/home-content/promo.ts`, so they cannot disagree about it; the old
+`getPromoSlogan()` (one slot, one page at a time) is deleted.
+
+**Verified:** 171 unit tests (5 new, on the resolver), and — spec by spec, on a
+clean single server — `pixels` (all three baselines), `home-field-tags`,
+`admin-home-content`, `admin-home-picker` and `admin-settings`, the last
+including a new e2e that fills line 2 in the admin, watches the strip start
+moving on `/shop`, and reverts it.
+
+⚠️ **Not verified: one green full-suite run**, and the reason is the machine, not
+the code. The test server was repeatedly SIGKILLed mid-run (`Killed: 9`, macOS
+memory pressure), which presents as dozens of `ERR_CONNECTION_REFUSED` failures
+in unrelated specs. Two self-inflicted causes worth remembering next time:
+`rm -rf .next/cache` also deletes next/font's downloaded fonts, and a rebuild
+without network then ships fallback faces and quietly breaks every pixel
+baseline; and `reuseExistingServer` means a hand-started `next start` on :3001
+is served to the suite instead of its own build — at one point THREE
+`next-server` processes shared that port, so requests hit different builds at
+random. Kill every server and re-seed before trusting a run.
+

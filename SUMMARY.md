@@ -260,6 +260,20 @@ Open linked resources only when the task needs them.
     preflight. It now renders at the width Figma traced. Its registry `box`
     was also corrected 132×170 → 122×69 — that is the opening, and it is what
     the framer frames against.
+- **The promo bar plays several lines (2026-08-10, `worktree-chrome-promo-autoplay`).**
+  The 32px strip took one slogan; it now takes up to five lines and carries each
+  one upward as the next arrives, at a hold the owner sets (Content → Home page
+  → Promo bar: lines 2–5 plus one `number`, all registry fields, so no
+  migration). An empty line is not a slide, so the untouched design still
+  renders the single-line markup it always did — all three pixel baselines pass
+  unchanged — and §11 stays per line: line 1 is Figma's own render until the
+  slogan is edited, even as slide 1 of a rotation. The three pages that draw the
+  chrome (`/`, `/shop`, PDP) now resolve the strip through one function
+  (`lib/home-content/promo.ts`), so they cannot disagree about it;
+  `getPromoSlogan()` is gone. Reduced motion keeps the rotation and drops the
+  movement — freezing on line 1 would hide the other lines from exactly the
+  people who cannot ask them to move on — and the strip pauses under the
+  pointer.
 - **Every photo is framed twice (2026-08-07, `worktree-media-spotlight`).**
   Migration `0010` gives `product_images` two **spotlight areas** — a point
   plus a zoom each — one framed against the PDP viewer window (398×250), one
