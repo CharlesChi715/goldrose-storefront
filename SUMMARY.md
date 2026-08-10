@@ -274,6 +274,33 @@ Open linked resources only when the task needs them.
   [`admin-design.md` §9.5](docs/admin-design.md#95-products-adminproducts--clone).
   The PDP ABOUT panel takes the point but not the zoom — that zoom was
   authored against a wide box and this one is nearly square.
+- **The header search box searches, and answers as you type (2026-08-10,
+  `claude/top-nav-search-button-78775c`).** It matched product TITLES only,
+  while its own hint promised "products, occasions, or recipients" and its own
+  trending chips offered "Anniversary Gift", "For Mom" and "Ready to Ship" —
+  three of the five chips we ship landed a stranger on an empty grid. One
+  engine now serves both sides ([`lib/catalog/search.ts`](lib/catalog/search.ts)):
+  the overlay runs it in the browser on every keystroke and `/shop?q=` runs the
+  same function on the server, so a dropdown can never preview products the
+  grid then disagrees about. A query that NAMES a facet filters exactly as the
+  drawer's chip would (`ALIASES` maps "mom"/"mum"/"bday"/"ships now" onto the
+  closed vocabulary in `facets.ts`, and every chip's own label registers
+  itself, so a re-worded chip keeps working). Words are scored — short name >
+  title > facet label > tag > badge > handle > description — and a search
+  RELAXES rather than emptying the shop, reporting which reading answered so
+  the panel can call a loose match loose. `mode: "none"` is still a real
+  outcome, which is what keeps `?q=zzzz` empty. The panel is fed by
+  `GET /api/search`, fetched once per tab (prefetched on hover) and cached
+  300s — so there is no request per letter, no debounce and no out-of-order
+  response. Also: ↑/↓/Enter drive the list while focus stays in the field (the
+  repo's first `aria-activedescendant`), Escape clears before it closes, and a
+  visitor with no history is offered the shop instead of the frame's dead
+  half-panel. The idle panel is byte-identical to the import and all three
+  pixel baselines pass. Record:
+  [storefront-search](docs/features/storefront-search.md).
+  ⚠️ **Nothing records what shoppers type** — so the trending chips stay a
+  design guess and zero-result queries are invisible; that needs migration
+  `0012` and the Beacon's framed-document guard (OQ-1 in the record).
 - **The /shop filter drawer is real (2026-08-07, `feat/best-for-facets`).**
   `products.best_for` changed from a dormant prose blurb to `text[]` holding
   filter slugs (migration `0009` — **written, not yet pushed to hosted**), and

@@ -458,6 +458,24 @@ export function facetSubject(product: CatalogProduct): FacetSubject {
 }
 
 /**
+ * The derived facets a product currently qualifies for — the Price band and
+ * the Availability shades, computed the same way the drawer computes them.
+ *
+ * Exposed for the search index (`lib/catalog/search.ts`), which treats a
+ * product's facets as searchable words: typing "ready to ship" has to find the
+ * same products the drawer's "Ready to Ship" chip finds, and the only way to
+ * guarantee that is to ask this file rather than re-derive it.
+ *
+ * @param subject - The product's filterable facts (`facetSubject()`).
+ * @returns The derived slugs this product qualifies for, in drawer order.
+ */
+export function derivedFacets(subject: FacetSubject): string[] {
+  return FACET_GROUPS.filter((group) => group.source === "derived")
+    .flatMap((group) => group.facets.map((facet) => facet.slug))
+    .filter((slug) => DERIVED_TESTS[slug](subject));
+}
+
+/**
  * Does one product match a shopper's selection?
  *
  * OR inside a group, AND across groups — "Birthday or Wedding, for a Wife".
