@@ -86,9 +86,21 @@ test("average results is per search, and rounds", () => {
 test("zero-result queries are ranked among their own kind", () => {
   const report = searchReport([
     // A popular query that works — it must NOT crowd the failures out.
-    ...Array.from({ length: 20 }, () => row({ query: "rose", result_count: 4 })),
-    row({ query: "sunflower", query_raw: "sunflower", result_count: 0, mode: "none" }),
-    row({ query: "sunflower", query_raw: "Sunflower", result_count: 0, mode: "none" }),
+    ...Array.from({ length: 20 }, () =>
+      row({ query: "rose", result_count: 4 }),
+    ),
+    row({
+      query: "sunflower",
+      query_raw: "sunflower",
+      result_count: 0,
+      mode: "none",
+    }),
+    row({
+      query: "sunflower",
+      query_raw: "Sunflower",
+      result_count: 0,
+      mode: "none",
+    }),
     row({ query: "tulip", query_raw: "tulip", result_count: 0, mode: "none" }),
   ]);
 

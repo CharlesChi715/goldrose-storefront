@@ -614,8 +614,7 @@ const en = {
     "Searches that returned nothing at all, most-asked first. Each one is a shopper who wanted something we did not show them — stock it, rename a product, or add the words to one.",
   "analytics.search.empty":
     "No searches yet — searches are recorded when a shopper presses enter or taps a chip, never as they type",
-  "analytics.search.emptyZero":
-    "Every search found something in this period",
+  "analytics.search.emptyZero": "Every search found something in this period",
 
   // ⌘K search (§9.1)
   "search.group.orders": "Orders",
