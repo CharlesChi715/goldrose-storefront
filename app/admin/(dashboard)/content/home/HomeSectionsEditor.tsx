@@ -83,6 +83,7 @@ import {
   type SpotlightArea,
 } from "@/lib/home-content/frames";
 import { SectionPreview } from "./SectionPreview";
+import "./home-editor.css";
 import {
   resetHomeFieldAction,
   resetHomePageAction,
@@ -161,9 +162,18 @@ const INTRO_KEY = "goldrose-admin-home-intro-dismissed";
  * anchor rather than as arithmetic at the call site, because it then also
  * applies to a plain `#home-section-…` link — a pasted URL, a restored hash, a
  * keyboard activation — and not only to the section map's own scroll.
+ *
+ * Since this screen's own header is pinned under that bar too (home-editor.css),
+ * the clearance is the pair of them — and the header's height is not a constant:
+ * it is two lines of blurb at 1280px and four at 800, and it grows again when
+ * the actions wrap. So the number below is only the floor used before the first
+ * measurement; `--home-jump-clearance` carries the real one (see PINNED_CLASS).
  */
 const ADMIN_TOP_BAR = 56;
 const JUMP_CLEARANCE = ADMIN_TOP_BAR + 16;
+
+/** Marks `<body>` while this screen is mounted, scoping home-editor.css to it. */
+const PINNED_CLASS = "home-editor-pinned";
 
 /**
  * The preview's width range, in CSS pixels — the width a website actually sees,
@@ -318,6 +328,51 @@ export function HomeSectionsEditor({
   // Which phone width the preview is standing in for. Session-local: it is a
   // way of looking at the page, not a setting that belongs to the store.
   const [previewWidth, setPreviewWidth] = useState(DESIGN_WIDTH);
+
+  /**
+   * Pin this screen's header, and keep "jump to a section" clear of it.
+   *
+   * WHY A BODY CLASS AND NOT A WRAPPER ELEMENT
+   * The rule in home-editor.css has to be scoped to this screen, and the obvious
+   * way — a `<div className="…">` around `<Page>` — re-indents this file's whole
+   * JSX tree, which is 800 lines of whitespace churn in a file three worktrees
+   * touch. A class on `<body>`, added on mount and removed on unmount, scopes it
+   * just as tightly and changes no markup at all. `Page` does not forward
+   * `className`, so there is no third option.
+   *
+   * THE CLEARANCE IS MEASURED, AND IT NEVER BECOMES REACT STATE
+   * A pinned bar covers the top of whatever a jump lands on, and its height is
+   * not a constant: the blurb wraps at narrow widths and the actions wrap below
+   * the title. So it is measured and written to a CSS custom property — a style
+   * write, touching no vdom. That is not a micro-optimisation: `Page` re-measures
+   * its own header actions in an effect and `setState`s from it, so a component
+   * above `Page` that re-renders whenever the header resizes is the nested-update
+   * loop that has already broken this screen once (see the frame-loop rule in
+   * this file's header).
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    document.body.classList.add(PINNED_CLASS);
+    const header = document.querySelector<HTMLElement>(
+      ".Polaris-Page > .Polaris-Box",
+    );
+    const apply = () => {
+      const clearance =
+        ADMIN_TOP_BAR + Math.round(header!.getBoundingClientRect().height) + 16;
+      root.style.setProperty("--home-jump-clearance", `${clearance}px`);
+    };
+    let observer: ResizeObserver | null = null;
+    if (header) {
+      apply();
+      observer = new ResizeObserver(apply);
+      observer.observe(header);
+    }
+    return () => {
+      observer?.disconnect();
+      document.body.classList.remove(PINNED_CLASS);
+      root.style.removeProperty("--home-jump-clearance");
+    };
+  }, []);
 
   /* --- Point-and-edit ---------------------------------------------------- */
   /**
@@ -1067,7 +1122,9 @@ export function HomeSectionsEditor({
             <div
               id={`home-section-${section.id}`}
               data-home-section={section.id}
-              style={{ scrollMarginTop: JUMP_CLEARANCE }}
+              style={{
+                scrollMarginTop: `var(--home-jump-clearance, ${JUMP_CLEARANCE}px)`,
+              }}
             >
               <Card>
                 <BlockStack gap="400">

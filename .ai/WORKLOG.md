@@ -6697,3 +6697,41 @@ is served to the suite instead of its own build — at one point THREE
 `next-server` processes shared that port, so requests hit different builds at
 random. Kill every server and re-seed before trusting a run.
 
+## 2026-08-10 — the Home page header is pinned
+
+**Branch:** `claude/chrome-promo-autoplay-db5cc2`
+
+Charles asked for the bar carrying the screen title and the Save button to stay
+at the top of the viewport, so he can save from anywhere on the page.
+
+Done as CSS on the header the screen already has (`home-editor.css`), not as a
+second Save button — this screen's standing rule is that Save lives in one place
+so two buttons never mean the same thing. The screen is ~27,000px tall, so
+"scroll back to the top to save" was the actual cost.
+
+Two things it turned out to need:
+
+- **`position: sticky !important`.** Polaris' `Box` writes `position: relative`
+  as an INLINE style on the header wrapper, and no selector out-scores an inline
+  declaration. `top`, `z-index` and `background` are not set inline and win
+  normally. Measured before assuming: the rule applied but lost, which read as
+  "sticky doesn't work here".
+- **The jump clearance is now two bars, and it is measured.** Sections carry
+  `scroll-margin-top` so a jump does not land under the fixed 56px top bar; the
+  pinned header adds its own height, which is not a constant (the blurb wraps,
+  the actions wrap). It is measured with a ResizeObserver and written to a CSS
+  custom property **on the element** — never into React state, because `Page`
+  re-measures its header actions in an effect and `setState`s from it, and a
+  component above `Page` re-rendering on every resize is exactly the
+  nested-update storm that killed this screen once before.
+
+Verified at 1280 and 820: header parks at y=56 while scrolled 12,000px down with
+Save on screen, and a jump lands the section 16px below the pinned bar at both
+widths.
+
+**Also:** a full-suite failure turned out to be live experimentation on the
+shared local database — `home.promo.line_2` and `cycle_ms` had been saved
+through the admin on the preview server, so `/shop` legitimately drew two
+slogan images (the rotator's wrap clone) and a strict-mode locator failed.
+Removed the two rows; the suite's contract is that the local DB sits at the
+design defaults.
