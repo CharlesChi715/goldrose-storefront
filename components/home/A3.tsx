@@ -3,7 +3,7 @@
  * ROLE OF THIS FILE
  * Module A-3 (Figma node 2380:422) of the simplified homepage frame: the two
  * Ready-to-Ship rows. Coordinates/colors/fonts are verbatim Figma REST values
- * on the 430px stage; y-range 1405–1732.
+ * on the 430px stage; y-range 1422–1749.
  *
  * 2026-08-04 sync: the band still carries the design's "New Arrivals and Ready
  * to Ship" name but the New Arrivals half — hero image, copy card, the two
@@ -14,9 +14,13 @@
  * "—   ✿   —" ornament, the heading and all four benefit tiles are deleted in
  * the new frame, taking the band 463px → 327px. That removed this file's
  * second named band (PROMISE), so only READY-TO-SHIP remains, and the strip's
- * four editable promise fields left the admin registry with it. The 136px is
- * given back to the stage by `band.trim` in lib/home-content/layout.ts rather
- * than by rewriting every later band's coordinates.
+ * four editable promise fields left the admin registry with it.
+ *
+ * 2026-08-10 sync: the frame has now re-stacked around that deletion, so the
+ * band sits at its own y (1422) and `band.trim` — which existed only to hold
+ * the stage together while the design and the repo disagreed — is gone. The
+ * heading also took the typography pass (24 → 32), and the two rows' titles
+ * went 13 → 16 at their own, slightly different, y offsets.
  */
 
 import Link from "next/link";
@@ -30,8 +34,8 @@ import type { HomeText } from "@/lib/home-content/registry";
    same crop — the design repeats one product because the real catalogue is
    still OQ-3 placeholder content. */
 const ROWS = [
-  { x: 24, y: 1465, w: 386 },
-  { x: 25, y: 1577, w: 385 },
+  { x: 24, y: 1482, w: 386, titleY: 11, metaY: 49 },
+  { x: 25, y: 1594, w: 385, titleY: 13, metaY: 51 },
 ] as const;
 
 export function A3({
@@ -44,7 +48,7 @@ export function A3({
   return (
     <>
       {/* 2380:422 · module background — decoration, deliberately unnamed */}
-      <div style={{ ...abs(0, 1405, 430, 327), background: "#FFF6EC" }} />
+      <div style={{ ...abs(0, 1422, 430, 327), background: "#FFF6EC" }} />
 
       {/* 2380:423 · Ready to Ship heading */}
       <div
@@ -52,8 +56,8 @@ export function A3({
         data-field="ready.title"
         className={playfair.className}
         style={{
-          ...abs(26, 1423, 230),
-          fontSize: 24,
+          ...abs(26, 1440, 230),
+          fontSize: 32,
           lineHeight: "30px",
           color: "#3B2F2F",
           fontWeight: 500,
@@ -67,7 +71,7 @@ export function A3({
         data-el="HOME-READY-TO-SHIP-VIEW-ALL-LINK"
         data-field="ready.view_all_href"
         href={c.view_all_href}
-        style={{ ...abs(350, 1433, 80, 20), display: "block" }}
+        style={{ ...abs(350, 1450, 80, 20), display: "block" }}
       >
         <img
           data-field="ready.view_all_label"
@@ -133,8 +137,8 @@ export function A3({
             data-field="ready.card_title"
             className={playfair.className}
             style={{
-              ...abs(186, 12.5, 180),
-              fontSize: 13,
+              ...abs(186, row.titleY, 180),
+              fontSize: 16,
               lineHeight: "19px",
               color: "#3B2F2F",
               fontWeight: 500,
@@ -152,7 +156,7 @@ export function A3({
             width={180}
             height={36}
             style={{
-              ...abs(186, 50.5, 180, 36),
+              ...abs(186, row.metaY, 180, 36),
               display: "block",
               objectFit: "none",
               objectPosition: "left center",

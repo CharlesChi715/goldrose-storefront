@@ -28,11 +28,10 @@ test("a band's window is its live rectangle, not its imported one", () => {
   const craft = homePreviewTarget("craft", { hero: false }, shift);
   const band = findSection("craft")?.band;
   assert.ok(band && craft);
-  // TWO things move Craft up, and a window that knew about only one would open
-  // 136px into the wrong band: hiding A-1 takes its 732, and A-3's permanent
-  // 136px trim comes off whether or not anything is hidden. The imported y is
-  // 3133; the live one is 2265.
-  assert.equal(craft.y, band.y - 732 - 136);
+  // The window must open at the band's LIVE rectangle, not its imported one:
+  // hiding A-1 takes its 749px off everything below. The imported y is 3014;
+  // the live one is 2265.
+  assert.equal(craft.y, band.y - 749);
   assert.equal(craft.y, 2265);
   assert.equal(craft.h, band.h);
   assert.equal(craft.onPage, true);

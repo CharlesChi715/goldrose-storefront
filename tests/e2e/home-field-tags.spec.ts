@@ -76,6 +76,7 @@ const NO_ELEMENT = new Map<string, string>([
   ["craft.step_1_photo_alt", "alt text — see hero.photo_1_alt"],
   ["craft.step_2_photo_alt", "alt text — see hero.photo_1_alt"],
   ["craft.step_3_photo_alt", "alt text — see hero.photo_1_alt"],
+  ["craft.step_4_photo_alt", "alt text — see hero.photo_1_alt"],
   ["story.story_photo_alt", "alt text — see hero.photo_1_alt"],
   ["story.gift_photo_alt", "alt text — see hero.photo_1_alt"],
 ]);

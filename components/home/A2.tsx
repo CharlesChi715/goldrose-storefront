@@ -6,9 +6,9 @@
  * product cards. Coordinates/colors/fonts are verbatim
  * from the Figma REST API data; product cards and "View all" link to /shop.
  *
- * 2026-08-04 sync: the band moved 843 → 764 as the page re-stacked around
- * the deleted modules. Its own layout is unchanged except that the design
- * deleted the four carousel dots under the rail — see BestSellersRail.tsx.
+ * 2026-08-10 sync: the band moved 764 → 781 (A-1 grew) and took the page-wide
+ * typography pass — section title 34 → 36, subtitle 12 → 13 and four pixels
+ * lower, "Best Sellers" 24 → 32. Its structure is otherwise unchanged.
  */
 
 import Link from "next/link";
@@ -29,11 +29,11 @@ export function A2({
   frames?: HomeFrames;
 }) {
   return (
-    // 2380:399 module frame — children positioned relative to (0, 764)
+    // 2380:399 module frame — children positioned relative to (0, 781)
     <div
       data-el="HOME-FEATURED-SECTION"
       style={{
-        ...abs(0, 764, 430, 641),
+        ...abs(0, 781, 430, 641),
         background: "#FFF6EC",
         overflow: "hidden",
       }}
@@ -60,7 +60,7 @@ export function A2({
         className={playfair.className}
         style={{
           ...abs(38, 62, 354),
-          fontSize: 34,
+          fontSize: 36,
           lineHeight: "42px",
           fontWeight: 500,
           color: "#3B2F2F",
@@ -77,8 +77,8 @@ export function A2({
         data-field="featured.subtitle"
         className={notoSC.className}
         style={{
-          ...abs(54, 112, 322),
-          fontSize: 12,
+          ...abs(54, 116, 322),
+          fontSize: 13,
           lineHeight: "18px",
           fontWeight: 400,
           color: "#3B2F2F",
@@ -96,7 +96,7 @@ export function A2({
         className={playfair.className}
         style={{
           ...abs(20, 176, 220),
-          fontSize: 24,
+          fontSize: 32,
           lineHeight: "30px",
           fontWeight: 500,
           color: "#3B2F2F",

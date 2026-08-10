@@ -12,7 +12,9 @@
  * The 2026-08-04 sync cut the page from 8673px to 5193px: the design deleted
  * modules A-4 (Real Rose Story + MORI entry), A-7 (MORI Gift Finder), A-8
  * (Personalization) and A-10 (Corporate Partnerships) at source, and
- * re-stacked what remained. Band offsets below are the frame's own.
+ * re-stacked what remained. The 2026-08-10 sync took it to 5074: a page-wide
+ * typography pass, seven further content deletions and a taller hero. Band
+ * offsets below are the frame's own.
  */
 
 import type { Metadata } from "next";
@@ -115,7 +117,7 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* 2380:370 is 5193 tall: A-11 ends at 5134 and the bottom nav fills
+      {/* 2380:370 is 5074 tall: A-11 ends at 5015 and the bottom nav fills
           the last 59px (it renders as a fixed overlay, outside this stage).
           Hiding a section in the admin shrinks the stage by that band's
           height — see lib/home-content/layout.ts. */}
@@ -135,8 +137,8 @@ export default async function HomePage() {
           isDefault={promo.isDefault}
           variant="brown"
         />
-        {/* Band offsets are 2380:370's own: A-1 @32, A-2 @764, A-3 @1405,
-          A-5 @1868, A-6 @2344, A-9 @3133, A-11 @4124. HomeBand is a no-op
+        {/* Band offsets are 2380:370's own: A-1 @32, A-2 @781, A-3 @1422,
+          A-5 @1749, A-6 @2225, A-9 @3014, A-11 @4005. HomeBand is a no-op
           while every section is visible, which is what keeps the untouched
           page byte-identical to the import. */}
         {/* The band CONTENT comes from components/home/bands.tsx so that the
@@ -167,7 +169,7 @@ export default async function HomePage() {
           header (chrome, not part of any module) must paint above it. */}
         <HomeHeader />
       </ScaleFrame>
-      {/* Outside the fixed 5193 canvas on purpose — see SiteLegalFooter. */}
+      {/* Outside the fixed 5074 canvas on purpose — see SiteLegalFooter. */}
       <SiteLegalFooter />
     </>
   );

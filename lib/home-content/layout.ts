@@ -2,36 +2,35 @@
  * ROLE OF THIS FILE
  * Re-stacking maths for the homepage when a section is hidden.
  *
- * The homepage is one fixed 430×5193 stage: every element is absolutely
+ * The homepage is one fixed 430×5074 stage: every element is absolutely
  * positioned at its Figma coordinate, so `display: none` on a band would leave
  * a hole rather than closing the gap. The seven A-module bands do tile the
- * stage contiguously though (32 → 764 → 1405 → 1868 → 2344 → 3133 → 4124 →
- * 5134, then 59px of bottom nav), so hiding one is exactly: drop it, slide
+ * stage contiguously though (32 → 781 → 1422 → 1749 → 2225 → 3014 → 4005 →
+ * 5015, then 59px of bottom nav), so hiding one is exactly: drop it, slide
  * every later band up by its height, and shrink the stage by the same amount.
  *
  * Bands are moved with a `translateY` wrapper rather than by rewriting
  * coordinates (see components/home/HomeBand.tsx), which keeps every imported
  * pixel value untouched.
  *
- * The same arithmetic absorbs a **trim** — height the design team deleted from
- * inside a band, as happened to A-3's Real Rose Promise strip on 2026-08-07.
- * A trim is permanent rather than owner-controlled, so it applies whether or
- * not anything is hidden; the practical effect is that the bands below an
- * in-band deletion slide up without a single one of their imported
- * coordinates changing.
+ * There is no `trim` any more. It existed for one delivery (A-3's Real Rose
+ * Promise strip, 2026-08-07) because the frame had NOT yet re-stacked around
+ * the deletion, so the repo had to hold coordinates the design no longer used.
+ * The 2026-08-10 sync re-imported every band at its own new y, so the design
+ * and the repo agree again and the compensation is gone.
  */
 
 import { HOME_SECTIONS, type HomeSectionId } from "./registry.ts";
 
-/** Total stage height of frame 2380:370: 5134px of bands + the 59px nav. */
-export const HOME_FRAME_HEIGHT = 5193;
+/** Total stage height of frame 2380:370: 5015px of bands + the 59px nav. */
+export const HOME_FRAME_HEIGHT = 5074;
 
 /** The seven hideable module bands, in page order, with their design geometry. */
 const BANDS = HOME_SECTIONS.filter(
   (
     section,
   ): section is typeof section & {
-    band: { y: number; h: number; trim?: number };
+    band: { y: number; h: number };
   } => section.band !== null,
 );
 
@@ -59,8 +58,6 @@ export function homeLayout(
   let removed = 0;
   for (const section of BANDS) {
     if (visible[section.id] === false) {
-      // A hidden band takes its post-trim height with it; its trim is added
-      // below either way, so the two together remove the full drawn height.
       removed += section.band.h;
     } else {
       // `-removed` would be -0 while nothing is hidden; keep it a plain 0 so
@@ -68,10 +65,6 @@ export function homeLayout(
       // printed.
       shift[section.id] = removed === 0 ? 0 : -removed;
     }
-    // Trim is design height deleted from inside the band, so it comes off
-    // *after* this band is placed — the band itself does not move, everything
-    // below it does.
-    removed += section.band.trim ?? 0;
   }
 
   return { shift, frameHeight: HOME_FRAME_HEIGHT - removed };

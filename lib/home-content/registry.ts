@@ -111,21 +111,13 @@ export type HomeSection = {
   readonly blurb: string;
   readonly blurbZh: string;
   /**
-   * The band's y-offset and height on the 430×5193 stage. `null` means the
+   * The band's y-offset and height on the 430×5074 stage. `null` means the
    * section is page chrome rather than a band, so it cannot be hidden — see
    * lib/home-content/layout.ts.
-   *
-   * `trim` is height the design team has since deleted from *inside* the band
-   * while the elements below it keep their original imported coordinates. The
-   * layout treats it as permanently removed: later bands slide up by it and
-   * the stage shrinks by it, exactly as for a hidden band, so an in-band
-   * deletion never requires rewriting the rest of the page's pixel values.
-   * `h` is the band's height after the trim.
    */
   readonly band: {
     readonly y: number;
     readonly h: number;
-    readonly trim?: number;
   } | null;
   readonly fields: readonly HomeField[];
 };
@@ -252,9 +244,9 @@ export const HOME_SECTIONS = [
     title: "Hero",
     titleZh: "首屏",
     blurb:
-      "The gift-box photo, the headline block under it, the main shop button and the two benefit tiles.",
-    blurbZh: "礼盒照片、下方标题区、主购物按钮，以及两个卖点小卡片。",
-    band: { y: 32, h: 732 },
+      "The gift-box photo and the headline block under it, closing on the main shop button.",
+    blurbZh: "礼盒照片与下方标题区，最后是主购物按钮。",
+    band: { y: 32, h: 749 },
     fields: [
       {
         id: "eyebrow",
@@ -275,7 +267,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Gold-Dipped Roses\nMade from Real Roses",
         lines: 2,
-        max: budget(362, 34),
+        max: budget(362, 36),
         note: "Two lines by design.",
         noteZh: "设计稿为两行。",
       },
@@ -285,7 +277,7 @@ export const HOME_SECTIONS = [
         labelZh: "副标题",
         kind: "text",
         value: "Eternal Beauty, Endless Love",
-        max: budget(294, 16),
+        max: budget(332, 24),
       },
       {
         id: "body",
@@ -295,7 +287,7 @@ export const HOME_SECTIONS = [
         value:
           "Discover real preserved rose gifts for anniversaries, birthdays, weddings and meaningful moments.",
         lines: 2,
-        max: budget(306, 11),
+        max: budget(306, 13),
         note: "Wraps inside a 306px box — this one can breathe.",
         noteZh: "在 306px 宽度内自动换行——这一处可以稍长。",
       },
@@ -317,12 +309,12 @@ export const HOME_SECTIONS = [
         label: "Slide 1 photo",
         labelZh: "第 1 张图片",
         kind: "image",
-        value: "/eldreve/screens/1523-1675.png",
-        box: { w: 430, h: 317 },
+        value: "/eldreve/screens/2380-386.png",
+        box: { w: 430, h: 405 },
         fit: "stretch",
-        note: "The biggest picture on the site — the first thing a visitor sees. It fills the full width, so use a wide 430 × 317 photo (or the same shape at a larger size); a differently shaped photo is squashed rather than cropped.",
+        note: "The biggest picture on the site — the first thing a visitor sees. It fills the full width, so use a wide 430 × 405 photo (or the same shape at a larger size); a differently shaped photo is squashed rather than cropped.",
         noteZh:
-          "全站最大的一张图，也是访客看到的第一眼。图片满宽显示，请使用 430 × 317 的横图（或同比例的更大尺寸）；比例不同的图片会被压扁而不是裁切。",
+          "全站最大的一张图，也是访客看到的第一眼。图片满宽显示，请使用 430 × 405 的横图（或同比例的更大尺寸）；比例不同的图片会被压扁而不是裁切。",
       },
       {
         id: "photo_1_alt",
@@ -340,8 +332,8 @@ export const HOME_SECTIONS = [
         label: "Slide 2 photo",
         labelZh: "第 2 张图片",
         kind: "image",
-        value: "/eldreve/screens/1523-1675.png",
-        box: { w: 430, h: 317 },
+        value: "/eldreve/screens/2380-386.png",
+        box: { w: 430, h: 405 },
         fit: "stretch",
         note: "The design ships ONE hero photo against four dots, so slides 2–4 start out as repeats of slide 1. Upload a different photo here and the slideshow becomes a real one.",
         noteZh:
@@ -363,8 +355,8 @@ export const HOME_SECTIONS = [
         label: "Slide 3 photo",
         labelZh: "第 3 张图片",
         kind: "image",
-        value: "/eldreve/screens/1523-1675.png",
-        box: { w: 430, h: 317 },
+        value: "/eldreve/screens/2380-386.png",
+        box: { w: 430, h: 405 },
         fit: "stretch",
       },
       {
@@ -383,8 +375,8 @@ export const HOME_SECTIONS = [
         label: "Slide 4 photo",
         labelZh: "第 4 张图片",
         kind: "image",
-        value: "/eldreve/screens/1523-1675.png",
-        box: { w: 430, h: 317 },
+        value: "/eldreve/screens/2380-386.png",
+        box: { w: 430, h: 405 },
         fit: "stretch",
       },
       {
@@ -403,8 +395,10 @@ export const HOME_SECTIONS = [
         label: "Button label",
         labelZh: "按钮文字",
         kind: "text",
-        value: "SHOP GOLD-DIPPED ROSES",
-        max: budget(181, 12, 0.62),
+        // 08-10: the design dropped the all-caps setting with the typography
+        // pass — the button now reads as a sentence at 20px.
+        value: "Shop Gold-Dipped Roses",
+        max: budget(242, 20),
       },
       {
         id: "cta_href",
@@ -415,28 +409,9 @@ export const HOME_SECTIONS = [
         kind: "url",
         value: "/shop",
       },
-      {
-        id: "benefit_1",
-        group: "Benefit tiles",
-        groupZh: "卖点卡片",
-        label: "Tile 1",
-        labelZh: "卡片 1",
-        kind: "multiline",
-        value: "Made from\nReal Roses",
-        lines: 2,
-        max: budget(46, 9),
-      },
-      {
-        id: "benefit_2",
-        group: "Benefit tiles",
-        groupZh: "卖点卡片",
-        label: "Tile 2",
-        labelZh: "卡片 2",
-        kind: "multiline",
-        value: "Gift-Ready\nPackaging",
-        lines: 2,
-        max: budget(44, 9),
-      },
+      /* The two benefit tiles ("Made from Real Roses" / "Gift-Ready
+         Packaging") were deleted at source on 2026-08-10 and their two fields
+         left the registry with them. */
     ],
   },
   {
@@ -448,7 +423,7 @@ export const HOME_SECTIONS = [
       "Section heading plus the Best Sellers rail. The rail's cards are design placeholders until the real catalogue lands (OQ-3).",
     blurbZh:
       "板块标题与畅销榜滑动栏。滑动栏中的卡片在真实商品内容上线前仍为设计占位（OQ-3）。",
-    band: { y: 764, h: 641 },
+    band: { y: 781, h: 641 },
     fields: [
       {
         id: "title",
@@ -456,7 +431,7 @@ export const HOME_SECTIONS = [
         labelZh: "板块标题",
         kind: "text",
         value: "Featured Rose Gifts",
-        max: budget(354, 34),
+        max: budget(354, 36),
       },
       {
         id: "subtitle",
@@ -464,7 +439,7 @@ export const HOME_SECTIONS = [
         labelZh: "板块副标题",
         kind: "text",
         value: "Timeless roses for meaningful moments.",
-        max: budget(322, 12),
+        max: budget(322, 13),
       },
       {
         id: "rail_title",
@@ -472,7 +447,7 @@ export const HOME_SECTIONS = [
         labelZh: "滑动栏标题",
         kind: "text",
         value: "Best Sellers",
-        max: budget(220, 24),
+        max: budget(220, 32),
       },
       {
         id: "view_all_href",
@@ -545,7 +520,7 @@ export const HOME_SECTIONS = [
         labelZh: "金色小字",
         kind: "text",
         value: "Personalization available",
-        max: budget(160, 11),
+        max: budget(183, 14),
       },
       {
         id: "card_1_photo",
@@ -606,7 +581,7 @@ export const HOME_SECTIONS = [
         labelZh: "金色小字",
         kind: "text",
         value: "Gift-ready packaging",
-        max: budget(160, 11),
+        max: budget(160, 13),
       },
       {
         id: "card_2_photo",
@@ -651,7 +626,7 @@ export const HOME_SECTIONS = [
       "两行现货商品。此板块原有的「真玫瑰承诺」四图标条已于 2026-08-07 由设计团队删除，其五个可编辑字段一并移除。",
     // 08-07: the promise strip's 136px left the band; `trim` gives them back to
     // the stage so no later band's imported coordinates have to be rewritten.
-    band: { y: 1405, h: 327, trim: 136 },
+    band: { y: 1422, h: 327 },
     fields: [
       {
         id: "title",
@@ -661,7 +636,7 @@ export const HOME_SECTIONS = [
         labelZh: "板块标题",
         kind: "text",
         value: "Ready to Ship",
-        max: budget(230, 24),
+        max: budget(230, 32),
       },
       {
         id: "view_all_href",
@@ -691,7 +666,7 @@ export const HOME_SECTIONS = [
         labelZh: "商品行标题",
         kind: "text",
         value: "Mini Rose Dome + Light",
-        max: budget(180, 13),
+        max: budget(180, 16),
         note: "The design repeats one product across both rows.",
         noteZh: "设计稿两行使用同一个商品。",
       },
@@ -750,7 +725,7 @@ export const HOME_SECTIONS = [
       "Occasion chips and the sliding occasion-card rail. Per-occasion filtering does not exist yet, so every chip lands on the full shop.",
     blurbZh:
       "场合筛选标签与滑动卡片栏。目前尚无按场合筛选功能，所有标签均指向完整商店页。",
-    band: { y: 1868, h: 476 },
+    band: { y: 1749, h: 476 },
     fields: [
       {
         id: "title",
@@ -758,15 +733,17 @@ export const HOME_SECTIONS = [
         labelZh: "板块标题",
         kind: "text",
         value: "Shop by Occasion",
-        max: budget(382, 30),
+        max: budget(382, 36),
       },
       {
         id: "intro",
         label: "Section intro",
         labelZh: "板块引导语",
         kind: "text",
-        value: "Find an ELDREVE for every meaningful moment.",
-        max: budget(326, 10),
+        // 08-10 (owner): match the frame, as for craft.workshop_title — the
+        // same ruling, so the two headings on this page cannot disagree.
+        value: "Find a GoldRose for every meaningful moment.",
+        max: budget(326, 13),
       },
       {
         id: "chips_href",
@@ -787,7 +764,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 1",
         kind: "text",
         value: "Valentine's Day",
-        max: budget(64, 9),
+        max: budget(93, 13),
       },
       {
         id: "chip_2",
@@ -797,7 +774,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 2",
         kind: "text",
         value: "Mother's Day",
-        max: budget(55, 9),
+        max: budget(79, 13),
       },
       {
         id: "chip_3",
@@ -807,7 +784,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 3",
         kind: "text",
         value: "Birthday",
-        max: budget(37, 9),
+        max: budget(53, 13),
       },
       {
         id: "chip_4",
@@ -817,7 +794,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 4",
         kind: "text",
         value: "Christmas",
-        max: budget(43, 9),
+        max: budget(62, 13),
       },
       {
         id: "chip_5",
@@ -827,7 +804,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 5",
         kind: "text",
         value: "Anniversary",
-        max: budget(50, 9),
+        max: budget(72, 13),
       },
       {
         id: "card_href",
@@ -847,7 +824,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Valentine's Day\nGifts",
         lines: 2,
-        max: budget(148, 22),
+        max: budget(152, 20),
       },
       {
         id: "card_1_copy",
@@ -857,7 +834,7 @@ export const HOME_SECTIONS = [
         labelZh: "卡片 1 文案",
         kind: "text",
         value: "For the one who means everything.",
-        max: budget(122, 8),
+        max: budget(122, 13),
       },
       {
         id: "card_1_photo",
@@ -891,7 +868,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Valentine's Day\nGifts",
         lines: 2,
-        max: budget(148, 22),
+        max: budget(152, 20),
         note: "The design repeats card 1's title here — safe to make it distinct.",
         noteZh: "设计稿此处与卡片 1 标题重复——可以改成不同文案。",
       },
@@ -903,7 +880,7 @@ export const HOME_SECTIONS = [
         labelZh: "卡片 2 文案",
         kind: "text",
         value: "Romantic gifts to make her feel cherished.",
-        max: budget(152, 8),
+        max: budget(152, 13),
       },
       {
         id: "card_2_photo",
@@ -937,7 +914,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Anniversary Gifts\nfor Wife",
         lines: 2,
-        max: budget(148, 22),
+        max: budget(152, 20),
       },
       {
         id: "card_3_copy",
@@ -947,7 +924,7 @@ export const HOME_SECTIONS = [
         labelZh: "卡片 3 文案",
         kind: "text",
         value: "Celebrate your love with a timeless gift.",
-        max: budget(148, 9),
+        max: budget(148, 13),
       },
       {
         id: "card_3_photo",
@@ -994,7 +971,7 @@ export const HOME_SECTIONS = [
       "Recipient chips, the recipient-card rail, and the “Real Gifts, Real Moments” review strip. One Figma band, so they show and hide together.",
     blurbZh:
       "收礼人标签、卡片滑动栏，以及“Real Gifts, Real Moments”评价条。三者属于同一个设计板块，一起显示或隐藏。",
-    band: { y: 2344, h: 789 },
+    band: { y: 2225, h: 789 },
     fields: [
       {
         id: "title",
@@ -1002,7 +979,7 @@ export const HOME_SECTIONS = [
         labelZh: "板块标题",
         kind: "text",
         value: "Shop by Recipient",
-        max: budget(382, 30),
+        max: budget(382, 36),
       },
       {
         id: "intro",
@@ -1010,7 +987,7 @@ export const HOME_SECTIONS = [
         labelZh: "板块引导语",
         kind: "text",
         value: "Choose a rose gift for someone special.",
-        max: budget(326, 10),
+        max: budget(326, 13),
       },
       {
         id: "chip_1",
@@ -1020,7 +997,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 1（选中态）",
         kind: "text",
         value: "Wife",
-        max: budget(19, 9),
+        max: budget(27, 13),
         note: "Chips are decoration in this design — they carry no link.",
         noteZh: "本设计中的标签仅为装饰，没有链接。",
       },
@@ -1032,7 +1009,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 2",
         kind: "text",
         value: "Girlfriend",
-        max: budget(40, 9),
+        max: budget(58, 13),
       },
       {
         id: "chip_3",
@@ -1042,7 +1019,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 3",
         kind: "text",
         value: "Mom",
-        max: budget(22, 9),
+        max: budget(31, 13),
       },
       {
         id: "chip_4",
@@ -1052,7 +1029,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 4",
         kind: "text",
         value: "Friends",
-        max: budget(31, 9),
+        max: budget(45, 13),
       },
       {
         id: "chip_5",
@@ -1062,7 +1039,7 @@ export const HOME_SECTIONS = [
         labelZh: "标签 5",
         kind: "text",
         value: "Couples",
-        max: budget(34, 9),
+        max: budget(50, 13),
       },
       {
         id: "card_href",
@@ -1082,7 +1059,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Gifts for Wife",
         lines: 2,
-        max: budget(148, 22),
+        max: budget(152, 20),
       },
       {
         id: "card_1_copy",
@@ -1092,7 +1069,7 @@ export const HOME_SECTIONS = [
         labelZh: "卡片 1 文案",
         kind: "text",
         value: "For the one who means everything.",
-        max: budget(122, 8),
+        max: budget(122, 13),
       },
       {
         id: "card_2_title",
@@ -1103,7 +1080,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Thoughtful Gifts\nShe’ll Love",
         lines: 2,
-        max: budget(148, 22),
+        max: budget(152, 20),
       },
       {
         id: "card_2_copy",
@@ -1113,7 +1090,7 @@ export const HOME_SECTIONS = [
         labelZh: "卡片 2 文案",
         kind: "text",
         value: "Romantic gifts to make her feel cherished.",
-        max: budget(152, 8),
+        max: budget(152, 13),
       },
       {
         id: "card_3_title",
@@ -1124,7 +1101,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Anniversary Gifts\nfor Wife",
         lines: 2,
-        max: budget(148, 22),
+        max: budget(152, 20),
       },
       {
         id: "card_3_copy",
@@ -1134,7 +1111,7 @@ export const HOME_SECTIONS = [
         labelZh: "卡片 3 文案",
         kind: "text",
         value: "Celebrate your love with a timeless gift.",
-        max: budget(148, 9),
+        max: budget(148, 13),
       },
       {
         id: "card_1_photo",
@@ -1264,16 +1241,8 @@ export const HOME_SECTIONS = [
         kind: "url",
         value: "/shop",
       },
-      {
-        id: "reviews_verified_label",
-        group: "Reviews strip",
-        groupZh: "评价条",
-        label: "Trust label on every card",
-        labelZh: "每张卡片的信任标签",
-        kind: "text",
-        value: "Verified Purchase",
-        max: budget(57, 7, 0.55),
-      },
+      /* The "Verified Purchase" row — badge glyph and label — was deleted at
+         source on 2026-08-10; the stars moved down into the space it left. */
       {
         id: "reviews_stars",
         group: "Reviews strip",
@@ -1295,7 +1264,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "“The most beautiful gift I’ve ever received.”",
         lines: 2,
-        max: budget(106, 8.5),
+        max: budget(106, 13),
         note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars. Real reviews live in Products → Reviews.",
         noteZh:
           "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。真实评价见「产品 → 评价」。",
@@ -1336,7 +1305,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "“My wife was speechless on our anniversary.”",
         lines: 2,
-        max: budget(106, 8.5),
+        max: budget(106, 13),
         note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars.",
         noteZh:
           "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
@@ -1372,7 +1341,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "“Elegant and meaningful for our client.”",
         lines: 2,
-        max: budget(106, 8.5),
+        max: budget(106, 13),
         note: "⚠️ Not a real customer review — a placeholder from the design. Two lines fit; a third runs into the stars.",
         noteZh:
           "⚠️ 并非真实顾客评价，而是设计稿占位内容。最多两行，第三行会压到星标。",
@@ -1409,7 +1378,7 @@ export const HOME_SECTIONS = [
     blurb:
       "The four craft steps, the workshop gallery, and the patents and certificates panel.",
     blurbZh: "四个工艺步骤、工坊图集，以及专利与证书面板。",
-    band: { y: 3133, h: 991 },
+    band: { y: 3014, h: 991 },
     fields: [
       {
         id: "eyebrow",
@@ -1587,11 +1556,25 @@ export const HOME_SECTIONS = [
         groupZh: "工艺步骤",
         label: "Step 04 photo",
         labelZh: "步骤 04 图片",
-        kind: "artwork",
-        value: "Part of the design's own artwork",
-        note: "Unlike steps 01–03, step 04's picture is not a photo — the whole tile is one image exported from Figma (165-155.svg), so it cannot be swapped here. Ask the design team.",
+        kind: "image",
+        // 08-10: this tile stopped being a flattened Figma export and became
+        // the same 430×912 source photo as steps 01–03, so it is replaceable
+        // for the first time.
+        value: "/eldreve/screens/2380-678.png",
+        box: { w: 90, h: 96 },
+        fit: "window",
+        note: "A small 90 × 96 window. The design shows one corner of a full-page picture here; your own photo is cropped to fill the window instead, so any shape works.",
         noteZh:
-          "与步骤 01–03 不同，步骤 04 的图片并非照片——整块由 Figma 导出为一张图（165-155.svg），因此无法在此更换，需联系设计团队。",
+          "90 × 96 的小窗口。设计稿在此显示整页大图的一角；换成你自己的图片后会裁切填满窗口，任何比例都可用。",
+      },
+      {
+        id: "step_4_photo_alt",
+        group: "Craft steps",
+        groupZh: "工艺步骤",
+        label: "Step 04 photo description",
+        labelZh: "步骤 04 图片描述",
+        kind: "text",
+        value: "Gold rose protected and packaged for delivery",
       },
       {
         id: "step_4_copy",
@@ -1620,10 +1603,14 @@ export const HOME_SECTIONS = [
         label: "Button label",
         labelZh: "按钮文字",
         kind: "artwork",
-        value: "EXPLORE OUR CRAFT →",
-        note: "The whole button — background, border and label — is one Figma render (165-180.svg). Only its link is editable.",
-        noteZh:
-          "整个按钮（底色、描边、文字）是一张设计稿图片（165-180.svg），仅链接可编辑。",
+        // 08-10: the frame rebuilt the button out of a real box and a real
+        // text node, so the BOX is ours now (that is what fixed its corners
+        // and its fill). The label itself stays the design's own render: it is
+        // letter-spaced Goudy ending in a → that falls back to a system glyph,
+        // and a live rebuild missed the design by several pixels.
+        value: "Explore  Our  Craft  →",
+        note: "The label is the design's own render (2380-683.png). Only the button's link is editable here.",
+        noteZh: "按钮文字为设计稿原图（2380-683.png），此处仅可编辑链接。",
       },
       {
         id: "workshop_title",
@@ -1632,21 +1619,13 @@ export const HOME_SECTIONS = [
         label: "Gallery title",
         labelZh: "图集标题",
         kind: "text",
-        value: "Inside the ELDREVE Workshop",
-        max: budget(390, 25),
+        // 08-10 (owner): match the frame. The design file still carries the
+        // pre-rename name here, and the owner ruled the frame wins over the
+        // 08-05 ELDREVE rename for this heading.
+        value: "Inside the GoldRose Workshop",
+        max: budget(390, 36),
       },
-      {
-        id: "workshop_copy",
-        group: "Workshop gallery",
-        groupZh: "工坊图集",
-        label: "Gallery copy",
-        labelZh: "图集文案",
-        kind: "multiline",
-        value:
-          "See where real roses are prepared, finished,\ninspected and packed for delivery.",
-        lines: 2,
-        max: budget(330, 9),
-      },
+      /* The gallery's two-line caption was deleted at source on 2026-08-10. */
       {
         id: "verified_title",
         group: "Patents & certificates",
@@ -1655,7 +1634,7 @@ export const HOME_SECTIONS = [
         labelZh: "面板标题",
         kind: "text",
         value: "—  VERIFIED QUALITY  —",
-        max: budget(240, 20),
+        max: budget(313, 24),
       },
       {
         id: "cert_1_title",
@@ -1665,17 +1644,7 @@ export const HOME_SECTIONS = [
         labelZh: "证书 1 名称",
         kind: "text",
         value: "US Patent",
-        max: budget(69, 6.5),
-      },
-      {
-        id: "cert_1_number",
-        group: "Patents & certificates",
-        groupZh: "专利与证书",
-        label: "Certificate 1 number",
-        labelZh: "证书 1 编号",
-        kind: "text",
-        value: "US 11,324,751 B2",
-        max: budget(69, 5),
+        max: budget(69, 13),
       },
       {
         id: "cert_2_title",
@@ -1685,17 +1654,7 @@ export const HOME_SECTIONS = [
         labelZh: "证书 2 名称",
         kind: "text",
         value: "European Patent",
-        max: budget(69, 6.5),
-      },
-      {
-        id: "cert_2_number",
-        group: "Patents & certificates",
-        groupZh: "专利与证书",
-        label: "Certificate 2 number",
-        labelZh: "证书 2 编号",
-        kind: "text",
-        value: "EP 3 982 104 B1",
-        max: budget(69, 5),
+        max: budget(69, 13),
       },
       {
         id: "cert_3_title",
@@ -1705,17 +1664,7 @@ export const HOME_SECTIONS = [
         labelZh: "证书 3 名称",
         kind: "text",
         value: "China Patent",
-        max: budget(69, 6.5),
-      },
-      {
-        id: "cert_3_number",
-        group: "Patents & certificates",
-        groupZh: "专利与证书",
-        label: "Certificate 3 number",
-        labelZh: "证书 3 编号",
-        kind: "text",
-        value: "ZL 2021 2 1234567.8",
-        max: budget(69, 5),
+        max: budget(69, 13),
       },
       {
         id: "cert_4_title",
@@ -1725,17 +1674,7 @@ export const HOME_SECTIONS = [
         labelZh: "证书 4 名称",
         kind: "text",
         value: "ISO 9001:2015",
-        max: budget(69, 6.5),
-      },
-      {
-        id: "cert_4_number",
-        group: "Patents & certificates",
-        groupZh: "专利与证书",
-        label: "Certificate 4 number",
-        labelZh: "证书 4 编号",
-        kind: "text",
-        value: "Quality Certified",
-        max: budget(69, 5),
+        max: budget(69, 13),
       },
     ],
   },
@@ -1748,7 +1687,7 @@ export const HOME_SECTIONS = [
       "The whole closing band: brand story, four FAQ rows, the gift card, the newsletter strip and the footer link cloud.",
     blurbZh:
       "页面结尾的整个板块：品牌故事、四条常见问题、礼物卡、订阅条，以及页脚链接组。",
-    band: { y: 4124, h: 1010 },
+    band: { y: 4005, h: 1010 },
     fields: [
       {
         id: "story_title",
@@ -1759,22 +1698,10 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "A Real Rose Made\nto Outlive the Moment",
         lines: 2,
-        max: budget(190, 18),
+        max: budget(195, 32),
       },
-      {
-        id: "story_body",
-        group: "Brand story",
-        groupZh: "品牌故事",
-        label: "Story paragraph",
-        labelZh: "故事正文",
-        kind: "multiline",
-        value:
-          "At ELDREVE, we believe the most meaningful\ngifts are more than beautiful — they’re personal.\nEach real rose is carefully preserved in 24K gold,\ncapturing not just a flower, but a memory,\na milestone, a feeling.\n\nWe don’t just preserve roses.\nWe preserve what matters.",
-        lines: 8,
-        max: budget(176, 8),
-        note: "Line breaks are the design's own — keep it to eight lines so it clears the CTA below.",
-        noteZh: "换行位置来自设计稿——请保持八行，以免压到下方按钮。",
-      },
+      /* The eight-line story paragraph was deleted at source on 2026-08-10 —
+         the title now runs straight into the pull quote. */
       {
         id: "story_quote",
         group: "Brand story",
@@ -1784,7 +1711,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "A flower may fade.\nThe story does not have to.",
         lines: 2,
-        max: budget(170, 11.2),
+        max: budget(170, 13),
       },
       {
         id: "story_cta_label",
@@ -1794,7 +1721,7 @@ export const HOME_SECTIONS = [
         labelZh: "按钮文字",
         kind: "text",
         value: "READ OUR STORY",
-        max: budget(110, 7.9, 0.62),
+        max: budget(139, 13, 0.62),
       },
       {
         id: "story_cta_href",
@@ -1836,7 +1763,7 @@ export const HOME_SECTIONS = [
         labelZh: "常见问题标题",
         kind: "text",
         value: "Frequently Asked Questions",
-        max: budget(360, 24),
+        max: budget(411, 32),
       },
       {
         id: "faq_1",
@@ -1846,7 +1773,7 @@ export const HOME_SECTIONS = [
         labelZh: "问题 1",
         kind: "text",
         value: "Are ELDREVE gifts made from real roses?",
-        max: budget(315, 10.5),
+        max: budget(315, 13),
       },
       {
         id: "faq_2",
@@ -1856,7 +1783,7 @@ export const HOME_SECTIONS = [
         labelZh: "问题 2",
         kind: "text",
         value: "Can I personalize a gift?",
-        max: budget(315, 10.5),
+        max: budget(315, 13),
       },
       {
         id: "faq_3",
@@ -1866,7 +1793,7 @@ export const HOME_SECTIONS = [
         labelZh: "问题 3",
         kind: "text",
         value: "How are gifts protected during shipping?",
-        max: budget(315, 10.5),
+        max: budget(315, 13),
       },
       {
         id: "faq_4",
@@ -1876,7 +1803,7 @@ export const HOME_SECTIONS = [
         labelZh: "问题 4",
         kind: "text",
         value: "Do you accept corporate and bulk orders?",
-        max: budget(315, 10.5),
+        max: budget(315, 13),
       },
       {
         id: "faq_href",
@@ -1909,7 +1836,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Give Them a Rose\nThey Will Remember",
         lines: 2,
-        max: budget(152, 18.5),
+        max: budget(181, 20),
       },
       {
         id: "gift_body",
@@ -1920,7 +1847,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "Choose a classic design\nand let your message last.",
         lines: 2,
-        max: budget(150, 9.5),
+        max: budget(150, 13),
       },
       {
         id: "gift_cta_label",
@@ -1930,7 +1857,7 @@ export const HOME_SECTIONS = [
         labelZh: "按钮文字",
         kind: "text",
         value: "SHOP GOLD ROSES",
-        max: budget(86, 9.5, 0.62),
+        max: budget(92, 10, 0.62),
       },
       {
         id: "gift_cta_href",
@@ -1972,7 +1899,7 @@ export const HOME_SECTIONS = [
         kind: "text",
         value: "Keep Meaningful Moments Close",
         lines: 2,
-        max: budget(184, 19),
+        max: budget(184, 20),
       },
       {
         id: "newsletter_body",
@@ -1983,7 +1910,7 @@ export const HOME_SECTIONS = [
         kind: "multiline",
         value: "New stories, gifting inspiration,\nand occasional updates.",
         lines: 2,
-        max: budget(184, 10.5),
+        max: budget(184, 13),
       },
       {
         id: "newsletter_button",
@@ -2040,7 +1967,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 1 文字",
         kind: "text",
         value: "SHOP",
-        max: budget(82, 8.5, 0.62),
+        max: budget(82, 9, 0.62),
         note: "The footer labels sit in hand-placed, centre-aligned boxes. Five of them pad the label with a NON-BREAKING space to nudge the centred text sideways; an ordinary space collapses and the label jumps. Copy the padding as-is.",
         noteZh:
           "页脚文字位于手工摆放的居中文本框内。其中五条用不换行空格（NBSP）微调居中位置；换成普通空格会被浏览器折叠，文字会跳位。请原样保留。",
@@ -2062,7 +1989,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 2 文字",
         kind: "text",
         value: "OUR CRAFT\u00a0",
-        max: budget(65, 8.5, 0.62),
+        max: budget(65, 9, 0.62),
       },
       {
         id: "footer_2_href",
@@ -2081,7 +2008,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 3 文字",
         kind: "text",
         value: "OUR STORY",
-        max: budget(160, 8.5, 0.62),
+        max: budget(160, 9, 0.62),
       },
       {
         id: "footer_3_href",
@@ -2100,7 +2027,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 4 文字",
         kind: "text",
         value: "FAQ\u00a0",
-        max: budget(67, 8.5, 0.62),
+        max: budget(67, 9, 0.62),
       },
       {
         id: "footer_4_href",
@@ -2119,7 +2046,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 5 文字",
         kind: "text",
         value: "BLOG\u00a0",
-        max: budget(46, 8.5, 0.62),
+        max: budget(46, 9, 0.62),
       },
       {
         id: "footer_5_href",
@@ -2138,7 +2065,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 6 文字",
         kind: "text",
         value: "SHIPPING & RETURNS",
-        max: budget(121, 8.5, 0.62),
+        max: budget(121, 9, 0.62),
       },
       {
         id: "footer_6_href",
@@ -2157,7 +2084,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 7 文字",
         kind: "text",
         value: "\u00a0PRIVACY",
-        max: budget(68, 8.5, 0.62),
+        max: budget(68, 9, 0.62),
       },
       {
         id: "footer_7_href",
@@ -2176,7 +2103,7 @@ export const HOME_SECTIONS = [
         labelZh: "链接 8 文字",
         kind: "text",
         value: "\u00a0TERMS",
-        max: budget(39, 8.5, 0.62),
+        max: budget(39, 9, 0.62),
       },
       {
         id: "footer_8_href",

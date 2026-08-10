@@ -33,8 +33,16 @@ export type Window = {
   height: number;
 };
 
-/** One pagination dot, at the exact position/size the design draws it. */
-export type Dot = { x: number; y: number; size: number };
+/**
+ * One pagination dot, at the exact position/size the design draws it.
+ *
+ * `activeSize` is the design's own larger dot. Every frame on this page draws
+ * the CURRENT indicator a pixel or two bigger than the rest, so a rail that
+ * normalized them all to one size could never rest on the frame's own picture.
+ * It is a property of the position, not of the dot: whichever dot is current
+ * grows, and it grows about its own centre so the row's rhythm is unchanged.
+ */
+export type Dot = { x: number; y: number; size: number; activeSize?: number };
 
 /** Auto-play interval. Deliberately brisk — the owner asked for faster. */
 export const AUTOPLAY_MS = 1800;
@@ -290,24 +298,29 @@ export function Carousel({
         </div>
       </div>
 
-      {dots.map((dot, i) => (
-        <button
-          key={`${dot.x}-${dot.y}`}
-          data-el={name && `${name}-DOT-${i + 1}`}
-          type="button"
-          onClick={() => go(i)}
-          aria-label={`Show ${label} ${i + 1}`}
-          aria-current={i === index}
-          style={{
-            ...abs(dot.x, dot.y, dot.size, dot.size),
-            background: i === index ? activeColor : idleColor,
-            borderRadius: 9999,
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-          }}
-        />
-      ))}
+      {dots.map((dot, i) => {
+        // Grown about its own centre, so only the dot changes — not the pitch.
+        const size = (i === index && dot.activeSize) || dot.size;
+        const inset = (dot.size - size) / 2;
+        return (
+          <button
+            key={`${dot.x}-${dot.y}`}
+            data-el={name && `${name}-DOT-${i + 1}`}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`Show ${label} ${i + 1}`}
+            aria-current={i === index}
+            style={{
+              ...abs(dot.x + inset, dot.y + inset, size, size),
+              background: i === index ? activeColor : idleColor,
+              borderRadius: 9999,
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+          />
+        );
+      })}
     </>
   );
 }
