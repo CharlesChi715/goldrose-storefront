@@ -1326,6 +1326,11 @@ export function buildSeedTables(
     // Reviews start empty everywhere: the PDP falls back to the design's
     // mock rows until real published reviews exist (pre-launch rule).
     product_reviews: [],
+    // Searches are never seeded, in demo mode either. This table exists to
+    // answer "what do shoppers ask for", and an invented answer is worse than
+    // no answer: the Trending Searches chips are about to be chosen from it,
+    // so a seeded row would put words on the storefront that nobody typed.
+    search_queries: [],
     ...demo,
     site_content: [
       {

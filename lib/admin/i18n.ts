@@ -602,6 +602,21 @@ const en = {
   "analytics.engagement.captionDropOff":
     "The last section a visit reached before leaving, then its share of all measured visits. Where readers stop.",
 
+  // Search-query analytics (storefront-search.md OQ-1)
+  "analytics.card.searches": "Searches",
+  "analytics.card.zeroResultRate": "Searches finding nothing",
+  "analytics.card.topQueries": "Top searches",
+  "analytics.card.zeroResultQueries": "What shoppers could not find",
+  "analytics.search.distinct": "different searches",
+  "analytics.search.captionTop":
+    "What shoppers typed, most-asked first, then how many products it found on average. These are the real queries the Trending Searches chips should be chosen from.",
+  "analytics.search.captionZero":
+    "Searches that returned nothing at all, most-asked first. Each one is a shopper who wanted something we did not show them — stock it, rename a product, or add the words to one.",
+  "analytics.search.empty":
+    "No searches yet — searches are recorded when a shopper presses enter or taps a chip, never as they type",
+  "analytics.search.emptyZero":
+    "Every search found something in this period",
+
   // ⌘K search (§9.1)
   "search.group.orders": "Orders",
   "search.group.products": "Products",
@@ -1396,6 +1411,19 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
     "每个区域的平均停留时长，其后为该页访问中到达此区域的比例。同一时刻只统计一个区域，因此各区域之和不会超过整页时长。",
   "analytics.engagement.captionDropOff":
     "访问离开前最后到达的区域，其后为占全部已测量访问的比例，即读者止步之处。",
+
+  "analytics.card.searches": "搜索次数",
+  "analytics.card.zeroResultRate": "无结果搜索占比",
+  "analytics.card.topQueries": "热门搜索词",
+  "analytics.card.zeroResultQueries": "顾客没有找到的东西",
+  "analytics.search.distinct": "个不同搜索词",
+  "analytics.search.captionTop":
+    "顾客实际输入的内容，按搜索次数排序，其后为平均找到的产品数量。“热门搜索”标签应根据这些真实搜索词来选择。",
+  "analytics.search.captionZero":
+    "完全没有找到任何结果的搜索，按搜索次数排序。每一条都代表一位顾客想要而我们没有展示的东西——补货、为产品改名，或在产品文案中加入这些词。",
+  "analytics.search.empty":
+    "暂无搜索记录——仅在顾客按下回车或点击标签时记录，输入过程中不记录",
+  "analytics.search.emptyZero": "本期间的所有搜索都找到了结果",
 
   "search.group.orders": "订单",
   "search.group.products": "产品",

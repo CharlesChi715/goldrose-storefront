@@ -23,6 +23,42 @@ import type {
  * cache() collapses identical reads within a single request.
  */
 const cachedAllUntyped = cache((table: TableName) => getStore().all(table));
+
+/**
+ * Read a table this dashboard can do without, degrading to no rows if it is
+ * not there yet.
+ *
+ * WHY THIS EXISTS. Code reaches production by merging to `main` (Vercel
+ * deploys on push); migrations are pushed BY HAND with `supabase db push`.
+ * There is therefore always a window where the deployed code expects a table
+ * the database does not have — and `remote.ts`'s `all()` throws on any
+ * PostgREST error, inside a `Promise.all`, so one missing table would reject
+ * the whole of `analyticsSummary` and take down the sales dashboard with it.
+ *
+ * Search-query logging is the first optional read here: it is a merchandising
+ * nicety, and it must not be able to break the screen the owner uses to see
+ * whether the shop is selling anything. The failure is logged, not hidden, so
+ * a table missing for any reason other than "not pushed yet" is still visible
+ * in the server logs.
+ *
+ * Only ever use this for a table whose absence should degrade ONE card. Orders
+ * and page_views are load-bearing: if those cannot be read, the right
+ * behaviour is a loud failure, not a dashboard quietly reporting zero sales.
+ *
+ * @param table - The table to read.
+ * @returns Its rows, or an empty list if the read failed.
+ */
+async function cachedAllOptional<T extends TableName>(
+  table: T,
+): Promise<DbTables[T][]> {
+  try {
+    return await cachedAll(table);
+  } catch (error) {
+    console.error(`[analytics] optional table "${table}" unavailable`, error);
+    return [];
+  }
+}
+
 /** Typed wrapper over the cached table reader — same promise, narrowed row type. */
 function cachedAll<T extends TableName>(table: T): Promise<DbTables[T][]> {
   return cachedAllUntyped(table) as Promise<DbTables[T][]>;
@@ -94,6 +130,7 @@ import {
   type PathEngagement,
   type SectionEngagement,
 } from "./engagement-report.ts";
+import { searchReport, type SearchQueryStat } from "./search-report.ts";
 
 export type MetricPair = { current: number; previous: number };
 
@@ -142,6 +179,16 @@ export type AnalyticsSummary = {
     sections: SectionEngagement[];
     dropOff: DropOffEntry[];
   };
+  /** What shoppers searched for, and what they searched for and did not find
+   *  (storefront-search.md OQ-1). Empty until the overlay records a submit. */
+  search: {
+    totalSearches: MetricPair;
+    zeroResultSearches: number;
+    zeroResultRatePercent: MetricPair;
+    distinctQueries: number;
+    topQueries: SearchQueryStat[];
+    zeroResultQueries: SearchQueryStat[];
+  };
 };
 
 /**
@@ -157,10 +204,13 @@ export async function analyticsSummary(
   key: RangeKey,
   now = new Date(),
 ): Promise<AnalyticsSummary> {
-  const [orders, lines, views] = await Promise.all([
+  const [orders, lines, views, searches] = await Promise.all([
     cachedAll("orders"),
     cachedAll("order_lines"),
     cachedAll("page_views"),
+    // Optional: migration 0012 may not be pushed yet on a given environment,
+    // and an empty search report must never cost the owner their sales cards.
+    cachedAllOptional("search_queries"),
   ]);
   const { current, previous } = rangesFor(key, now);
 
@@ -365,6 +415,16 @@ export async function analyticsSummary(
     views.filter((view) => within(view.created_at, previous)),
   );
 
+  // Search reads its own table, filtered the same way. The previous period is
+  // computed for the two numbers that carry a compare-to-previous badge: how
+  // much shoppers searched, and how often searching failed them.
+  const currentSearch = searchReport(
+    searches.filter((row) => within(row.created_at, current)),
+  );
+  const previousSearch = searchReport(
+    searches.filter((row) => within(row.created_at, previous)),
+  );
+
   const currentAov =
     currentOrders.length > 0
       ? Math.round(netSales(currentOrders) / currentOrders.length)
@@ -452,6 +512,20 @@ export async function analyticsSummary(
       byPath: currentEngagement.byPath,
       sections: currentEngagement.sections,
       dropOff: currentEngagement.dropOff,
+    },
+    search: {
+      totalSearches: {
+        current: currentSearch.totalSearches,
+        previous: previousSearch.totalSearches,
+      },
+      zeroResultSearches: currentSearch.zeroResultSearches,
+      zeroResultRatePercent: {
+        current: currentSearch.zeroResultRatePercent,
+        previous: previousSearch.zeroResultRatePercent,
+      },
+      distinctQueries: currentSearch.distinctQueries,
+      topQueries: currentSearch.topQueries,
+      zeroResultQueries: currentSearch.zeroResultQueries,
     },
   };
 }

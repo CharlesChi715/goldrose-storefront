@@ -361,6 +361,23 @@ export type ProductReviewRow = {
   created_at: string;
 };
 
+export type SearchQueryRow = {
+  id: string;
+  /** Folded form (`normalizeSearchText`) — the grouping key for the report. */
+  query: string;
+  /** What the shopper typed, untouched: the only place 玫瑰 or 🌹 survives,
+   *  because folding reduces both to the same empty string. */
+  query_raw: string;
+  /** Products returned. 0 is the row that matters most, so never null. */
+  result_count: number;
+  /** Which rung of the relaxation ladder answered. The engine's fourth mode,
+   *  "all", cannot occur: an empty box is never submitted. */
+  mode: "exact" | "relaxed" | "none";
+  /** Facet slugs the query itself named ("for mom" → ["mother"]). */
+  facets: string[];
+  created_at: string;
+};
+
 export type SettingRow = {
   key: string;
   value: unknown;
@@ -390,6 +407,7 @@ export type DbTables = {
   forum_posts: ForumPostRow;
   site_content: SiteContentRow;
   product_reviews: ProductReviewRow;
+  search_queries: SearchQueryRow;
   settings: SettingRow;
   admin_users: AdminUserRow;
 };
@@ -414,6 +432,7 @@ export const TABLE_NAMES: TableName[] = [
   "forum_posts",
   "site_content",
   "product_reviews",
+  "search_queries",
   "settings",
   "admin_users",
 ];

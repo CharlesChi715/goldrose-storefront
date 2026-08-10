@@ -298,9 +298,39 @@ Open linked resources only when the task needs them.
   half-panel. The idle panel is byte-identical to the import and all three
   pixel baselines pass. Record:
   [storefront-search](docs/features/storefront-search.md).
-  ⚠️ **Nothing records what shoppers type** — so the trending chips stay a
-  design guess and zero-result queries are invisible; that needs migration
-  `0012` and the Beacon's framed-document guard (OQ-1 in the record).
+- **What shoppers search for is now recorded (2026-08-10, closes OQ-1).** One
+  row per SUBMIT in `search_queries` (migration `0012`) — the engine's folded
+  form as the grouping key, the raw text untouched, the result count, the
+  `mode` that answered, and any facets the query named. `/admin/analytics`
+  gained search volume, the share finding nothing, and two separate lists: top
+  searches, and **what shoppers could not find**. Separate because a failing
+  query is almost never popular, so ranked together it sits below the fold.
+  - **On submit, never per keystroke.** The panel matches as you type; only
+    Enter, a chip, a recent row or picking a result writes. All four already
+    funnel through `remember()`, so the rule holds by construction rather than
+    by four call sites agreeing. The engine is re-run for the submitted term —
+    a chip submits a term that is NOT in the field, and reusing the typed
+    result would file every chip tap under an empty box.
+  - **`page_views` is deliberately not reused.** `engagement-report.ts` groups
+    `path` verbatim (each query would become a fake page) and `utm` is read as
+    the session's landing attribution (which feeds commissions). Neither would
+    throw; both would quietly produce wrong reports.
+  - The send carries the Beacon's own `window.self !== window.top` guard, since
+    this overlay is reachable in the admin's eleven home-page preview iframes.
+    `admin-home-content.spec.ts` was widened from `/api/beacon` to a list of
+    analytics endpoints, so a third sink is caught by the same test.
+  - 玫瑰, 🌹 and `!!!` all fold to `""`, and are the misses worth most; the
+    grouping key falls back to the raw text, which is also what keeps the row
+    inside its length CHECK instead of throwing into the endpoint's catch.
+  - RLS enabled with **no policy at all** (the `page_views` treatment).
+  ⚠️ `0012` is **written and validated but not pushed to hosted**, so the two
+  cards are empty on the deployed site until `supabase db push` runs. The read
+  side had to be made safe for that window: `remote.ts`'s `all()` throws on a
+  missing table inside the `Promise.all` that builds `analyticsSummary`, so an
+  unpushed `0012` would have taken down the whole of `/admin/analytics`, sales
+  cards included. Code deploys on merge while migrations are pushed by hand, so
+  the window always exists — `cachedAllOptional` degrades this one read and
+  logs it, and is for optional tables only (a missing `orders` must fail loud).
 - **The /shop filter drawer is real (2026-08-07, `feat/best-for-facets`).**
   `products.best_for` changed from a dormant prose blurb to `text[]` holding
   filter slugs (migration `0009` — **written, not yet pushed to hosted**), and
@@ -401,8 +431,10 @@ Open linked resources only when the task needs them.
   own server, and `ALLOW_LOCAL_MODE=1 npm run dev` wakes it deliberately.
 - **Hosted mode:** add migrations as `supabase/migrations/000N_*.sql` and apply
   with `supabase db push` — never the web SQL editor. `0001`–`0003` and
-  `0005`–`0011` applied (`0009`–`0011` pushed 2026-08-07); `0004` is
-  permanently skipped (its orphan history row was repaired 2026-07-28 —
+  `0005`–`0011` applied (`0009`–`0011` pushed 2026-08-07); **`0012`
+  (`search_queries`) is written and validated but NOT pushed** — until it is,
+  the search log's insert fails and is swallowed by design, so searching works
+  and the two admin cards stay empty; `0004` is permanently skipped (its orphan history row was repaired 2026-07-28 —
   intentional, not a gap). Pushing `0010` exposed the mirror of the hazard this
   note used to warn about: `0009` added `stocked` to `catalog_products`, `0010`
   rebuilt the view from the pre-`0009` definition and dropped it again, so
