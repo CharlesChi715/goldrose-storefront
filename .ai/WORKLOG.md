@@ -6637,3 +6637,19 @@ gone missing mid-session, which presents as all 155 e2e tests failing at 0ms.
 Not a code failure; worth recognising quickly next time.
 
 **Verified:** 166 unit, 155 e2e including the three pixel baselines.
+
+## 2026-08-10 — the top-nav cart icon opens the bag, not checkout
+
+- **Bug:** every header cart icon linked to `/checkout`, skipping the bag. The
+  Figma prototype has wired it to `/bag` (`1523:3059`) since 07-31; the repo
+  deviated on purpose (AI-008) because `/bag` then drew the design's mock line
+  items and would have hidden the shopper's real basket.
+- That reason expired on 2026-08-07, when `BagScreen` started reading
+  `lib/cart/store.ts` — the same store `/checkout` uses. Repointed all five
+  icons: `chrome.tsx` (detail, home, shop headers), `CraftScreen`,
+  `returns-chrome`. The PDP's ADD TO CART already went to `/bag`.
+- AI-008 narrowed to its two live arms (pay→keepsake, inert Save/submit) in
+  `agent-delivery/INBOX.md`, with the resolution written into the 07-31 session
+  record.
+- Three e2e cases added in `tests/e2e/homepage.spec.ts` (home/shop/craft
+  headers). 18 homepage tests and all 3 pixel baselines pass; `tsc` clean.

@@ -106,7 +106,7 @@ export function LineGlyph({
  * The frames' wordmark image reads "ELDREVE" — the brand itself (DQ-34) —
  * so the live pages ship that art unchanged. The back arrow reuses the 07-29 返回 raster 1523-3470 (the
  * same source bitmap, hash 147fbe10, as this batch's header art); the cart
- * art links to /checkout, which is the live cart (shared cart convention).
+ * art links to /bag, the live cart screen (shared cart convention).
  *
  * @param dy The frame's Brand Navigation instance y-offset.
  * @param backFallback BackButton fallback: /account on the returns root,
@@ -128,7 +128,7 @@ export function ReturnsHeader({
       />
       <BrandWordmark x={145} y={20.5 + dy} w={140} h={51} />
       <Link
-        href="/checkout"
+        href="/bag"
         aria-label="Cart"
         style={{ ...abs(375, 24.5 + dy, 40, 43), display: "block" }}
       >

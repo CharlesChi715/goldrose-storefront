@@ -10,7 +10,7 @@
  * (workshop hero + three process shots). Header brand is the design's own
  * "ELDREVE" Playfair text.
  *
- * Wiring: header cart → /checkout (the live cart), SHOP THE COLLECTION →
+ * Wiring: header cart → /bag (the shared cart convention), SHOP THE COLLECTION →
  * /shop, READ OUR STORY → /story. The frame draws a five-tab glyph TEXT nav
  * ("Me" active — its STORY sibling draws the owner-art band instead); the
  * shared owner-art BottomNav ships on both for one consistent chrome (DQ
@@ -122,7 +122,7 @@ export function CraftScreen() {
         ELDREVE
       </div>
       <Link
-        href="/checkout"
+        href="/bag"
         aria-label="Cart"
         style={{ ...abs(386, 23, 24, 24), display: "block" }}
       >

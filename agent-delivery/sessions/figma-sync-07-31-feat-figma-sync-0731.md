@@ -18,6 +18,12 @@ the bottom. See [`../README.md`](../README.md) for tag meanings and workflow.
   (live `/bag` cart, a designed post-payment share step, account backends).
 - **Veto:** if the bosses want the design's flow verbatim anyway, say so and
   the links are repointed in one commit.
+- **Update 2026-08-10 — the cart arm is resolved as foreseen.** `/bag` has read
+  `lib/cart/store.ts` since 2026-08-07, so it is now the shopper's real basket
+  and the reason for the deviation is gone. All five header cart icons
+  (`chrome.tsx` ×3, `CraftScreen`, `returns-chrome`) go to `/bag`, matching the
+  prototype and the PDP's ADD TO CART. The pay→keepsake and inert Save/submit
+  arms stand unchanged.
 
 ---
 

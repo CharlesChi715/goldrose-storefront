@@ -264,3 +264,21 @@ test.describe("H-09 · Best Sellers", () => {
     ).toHaveCount(0);
   });
 });
+
+test.describe("shared chrome · cart icon", () => {
+  // The prototype has always sent this icon to /bag (1523:3059). It was held
+  // on /checkout while /bag drew mock line items (AI-008); /bag reads the live
+  // cart now, so the deviation is over. One test per header family, because
+  // each one draws its own <Link> at its own frame coordinates.
+  for (const [name, path] of [
+    ["home", "/"],
+    ["shop", "/shop"],
+    ["craft", "/craft"],
+  ] as const) {
+    test(`the ${name} header cart icon opens /bag`, async ({ page }) => {
+      await page.goto(path);
+      await page.getByRole("link", { name: "Cart" }).first().click();
+      await expect(page).toHaveURL(/\/bag$/);
+    });
+  }
+});

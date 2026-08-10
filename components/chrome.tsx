@@ -234,7 +234,7 @@ export function VHeader({
         />
       )}
       <Link
-        href="/checkout"
+        href="/bag"
         style={{ ...abs(392.5, 50, 33, 26), display: "block" }}
         aria-label="Cart"
       >
@@ -280,15 +280,14 @@ export function HomeHeader() {
       {/* The magnifier art is a live search button here too (owner, 07-27):
           the homepage is where visitors actually look for it. */}
       <SearchButton style={abs(311.5, 45.5, 40, 43)} />
-      {/* Cart art still goes to /checkout, which IS the live cart. /bag holds
-          the B-1 design but shows the mock's own line items — repointing the
-          icon there would hide the shopper's real basket. Swap once /bag reads
-          lib/cart/store.ts.
-          AI-TAG(AI-008): AGENT-DECISION — the 07-31 prototype wires this icon
-          (and PDP Add to Cart) to /bag; kept on /checkout deliberately. See
-          /agent-delivery/sessions/figma-sync-07-31-feat-figma-sync-0731.md. */}
+      {/* Cart art goes to /bag, as the 07-31 prototype always wired it
+          (1523:3059). AI-008 held it on /checkout only because /bag drew the
+          design's mock line items back then; since 2026-08-07 BagScreen reads
+          the same lib/cart/store.ts /checkout does, so the icon now shows the
+          shopper's real basket — the swap that record promised. PDP
+          "Add to Cart" already lands here (components/BuyButtons.tsx). */}
       <Link
-        href="/checkout"
+        href="/bag"
         style={{ ...abs(381.5, 45.5, 40, 43), display: "block" }}
         aria-label="Cart"
       >
@@ -332,7 +331,7 @@ export function ShopHeader() {
       {/* Search art opens the SEARCH-OPEN overlay (914:114, 07-27). */}
       <SearchButton style={abs(313, 41.5, 40, 43)} />
       <Link
-        href="/checkout"
+        href="/bag"
         style={{ ...abs(383, 41.5, 40, 43), display: "block" }}
         aria-label="Cart"
       >
