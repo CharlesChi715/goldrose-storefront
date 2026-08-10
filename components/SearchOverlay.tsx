@@ -435,6 +435,18 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
       // submitted searches and off every keystroke. Recording at the four call
       // sites instead would be four chances to forget.
       //
+      // ONLY WHEN THE INDEX IS ACTUALLY LOADED. `products` is `[]` while the
+      // status is "loading" or "failed", and `searchDocs([], "rose")` returns
+      // `mode: "none"` with no hits — indistinguishable, at this call site,
+      // from a genuine miss. Recording that would fabricate the one number
+      // this whole feature exists to produce: the owner would be told to stock
+      // roses because a shopper searched for one before the catalogue
+      // finished downloading. A search we cannot describe is not recorded at
+      // all; it still runs, because submitting hands the words to `/shop`,
+      // which matches on the server. The panel makes the same distinction for
+      // its own copy — see the `status === "ready"` guard on "No exact match".
+      if (status !== "ready") return;
+
       // The engine is re-run for `cleaned` rather than reusing `results`: a
       // chip and a recent row submit a term that is NOT what is in the field,
       // so reusing the typed result would file that tap under the result count
@@ -452,7 +464,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
         facets: outcome.facets,
       });
     },
-    [products, recents],
+    [products, recents, status],
   );
 
   const submit = useCallback(

@@ -324,7 +324,13 @@ Open linked resources only when the task needs them.
     inside its length CHECK instead of throwing into the endpoint's catch.
   - RLS enabled with **no policy at all** (the `page_views` treatment).
   ⚠️ `0012` is **written and validated but not pushed to hosted**, so the two
-  cards are empty on the deployed site until `supabase db push` runs.
+  cards are empty on the deployed site until `supabase db push` runs. The read
+  side had to be made safe for that window: `remote.ts`'s `all()` throws on a
+  missing table inside the `Promise.all` that builds `analyticsSummary`, so an
+  unpushed `0012` would have taken down the whole of `/admin/analytics`, sales
+  cards included. Code deploys on merge while migrations are pushed by hand, so
+  the window always exists — `cachedAllOptional` degrades this one read and
+  logs it, and is for optional tables only (a missing `orders` must fail loud).
 - **The /shop filter drawer is real (2026-08-07, `feat/best-for-facets`).**
   `products.best_for` changed from a dormant prose blurb to `text[]` holding
   filter slugs (migration `0009` — **written, not yet pushed to hosted**), and

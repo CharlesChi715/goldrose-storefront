@@ -209,6 +209,36 @@ test("a search that finds nothing is recorded as the miss it is", async ({
   expect(rows[0].mode).toBe("none");
 });
 
+test("a search made without the index is not recorded as a miss", async ({
+  page,
+}) => {
+  // THE BUG THIS PINS. `products` is `[]` whenever the index has not loaded —
+  // still downloading, or the route is down — and `searchDocs([], "rose")`
+  // returns mode "none" with no hits, which is indistinguishable at the
+  // recording call site from a genuine miss. Without the `status` guard, an
+  // outage writes one fabricated zero-result row per search, and the owner is
+  // told to stock the things they already sell. The zero-result card is the
+  // one number this whole feature exists to produce; a wrong one is worse than
+  // none.
+  const since = new Date().toISOString();
+
+  // The index is unreachable. The panel says so ("Search is unavailable") and
+  // still hands the words to /shop, which matches on the server.
+  await page.route("**/api/search", (route) => route.abort());
+
+  await page.goto("/");
+  await openSearch(page);
+  const field = page.getByRole("combobox", { name: /Search products/ });
+  // "rose" genuinely matches this catalogue, so ANY row written here is false.
+  await field.fill("rose");
+  await field.press("Enter");
+  await page.waitForURL(/\/shop\?q=/);
+  await page.waitForTimeout(500);
+
+  expect(await rowsSince(since)).toHaveLength(0);
+  await page.unroute("**/api/search");
+});
+
 test.describe("the admin's report", () => {
   test.use({ viewport: ADMIN_VIEWPORT });
 

@@ -6832,3 +6832,53 @@ unmerged, and this worktree is not `supabase link`ed (the repo root is). Until
 it runs, the insert fails and is swallowed by design: searching is unaffected
 and the two admin cards are empty, which is the correct behaviour for a
 missing table rather than a broken storefront.
+
+## 2026-08-10 08:20 AEST — running the app found two defects the tests had not
+
+Started a local-mode dev server so the owner could look at the feature. Two
+real bugs surfaced, neither of which the 175-test suite had caught, and both in
+the same class: the code was right about the happy path and wrong about the
+states around it.
+
+**1. An unpushed `0012` would have taken down the whole of `/admin/analytics`.**
+`analyticsSummary` reads `search_queries` inside a `Promise.all`, and
+`remote.ts`'s `all()` THROWS on a missing table — so one rejected promise would
+have taken the sales cards, the funnel and the engagement report with it. I had
+written the opposite in the record and in SUMMARY ("the cards stay empty"); that
+was wrong, and both are corrected. This window is structural, not a one-off:
+code reaches production by merging to `main` and migrations are pushed by hand,
+so the deployed code always expects the database to be ahead of where it is.
+`cachedAllOptional` degrades one read to no rows and logs it. Deliberately NOT
+applied to `orders` or `page_views` — a dashboard that quietly reports zero
+sales because it could not read the orders table is worse than one that fails.
+
+**2. A search made before the index loads was recorded as a MISS.** The worse
+one. `products` is `[]` until `/api/search` answers — and also when it fails —
+and `searchDocs([], "rose")` returns `mode: "none"` with no hits, which at the
+recording call site is indistinguishable from a genuine miss. So an outage, or
+simply a fast typist on a slow connection, wrote fabricated zero-result rows for
+products we sell. That poisons the single number this entire feature exists to
+produce: the owner reads "sunflower, rose, tulip" on the what-shoppers-could-not
+-find card and stocks roses they already sell.
+
+Found by reading `.data/db.json` after the e2e runs and noticing one row that
+could not be true: `rose -> 0/none`. The overlay already makes this distinction
+for its own UI — it will not print "No exact match" unless `status === "ready"`
+— so the guard existed three lines away and the new call site simply did not
+use it. Now `remember()` returns early unless the index is ready: the search
+still runs (submitting hands the words to `/shop`, which matches server-side),
+it is just not described. An unrecorded search costs a little volume; a
+fabricated miss costs the owner money.
+
+Pinned by an e2e that aborts `/api/search`, searches "rose" — which genuinely
+matches this catalogue — and asserts NO row is written. Verified the test fails
+with the guard removed, so it is guarding something.
+
+**Also:** added a `worktree-search-analytics` launch config (`env
+ALLOW_LOCAL_MODE=1 npm run dev --port 3450`), since this worktree has no
+`.env.local` and `predev` refuses local mode without the flag.
+
+**Lesson worth keeping:** every test I wrote exercised a loaded index, because
+every test navigated and waited. The suite was green and the feature was wrong.
+The bug was visible in thirty seconds of looking at the data the app had
+actually written.

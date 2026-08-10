@@ -137,9 +137,14 @@ page it hands over to can never disagree.
 
 - Search itself ships behind no flag and needs no migration.
 - **Search analytics needs migration `0012` pushed to hosted** (`supabase db
-  push`). Until then the endpoint's insert fails, is swallowed into
-  `console.error` as designed, and the two admin cards stay empty — searching
-  itself is unaffected, which is the point of swallowing it.
+  push`). Until then the endpoint's insert fails and is swallowed into
+  `console.error` as designed, so searching itself is unaffected.
+  ⚠️ The READ side needed the same care and did not get it for free:
+  `remote.ts`'s `all()` throws on a missing table, inside the `Promise.all`
+  that builds `analyticsSummary` — so an unpushed `0012` would have taken down
+  the whole of `/admin/analytics`, sales cards included. Code deploys on merge
+  and migrations are pushed by hand, so that window always exists.
+  `cachedAllOptional` now degrades this one read to no rows and logs it.
 
 ## Open questions
 
