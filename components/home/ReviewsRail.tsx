@@ -15,7 +15,7 @@
 import { Carousel } from "@/components/home/Carousel";
 import type { RailTiming } from "@/lib/home-content/rail-timing";
 import { abs } from "@/lib/figma-layout";
-import { playfair, notoSC } from "@/lib/fonts";
+import { playfair } from "@/lib/fonts";
 import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
@@ -34,12 +34,15 @@ import type { HomeText } from "@/lib/home-content/registry";
 type Review = {
   photoBox: readonly [number, number, number, number];
   quoteX: number;
+  /** The star strip, which the 08-10 pass moved into the deleted badge row. */
+  starsX: number;
+  starsY: number;
 };
 
 const REVIEWS: readonly Review[] = [
-  { photoBox: [0, -55, 132, 170], quoteX: 8 },
-  { photoBox: [0, 0, 122, 69], quoteX: 8 },
-  { photoBox: [0, 0, 122, 69], quoteX: 9 },
+  { photoBox: [0, -55, 132, 170], quoteX: 8, starsX: 6, starsY: 109 },
+  { photoBox: [0, 0, 122, 69], quoteX: 8, starsX: 8, starsY: 111 },
+  { photoBox: [0, 0, 122, 69], quoteX: 9, starsX: 8, starsY: 110 },
 ];
 
 /** The editable strings of one review card, picked out of the `recipient` section. */
@@ -75,21 +78,21 @@ function copyOf(c: HomeText["recipient"]): readonly ReviewCopy[] {
    design draws FOUR dots for three review cards, so only the first three are
    wired to a slide; the fourth stays the inert ellipse rendered by A-6. */
 const REVIEW_DOTS = [
-  { x: 185.5, y: 3086.5, size: 7 },
-  { x: 204, y: 3086.5, size: 7 },
-  { x: 222, y: 3086.5, size: 7 },
+  { x: 185.5, y: 2967.5, size: 7, activeSize: 8 },
+  { x: 204, y: 2967.5, size: 7, activeSize: 8 },
+  { x: 222, y: 2967.5, size: 7, activeSize: 8 },
 ];
 
 function ReviewCard({
   photoBox,
   quoteX,
+  starsX,
+  starsY,
   copy,
-  verifiedLabel,
   n,
   frames,
 }: Review & {
   copy: ReviewCopy;
-  verifiedLabel: string;
   n: number;
   frames?: HomeFrames;
 }) {
@@ -136,8 +139,8 @@ function ReviewCard({
         className={playfair.className}
         style={{
           ...abs(quoteX, 72, 106),
-          fontSize: 8.5,
-          lineHeight: "10px",
+          fontSize: 13,
+          lineHeight: "12px",
           fontWeight: 500,
           color: "#3B2F2F",
         }}
@@ -151,33 +154,18 @@ function ReviewCard({
         width={106}
         height={11}
         style={{
-          ...abs(8, 95, 106, 11),
+          ...abs(starsX, starsY, 106, 11),
           display: "block",
           objectFit: "none",
           objectPosition: "left center",
         }}
       />
-      <img
-        src="/eldreve/home/442-149.svg"
-        alt=""
-        width={12}
-        height={12}
-        style={{ ...abs(8, 109, 12, 12), display: "block" }}
-      />
-      <div
-        data-field="recipient.reviews_verified_label"
-        className={notoSC.className}
-        style={{
-          ...abs(23, 109, 57),
-          fontSize: 7,
-          lineHeight: "10px",
-          fontWeight: 400,
-          color: "#3B2E2E",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {verifiedLabel}
-      </div>
+      {/* The badge glyph (442:149) and its "Verified Purchase" label used to
+          close each card. Both are deleted at source on 08-10 and the stars
+          took their place.
+          AI-TAG(AI-045): OWNER-DECISION — this deletion, the four certificate
+          numbers and the brand-story paragraph remove substance rather than
+          decoration. See /agent-delivery/sessions/figma-sync-home-page-08-10-claude-figma-sync-home-page-75f37e.md. */}
     </div>
   );
 }
@@ -206,7 +194,7 @@ export function ReviewsRail({
        window runs from the first card to x=430 so the rail clips at the
        canvas edge exactly as the Figma frame does. */
     <Carousel
-      window={{ left: 22, top: 2873, width: 408, height: 124 }}
+      window={{ left: 21, top: 2766, width: 409, height: 124 }}
       count={REVIEWS.length}
       cellWidth={122}
       step={134}
@@ -222,7 +210,6 @@ export function ReviewsRail({
         <ReviewCard
           {...REVIEWS[i]}
           copy={copies[i]}
-          verifiedLabel={c.reviews_verified_label}
           n={i + 1}
           frames={frames}
         />

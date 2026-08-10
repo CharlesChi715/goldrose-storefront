@@ -12,13 +12,13 @@ simplified frame, and their files went with them.
 
 | File      | Figma node | Band offset | What the band is                                                                        |
 | --------- | ---------- | ----------- | ----------------------------------------------------------------------------------------- |
-| `A1.tsx`  | 2380:374   | 32          | Hero and intro — gift-box photo + dots, eyebrow/title/subtitle, one pill CTA, two tiles |
-| `A2.tsx`  | 2380:399   | 764         | Featured Rose Gifts — "Best Sellers" row, product cards, carousel dots                  |
-| `A3.tsx`  | 2380:422   | 1405        | Ready to Ship — two product rows and the Real Rose Promise strip                        |
-| `A5.tsx`  | 2380:454   | 1868        | Shop by Occasion — occasion chips and an auto-sliding recipient rail                    |
-| `A6.tsx`  | 2380:523   | 2344        | Shop by Recipient and Reviews — recipient chips, gift cards, "Real Gifts, Real Moments" |
-| `A9.tsx`  | 2380:658   | 3133        | Craft, Workshop and Patents (cream since 08-04) — the `#craft` anchor                   |
-| `A11.tsx` | 2380:727   | 4124        | Story, FAQ, gift CTA, newsletter and the footer link cloud                              |
+| `A1.tsx`  | 2380:374   | 32          | Hero and intro — gift-box photo + dots, eyebrow/title/subtitle, one pill CTA |
+| `A2.tsx`  | 2380:399   | 781         | Featured Rose Gifts — "Best Sellers" row and the two product cards                  |
+| `A3.tsx`  | 2380:422   | 1422        | Ready to Ship — two product rows                        |
+| `A5.tsx`  | 2380:454   | 1749        | Shop by Occasion — occasion chips and an auto-sliding recipient rail                    |
+| `A6.tsx`  | 2380:523   | 2225        | Shop by Recipient and Reviews — recipient chips, gift cards, "Real Gifts, Real Moments" |
+| `A9.tsx`  | 2380:658   | 3014        | Craft, Workshop and Patents (cream since 08-04) — the `#craft` anchor                   |
+| `A11.tsx` | 2380:727   | 4005        | Story, FAQ, gift CTA, newsletter and the footer link cloud                              |
 
 ## Shared pieces in this folder
 

@@ -2,7 +2,7 @@
 /**
  * ROLE OF THIS FILE
  * Module A-9 · "Craft, Workshop and Patents" of the simplified ELDREVE
- * homepage (Figma node 2380:658 — 430×991 CREAM section at y=3133): craft
+ * homepage (Figma node 2380:658 — 430×991 CREAM section at y=3014): craft
  * steps 01–04 with photo crops, the EXPLORE OUR CRAFT button, and the lower
  * block (2380:684) holding the workshop gallery and the Patents &
  * Certificates panel. Values verbatim from the Figma data.
@@ -11,6 +11,12 @@
  * every body colour inverted to INK; the certificates panel lost its intro
  * column, footer divider and benefits row (the four certificates now span the
  * full 422px panel); and the "SEE HOW WE WORK" button was deleted at source.
+ *
+ * 2026-08-10 sync: the band moved 3133 → 3014 and lost two more things at
+ * source — the workshop gallery's two-line caption, and all four certificate
+ * NUMBER lines (the names stay). The typography pass reset almost every size
+ * here, and it rebuilt the EXPLORE OUR CRAFT button out of a real frame and a
+ * real text node, so its label stopped being baked artwork and is editable.
  */
 
 import Link from "next/link";
@@ -31,29 +37,45 @@ const CRAFT_STEPS = [
   {
     x: 20,
     num: "01",
+    titleX: 20,
+    titleY: 294,
     titleW: 90,
     centerTitle: true,
+    copyX: 24,
+    copyY: 343,
     alt: "Hand-selecting real roses at perfect bloom",
   },
   {
     x: 120,
     num: "02",
+    titleX: 120,
+    titleY: 288,
     titleW: 92,
     centerTitle: false,
+    copyX: 125,
+    copyY: 340,
     alt: "Rose being finished by hand in pure 24k gold",
   },
   {
     x: 220,
     num: "03",
+    titleX: 222,
+    titleY: 288,
     titleW: 90,
     centerTitle: false,
+    copyX: 224,
+    copyY: 340,
     alt: "Gold-dipped rose under quality inspection",
   },
   {
     x: 320,
     num: "04",
+    titleX: 320,
+    titleY: 288,
     titleW: 90,
     centerTitle: false,
+    copyX: 323,
+    copyY: 340,
     alt: "Gold rose protected and packaged for delivery",
   },
 ];
@@ -117,12 +139,15 @@ const WORKSHOP_CROPS = [
   },
 ];
 
-// Certificate columns (2380:707…2380:726), x relative to the 422×116 strip.
+/* Certificate columns (2380:707…2380:726), x relative to the 422×116 strip.
+   `title` is the NAME's own box, which the 08-10 pass stopped keeping inside
+   the column: "European Patent" is set 100px wide and 6px higher so its two
+   words clear the neighbours. Panel-relative, like `x`. */
 const CERTIFICATES = [
-  { x: 0, imgX: -120 },
-  { x: 116, imgX: -194 },
-  { x: 232, imgX: -268 },
-  { x: 348, imgX: -341 },
+  { x: 0, imgX: -120, title: { x: 0, y: 96, w: 69 } },
+  { x: 116, imgX: -194, title: { x: 99, y: 90, w: 100 } },
+  { x: 232, imgX: -268, title: { x: 232, y: 92, w: 69 } },
+  { x: 348, imgX: -341, title: { x: 348, y: 92, w: 69 } },
 ];
 
 export function A9({
@@ -146,10 +171,10 @@ export function A9({
     { title: c.step_4_title, copy: c.step_4_copy },
   ];
   const certs = [
-    { title: c.cert_1_title, num: c.cert_1_number },
-    { title: c.cert_2_title, num: c.cert_2_number },
-    { title: c.cert_3_title, num: c.cert_3_number },
-    { title: c.cert_4_title, num: c.cert_4_number },
+    c.cert_1_title,
+    c.cert_2_title,
+    c.cert_3_title,
+    c.cert_4_title,
   ];
   return (
     // id="craft" — in-page anchor kept for deep links; the A-4 card that used
@@ -157,7 +182,7 @@ export function A9({
     <div
       id="craft"
       style={{
-        ...abs(0, 3133, 430, 991),
+        ...abs(0, 3014, 430, 991),
         background: CREAM,
         overflow: "hidden",
       }}
@@ -169,7 +194,7 @@ export function A9({
         style={{
           ...abs(24, 20, 382),
           fontSize: 9,
-          lineHeight: "10.8px",
+          lineHeight: "11px",
           color: GOLD,
           fontWeight: 500,
           textAlign: "center",
@@ -185,7 +210,7 @@ export function A9({
         className={playfair.className}
         style={{
           ...abs(24, 44, 382),
-          fontSize: 31,
+          fontSize: 32,
           lineHeight: "30px",
           color: INK,
           fontWeight: 500,
@@ -202,7 +227,7 @@ export function A9({
         className={goudy.className}
         style={{
           ...abs(50, 118, 330),
-          fontSize: 11,
+          fontSize: 13,
           lineHeight: "17px",
           color: INK,
           textAlign: "center",
@@ -237,15 +262,27 @@ export function A9({
           />
         </div>
       ))}
-      {/* 165:155 · craft crop 4 — the whole frame is served as one Figma SVG render */}
-      <img
-        data-field="craft.step_4_photo"
-        src="/eldreve/home/165-155.svg"
-        alt={CRAFT_STEPS[3].alt}
-        width={90}
-        height={96}
-        style={{ ...abs(320, 170, 90, 96), borderRadius: 10, display: "block" }}
-      />
+      {/* 2380:677 · craft crop 4. It used to be one flattened SVG; the 08-10
+          frame gives it the same 430×912 source photo as steps 01–03, so it is
+          a real window like them — and a replaceable photo like them. */}
+      <div
+        style={{
+          ...abs(320, 170, 90, 96),
+          background: "#F3C6D1",
+          borderRadius: 10,
+          overflow: "hidden",
+        }}
+      >
+        <HomePhoto
+          section="craft"
+          field="step_4_photo"
+          value={c.step_4_photo}
+          alt={c.step_4_photo_alt}
+          box={{ w: 90, h: 96 }}
+          design={{ x: -320, y: -170, w: 430, h: 912.397 }}
+          frames={frames}
+        />
+      </div>
 
       {/* 165:142/147/152/157 · step numbers */}
       {CRAFT_STEPS.map((s) => (
@@ -254,8 +291,8 @@ export function A9({
           className={notoSC.className}
           style={{
             ...abs(s.x, 274, 90),
-            fontSize: 8,
-            lineHeight: "9.6px",
+            fontSize: 12,
+            lineHeight: "14px",
             color: GOLD,
             fontWeight: 500,
             textAlign: "center",
@@ -273,9 +310,14 @@ export function A9({
           key={s.num}
           className={playfair.className}
           style={{
-            ...abs(s.x, 294, s.titleW, s.centerTitle ? 30 : undefined),
-            fontSize: 13,
-            lineHeight: "17.33px",
+            ...abs(
+              s.titleX,
+              s.titleY,
+              s.titleW,
+              s.centerTitle ? 30 : undefined,
+            ),
+            fontSize: 16,
+            lineHeight: "21px",
             color: INK,
             fontWeight: 500,
             textAlign: "center",
@@ -299,8 +341,8 @@ export function A9({
           key={s.num}
           className={goudy.className}
           style={{
-            ...abs(s.x + 4, 326, 82, 42),
-            fontSize: 8,
+            ...abs(s.copyX, s.copyY, 82, 42),
+            fontSize: 12,
             lineHeight: "12px",
             color: INK,
             textAlign: "center",
@@ -314,21 +356,38 @@ export function A9({
       ))}
 
       {/* 2380:682 · EXPLORE OUR CRAFT — live since 2026-08-04: the frame's own
-          prototype wires ON_CLICK → 1573:107 (/craft). Button chrome + label
-          stay Figma's baked render; the Link only adds the hit area. */}
+          prototype wires ON_CLICK → 1573:107 (/craft). Rebuilt on 08-10 out of
+          a real box and a real text node, because that is what the frame is
+          now — which is what makes the label editable. The trailing arrow is
+          still a glyph render, as everywhere else on this page. */}
       <Link
         data-field="craft.cta_href"
         href={c.cta_href}
         aria-label="Explore our craft"
-        style={{ ...abs(93, 380, 246, 38), display: "block" }}
+        style={{
+          ...abs(92, 401, 246, 38),
+          display: "block",
+          background: INK,
+          borderRadius: 8,
+          // 2380:682 carries a 1px GOLD stroke — invisible in the outline, and
+          // the single biggest pixel difference in this band while it was
+          // missing.
+          boxShadow: `inset 0 0 0 1px ${GOLD}`,
+        }}
       >
+        {/* Figma exports a text strip at its INK bounds, not the node box —
+            134×13.5 CSS here (268×27 at 2×). A PNG must therefore be given
+            that size explicitly and centred by hand: `object-fit: none` draws
+            a 2× raster at its full intrinsic pixel size, i.e. twice too big.
+            The SVG strips elsewhere on this page get away with it because
+            they are resolution-independent. */}
         <img
           data-field="craft.cta_label"
-          src="/eldreve/home/165-180.svg"
-          alt="EXPLORE OUR CRAFT →"
-          width={246}
-          height={38}
-          style={{ ...abs(0, 0, 246, 38), display: "block" }}
+          src="/eldreve/home/2380-683.png"
+          alt="Explore Our Craft →"
+          width={134}
+          height={13.5}
+          style={{ ...abs(56, 12.25, 134, 13.5), display: "block" }}
         />
       </Link>
 
@@ -349,38 +408,24 @@ export function A9({
           style={{ ...abs(163, 7, 104, 14), display: "block" }}
         />
 
-        {/* 482:122 · workshop title */}
+        {/* 482:122 · workshop title. Wraps: at 36px the frame breaks it over
+            two lines and lets it overflow its own 32px box. */}
         <div
           data-field="craft.workshop_title"
           className={playfair.className}
           style={{
-            ...abs(20, 30, 390),
-            fontSize: 25,
+            ...abs(20, 33, 390),
+            fontSize: 36,
             lineHeight: "28px",
             color: INK,
             fontWeight: 500,
             textAlign: "center",
-            whiteSpace: "nowrap",
           }}
         >
           {c.workshop_title}
         </div>
 
-        {/* 482:123 · workshop copy */}
-        <div
-          data-field="craft.workshop_copy"
-          className={goudy.className}
-          style={{
-            ...abs(50, 68, 330),
-            fontSize: 9,
-            lineHeight: "10px",
-            color: INK,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {c.workshop_copy}
-        </div>
+        {/* 482:123 · the gallery's two-line caption is deleted at source. */}
 
         {/* 482:124 · six workshop gallery crops */}
         {WORKSHOP_CROPS.map((c) => (
@@ -423,9 +468,9 @@ export function A9({
           data-field="craft.verified_title"
           className={playfair.className}
           style={{
-            ...abs(97, 345, 240, 44),
-            fontSize: 20,
-            lineHeight: "26.7px",
+            ...abs(58, 340, 313, 44),
+            fontSize: 24,
+            lineHeight: "32px",
             color: INK,
             fontWeight: 500,
             textAlign: "center",
@@ -466,7 +511,7 @@ export function A9({
                   <img
                     data-field={`craft.cert_${i + 1}_title`}
                     src="/eldreve/home/482-129.png"
-                    alt={`${certs[i].title} certificate`}
+                    alt={`${certs[i]} certificate`}
                     width={430}
                     height={913}
                     style={{
@@ -486,35 +531,26 @@ export function A9({
                     }}
                   />
                 </div>
-                <div
-                  className={notoSC.className}
-                  style={{
-                    ...abs(0, 92, 69),
-                    fontSize: 6.5,
-                    lineHeight: "8px",
-                    color: INK,
-                    fontWeight: 500,
-                    textAlign: "center",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {certs[i].title}
-                </div>
-                <div
-                  data-field={`craft.cert_${i + 1}_number`}
-                  className={notoSC.className}
-                  style={{
-                    ...abs(0, 104, 69),
-                    fontSize: 5,
-                    lineHeight: "6px",
-                    color: INK,
-                    fontWeight: 400,
-                    textAlign: "center",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {certs[i].num}
-                </div>
+              </div>
+            ))}
+            {/* The certificate NUMBER line under each name was deleted at
+                source on 08-10, and the name itself went 6.5 → 13. The names
+                are drawn OUTSIDE their columns because the design lets
+                "European Patent" spill 100px wide across its neighbours. */}
+            {CERTIFICATES.map((cert, i) => (
+              <div
+                key={`title-${cert.x}`}
+                className={notoSC.className}
+                style={{
+                  ...abs(cert.title.x, cert.title.y, cert.title.w),
+                  fontSize: 13,
+                  lineHeight: "10px",
+                  color: INK,
+                  fontWeight: 500,
+                  textAlign: "center",
+                }}
+              >
+                {certs[i]}
               </div>
             ))}
           </div>

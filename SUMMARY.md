@@ -106,14 +106,70 @@ Open linked resources only when the task needs them.
   frame's own: no backend, and the schema holds one `default_address` rather
   than a collection (AI-039). The same delivery deleted the `/account`
   three-tile shortcut band and the homepage's Real Rose Promise strip; both are
-  applied, the latter via a new `band.trim` that returns its 136px to the stage
-  without moving any later band's imported coordinates (5193 → 5057). **The
-  other 28 changed frames are not imported** — chiefly the homepage typography
-  pass and seven further content deletions; the baseline is deliberately
-  un-stamped so the next sync still sees them.
-  ⚠️ The Figma file still carries **GoldRose**/**VELORIA** in three frames the
+  applied, the latter via a `band.trim` that returned its 136px to the stage
+  without moving any later band's imported coordinates (5193 → 5057) — retired
+  on 08-10, see below. **The other 28 changed frames were not imported**;
+  the baseline was deliberately un-stamped so the next sync still saw them.
+  ⚠️ The Figma file still carries **GoldRose**/**VELORIA** in frames the
   repo already renamed, so those frames must not be imported verbatim
-  (AI-037), and `/story` descends from a frame that no longer exists (AI-038).
+  (AI-037), and `/story` descends from a frame that no longer exists
+  (AI-038).
+- **The home page `/` is re-imported, and the stage is 5074 (2026-08-10,
+  `claude/figma-sync-home-page-75f37e`).** A home-only sync that finally takes
+  the **page-wide typography pass** the 08-07 delivery deferred: nearly every
+  text node grew (headings 24/30/21 → 32/36, body and card copy 8–11 → 13, chip
+  labels 9 → 13), plus **seven content deletions** and one band that changed
+  shape. **`band.trim` is gone with it** — it existed only while the frame had
+  deleted A-3's promise strip *without* re-stacking, so the repo held 136px the
+  design no longer used; this frame re-stacks, so every band took its own new y
+  (32 / 781 / 1422 / 1749 / 2225 / 3014 / 4005) and the compensation, its type
+  field and its three unit tests were deleted. Net 5057 → **5074**, all of it
+  A-1 growing 732 → 749. One frame quirk resolved silently: the content group
+  sits at `y=4` inside a frame that did not grow to match, so 4px is subtracted
+  from every imported coordinate — which makes the stack close exactly on the
+  frame's declared 5074 and keeps the promo bar at y=0 with the rest of the
+  site's chrome.
+  - **A-1 rebuilt:** the two benefit tiles deleted, the photo window 317 → 405
+    (re-exported as `2380-386.png`), the subtitle 16px pink → **24px gold**, the
+    CTA tracked-out 12px caps → **20px sentence case in Goudy**.
+  - **Two things stopped being baked artwork and became editable**, because the
+    frame rebuilt them out of real nodes: A-9's EXPLORE OUR CRAFT button label
+    and A-11's FAQ `＋` markers. Nine registry fields went the other way, with
+    the content they described.
+  - ⚠️ **Three deletions remove substance, not decoration** (AI-045):
+    "Verified Purchase" on every review card, all four certificate
+    **numbers**, and the eight-line brand-story paragraph. Imported as deleted
+    — a page must not disagree with its own design — but recorded for a
+    ruling.
+  - ⚠️ **Not taken verbatim:** the frame slid every rail card's ornament onto
+    its own button and deleted the button on three of six cards; all six keep
+    theirs (AI-043).
+  - **The stale brand name in this frame is now the owner's decision, and the
+    frame won (2026-08-10, AI-044, closed).** The hero eyebrow stays
+    `— G O L D R O S E —`, and two defaults went BACK to the frame's wording:
+    `craft.workshop_title` → "Inside the **GoldRose** Workshop" and
+    `occasion.intro` → "Find a **GoldRose** for every meaningful moment." This
+    partly reverses the 08-05 ELDREVE rename on the home page; it was raised
+    as such before the ruling. AI-037 (the same name in three *other* frames)
+    is untouched and still open.
+  - **Then band-diffed to the frame and closed the gap.** Every one of the
+    frame's 123 TEXT nodes is now **within 1px** of the live DOM, measured by
+    matching them on their own copy. The pass found things `--outline` cannot
+    show: two italics and four letter-spacings, a **1px gold stroke** on the
+    EXPLORE OUR CRAFT button, every chip label 1px low, and per-certificate
+    title boxes. Craft step 04's tile turned out to be a photo rather than the
+    flattened SVG it used to be, so it became a replaceable `image` field. The
+    **active carousel dot now takes the design's larger size** (`activeSize` on
+    the shared Carousel) — every rail here draws the current indicator bigger,
+    and normalizing that away meant no rail could rest on the frame's picture.
+    ⚠️ A 2× PNG strip must be sized explicitly: `object-fit: none`, the idiom
+    this page uses for SVG strips, draws a raster twice too big.
+  - **What remains is not position.** ~2.0–2.7% of pixels per band differ, all
+    of it font rasterisation, two lines where Figma's text engine wraps earlier
+    than Chrome at the same size, and the two sanctioned divergences — A-2's
+    uniform card 2 (owner, 08-07) and the six rail CTAs (AI-043), which is why
+    A-2 alone reads 8.3%.
+  - The baseline is **again un-stamped**: 41 changed frames remain.
 - **Product reviews are real (2026-08-06, PR #30, `feat/product-reviews`).**
   `product_reviews` table live on hosted (migration `0007`; content-neutral
   moderation, never hard-deleted), `lib/reviews/db.ts` + `POST /api/reviews`,
@@ -137,8 +193,9 @@ Open linked resources only when the task needs them.
   baselines pass). Figma-baked labels and catalogue/review data are listed
   read-only with the reason. `promo.slogan` moved here from `/admin/content`.
   Spec: [`admin-design.md` §9.8.1](docs/admin-design.md#981-content--home-page).
-  ⚠️ The hero eyebrow still reads `— G O L D R O S E —`, a miss in the 08-05
-  ELDREVE rename; it is now editable, so it is an owner decision, not a deploy.
+  ⚠️ The hero eyebrow reads `— G O L D R O S E —`. Originally a miss in the
+  08-05 ELDREVE rename, it is now a **kept** owner decision (AI-044, 08-10) —
+  editable, so reversible with one save and no deploy.
 - **Photos, the two hidden rails and rail speed followed (2026-08-07,
   `worktree-admin-home-customization`).** New field kinds `image` (21 photos,
   each paired with a description) and `number` (one shared card-rail speed,

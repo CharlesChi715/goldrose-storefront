@@ -6,8 +6,8 @@
  * art — one photo and four inert ellipses.
  *
  * The design ships ONE hero photo against four dots, so the registry defaults
- * all four slides to that same render (1523:1675 — the candle-lit "Real Rose"
- * box scene, a flat 430×317 photo since the 07-29 delivery). That keeps the
+ * all four slides to that same render (2380:386 — a flat 430×405 photo since
+ * the 08-10 delivery, which grew the opening from 317). That keeps the
  * untouched page byte-identical to the import while giving the owner four real
  * slots: upload a different photo to any of slides 2–4 in Content → Home page
  * and the auto-play becomes a genuine slideshow, with no layout change at all
@@ -19,13 +19,13 @@ import { HomePhoto } from "@/components/home/HomePhoto";
 import type { HomeFrames } from "@/lib/home-content/frames";
 import type { HomeText } from "@/lib/home-content/registry";
 
-// 549:97 — keep every indicator at the same visible size. The active slide is
+// 2380:394 — keep every indicator at the same visible size. The active slide is
 // communicated by colour, so it does not also need a larger first dot.
 const DOTS = [
-  { x: 185, y: 365, size: 7 },
-  { x: 203, y: 365, size: 7 },
-  { x: 220, y: 365, size: 7 },
-  { x: 237, y: 365, size: 7 },
+  { x: 192, y: 451, size: 7, activeSize: 9 },
+  { x: 210, y: 450, size: 7, activeSize: 9 },
+  { x: 227, y: 450, size: 7, activeSize: 9 },
+  { x: 244, y: 450, size: 7, activeSize: 9 },
 ];
 
 /**
@@ -54,7 +54,7 @@ export function HeroCarousel({
 
   return (
     <Carousel
-      window={{ left: -1, top: 66, width: 430, height: 317 }}
+      window={{ left: -1, top: 66, width: 430, height: 405 }}
       count={DOTS.length}
       dots={DOTS}
       activeColor="#D4AF37"
@@ -74,8 +74,8 @@ export function HeroCarousel({
           field={`photo_${i + 1}`}
           value={slides[i].photo}
           alt={slides[i].alt}
-          box={{ w: 430, h: 317 }}
-          design={{ x: 0, y: 0, w: 430, h: 317 }}
+          box={{ w: 430, h: 405 }}
+          design={{ x: 0, y: 0, w: 430, h: 405 }}
           frames={frames}
         />
       )}

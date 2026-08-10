@@ -2,7 +2,7 @@
 /**
  * ROLE OF THIS FILE
  * Homepage module A-11 "A11 · Reference Rebuild" (Figma node 2380:727) of the
- * simplified homepage frame, [0,4124 430×1010]: the brand-story block with
+ * simplified homepage frame, [0,4005 430×1010]: the brand-story block with
  * photo and "READ OUR STORY" CTA, four FAQ rows with "VIEW ALL FAQs", a
  * second story photo beside the "Give Them a Rose" gift card, the newsletter
  * sign-up strip, and the footer link cloud.
@@ -20,11 +20,12 @@
  *
  * 2026-08-07 sync: the newsletter strip's email field is deleted at source and
  * the control now has two states — see components/home/NewsletterJoin.tsx.
- * NOT taken from that delivery: the homepage-wide typography pass, which also
- * enlarges this strip's title and body (19→20, 10.5→13) and reflows the strip
- * from 97px to 105px. That pass is deferred as a whole rather than applied one
- * band at a time, so the strip keeps its 97px column and both control states
- * are centred in it — the same centring the frames use, on the shorter box.
+ *
+ * 2026-08-10 sync: the band moved 4124 → 4005 and the typography pass deferred
+ * on 08-07 is applied — including the newsletter strip's own 19→20 / 10.5→13
+ * and its reflow from 97px to 105px. The eight-line brand-story paragraph is
+ * deleted at source, and the FAQ "＋" markers stopped being a glyph render and
+ * became real text.
  */
 
 import Link from "next/link";
@@ -48,7 +49,7 @@ const GLOW =
    to the A11/02 FAQ frame. Every row's prototype goes to the same place: the
    concierge chat (1537:111 → /care/chat), which is where an unanswered
    question actually gets answered. */
-const FAQ_ROWS = [{ y: 85 }, { y: 124 }, { y: 163 }, { y: 202 }] as const;
+const FAQ_ROWS = [{ y: 88 }, { y: 127 }, { y: 166 }, { y: 205 }] as const;
 
 /* 2380:849…2380:865 · the footer link cloud. The design lays these out as
    eight individually-placed, centre-aligned text boxes rather than a row —
@@ -84,11 +85,11 @@ export function A11({
     { label: c.footer_8_label, href: c.footer_8_href },
   ];
   return (
-    // 2380:727 module frame — children are positioned relative to (0, 4124).
+    // 2380:727 module frame — children are positioned relative to (0, 4005).
     <div
       data-el="HOME-STORY-SECTION"
       style={{
-        ...abs(0, 4124, 430, 1010),
+        ...abs(0, 4005, 430, 1010),
         background: GLOW,
         overflow: "hidden",
       }}
@@ -122,9 +123,9 @@ export function A11({
           data-el="HOME-STORY-TITLE"
           className={playfair.className}
           style={{
-            ...abs(26, 32, 190),
-            fontSize: 18,
-            lineHeight: "22px",
+            ...abs(26, 32, 195),
+            fontSize: 32,
+            lineHeight: "30px",
             color: INK,
             fontWeight: 500,
             whiteSpace: "pre-line",
@@ -132,29 +133,19 @@ export function A11({
         >
           {c.story_title}
         </div>
-        <div
-          data-field="story.story_body"
-          data-el="HOME-STORY-BODY-TEXT"
-          className={goudy.className}
-          style={{
-            ...abs(26, 82, 176),
-            fontSize: 8,
-            lineHeight: "11.5px",
-            color: INK,
-            whiteSpace: "pre-line",
-          }}
-        >
-          {c.story_body}
-        </div>
+        {/* The eight-line story paragraph (2380:770) is deleted at source
+            on 08-10; the title runs straight into the pull quote. */}
         <div
           data-field="story.story_quote"
           className={playfair.className}
           style={{
-            ...abs(26, 184, 170),
-            fontSize: 11.2,
+            ...abs(27, 173, 170),
+            fontSize: 13,
             lineHeight: "15px",
             color: "#AD6152",
             fontWeight: 400,
+            // Italic in the design — the only italic in A-11.
+            fontStyle: "italic",
             whiteSpace: "pre-line",
           }}
         >
@@ -167,7 +158,7 @@ export function A11({
           href={c.story_cta_href}
           aria-label="Read our story"
           style={{
-            ...abs(22, 227, 138, 28),
+            ...abs(22, 227, 180, 28),
             background: CTA_GRADIENT,
             borderRadius: 6,
             overflow: "hidden",
@@ -178,8 +169,8 @@ export function A11({
             data-field="story.story_cta_label"
             className={goudy.className}
             style={{
-              ...abs(5, 0, 110, 28),
-              fontSize: 7.9,
+              ...abs(10, 2, 139, 28),
+              fontSize: 13,
               lineHeight: "28px",
               color: "#FAF0E0",
               letterSpacing: 1.25,
@@ -194,7 +185,7 @@ export function A11({
             alt="→"
             width={13}
             height={7}
-            style={{ ...abs(117.02, 11.005, 13, 7), display: "block" }}
+            style={{ ...abs(158, 11.005, 13, 7), display: "block" }}
           />
         </Link>
       </div>
@@ -214,8 +205,8 @@ export function A11({
           data-el="HOME-FAQ-TITLE"
           className={playfair.className}
           style={{
-            ...abs(31, 42, 360, 32),
-            fontSize: 24,
+            ...abs(9, 33, 411, 32),
+            fontSize: 32,
             lineHeight: "30px",
             color: INK,
             fontWeight: 500,
@@ -248,7 +239,7 @@ export function A11({
               className={goudy.className}
               style={{
                 ...abs(14, 0, 315, 28),
-                fontSize: 10.5,
+                fontSize: 13,
                 lineHeight: "28px",
                 color: INK,
                 whiteSpace: "nowrap",
@@ -256,13 +247,21 @@ export function A11({
             >
               {faqs[i]}
             </div>
-            <img
-              src="/eldreve/home/507-100.svg"
-              alt="＋"
-              width={11}
-              height={11}
-              style={{ ...abs(338.6, 8.945, 11, 11), display: "block" }}
-            />
+            {/* 08-10: the marker is a real text node in the frame now, at
+                15px in the design's own gold — no longer a glyph render. */}
+            <div
+              className={notoSC.className}
+              aria-hidden
+              style={{
+                ...abs(332, 0, 24, 28),
+                fontSize: 15,
+                lineHeight: "28px",
+                color: "#C47829",
+                textAlign: "center",
+              }}
+            >
+              ＋
+            </div>
           </Link>
         ))}
       </div>
@@ -273,22 +272,19 @@ export function A11({
         data-field="story.faq_href"
         data-el="HOME-FAQ-VIEW-ALL-LINK"
         href={c.faq_href}
-        style={{ ...abs(131, 519, 190, 33), display: "block" }}
+        style={{ ...abs(131, 523, 190, 33), display: "block" }}
       >
-        {/* Figma exports glyph strips at their INK bounds (104×9), not the
-            node box, so the strip is drawn at natural size and centred rather
-            than stretched to 190×33. */}
+        {/* Figma exports glyph strips at their INK bounds, not the node box —
+            143×12 CSS here (286×24 at 2×). A 2× PNG must be sized explicitly
+            and centred by hand; `object-fit: none` would draw it at its full
+            intrinsic pixel size, twice too big (see A9.tsx). */}
         <img
           data-field="story.faq_view_all_label"
-          src="/eldreve/home/2380-796.svg"
+          src="/eldreve/home/2380-796.png"
           alt="VIEW ALL FAQs →"
-          width={190}
-          height={33}
-          style={{
-            display: "block",
-            objectFit: "none",
-            objectPosition: "center center",
-          }}
+          width={143}
+          height={12}
+          style={{ ...abs(23.5, 10.5, 143, 12), display: "block" }}
         />
       </Link>
 
@@ -310,7 +306,7 @@ export function A11({
       <div
         data-el="HOME-GIFT-CTA-CARD"
         style={{
-          ...abs(239, 573, 174, 207),
+          ...abs(242, 567, 174, 207),
           background: "#FFF6EC",
           borderRadius: 4,
           overflow: "hidden",
@@ -321,9 +317,9 @@ export function A11({
           data-el="HOME-GIFT-CTA-TITLE"
           className={playfair.className}
           style={{
-            ...abs(11, 18, 152, 78),
-            fontSize: 18.5,
-            lineHeight: "24.7px",
+            ...abs(11, 18, 181, 78),
+            fontSize: 20,
+            lineHeight: "27px",
             color: BROWN,
             fontWeight: 500,
             display: "flex",
@@ -338,9 +334,9 @@ export function A11({
           data-el="HOME-GIFT-CTA-BODY-TEXT"
           className={notoSC.className}
           style={{
-            ...abs(11, 102, 150, 50),
-            fontSize: 9.5,
-            lineHeight: "11.4px",
+            ...abs(11, 115, 150, 50),
+            fontSize: 13,
+            lineHeight: "16px",
             color: BROWN,
             fontWeight: 400,
             display: "flex",
@@ -356,7 +352,7 @@ export function A11({
           data-el="HOME-GIFT-CTA-SHOP-BTN"
           href={c.gift_cta_href}
           style={{
-            ...abs(11, 158, 145, 26),
+            ...abs(11, 184, 145, 26),
             display: "block",
             background: BROWN,
             borderRadius: 5,
@@ -366,9 +362,10 @@ export function A11({
             data-field="story.gift_cta_label"
             className={notoSC.className}
             style={{
-              ...abs(29.5, 7.5, 86),
+              ...abs(27, 0, 92, 26),
               fontSize: 9.5,
-              lineHeight: "11.4px",
+              lineHeight: "26px",
+              letterSpacing: -0.095,
               color: "#FFF6EC",
               fontWeight: 400,
               textAlign: "center",
@@ -381,15 +378,15 @@ export function A11({
       </div>
 
       {/* ---- 2380:797 · newsletter strip ---- */}
-      <div style={{ ...abs(25, 808, 391, 97) }}>
+      <div style={{ ...abs(25, 808, 391, 105) }}>
         <div
           data-field="story.newsletter_title"
           data-el="HOME-NEWSLETTER-TITLE"
           className={playfair.className}
           style={{
             ...abs(0, 0, 184, 52),
-            fontSize: 19,
-            lineHeight: "25.3px",
+            fontSize: 20,
+            lineHeight: "27px",
             color: BROWN,
             fontWeight: 500,
             display: "flex",
@@ -403,9 +400,9 @@ export function A11({
           data-el="HOME-NEWSLETTER-BODY-TEXT"
           className={notoSC.className}
           style={{
-            ...abs(0, 53, 184, 44),
-            fontSize: 10.5,
-            lineHeight: "12.6px",
+            ...abs(0, 61, 184, 44),
+            fontSize: 13,
+            lineHeight: "16px",
             color: BROWN,
             fontWeight: 400,
             display: "flex",
@@ -444,8 +441,8 @@ export function A11({
           className={notoSC.className}
           style={{
             ...abs(l.x, l.y, l.w, l.h),
-            fontSize: 8.5,
-            lineHeight: "10.2px",
+            fontSize: 9,
+            lineHeight: "10px",
             color: BROWN,
             fontWeight: 400,
             display: "flex",

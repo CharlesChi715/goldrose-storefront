@@ -43,9 +43,9 @@ const GOLD = "#D4AF37";
 
 /* Both states are centred in the strip the parent hands them, so the y is
    derived rather than copied: the frames centre a 42px pill and a 71px card
-   in the same 105px column, and this strip is 97px until the homepage
-   typography pass lands (see components/home/A11.tsx). */
-const STRIP_HEIGHT = 97;
+   in the same 105px column, which is what the strip is since the 08-10
+   typography pass (see components/home/A11.tsx). */
+const STRIP_HEIGHT = 105;
 const PILL = { w: 143, h: 42 };
 const CARD = { w: 187, h: 71 };
 

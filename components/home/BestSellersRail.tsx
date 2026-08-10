@@ -88,11 +88,13 @@ type Card = {
   priceW: number;
   /** Card 1's price node is CENTER-aligned in its 45px box; card 2's is LEFT. */
   priceCentered: boolean;
+  /** The gold caption: the 08-10 pass left the two cards at different sizes. */
+  note: { w: number; fontSize: number };
 };
 
 const CARDS: readonly Card[] = [
-  { priceW: 45, priceCentered: true },
-  { priceW: 53, priceCentered: false },
+  { priceW: 45, priceCentered: true, note: { w: 183, fontSize: 14 } },
+  { priceW: 53, priceCentered: false, note: { w: 160, fontSize: 13 } },
 ];
 
 /** The editable strings of one card, picked out of the `featured` section. */
@@ -166,7 +168,7 @@ function Content({ card, copy, n }: { card: Card; copy: CardCopy; n: number }) {
         style={{
           ...abs(12, 57, card.priceW),
           fontSize: 14,
-          lineHeight: "16.8px",
+          lineHeight: "17px",
           fontWeight: 500,
           color: "#3B2F2F",
           textAlign: card.priceCentered ? "center" : "left",
@@ -180,8 +182,8 @@ function Content({ card, copy, n }: { card: Card; copy: CardCopy; n: number }) {
         className={notoSC.className}
         data-el={`HOME-FEATURED-PRODUCT-NOTE-${n}`}
         style={{
-          ...abs(12, 75, 160),
-          fontSize: 11,
+          ...abs(12, 75, card.note.w),
+          fontSize: card.note.fontSize,
           lineHeight: "16px",
           fontWeight: 400,
           color: "#D4AF37",

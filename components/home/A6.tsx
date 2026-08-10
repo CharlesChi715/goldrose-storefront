@@ -7,11 +7,16 @@
  * and the "Read Customer Stories" button. All coordinates/colors are verbatim
  * Figma REST data, homepage-frame absolute.
  *
- * 2026-08-04 sync: the band moved 3762 → 2344 and lost three things at
- * source — the "Clients" and "Employees" chips, and the full-width "Just
- * Because" note card. The "more recipients" arrow node survives but is now an
- * empty clipped frame (no vector child), so it draws nothing and is not
- * rebuilt here.
+ * 2026-08-04 sync: the band lost three things at source — the "Clients" and
+ * "Employees" chips, and the full-width "Just Because" note card. The "more
+ * recipients" arrow node survives but is now an empty clipped frame (no vector
+ * child), so it draws nothing and is not rebuilt here.
+ *
+ * 2026-08-10 sync: the band moved 2344 → 2225 and took the typography pass —
+ * both section headings 30/21 → 36/32, the intro and the review subtitle
+ * 10/9 → 13, and every chip label 9 → 13, which drops the chip row 15px. The
+ * review cards lost their "Verified Purchase" row at source; see
+ * ReviewsRail.tsx.
  */
 
 import Link from "next/link";
@@ -27,43 +32,43 @@ import type { HomeText } from "@/lib/home-content/registry";
    state: orange stroke + orange label; the rest share the neutral pair. */
 const CHIPS = [
   {
-    x: 12,
+    x: 10,
     w: 46,
     stroke: "#C76E29",
-    labelX: 25.5,
-    labelW: 19,
+    labelX: 20,
+    labelW: 27,
     color: "#BD5C1A",
   },
   {
-    x: 63,
+    x: 61,
     w: 58,
     stroke: "#E5D6C2",
-    labelX: 72,
-    labelW: 40,
+    labelX: 61,
+    labelW: 58,
     color: "#3B2E2E",
   },
   {
-    x: 126,
+    x: 124,
     w: 42,
     stroke: "#E5D6C2",
-    labelX: 136,
-    labelW: 22,
-    color: "#3B2E2E",
-  },
-  {
-    x: 173,
-    w: 52,
-    stroke: "#E5D6C2",
-    labelX: 183.5,
+    labelX: 130,
     labelW: 31,
     color: "#3B2E2E",
   },
   {
-    x: 230,
+    x: 171,
+    w: 52,
+    stroke: "#E5D6C2",
+    labelX: 175,
+    labelW: 45,
+    color: "#3B2E2E",
+  },
+  {
+    x: 228,
     w: 54,
     stroke: "#E5D6C2",
-    labelX: 240,
-    labelW: 34,
+    labelX: 230,
+    labelW: 50,
     color: "#3B2E2E",
   },
 ] as const;
@@ -81,7 +86,7 @@ export function A6({
   return (
     <>
       {/* Module background (138:62) */}
-      <div style={{ ...abs(0, 2344, 430, 789), background: "#FFF6EC" }} />
+      <div style={{ ...abs(0, 2225, 430, 789), background: "#FFF6EC" }} />
 
       {/* Header ornament · rose and lines (431:265) */}
       <img
@@ -89,7 +94,7 @@ export function A6({
         alt=""
         width={142}
         height={34}
-        style={{ ...abs(144, 2344, 142, 34), display: "block" }}
+        style={{ ...abs(144, 2225, 142, 34), display: "block" }}
       />
 
       {/* Title + intro (163:82, 163:83) */}
@@ -97,8 +102,8 @@ export function A6({
         data-field="recipient.title"
         className={playfair.className}
         style={{
-          ...abs(24, 2375, 382),
-          fontSize: 30,
+          ...abs(23, 2255, 382),
+          fontSize: 36,
           lineHeight: "36px",
           fontWeight: 500,
           color: "#3B2F2F",
@@ -112,8 +117,8 @@ export function A6({
         data-field="recipient.intro"
         className={goudy.className}
         style={{
-          ...abs(52, 2411, 326),
-          fontSize: 10,
+          ...abs(53, 2296, 326),
+          fontSize: 13,
           lineHeight: "15px",
           color: "#3B2F2F",
           textAlign: "center",
@@ -128,7 +133,7 @@ export function A6({
         <div
           key={chip.x}
           style={{
-            ...abs(chip.x, 2435, chip.w, 30),
+            ...abs(chip.x, 2331, chip.w, 30),
             background: "#FFF6EC",
             borderRadius: 999,
             boxShadow: `inset 0 0 0 1px ${chip.stroke}`,
@@ -138,9 +143,9 @@ export function A6({
             data-field={`recipient.chip_${i + 1}`}
             className={notoSC.className}
             style={{
-              ...abs(chip.labelX - chip.x, 9.5, chip.labelW),
-              fontSize: 9,
-              lineHeight: "10.8px",
+              ...abs(chip.labelX - chip.x, 7, chip.labelW),
+              fontSize: 13,
+              lineHeight: "16px",
               fontWeight: 400,
               color: chip.color,
               whiteSpace: "nowrap",
@@ -164,14 +169,14 @@ export function A6({
           these two stay inert; RecipientRail wires the first three. */}
       <div
         style={{
-          ...abs(231, 2758.5, 7, 7),
+          ...abs(233, 2649.5, 7, 7),
           background: "#E0CCB2",
           borderRadius: 9999,
         }}
       />
       <div
         style={{
-          ...abs(249, 2758.5, 7, 7),
+          ...abs(251, 2649.5, 7, 7),
           background: "#E0CCB2",
           borderRadius: 9999,
         }}
@@ -186,14 +191,14 @@ export function A6({
         alt=""
         width={58.149}
         height={13.923}
-        style={{ ...abs(187.926, 2795, 58.149, 13.923), display: "block" }}
+        style={{ ...abs(187.926, 2676, 58.149, 13.923), display: "block" }}
       />
       <div
         data-field="recipient.reviews_title"
         className={playfair.className}
         style={{
-          ...abs(26, 2816, 382),
-          fontSize: 21,
+          ...abs(26, 2697, 382),
+          fontSize: 32,
           lineHeight: "27px",
           fontWeight: 500,
           color: "#3B2F2F",
@@ -207,8 +212,8 @@ export function A6({
         data-field="recipient.reviews_intro"
         className={goudy.className}
         style={{
-          ...abs(50, 2843, 330),
-          fontSize: 9,
+          ...abs(51, 2732, 330),
+          fontSize: 13,
           lineHeight: "13px",
           color: "#3B2E2E",
           textAlign: "center",
@@ -224,7 +229,7 @@ export function A6({
           so it stays static art rather than pointing at a missing slide. */}
       <div
         style={{
-          ...abs(240, 3086.5, 7, 7),
+          ...abs(240, 2967.5, 7, 7),
           background: "#E0CCB2",
           borderRadius: 9999,
         }}
@@ -237,7 +242,7 @@ export function A6({
         href={c.reviews_cta_href}
         aria-label="Read customer stories"
         style={{
-          ...abs(91, 3031, 246, 33),
+          ...abs(91, 2912, 246, 33),
           background: "#2E1C12",
           borderRadius: 7,
           display: "block",

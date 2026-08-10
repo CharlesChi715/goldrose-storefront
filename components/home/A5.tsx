@@ -2,18 +2,23 @@
 /**
  * ROLE OF THIS FILE
  * Module A-5 · "Shop by Occasion" of the simplified homepage frame (Figma
- * node 2380:454, [0,1868 430×476]): ornamented title, occasion filter chips
+ * node 2380:454, [0,1749 430×476]): ornamented title, occasion filter chips
  * (each → /shop), an auto-sliding horizontal rail of recipient cards (each →
  * /shop), and carousel dots. All coordinates, colors and type values are
  * verbatim from the Figma REST data; rail items past x=430 are intentionally
  * clipped by the module frame.
  *
- * 2026-08-04 sync: the band gained a "—   ♡   —" eyebrow, swapped its 4th/5th
- * chips (Wedding/Graduation → Christmas/Anniversary), dropped the 6th chip and
- * the "Just Because" note card, and lost 82px of height. Two nodes that DO
- * exist in the frame are deliberately not built: "A5 Prompt" (2380:464) and
- * "Button · Explore Occasion Gifts" (2380:478) sit at y=511/547 inside a
- * 476-tall clipping frame, so the design itself renders neither.
+ * 2026-08-04 sync: the band swapped its 4th/5th chips (Wedding/Graduation →
+ * Christmas/Anniversary), dropped the 6th chip and the "Just Because" note
+ * card, and lost 82px of height. Two nodes that DO exist in the frame are
+ * deliberately not built: "A5 Prompt" (2380:464) and "Button · Explore
+ * Occasion Gifts" (2380:478) sit at y=511/547 inside a 476-tall clipping
+ * frame, so the design itself renders neither.
+ *
+ * 2026-08-10 sync: the band moved 1868 → 1749, the "—   ♡   —" eyebrow the
+ * 08-04 delivery had added is deleted again, and the typography pass reset the
+ * title (30 → 36), the intro (10 → 13) and every chip label (9 → 13) — the
+ * taller chip labels are why the chip row itself drops 11px.
  */
 
 import Link from "next/link";
@@ -37,7 +42,7 @@ export function A5({
     // 138:61 — module frame; clips the over-wide chip + card rails.
     <div
       style={{
-        ...abs(0, 1868, 430, 476),
+        ...abs(0, 1749, 430, 476),
         background: "#FFF6EC",
         overflow: "hidden",
       }}
@@ -51,21 +56,8 @@ export function A5({
         style={{ ...abs(144, 0, 142, 34), display: "block" }}
       />
 
-      {/* 2380:455 · "—   ♡   —" eyebrow, new in this revision. The ♡ falls back
-          to a system font in the browser, so it is served as Figma's own render
-          rather than live text. */}
-      <img
-        src="/eldreve/home/2380-455.svg"
-        alt="— ♡ —"
-        width={160}
-        height={20}
-        style={{
-          ...abs(135, 20, 160, 20),
-          display: "block",
-          objectFit: "none",
-          objectPosition: "center center",
-        }}
-      />
+      {/* The "—   ♡   —" eyebrow (2380:455) added on 08-04 was deleted at
+          source on 08-10. */}
 
       {/* 2380:456 · title */}
       <div
@@ -73,7 +65,7 @@ export function A5({
         className={playfair.className}
         style={{
           ...abs(24, 31, 382),
-          fontSize: 30,
+          fontSize: 36,
           lineHeight: "36px",
           color: "#3B2F2F",
           fontWeight: 500,
@@ -89,8 +81,8 @@ export function A5({
         data-field="occasion.intro"
         className={notoSC.className}
         style={{
-          ...abs(52, 67, 326),
-          fontSize: 10,
+          ...abs(55, 73, 326),
+          fontSize: 13,
           lineHeight: "15px",
           color: "#3B2F2F",
           fontWeight: 400,
@@ -111,7 +103,7 @@ export function A5({
         data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
-          ...abs(12, 91, 118, 30),
+          ...abs(11, 102, 118, 30),
           display: "block",
           background: "#FFF9F0",
           boxShadow: "inset 0 0 0 1px #C77D2B",
@@ -122,15 +114,15 @@ export function A5({
         <img
           src="/eldreve/home/425-151.svg"
           alt=""
-          style={{ ...abs(14.75, 6, 16.5, 18), display: "block" }}
+          style={{ ...abs(3, 6, 16.5, 18), display: "block" }}
         />
         <div
           data-field="occasion.chip_1"
           className={notoSC.className}
           style={{
-            ...abs(37.25, 9.5, 64),
-            fontSize: 9,
-            lineHeight: "10.8px",
+            ...abs(23, 7, 93),
+            fontSize: 13,
+            lineHeight: "16px",
             color: "#3B2F2F",
             fontWeight: 400,
             whiteSpace: "nowrap",
@@ -144,7 +136,7 @@ export function A5({
         data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
-          ...abs(135, 91, 86, 30),
+          ...abs(134, 102, 86, 30),
           display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -156,9 +148,9 @@ export function A5({
           data-field="occasion.chip_2"
           className={notoSC.className}
           style={{
-            ...abs(15.5, 9.5, 55),
-            fontSize: 9,
-            lineHeight: "10.8px",
+            ...abs(4, 7, 79),
+            fontSize: 13,
+            lineHeight: "16px",
             color: "#3B2F2F",
             fontWeight: 400,
             whiteSpace: "nowrap",
@@ -172,7 +164,7 @@ export function A5({
         data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
-          ...abs(226, 91, 70, 30),
+          ...abs(225, 102, 70, 30),
           display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -184,9 +176,9 @@ export function A5({
           data-field="occasion.chip_3"
           className={notoSC.className}
           style={{
-            ...abs(16.5, 9.5, 37),
-            fontSize: 9,
-            lineHeight: "10.8px",
+            ...abs(9, 7, 53),
+            fontSize: 13,
+            lineHeight: "16px",
             color: "#3B2F2F",
             fontWeight: 400,
             whiteSpace: "nowrap",
@@ -204,7 +196,7 @@ export function A5({
         data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
-          ...abs(301, 91, 82, 30),
+          ...abs(300, 102, 82, 30),
           display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -216,9 +208,9 @@ export function A5({
           data-field="occasion.chip_4"
           className={notoSC.className}
           style={{
-            ...abs(19.5, 9.5, 43),
-            fontSize: 9,
-            lineHeight: "10.8px",
+            ...abs(10, 7, 62),
+            fontSize: 13,
+            lineHeight: "16px",
             color: "#3B2F2F",
             fontWeight: 400,
             whiteSpace: "nowrap",
@@ -232,7 +224,7 @@ export function A5({
         data-field="occasion.chips_href"
         href={c.chips_href}
         style={{
-          ...abs(388, 91, 86, 30),
+          ...abs(387, 102, 86, 30),
           display: "block",
           background: "#FFF6EC",
           boxShadow: "inset 0 0 0 1px #E5D9C9",
@@ -244,9 +236,9 @@ export function A5({
           data-field="occasion.chip_5"
           className={notoSC.className}
           style={{
-            ...abs(18, 9.5, 50),
-            fontSize: 9,
-            lineHeight: "10.8px",
+            ...abs(7, 7, 72),
+            fontSize: 13,
+            lineHeight: "16px",
             color: "#3B2F2F",
             fontWeight: 400,
             whiteSpace: "nowrap",
@@ -261,7 +253,7 @@ export function A5({
         alt=""
         width={12}
         height={18}
-        style={{ ...abs(479, 97, 12, 18), display: "block" }}
+        style={{ ...abs(478, 108, 12, 18), display: "block" }}
       />
 
       {/* 162:95 · Occasion Card · Valentine's Day (off-canvas rail item)
@@ -320,7 +312,7 @@ export function A5({
           className={notoSC.className}
           style={{
             ...abs(12, 299, 186),
-            fontSize: 10.5,
+            fontSize: 11,
             lineHeight: "14px",
             color: "#3B2F2F",
             fontWeight: 400,
@@ -356,7 +348,7 @@ export function A5({
         <div
           key={x}
           style={{
-            ...abs(x, 425, 8, 8),
+            ...abs(x, 430, 8, 8),
             background: "#E5D1B2",
             borderRadius: 9999,
           }}

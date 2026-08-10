@@ -31,7 +31,7 @@ import type { HomeText } from "@/lib/home-content/registry";
 type Card = {
   /** x offset of the one shared bleed crop (2380:528/542/556, ref 42c600f0). */
   photoX: number;
-  title: { y: number };
+  title: { y: number; fontSize: number };
   copy: {
     font: string;
     x: number;
@@ -48,19 +48,19 @@ type Card = {
    photos and descriptions come from the registry through `c`. They carry
    different copy fonts and vertical rhythm, so all three stay distinct;
    coordinates are
-   CELL-relative (each card's own 15/201/387 × 2479 origin subtracted) because
+   CELL-relative (each card's own 13/199/385 × 2375 origin subtracted) because
    the Carousel positions the cell itself. */
 const CARDS: readonly Card[] = [
   {
     // 2380:526 · Gifts for Wife
     photoX: -25.4,
-    title: { y: 166 },
+    title: { y: 166, fontSize: 20 },
     copy: {
       font: goudy.className,
       x: 27,
       y: 193,
       width: 122,
-      fontSize: 8,
+      fontSize: 13,
     },
     ornamentY: 214,
     ctaY: 235.82,
@@ -68,13 +68,13 @@ const CARDS: readonly Card[] = [
   {
     // 2380:540 · Thoughtful Gifts She'll Love
     photoX: -241.3,
-    title: { y: 161 },
+    title: { y: 161, fontSize: 20 },
     copy: {
       font: goudy.className,
       x: 12,
       y: 202,
       width: 152,
-      fontSize: 8,
+      fontSize: 13,
     },
     ornamentY: 219,
     ctaY: 236.82,
@@ -82,7 +82,7 @@ const CARDS: readonly Card[] = [
   {
     // 2380:554 · Anniversary Gifts for Wife (the design parks this one clipped)
     photoX: -457.2,
-    title: { y: 166 },
+    title: { y: 166, fontSize: 16 },
     copy: {
       font: notoSC.className,
       x: 14,
@@ -101,9 +101,9 @@ const CARDS: readonly Card[] = [
    ellipses. Normalized to one visible size — the current slide is signalled
    by colour, matching the hero and review rails. */
 const DOTS = [
-  { x: 176.5, y: 2758.5, size: 7 },
-  { x: 195, y: 2758.5, size: 7 },
-  { x: 213, y: 2758.5, size: 7 },
+  { x: 178.5, y: 2649.5, size: 7, activeSize: 8 },
+  { x: 197, y: 2649.5, size: 7, activeSize: 8 },
+  { x: 215, y: 2649.5, size: 7, activeSize: 8 },
 ];
 
 /**
@@ -127,9 +127,16 @@ export function RecipientRail({
   return (
     /* The design draws three cards side by side (x=15/201/387, 176 wide on a
        186 pitch, the third clipped by the canvas edge). The window stops at
-       415 = 430 − 15, so the resting frame is pixel-identical to the import. */
+       the canvas edge (417 = 430 − 13), so the resting frame is
+       pixel-identical to the import.
+
+       ⚠️ 08-10: as in A-5, the frame slid each card's rose ornament down onto
+       its CTA and dropped the CTA on cards 1 and 2. Ornament and CTA are left
+       where the earlier import put them so all three cards stay legible and
+       consistent.
+       AI-TAG(AI-043): AGENT-DECISION — see /agent-delivery/sessions/figma-sync-home-page-08-10-claude-figma-sync-home-page-75f37e.md. */
     <Carousel
-      window={{ left: 15, top: 2479, width: 415, height: 257 }}
+      window={{ left: 13, top: 2375, width: 417, height: 257 }}
       count={CARDS.length}
       cellWidth={176}
       step={186}
@@ -188,7 +195,7 @@ export function RecipientRail({
               className={playfair.className}
               style={{
                 ...abs(12, card.title.y, 152),
-                fontSize: 16,
+                fontSize: card.title.fontSize,
                 lineHeight: "18px",
                 color: "#3B2F2F",
                 fontWeight: 500,
@@ -198,6 +205,7 @@ export function RecipientRail({
             >
               {titles[i]}
             </div>
+            {/* Wraps: at 13px the frame breaks each copy over two lines. */}
             <div
               data-field={`recipient.card_${i + 1}_copy`}
               className={card.copy.font}
@@ -208,8 +216,6 @@ export function RecipientRail({
                 color: "#3B2F2F",
                 fontWeight: card.copy.fontWeight,
                 textAlign: "center",
-                whiteSpace:
-                  card.copy.font === notoSC.className ? undefined : "nowrap",
               }}
             >
               {copies[i]}

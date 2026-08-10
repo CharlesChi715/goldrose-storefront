@@ -28,7 +28,7 @@ import type { HomeText } from "@/lib/home-content/registry";
 type RecipientCard = {
   /** 436:279/293/307 — one shared bleed crop, shifted per card. */
   photo: { x: number };
-  title: { y: number; lineHeight: string };
+  title: { y: number; fontSize: number; lineHeight: string };
   copy: {
     font: string;
     x: number;
@@ -51,32 +51,32 @@ const RECIPIENT_CARDS: RecipientCard[] = [
   {
     // 436:277 · Gifts for Wife
     photo: { x: -25.4 },
-    title: { y: 159, lineHeight: "21px" },
+    title: { y: 159, fontSize: 20, lineHeight: "21px" },
     // 436:282 · copy (Goudy is single-weight; design's 500 not applied)
-    copy: { font: goudy.className, x: 27, y: 206, width: 122, fontSize: 8 },
+    copy: { font: goudy.className, x: 27, y: 206, width: 122, fontSize: 13 },
     ornamentY: 223,
     ctaY: 240.82,
   },
   {
     // 436:291 · Thoughtful Gifts She'll Love
     photo: { x: -241.3 },
-    title: { y: 161, lineHeight: "21px" },
+    title: { y: 161, fontSize: 20, lineHeight: "21px" },
     // 436:296 · copy (Goudy, single-weight)
-    copy: { font: goudy.className, x: 12, y: 208, width: 152, fontSize: 8 },
+    copy: { font: goudy.className, x: 12, y: 208, width: 152, fontSize: 13 },
     ornamentY: 225,
     ctaY: 242.82,
   },
   {
     // 436:305 · Anniversary Gifts for Wife (the design parks this one clipped)
     photo: { x: -457.2 },
-    title: { y: 166, lineHeight: "18px" },
+    title: { y: 166, fontSize: 16, lineHeight: "18px" },
     // 436:309 · copy
     copy: {
       font: notoSC.className,
       x: 14,
       y: 207,
       width: 148,
-      fontSize: 9,
+      fontSize: 13,
       fontWeight: 400,
     },
     ornamentY: 236,
@@ -86,11 +86,18 @@ const RECIPIENT_CARDS: RecipientCard[] = [
 
 /* 2380:486 · three of the design's seven dots, normalized to one visible
    size — the current slide is signalled by colour, as on every other rail.
-   Coordinates are band-relative, matching the rest of A-5. */
+   Coordinates are band-relative, matching the rest of A-5.
+
+   ⚠️ 08-10: the frame moved each card's rose ornament DOWN onto its own CTA
+   strip, and dropped the CTA outright on card 2 — the ornament and the CTA now
+   overlap in the design file itself. Both are left where the earlier, clean
+   import put them, so all three cards keep a legible call to action.
+   AI-TAG(AI-043): AGENT-DECISION — the six rail cards keep their buttons and
+   their 08-04 ornament positions. See /agent-delivery/sessions/figma-sync-home-page-08-10-claude-figma-sync-home-page-75f37e.md. */
 const DOTS = [
-  { x: 145.5, y: 425, size: 8 },
-  { x: 167, y: 425, size: 8 },
-  { x: 188, y: 425, size: 8 },
+  { x: 145.5, y: 430, size: 8, activeSize: 9 },
+  { x: 167, y: 430, size: 8, activeSize: 9 },
+  { x: 188, y: 430, size: 8, activeSize: 9 },
 ];
 
 /**
@@ -125,7 +132,7 @@ export function OccasionRail({
       inert ellipses, the same split the review rail uses.
     */
     <Carousel
-      window={{ left: 15, top: 142, width: 415, height: 257 }}
+      window={{ left: 15, top: 148, width: 415, height: 257 }}
       count={RECIPIENT_CARDS.length}
       cellWidth={176}
       step={186}
@@ -178,7 +185,7 @@ export function OccasionRail({
               className={playfair.className}
               style={{
                 ...abs(12, card.title.y, 152),
-                fontSize: 16,
+                fontSize: card.title.fontSize,
                 lineHeight: card.title.lineHeight,
                 color: "#3B2F2F",
                 fontWeight: 500,
@@ -188,7 +195,8 @@ export function OccasionRail({
             >
               {titles[i]}
             </div>
-            {/* 436:282/296/309 · copy */}
+            {/* 436:282/296/309 · copy. Wraps: at 13px the design's own
+                frame breaks each of these over two lines. */}
             <div
               data-field={`occasion.card_${i + 1}_copy`}
               className={card.copy.font}
@@ -199,7 +207,6 @@ export function OccasionRail({
                 color: "#3B2F2F",
                 fontWeight: card.copy.fontWeight,
                 textAlign: "center",
-                whiteSpace: "nowrap",
               }}
             >
               {copies[i]}

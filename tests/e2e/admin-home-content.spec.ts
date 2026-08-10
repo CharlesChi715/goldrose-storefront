@@ -195,10 +195,9 @@ test("hiding a section removes its band and shortens the page", async ({
   page,
 }) => {
   const fullHeight = await stageHeight(page);
-  // The imported stage is 5193; A-3's Real Rose Promise strip was deleted on
-  // 2026-08-07 and its 136px comes off permanently (band.trim), so nothing
-  // hidden still renders 5057.
-  expect(fullHeight).toBe(5193 - 136);
+  // The 08-10 frame re-stacked around every deletion, so the imported stage
+  // is exactly what renders with nothing hidden.
+  expect(fullHeight).toBe(5074);
 
   await openEditor(page);
   // "Craft, Workshop & Patents" is the A-9 band: 991px tall.
@@ -207,7 +206,7 @@ test("hiding a section removes its band and shortens the page", async ({
   await expect(page.getByText("Home page updated").first()).toBeVisible();
 
   await page.goto("/");
-  await expect(page.getByText("Inside the ELDREVE Workshop")).toHaveCount(0);
+  await expect(page.getByText("Inside the GoldRose Workshop")).toHaveCount(0);
   // The band is gone AND the gap is closed: the stage is exactly 991 shorter,
   // and the band below it has moved up to fill the space.
   expect(await stageHeight(page)).toBe(fullHeight - 991);
@@ -222,7 +221,7 @@ test("hiding a section removes its band and shortens the page", async ({
   await expect(page.getByText("Home page updated").first()).toBeVisible();
 
   expect(await stageHeight(page)).toBe(fullHeight);
-  await expect(page.getByText("Inside the ELDREVE Workshop")).toBeVisible();
+  await expect(page.getByText("Inside the GoldRose Workshop")).toBeVisible();
 });
 
 /* --- The per-section live previews (2026-08-08) ------------------------- */

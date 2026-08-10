@@ -6637,3 +6637,145 @@ gone missing mid-session, which presents as all 155 e2e tests failing at 0ms.
 Not a code failure; worth recognising quickly next time.
 
 **Verified:** 166 unit, 155 e2e including the three pixel baselines.
+
+## 2026-08-10 12:26 AEST — home page re-imported: the typography pass, seven deletions, and the end of `band.trim`
+
+Home-only Figma sync on `claude/figma-sync-home-page-75f37e`, file version
+`2385751945240834559`. Scope reported 5 added / 42 modified / 1 removed; only
+`2380:370` was imported and the baseline is **not** stamped.
+
+**What the frame changed.** The page-wide typography pass the 08-07 delivery
+deferred as a whole: section headings 24/30/21 → 32/36, body and card copy
+8–11 → 13, chip labels 9 → 13, craft step numbers 8 → 12, review quotes
+8.5 → 13. Plus seven content deletions and one band that changed shape.
+
+**`band.trim` is retired.** It was invented on 08-07 because the design had
+deleted A-3's Real Rose Promise strip *without* re-stacking the frame, so the
+repo held 136px of coordinates the design no longer used and closed the gap at
+render time. This frame re-stacks, so each band took its own new y —
+32 / 781 / 1422 / 1749 / 2225 / 3014 / 4005 — and the mechanism, its type
+field, its layout branch and its three unit tests were deleted. Stage
+5057 → 5074, all of it A-1 growing 732 → 749.
+
+**One frame quirk, resolved rather than reproduced.** The content group sits at
+`y=4` inside a frame whose declared height did not grow to match, so the nav
+would end at 5078 in a 5074 frame. 4px is subtracted from every imported
+coordinate, which closes the band stack exactly on 5074 and keeps the promo bar
+at y=0 where the rest of the site's chrome expects it.
+
+**A-1 rebuilt.** Benefit tiles deleted; photo window 317 → 405 and re-exported
+(`2380-386.png`, 430×405, replacing `1523-1675.png` on all four hero slides);
+subtitle 16px `#F3C6D1` → 24px `#D4AF37`; CTA label tracked-out 12px caps in
+Noto → 20px sentence case in Goudy; dots moved to the window's new lower edge.
+
+**Two nodes stopped being baked artwork.** The frame rebuilt A-9's EXPLORE OUR
+CRAFT button out of a real box and a real text node (was one 246×38 SVG), and
+A-11's FAQ `＋` markers likewise — so `craft.cta_label` went `artwork` → `text`
+and is editable. Nine registry fields went the other way with the content they
+described: `hero.benefit_1/2`, `recipient.reviews_verified_label`,
+`craft.workshop_copy`, `craft.cert_1…4_number`, `story.story_body`.
+
+**Three wrapping fixes the pass forced.** At 13px the rail card copy and at
+36px the workshop title no longer fit one line, and the frame wraps all of
+them, so `white-space: nowrap` came off those three — matching Figma's own
+render instead of clipping mid-word.
+
+**Not taken verbatim (AI-043).** The frame slid every rail card's rose ornament
+down onto its own CTA strip and deleted the strip on three of six cards, so
+Figma's render shows cards that end in an ornament and no call to action, and
+one where the two overlap. All six keep their buttons and their 08-04 ornament
+positions; raised for a ruling.
+
+**Verified.** 165 unit, 155 e2e, three pixel baselines. `/shop` and the PDP
+baselines are byte-identical; only `home-darwin.png` was regenerated — the
+expected blast radius for a home-only sync. ⚠️ The first baseline run silently
+reused a stale `next start` on 3001 from another worktree (Playwright's
+`reuseExistingServer`), which passed against the OLD build; killing it and
+re-running is what actually regenerated the snapshot.
+
+**Raised:** AI-043 (rail buttons), AI-044 (the hero eyebrow still reads
+GOLDROSE, in the frame and on the live site — now one save, not a deploy),
+AI-045 (three deletions that remove substance: "Verified Purchase", all four
+patent/ISO numbers, the brand-story paragraph).
+
+## 2026-08-10 12:52 AEST — AI-044 answered and closed: the frame wins on the brand name
+
+Same session, immediately after the home import. Charles was shown Figma's own
+A-9 render ("Inside the GoldRose Workshop") and ruled on the two stale-name
+questions the sync raised:
+
+- **Hero eyebrow — leave it as `— G O L D R O S E —`.** No change. It is an
+  editable field, so it is one save in Content → Home page to reverse.
+- **A-9 workshop title — match the frame.** `craft.workshop_title` went back
+  from "Inside the ELDREVE Workshop" to **"Inside the GoldRose Workshop"**.
+- **A-5 intro followed the same ruling**, applied on the stated principle
+  rather than a separate answer: `occasion.intro` → "Find a **GoldRose** for
+  every meaningful moment." Leaving it at ELDREVE would have put two
+  differently-branded headings on one page.
+
+The concern was put before the decision — this places the retired name on
+eldreve.com in three places and partly reverses the 08-05 ELDREVE rename
+(AI-021) — and the decision stands. AI-044 is closed with that reason;
+the archived matter carries the full record. **AI-037** (the same stale name in
+three *other* frames) is unaffected and still open, so those frames still must
+not be imported verbatim.
+
+Home pixel baseline regenerated for the two-word change; 165 unit and 155 e2e
+tests re-run green.
+
+## 2026-08-10 14:40 AEST — pixel-matching the home page against the frame
+
+Charles asked for the imported home page to pixel-match `2380:370`. Built a
+throwaway two-part harness rather than eyeballing: a **band diff** (screenshot
+`/` at the design's own 430px width at 2×, compare each band with that band's
+Figma render, report the share of differing pixels and the worst rows in design
+px) and a **text audit** that matches all 123 of the frame's TEXT nodes to the
+live DOM *by their own copy* and reports dx/dy/dw. The audit is the one that
+paid: it turns "looks off" into a list of numbers.
+
+Result: **every text node is within 1px of the frame.** Fixed along the way,
+none of which `--outline` can show:
+
+- **Two italics** — `hero.subtitle` and `story.story_quote`. `style.italic` in
+  the raw node is the only place this appears.
+- **Four letter-spacings** restored (hero CTA 1.1, gift CTA −0.095, etc).
+- **A 1px gold stroke on the EXPLORE OUR CRAFT button**, the largest single
+  pixel difference in A-9 while it was missing. Strokes are invisible in the
+  outline; `strokes[]` in the JSON is where they live.
+- **Every chip label sat 1px low**, in both A-5 and A-6.
+- **Per-certificate title boxes** — the design lets "European Patent" spill
+  100px wide across its neighbours rather than stay in its 69px column.
+- **Craft step 04's tile is a photo now**, not the flattened SVG it was, so it
+  joined steps 01–03 as a replaceable `image` field (`2380-678.png`).
+- **The active carousel dot takes the design's larger size.** Every rail on this
+  page draws the current indicator a pixel or two bigger; the rails had
+  normalized that away, so none could ever rest on the frame's own picture. Now
+  `activeSize` on the shared Carousel, so the size travels with the slide
+  instead of being pinned to dot 1.
+
+⚠️ **A 2× PNG strip must be sized explicitly.** `object-fit: none` — this
+page's idiom for SVG glyph strips — draws a raster at its full intrinsic pixel
+size, i.e. twice too big. Both refreshed strips (`2380-683`, `2380-796`) are
+given their CSS ink size and centred by hand.
+
+**What is left is not position.** ~2.0–2.7% of pixels per band still differ:
+font rasterisation (every glyph edge is a 1px outline in the diff), two lines
+where Figma's text engine wraps earlier than Chrome does with the same font at
+the same size, and the two sanctioned divergences — A-2's uniform card 2 (owner,
+08-07) and the six rail CTAs (AI-043). A-2 reads 8.3% for exactly that reason.
+
+**Two environment traps cost most of the verification time.**
+
+1. Playwright's `reuseExistingServer: !CI` silently reuses a stale `next start`
+   on port 3001, so `--update-snapshots` can "pass" while regenerating the
+   baseline from the OLD build. The tell is the runtime: ~2s means no build
+   happened. Use `CI=1` for any baseline regeneration.
+2. `npm run seed -- --reset` does **not** clear `site_content`. An aborted run
+   of "hiding a section removes its band" leaves `home.craft.__visible = hidden`
+   in `.data/db.json`; after that every homepage test fails for want of a band,
+   and a regenerated baseline bakes the missing band in. Both happened here.
+
+Verified: 165 unit, **154/155 e2e**, three pixel baselines (home regenerated;
+`/shop` and PDP byte-identical). The single failure,
+`shop-filters.spec.ts:158`, reproduces on stashed pre-change code and is not
+this delivery's.
