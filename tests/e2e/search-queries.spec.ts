@@ -12,13 +12,33 @@
  *     rather than being lost to a failed NOT NULL constraint.
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { promises as fs } from "fs";
 import path from "path";
 import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
 
-test.use({ viewport: ADMIN_VIEWPORT });
 test.describe.configure({ mode: "serial" });
+
+/** Rows written after `since`, straight off the local adapter's file. */
+async function rowsSince(since: string) {
+  const db = JSON.parse(
+    await fs.readFile(path.join(process.cwd(), ".data", "db.json"), "utf8"),
+  ) as {
+    tables: {
+      search_queries?: Array<{
+        query: string;
+        query_raw: string;
+        result_count: number;
+        mode: string;
+        facets: string[];
+        created_at: string;
+      }>;
+    };
+  };
+  return (db.tables.search_queries ?? []).filter(
+    (row) => row.created_at >= since,
+  );
+}
 
 /** Unique per run, so a re-run cannot read the previous run's rows. */
 const STAMP = Date.now();
@@ -78,23 +98,7 @@ test("a submitted search is stored, and the endpoint never fails the shopper", a
   });
   expect(cjk.status()).toBe(200);
 
-  const db = JSON.parse(
-    await fs.readFile(path.join(process.cwd(), ".data", "db.json"), "utf8"),
-  ) as {
-    tables: {
-      search_queries?: Array<{
-        query: string;
-        query_raw: string;
-        result_count: number;
-        mode: string;
-        facets: string[];
-        created_at: string;
-      }>;
-    };
-  };
-  const rows = (db.tables.search_queries ?? []).filter(
-    (row) => row.created_at >= since,
-  );
+  const rows = await rowsSince(since);
 
   const popular = rows.filter((row) => row.query === POPULAR);
   expect(popular).toHaveLength(3);
@@ -125,28 +129,110 @@ test("bad input is refused without ever throwing at the shopper", async ({
   expect(allMode.status()).toBe(400);
 });
 
-test("the analytics screen shows top searches and, separately, the misses", async ({
+/* ---------- the real overlay, driven the way a shopper drives it ---------- */
+
+/** Without `exact`, "Search" also matches the panel's "Clear search" button. */
+async function openSearch(page: Page) {
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Search" })).toBeVisible();
+}
+
+test("pressing enter records the search, with what it actually found", async ({
   page,
 }) => {
-  await adminLogin(page);
-  await page.goto("/admin/analytics?range=30d");
+  const since = new Date().toISOString();
+  await page.goto("/");
+  await openSearch(page);
 
-  // Popular list: the commonest spelling, with its count.
-  const topCard = page
-    .locator("div")
-    .filter({ hasText: /^Top searches/ })
-    .first();
-  await expect(topCard).toContainText(`Gold Rose ${STAMP}`);
-  await expect(topCard).toContainText("(3)");
+  const field = page.getByRole("combobox", { name: /Search products/ });
+  // Typed one character at a time, which is the point: the panel matches on
+  // every keystroke, and NONE of that may be recorded.
+  await field.pressSequentially("rose", { delay: 30 });
+  await page.waitForTimeout(400);
+  expect(await rowsSince(since)).toHaveLength(0);
 
-  // The failures get their OWN card — ranked among their own kind, so a query
-  // asked twice is visible next to one asked a thousand times.
-  const missCard = page
-    .locator("div")
-    .filter({ hasText: /^What shoppers could not find/ })
-    .first();
-  await expect(missCard).toContainText(MISSING);
-  await expect(missCard).toContainText("玫瑰");
-  // A successful query must never appear in the misses list.
-  await expect(missCard).not.toContainText(`Gold Rose ${STAMP}`);
+  await field.press("Enter");
+  await page.waitForURL(/\/shop\?q=/);
+
+  // Polled, not read once: the request being SENT is not the row being
+  // written, and the local adapter serialises its writes behind a queue.
+  await expect.poll(async () => (await rowsSince(since)).length).toBe(1);
+  const rows = await rowsSince(since);
+  // Exactly one row for four keystrokes plus a submit.
+  expect(rows[0].query).toBe("rose");
+  expect(rows[0].query_raw).toBe("rose");
+  // The engine found the catalogue's roses, and said so honestly.
+  expect(rows[0].result_count).toBeGreaterThan(0);
+  expect(rows[0].mode).toBe("exact");
+});
+
+test("a trending chip is filed under what THAT chip finds, not the empty box", async ({
+  page,
+}) => {
+  // The regression this pins: `results` is computed from what is TYPED, and a
+  // chip submits its own label instead. Reusing the typed result would file
+  // every chip tap as a search of an empty field.
+  const since = new Date().toISOString();
+  await page.goto("/");
+  await openSearch(page);
+
+  await page
+    .getByRole("dialog", { name: "Search" })
+    .getByRole("button", { name: /^For Mom/ })
+    .click();
+  await page.waitForURL(/\/shop\?q=/);
+
+  await expect.poll(async () => (await rowsSince(since)).length).toBe(1);
+  const rows = await rowsSince(since);
+  expect(rows[0].query_raw).toBe("For Mom");
+  // "for mom" names a facet, so the query resolves to the recipient slug and
+  // is stored against the same closed vocabulary the filter drawer uses.
+  expect(rows[0].facets).toEqual(["mother"]);
+  expect(rows[0].result_count).toBeGreaterThan(0);
+});
+
+test("a search that finds nothing is recorded as the miss it is", async ({
+  page,
+}) => {
+  const since = new Date().toISOString();
+  await page.goto("/");
+  await openSearch(page);
+
+  const field = page.getByRole("combobox", { name: /Search products/ });
+  await field.fill("zzzznotathing");
+  await field.press("Enter");
+  await page.waitForURL(/\/shop\?q=/);
+
+  await expect.poll(async () => (await rowsSince(since)).length).toBe(1);
+  const rows = await rowsSince(since);
+  expect(rows[0].result_count).toBe(0);
+  expect(rows[0].mode).toBe("none");
+});
+
+test.describe("the admin's report", () => {
+  test.use({ viewport: ADMIN_VIEWPORT });
+
+  test("shows top searches and, separately, the misses", async ({ page }) => {
+    await adminLogin(page);
+    await page.goto("/admin/analytics?range=30d");
+
+    // Popular list: the commonest spelling, with its count.
+    const topCard = page
+      .locator("div")
+      .filter({ hasText: /^Top searches/ })
+      .first();
+    await expect(topCard).toContainText(`Gold Rose ${STAMP}`);
+    await expect(topCard).toContainText("(3)");
+
+    // The failures get their OWN card — ranked among their own kind, so a
+    // query asked twice is visible next to one asked a thousand times.
+    const missCard = page
+      .locator("div")
+      .filter({ hasText: /^What shoppers could not find/ })
+      .first();
+    await expect(missCard).toContainText(MISSING);
+    await expect(missCard).toContainText("玫瑰");
+    // A successful query must never appear in the misses list.
+    await expect(missCard).not.toContainText(`Gold Rose ${STAMP}`);
+  });
 });

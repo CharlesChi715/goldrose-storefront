@@ -29,8 +29,9 @@ page it hands over to can never disagree.
 3. Publish a projected index at `GET /api/search`, cached 300s like every other
    storefront read. ✅
 4. Render results in the overlay as you type, with keyboard navigation. ✅
-5. Retire the demo trending chips in favour of real popular queries once there
-   is search traffic to read them from — needs the analytics below.
+5. Record what shoppers submit, so the demo trending chips can be retired in
+   favour of real popular queries and zero-result searches become visible. ✅
+   (The chips themselves stay the design's until there is traffic to read.)
 
 ## Options considered
 
@@ -94,21 +95,60 @@ page it hands over to can never disagree.
   request, which is what lets `export const revalidate = 300` apply; the build
   reports it as `○ /api/search 5m`. `revalidateStorefront()` busts it so an
   owner's edit is not stale for 300s after every other surface has updated.
+- **Search analytics (OQ-1).** One row per SUBMIT in `search_queries`
+  (migration `0012`): the engine's folded form as the grouping key, the raw
+  text untouched, `result_count`, the `mode` that answered, and any facets the
+  query named. `/admin/analytics` shows search volume, the share finding
+  nothing, and two separate lists — top searches, and what shoppers could not
+  find. Separate because a failing query is almost never popular, so ranked
+  together it sits below the fold, which is where nobody looks.
+  - **On submit, never per keystroke.** The panel matches as you type, so a
+    keystroke log would be one line of code and a permanent mistake: a privacy
+    problem, and a dataset in which "r", "ro", "ros" bury the one query that
+    was meant. All four ways to submit already funnel through `remember()`, so
+    recording there makes the rule true by construction. The engine is re-run
+    for the submitted term rather than reusing `results` — a chip and a recent
+    row submit a term that is NOT in the field, so reusing the typed result
+    would file every chip tap under the result count of an empty box.
+  - **`page_views` is deliberately not reused.** `engagement-report.ts` groups
+    `path` verbatim, so each query would become a fake page in the
+    time-on-page and drop-off cards; `utm` is read as the session's landing
+    attribution, which also feeds posting-account commissions. Neither would
+    throw — both would quietly produce wrong reports.
+  - **The send carries the Beacon's own guard** (`window.self !== window.top`,
+    catch → true), because this overlay is reachable inside the admin's eleven
+    home-page preview iframes, where the pathname genuinely is `/`.
+    `?adminPreview` is not the test: it would be an analytics kill switch
+    anyone could type into a URL bar.
+  - **A query the fold destroys keeps its identity.** 玫瑰, 🌹 and `!!!` all
+    normalize to `""`, and they are the zero-result rows worth most — a shop
+    selling to the US whose misses fill with Chinese is being told something
+    urgent. `searchGroupingKey` falls back to the raw text, which is also what
+    keeps the row inside its `NOT NULL CHECK (length between 1 and 200)`
+    instead of throwing into the endpoint's own catch.
+  - **RLS with no policy at all**, the `page_views` treatment: Postgres denies
+    everything under RLS until a policy allows it, so only the service role
+    reaches the table. What shoppers fail to find is business intelligence.
+  - **The endpoint always answers 200 fast**, swallowing every failure into
+    `console.error`. It is fired immediately before navigating to `/shop`, so a
+    slow or angry response here would be a slow or broken search.
 
 ## Blockers and dependencies
 
-- None to ship. It is live behind no flag and needs no migration.
+- Search itself ships behind no flag and needs no migration.
+- **Search analytics needs migration `0012` pushed to hosted** (`supabase db
+  push`). Until then the endpoint's insert fails, is swallowed into
+  `console.error` as designed, and the two admin cards stay empty — searching
+  itself is unaffected, which is the point of swallowing it.
 
 ## Open questions
 
-- **OQ-1 — no search analytics.** Nothing records what shoppers type, so the
-  trending chips stay a design guess and zero-result queries (the single most
-  valuable merchandising signal a shop has) are invisible. `page_views.path`
-  and `.utm` must NOT be reused for this: `lib/admin/engagement-report.ts`
-  groups `path` verbatim, so every distinct query would become a fake page.
-  Doing it properly needs a `search_queries` table (migration `0012`) and the
-  Beacon's `window.self !== window.top` guard, so the admin's home-page preview
-  iframes never record a search.
+- **OQ-1 — RESOLVED 2026-08-10. Search analytics are live in code.** Every
+  submitted search — Enter, a trending chip, a recent row, or tapping a result
+  — is recorded to `search_queries` (migration `0012`) through
+  `POST /api/search-queries`. See **Search analytics** under Tech details.
+  ⚠️ `0012` is written and validated but **not yet pushed to hosted**, so the
+  report is empty on the deployed site until `supabase db push` runs.
 - **OQ-2 — `/shop` does not say when it relaxed.** The overlay admits "the
   closest gifts we have"; the grid shows the same products with no such note,
   because the frame has no place to put one. Needs a design ruling.
@@ -125,6 +165,14 @@ page it hands over to can never disagree.
 - Geometry: [`lib/catalog/search-layout.ts`](../../lib/catalog/search-layout.ts)
 - UI: [`components/SearchOverlay.tsx`](../../components/SearchOverlay.tsx) ·
   [`components/SearchButton.tsx`](../../components/SearchButton.tsx)
+- Analytics: [`lib/search/record.ts`](../../lib/search/record.ts) ·
+  [`lib/search/query-log.ts`](../../lib/search/query-log.ts) ·
+  [`app/api/search-queries/route.ts`](../../app/api/search-queries/route.ts) ·
+  [`lib/admin/search-report.ts`](../../lib/admin/search-report.ts) · migration
+  [`0012_search_queries.sql`](../../supabase/migrations/0012_search_queries.sql)
 - Tests: [`tests/unit/search.test.ts`](../../tests/unit/search.test.ts),
   [`tests/unit/search-layout.test.ts`](../../tests/unit/search-layout.test.ts),
-  [`tests/e2e/search.spec.ts`](../../tests/e2e/search.spec.ts)
+  [`tests/unit/search-report.test.ts`](../../tests/unit/search-report.test.ts),
+  [`tests/unit/search-record.test.ts`](../../tests/unit/search-record.test.ts),
+  [`tests/e2e/search.spec.ts`](../../tests/e2e/search.spec.ts),
+  [`tests/e2e/search-queries.spec.ts`](../../tests/e2e/search-queries.spec.ts)

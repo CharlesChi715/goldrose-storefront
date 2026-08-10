@@ -94,7 +94,12 @@ import {
   stageHeight,
   wrapRatio,
 } from "@/lib/catalog/search-layout.ts";
-import { highlightRuns, searchDocs } from "@/lib/catalog/search.ts";
+import {
+  highlightRuns,
+  normalizeSearchText,
+  searchDocs,
+} from "@/lib/catalog/search.ts";
+import { recordSearchQuery } from "@/lib/search/record.ts";
 import { spotlightStyle } from "@/lib/images/spotlight";
 import { abs, txt } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
@@ -423,8 +428,31 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
         cleaned,
         ...recents.filter((t) => t.toLowerCase() !== cleaned.toLowerCase()),
       ]);
+
+      // Search analytics (storefront-search.md OQ-1). THIS is the one funnel
+      // every submit passes through — Enter, a trending chip, a recent row and
+      // tapping a result all reach it — which is what keeps the log to
+      // submitted searches and off every keystroke. Recording at the four call
+      // sites instead would be four chances to forget.
+      //
+      // The engine is re-run for `cleaned` rather than reusing `results`: a
+      // chip and a recent row submit a term that is NOT what is in the field,
+      // so reusing the typed result would file that tap under the result count
+      // of an empty box. It is one extra pass over the same small index the
+      // panel already searches on every keystroke.
+      const outcome = searchDocs(products, cleaned);
+      recordSearchQuery({
+        raw: cleaned,
+        normalized: normalizeSearchText(cleaned),
+        resultCount: outcome.hits.length,
+        // "all" cannot occur — `cleaned` is non-empty by the guard above — but
+        // it is narrowed rather than cast, so a future engine change fails the
+        // typecheck here instead of the CHECK constraint in production.
+        mode: outcome.mode === "all" ? "exact" : outcome.mode,
+        facets: outcome.facets,
+      });
     },
-    [recents],
+    [products, recents],
   );
 
   const submit = useCallback(

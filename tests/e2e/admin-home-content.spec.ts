@@ -111,10 +111,20 @@ test("the previews of the home page are not recorded as visits", async ({
   // apply to them. Before this was handled, opening this one screen wrote two
   // home-page views plus a stream of engagement updates — analytics the shop
   // is judged on, for visits nobody made.
+  //
+  // EVERY first-party analytics endpoint, not just the beacon. This filter used
+  // to match `/api/beacon` alone, which silently stopped covering the storefront
+  // the moment search-query logging added a second sink (`/api/search-queries`,
+  // storefront-search.md OQ-1) — the search overlay is reachable in these very
+  // frames. Anything that records shopper behaviour belongs in this list, so a
+  // third sink is caught by the same test rather than needing a new one.
+  const ANALYTICS_ENDPOINTS = ["/api/beacon", "/api/search-queries"];
   const beacons: string[] = [];
   page.on("request", (request) => {
     const url = request.url();
-    if (url.includes("/api/beacon")) beacons.push(new URL(url).pathname);
+    if (ANALYTICS_ENDPOINTS.some((endpoint) => url.includes(endpoint))) {
+      beacons.push(new URL(url).pathname);
+    }
   });
 
   await openEditor(page);

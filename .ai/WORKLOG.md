@@ -6638,70 +6638,6 @@ Not a code failure; worth recognising quickly next time.
 
 **Verified:** 166 unit, 155 e2e including the three pixel baselines.
 
-## 2026-08-10 07:05 AEST — search-query analytics: the server half is built, the shopper half is blocked
-
-**What the brief assumed, and what is actually true.** The task described
-storefront search as shipped on 2026-08-10, pointing at
-`docs/features/storefront-search.md` and `lib/catalog/search.ts`. Neither file
-exists on `main`, on this worktree's branch, or anywhere in git history. The
-search feature is real and looks complete — engine, `/api/search`, the rewritten
-overlay, three test files — but it is **uncommitted, untracked working-tree
-state in a sibling worktree**, `.claude/worktrees/top-nav-search-button-78775c`,
-whose branch sits at the same commit as `main` (`2fd779c`). Mtimes put it at
-00:19–01:14 this morning. Nothing about it is on a branch, so nothing about it
-is anywhere but that one directory.
-
-That matters because search analytics is not a parallel feature, it is a
-follow-on: `result_count` and `mode` are produced by `searchDocs()`, and the
-one place to record a submit is the overlay's `submit()` — which in that
-worktree is a near-total rewrite of the 16KB file on `main`.
-
-**Built here, and independent of any of that** (181 unit + 3 new e2e green,
-typecheck and lint clean):
-
-- `supabase/migrations/0012_search_queries.sql` — `search_queries` with the
-  folded `query` and the untouched `query_raw`, `result_count`, `mode`
-  (`exact|relaxed|none`), `facets text[]`, `created_at`. Two indexes: one on
-  the range, one PARTIAL on `result_count = 0`, which is small because it
-  indexes only the failures. RLS enabled with **no policy at all** — the
-  `page_views` treatment, so only the service role reaches it.
-- Registered in both halves of `lib/supabase/types.ts` (`DbTables` +
-  `TABLE_NAMES`). The typechecker then required `seed-data.ts` to account for
-  it; seeded empty on purpose, in demo mode too — the Trending chips are about
-  to be chosen from this table, and a seeded row would put words on the
-  storefront that nobody typed.
-- `POST /api/search-queries` — zod, every failure into `console.error`, always
-  200 fast. Named for the table, not the feature: `/api/search` is the search
-  INDEX, and two routes one letter apart is a permanent invitation to wire the
-  wrong one. Validates `facets` against the closed vocabulary so the column
-  stays joinable against the filter drawer.
-- `lib/search/record.ts` — the browser recorder, carrying the Beacon's guard
-  verbatim (`window.self !== window.top`, catch → true). Called from `submit()`
-  and nowhere else, so "on submit, never per keystroke" is true by construction
-  rather than by four call sites agreeing.
-- `lib/admin/search-report.ts` + the `/admin/analytics` cards, EN and 中文.
-
-**Two things worth keeping.** A query the engine's fold destroys — 玫瑰, 🌹,
-`!!!` all normalize to `""` — is exactly the zero-result row worth most, and a
-naive `length >= 1` CHECK would have thrown on every one of them straight into
-the endpoint's own catch. `searchGroupingKey` falls back to the raw text, so
-玫瑰 groups as 玫瑰. And the guard is unit-tested directly rather than left to
-`admin-home-content.spec.ts`, whose filter matches `/api/beacon` and would not
-have caught a regression posting to `/api/search-queries`.
-
-**Not done, and why.** The recording call site, and closing OQ-1 in
-`storefront-search.md` — both live in the other worktree's uncommitted files. I
-did not add to someone else's working tree or commit their work for them.
-`0012` is written and validated (`check:migrations` ok, 11 files) but **not
-pushed**: this branch is unmerged, nothing writes to the table yet, and this
-worktree is not `supabase link`ed (the root is).
-
-**Verified:** 181 unit, 158 e2e including the three pixel baselines; typecheck
-and lint clean; `check:migrations` ok; `features:check` 13 records pass. One
-full-suite run failed `admin-home-picker.spec.ts:210` ("framing a replaced
-photo") — a flake, not this work: it passes alone, passes with the admin specs
-in suite order, and the next full run was 158/158. That test is the previous
-session's photo-framing work and nothing here touches the picker.
 ## 2026-08-10 — the header search box actually searches, and answers as you type
 
 **The bug was the promise, not the code.** The overlay's own hint offered
@@ -6783,3 +6719,116 @@ were arrow-navigable but rendered outside any listbox, leaving
 `extractFacets` unbounded from `?q=`. Also pre-empted before the review
 returned: IME composition (Enter committing a Japanese candidate would have
 opened a product page instead).
+
+
+## 2026-08-10 07:05 AEST — search-query analytics: the server half is built, the shopper half is blocked
+
+**What the brief assumed, and what is actually true.** The task described
+storefront search as shipped on 2026-08-10, pointing at
+`docs/features/storefront-search.md` and `lib/catalog/search.ts`. Neither file
+exists on `main`, on this worktree's branch, or anywhere in git history. The
+search feature is real and looks complete — engine, `/api/search`, the rewritten
+overlay, three test files — but it is **uncommitted, untracked working-tree
+state in a sibling worktree**, `.claude/worktrees/top-nav-search-button-78775c`,
+whose branch sits at the same commit as `main` (`2fd779c`). Mtimes put it at
+00:19–01:14 this morning. Nothing about it is on a branch, so nothing about it
+is anywhere but that one directory.
+
+That matters because search analytics is not a parallel feature, it is a
+follow-on: `result_count` and `mode` are produced by `searchDocs()`, and the
+one place to record a submit is the overlay's `submit()` — which in that
+worktree is a near-total rewrite of the 16KB file on `main`.
+
+**Built here, and independent of any of that** (181 unit + 3 new e2e green,
+typecheck and lint clean):
+
+- `supabase/migrations/0012_search_queries.sql` — `search_queries` with the
+  folded `query` and the untouched `query_raw`, `result_count`, `mode`
+  (`exact|relaxed|none`), `facets text[]`, `created_at`. Two indexes: one on
+  the range, one PARTIAL on `result_count = 0`, which is small because it
+  indexes only the failures. RLS enabled with **no policy at all** — the
+  `page_views` treatment, so only the service role reaches it.
+- Registered in both halves of `lib/supabase/types.ts` (`DbTables` +
+  `TABLE_NAMES`). The typechecker then required `seed-data.ts` to account for
+  it; seeded empty on purpose, in demo mode too — the Trending chips are about
+  to be chosen from this table, and a seeded row would put words on the
+  storefront that nobody typed.
+- `POST /api/search-queries` — zod, every failure into `console.error`, always
+  200 fast. Named for the table, not the feature: `/api/search` is the search
+  INDEX, and two routes one letter apart is a permanent invitation to wire the
+  wrong one. Validates `facets` against the closed vocabulary so the column
+  stays joinable against the filter drawer.
+- `lib/search/record.ts` — the browser recorder, carrying the Beacon's guard
+  verbatim (`window.self !== window.top`, catch → true). Called from `submit()`
+  and nowhere else, so "on submit, never per keystroke" is true by construction
+  rather than by four call sites agreeing.
+- `lib/admin/search-report.ts` + the `/admin/analytics` cards, EN and 中文.
+
+**Two things worth keeping.** A query the engine's fold destroys — 玫瑰, 🌹,
+`!!!` all normalize to `""` — is exactly the zero-result row worth most, and a
+naive `length >= 1` CHECK would have thrown on every one of them straight into
+the endpoint's own catch. `searchGroupingKey` falls back to the raw text, so
+玫瑰 groups as 玫瑰. And the guard is unit-tested directly rather than left to
+`admin-home-content.spec.ts`, whose filter matches `/api/beacon` and would not
+have caught a regression posting to `/api/search-queries`.
+
+**Not done, and why.** The recording call site, and closing OQ-1 in
+`storefront-search.md` — both live in the other worktree's uncommitted files. I
+did not add to someone else's working tree or commit their work for them.
+`0012` is written and validated (`check:migrations` ok, 11 files) but **not
+pushed**: this branch is unmerged, nothing writes to the table yet, and this
+worktree is not `supabase link`ed (the root is).
+
+**Verified:** 181 unit, 158 e2e including the three pixel baselines; typecheck
+and lint clean; `check:migrations` ok; `features:check` 13 records pass. One
+full-suite run failed `admin-home-picker.spec.ts:210` ("framing a replaced
+photo") — a flake, not this work: it passes alone, passes with the admin specs
+in suite order, and the next full run was 158/158. That test is the previous
+session's photo-framing work and nothing here touches the picker.
+## 2026-08-10 07:45 AEST — search committed, analytics wired on top of it
+
+Owner ruling on the fork above: commit the stranded search work, then land the
+analytics on top. Done in that order, as two separate commits, so the two
+features stay separable.
+
+**`593e88a feat(search)`** — the search worktree's 17 files committed as-is on
+`claude/top-nav-search-button-78775c`, unreviewed and unmodified. It was
+finished work (engine, `/api/search`, the rewritten overlay, a feature doc and
+three test files) that existed only as working-tree state in one directory on
+one Mac; a `git clean` or a deleted worktree would have taken it. Merged into
+this branch with no conflicts. That worktree has no `node_modules`, so it was
+committed there and verified here.
+
+**`4d72ffa feat(analytics)`** — the analytics, then the one edit that needed
+the engine.
+
+**Where the recording call actually goes, and the trap in it.** All four ways
+to submit — Enter, a trending chip, a recent row, tapping a result — already
+funnel through `remember(term)`. Recording there makes "on submit, never per
+keystroke" true by construction instead of by four call sites agreeing. But
+`results` is computed from `value`, what is TYPED, and a chip submits its OWN
+label: reusing `results` would file every chip tap under the result count of an
+empty box. So the engine is re-run for the submitted term — one extra pass over
+an index the panel already searches on every keystroke. Pinned by a test that
+taps "For Mom" and asserts the row carries `facets: ["mother"]` and a non-zero
+count.
+
+**One existing test was quietly no longer covering what it claimed.**
+`admin-home-content.spec.ts` asserts no analytics fires while the home-page
+editor is open, by filtering `url.includes("/api/beacon")`. That stopped being
+true the moment a second sink existed — the search overlay is reachable in
+those very frames and posts to `/api/search-queries`. Widened to a list of
+analytics endpoints, so a third sink is caught by the same test.
+
+**WORKLOG ordering.** The merge put the search entry (00:19–01:14) after the
+analytics entry (07:05); reordered to chronological.
+
+**Verified after the merge:** 217 unit, 175 e2e including the three pixel
+baselines; typecheck and lint clean; `features:check` 14 records pass;
+`check:migrations` ok.
+
+**Still open:** `supabase db push` for `0012`. Not run — this branch is
+unmerged, and this worktree is not `supabase link`ed (the repo root is). Until
+it runs, the insert fails and is swallowed by design: searching is unaffected
+and the two admin cards are empty, which is the correct behaviour for a
+missing table rather than a broken storefront.
