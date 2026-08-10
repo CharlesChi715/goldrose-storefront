@@ -6637,3 +6637,68 @@ gone missing mid-session, which presents as all 155 e2e tests failing at 0ms.
 Not a code failure; worth recognising quickly next time.
 
 **Verified:** 166 unit, 155 e2e including the three pixel baselines.
+
+## 2026-08-10 07:05 AEST — search-query analytics: the server half is built, the shopper half is blocked
+
+**What the brief assumed, and what is actually true.** The task described
+storefront search as shipped on 2026-08-10, pointing at
+`docs/features/storefront-search.md` and `lib/catalog/search.ts`. Neither file
+exists on `main`, on this worktree's branch, or anywhere in git history. The
+search feature is real and looks complete — engine, `/api/search`, the rewritten
+overlay, three test files — but it is **uncommitted, untracked working-tree
+state in a sibling worktree**, `.claude/worktrees/top-nav-search-button-78775c`,
+whose branch sits at the same commit as `main` (`2fd779c`). Mtimes put it at
+00:19–01:14 this morning. Nothing about it is on a branch, so nothing about it
+is anywhere but that one directory.
+
+That matters because search analytics is not a parallel feature, it is a
+follow-on: `result_count` and `mode` are produced by `searchDocs()`, and the
+one place to record a submit is the overlay's `submit()` — which in that
+worktree is a near-total rewrite of the 16KB file on `main`.
+
+**Built here, and independent of any of that** (181 unit + 3 new e2e green,
+typecheck and lint clean):
+
+- `supabase/migrations/0012_search_queries.sql` — `search_queries` with the
+  folded `query` and the untouched `query_raw`, `result_count`, `mode`
+  (`exact|relaxed|none`), `facets text[]`, `created_at`. Two indexes: one on
+  the range, one PARTIAL on `result_count = 0`, which is small because it
+  indexes only the failures. RLS enabled with **no policy at all** — the
+  `page_views` treatment, so only the service role reaches it.
+- Registered in both halves of `lib/supabase/types.ts` (`DbTables` +
+  `TABLE_NAMES`). The typechecker then required `seed-data.ts` to account for
+  it; seeded empty on purpose, in demo mode too — the Trending chips are about
+  to be chosen from this table, and a seeded row would put words on the
+  storefront that nobody typed.
+- `POST /api/search-queries` — zod, every failure into `console.error`, always
+  200 fast. Named for the table, not the feature: `/api/search` is the search
+  INDEX, and two routes one letter apart is a permanent invitation to wire the
+  wrong one. Validates `facets` against the closed vocabulary so the column
+  stays joinable against the filter drawer.
+- `lib/search/record.ts` — the browser recorder, carrying the Beacon's guard
+  verbatim (`window.self !== window.top`, catch → true). Called from `submit()`
+  and nowhere else, so "on submit, never per keystroke" is true by construction
+  rather than by four call sites agreeing.
+- `lib/admin/search-report.ts` + the `/admin/analytics` cards, EN and 中文.
+
+**Two things worth keeping.** A query the engine's fold destroys — 玫瑰, 🌹,
+`!!!` all normalize to `""` — is exactly the zero-result row worth most, and a
+naive `length >= 1` CHECK would have thrown on every one of them straight into
+the endpoint's own catch. `searchGroupingKey` falls back to the raw text, so
+玫瑰 groups as 玫瑰. And the guard is unit-tested directly rather than left to
+`admin-home-content.spec.ts`, whose filter matches `/api/beacon` and would not
+have caught a regression posting to `/api/search-queries`.
+
+**Not done, and why.** The recording call site, and closing OQ-1 in
+`storefront-search.md` — both live in the other worktree's uncommitted files. I
+did not add to someone else's working tree or commit their work for them.
+`0012` is written and validated (`check:migrations` ok, 11 files) but **not
+pushed**: this branch is unmerged, nothing writes to the table yet, and this
+worktree is not `supabase link`ed (the root is).
+
+**Verified:** 181 unit, 158 e2e including the three pixel baselines; typecheck
+and lint clean; `check:migrations` ok; `features:check` 13 records pass. One
+full-suite run failed `admin-home-picker.spec.ts:210` ("framing a replaced
+photo") — a flake, not this work: it passes alone, passes with the admin specs
+in suite order, and the next full run was 158/158. That test is the previous
+session's photo-framing work and nothing here touches the picker.

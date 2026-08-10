@@ -343,6 +343,49 @@ export function AnalyticsDashboard({
           />
         </InlineGrid>
 
+        {/* Search (storefront-search.md OQ-1): what shoppers asked for, and
+            what they asked for and did not find. The two lists are separate on
+            purpose — a failing query is almost never a popular one, so ranked
+            together it would sit below the fold, which is where nobody looks. */}
+        <InlineGrid columns={{ xs: 1, sm: 2 }} gap="400">
+          <StatCard
+            title={t("analytics.card.searches")}
+            value={String(summary.search.totalSearches.current)}
+            pair={summary.search.totalSearches}
+          />
+          <StatCard
+            title={t("analytics.card.zeroResultRate")}
+            value={`${summary.search.zeroResultRatePercent.current}%`}
+            pair={summary.search.zeroResultRatePercent}
+          />
+        </InlineGrid>
+        <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
+          <ListCard
+            title={t("analytics.card.topQueries")}
+            caption={`${summary.search.distinctQueries} ${t(
+              "analytics.search.distinct",
+            )}. ${t("analytics.search.captionTop")}`}
+            empty={t("analytics.search.empty")}
+            rows={summary.search.topQueries.map((row) => ({
+              label: `${row.display} (${row.searches})`,
+              value: `${row.averageResults}`,
+            }))}
+          />
+          <ListCard
+            title={t("analytics.card.zeroResultQueries")}
+            caption={t("analytics.search.captionZero")}
+            empty={
+              summary.search.totalSearches.current > 0
+                ? t("analytics.search.emptyZero")
+                : t("analytics.search.empty")
+            }
+            rows={summary.search.zeroResultQueries.map((row) => ({
+              label: row.display,
+              value: String(row.searches),
+            }))}
+          />
+        </InlineGrid>
+
         <InlineGrid columns={{ xs: 1, md: 2 }} gap="400">
           <ListCard
             title={t("analytics.card.sessionsByChannel")}

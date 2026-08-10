@@ -94,6 +94,7 @@ import {
   type PathEngagement,
   type SectionEngagement,
 } from "./engagement-report.ts";
+import { searchReport, type SearchQueryStat } from "./search-report.ts";
 
 export type MetricPair = { current: number; previous: number };
 
@@ -142,6 +143,16 @@ export type AnalyticsSummary = {
     sections: SectionEngagement[];
     dropOff: DropOffEntry[];
   };
+  /** What shoppers searched for, and what they searched for and did not find
+   *  (storefront-search.md OQ-1). Empty until the overlay records a submit. */
+  search: {
+    totalSearches: MetricPair;
+    zeroResultSearches: number;
+    zeroResultRatePercent: MetricPair;
+    distinctQueries: number;
+    topQueries: SearchQueryStat[];
+    zeroResultQueries: SearchQueryStat[];
+  };
 };
 
 /**
@@ -157,10 +168,11 @@ export async function analyticsSummary(
   key: RangeKey,
   now = new Date(),
 ): Promise<AnalyticsSummary> {
-  const [orders, lines, views] = await Promise.all([
+  const [orders, lines, views, searches] = await Promise.all([
     cachedAll("orders"),
     cachedAll("order_lines"),
     cachedAll("page_views"),
+    cachedAll("search_queries"),
   ]);
   const { current, previous } = rangesFor(key, now);
 
@@ -365,6 +377,16 @@ export async function analyticsSummary(
     views.filter((view) => within(view.created_at, previous)),
   );
 
+  // Search reads its own table, filtered the same way. The previous period is
+  // computed for the two numbers that carry a compare-to-previous badge: how
+  // much shoppers searched, and how often searching failed them.
+  const currentSearch = searchReport(
+    searches.filter((row) => within(row.created_at, current)),
+  );
+  const previousSearch = searchReport(
+    searches.filter((row) => within(row.created_at, previous)),
+  );
+
   const currentAov =
     currentOrders.length > 0
       ? Math.round(netSales(currentOrders) / currentOrders.length)
@@ -452,6 +474,20 @@ export async function analyticsSummary(
       byPath: currentEngagement.byPath,
       sections: currentEngagement.sections,
       dropOff: currentEngagement.dropOff,
+    },
+    search: {
+      totalSearches: {
+        current: currentSearch.totalSearches,
+        previous: previousSearch.totalSearches,
+      },
+      zeroResultSearches: currentSearch.zeroResultSearches,
+      zeroResultRatePercent: {
+        current: currentSearch.zeroResultRatePercent,
+        previous: previousSearch.zeroResultRatePercent,
+      },
+      distinctQueries: currentSearch.distinctQueries,
+      topQueries: currentSearch.topQueries,
+      zeroResultQueries: currentSearch.zeroResultQueries,
     },
   };
 }
