@@ -40,6 +40,7 @@ markers (`check` fails when the block is stale). Meter legend:
 | [tiktok-analytics](tiktok-analytics.md) | ○○○○ backlog | not-deployed |
 | [card-payments](card-payments.md) | ●○○○ ready | not-deployed |
 | [shipping-rates](shipping-rates.md) | ●○○○ ready | not-deployed |
+| [storefront-search](storefront-search.md) | ●○○○ ready | not-deployed |
 | [engagement-tracking](engagement-tracking.md) | ●●○○ in-progress | live |
 | [feature-records](feature-records.md) | ●●○○ in-progress | not-deployed |
 | [checkout-screens](checkout-screens.md) | ●●●○ uat | live |
