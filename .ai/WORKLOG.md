@@ -6702,3 +6702,84 @@ full-suite run failed `admin-home-picker.spec.ts:210` ("framing a replaced
 photo") — a flake, not this work: it passes alone, passes with the admin specs
 in suite order, and the next full run was 158/158. That test is the previous
 session's photo-framing work and nothing here touches the picker.
+## 2026-08-10 — the header search box actually searches, and answers as you type
+
+**The bug was the promise, not the code.** The overlay's own hint offered
+"Search products, occasions, or recipients" and its own trending chips offered
+"Anniversary Gift", "For Mom" and "Ready to Ship", while `/shop?q=` matched
+`title + short_name` and nothing else. Three of the five chips we ship landed a
+stranger on an empty grid. Occasions and recipients were never free text we had
+to guess at — they are the closed vocabulary in `lib/catalog/facets.ts`, already
+stored per product as `best_for` and already what the filter drawer filters on.
+
+**One engine, both sides.** `lib/catalog/search.ts` is pure, synchronous and
+dependency-free, so the overlay runs it in the browser on every keystroke and
+`/shop` runs the same function on the server. A dropdown that previews one set
+of products and an Enter key that delivers another is the bug the file exists to
+make impossible; an e2e test compares the two lists href for href. A query that
+names a facet FILTERS (OR inside a heading, AND across headings — the drawer's
+own combination); free words SCORE, weighted short name > title > facet label >
+tag > badge > handle > description.
+
+**Relaxation, because zero results is a failure state.** Strict → drop the
+words, keep the facets → drop the facets, keep the words → facets alone →
+nothing. `mode` reports which rung answered so the panel can say "the closest
+gifts we have" instead of passing a loose match off as exact. `mode: "none"` is
+still a real outcome, which is what keeps `?q=zzzz` empty and
+`screens.spec.ts`'s contract intact.
+
+**An index, not a query API.** `GET /api/search` takes no arguments and reads
+nothing off the request — which is what lets `export const revalidate = 300`
+apply (the build reports `○ /api/search 5m`). The browser fetches it once per
+tab, prefetched on pointer-enter, so there is no request per letter, no
+debounce, no `AbortController` and no out-of-order response to discard.
+`revalidateStorefront()` busts it so an owner's edit is not stale for 300s after
+every other surface has updated.
+
+**Three things the tests caught that review would not have.** The e2e run showed
+"rose" returning 2 of 3 products: "ELDREVE Premium Gift Bundle" has no "rose" in
+its title or copy, in a shop that sells nothing else — only its frozen handle
+says so, so the handle is now indexed at low weight. A unit test showed
+`highlightRuns` folding "Valentine’s" to the two words "valentine s", so the
+query "valentines" could never match it. And another showed the ladder had no
+rung for "the words are gibberish but the facet is not" — "mom sparkly" returned
+nothing when the mother's shelf was the obvious answer.
+
+**Also, because the panel was already being rebuilt:** ↑/↓/Enter drive the list
+while focus stays in the field (the repo's first `aria-activedescendant` — the
+Carousel's roving tabindex would take focus off the input and the next character
+typed would go nowhere), Escape clears before it closes, the field autofocuses,
+closing returns focus to the button, matched words are bolded in each row, and a
+visitor with no history is offered the shop itself instead of the frame's dead
+half-panel. Geometry lives in `lib/catalog/search-layout.ts` with the frame's
+932 as a FLOOR, so the idle panel is byte-identical to the import.
+
+**Verified:** 196 unit tests, 11 new e2e tests, the full e2e suite (164 passed;
+one pre-existing flake in `admin-home-picker.spec.ts` that passes in isolation),
+all three pixel baselines unchanged, `lint`/`typecheck`/`build`/`features:check`
+clean.
+
+**Left open, deliberately:** nothing records what shoppers type, so the trending
+chips stay a design guess and zero-result queries — the most valuable
+merchandising signal a shop has — are invisible. That needs a `search_queries`
+table (`0012`) and the Beacon's framed-document guard; `page_views.path` must
+not be reused, because `engagement-report.ts` groups it verbatim and every
+distinct query would become a fake page. See OQ-1 in
+`docs/features/storefront-search.md`.
+
+**Adversarial review pass (same day).** Five review agents over the diff, each
+finding verified by two independent skeptics. Seven distinct real defects, all
+fixed with tests: a 503 from `/api/search` resolved to `[]` rather than
+throwing, so an outage read as "no gifts match" (now a third `failed` state
+that still carries the query to `/shop`); the description cap was applied at
+the wire and not at indexing, so the browser and `/shop` searched different
+text; a CJK or emoji query folded to "" and was answered with the whole
+catalogue reported as matches; price LABELS auto-registered as search phrases,
+so "$100–$199" became the phrase "100 199" and "$300+" made a bare "300" mean a
+price band; `MIN_PREFIX` was 3 while the highlighter bolded from 2, so "ro" said
+"No exact match" over rows with "Ro" bolded in them; the idle "All Gifts" rows
+were arrow-navigable but rendered outside any listbox, leaving
+`aria-activedescendant` naming ids not in the document; and the query reached
+`extractFacets` unbounded from `?q=`. Also pre-empted before the review
+returned: IME composition (Enter committing a Japanese candidate would have
+opened a product page instead).

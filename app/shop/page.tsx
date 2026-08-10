@@ -47,6 +47,7 @@ import {
   parseFacetParam,
   type FacetSubject,
 } from "@/lib/catalog/facets.ts";
+import { searchDocs, toSearchDoc } from "@/lib/catalog/search.ts";
 import { abs, txt } from "@/lib/figma-layout";
 import { fileUrl } from "@/lib/files-url";
 import { cardAreaOf } from "@/lib/images/spotlight";
@@ -203,17 +204,26 @@ export default async function ShopPage({
   try {
     // Card order = active products by position (§8).
     const catalog = await getCatalog();
-    // /search hands off here as ?q= — a plain title/short-name match. No
-    // matches now means no cards; it used to fall back to the whole catalog
-    // because the eight fixed slots had to be filled either way.
-    const needle = query.toLowerCase();
-    const matches = needle
-      ? catalog.filter((product) =>
-          `${product.title} ${product.short_name ?? ""}`
-            .toLowerCase()
-            .includes(needle),
-        )
-      : catalog;
+    // The header's search overlay hands off here as ?q=, and BOTH sides run
+    // the one engine in lib/catalog/search.ts — the dropdown a shopper picked
+    // from and the grid they land on cannot show different products. It reads
+    // names, occasions, recipients and availability, so the overlay's own
+    // "Search products, occasions, or recipients" is true. No matches still
+    // means no cards; it used to fall back to the whole catalog because the
+    // eight fixed slots had to be filled either way.
+    // The engine is generic over anything shaped like a SearchDoc, so each
+    // document carries its own product home rather than being matched back by
+    // handle afterwards — one less place for the two lists to fall out of step.
+    const indexed = catalog.map((product) => ({
+      ...toSearchDoc(product),
+      product,
+    }));
+    // Ranked best-first. The grid's default sort ("Recommended"/"New") leaves
+    // the incoming order alone, so for a search, relevance IS the order; only
+    // an explicit price sort overrides it.
+    const matches = searchDocs(indexed, query).hits.map(
+      (hit) => hit.doc.product,
+    );
     subjects = matches.map(facetSubject);
     // Then the drawer's chips: OR inside a heading, AND across headings.
     const shown = matches.filter((product) =>

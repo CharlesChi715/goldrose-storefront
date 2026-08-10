@@ -67,6 +67,10 @@ export function revalidateStorefront(): void {
   // The discovery layer regenerates with the catalog (§8.1).
   revalidatePath("/sitemap.xml");
   revalidatePath("/llms.txt");
+  // The header search overlay reads this index, so a product renamed, hidden
+  // or re-priced here would otherwise stay findable under its old wording for
+  // the full 300s while every other surface had already changed.
+  revalidatePath("/api/search");
 }
 
 /**
