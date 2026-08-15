@@ -7142,3 +7142,7 @@ this delivery's.
   `npm run features:new -- <id>` now scaffolds a backlog record without the
   long `node scripts/…` incantation. Charles's draft ideas start life as
   backlog records via this command (or the /feature-new skill).
+- Replaced the feature-new skill (v2.0.0): discussion-first — four phases
+  (listen/ground, critique/explore, converge at an explicit-agreement gate,
+  materialize via features:new + TEMPLATE fill + roadmap sync + check). No
+  files may be touched before Charles's explicit yes.
