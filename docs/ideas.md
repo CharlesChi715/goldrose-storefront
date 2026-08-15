@@ -70,26 +70,11 @@ is there any way to get how long time do user stay on a page or stay on a sectio
 
 ## TODO from me:
 
-播放量
-点赞
-评论
-
-reviews
 payment, 
 order
 return
-
-
-
-工作台
-产品的替换
-bulk upload
 tiktok 数据分析
 
-
-privacy policy page should reachable
-
+- Shipped an LLM business advisor based on Anthropic APIs that retrieves across the codebase, marketing copy, vendor records and supply-chain data (pgvector) and answers a non-technical owner in business language — constrained to propose changes only as a structured patch approved via visual diff, with numeric questions routed to typed SQL tools so sales and stock figures are read, never generated.
 
 - meeting
-
-me page 重复

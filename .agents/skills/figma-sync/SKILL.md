@@ -175,6 +175,12 @@ one-line **"pending from design"** note in the session hand-off — but change
 nothing. When filing the hand-off, invoke the `agent-delivery` skill and follow
 it; don't improvise the write-back.
 
+**Where the standing state lives:** `docs/ixd/README.md` → *Design-sync state*
+— what is imported, whether the baseline is stamped, what design still owes us,
+and the divergences from the frames that are sanctioned rather than bugs. Read
+it before a sync and update it after one; per-sync detail stays in the session
+file.
+
 ## 6. Repo ↔ Figma drift
 
 `npm run figma:routes` reports both directions: repo routes with no frame, and
@@ -189,6 +195,17 @@ one means.
 
 Band-diff the live render against the scale-2 frame render from
 `cli.mjs render` (font-AA envelope), and cover new interactions with a test.
+
+**Two environment traps that cost most of the 08-10 sync's verification time:**
+
+- **Always regenerate a pixel baseline with `CI=1`.** Playwright's
+  `reuseExistingServer: !CI` silently reuses a stale `next start` on port 3001,
+  so `--update-snapshots` can "pass" while baking a baseline from the OLD
+  build. The tell is the runtime: ~2s means no build happened.
+- **`npm run seed -- --reset` does NOT clear `site_content`.** An aborted admin
+  test can leave e.g. `home.craft.__visible = hidden` in `.data/db.json`, after
+  which every homepage test fails for want of a band — and a regenerated
+  baseline bakes the missing band in.
 
 ## 8. Finish — notify Charles and recommend the close-out
 

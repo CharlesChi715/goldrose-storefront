@@ -117,5 +117,8 @@ one.
 
 ## Repository map and documentation
 
-[`SUMMARY.md`](SUMMARY.md) owns the repository tree and documentation index.
-Keep setup and command guidance here; add project navigation there.
+[`SUMMARY.md`](SUMMARY.md) owns the repository tree and the current state of the
+project. **Which document owns which topic is a skill, not a table** — load
+`project-docs` (in [`.agents/skills/`](.agents/skills/), symlinked into
+`.claude/skills/`) to route to specs, database rules, naming, SEO/GEO, feature
+status, deliveries or ideas. Keep setup and command guidance here.

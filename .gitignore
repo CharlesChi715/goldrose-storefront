@@ -44,7 +44,9 @@ next-env.d.ts
 
 # scratch — deletable at any time; nothing in the repo may reference it
 trash/
+
 .claude/
+.agents/
 
 # local file-adapter database and its uploads (see lib/orders/db.ts)
 .data/

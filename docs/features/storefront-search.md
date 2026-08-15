@@ -1,7 +1,7 @@
 ---
-delivery: ready
-rollout: not-deployed
-statusChangedAt: 2026-08-10
+delivery: uat
+rollout: live
+statusChangedAt: 2026-08-15
 priority: p2
 ---
 

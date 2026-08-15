@@ -1,5 +1,34 @@
 # Interaction Specifications · IxD Specs
 
+Design-facing record: where the Figma file and the repo currently stand, what
+the design team still owes us, and the naming rules. Per-sync history lives in
+[`agent-delivery/sessions/`](../../agent-delivery/README.md); the process lives
+in the `figma-sync` skill.
+
+## Design-sync state — 2026-08-10
+
+- **Imported through 2026-08-10.** The home page `/` was re-imported from frame
+  `2380:370` (page-wide typography pass); the stage is **5074** and
+  `band.trim` is retired. Detail:
+  [figma-sync-home-page-08-10](../../agent-delivery/sessions/figma-sync-home-page-08-10-claude-figma-sync-home-page-75f37e.md).
+- ⚠️ **The baseline is deliberately un-stamped: 41 changed frames remain
+  un-imported.** `npm run figma:baseline` was not run, so the next sync still
+  sees them. Do not stamp it to "clean up" a diff.
+- **`npm run figma:unbuilt` is empty** since 2026-08-07 — every Ready-for-dev
+  frame has a route (`/account/addresses` was the last one).
+- **Pending from design:** the 7 `/policies/*` pages, the MENU and long-form
+  story redesigns, and `/gift-guide` (frame `1942:182`, no route built).
+- **Sanctioned divergences** — a pixel diff will never close these, and that is
+  intended: A-2's uniform card 2 (owner, 2026-08-07), the six rail CTAs the
+  frame deleted on three cards (AI-043), and ~2.0–2.7% per band of font
+  rasterisation. A-2 reads 8.3% for exactly that reason.
+- ⚠️ **A frame carrying a pre-rename brand name is not imported verbatim**
+  (AI-037) — see [naming/brand-name.md](naming/brand-name.md). The home page is
+  the owner's sanctioned exception (AI-044).
+- Open design matters, with the frame each one is about, are rows in
+  [`agent-delivery/INBOX.md`](../../agent-delivery/INBOX.md): AI-024, AI-037,
+  AI-038, AI-043, AI-045.
+
 ## Files
 
 Only the naming docs below live here now.
@@ -26,6 +55,8 @@ The `data-el` attributes themselves are in code. Current naming docs:
   title, so any person or model produces the identical string
 - [naming/component-names.md](naming/component-names.md) — the `data-el`
   attribute vocabulary tying a rendered element back to its design component
+- [naming/brand-name.md](naming/brand-name.md) — ELDREVE in all copy, and the
+  `goldrose` strings that are identifiers and must never be renamed
 
 The 2026-07-25 design-team naming guide was archived on 2026-07-31; the three
 docs above supersede it. Its raw source (a translated spreadsheet) was deleted

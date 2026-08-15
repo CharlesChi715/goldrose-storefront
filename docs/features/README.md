@@ -40,13 +40,20 @@ markers (`check` fails when the block is stale). Meter legend:
 | [tiktok-analytics](tiktok-analytics.md) | ○○○○ backlog | not-deployed |
 | [card-payments](card-payments.md) | ●○○○ ready | not-deployed |
 | [shipping-rates](shipping-rates.md) | ●○○○ ready | not-deployed |
-| [storefront-search](storefront-search.md) | ●○○○ ready | not-deployed |
+| [customer-accounts](customer-accounts.md) | ●●○○ in-progress | live |
+| [database-migrations](database-migrations.md) | ●●○○ in-progress | live |
 | [engagement-tracking](engagement-tracking.md) | ●●○○ in-progress | live |
 | [feature-records](feature-records.md) | ●●○○ in-progress | not-deployed |
+| [product-reviews](product-reviews.md) | ●●○○ in-progress | live |
 | [checkout-screens](checkout-screens.md) | ●●●○ uat | live |
+| [domain-and-email](domain-and-email.md) | ●●●○ uat | live |
+| [home-content-admin](home-content-admin.md) | ●●●○ uat | live |
+| [media-spotlight](media-spotlight.md) | ●●●○ uat | live |
 | [order-tracking](order-tracking.md) | ●●●○ uat | live |
 | [paypal-wallet](paypal-wallet.md) | ●●●○ uat | test-deployment |
 | [posting-account-attribution](posting-account-attribution.md) | ●●●○ uat | live |
+| [shop-facets](shop-facets.md) | ●●●○ uat | live |
+| [storefront-search](storefront-search.md) | ●●●○ uat | live |
 | [region-alignment](region-alignment.md) | ●●●● accepted | live |
 
 <!-- END features:roadmap -->

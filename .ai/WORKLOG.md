@@ -7135,3 +7135,89 @@ Verified: 165 unit, **154/155 e2e**, three pixel baselines (home regenerated;
 `/shop` and PDP byte-identical). The single failure,
 `shop-filters.spec.ts:158`, reproduces on stashed pre-change code and is not
 this delivery's.
+
+## 2026-08-15 16:37 AEST — SUMMARY trimmed to an entrypoint; current state moved to its owning docs
+
+- **SUMMARY.md 668 → 263 lines.** The `Current phase` section (430 lines) was
+  mostly duplication: `admin-design.md` §9.8.1 already described the home-page
+  editor in more detail, `docs/features/storefront-search.md` already carried
+  the search and search-analytics prose verbatim, and the 08-10 session file
+  already held the home re-import. Those blocks were deleted, not rewritten.
+- **Five new feature records** for the topics that had no owner anywhere:
+  `product-reviews`, `shop-facets`, `home-content-admin`, `customer-accounts`,
+  `media-spotlight`. `checkout-screens` absorbed `/bag`. 19 records,
+  `features:check` green, roadmap re-synced.
+- **`storefront-search` front matter corrected** `ready`/`not-deployed` →
+  `uat`/`live`: the code has been merged to `main` and deployed since 08-10.
+- **New `docs/ixd/naming/brand-name.md`** — ELDREVE in all copy, and the
+  `goldrose` strings that are identifiers and must never be renamed (cookie and
+  localStorage keys, the vercel.app host, the test fixture, "24K Gold Rose"),
+  plus the AI-044 home-page exception and the open AI-035/AI-037.
+- **`docs/ixd/README.md` gained a "Design-sync state" section** — imported
+  through 08-10, baseline deliberately un-stamped with 41 changed frames
+  outstanding, what design still owes, and the sanctioned pixel divergences.
+- **The 08-10 sync's two environment traps moved into the `figma-sync` skill**
+  §7 (use `CI=1` for baselines; `seed -- --reset` does not clear
+  `site_content`), where the next sync will actually read them.
+- **Two errors fixed while reconciling:** SUMMARY's hard gates still demanded
+  migrations `0009`+`0010` be pushed (done 08-07, and the same file said so
+  two sections later), and `npm run figma:assets` does not exist — the command
+  is `node scripts/figma/cli.mjs assets <frame-id>`.
+- `CLAUDE.md` stays deleted (owner's call); its row was removed from the
+  repository tree chart. Nothing else was deleted — every trimmed paragraph is
+  in an owning doc or in git history.
+- Verified: 221 unit tests, `npm run features:check`, `prettier --check .`, and
+  a link/anchor sweep over every touched document. No code changed, so the e2e
+  suite was not run.
+
+## 2026-08-15 17:05 AEST — the doc index became five skills
+
+- **Owner's call:** SUMMARY's "Find details on demand" table (and the
+  "Kind of truth → Home" writing rule above it) are deleted; routing to
+  documentation now lives in skills, so it fires at the moment of need instead
+  of only when someone loads SUMMARY. The reasoning that made it clearly right:
+  skill names and descriptions are injected into every turn's context, while
+  SUMMARY is not — especially now that `CLAUDE.md` is gone.
+- **Five new skills**, pointer cards only (~30 lines each; the docs stay the
+  single source of truth, so nothing can drift out of sync with them):
+  - `project-docs` — the whole map, plus the rule for choosing where a NEW fact
+    goes, feature-status commands, and the private-archive / ideas-verbatim /
+    Database.md-on-request constraints.
+  - `admin-spec` — `docs/admin-design.md` § table and the rules it imposes
+    (`t()`, JSDoc, integer cents, §11 pixel-vs-editable).
+  - `database` — migrations via `supabase db push` only, never the web SQL
+    editor; the CLI does not work from a worktree; the view-rebuild hazard;
+    new analytics never reuses `page_views`; psql read-only recipe.
+  - `naming` — the four naming docs, with handle-freezing and the `goldrose`
+    identifiers that must never be renamed called out.
+  - `seo-geo` — the six non-negotiable rules and what is already implemented.
+- `figma-sync` §5 now points at `docs/ixd/README.md` → Design-sync state as the
+  standing state to read before a sync and update after one.
+- `README.md`'s "Repository map and documentation" updated: SUMMARY owns the
+  tree and current state; the `project-docs` skill owns topic routing.
+- SUMMARY.md 263 → 244 lines. `features:check` green, all links resolve.
+
+## 2026-08-15 17:40 AEST — app state moved out of SUMMARY and skills, into the records
+
+Charles's ruling: state changes too often to sit in a skill, a memory file or a
+hand-written table — it belongs in `docs/features/`, where CI watches it.
+
+- **SUMMARY's 14-row state table is deleted** (263 → 228 lines). What replaced
+  it is a pointer to the generated roadmap, which cannot disagree with the
+  records because it is derived from their front matter.
+- **Two new records for state that had no owner:**
+  - `database-migrations` — which of `0001`–`0012` are applied, why `0004` is
+    skipped, why `0012` is still unpushed, the push-order hazard, and the rule
+    that an unpushed migration must never take down a read (`cachedAllOptional`).
+  - `domain-and-email` — eldreve.com, Vercel/Supabase wiring, the passkey RP ID
+    warning, the two Resend keys and the Production-only fallback, the ~3k/month
+    allowance, and the outstanding billing move. `customer-accounts` now links
+    here instead of restating the SMTP setup.
+- **Four state lines stripped from the skills**, which keep only rules: seo-geo
+  points at §3's baseline table instead of listing what exists; database points
+  at the new record instead of at SUMMARY; naming points at `product-handles.md`
+  §5 rather than asserting a table's absence.
+- SUMMARY's "How to update this file" now states the rule outright: anything
+  that changes as the app changes goes in a record, never here.
+- Verified: 21 records pass `features:check`, 221 unit tests, every link and
+  heading anchor across records, skills, SUMMARY and README.
