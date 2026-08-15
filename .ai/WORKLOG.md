@@ -7135,3 +7135,10 @@ Verified: 165 unit, **154/155 e2e**, three pixel baselines (home regenerated;
 `/shop` and PDP byte-identical). The single failure,
 `shop-filters.spec.ts:158`, reproduces on stashed pre-change code and is not
 this delivery's.
+
+## 2026-08-15 — npm alias for feature scaffolding
+
+- Added `"features:new"` to package.json beside features:check/roadmap:
+  `npm run features:new -- <id>` now scaffolds a backlog record without the
+  long `node scripts/…` incantation. Charles's draft ideas start life as
+  backlog records via this command (or the /feature-new skill).

@@ -35,6 +35,7 @@
     "figma:baseline": "node scripts/figma/cli.mjs baseline",
     "polish": "npm run format",
     "features:check": "node scripts/features/cli.mjs check",
+    "features:new": "node scripts/features/cli.mjs new",
     "features:roadmap": "node scripts/features/cli.mjs roadmap --sync"
   },
   "dependencies": {
