@@ -1,0 +1,135 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "goldrose-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "goldrose-attach",
+      "url": "http://localhost:3000",
+      "port": 3000
+    },
+    {
+      "name": "eldreve-hosted-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "worktree-bestsellers-card-size",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/fix-bestsellers-card-size",
+        "--port",
+        "3200"
+      ],
+      "port": 3200
+    },
+    {
+      "name": "worktree-pdp-badge",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/fix-pdp-badge-truncation",
+        "--port",
+        "3300"
+      ],
+      "port": 3300
+    },
+    {
+      "name": "worktree-search-close-btn",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/fix-search-close-button",
+        "--port",
+        "3410"
+      ],
+      "port": 3410
+    },
+    {
+      "name": "worktree-company-legal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/feat-company-legal-info",
+        "--port",
+        "3100"
+      ],
+      "port": 3100
+    },
+    {
+      "name": "worktree-home-page-map",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/home-page-map",
+        "--port",
+        "3800"
+      ],
+      "port": 3800
+    },
+    {
+      "name": "worktree-figma-sync",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/figma-sync",
+        "--port",
+        "3700"
+      ],
+      "port": 3700
+    },
+    {
+      "name": "worktree-home-section-previews",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/admin-home-section-previews",
+        "--port",
+        "3007"
+      ],
+      "port": 3007
+    },
+    {
+      "name": "worktree-passkey",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        ".claude/worktrees/passkey",
+        "--port",
+        "3900"
+      ],
+      "port": 3900
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "WebSearch",
+      "Bash(npx prettier *)",
+      "Bash(git worktree *)",
+      "Bash(cd /Users/charles/Developer/gr-without-tools && grep -rn \"features/backend\" --include=\"*.md\" . | grep -vE \"^\\\\./\\\\.\\(claude|ai\\)\" | grep -v \"feature-records.md\"; echo \"referrer grep done\"; head -12 docs/features/region-alignment.md; echo \"── statusChangedAt across B's records:\"; grep -H \"statusChangedAt\" docs/features/*.md | grep -v TEMPLATE)",
+      "Read(//Users/charles/Developer/gr-without-tools/**)",
+      "Bash(git merge *)",
+      "Bash(git commit -m 'feat\\(features\\): migrate all 9 legacy records to the scheme \\(arm A\\) *)",
+      "Bash(git checkout *)",
+      "Bash(node scripts/features/cli.mjs check)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git commit -m ' *)",
+      "Bash(echo \"check exit: $?\")",
+      "Bash(git commit -m 'docs\\(features\\): adopt arm B'\\\\''s compact record bodies + conformance ruling *)",
+      "Bash(git commit -m 'docs\\(summary\\): per-feature status moves to its records *)",
+      "Bash(node scripts/features/cli.mjs roadmap --sync)",
+      "Bash(npm pkg *)",
+      "Bash(sed -n '/BEGIN features:roadmap/,/END features:roadmap/p' docs/features/README.md)",
+      "Bash(ln -s ../../.agents/skills/feature-new .claude/skills/feature-new)",
+      "Bash(git commit -m 'docs\\(features\\): tick plan steps 5-6 — the rebuild plan is complete *)",
+      "Bash(git commit -m 'docs\\(worklog\\): record the feature-records toolchain day *)",
+      "Read(//private/tmp/**)",
+      "Bash(claude --print --no-session-persistence --strict-mcp-config --disable-slash-commands --tools \"\" --model claude-haiku-4-5-20251001 --effort low --system-prompt 'You write git commit messages. Output only the commit message: a Conventional Commits subject line under 72 characters, optionally followed by a blank line and a short body. No code fences, no preamble, no quotes.' 'Write the commit message for this staged diff:')",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(cat ~/.claude/skills/evolve/critics.md 2>/dev/null || echo \"MISSING\")",
+      "Read(//Users/charles/.claude/skills/evolve/**)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "supabase",
+    "next-devtools",
+    "playwright",
+    "figma"
+  ],
+  "outputStyle": "Explanatory"
+}

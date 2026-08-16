@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -D - -o /dev/null https://goldrose-storefront.vercel.app/admin/login)",
+      "Bash(curl -s -o /dev/null -w \"login TTFB: %{time_starttransfer}s total: %{time_total}s\\\\n\" https://goldrose-storefront.vercel.app/admin/login)",
+      "Bash(python3 -)",
+      "Bash(unzip -o \"上部菜单按钮.zip\" -d \"上部菜单按钮\")",
+      "Bash(sips -g pixelWidth -g pixelHeight *.png)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(git rm *)",
+      "Bash(npm run *)",
+      "Bash(git mv *)",
+      "Bash(python3 -c \"import json,sys; print\\('\\\\n'.join\\(f'{k}: {v}' for k,v in json.load\\(sys.stdin\\)['scripts'].items\\(\\)\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git -C . ls-files assets/top-nav-buttons)",
+      "Bash(sed -i '' 's|\\\\[seo-roadmap\\\\.md\\\\]\\(seo-roadmap\\\\.md\\)|[seo-intro.md]\\(seo-intro.md\\)|' docs/search-discovery-implementation.md)",
+      "Bash(sed -i '' 's|\\\\[seo-roadmap\\\\.md\\\\]\\(seo-roadmap\\\\.md\\)|[seo-intro.md]\\(../seo-intro.md\\)|; s|seo-roadmap\\\\.md §1|seo-intro.md §1|' docs/archive/geo-claude.md)",
+      "Bash(sed -i '' 's|`docs/seo-roadmap\\\\.md`|`docs/seo-intro.md`|; s|\\\\[seo-roadmap\\\\.md\\\\]\\(seo-roadmap\\\\.md\\)|[seo-intro.md]\\(../seo-intro.md\\)|' docs/archive/flow-map.md)",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('.data/db.json'\\)\\); print\\(list\\(d.keys\\(\\)\\)\\); print\\([r['key'] for r in d.get\\('settings',[]\\)]\\)\")",
+      "Read(//Users/charles/Documents/bin/**)",
+      "Bash(zsh -n /Users/charles/Documents/bin/git-sync)",
+      "Bash(codex exec *)",
+      "Read(//Users/charles/.codex/**)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\) if False else None\")"
+    ],
+    "ask": [
+      "Read(./agent-delivery/archive/**)",
+      "Bash(cat ./agent-delivery/archive/*)",
+      "Bash(grep * ./agent-delivery/archive/*)"
+    ],
+    "additionalDirectories": [
+      "/Users/charles/Documents/bin"
+    ]
+  }
+}
