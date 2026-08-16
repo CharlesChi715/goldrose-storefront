@@ -29,11 +29,6 @@
       "Read(//Users/charles/.claude/skills/evolve/**)"
     ]
   },
-  "enabledMcpjsonServers": [
-    "supabase",
-    "next-devtools",
-    "playwright",
-    "figma"
-  ],
+  "enabledMcpjsonServers": ["supabase", "next-devtools", "playwright", "figma"],
   "outputStyle": "Explanatory"
 }

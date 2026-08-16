@@ -30,8 +30,6 @@
       "Bash(cat ./agent-delivery/archive/*)",
       "Bash(grep * ./agent-delivery/archive/*)"
     ],
-    "additionalDirectories": [
-      "/Users/charles/Documents/bin"
-    ]
+    "additionalDirectories": ["/Users/charles/Documents/bin"]
   }
 }

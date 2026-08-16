@@ -4,10 +4,7 @@
     {
       "name": "goldrose-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
+      "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
     },
@@ -19,12 +16,7 @@
     {
       "name": "eldreve-hosted-preview",
       "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "next",
-        "start",
-        "-p",
-        "3001"
-      ],
+      "runtimeArgs": ["next", "start", "-p", "3001"],
       "port": 3001
     },
     {
