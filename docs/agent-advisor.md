@@ -8,6 +8,10 @@
 > Run /idea and the agent sorts it into the sections below.
 
 - Shipped an LLM business advisor based on Anthropic APIs that retrieves across the codebase, marketing copy, vendor records and supply-chain data (pgvector) and answers a non-technical owner in business language — constrained to propose changes only as a structured patch approved via visual diff, with numeric questions routed to typed SQL tools so sales and stock figures are read, never generated.
+- Corpus scan 2026-08-16 (docs/, 38 files): admin-design.md (design doc), ideas.md (owner backlog),
+  supplier-color-charts.md (vendor data), features/ = 21 feature records (+README/TEMPLATE),
+  learning/ = 10 numbered teaching docs (+README) — candidate retrieval sources for the advisor;
+  code, marketing copy and DB tables not yet inventoried. → future §2 scope
 
 ## 2. ASCII Workflow map
 
