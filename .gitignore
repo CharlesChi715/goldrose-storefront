@@ -57,3 +57,6 @@ trash/
 
 # supabase CLI per-machine link state (project ref, pooler url) — migrations stay tracked
 supabase/.temp/
+
+# claude code worktrees — nested repos, never track
+.claude/worktrees/
