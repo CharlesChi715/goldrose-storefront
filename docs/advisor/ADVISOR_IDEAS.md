@@ -68,7 +68,6 @@
 
 ## 4. Open questions  (things you haven't decided yet)
 
-- Where does the curated doc live? (a) `docs/advisor/app-info.md`
 - What does the doc actually cover on day one? "How they improve their work"
   is still too vague to build or test against — needs 3–5 real example
   questions the bosses would genuinely ask. parked.
