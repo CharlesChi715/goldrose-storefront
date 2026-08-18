@@ -35,6 +35,7 @@ const en = {
   "nav.discounts": "Discounts",
   "nav.forum": "Forum",
   "nav.guide": "Guide",
+  "nav.advisor": "Advisor",
   "nav.settings": "Settings",
   "nav.settings.general": "General",
   "nav.settings.team": "Team",
@@ -165,6 +166,34 @@ const en = {
   // Guide
   "guide.missing":
     "The guide file (docs/TESTER-GUIDE.md) is missing from this deployment.",
+
+  // Advisor (docs/advisor/BLUEPRINT-agent-advisor.md)
+  "advisor.title": "Advisor",
+  "advisor.subtitle":
+    "Ask about this shop and about your own work. Answers come only from what the advisor has been told.",
+  "advisor.empty":
+    "Ask a question to start. Chinese or English — either is fine.",
+  "advisor.composer": "Your question",
+  "advisor.placeholder": "For example: which products should I promote first?",
+  "advisor.send": "Ask",
+  "advisor.clear": "Start over",
+  "advisor.thinking": "Thinking…",
+  "advisor.you": "You",
+  "advisor.name": "Advisor",
+  // One message per failure kind — each has a different remedy, and only the
+  // first two are the admin's own key to fix.
+  "advisor.error.noKey":
+    "You have not saved an Anthropic API key yet, so the advisor cannot answer. Add one in Settings.",
+  "advisor.error.badKey":
+    "Your Anthropic API key was refused. It may have been revoked or mistyped — save a new one in Settings.",
+  "advisor.error.billing":
+    "Your Anthropic account has no usable credit. Your key is fine; add billing at Anthropic, then try again.",
+  "advisor.error.rateLimit":
+    "Your Anthropic account is sending too many requests right now. Wait a moment and ask again.",
+  "advisor.error.busy":
+    "Anthropic is busy or unreachable at the moment. Nothing is wrong with your key — please try again.",
+  "advisor.error.unknown": "The advisor could not answer. Please try again.",
+  "advisor.error.action": "Open Settings",
   "login.devHint":
     "Local development login — no Supabase configured. Use any email with the dev password (ADMIN_DEV_PASSWORD).",
 
@@ -681,6 +710,20 @@ const en = {
   "settings.policies.refund": "Refund policy",
   "settings.policies.privacy": "Privacy policy",
   "settings.policies.terms": "Terms of service",
+  "settings.advisor.title": "Advisor",
+  "settings.advisor.note":
+    "Each person uses their own Anthropic API key, so each of you pays only for your own questions. Nobody else can see or use your key.",
+  "settings.advisor.key": "Your Anthropic API key",
+  "settings.advisor.saved":
+    "A key is saved. Type a new one to replace it — leave this blank to keep the current key.",
+  "settings.advisor.notSaved":
+    "No key saved yet. The advisor cannot answer until you add one.",
+  "settings.advisor.savedPlaceholder": "Saved — type a new key to replace it",
+  "settings.advisor.emptyPlaceholder": "Paste your key here",
+  "settings.advisor.error.tooShort":
+    "That does not look like a full API key. Copy the whole key from your Anthropic account and paste it again.",
+  "settings.advisor.error.notConfigured":
+    "This deployment has no database configured, so the key cannot be saved here.",
   "settings.search.title": "Search engine & AI",
   "settings.search.homeTitle": "Homepage title",
   "settings.search.homeDescription": "Homepage meta description",
@@ -888,6 +931,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "nav.discounts": "折扣",
   "nav.forum": "论坛",
   "nav.guide": "使用指南",
+  "nav.advisor": "顾问",
   "nav.settings": "设置",
   "nav.settings.general": "通用",
   "nav.settings.team": "团队",
@@ -1002,6 +1046,31 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
 
   // Guide
   "guide.missing": "本部署缺少指南文件（docs/TESTER-GUIDE.md）。",
+
+  // Advisor
+  "advisor.title": "顾问",
+  "advisor.subtitle":
+    "可以询问本店的情况，也可以询问你自己的工作。顾问只根据已告知它的内容回答。",
+  "advisor.empty": "输入问题即可开始。中文或英文都可以。",
+  "advisor.composer": "你的问题",
+  "advisor.placeholder": "例如：我应该先推广哪些商品？",
+  "advisor.send": "提问",
+  "advisor.clear": "重新开始",
+  "advisor.thinking": "思考中…",
+  "advisor.you": "你",
+  "advisor.name": "顾问",
+  "advisor.error.noKey":
+    "你还没有保存 Anthropic API 密钥，顾问无法回答。请在设置中添加。",
+  "advisor.error.badKey":
+    "你的 Anthropic API 密钥被拒绝，可能已被撤销或输入有误。请在设置中重新保存。",
+  "advisor.error.billing":
+    "你的 Anthropic 账户余额不足。密钥没有问题，请先在 Anthropic 添加付款方式，然后重试。",
+  "advisor.error.rateLimit":
+    "你的 Anthropic 账户当前请求过于频繁。请稍等一会儿再提问。",
+  "advisor.error.busy":
+    "Anthropic 当前繁忙或无法连接。这与你的密钥无关，请稍后重试。",
+  "advisor.error.unknown": "顾问无法回答，请重试。",
+  "advisor.error.action": "打开设置",
   "login.devHint":
     "本地开发登录 — 未配置 Supabase。使用任意邮箱和开发密码（ADMIN_DEV_PASSWORD）。",
 
@@ -1481,6 +1550,19 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "settings.policies.refund": "退款政策",
   "settings.policies.privacy": "隐私政策",
   "settings.policies.terms": "服务条款",
+  "settings.advisor.title": "顾问",
+  "settings.advisor.note":
+    "每人使用自己的 Anthropic API 密钥，因此各自只为自己的提问付费。其他人无法查看或使用你的密钥。",
+  "settings.advisor.key": "你的 Anthropic API 密钥",
+  "settings.advisor.saved":
+    "已保存密钥。输入新密钥即可替换；留空则保留当前密钥。",
+  "settings.advisor.notSaved": "尚未保存密钥。添加后顾问才能回答。",
+  "settings.advisor.savedPlaceholder": "已保存 — 输入新密钥可替换",
+  "settings.advisor.emptyPlaceholder": "在此粘贴你的密钥",
+  "settings.advisor.error.tooShort":
+    "这看起来不是完整的 API 密钥。请从 Anthropic 账户复制完整密钥后重新粘贴。",
+  "settings.advisor.error.notConfigured":
+    "本部署未配置数据库，无法在此保存密钥。",
   "settings.search.title": "搜索引擎与 AI",
   "settings.search.homeTitle": "首页标题",
   "settings.search.homeDescription": "首页元描述",

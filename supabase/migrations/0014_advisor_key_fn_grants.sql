@@ -1,0 +1,31 @@
+-- ----------------------------------------------------------------------------
+-- 0014 — lock down the advisor key functions (repairs 0013).
+--
+-- WHAT 0013 GOT WRONG.
+-- It ended with `revoke all on function ... from public` and claimed that
+-- removed anon and authenticated. It did not. Supabase ships
+--   alter default privileges in schema public
+--     grant execute on functions to anon, authenticated, service_role;
+-- so both functions were CREATED carrying explicit grants to those roles.
+-- Revoking from PUBLIC — the pseudo-role meaning "everyone by default" —
+-- leaves an explicit per-role grant completely untouched. Verified after the
+-- push: proacl read {postgres=X,anon=X,authenticated=X,service_role=X}.
+--
+-- WHY THAT MATTERED.
+-- Both functions are SECURITY DEFINER and take the user id as an argument, so
+-- they never consult the caller's identity. With EXECUTE granted to anon, any
+-- holder of the anon key — which ships inside the storefront's browser bundle
+-- — could POST /rest/v1/rpc/advisor_key_read with an arbitrary admin uuid and
+-- receive that admin's plaintext Anthropic key. The table's RLS is irrelevant
+-- here: a definer function runs as its owner and reads straight past it.
+--
+-- No key had been saved when this was found, so nothing was disclosed. This
+-- must land before the first key is stored.
+--
+-- LESSON FOR ANY FUTURE SECURITY DEFINER FUNCTION IN THIS REPO: revoking from
+-- PUBLIC is not enough on Supabase. Name anon and authenticated explicitly,
+-- then verify with pg_proc.proacl rather than trusting the revoke.
+-- ----------------------------------------------------------------------------
+
+revoke all on function public.advisor_key_save(uuid, text) from anon, authenticated;
+revoke all on function public.advisor_key_read(uuid) from anon, authenticated;

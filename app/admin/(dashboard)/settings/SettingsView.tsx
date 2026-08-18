@@ -27,6 +27,7 @@ import {
 import type { SettingsShape } from "@/lib/admin/settings";
 import { useAdminT } from "../../PolarisShell";
 import {
+  saveAdvisorKeyAction,
   saveCheckoutSettingsAction,
   saveLowStockAction,
   saveNotificationsAction,
@@ -64,6 +65,7 @@ function toCents(value: string): number | null {
 export function SettingsView({
   settings,
   payment,
+  advisor,
   owners,
   policies,
 }: {
@@ -73,6 +75,8 @@ export function SettingsView({
     clientIdTail: string | null;
     webhookConfigured: boolean;
   };
+  /** Whether this admin has an advisor key stored — never the key itself. */
+  advisor: { keySaved: boolean };
   owners: string[];
   policies: { refund: string; privacy: string; terms: string };
 }) {
@@ -121,6 +125,15 @@ export function SettingsView({
 
   // Tax
   const [taxRate, setTaxRate] = useState(String(settings.tax.rate_percent));
+  // Always starts empty: a saved key is never sent to the browser, so there is
+  // nothing to prefill. Blank means "leave the stored key alone".
+  const [advisorKey, setAdvisorKey] = useState("");
+  // Shown inside the Advisor card, not in the page-top banner: the card sits
+  // near the bottom of a long page, and an error the user must scroll up to
+  // find reads as no error at all.
+  const [advisorError, setAdvisorError] = useState<
+    "tooShort" | "notConfigured" | null
+  >(null);
 
   // Notifications + low stock
   const [notifications, setNotifications] = useState(settings.notifications);
@@ -607,6 +620,70 @@ export function SettingsView({
                     await savePolicyAction("policy.terms", terms);
                   })
                 }
+              >
+                {t("common.save")}
+              </Button>
+            </InlineStack>
+          </BlockStack>
+        </Card>
+
+        {/* Advisor — each admin's own Anthropic key
+            (docs/advisor/BLUEPRINT-agent-advisor.md) */}
+        <Card>
+          <BlockStack gap="300">
+            <Text as="h2" variant="headingSm">
+              {t("settings.advisor.title")}
+            </Text>
+            <Text as="p" tone="subdued">
+              {t("settings.advisor.note")}
+            </Text>
+            <TextField
+              label={t("settings.advisor.key")}
+              type="password"
+              value={advisorKey}
+              onChange={setAdvisorKey}
+              autoComplete="off"
+              placeholder={
+                advisor.keySaved
+                  ? t("settings.advisor.savedPlaceholder")
+                  : t("settings.advisor.emptyPlaceholder")
+              }
+              error={
+                advisorError
+                  ? t(
+                      advisorError === "tooShort"
+                        ? "settings.advisor.error.tooShort"
+                        : "settings.advisor.error.notConfigured",
+                    )
+                  : undefined
+              }
+              helpText={
+                advisor.keySaved
+                  ? t("settings.advisor.saved")
+                  : t("settings.advisor.notSaved")
+              }
+            />
+            <InlineStack align="end">
+              <Button
+                variant="primary"
+                loading={pending}
+                disabled={advisorKey.trim().length === 0}
+                onClick={() => {
+                  setAdvisorError(null);
+                  startTransition(async () => {
+                    const result = await saveAdvisorKeyAction({
+                      key: advisorKey.trim(),
+                    });
+                    if (!result.ok) {
+                      setAdvisorError(result.reason);
+                      return;
+                    }
+                    // Drop it from component state the moment it is stored.
+                    setAdvisorKey("");
+                    setToast(t("settings.saved"));
+                    router.refresh();
+                  });
+                }}
               >
                 {t("common.save")}
               </Button>

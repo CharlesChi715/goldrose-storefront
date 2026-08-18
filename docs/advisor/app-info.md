@@ -17,7 +17,6 @@
 
 ## Who is who
 
-- Two owners make the final decisions.
 - A frontend UI design team designs how the site looks and behaves.
 - Charles owns every technical decision and implementation.
 

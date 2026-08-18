@@ -7,6 +7,7 @@
  */
 
 import { z } from "zod";
+import { saveAdvisorKey } from "@/lib/advisor/keys";
 import { requireAdmin } from "@/lib/admin/auth";
 import { saveSetting } from "@/lib/admin/settings";
 import { revalidateStorefront } from "@/lib/admin/products";
@@ -75,6 +76,47 @@ export async function saveShippingZonesAction(payload: unknown): Promise<void> {
 export async function saveTaxAction(payload: unknown): Promise<void> {
   await requireAdmin();
   await saveSetting("tax", taxSchema.parse(payload));
+}
+
+// No format check beyond a length floor: the prefix Anthropic uses today is
+// not ours to depend on, and a mistyped key already surfaces as the advisor's
+// "key refused" message. Validating a shape we do not own would turn their
+// rename into our outage.
+const advisorKeySchema = z.object({ key: z.string().trim().min(20).max(200) });
+
+/**
+ * Why this returns a reason instead of throwing.
+ *
+ * Next.js redacts anything thrown from a server action in production — the
+ * browser gets a digest, not the message — so a thrown zod error reaches the
+ * boss as HTTP 500 with no explanation. A mistyped key is an expected outcome,
+ * not a server fault, so it comes back as a value the form can translate.
+ * Genuine faults (Vault unreachable, RPC failure) still throw and still 500.
+ */
+export type SaveAdvisorKeyResult =
+  { ok: true } | { ok: false; reason: "tooShort" | "notConfigured" };
+
+/**
+ * Save (or overwrite) the signed-in admin's own Anthropic API key, so each
+ * boss funds their own advisor usage (docs/advisor/BLUEPRINT-agent-advisor.md).
+ *
+ * The key comes from the form; the user id comes from the session and never
+ * from the client — advisor_key_save() would happily write against any uuid
+ * it is handed.
+ *
+ * @param payload - `{ key: string }` as typed in Settings.
+ * @returns ok, or the reason the form should explain.
+ */
+export async function saveAdvisorKeyAction(
+  payload: unknown,
+): Promise<SaveAdvisorKeyResult> {
+  const session = await requireAdmin();
+  const parsed = advisorKeySchema.safeParse(payload);
+  if (!parsed.success) {
+    return { ok: false, reason: "tooShort" };
+  }
+  const stored = await saveAdvisorKey(session.userId, parsed.data.key);
+  return stored ? { ok: true } : { ok: false, reason: "notConfigured" };
 }
 
 export async function saveCheckoutSettingsAction(

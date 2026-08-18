@@ -31,6 +31,7 @@ import {
   ContentIcon,
   DiscountIcon,
   HomeIcon,
+  MagicIcon,
   NotificationIcon,
   OrderIcon,
   PersonIcon,
@@ -246,6 +247,12 @@ export function AdminFrame({
             label: t("nav.guide"),
             icon: QuestionCircleIcon,
             selected: selected("/admin/guide"),
+          },
+          {
+            url: "/admin/advisor",
+            label: t("nav.advisor"),
+            icon: MagicIcon,
+            selected: selected("/admin/advisor"),
           },
         ]}
       />
