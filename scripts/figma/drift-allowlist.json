@@ -14,6 +14,10 @@
     {
       "route": "/checkout/cancel",
       "why": "PayPal cancel return path; technical, no design."
+    },
+    {
+      "route": "/policies/email-sms-terms",
+      "why": "The frame exists (2127:238) but is named SCROLL-CONTENT instead of its route, so the matcher cannot pair them. It IS this page — titled \"Email & SMS Terms\", carrying the Policy G code, and imported from on 2026-08-18. Settled here rather than re-diagnosed every sync; drop this entry if the design team ever renames the frame per the route rule."
     }
   ]
 }

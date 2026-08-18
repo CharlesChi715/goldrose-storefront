@@ -49,23 +49,6 @@ Full findings: `docs/ixd/README.md` § "08-02 delivery sync".
   conditional 交互（if 状态 = 已通过 → A 页，否则 → B 页）。列表里每张卡片
   各自连到自己的状态页（你们在 2030:188 已经这么做了）就是最准确的表达。
 
-## AI-012 · `PLACEHOLDER` · seven /policies/* routes are coming-soon scaffolds
-
-- **Where:** [`components/screens/PolicyComingSoon.tsx`](../../components/screens/PolicyComingSoon.tsx)
-  and the routes under [`app/policies/`](../../app/policies).
-- **What:** the Ready-for-dev POLICIES-LEGAL hub (1523:1136 →
-  `/account/policies-legal`) links seven policy pages whose frames are NOT
-  Ready-for-dev (2118:239/241/242/243/244/245, 2127:238). Per the scaffold
-  rule each destination renders a quiet coming-soon state so the hub's
-  navigation works without importing un-final design.
-- **Resolution:** import each page when its frame is marked; the scaffold
-  component then retires.
-- **Charles (08-02):** "yes just leave it untouched." Confirmed — the
-  scaffolds stay exactly as they are until the frames are marked.
-- **⚠️ When `/policies/privacy` (2118:244) is imported:** point
-  `/account/privacy-policy` at it with a redirect and retire the old
-  accordion screen — decided with Charles 08-02 under AI-014.
-
 ## AI-013 · `AGENT-DECISION` · the checkout rebuild adds four controls the new design left out
 
 - **Where:** [`app/checkout/CheckoutClient.tsx`](../../app/checkout/CheckoutClient.tsx).

@@ -19,6 +19,8 @@
     "figma:changes": "node scripts/figma/cli.mjs changes",
     "figma:comments": "node scripts/figma/cli.mjs comments",
     "figma:proto": "node scripts/figma/cli.mjs proto",
+    "figma:policies": "node scripts/figma/import-policies.mjs",
+    "figma:policies:check": "node scripts/figma/import-policies.mjs --check",
     "figma:pull": "node scripts/figma/cli.mjs pull",
     "figma:ready": "node scripts/figma/cli.mjs ready",
     "figma:routes": "node scripts/figma/cli.mjs routes",
