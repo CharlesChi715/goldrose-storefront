@@ -73,9 +73,16 @@ fails if it drifts:
 21 records, each with its own blockers, open questions and links.
 
 What is still visibly mocked (product copy and imagery, the tracking timeline,
-shipping choices, card fields, the 7 `/policies/*` pages) is tracked in those
-records and in [`agent-delivery/INBOX.md`](agent-delivery/INBOX.md); how far
-the design import has got is [`docs/ixd/README.md`](docs/ixd/README.md).
+shipping choices, card fields) is tracked in those records and in
+[`agent-delivery/INBOX.md`](agent-delivery/INBOX.md); how far the design
+import has got is [`docs/ixd/README.md`](docs/ixd/README.md).
+
+⚠️ **The `/policies/*` documents are built but not published.** Six were
+imported from their Figma frames on 2026-08-18 and are reachable, but they
+commit ELDREVE to a 30-day return window, a one-year warranty, stated
+processing times and arbitration — so every route ships
+`robots: { index: false }` until the bosses sign the copy off (AI-046).
+Removing that line is a business decision, not a technical one.
 
 **Next:** clear the hard gates (owner activation/UAT, real shipping rates, live
 PayPal) → take real orders → keep replacing mock content and placeholder
@@ -140,7 +147,8 @@ While live, in any order (nothing below blocks taking orders):
 9. Replace mock product content (OQ-3) and third-party/dev imagery product by
    product; reconcile palettes and tabs.
 10. Replace the remaining placeholder screens: tracking timeline, shipping
-    choices, card fields, the 7 `/policies/*` coming-soon pages.
+    choices, card fields, `/blog`. Sign off the six `/policies/*` documents so
+    they can come out of `noindex` (AI-046).
 11. Capture screenshots, cancel Shopify, revoke the Figma token, begin
     marketing. (The Shopify *store integration* is already gone; the
     `@shopify/polaris` UI framework is the admin's own and stays. Cancel the

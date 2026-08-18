@@ -7240,3 +7240,53 @@ hand-written table — it belongs in `docs/features/`, where CI watches it.
   `feat/env-check-skill` left in place.
 - `agent-advisor` worktree left on disk: it holds uncommitted work (deleted
   `docs/agent-advisor.md`, untracked `docs/advisor/`, `lib/advisor/`).
+
+## 2026-08-18 · figma-sync (policies) · `worktree-figma-sync-policies`
+
+Ran the read pipeline against file version `2385988852413855782`. **No new
+delivery** — the Figma file's `lastModified` is `2026-08-10T07:01:35Z` and the
+live version-check was a cache hit, so the scope report ("+5 ~42 −1") is the
+same diff the 08-10 sync saw, still measured against the 08-05 baseline. Four
+of the five "added" frames were already imported.
+
+What the tooling could not see: **six Ready-for-dev policy frames had never
+been built.** `figma:unbuilt` reported 0 and `figma:routes` was clean because
+both are satisfied by a route *existing*, and a `PolicyComingSoon` scaffold is
+a route. The frames (`2118:239`, `2118:241`, `2118:242`, `2118:243`,
+`2118:244`, `2127:238`) had been marked ready some time after 2026-08-02 and
+sat behind "This page is coming soon."
+
+Built all six — 57 numbered sections, 37 icons exported at 2× from Figma's own
+renderer (the `assets` detector descends into an icon's child vectors and
+would have split a two-path icon into two files, so `render` was used).
+
+- **The copy is generated, not transcribed.**
+  `scripts/figma/import-policies.mjs` (`npm run figma:policies`) emits
+  `lib/policies/documents.ts` from the cached frames; `--check` fails on drift.
+  Regenerating after the script was committed produced byte-identical copy.
+- **Two departures from the frames.** The frames say "GoldRose" 24 times
+  (stale per AI-037 → ELDREVE), and ship sixteen unfilled `[BRACKET]`
+  placeholders → `{token}` markers resolved from the `store` setting, with a
+  visible "to be confirmed" where the business has no answer. Warranty-care
+  also shipped a bracketed fake date, `[MAY 20, 2024]`.
+- **Not a `ScaleFrame`.** Its declared height plus `overflow: hidden` would
+  clip a warranty exclusion whenever body copy re-wraps, so the frames'
+  metrics are exact and only the heights flow.
+- **The 10.5px trap again.** Body copy is 10.5/14 in the REST `style` block;
+  `--outline` rounds it to 11 and it reads visibly heavier.
+- Drift allowlist gained `/policies/email-sms-terms` (its frame is named
+  `SCROLL-CONTENT`, not its route). `PolicyComingSoon` and
+  `ContactLegalScreen` docblocks corrected — both claimed frames were not
+  Ready-for-dev when they now are.
+- **AI-046 raised** (the copy's unsigned commitments; all six routes stay
+  `noindex`). **AI-012 closed.**
+- Verified: 231 unit tests (10 new), 11 new e2e, full suite 189/191 — the one
+  failure, `admin-home-picker.spec.ts:210`, passes in isolation and touches
+  admin home content, which this delivery does not. Typecheck, lint,
+  `check:assets`, `features:check` clean.
+- ⚠️ `@anthropic-ai/sdk` is declared in `package.json` and in the lockfile but
+  is not installed in the main checkout, so `npm run build` fails there in
+  `app/api/advisor/route.ts`. Installed with `--no-save` in the worktree to
+  allow verification; run `npm install` in the main checkout.
+- **Baseline deliberately NOT stamped** — ~36 changed frames remain
+  un-imported (the page-wide typography pass has only reached `/`).
