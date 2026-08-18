@@ -162,8 +162,13 @@ stall on USPS behind an EPS account. That asymmetry is the single strongest
 argument for an aggregator — one integration, and someone else maintains the
 carrier relationships.
 
-UPS is unchanged and remains the easy half: free to license, self-serve OAuth
-2.0 app registration on `developer.ups.com`, immediate test + production access.
+UPS is unchanged and remains the easier half — but only for *pull*. The Track
+API is free to license, with self-serve OAuth 2.0 app registration on
+`developer.ups.com` and immediate test + production access. **Push is a
+separate, paid product**: UPS Track Alert takes a tracking number plus a
+callback URL (up to 100 per call) and posts scan events for 14 days. So a DIY
+UPS build means polling on our own schedule for free, or paying UPS for the
+webhook — the "free API" is not the same thing as free live tracking.
 
 ### Finding 2 — the aggregator floor is now near zero at our volume
 
@@ -261,6 +266,88 @@ Read those percentages as directional. They are vendor-published, and our order
 volume is far too small for any of them to bite yet; they say where this pays
 off, not what it pays today.
 
+### Finding 5 — what practitioners actually hit (Stack Overflow)
+
+Vendor docs describe the happy path; Stack Overflow records where people get
+stuck. Queried through the Stack Exchange API, because SO blocks the search
+crawler.
+
+**The distribution of questions is itself the finding.** Ask how many people
+get stuck, per integration route:
+
+```
+  tag:fedex   top question  75 pts / 68 k views   ─────────────────────────█
+  tag:ups     top question  20 pts / 21 k views   ──────────█
+  tag:usps    top question  11 pts / 15 k views   ──────█
+  tag:shippo  top question   5 pts /  0.4 k views ──█
+  tag:easypost top question  3 pts /  1.7 k views ─█
+  tag:aftership          no such tag
+```
+
+Hundreds of high-score questions about raw carrier APIs; a handful of
+low-score ones about aggregators, and nothing at all about AfterShip or
+17TRACK. Aggregators are boring to integrate — that is the point of them. The
+carrier APIs are where the time goes.
+
+**Testing is the hidden cost, and it lands unevenly.**
+
+- **UPS publishes fixed test tracking numbers**, one per scenario, in the
+  Tracking Web Service Developer Guide appendix — `1Z12345E0205271688`
+  (Delivered), `1Z12345E1305277940` (Origin scan), `1Z12345E6205277936`
+  (2nd delivery attempt), `1Z12345E020527079` (Invalid number),
+  `1Z12345E1505270452` (No tracking information). Production numbers also work
+  against the test environment.
+- **FedEx publishes a full table** — `449044304137821` (info sent),
+  `122816215025810` (Delivered), `957794015041323` (Unable to deliver),
+  `797615467620` (Incorrect address), `076288115212522` (Returned to sender),
+  and a dozen more.
+- **USPS publishes none.** The accepted answer is blunt about the options: hoard
+  real production numbers and build your own status mapping, or use a provider
+  that has already mapped them. That is an argument for the aggregator written
+  by a practitioner in 2015 and still true after the 2026 lockdown.
+
+This bears directly on `tests/e2e/admin-orders.spec.ts`, which today asserts
+against a fulfilment we fake ourselves. A live integration needs those
+fixtures, and only two of our three carriers supply them.
+
+**Auth failures dominate the UPS questions**, and they are the same three
+every time:
+
+1. The token call wants `Authorization: Basic base64(clientId:clientSecret)`.
+   Sending the UPS account username/password instead is the single most-viewed
+   UPS question on the site (21 k views). The `x-merchant-id` header is *not*
+   the credential.
+2. Two hosts, and they are not interchangeable — `wwwcie.ups.com` (test) vs
+   `onlinetools.ups.com` (production). The test host only accepts the test
+   products actually assigned to your app.
+3. `transId` and `transactionSrc` are required headers with no real
+   explanation in the docs — a per-request unique id (≤32 chars; a GUID is
+   fine) and a client-app identifier (≤512).
+
+**"Real-time" is a misnomer**, per an EasyPost engineer answering on their own
+product: there is always a lag between the carrier's system and any provider's,
+so no one should claim real-time. Worth holding onto for the page copy and for
+what we promise the boss — "latest scan, as the carrier reports it" is honest;
+"live tracking" is not.
+
+**The raw-body trap will bite us specifically.** Every "signature verification
+failed" thread has the same root cause: the framework parsed the body before
+the handler saw it, so the HMAC is computed over re-serialised JSON that no
+longer matches byte-for-byte. In the Pages Router the fix was
+`config.api.bodyParser = false`; we are on the App Router, where
+`await req.text()` gives the raw body — so the rule for
+`app/api/webhooks/tracking` is **never call `req.json()` before verifying**.
+Related: Shippo POSTs a raw JSON body rather than form fields, so reading
+request *parameters* silently yields nothing.
+
+**Carrier-detection regexes are a solved but sharp problem.** The canonical
+thread (75 pts, 68 k views) has a well-tested 2020 answer covering UPS
+(`\b1Z[A-Z0-9]{16}\b`), FedEx and USPS/S10, with two caveats worth copying: the
+patterns do **not** verify the mod-check digits, and FedEx SmartPost is
+deliberately classed as USPS because either carrier can track it. That answer
+points at `jkeen/tracking_number_data` — the same library the vendor-neutral
+sources recommend, which is a good sign.
+
 ### How it would plug into what we already have
 
 The groundwork is unusually complete — this is wiring, not a new subsystem:
@@ -328,6 +415,11 @@ link where we do not**, never a dead end.
 - UPS developer portal — <https://developer.ups.com/> · pricing
   <https://developer.ups.com/pricing>
 - UPS API overview / OAuth — <https://zuplo.com/learning-center/ups-api>
+- UPS Track Alert (the paid push product) —
+  <https://developer.ups.com/tag/UPS-Track-Alert?loc=en_US> · Postman collection
+  <https://www.postman.com/ups-api/ups-apis/documentation/gk3hpdh/ups-track-alert>
+  · integration write-up
+  <https://www.houseblend.io/articles/netsuite-shipment-tracking-webhooks>
 
 **Aggregators (first-party docs + pricing)**
 
@@ -375,6 +467,49 @@ link where we do not**, never a dead end.
   <https://github.com/jkeen/tracking_number_data>
   · <https://www.npmjs.com/package/ts-tracking-number>
 
+**Practitioner threads (Stack Overflow)**
+
+Queried via the Stack Exchange API (`api.stackexchange.com/2.3/search/advanced`)
+— stackoverflow.com blocks the search crawler, so a plain web search will not
+surface these.
+
+- Carrier detection regexes, the canonical thread (75 pts, 68 k views) —
+  <https://stackoverflow.com/questions/619977/regular-expression-patterns-for-tracking-numbers>
+- UPS OAuth token request fails — `Basic base64(id:secret)`, test vs prod hosts
+  (20 pts, 21 k views) —
+  <https://stackoverflow.com/questions/73791089/ups-api-oauth-token-request-fails>
+- UPS `transId` / `transactionSrc` headers explained —
+  <https://stackoverflow.com/questions/77764991/ups-oauth-2-0-restful-api-integration>
+- UPS test tracking numbers, per scenario —
+  <https://stackoverflow.com/questions/15145865/ups-test-tracking-numbers-is-there-a-such-thing>
+- Does UPS offer real-time tracking? ("real-time is a misnomer", answered by an
+  EasyPost engineer; later answer notes UPS webhooks are now paid) —
+  <https://stackoverflow.com/questions/71655908/does-ups-offer-any-real-time-tracking-api>
+- UPS Track JSON body format —
+  <https://stackoverflow.com/questions/35662181/ups-tracking-api-json-body-format>
+- Tracking API for FedEx and UPS, incl. the link-out fallback we already use —
+  <https://stackoverflow.com/questions/5879953/tracking-api-for-fedex-and-ups>
+- FedEx test tracking numbers, full status table (46 pts, 63 k views) —
+  <https://stackoverflow.com/questions/11049025/how-to-get-fedex-testing-tracking-number>
+- USPS has no test tracking numbers — accepted answer recommends an aggregator —
+  <https://stackoverflow.com/questions/33163757/how-to-test-usps-package-tracking-api-without-test-tracking-numbers>
+- USPS auth / XML parse failures —
+  <https://stackoverflow.com/questions/31164890/usps-api-returning-80040b19-error-code-and-account-is-in-production>
+  · <https://stackoverflow.com/questions/9969977/usps-api-authorization-failure>
+- USPS expected-delivery-date field —
+  <https://stackoverflow.com/questions/23902091/usps-tracking-api-expected-delivery-date>
+- Shippo posts a raw JSON body, not form fields —
+  <https://stackoverflow.com/questions/45971304/what-data-is-posted-to-a-shippo-webhook>
+- Webhook signature fails because the framework parsed the body first (the
+  App Router lesson: `req.text()`, never `req.json()`, before verifying) —
+  <https://stackoverflow.com/questions/76477168/error-verifying-request-signature-next-js-13-stripe>
+  · <https://stackoverflow.com/questions/72888820/stripe-error-no-signatures-found-matching-the-expected-signature-for-payload-a>
+- Verifying a webhook really came from the sender —
+  <https://stackoverflow.com/questions/47917733/how-to-ensure-that-webhook-is-receiving-data-from-desired-data-source-and-not-th>
+- pg_cron: no transaction blocks, and scheduling runs in the server's timezone —
+  <https://stackoverflow.com/questions/75545014/pg-cron-failing-when-using-transaction-block>
+  · <https://stackoverflow.com/questions/73795095/how-to-run-pg-cron-job-as-per-local-time>
+
 **Customer-facing design**
 
 - Shopify order tracking (our reference model) —
@@ -404,6 +539,9 @@ Left for Charles, in the order they block each other:
    aggregator is the only route. This decides everything below it.
 2. **Buy or build.** The evidence points to buy — Ship24 or 17TRACK free tier,
    $0 at our volume, both give API + webhooks free, both cover UPS and USPS.
+   Finding 5 hardens this: UPS charges for push, USPS ships no test numbers, and
+   the volume of people stuck on carrier APIs versus aggregator APIs is not
+   close.
 3. **Is it worth doing before volume?** The V1 verdict — "email with a carrier
    tracking link *is* the standard design for a small store" — still holds. The
    honest reading is that the cost of Option C fell to roughly zero, not that

@@ -7271,3 +7271,34 @@ under whose postage account, buy-vs-build, and whether it is worth doing before
 volume. The V1 verdict (carrier link-out is the standard for a small store)
 still stands; what changed is that Option C now costs roughly nothing, not that
 the need arrived.
+
+## 2026-08-19 03:31 AEST — Stack Overflow layer added to the tracking research
+
+Charles asked "and stackoverflow?" — the first sweep was vendor docs and
+comparison blogs, i.e. the happy path only. Added `### Finding 5 — what
+practitioners actually hit` to the same section, plus a Practitioner threads
+group in Sources (19 SO links).
+
+Note for future sessions: **stackoverflow.com blocks our search crawler**
+(WebSearch with allowed_domains returns a 400). The way in is the Stack
+Exchange API — `api.stackexchange.com/2.3/search/advanced?...&site=stackoverflow`,
+and `/questions/{ids}/answers?filter=withbody` to read the answers. Free, no
+key needed at this volume. Tag-first queries work; full-text `q` mostly misses.
+
+What the SO layer changed:
+
+- **UPS push is a paid product.** Track Alert takes a number + callback URL (100
+  per call) and posts scans for 14 days. The free Track API is pull-only, so
+  amended the Finding 1 claim that UPS is simply "the easy half".
+- **USPS publishes no test tracking numbers**; UPS and FedEx both publish a
+  table of them, one per scenario. Captured the actual numbers. Bears on
+  tests/e2e/admin-orders.spec.ts, which fakes fulfilment today.
+- **The question distribution is itself evidence**: tag:fedex/ups/usps carry
+  dozens of high-score questions, tag:easypost and tag:shippo top out at 3–5
+  points, and tag:aftership does not exist. Aggregators are boring to integrate.
+- **The raw-body trap applies to us directly**: App Router must use
+  `await req.text()` and never `req.json()` before HMAC verification.
+- "Real-time tracking is a misnomer" — from an EasyPost engineer. Use it for
+  page copy and for what we promise the boss.
+
+Still no decision; the three open questions are unchanged.
