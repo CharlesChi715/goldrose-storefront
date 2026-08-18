@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The advisor route reads docs/advisor/app-info.md at request time. Tracing
+  // only follows imports, so a plain file read would work locally and 404 on
+  // Vercel — name the file here and it ships inside the function bundle.
+  outputFileTracingIncludes: {
+    "/api/advisor": ["./docs/advisor/app-info.md"],
+  },
   experimental: {
     serverActions: {
       // Forum attachments (owner request 2026-07-22): up to 5 files ×
