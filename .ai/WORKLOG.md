@@ -7240,3 +7240,34 @@ hand-written table — it belongs in `docs/features/`, where CI watches it.
   `feat/env-check-skill` left in place.
 - `agent-advisor` worktree left on disk: it holds uncommitted work (deleted
   `docs/agent-advisor.md`, untracked `docs/advisor/`, `lib/advisor/`).
+
+## 2026-08-19 03:03 AEST — Sourced research: live delivery tracking (order-tracking Option C)
+
+Charles asked for every source on how to build a delivery-tracking system for
+this app. Ran a web sweep and wrote the digest into the feature that owns the
+topic — `docs/features/order-tracking.md`, new `## Research — live status
+(Option C), 2026-08-19` section. Decision and Options above it left untouched
+(the cli.mjs note freezes them as write-once); `npm run features:check` passes
+21/21.
+
+Two findings change the inputs to the parked Option C:
+
+1. **USPS closed public tracking on 2026-04-01.** Access is now tied to the
+   sender's Mailer ID plus an Enterprise Payment System account and a signed IP
+   agreement; Web Tools went dark 2026-01-25. Our own parcels stay free *if* we
+   buy postage on our own MID. UPS is unaffected — still free, self-serve
+   OAuth. So a DIY build would cover UPS only and stall on USPS.
+2. **The aggregator floor fell to ~$0 at our volume.** Ship24 (10/mo free) and
+   17TRACK (100 quotas/mo free) both include API *and* webhooks on the free
+   tier. AfterShip's free tier is a decoy — API access starts at ~$70/mo.
+
+Also captured: the push-not-poll architecture with HMAC-over-raw-body +
+idempotency + 5-minute replay window, status normalisation, the EDD-as-release-
+gate constraint, tokenised guest lookup, and two no-API wins (ParcelDelivery
+JSON-LD in the shipping email, carrier auto-detect from number format).
+
+Not decided — left in "What this research does not settle": who fulfils and
+under whose postage account, buy-vs-build, and whether it is worth doing before
+volume. The V1 verdict (carrier link-out is the standard for a small store)
+still stands; what changed is that Option C now costs roughly nothing, not that
+the need arrived.
