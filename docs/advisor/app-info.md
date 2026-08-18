@@ -31,11 +31,19 @@
 - Two roses are on sale: a 24K gold-dipped eternal rose, and a ruby-red
   gold-trimmed eternal rose.
 - Customers can browse the shop, open a product page, and search the site.
-- Customers can put a rose in the bag and buy it. The payment is taken by
-  PayPal, and a real customer payment has been taken this way.
+- Customers can put a rose in the bag and go all the way through checkout,
+  paying with PayPal. Important: checkout is still running in PayPal's test
+  mode, so an order can be placed end to end but no real money moves yet.
+  Turning on real payments is the owner's decision and has not been made.
 - Discount codes work: a valid code lowers the price during checkout.
-- Customers can write a review of a product. A review only appears on the
-  site after someone on our side publishes it.
+- A customer can sign in with a code sent to their email, and gets an account
+  area. Some screens in there are real and some are still only a design.
+- When we mark an order as shipped and enter its tracking number, the
+  customer is sent a confirmation email with the tracking link, and the
+  delivery status shows in their account.
+- Customers can write a review of a product they were delivered, and reviews
+  appear on the product page. Publishing one is still a manual job for us —
+  there is no screen for it yet.
 - Besides the shop, customers can read the brand story, how a rose is made,
   and a care and help area.
 - The published policy pages are: shipping and delivery, returns, refunds and
@@ -63,8 +71,11 @@
   kept with a reason, so a wrong number can be traced.
 - We create discount codes in three shapes: a percentage off, a fixed amount
   off, or free shipping.
-- We can change certain words on the site ourselves, such as the promotion
-  line and policy text, and put any of them back to the original wording.
+- We can change the words on the site ourselves — the whole home page, string
+  by string, plus the promotion line and policy text — and put any of them
+  back to the original wording.
+- We can tag a link with the posting account that shared it, so we can see
+  which account actually brought visitors and sales, not just clicks.
 - We can see how the site is being used: total sales, number of orders,
   average order value, how many visitors turn into buyers, who is on the site
   right now, where visitors came from (channel, campaign, country), which
