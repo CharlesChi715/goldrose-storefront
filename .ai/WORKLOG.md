@@ -7221,3 +7221,22 @@ hand-written table — it belongs in `docs/features/`, where CI watches it.
   that changes as the app changes goes in a record, never here.
 - Verified: 21 records pass `features:check`, 221 unit tests, every link and
   heading anchor across records, skills, SUMMARY and README.
+
+## 2026-08-17 18:19 AEST
+
+**Nested Claude worktrees committed as gitlinks — untracked and ignored.**
+
+- `git-sync`'s `git add -A` swept `.claude/worktrees/{agent-advisor,env-check-skill}`
+  into commit `98bbb9c` as gitlinks (mode `160000`). A gitlink records a commit
+  SHA, not files, so a fresh clone gets two empty directories and no way to
+  fetch their contents — git warned about exactly this at add time.
+- `a805c03` removes both from the index (`git rm --cached`, disk untouched) and
+  adds `.claude/worktrees/` to `.gitignore`. Pushed; `.claude/` in HEAD is back
+  to `launch.json`, `settings.json`, `settings.local.json`, `skills`.
+- Also created `~/.config/git/ignore` (git's default excludes file when
+  `core.excludesFile` is unset) with the same rule, so `git add -A` cannot
+  repeat this in any other repo on this machine.
+- `env-check-skill` worktree removed — clean, branch held no commits. Branch
+  `feat/env-check-skill` left in place.
+- `agent-advisor` worktree left on disk: it holds uncommitted work (deleted
+  `docs/agent-advisor.md`, untracked `docs/advisor/`, `lib/advisor/`).
