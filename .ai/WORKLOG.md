@@ -7240,3 +7240,65 @@ hand-written table — it belongs in `docs/features/`, where CI watches it.
   `feat/env-check-skill` left in place.
 - `agent-advisor` worktree left on disk: it holds uncommitted work (deleted
   `docs/agent-advisor.md`, untracked `docs/advisor/`, `lib/advisor/`).
+
+## 2026-08-19 03:03 AEST — Sourced research: live delivery tracking (order-tracking Option C)
+
+Charles asked for every source on how to build a delivery-tracking system for
+this app. Ran a web sweep and wrote the digest into the feature that owns the
+topic — `docs/features/order-tracking.md`, new `## Research — live status
+(Option C), 2026-08-19` section. Decision and Options above it left untouched
+(the cli.mjs note freezes them as write-once); `npm run features:check` passes
+21/21.
+
+Two findings change the inputs to the parked Option C:
+
+1. **USPS closed public tracking on 2026-04-01.** Access is now tied to the
+   sender's Mailer ID plus an Enterprise Payment System account and a signed IP
+   agreement; Web Tools went dark 2026-01-25. Our own parcels stay free *if* we
+   buy postage on our own MID. UPS is unaffected — still free, self-serve
+   OAuth. So a DIY build would cover UPS only and stall on USPS.
+2. **The aggregator floor fell to ~$0 at our volume.** Ship24 (10/mo free) and
+   17TRACK (100 quotas/mo free) both include API *and* webhooks on the free
+   tier. AfterShip's free tier is a decoy — API access starts at ~$70/mo.
+
+Also captured: the push-not-poll architecture with HMAC-over-raw-body +
+idempotency + 5-minute replay window, status normalisation, the EDD-as-release-
+gate constraint, tokenised guest lookup, and two no-API wins (ParcelDelivery
+JSON-LD in the shipping email, carrier auto-detect from number format).
+
+Not decided — left in "What this research does not settle": who fulfils and
+under whose postage account, buy-vs-build, and whether it is worth doing before
+volume. The V1 verdict (carrier link-out is the standard for a small store)
+still stands; what changed is that Option C now costs roughly nothing, not that
+the need arrived.
+
+## 2026-08-19 03:31 AEST — Stack Overflow layer added to the tracking research
+
+Charles asked "and stackoverflow?" — the first sweep was vendor docs and
+comparison blogs, i.e. the happy path only. Added `### Finding 5 — what
+practitioners actually hit` to the same section, plus a Practitioner threads
+group in Sources (19 SO links).
+
+Note for future sessions: **stackoverflow.com blocks our search crawler**
+(WebSearch with allowed_domains returns a 400). The way in is the Stack
+Exchange API — `api.stackexchange.com/2.3/search/advanced?...&site=stackoverflow`,
+and `/questions/{ids}/answers?filter=withbody` to read the answers. Free, no
+key needed at this volume. Tag-first queries work; full-text `q` mostly misses.
+
+What the SO layer changed:
+
+- **UPS push is a paid product.** Track Alert takes a number + callback URL (100
+  per call) and posts scans for 14 days. The free Track API is pull-only, so
+  amended the Finding 1 claim that UPS is simply "the easy half".
+- **USPS publishes no test tracking numbers**; UPS and FedEx both publish a
+  table of them, one per scenario. Captured the actual numbers. Bears on
+  tests/e2e/admin-orders.spec.ts, which fakes fulfilment today.
+- **The question distribution is itself evidence**: tag:fedex/ups/usps carry
+  dozens of high-score questions, tag:easypost and tag:shippo top out at 3–5
+  points, and tag:aftership does not exist. Aggregators are boring to integrate.
+- **The raw-body trap applies to us directly**: App Router must use
+  `await req.text()` and never `req.json()` before HMAC verification.
+- "Real-time tracking is a misnomer" — from an EasyPost engineer. Use it for
+  page copy and for what we promise the boss.
+
+Still no decision; the three open questions are unchanged.
