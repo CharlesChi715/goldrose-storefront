@@ -106,6 +106,14 @@ Tracked as stages 0–7 (session task list, 2026-07-26):
 - `PAYPAL_WEBHOOK_ID` must be set or signature verification fails closed and every
   delivery 401s.
 
+AI-TAG(AI-047): OWNER-DECISION — a live Stripe payment link is already taking
+card money for ELDREVE, which this record's decision did not contemplate. See
+/agent-delivery/sessions/stripe-payment-link-delivery-08-25-worktree-team-delivery-stripe-payment.md.
+
+AI-TAG(AI-048): OWNER-TODO — that link collects no shipping address and writes
+no order. See
+/agent-delivery/sessions/stripe-payment-link-delivery-08-25-worktree-team-delivery-stripe-payment.md.
+
 ## Related links
 
 - Decision register: [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions) (OQ-1)
