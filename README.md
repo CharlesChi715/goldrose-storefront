@@ -1,9 +1,3 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
-
 # ELDREVE Storefront
 
 Direct-to-consumer storefront for a 24K gold-dipped rose gift line, with its
@@ -73,6 +67,7 @@ npm install
 npm run dev            # http://localhost:3000  (admin: /admin)
 npm run seed -- --reset   # pristine local db (file adapter)
 npm run lint
+npm run check          # every check CI runs, in CI's order — green here = green there
 npm run build
 npm run test:unit
 npm run test:e2e       # Playwright vs a production build, own port 3001
@@ -96,7 +91,7 @@ npm run format               # Prettier over the repo
 npm run polish               # format, before committing
 ```
 
-Two conventions worth knowing before you touch either:
+Three conventions worth knowing before you touch any of them:
 
 - **Agent inbox** — unresolved questions from AI agents live in
   [`agent-delivery/`](agent-delivery/README.md). Closing one always archives
@@ -104,6 +99,11 @@ Two conventions worth knowing before you touch either:
 - **Worklog** — every completed deliverable gets a dated entry in
   [`.ai/WORKLOG.md`](.ai/WORKLOG.md). It is append-only history, never startup
   context; do not read it unless Charles asks.
+- **Git hooks** — `npm install` points `core.hooksPath` at
+  [`.githooks/`](.githooks/): `commit-msg` refuses an empty commit message and
+  `pre-commit` runs Prettier over the staged files (check only — `npm run
+  format` fixes). `git commit --no-verify` skips both for the rare deliberate
+  case.
 
 ## Deploy
 
@@ -122,3 +122,9 @@ project. **Which document owns which topic is a skill, not a table** — load
 `project-docs` (in [`.agents/skills/`](.agents/skills/), symlinked into
 `.claude/skills/`) to route to specs, database rules, naming, SEO/GEO, feature
 status, deliveries or ideas. Keep setup and command guidance here.
+
+<!-- BEGIN:nextjs-agent-rules -->
+## For AI coding agents: this is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->

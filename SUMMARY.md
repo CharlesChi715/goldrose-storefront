@@ -199,9 +199,10 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 - Agent tooling: `.mcp.json` declares supabase (read-only, pinned),
   next-devtools and playwright — all need one-time approval, Supabase needs
   `/mcp` OAuth; all are global in `~/.codex/config.toml`. `.agents/skills/` is
-  the **source of truth** for skills and `.claude/skills/` symlinks into it;
-  `.claude/` is gitignored, so the tracked path for any skill is always
-  `.agents/…`.
+  the **source of truth** for skills and `.claude/skills/` is a tracked
+  symlink into it, so the tracked path for any skill is always `.agents/…`.
+  `.claude/settings.local.json` (this machine's approvals) and
+  `.claude/worktrees/` are gitignored.
 
 ## Repository structure
 
@@ -222,7 +223,8 @@ goldrose-storefront/
 ├── .agents/skills/       # Skills — the doc router too (.claude/ symlinks in)
 ├── .ai/                  # Optional work history; never startup context
 ├── .data/                # Local file-adapter database and uploads
-├── .github/              # CI workflows
+├── .github/              # CI workflows (Node from .nvmrc = Vercel's 24.x)
+├── .githooks/            # commit-msg + pre-commit checks; npm install wires core.hooksPath
 ├── .mcp.json             # Project MCP servers (supabase, next-devtools, playwright)
 ├── .env.example          # Every environment variable, documented
 ├── proxy.ts              # Admin route/API authentication guard
@@ -233,4 +235,4 @@ goldrose-storefront/
 
 Config at the root: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
 `playwright.config.ts`, `postcss.config.mjs`, `vercel.json`, `.prettierrc.json`,
-`.prettierignore`, `.npmrc`, `skills-lock.json`.
+`.prettierignore`, `.npmrc`, `.nvmrc`, `skills-lock.json`.
