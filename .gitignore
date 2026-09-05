@@ -60,3 +60,7 @@ supabase/.temp/
 
 # claude code worktrees — nested repos, never track
 .claude/worktrees/
+
+# claude code per-machine settings — the permission approvals THIS machine
+# gave, appended by every session. .claude/settings.json is the shared one.
+.claude/settings.local.json
