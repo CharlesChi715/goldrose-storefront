@@ -20,6 +20,7 @@
 import type { Metadata } from "next";
 import { ScaleFrame, PromoBar, HomeHeader } from "@/components/chrome";
 import { SiteLegalFooter } from "@/components/SiteLegalFooter";
+import { HydrationMark } from "@/components/HydrationMark";
 import { playfair } from "@/lib/fonts";
 import { homeBand } from "@/components/home/bands";
 import { HomeBand } from "@/components/home/HomeBand";
@@ -171,6 +172,9 @@ export default async function HomePage() {
       </ScaleFrame>
       {/* Outside the fixed 5074 canvas on purpose — see SiteLegalFooter. */}
       <SiteLegalFooter />
+      {/* Last on purpose: its effect runs after every sibling's, which is what
+          tells the admin's live preview the page is safe to write into. */}
+      <HydrationMark />
     </>
   );
 }
