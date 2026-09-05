@@ -67,7 +67,7 @@ export function DeleteConfirmScreen() {
       nav={false}
     >
       {/* 1523:1263/1265/1227 — brand band, image back arrow, title */}
-      <BrandWordmark x={148} y={0} w={140} h={51} />
+      <BrandWordmark y={0} h={51} />
       <BackButton
         fallback="/account"
         src="/eldreve/screens/1523-1265.png"

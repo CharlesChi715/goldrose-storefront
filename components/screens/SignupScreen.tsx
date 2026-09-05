@@ -300,7 +300,7 @@ export function SignupScreen() {
         src="/eldreve/screens/1523-3344.png"
         style={abs(0, 18, 40, 42)}
       />
-      <BrandWordmark x={153} y={13.5} w={140} h={51} />
+      <BrandWordmark y={13.5} h={51} />
 
       <div
         className={playfair.className}

@@ -10,6 +10,7 @@
  */
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Banner, BlockStack, Button } from "@shopify/polaris";
 import {
   supabaseBrowserAuthClient,
@@ -20,6 +21,7 @@ import { confirmPasskeyLoginAction } from "./actions";
 
 export function PasskeyLoginButton() {
   const t = useAdminT();
+  const router = useRouter();
   const supported = useWebAuthnSupported();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<"failed" | "pending" | null>(null);
@@ -49,7 +51,9 @@ export function PasskeyLoginButton() {
       setPending(false);
       return;
     }
-    window.location.assign("/admin");
+    // /admin is rendered on demand, so this navigation fetches it fresh with
+    // the session cookie the ceremony just set — no full reload needed.
+    router.push("/admin");
   }
 
   return (

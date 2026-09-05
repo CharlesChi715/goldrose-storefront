@@ -67,7 +67,7 @@ export function PrivacySecurityScreen() {
       {/* 1526:166/168 Brand Navigation — ELDREVE art at the frame's wordmark
           box (the frame's own mark, DQ-34) + the frame's pasted 返回 back art
           (same raster every me-screen uses) */}
-      <BrandWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark y={0} h={51} />
       <BackButton
         fallback="/account/privacy"
         src="/eldreve/screens/1523-1014.png"

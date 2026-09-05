@@ -196,7 +196,7 @@ export function WriteReviewScreen({
         src={`${A}/2460-384.png`}
         style={abs(0, 28, 40, 43)}
       />
-      <BrandWordmark x={149} y={24} w={140} h={51} />
+      <BrandWordmark y={24} h={51} />
 
       {/* 2452:367…369 title band — the frame's rule sits on its bottom edge */}
       <div

@@ -59,18 +59,11 @@ export function sCard(
  * The asset is Figma's own scale-2 node render, which bakes in the fill's
  * FILL crop — the same image sits in a 136×40 box on home/shop, exported
  * separately rather than squeezed from one file.
+ *
+ * Takes only the frame box's `y` and `h`: the mark is centred on the 430
+ * canvas by design (below), so a caller's `x` and `w` would be ignored.
  */
-export function BrandWordmark({
-  x,
-  y,
-  w,
-  h,
-}: {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}) {
+export function BrandWordmark({ y, h }: { y: number; h: number }) {
   return (
     <img
       src="/eldreve/brand/eldreve-140x51.png"

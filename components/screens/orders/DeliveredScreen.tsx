@@ -149,7 +149,7 @@ export function DeliveredScreen() {
         src={`${A}/2460-384.png`}
         style={abs(0, 21, 40, 43)}
       />
-      <BrandWordmark x={149} y={17} w={140} h={51} />
+      <BrandWordmark y={17} h={51} />
 
       {/* 2440:374…378 hero */}
       <img

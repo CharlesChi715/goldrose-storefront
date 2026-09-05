@@ -95,7 +95,7 @@ export function LogoutConfirmScreen() {
       nav={false}
     >
       {/* 1523:1223/1225/1191 — brand band, image back arrow, title */}
-      <BrandWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark y={0} h={51} />
       <BackButton
         fallback="/account"
         src="/eldreve/screens/1523-1225.png"

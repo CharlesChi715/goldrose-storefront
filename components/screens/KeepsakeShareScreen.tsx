@@ -59,7 +59,7 @@ export function KeepsakeShareScreen() {
       nav={false}
     >
       {/* 1523:1468/1469 brand strip — the frame's whole header; no back arrow */}
-      <BrandWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark y={0} h={51} />
 
       <div
         className={playfair.className}

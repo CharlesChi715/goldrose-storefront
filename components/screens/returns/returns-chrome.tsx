@@ -126,7 +126,7 @@ export function ReturnsHeader({
         src="/eldreve/screens/1523-3470.png"
         style={abs(15, 24.5 + dy, 40, 43)}
       />
-      <BrandWordmark x={145} y={20.5 + dy} w={140} h={51} />
+      <BrandWordmark y={20.5 + dy} h={51} />
       <Link
         href="/bag"
         aria-label="Cart"
