@@ -13,6 +13,14 @@ updates:
       # list short. Majors still arrive as individual PRs worth reading.
       routine:
         update-types: ["minor", "patch"]
+    ignore:
+      # ESLint 10 crashes eslint-plugin-react 7.37 (react/display-name:
+      # "getFilename is not a function"), and eslint-config-next 16.3 still
+      # pins that plugin line — PR #40 failed on exactly this, 2026-08-23 and
+      # again on 2026-09-05 with 16.3.4. Lift once eslint-config-next's
+      # changelog says ESLint 10.
+      - dependency-name: eslint
+        versions: [">=10"]
 
   # The workflow's own actions go stale too.
   - package-ecosystem: github-actions
