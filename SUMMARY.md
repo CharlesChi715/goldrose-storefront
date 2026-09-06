@@ -126,6 +126,22 @@ screens while live; card integration after.
   [`docs/ideas.md`](docs/ideas.md) verbatim; change
   [`docs/Database.md`](docs/Database.md) only on explicit request.
 
+### One-way doors
+
+Most changes here are undone by reverting a pull request. These are not. Each
+needs a person who has decided, not an agent who is being helpful.
+
+- **Enabling live PayPal** — the owner's, and only the owner's.
+- **Changing Supabase's Site URL** — invalidates every existing passkey,
+  permanently ([customer-accounts](docs/features/customer-accounts.md)).
+- **`supabase db push`** — applies to the one live database; a migration that
+  drops or rewrites data has no undo ([database-migrations](docs/features/database-migrations.md)).
+- **Any email to a real customer** — cannot be recalled. The e2e suite blanks
+  `RESEND_API_KEY` for this reason.
+- **Publishing a policy page** (`/policies/*`) — a public promise about
+  returns, warranty or arbitration. All six stay `noindex` until signed off.
+- **A price or stock number on the live site** — someone may buy at it.
+
 ## Release queue
 
 1. Owner activation + [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
