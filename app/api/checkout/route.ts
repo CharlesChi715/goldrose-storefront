@@ -19,6 +19,8 @@ import { getPayPalConfig } from "@/lib/paypal/client";
 import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type { Address } from "@/lib/supabase/types.ts";
+import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   // "none" = the CHECKOUT_SKIP_PAYMENT flow: order placed with no payment step.
@@ -58,6 +60,21 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const gate = checkRequest(request.headers, "checkout", LIMITS.checkoutStart);
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.refused", { route: "checkout" });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Too many checkout attempts — please wait a moment.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(gate.retryAfterSeconds) },
+      },
+    );
+  }
+
   // Mock checkout exists only while no real provider is configured (§10.4) —
   // or while the testing-phase skip-payment flag is deliberately on.
   const skipPayment = skipPaymentEnabled();

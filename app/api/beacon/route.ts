@@ -10,6 +10,8 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { getStore } from "@/lib/supabase/store.ts";
+import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   visitorId: z.string().trim().min(4).max(64),
@@ -26,6 +28,17 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // DROPPED, NOT REFUSED. A flood costs us rows in the analytics table, which
+  // is worth stopping; but a 429 reaching the storefront could break browsing
+  // for a shopper behind a shared address, and a missing page view costs
+  // nothing anyone can feel. So the row is silently not written and the
+  // answer is the usual cheerful 200.
+  const gate = checkRequest(request.headers, "beacon", LIMITS.beacon);
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.dropped", { route: "beacon" });
+    return NextResponse.json({ ok: true });
+  }
+
   let parsed: z.infer<typeof requestSchema>;
   try {
     parsed = requestSchema.parse(await request.json());

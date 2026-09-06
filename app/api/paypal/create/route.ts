@@ -11,6 +11,8 @@ import { z } from "zod";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createPayPalOrder, getPayPalConfig } from "@/lib/paypal/client";
 import { getStore } from "@/lib/supabase/store.ts";
+import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { alert, logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   lines: z
@@ -30,6 +32,24 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // Limited, unlike /capture: starting an order is repeatable and refusing one
+  // costs the shopper a retry. Refusing a CAPTURE costs money.
+  const gate = checkRequest(
+    request.headers,
+    "paypal-create",
+    LIMITS.checkoutStart,
+  );
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.refused", { route: "paypal/create" });
+    return NextResponse.json(
+      { error: "Too many checkout attempts — please wait a moment." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(gate.retryAfterSeconds) },
+      },
+    );
+  }
+
   if (!getPayPalConfig().configured) {
     return NextResponse.json(
       { error: "PayPal is not configured." },
@@ -87,7 +107,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ id: paypalOrder.id });
   } catch (error) {
-    console.error("[paypal/create]", error);
+    // A shopper who cannot start a checkout is a lost sale, and it is silent —
+    // nobody complains, they just leave. Worth waking the owner for.
+    await alert(
+      "paypal.create.failed",
+      "A shopper could not start PayPal checkout.",
+      { err: error },
+    );
     return NextResponse.json(
       {
         error:

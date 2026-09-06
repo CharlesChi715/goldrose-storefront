@@ -11,6 +11,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendBusinessRequestEmail } from "@/lib/email.ts";
+import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   email: z.string().trim().email().max(254),
@@ -19,6 +21,24 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // This route puts a message in a human's inbox, which makes it the most
+  // abusable one in the app — hence the tightest limit we ship.
+  const gate = checkRequest(
+    request.headers,
+    "business-request",
+    LIMITS.businessRequest,
+  );
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.refused", { route: "business-request" });
+    return NextResponse.json(
+      { ok: false, error: "That's a few too many — please try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(gate.retryAfterSeconds) },
+      },
+    );
+  }
+
   let parsed: z.infer<typeof requestSchema>;
   try {
     parsed = requestSchema.parse(await request.json());

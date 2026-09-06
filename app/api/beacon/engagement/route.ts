@@ -11,6 +11,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getStore } from "@/lib/supabase/store.ts";
+import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { logEvent } from "@/lib/observe.ts";
 
 /** A day. Anything longer is a stuck clock, not a reader. */
 const MAX_ACTIVE_MS = 24 * 60 * 60 * 1000;
@@ -33,6 +35,15 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // Dropped rather than refused, for the reason given in ../route.ts: this
+  // arrives from sendBeacon during unload and must never be something the
+  // page can notice going wrong.
+  const gate = checkRequest(request.headers, "engagement", LIMITS.beacon);
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.dropped", { route: "beacon/engagement" });
+    return NextResponse.json({ ok: true });
+  }
+
   let parsed: z.infer<typeof requestSchema>;
   try {
     parsed = requestSchema.parse(await request.json());
