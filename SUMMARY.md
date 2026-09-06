@@ -134,22 +134,29 @@ screens while live; card integration after.
 3. Enter real shipping rates ([shipping-rates](docs/features/shipping-rates.md),
    OQ-2) — no placeholder rate may be live.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
-   `CHECKOUT_SKIP_PAYMENT`, turn on [database backups](docs/features/db-backups.md).
-5. Owner enables live PayPal → **the site is open for real orders.**
+   `CHECKOUT_SKIP_PAYMENT`.
+5. Turn database backups on — the pipeline is built and dormant. Set
+   `SUPABASE_DB_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and the
+   `BACKUP_S3_BUCKET` variable in GitHub Actions
+   ([db-backups](docs/features/db-backups.md)), then **rehearse one restore**
+   ([runbook](docs/runbooks/restore-from-backup.md)). Until a restore has been
+   rehearsed there is no backup, only files.
+6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
+   ([runbook](docs/runbooks/payment-failing.md)).
+7. Owner enables live PayPal → **the site is open for real orders.**
 
 While live, in any order (nothing below blocks taking orders):
 
-6. `supabase db push` for `0012`, which fills the two search-analytics cards.
-7. Apply the email-change mail template
+8. Apply the email-change mail template
    ([customer-accounts](docs/features/customer-accounts.md) step 4).
-8. Build guest order lookup ([order-tracking](docs/features/order-tracking.md));
+9. Build guest order lookup ([order-tracking](docs/features/order-tracking.md));
    signed-in customers already see their orders at `/account`.
-9. Replace mock product content (OQ-3) and third-party/dev imagery product by
-   product; reconcile palettes and tabs.
-10. Replace the remaining placeholder screens: tracking timeline, shipping
+10. Replace mock product content (OQ-3) and third-party/dev imagery product by
+    product; reconcile palettes and tabs.
+11. Replace the remaining placeholder screens: tracking timeline, shipping
     choices, card fields, `/blog`. Sign off the six `/policies/*` documents so
     they can come out of `noindex` (AI-046).
-11. Capture screenshots, cancel Shopify, revoke the Figma token, begin
+12. Capture screenshots, cancel Shopify, revoke the Figma token, begin
     marketing. (The Shopify *store integration* is already gone; the
     `@shopify/polaris` UI framework is the admin's own and stays. Cancel the
     subscription only after acceptance.)

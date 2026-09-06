@@ -34,7 +34,6 @@ markers (`check` fails when the block is stale). Meter legend:
 
 | Record | Delivery | Rollout |
 | ------ | -------- | ------- |
-| [db-backups](db-backups.md) | ○○○○ backlog | not-deployed |
 | [product-content-pipeline](product-content-pipeline.md) | ○○○○ backlog | not-deployed |
 | [promotion-emails](promotion-emails.md) | ○○○○ backlog | not-deployed |
 | [tiktok-analytics](tiktok-analytics.md) | ○○○○ backlog | not-deployed |
@@ -42,6 +41,7 @@ markers (`check` fails when the block is stale). Meter legend:
 | [shipping-rates](shipping-rates.md) | ●○○○ ready | not-deployed |
 | [customer-accounts](customer-accounts.md) | ●●○○ in-progress | live |
 | [database-migrations](database-migrations.md) | ●●○○ in-progress | live |
+| [db-backups](db-backups.md) | ●●○○ in-progress | not-deployed |
 | [engagement-tracking](engagement-tracking.md) | ●●○○ in-progress | live |
 | [feature-records](feature-records.md) | ●●○○ in-progress | not-deployed |
 | [product-reviews](product-reviews.md) | ●●○○ in-progress | live |
