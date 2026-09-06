@@ -136,10 +136,13 @@ page it hands over to can never disagree.
 ## Blockers and dependencies
 
 - Search itself ships behind no flag and needs no migration.
-- **Search analytics needs migration `0012` pushed to hosted** (`supabase db
-  push`). Until then the endpoint's insert fails and is swallowed into
-  `console.error` as designed, so searching itself is unaffected.
-  ⚠️ The READ side needed the same care and did not get it for free:
+- **Migration `0012` is applied** — verified against hosted on 2026-09-07, so
+  search analytics record and the two cards fill. This entry said the opposite
+  for some weeks after the push actually happened; the fix for that class of
+  staleness is in
+  [database-migrations](database-migrations.md), which now carries the query
+  that answers it rather than a remembered answer.
+  ⚠️ The READ side needed care and did not get it for free:
   `remote.ts`'s `all()` throws on a missing table, inside the `Promise.all`
   that builds `analyticsSummary` — so an unpushed `0012` would have taken down
   the whole of `/admin/analytics`, sales cards included. Code deploys on merge
@@ -152,8 +155,8 @@ page it hands over to can never disagree.
   submitted search — Enter, a trending chip, a recent row, or tapping a result
   — is recorded to `search_queries` (migration `0012`) through
   `POST /api/search-queries`. See **Search analytics** under Tech details.
-  ⚠️ `0012` is written and validated but **not yet pushed to hosted**, so the
-  report is empty on the deployed site until `supabase db push` runs.
+  `0012` is applied to hosted (verified 2026-09-07), so the report fills on the
+  deployed site.
 - **OQ-2 — `/shop` does not say when it relaxed.** The overlay admits "the
   closest gifts we have"; the grid shows the same products with no such note,
   because the frame has no place to put one. Needs a design ruling.
