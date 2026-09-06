@@ -130,11 +130,13 @@ screens while live; card integration after.
 
 1. Owner activation + [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
 2. Configure PayPal sandbox, begin Advanced Checkout onboarding; install
-   `cloudflared`/`ngrok` when webhook testing starts.
+   `cloudflared` when webhook testing starts —
+   [guide](docs/guides/paypal-wiring.md).
 3. Enter real shipping rates ([shipping-rates](docs/features/shipping-rates.md),
    OQ-2) — no placeholder rate may be live.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
-   `CHECKOUT_SKIP_PAYMENT`, turn on [database backups](docs/features/db-backups.md).
+   `CHECKOUT_SKIP_PAYMENT`, turn on [database backups](docs/features/db-backups.md)
+   — [guide](docs/guides/aws-backup.md).
 5. Owner enables live PayPal → **the site is open for real orders.**
 
 While live, in any order (nothing below blocks taking orders):
