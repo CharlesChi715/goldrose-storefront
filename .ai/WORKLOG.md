@@ -7326,3 +7326,72 @@ would have split a two-path icon into two files, so `render` was used).
 - Measured, not done: 23.7 MB of Figma PNGs via plain `<img>`, no lazy loading;
   lossless re-encode saves only 3–6 %, so the real win is next/image or WebP at
   the export step — its own project (pixel-exact import, pixel baselines).
+
+## 2026-09-07 18:49 AEST — production readiness (branch worktree-production-readiness, stacked on worktree-repo-health)
+
+Everything below was verified against primary sources or the running code, not
+from memory. Two multi-agent passes did the checking: one refuting research
+claims against vendor documentation, one checking every command in the new
+runbooks against the real tool.
+
+**Watching.** `lib/observe.ts`: `logEvent` writes one JSON line per event;
+`alert` also emails the owner, throttled to one per event per 15 minutes with
+the suppressed count. Alerts on every money failure — capture failed, capture
+orphaned (paid, no order), amount mismatch, create failed, webhook failed.
+`sendOwnerAlert` prefers `ALERT_EMAIL` over the settings row on purpose: the
+failure most worth an email is the database being unreachable. `GET /api/health`
+checks only that the database answers, has no side effects, calls no third
+party. `.github/workflows/uptime.yml` probes it every 15 minutes.
+
+**Abuse.** `lib/rate-limit.ts` over nine public POST routes, three policies:
+refuse (429 with Retry-After and no-store), drop-and-200 for analytics, and
+never for `/api/paypal/capture` — refusing that leaves a payment with no order,
+and the webhook repair only fires after a capture completes, so nothing would
+retry.
+
+**Backups.** `.github/workflows/db-backup.yml` + `scripts/backup-db.sh`, three
+files (public schema+data, auth/storage data-only, readable schema), dormant
+until four secrets are set. Not a backup until a restore is rehearsed.
+
+**Checks.** `npm run check:env` fails the build on an undocumented variable and
+on a secret-shaped `NEXT_PUBLIC_` name. Wired into CI.
+
+**Runbooks.** Five plus an index, under `docs/runbooks/`.
+
+**Migration 0015** — 13-month `page_views` retention, batched, function only
+(scheduling would need pg_cron and a failed `create extension` takes the
+migration with it). Written, deliberately not pushed.
+
+### Defects found and fixed
+
+- `logEvent` spread caller fields after the reserved keys, so a field named
+  `event` renamed the line — first casualty was the alerter's own failure line.
+- Nothing on the purchase path read inventory. A stale tab could buy the last
+  unit repeatedly and drive stock negative. Check now in `priceCart`, which
+  every payment route goes through.
+- The admin fell fully open on a Vercel preview with no Supabase configured;
+  `validate-env.mjs` only hard-fails production builds.
+- `PAYPAL_WEBHOOK_ID` was never validated, so the order-repair safety net could
+  be silently absent.
+- No `error.tsx`, `not-found.tsx` or `global-error.tsx` existed at all.
+- The limiter bucketed every addressless request together — which would have
+  made the analytics e2e specs flaky, since the suite fires a beacon per
+  navigation.
+- IPv6 callers were keyed by full address, giving anyone with a /64 unlimited
+  buckets.
+- 429s were cacheable, against RFC 6585 §4.
+- Seven runbook instructions that would have failed when followed, including a
+  `vercel logs` flag that does not exist, a Supabase rotation control that has
+  been removed, and an inverted success criterion on `pg_restore`.
+
+### Record corrections
+
+`database-migrations.md` claimed `0012` was unpushed and never mentioned `0013`
+or `0014`. Querying hosted directly shows `0001-0003` and `0005-0014` all
+applied. The section now carries the query instead of a remembered answer, and
+`storefront-search.md` repeated the same stale claim twice.
+
+### Not done, deliberately
+
+The `.ai/WORKLOG.md` retirement discussed earlier. It was raised, questioned,
+and never explicitly approved, so 7,300 lines were left alone.
