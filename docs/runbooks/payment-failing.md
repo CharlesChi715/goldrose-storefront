@@ -71,12 +71,25 @@ webhook's repair path reads that same missing row and gives up. Confirm by
 re-running the step 3 command with `select id, status from checkouts where
 provider_order_id = 'PASTE_THE_ID';` — `(0 rows)` confirms the orphan, a row
 means it can still repair itself, so wait. Then, using the item list from step
-2, either **fulfil** — `/admin/orders/drafts/new` → same variants and
-quantities, the buyer's email → Save → **Mark as paid**, which decrements stock,
-writes the timeline and sends the confirmation, and takes no money, which is
-right because PayPal already has it (that draft records as a `mock` payment with
-no capture id, so a later refund of it must also be done in PayPal) — or
-**refund** it, below, when you cannot tell what they bought.
+2, either **fulfil** or **refund**.
+
+⚠️ **Before leaving the PayPal transaction, copy the buyer's shipping address
+out of it.** This is the only moment it is on screen. The draft form
+(`/admin/orders/drafts/new`) takes lines, quantities, the buyer's email, a
+discount code and a note — there is **no address field anywhere in the admin**,
+and `priceDraft` forces `shipping_cents: 0` (`lib/admin/drafts.ts`). So a draft
+alone produces an order nobody can post, at a total lower than the amount
+PayPal actually took.
+
+**To fulfil:** `/admin/orders/drafts/new` → same variants and quantities, the
+buyer's email → paste the shipping address AND the shipping you charged into
+the **note** → Save → **Mark as paid**. That decrements stock, writes the
+timeline and sends the confirmation, and takes no money, which is right because
+PayPal already has it. The draft records as a `mock` payment with no capture id,
+so a later refund of it must also be done in PayPal, and its total will not
+match the capture — say so in the note.
+
+**To refund** — below — when you cannot tell what they bought.
 
 ### paypal.capture.amount-mismatch — nothing is broken, a human must decide
 

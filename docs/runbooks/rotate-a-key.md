@@ -62,13 +62,30 @@ Settings → API Keys; held by Vercel (server-side only) and `.env.local`. It
 **bypasses Row Level Security completely**, so RLS is only the wall that stands
 if the *anon* key leaks, not this one
 ([07-who-can-see-what](../learning/07-who-can-see-what.md)). Trust that panel
-over this page — Supabase has renamed it twice: older projects sign `anon` and
-`service_role` with one JWT secret, so rotating changes both and signs sessions
-out; newer ones revoke a single secret key, the cheap case.
+over this page, because Supabase keeps moving it.
 
-⚠️ Between the old key dying and the redeploy finishing, the site cannot read its
-database: pages fail, `/api/health` returns 503, the uptime workflow goes red and
-mails the owner. Recoverable, but do it in one sitting.
+**There is no rotate button for this key any more.** Supabase froze rotation of
+the legacy `anon` / `service_role` / JWT secrets — its own troubleshooting page
+says "it is no longer possible to rotate the legacy anon, service and JWT
+secrets" — and is retiring them by the end of 2026. This project holds legacy
+keys, so a leak is repaired by **replacing** the key, not reissuing it:
+
+1. Settings → API Keys → **Publishable and secret API keys** → create a secret
+   key (`sb_secret_…`). Creating it changes nothing on its own; the legacy keys
+   keep working.
+2. Put it in Vercel as `SUPABASE_SERVICE_ROLE_KEY`, and create a publishable
+   key (`sb_publishable_…`) for `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the same
+   sitting — step 4 kills both legacy keys together, so doing one without the
+   other takes the shop down.
+3. Redeploy and check the shop loads and `/api/health` is `ok`.
+4. ⚠️ **Only then** disable the legacy keys in the **Legacy API keys** tab.
+   That is the moment the leaked key dies. It is reversible — re-enable them if
+   anything breaks.
+
+⚠️ Between the legacy keys being disabled and a good deploy being live, the site
+cannot read its database: pages fail, `/api/health` returns 503, the uptime
+workflow goes red and mails the owner. Recoverable, but do steps 1 to 4 in one
+sitting.
 
 ### `NEXT_PUBLIC_SUPABASE_ANON_KEY` — public by construction
 

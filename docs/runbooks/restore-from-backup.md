@@ -23,13 +23,28 @@ about it.
 
 Nothing here touches live data. Run it in daylight, not during an outage.
 
+0. **Install the AWS command line and name the bucket.** It is the tool that
+   reads the bucket and this Mac does not have it — nothing below works without
+   it, and the failure looks like a bad bucket name rather than a missing
+   program. The bucket is the Actions variable `BACKUP_S3_BUCKET` (Settings →
+   Secrets and variables → Actions).
+
+   ```bash
+   brew install awscli
+   aws configure          # access key, secret, region us-west-2, output json
+   aws sts get-caller-identity
+   export BACKUP_S3_BUCKET='<bucket name>'
+   ```
+
+   Good answer: `get-caller-identity` prints your account number and user ARN.
+   ⚠️ Use **your own** AWS login here, not the backup job's keys — that IAM user
+   is put-only by design and cannot list or download.
+
 1. **Fetch last night's folder and read the dump before restoring it** — that
-   last check needs no database and catches a bad download in five seconds. The
-   bucket is the Actions variable `BACKUP_S3_BUCKET` (Settings → Secrets and
-   variables → Actions); use your own AWS login, because the workflow's IAM user
-   may only put files, not read them back. Good answer: three files, `public.dump`
-   tens of KB rather than zero, and a count near 21 — the number of tables the
-   shop has, and the same check `scripts/backup-db.sh` makes.
+   last check needs no database and catches a bad download in five seconds.
+   Good answer: three files, `public.dump` tens of KB rather than zero, and a
+   count near 21 — the number of tables the shop has, and the same check
+   `scripts/backup-db.sh` makes.
 
    ```bash
    aws s3 ls "s3://$BACKUP_S3_BUCKET/db/$(date -u +%Y/%m)/" --recursive | tail -6
@@ -46,7 +61,11 @@ Nothing here touches live data. Run it in daylight, not during an outage.
    POSTGRES_PASSWORD=drill -p 55432:5432 postgres:17`) is quicker but loads
    `public.dump` only — use it when you just want to prove the file opens.
    Create the project in the dashboard (`eldreve-restore-drill`, US West like
-   live; if the free plan refuses on quota, use a new organisation) and copy its
+   live). The Free plan allows **two free projects in total across every
+   organisation you own**, so a new organisation does not buy a third: if it
+   refuses, pause or delete a free project you no longer need, or restore
+   `public.dump` only into the local Docker Postgres above and skip the admin
+   check for this drill. Copy its
    **Session pooler** URI from Connect: the direct host is IPv6-only and the
    transaction pooler on 6543 cannot serve `pg_restore`. Percent-encode any
    `@ : / #` in the password, and never paste this line into a commit or chat.
@@ -61,10 +80,16 @@ Nothing here touches live data. Run it in daylight, not during an outage.
    `storage.objects` with none of their table definitions, because Supabase
    provisions those tables itself on every project and a dump carrying its own
    copies collides and dies half-done — so the rows can only pour in once
-   Supabase has made the tables, which is why they come second. Good answer: near
-   silence, exit 0. Ignored errors about extensions or `schema "public" already
-   exists` are normal, and duplicate keys on Supabase's own bookkeeping tables
-   are expected; what matters is that `auth.users` fills.
+   Supabase has made the tables, which is why they come second.
+
+   ⚠️ **Do not judge this by the exit code.** Good answer: it ends with
+   `warning: errors ignored on restore: N` and **exits 1**. That is normal
+   here, not a failure — `pg_restore` without `--exit-on-error` continues past
+   errors and then exits 1 if it ignored any, and the errors about extensions,
+   `schema "public" already exists`, and duplicate keys on Supabase's own
+   bookkeeping tables each count towards N. It exits 0 only when nothing at all
+   was ignored, which will not happen against a real Supabase project. Judge it
+   by the row counts in step 4 instead.
 
    ```bash
    pg_restore --no-owner --no-privileges --dbname "$DRILL_URL" "$HOME/eldreve-drill/public.dump"
@@ -127,6 +152,18 @@ aws s3 sync "$HOME/eldreve-images" "s3://$BACKUP_S3_BUCKET/storage/"
 
 Same commands, different stakes; the order of the first two steps is what
 protects you.
+
+**Set these first, in the shell you are about to work in.** This section is the
+one people jump straight to, so it cannot rely on variables the drill above
+exported. The live password is `SUPABASE_DB_PASSWORD` in `.env.local`; the
+bucket is the Actions variable `BACKUP_S3_BUCKET`. Percent-encode any
+`@ : / #` in the password, and never paste these lines into a commit or a chat.
+
+```bash
+cd /Users/charles/Developer/goldrose-storefront
+export LIVE_URL='postgresql://postgres.cfvsvgbldnzkcjvbwnjp:<password>@aws-1-us-west-2.pooler.supabase.com:5432/postgres'
+export BACKUP_S3_BUCKET='<bucket name>'
+```
 
 1. ⚠️ **Do not drop, reset or delete the damaged project.** It is evidence, it
    probably still holds rows the backup does not, and deleting it cannot be

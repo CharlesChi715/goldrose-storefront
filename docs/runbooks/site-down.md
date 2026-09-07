@@ -43,7 +43,7 @@ cannot, because from outside all three look identical:
 
 | eldreve.com     | vercel.app     | What is actually broken         |
 | --------------- | -------------- | ------------------------------- |
-| no connection   | no connection  | Vercel is not serving — step 5  |
+| no connection   | no connection  | Vercel is not serving — step 6  |
 | 503 `degraded`  | 503 `degraded` | The database — step 4           |
 | fails/TLS error | 200 `ok`       | DNS or the certificate — step 7 |
 
