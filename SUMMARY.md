@@ -159,20 +159,25 @@ needs a person who has decided, not an agent who is being helpful.
    rehearsed there is no backup, only files.
 6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
    ([runbook](docs/runbooks/payment-failing.md)).
-7. Owner enables live PayPal → **the site is open for real orders.**
+7. **Confirm the Vercel plan allows commercial use.** Hobby is for
+   non-commercial projects under Vercel's fair-use terms, so a shop taking
+   money belongs on Pro — a suspension here takes the whole site down, and it
+   is unrelated to anything in the code. Check the plan before item 8, not
+   after.
+8. Owner enables live PayPal → **the site is open for real orders.**
 
 While live, in any order (nothing below blocks taking orders):
 
-8. Apply the email-change mail template
+9. Apply the email-change mail template
    ([customer-accounts](docs/features/customer-accounts.md) step 4).
-9. Build guest order lookup ([order-tracking](docs/features/order-tracking.md));
-   signed-in customers already see their orders at `/account`.
-10. Replace mock product content (OQ-3) and third-party/dev imagery product by
+10. Build guest order lookup ([order-tracking](docs/features/order-tracking.md));
+    signed-in customers already see their orders at `/account`.
+11. Replace mock product content (OQ-3) and third-party/dev imagery product by
     product; reconcile palettes and tabs.
-11. Replace the remaining placeholder screens: tracking timeline, shipping
+12. Replace the remaining placeholder screens: tracking timeline, shipping
     choices, card fields, `/blog`. Sign off the six `/policies/*` documents so
     they can come out of `noindex` (AI-046).
-12. Capture screenshots, cancel Shopify, revoke the Figma token, begin
+13. Capture screenshots, cancel Shopify, revoke the Figma token, begin
     marketing. (The Shopify *store integration* is already gone; the
     `@shopify/polaris` UI framework is the admin's own and stays. Cancel the
     subscription only after acceptance.)
