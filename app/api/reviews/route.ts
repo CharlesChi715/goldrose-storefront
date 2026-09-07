@@ -16,7 +16,7 @@ import { createReview } from "@/lib/reviews/db.ts";
 import { getCatalogProduct } from "@/lib/supabase/catalog.ts";
 import { getSupabaseEnv } from "@/lib/supabase/env.ts";
 import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
-import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
 import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
@@ -32,10 +32,7 @@ export async function POST(request: Request) {
     logEvent("warn", "ratelimit.refused", { route: "reviews" });
     return NextResponse.json(
       { ok: false, error: "Too many attempts — please try again shortly." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(gate.retryAfterSeconds) },
-      },
+      { status: 429, headers: refusalHeaders(gate) },
     );
   }
 

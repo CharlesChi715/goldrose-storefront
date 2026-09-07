@@ -19,7 +19,7 @@ import { getPayPalConfig } from "@/lib/paypal/client";
 import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type { Address } from "@/lib/supabase/types.ts";
-import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
 import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
@@ -68,10 +68,7 @@ export async function POST(request: Request) {
         ok: false,
         error: "Too many checkout attempts — please wait a moment.",
       },
-      {
-        status: 429,
-        headers: { "Retry-After": String(gate.retryAfterSeconds) },
-      },
+      { status: 429, headers: refusalHeaders(gate) },
     );
   }
 

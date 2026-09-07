@@ -11,7 +11,7 @@ import { z } from "zod";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createPayPalOrder, getPayPalConfig } from "@/lib/paypal/client";
 import { getStore } from "@/lib/supabase/store.ts";
-import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
 import { alert, logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
@@ -43,10 +43,7 @@ export async function POST(request: Request) {
     logEvent("warn", "ratelimit.refused", { route: "paypal/create" });
     return NextResponse.json(
       { error: "Too many checkout attempts — please wait a moment." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(gate.retryAfterSeconds) },
-      },
+      { status: 429, headers: refusalHeaders(gate) },
     );
   }
 

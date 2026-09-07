@@ -12,9 +12,20 @@
  * mail through lib/email.ts, which logs to the console rather than sending
  * while RESEND_API_KEY is blank — and playwright.config.ts blanks it
  * deliberately, so this test cannot post real mail.
+ *
+ * EVERY REQUEST HERE SETS `x-real-ip` BY HAND, and that is the point rather
+ * than a convenience. The limiter does not count a request that carries no
+ * address, because Vercel sets that header on everything it serves, so its
+ * absence means local development or this very suite — and bucketing a whole
+ * test run under one shared key would put the 190-odd navigations that fire a
+ * beacon into a single per-minute allowance. Setting the header is therefore
+ * how a test asks to be treated as production traffic.
  */
 
 import { test, expect } from "@playwright/test";
+
+/** Stand in for the address Vercel's edge would have attached. */
+const AS_A_VISITOR = { "x-real-ip": "203.0.113.7" };
 
 const ENQUIRY = {
   email: "rate-limit-probe@example.com",
@@ -30,9 +41,13 @@ test("the owner's inbox cannot be flooded through the enquiry form", async ({
   for (let attempt = 0; attempt < 4; attempt++) {
     const response = await request.post("/api/business-request", {
       data: ENQUIRY,
+      headers: AS_A_VISITOR,
     });
     statuses.push(response.status());
     if (response.status() === 429) {
+      // RFC 6585 §4: a 429 must never be cached, or a CDN can hand one
+      // shopper's refusal to everyone behind the same edge node.
+      expect(response.headers()["cache-control"]).toBe("no-store");
       // The header is the contract with any well-behaved client: it must be a
       // positive whole number of seconds, never 0, or a retrying client
       // hammers straight back.
@@ -67,6 +82,7 @@ test("analytics keeps answering 200 however hard it is pushed", async ({
         sessionId: `rate-limit-probe-session-${attempt}`,
         path: "/",
       },
+      headers: AS_A_VISITOR,
     });
     statuses.add(response.status());
   }

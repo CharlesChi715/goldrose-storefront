@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { priceCart } from "@/lib/checkout/pricing";
 import { DiscountError } from "@/lib/checkout/discounts";
-import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
 import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
@@ -37,10 +37,7 @@ export async function POST(request: Request) {
     logEvent("warn", "ratelimit.refused", { route: "discount" });
     return NextResponse.json(
       { ok: false, error: "Too many code attempts — please wait a moment." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(gate.retryAfterSeconds) },
-      },
+      { status: 429, headers: refusalHeaders(gate) },
     );
   }
 

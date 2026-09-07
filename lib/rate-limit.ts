@@ -148,36 +148,79 @@ export function createLimiter({
 }
 
 /**
- * Who is calling, as well as we can tell, for use as a limiter key.
+ * Collapse an address to the unit a person plausibly controls.
  *
- * Vercel terminates every request at its edge and sets both `x-real-ip` and
- * `x-forwarded-for` from the connection it actually accepted, so those are the
- * only two worth reading. `x-real-ip` is preferred because it is a single
- * value with nothing to parse; `x-forwarded-for` is the fallback, and only its
- * FIRST entry is taken — that is the position the original client occupies in
- * the chain, everything after it being proxies.
+ * IPv4 is returned as-is. IPv6 is truncated to its /64 prefix, because a home
+ * connection is routinely handed a whole /64 — 18 quintillion addresses — and
+ * a limiter keyed on the full address would give one attacker an unlimited
+ * supply of fresh buckets, which is the entire thing it exists to prevent.
  *
- * A client CAN send its own `x-forwarded-for`. What that buys an attacker is
- * limited by what this key is used for: it is a rate-limit bucket and nothing
- * else — never an allowlist, never an identity, never an authorisation. The
- * worst outcomes are evading one's own limit (which the paragraphs at the top
- * of this file already concede to a determined attacker) and pinning the limit
- * on some other address, which costs that address nothing but a slower minute
- * on this one instance.
+ * IPv4-mapped forms (`::ffff:203.0.113.7`) are unwrapped rather than
+ * truncated, since truncating one collapses EVERY mapped address into a single
+ * bucket and would rate-limit the whole internet as one caller.
  *
- * The key is scoped by route, so a shopper who has used up their reviews does
- * not thereby lose their search.
+ * @param ip - An address from a request header.
+ * @returns The bucket identity for that address.
+ */
+export function ipBucket(ip: string): string {
+  if (!ip.includes(":")) return ip;
+
+  const [head, tail] = ip.split("::");
+  const headGroups = head ? head.split(":") : [];
+  const tailGroups = tail ? tail.split(":") : [];
+
+  // An IPv4-mapped address ends in dotted-quad form; that IS the caller.
+  const last = (tailGroups.length ? tailGroups : headGroups).at(-1);
+  if (last?.includes(".")) return last;
+
+  const missing = 8 - headGroups.length - tailGroups.length;
+  const full = [
+    ...headGroups,
+    ...Array(Math.max(0, missing)).fill("0"),
+    ...tailGroups,
+  ];
+  return full.slice(0, 4).join(":");
+}
+
+/**
+ * Who is calling, as well as we can tell.
+ *
+ * Vercel terminates every request at its edge and sets `x-real-ip` from the
+ * connection it actually accepted — the same header its own `ipAddress()`
+ * helper reads — so that is the value to trust. `x-forwarded-for` is a
+ * fallback, and only its FIRST entry is taken: on Vercel the platform
+ * overwrites the header, so that entry is the real client.
+ *
+ * ⚠️ On a host that APPENDS rather than overwrites, the first entry is
+ * whatever the client sent, and this becomes trivially evadable. That is
+ * acceptable only because the value is used for one thing — a rate-limit
+ * bucket — and never as an allowlist, an identity, or an authorisation.
+ *
+ * @param headers - The request headers.
+ * @returns The caller's bucket, or null when the platform named nobody.
+ */
+export function clientIp(headers: Headers): string | null {
+  const realIp = headers.get("x-real-ip")?.trim();
+  if (realIp) return ipBucket(realIp);
+  const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  if (forwarded) return ipBucket(forwarded);
+  return null;
+}
+
+/**
+ * The limiter key for one caller on one route, or null when there is no
+ * caller to key on.
+ *
+ * Scoped by route, so a shopper who has spent their reviews allowance does not
+ * thereby lose their search.
  *
  * @param headers - The request headers.
  * @param scope - A short route name, e.g. "reviews".
- * @returns The limiter key. Never empty: an unattributable request shares the
- *   "unknown" bucket, which is deliberately still limited rather than exempt.
+ * @returns The key, or null when the request carries no address.
  */
-export function clientKey(headers: Headers, scope: string): string {
-  const realIp = headers.get("x-real-ip")?.trim();
-  const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const who = realIp || forwarded || "unknown";
-  return `${scope}:${who}`;
+export function clientKey(headers: Headers, scope: string): string | null {
+  const ip = clientIp(headers);
+  return ip === null ? null : `${scope}:${ip}`;
 }
 
 /**
@@ -201,12 +244,52 @@ export function getLimiter(): Limiter {
 }
 
 /**
+ * The headers a 429 must carry.
+ *
+ * `Retry-After` tells a well-behaved client when to come back, which is the
+ * difference between a client that backs off and one that hammers. RFC 6585 §4
+ * is explicit about the other: "Responses with the 429 status code MUST NOT be
+ * stored by a cache" — without it, a CDN can serve one shopper's refusal to
+ * everybody behind the same edge node.
+ *
+ * @param decision - A refusing decision from `checkRequest`.
+ * @returns Headers to spread into the 429 response.
+ */
+export function refusalHeaders(decision: Decision): Record<string, string> {
+  return {
+    "Retry-After": String(decision.retryAfterSeconds),
+    "Cache-Control": "no-store",
+  };
+}
+
+/** The answer given when there is nobody to count. */
+const ALLOWED: Decision = {
+  allowed: true,
+  remaining: Number.POSITIVE_INFINITY,
+  retryAfterSeconds: 0,
+};
+
+/**
  * The one call a route makes: work out who is asking and whether they may.
  *
  * Returns the decision rather than a response, because the routes disagree
  * about what exceeding a limit means — see the header. A route that refuses
  * answers 429 with `Retry-After: decision.retryAfterSeconds`; a route that
  * drops answers its usual 200 and simply does not write.
+ *
+ * ⚠️ **A request with no client address is always allowed.** Vercel sets
+ * `x-real-ip` on every request it serves, so a missing address does not mean
+ * an anonymous visitor — it means this is not running behind Vercel: local
+ * development, or the Playwright suite. Bucketing those under one shared
+ * "unknown" key would put an entire 191-test run, which fires a beacon on
+ * every navigation, into a single 120-per-minute allowance, and the analytics
+ * specs would start failing for reasons no one could reproduce.
+ *
+ * The cost of this choice is that a self-hosted deployment behind a proxy that
+ * sets neither header is unlimited. That is the right trade for a first layer
+ * whose header already concedes it is not a security boundary, and it is why
+ * the real ceiling belongs at the edge (Vercel's firewall), where a blocked
+ * request never reaches this code at all.
  *
  * @param headers - The incoming request's headers.
  * @param scope - Short route name; scopes the bucket.
@@ -218,5 +301,7 @@ export function checkRequest(
   scope: string,
   limit: Limit,
 ): Decision {
-  return getLimiter().check(clientKey(headers, scope), limit);
+  const key = clientKey(headers, scope);
+  if (key === null) return ALLOWED;
+  return getLimiter().check(key, limit);
 }

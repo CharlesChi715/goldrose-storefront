@@ -11,7 +11,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendBusinessRequestEmail } from "@/lib/email.ts";
-import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
 import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
@@ -32,10 +32,7 @@ export async function POST(request: Request) {
     logEvent("warn", "ratelimit.refused", { route: "business-request" });
     return NextResponse.json(
       { ok: false, error: "That's a few too many — please try again shortly." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(gate.retryAfterSeconds) },
-      },
+      { status: 429, headers: refusalHeaders(gate) },
     );
   }
 

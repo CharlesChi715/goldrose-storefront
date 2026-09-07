@@ -10,9 +10,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  checkRequest,
   clientKey,
   createLimiter,
+  ipBucket,
   LIMITS,
+  refusalHeaders,
   type Limit,
 } from "../../lib/rate-limit.ts";
 
@@ -170,8 +173,69 @@ test("only the first x-forwarded-for entry is taken, and it is trimmed", () => {
   assert.equal(clientKey(headers, "feedback"), "feedback:203.0.113.7");
 });
 
-test("an unattributable request is bucketed, not exempted", () => {
-  assert.equal(clientKey(new Headers(), "feedback"), "feedback:unknown");
+test("a request with no address has no key, and is therefore not limited", () => {
+  // Vercel sets x-real-ip on everything it serves, so no address means we are
+  // not behind Vercel: local dev, or the Playwright suite. Bucketing those
+  // under one shared key would put a whole 191-test run — which fires a beacon
+  // on every navigation — into a single 120-per-minute allowance, and the
+  // analytics specs would fail for reasons nobody could reproduce.
+  assert.equal(clientKey(new Headers(), "feedback"), null);
+
+  const tiny: Limit = { limit: 1, windowMs: 60_000 };
+  for (let i = 0; i < 50; i++) {
+    assert.equal(checkRequest(new Headers(), "feedback", tiny).allowed, true);
+  }
+});
+
+test("an IPv6 caller is bucketed by /64, not by address", () => {
+  // A home connection is routinely handed a whole /64. Keyed on the full
+  // address, one attacker would have 18 quintillion fresh buckets — which is
+  // precisely what the limiter exists to deny.
+  assert.equal(
+    ipBucket("2001:db8:1234:5678:9abc:def0:1234:5678"),
+    "2001:db8:1234:5678",
+  );
+  assert.equal(
+    ipBucket("2001:db8:1234:5678:aaaa:bbbb:cccc:dddd"),
+    ipBucket("2001:db8:1234:5678:1111:2222:3333:4444"),
+    "two addresses in one /64 share a bucket",
+  );
+  assert.notEqual(
+    ipBucket("2001:db8:1234:5678::1"),
+    ipBucket("2001:db8:1234:9999::1"),
+    "different /64s do not",
+  );
+});
+
+test("a compressed IPv6 address expands before it is truncated", () => {
+  assert.equal(ipBucket("2001:db8::1"), "2001:db8:0:0");
+  assert.equal(ipBucket("::1"), "0:0:0:0");
+});
+
+test("an IPv4-mapped address is unwrapped, not collapsed", () => {
+  // Truncating ::ffff:a.b.c.d to /64 yields 0:0:0:0 for EVERY such address,
+  // which would rate-limit the whole internet as a single caller.
+  assert.equal(ipBucket("::ffff:203.0.113.7"), "203.0.113.7");
+  assert.notEqual(
+    ipBucket("::ffff:203.0.113.7"),
+    ipBucket("::ffff:198.51.100.9"),
+  );
+});
+
+test("an IPv4 address is used as-is", () => {
+  assert.equal(ipBucket("203.0.113.7"), "203.0.113.7");
+});
+
+test("a refusal is never cached, and says when to come back", () => {
+  // RFC 6585 §4: a 429 MUST NOT be stored by a cache. Without this a CDN can
+  // serve one shopper's refusal to everyone behind the same edge node.
+  const headers = refusalHeaders({
+    allowed: false,
+    remaining: 0,
+    retryAfterSeconds: 42,
+  });
+  assert.equal(headers["Cache-Control"], "no-store");
+  assert.equal(headers["Retry-After"], "42");
 });
 
 test("the owner-emailing route is the tightest limit we ship", () => {
