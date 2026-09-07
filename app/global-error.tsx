@@ -56,8 +56,11 @@ export default function GlobalError({
           We are aware and looking into it. Please try again shortly.
           {error.digest ? ` Reference ${error.digest}.` : ""}
         </p>
-        {/* A plain anchor, not next/link: the router is part of what may have
-            failed, and a full page load is exactly what is wanted here. */}
+        {/* A plain anchor, not next/link, and the lint rule is wrong here for
+            once: this file renders when the ROOT layout has thrown, so the
+            router is part of what may have failed. A full page load is not a
+            missed optimisation, it is the recovery. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/"
           style={{
