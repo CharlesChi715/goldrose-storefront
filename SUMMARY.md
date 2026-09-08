@@ -100,6 +100,15 @@ screens while live; card integration after.
 - `public/` is served, so anything left there is publicly reachable; a Figma
   export deleted from it is re-exported by
   `node scripts/figma/cli.mjs assets <frame-id>`.
+- **This is NOT the Next.js you know.** Next 16 has breaking changes — APIs,
+  conventions and file structure may all differ from your training data. Read
+  the relevant guide in `node_modules/next/dist/docs/` before writing any code,
+  and heed deprecation notices. (Moved here from `README.md` 2026-09-08: the
+  README is public and written for humans; this is a rule for agents.)
+- **The repository is public on GitHub.** Connection targets, credential
+  locations, tool-auth checks and deploy cautions live in
+  `ops/RUNBOOK.local.md`, which is gitignored — never in `README.md` or any
+  other tracked file.
 
 ### Release gates
 
@@ -184,7 +193,7 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 - Secrets in `.env.local` (gitignored); `.env.example` lists every variable.
 - Auth: `gh` SSH works as `CharlesChi715` but its API token is invalid — run
   `gh auth login` before `gh` API work. Vercel CLI linked as `vancechi`;
-  Supabase CLI linked; `psql` works ([`README.md`](README.md)); Docker reachable.
+  Supabase CLI linked; `psql` works (`ops/RUNBOOK.local.md`); Docker reachable.
   No `cloudflared`/`ngrok` — install one before PayPal webhook testing.
   `FIGMA_TOKEN` has `file_content:read`; revoke after design-import work.
   **Re-verify tool auth before environment-dependent work.**

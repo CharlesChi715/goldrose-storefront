@@ -60,3 +60,6 @@ supabase/.temp/
 
 # claude code worktrees — nested repos, never track
 .claude/worktrees/
+
+# operator runbook — connection targets and deploy cautions, never public
+ops/
