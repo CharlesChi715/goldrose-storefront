@@ -4,7 +4,7 @@ Direct-to-consumer storefront for a 24K gold-dipped rose gift line, with its own
 
 [![CI](https://github.com/CharlesChi715/goldrose-storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/CharlesChi715/goldrose-storefront/actions/workflows/ci.yml)
 
-Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by one engineer for Zhongshu Technology Worldwide Ltd (Hong Kong): 80 routes, 21 database tables and 401 automated tests across 76,331 lines of TypeScript. It replaced the brand's Shopify storefront, so everything a merchant needs — catalogue, checkout, orders, inventory, customers, discounts, analytics — is implemented here rather than rented.
+Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by one engineer for Zhongshu Technology Worldwide Ltd (Hong Kong): 80 routes, 21 database tables and 422 automated tests across 77,763 lines of TypeScript. It replaced the brand's Shopify storefront, so everything a merchant needs — catalogue, checkout, orders, inventory, customers, discounts, analytics — is implemented here rather than rented.
 
 <table>
   <tr>
@@ -103,9 +103,9 @@ Locally the admin opens without a password and checkout is simulated, so no mone
 ## Tests and CI
 
 ```bash
-npm run test:unit    # 221 tests, node --test, no services, ~0.6s
+npm run test:unit    # 231 tests, node --test, no services, ~0.6s
 npx playwright install
-npm run test:e2e     # 180 tests against a production build on port 3001
+npm run test:e2e     # 191 tests against a production build on port 3001
 ```
 
 The Playwright configuration blanks the Supabase, PayPal and Resend variables for its own server, so the suite cannot reach hosted data, real money or the live email quota. Unit tests cover the logic that is genuinely easy to get wrong: webhook idempotency, price derivation, discount and facet matching, engagement dwell rules, reminder time zones and the migration checker itself.
@@ -140,7 +140,7 @@ docs/           specs, feature records, database reference, learning series
 The site is live, and the following are deliberately incomplete:
 
 - **Payments run in PayPal sandbox.** The integration is end-to-end and has taken a sandbox payment; switching to live is an owner-only release gate. There is no card rail — the credit-card option is a form, not a processor.
-- **Seven `/policies/*` pages and the blog are coming-soon scaffolds,** and `/orders/track` shows the design's placeholder timeline. Real order status exists for signed-in customers at `/account/orders`.
+- **The policy documents are written but not indexed.** Six `/policies/*` documents were imported from their approved designs and are reachable, each shipping `robots: noindex` until the owner signs off the return window, warranty and arbitration terms they commit to. The journal is still a placeholder, and `/orders/track` shows the design's placeholder timeline — real order status exists for signed-in customers at `/account/orders`.
 - **The storefront is a scaled fixed-width mobile canvas,** not a fluid responsive layout with breakpoints.
 - **The admin assistant is a scoped assistant, not an agent.** It streams answers from a small hand-maintained allowlist document, with each admin supplying their own Anthropic key, stored in Supabase Vault behind restricted-grant functions. No retrieval, no tools, no database access.
 - **The admin is about 95% translated** into Simplified Chinese, falling back to English per key. The storefront is English only.
