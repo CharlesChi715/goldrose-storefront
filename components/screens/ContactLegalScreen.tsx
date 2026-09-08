@@ -3,11 +3,19 @@
  * /policies/contact-legal — the seller-of-record notice: who the company
  * legally is, where it is registered, and how to reach it.
  *
- * Deliberately NOT a pixel-exact import. Its Figma frame (2118:245) is not
- * Ready-for-dev, but the page is a payment-provider prerequisite and a US
- * disclosure obligation, so it ships now as plain typography in the shared
- * cream/Playfair palette — the same idiom as PolicyComingSoon — and the
- * frame replaces it when marked.
+ * Deliberately NOT a pixel-exact import. It was built out on 2026-08-06 ahead
+ * of its frame because the page is a payment-provider prerequisite and a US
+ * disclosure obligation, shipping as plain typography in the shared
+ * cream/Playfair palette — the same idiom as PolicyComingSoon.
+ *
+ * Its frame 2118:245 ("Policy J") IS Ready-for-dev as of the 2026-08-18 sync,
+ * and it was deliberately NOT imported like its six siblings. The frame draws
+ * the company's contact channels as static text; this page reads them from
+ * the `store` setting so the owner maintains them at /admin/settings, and it
+ * hides the legal block entirely rather than printing blanks (AI-033).
+ * Importing the frame verbatim would hard-code details that are owner data
+ * and re-open a gap that cost a rejected TikTok application. Recorded as a
+ * sanctioned divergence in docs/ixd/README.md rather than as unfinished work.
  *
  * Every value comes from the `store` setting, so the owner fills it in at
  * /admin/settings without a deploy. Until the registered entity is supplied

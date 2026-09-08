@@ -5,29 +5,46 @@ the design team still owes us, and the naming rules. Per-sync history lives in
 [`agent-delivery/sessions/`](../../agent-delivery/README.md); the process lives
 in the `figma-sync` skill.
 
-## Design-sync state — 2026-08-10
+## Design-sync state — 2026-08-18
 
-- **Imported through 2026-08-10.** The home page `/` was re-imported from frame
-  `2380:370` (page-wide typography pass); the stage is **5074** and
-  `band.trim` is retired. Detail:
-  [figma-sync-home-page-08-10](../../agent-delivery/sessions/figma-sync-home-page-08-10-claude-figma-sync-home-page-75f37e.md).
-- ⚠️ **The baseline is deliberately un-stamped: 41 changed frames remain
-  un-imported.** `npm run figma:baseline` was not run, so the next sync still
-  sees them. Do not stamp it to "clean up" a diff.
-- **`npm run figma:unbuilt` is empty** since 2026-08-07 — every Ready-for-dev
-  frame has a route (`/account/addresses` was the last one).
-- **Pending from design:** the 7 `/policies/*` pages, the MENU and long-form
-  story redesigns, and `/gift-guide` (frame `1942:182`, no route built).
+- **Imported through 2026-08-18.** The six policy documents were imported from
+  `2118:239`, `2118:241`, `2118:242`, `2118:243`, `2118:244` and `2127:238`,
+  replacing the coming-soon scaffolds those routes carried since 2026-08-02.
+  Detail: [figma-sync-policies-08-18](../../agent-delivery/sessions/figma-sync-policies-08-18-worktree-figma-sync-policies.md).
+  Before that, the home page `/` was re-imported from `2380:370` on 2026-08-10
+  (page-wide typography pass); the stage is **5074** and `band.trim` is
+  retired.
+- **The design file has not changed since 2026-08-10** (`lastModified
+  2026-08-10T07:01:35Z`). The 08-18 sync imported backlog, not a new delivery
+  — a scope report of "+5 ~42 −1" is measured against the 08-05 baseline, not
+  against the last sync.
+- ⚠️ **The baseline stays deliberately un-stamped: ~36 changed frames remain
+  un-imported** — the page-wide typography pass has only reached `/`. Do not
+  run `npm run figma:baseline` to "clean up" a diff; it would hide them.
+- ⚠️ **`npm run figma:unbuilt` has a blind spot, and it hid this delivery.**
+  It reports 0 whenever every Ready-for-dev frame has a *route*, and a
+  coming-soon scaffold is a route. Six policy frames sat Ready-for-dev behind
+  scaffolds and no command said so. When a frame becomes ready, check what the
+  route actually renders, not merely that it exists.
+- **Pending from design:** the MENU and long-form story redesigns,
+  `/gift-guide` (frame `1942:182`, no route built), `/blog` (`1593:115`, still
+  un-marked and still scaffolded), and the policy frames' own unfilled
+  placeholders — sixteen `[BRACKET]` tokens and a fake `[MAY 20, 2024]`
+  revision date the import had to work around.
 - **Sanctioned divergences** — a pixel diff will never close these, and that is
   intended: A-2's uniform card 2 (owner, 2026-08-07), the six rail CTAs the
-  frame deleted on three cards (AI-043), and ~2.0–2.7% per band of font
-  rasterisation. A-2 reads 8.3% for exactly that reason.
+  frame deleted on three cards (AI-043), ~2.0–2.7% per band of font
+  rasterisation (A-2 reads 8.3% for exactly that reason), the policy documents
+  laid out in flow rather than on a clipped fixed canvas, and
+  `/policies/contact-legal` keeping its settings-driven build instead of its
+  now-ready frame `2118:245` (both explained in their files' headers).
 - ⚠️ **A frame carrying a pre-rename brand name is not imported verbatim**
   (AI-037) — see [naming/brand-name.md](naming/brand-name.md). The home page is
-  the owner's sanctioned exception (AI-044).
+  the owner's sanctioned exception (AI-044). The policy import applied the rule
+  to 24 further occurrences.
 - Open design matters, with the frame each one is about, are rows in
   [`agent-delivery/INBOX.md`](../../agent-delivery/INBOX.md): AI-024, AI-037,
-  AI-038, AI-043, AI-045.
+  AI-038, AI-043, AI-045, AI-046.
 
 ## Files
 

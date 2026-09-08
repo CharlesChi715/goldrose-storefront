@@ -1,19 +1,22 @@
 /**
  * ROLE OF THIS FILE
- * The shared coming-soon scaffold behind every /policies/* route (added
- * 2026-08-02 with the POLICIES-LEGAL hub, 1523:1136). The seven policy PAGE
- * frames exist in the design file but none is marked Ready-for-dev, so the
- * hub's links land on this deliberately quiet cream page — brand top nav,
- * centred Playfair title, one-line note, back link — instead of an invented
- * design. Each route file names the frame that will replace it.
+ * The quiet coming-soon scaffold for a page whose frame is not Ready-for-dev
+ * yet — a deliberately plain cream page (brand top nav, centred Playfair
+ * title, one-line note, back link) rather than an invented design. Added
+ * 2026-08-02 with the POLICIES-LEGAL hub (1523:1136), when it stood behind
+ * all seven /policies/* routes.
  *
- * Since 2026-08-04 it also backs /blog, whose BLOG-JOURNAL-PAGE frame
- * (1593:115) is likewise un-marked but is linked from the Ready-for-dev
- * homepage footer — hence the overridable back link.
+ * **Only /blog still uses it.** On 2026-08-18 the design team's six policy
+ * documents were marked Ready-for-dev and imported, so those routes now
+ * render the real frames through PolicyDocumentScreen; /policies/contact-legal
+ * had already been built out on 2026-08-06. What is left is /blog, whose
+ * BLOG-JOURNAL-PAGE frame (1593:115) is still un-marked while being linked
+ * from the Ready-for-dev homepage footer — hence the overridable back link,
+ * which /blog is the only caller to use.
  *
- * AI-TAG(AI-012): PLACEHOLDER — seven /policies/* routes are coming-soon
- * scaffolds until their frames are Ready-for-dev. See
- * /agent-delivery/sessions/figma-sync-08-02-feat-figma-sync.md.
+ * Keep the component rather than inlining it into /blog: it is the house
+ * answer to "a frame links here but the design is not ready", and the next
+ * scaffolded target (/craft, /story) will want exactly this page.
  */
 
 import Link from "next/link";
