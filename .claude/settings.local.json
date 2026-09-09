@@ -30,5 +30,5 @@
     ]
   },
   "enabledMcpjsonServers": ["supabase", "next-devtools", "playwright", "figma"],
-  "outputStyle": "Explanatory"
+  "outputStyle": "default"
 }

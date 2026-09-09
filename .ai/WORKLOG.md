@@ -7241,6 +7241,35 @@ hand-written table — it belongs in `docs/features/`, where CI watches it.
 - `agent-advisor` worktree left on disk: it holds uncommitted work (deleted
   `docs/agent-advisor.md`, untracked `docs/advisor/`, `lib/advisor/`).
 
+## 2026-09-08 — README rewritten for a public, portfolio-facing repository
+
+- Replaced `README.md` (124 lines, agent-facing) with a project README written
+  against GitHub's own README guidance, Google's documentation style guide, the
+  standard-readme spec, Make a README and Write the Docs, plus a study of the
+  READMEs of Cal.com, Supabase, Medusa, Saleor, Vercel Commerce, Payload,
+  Documenso, Dub and Twenty. Ten sections: identity + live link, screenshots,
+  what's inside, design decisions, architecture, tech stack, quick start,
+  tests and CI, repository layout, documentation, status and limitations,
+  licence and contact.
+- Every number in it was verified: 378 tracked TS/TSX files / 76,331 lines,
+  80 routes (48 storefront + 32 admin), 20 handlers, 21 tables, 13 migrations,
+  221 unit tests + 180 Playwright tests, nine CI gates.
+- Added `docs/assets/readme/` — four screenshots: the live storefront (mobile)
+  and the admin home, analytics and orders screens, captured against the local
+  file adapter so the hosted database was never touched.
+- REMOVED from the public README and preserved in `ops/RUNBOOK.local.md`
+  (gitignored): the hosted-PostgreSQL connection recipe (pooler host, port,
+  database, `postgres.<ref>` role and the `SUPABASE_DB_PASSWORD` location),
+  tool-auth checks, deploy cautions, agent-inbox commands and doc routing.
+  A public repo should not carry a connection target for the client's live
+  database; no credential value was ever committed.
+- The `nextjs-agent-rules` block moved from the top of the README into
+  SUMMARY.md "Runtime and safety", where agents already read.
+- Dropped the claim that `agent-delivery/archive/` is private — it is tracked
+  and world-readable.
+- `ops/CLEANUP-BEFORE-SHARING.sh` (gitignored, NOT run) lists the untracking
+  still needed: supplier colour charts, this worklog, agent-delivery archive
+  and sessions, team-deliveries originals, .claude/settings.local.json.
 ## 2026-08-18 · figma-sync (policies) · `worktree-figma-sync-policies`
 
 Ran the read pipeline against file version `2385988852413855782`. **No new
