@@ -7424,3 +7424,31 @@ applied. The section now carries the query instead of a remembered answer, and
 
 The `.ai/WORKLOG.md` retirement discussed earlier. It was raised, questioned,
 and never explicitly approved, so 7,300 lines were left alone.
+## 2026-08-25 21:03 AEST — Stripe payment link + QR filed as a team delivery
+
+Charles was handed two artefacts by someone the bosses had do "the payment
+job": a Stripe payment link and a 扫码付款 QR poster. Both filed raw and
+**unparsed** in `team-deliveries/inbox/` — the routing table is still empty
+(AI-004), and its README forbids an agent choosing a destination. The
+check-first rule cleared it as a new delivery, not a re-delivery: no sha256
+match in any `originals/*/batch.md`, and the repo held no `stripe` reference of
+any kind beforehand.
+
+The QR decodes (CoreImage) to exactly the delivered URL, so the two artefacts
+are one. Rendering the page read-only — no payment, no field filled — showed it
+is **live**, not a test: US $79.00 for "Gold-Dipped Roses" branded ELDREVE,
+payee **Zhongshu Technology Worldwide Limited**, which matches
+`settings.store.legal_name`, so the money does reach our own entity.
+
+Two matters raised, both tagged in `docs/features/card-payments.md`:
+
+- **AI-047** `OWNER-DECISION` — OQ-1 closed on PayPal Advanced Checkout on
+  single-provider grounds; this is a second live acquirer nobody has recorded.
+  Real checkout rail, or off-site channel?
+- **AI-048** `OWNER-TODO` — the link collects **no shipping address** for a
+  physical gift, writes no `orders` row (so no admin screen, no inventory
+  decrement, no confirmation email, no tracking), and charges $79.00 against a
+  $79.99 catalog price.
+
+SUMMARY was deliberately left alone: OQ-1 is still the recorded decision, and
+changing it is the owner's call, not this session's.
