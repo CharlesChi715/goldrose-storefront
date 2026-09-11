@@ -173,7 +173,7 @@ export function AddressBookScreen() {
         src={`${A}/2207-293.png`}
         style={abs(7, 20, 40, 43)}
       />
-      <BrandWordmark x={143} y={21} w={136} h={40} />
+      <BrandWordmark y={21} h={40} />
 
       <h1
         className={playfair.className}

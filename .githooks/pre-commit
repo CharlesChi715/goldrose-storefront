@@ -1,0 +1,21 @@
+#!/bin/sh
+# Prettier check on the staged files, so `npm run format:check` cannot be the
+# step that turns CI red. Check only — the hook never rewrites what you staged.
+#
+# Skipped with a notice when node_modules is absent (a fresh worktree before
+# `npm ci`); everything else that can fail here is a real formatting difference.
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$files" ] && exit 0
+
+if [ ! -x node_modules/.bin/prettier ]; then
+  echo "pre-commit: node_modules missing — Prettier check skipped (run npm ci)." >&2
+  exit 0
+fi
+
+# --ignore-unknown: binaries and formats Prettier has no parser for are skipped
+# rather than failing. .prettierignore and .gitignore still apply.
+if ! printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 node_modules/.bin/prettier --check --ignore-unknown; then
+  echo "" >&2
+  echo "pre-commit: formatting differs. Fix with:  npm run format   then stage again." >&2
+  exit 1
+fi

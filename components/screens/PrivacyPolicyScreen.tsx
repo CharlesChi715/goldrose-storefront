@@ -100,7 +100,7 @@ export function PrivacyPolicyScreen() {
       nav={false}
     >
       {/* 1523:1187 Brand Navigation — the frame's own wordmark art */}
-      <BrandWordmark x={145} y={0} w={140} h={51} />
+      <BrandWordmark y={0} h={51} />
       <SettingsHeader title="Privacy Policy" />
 
       {/* hero card (1523:1138) */}

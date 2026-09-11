@@ -1,0 +1,17 @@
+#!/bin/sh
+# Reject an empty commit message.
+#
+# Git refuses one on its own unless it is told --allow-empty-message, which is
+# how two message-less commits reached main in August 2026 (a git-sync helper
+# offers that path). This hook runs regardless of that flag; only --no-verify
+# skips it. A message made only of blank lines and "#" comment lines counts as
+# empty, because git strips those before recording the commit.
+#
+# Active once `git config core.hooksPath .githooks` has run — npm's `prepare`
+# script does that on every `npm install`/`npm ci`. Needs no node.
+msg_file="$1"
+if ! grep -qE '^[[:space:]]*[^#[:space:]]' "$msg_file"; then
+  echo "commit-msg: empty commit message — write one line saying what changed." >&2
+  echo "commit-msg: e.g.  git commit -m 'type(scope): what changed'" >&2
+  exit 1
+fi

@@ -7319,3 +7319,39 @@ would have split a two-path icon into two files, so `render` was used).
   allow verification; run `npm install` in the main checkout.
 - **Baseline deliberately NOT stamped** — ~36 changed frames remain
   un-imported (the page-wide typography pass has only reached `/`).
+
+## 2026-09-05 20:43 AEST — repository health pass (branch worktree-repo-health)
+
+- Deps: next/eslint-config-next 16.3.0 → 16.3.4 (clears the postcss + sharp
+  highs), `npm audit fix` for nanoid/browserslist/brace-expansion → 0 findings;
+  supabase-js, ssr, zod, anthropic sdk, types to current minors; `server-only`
+  and `@next/env` declared (were hoisted-only). ESLint stays on 9: ESLint 10
+  still crashes eslint-plugin-react 7.37 under eslint-config-next 16.3.4
+  (Dependabot #40) — `dependabot.yml` ignores `eslint >=10` with the reason.
+- Security headers in `next.config.ts` (X-Frame-Options SAMEORIGIN, nosniff,
+  Referrer-Policy, Permissions-Policy camera/mic/geolocation off) and
+  `poweredByHeader: false`. No CSP yet — needs PayPal/Supabase/JSON-LD
+  allowances tested against a live checkout.
+- Fixed the flaky "editing a section heading reaches the live home page" e2e:
+  the editor guessed hydration with two animation frames after `load`, and a
+  write landing before hydration was reverted by React 19 (failed 3/6 with the
+  headers on, which only shift timing). The home page now renders
+  `HydrationMark` last (`<html data-hydrated>` from its effect) and
+  `whenPatchable` waits for that mark, 5 s grace; keystrokes reach only cleared
+  documents. 6/6 repeats green afterwards, full suite 191/191.
+- CI: `permissions: contents: read`, concurrency cancels superseded PR runs
+  only, `timeout-minutes: 20`, Node from `.nvmrc` = 24 (Vercel runs 24.x; CI
+  was on 22). `npm run lint` fails on warnings; `npm run check` = CI locally.
+- Hooks in `.githooks/` wired by npm `prepare`: `commit-msg` rejects an empty
+  message (two message-less commits reached main in August via
+  `git-sync`'s --allow-empty-message path), `pre-commit` runs Prettier on the
+  staged files. `.claude/settings.local.json` untracked + gitignored.
+- Code: `BrandWordmark` drops the `x`/`w` props it ignored (14 call sites);
+  `PasskeyLoginButton` uses `router.push` (new Next lint rule). Package name
+  `gr` → `eldreve-storefront`.
+- Docs: README agent-rules block moved to the end, hooks + `npm run check`
+  documented; SUMMARY `.claude/` note and tree; learning doc 09 re-quotes the
+  real setup-node block.
+- Measured, not done: 23.7 MB of Figma PNGs via plain `<img>`, no lazy loading;
+  lossless re-encode saves only 3–6 %, so the real win is next/image or WebP at
+  the export step — its own project (pixel-exact import, pixel baselines).

@@ -582,6 +582,12 @@ export function HomeSectionsEditor({
    * screen only ever iterates this to write into documents.
    */
   const frames = useRef(new Set<HTMLIFrameElement>());
+  /**
+   * The documents `whenPatchable` has cleared. A keystroke is written only into
+   * these: a document still hydrating would have the write reverted by React,
+   * and `applyDrafts` is already waiting to give it every draft once it is safe.
+   */
+  const patchable = useRef(new WeakSet<Document>());
   /** Read by callbacks that must stay stable; see `applyDrafts`. */
   const draftsRef = useRef(drafts);
   const frameDraftsRef = useRef(frameDrafts);
@@ -609,6 +615,7 @@ export function HomeSectionsEditor({
     whenPatchable(frameWindow).then(() => {
       const doc = frame.contentDocument;
       if (!doc) return;
+      patchable.current.add(doc);
       for (const section of sectionsRef.current) {
         for (const field of section.fields) {
           const key = `${section.id}.${field.id}`;
@@ -678,7 +685,9 @@ export function HomeSectionsEditor({
       if (!field) return;
       for (const frame of frames.current) {
         const doc = frame.contentDocument;
-        if (doc) patchField(doc, field, key, next);
+        if (doc && patchable.current.has(doc)) {
+          patchField(doc, field, key, next);
+        }
       }
     },
     [],
@@ -696,7 +705,7 @@ export function HomeSectionsEditor({
     setFrameDrafts((current) => ({ ...current, [key]: area }));
     for (const frame of frames.current) {
       const doc = frame.contentDocument;
-      if (doc) patchFrame(doc, key, area);
+      if (doc && patchable.current.has(doc)) patchFrame(doc, key, area);
     }
   }, []);
 
