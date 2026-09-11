@@ -15,6 +15,7 @@
     "check:migrations": "node scripts/check-migrations.mjs",
     "dev": "next dev",
     "features:check": "node scripts/features/cli.mjs check",
+    "features:new": "node scripts/features/cli.mjs new",
     "features:roadmap": "node scripts/features/cli.mjs roadmap --sync",
     "figma:baseline": "node scripts/figma/cli.mjs baseline",
     "figma:brief": "node scripts/figma/cli.mjs brief",

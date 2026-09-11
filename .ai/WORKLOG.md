@@ -7452,3 +7452,13 @@ Two matters raised, both tagged in `docs/features/card-payments.md`:
 
 SUMMARY was deliberately left alone: OQ-1 is still the recorded decision, and
 changing it is the owner's call, not this session's.
+## 2026-08-15 — npm alias for feature scaffolding
+
+- Added `"features:new"` to package.json beside features:check/roadmap:
+  `npm run features:new -- <id>` now scaffolds a backlog record without the
+  long `node scripts/…` incantation. Charles's draft ideas start life as
+  backlog records via this command (or the /feature-new skill).
+- Replaced the feature-new skill (v2.0.0): discussion-first — four phases
+  (listen/ground, critique/explore, converge at an explicit-agreement gate,
+  materialize via features:new + TEMPLATE fill + roadmap sync + check). No
+  files may be touched before Charles's explicit yes.
