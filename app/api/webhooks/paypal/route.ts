@@ -17,6 +17,7 @@ import {
   handlePayPalEvent,
   type PayPalWebhookEvent,
 } from "@/lib/paypal/webhook";
+import { alert, logEvent } from "@/lib/observe.ts";
 
 export const runtime = "nodejs";
 
@@ -45,9 +46,28 @@ export async function POST(request: Request) {
 
   try {
     const outcome = await handlePayPalEvent(event);
+    // The webhook is the safety net under the browser-driven capture: when it
+    // reports "repaired", the net just caught something. Logged at warn so a
+    // run of repairs is visible without an email per event.
+    logEvent(
+      outcome === "repaired" ? "warn" : "info",
+      "paypal.webhook.handled",
+      {
+        outcome,
+        eventType: event.event_type,
+      },
+    );
     return NextResponse.json({ outcome });
   } catch (error) {
-    console.error("[webhooks/paypal]", error);
+    // This is the LAST line of defence for an order PayPal has already taken
+    // money for. PayPal will retry, and the handler is idempotent, so one
+    // failure is survivable — but a persistent one means orders are being
+    // lost, and nobody would otherwise find out.
+    await alert(
+      "paypal.webhook.failed",
+      "A verified PayPal webhook could not be handled. PayPal will retry; if these continue, orders are being lost.",
+      { err: error, eventType: event.event_type },
+    );
     // 500 → PayPal retries the delivery; the handler is idempotent.
     return NextResponse.json({ error: "Handler failed" }, { status: 500 });
   }

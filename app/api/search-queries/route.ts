@@ -26,6 +26,8 @@ import {
   searchGroupingKey,
 } from "@/lib/search/query-log.ts";
 import { getStore } from "@/lib/supabase/store.ts";
+import { checkRequest, LIMITS } from "@/lib/rate-limit.ts";
+import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   /** Raw shopper input. Trimmed and bounded; empty is rejected as "not a search". */
@@ -46,6 +48,19 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // Dropped, not refused — the file header's "always 200, always fast" rule.
+  // The caller fires this immediately before navigating to /shop, so an angry
+  // answer here would be a broken search.
+  const gate = checkRequest(
+    request.headers,
+    "search-queries",
+    LIMITS.searchQueries,
+  );
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.dropped", { route: "search-queries" });
+    return NextResponse.json({ ok: true });
+  }
+
   let parsed: z.infer<typeof requestSchema>;
   try {
     parsed = requestSchema.parse(await request.json());

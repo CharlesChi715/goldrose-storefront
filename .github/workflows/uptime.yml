@@ -1,0 +1,99 @@
+# Ask the live shop, every fifteen minutes, whether it is actually working.
+#
+# WHY THIS EXISTS
+# Nothing watched the site. A failure between two visits from the owner was a
+# failure nobody knew about until a customer said so, and customers mostly do
+# not say so — they leave.
+#
+# WHAT IT CHECKS, AND WHY NOT JUST "/"
+# A Next.js storefront serves cached pages perfectly while its database is
+# unreachable, so "GET / returns 200" is exactly the probe that misses the
+# outage that matters. /api/health does one real read and says so; the two page
+# checks catch a broken deploy that health alone would not.
+#
+# It only ever sends GET, and never to a payment route. A monitor that can
+# place an order is a monitor that eventually places one.
+#
+# HOW IT SHOUTS
+# By going red. GitHub emails the repository owner when a scheduled workflow
+# fails, which is the whole alerting mechanism and needs no third-party
+# account. During a long outage that is one email per run — noisy, but an
+# outage is the moment to be noisy.
+#
+# TWO HONEST LIMITATIONS, BOTH WORTH KNOWING BEFORE TRUSTING THIS
+#  1. Scheduled workflows run only from the DEFAULT branch, so this does
+#     nothing until it is merged to main.
+#  2. GitHub disables scheduled workflows in a repository with no activity for
+#     60 days, and a probe that has silently stopped looks exactly like a shop
+#     that is fine. This is not a dead man's switch. Pair it with one free
+#     external monitor (UptimeRobot or Better Stack) pointed at /api/health —
+#     see docs/runbooks/site-down.md — so that two independent things would
+#     have to fail before an outage goes unnoticed.
+name: Uptime
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub's scheduler drifts under load and makes no
+    # promise about punctuality; for a probe, late is fine and missed is not.
+    - cron: "*/15 * * * *"
+  # So it can be run by hand while diagnosing, without waiting for the cron.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two probes overlap: a slow run during an outage would otherwise
+# stack up behind itself.
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      # Override in Settings → Secrets and variables → Actions → Variables to
+      # point at a preview deployment while testing this workflow.
+      SITE: ${{ vars.SITE_URL || 'https://eldreve.com' }}
+    steps:
+      - name: The shop can reach its database
+        run: |
+          echo "Probing $SITE/api/health"
+          # --max-time bounds the whole request; the endpoint gives its own
+          # database probe 5s, so 20s here means a timeout is the network's.
+          body=$(curl --silent --show-error --max-time 20 \
+                      --write-out '\nHTTP_STATUS:%{http_code}' \
+                      "$SITE/api/health") || {
+            echo "::error::/api/health could not be reached at all."
+            exit 1
+          }
+          echo "$body"
+          status=$(printf '%s' "$body" | sed -n 's/.*HTTP_STATUS:\([0-9]*\)$/\1/p')
+          if [ "$status" != "200" ]; then
+            echo "::error::/api/health answered HTTP $status (expected 200)."
+            echo "::error::Runbook: docs/runbooks/site-down.md"
+            exit 1
+          fi
+          case "$body" in
+            *'"status":"ok"'*) ;;
+            *)
+              echo "::error::/api/health is reachable but reports degraded."
+              echo "::error::Runbook: docs/runbooks/site-down.md"
+              exit 1
+              ;;
+          esac
+
+      - name: The storefront still renders
+        run: |
+          for path in "/" "/shop"; do
+            code=$(curl --silent --show-error --max-time 20 \
+                        --output /dev/null --write-out '%{http_code}' \
+                        "$SITE$path") || code="000"
+            echo "$path -> $code"
+            if [ "$code" != "200" ]; then
+              echo "::error::$path answered HTTP $code (expected 200)."
+              echo "::error::Runbook: docs/runbooks/site-down.md"
+              exit 1
+            fi
+          done

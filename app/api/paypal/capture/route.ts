@@ -19,8 +19,16 @@ import {
 } from "@/lib/paypal/mapping";
 import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
 import { getStore } from "@/lib/supabase/store.ts";
+import { alert } from "@/lib/observe.ts";
 
 const requestSchema = z.object({ orderID: z.string().min(1).max(64) });
+
+// DELIBERATELY NOT RATE LIMITED. Every other public write route has a limiter
+// (lib/rate-limit.ts); this one must not. By the time a request reaches here
+// PayPal may already hold the shopper's money, and a refusal would leave a
+// payment with no order against it — the one failure this shop cannot absorb.
+// The route is idempotent by provider_order_id and PayPal itself throttles
+// upstream, which is the protection it gets instead.
 
 export async function POST(request: Request) {
   if (!getPayPalConfig().configured) {
@@ -57,6 +65,14 @@ export async function POST(request: Request) {
       (row) => row.provider_order_id === parsed.orderID,
     );
     if (!checkout) {
+      // Money has been captured and there is no cart to build an order from.
+      // This is the worst state the shop can reach, and it is invisible to
+      // everyone except the buyer, who has paid and received nothing.
+      await alert(
+        "paypal.capture.orphaned",
+        "A PayPal payment was captured but its checkout row is missing — the buyer has paid and no order exists. Refund or fulfil by hand.",
+        { providerOrderId: parsed.orderID },
+      );
       return NextResponse.json({ error: "Unknown checkout." }, { status: 400 });
     }
 
@@ -77,9 +93,18 @@ export async function POST(request: Request) {
       mapped.amountCents !== null &&
       mapped.amountCents !== priced.total_cents
     ) {
-      // Amount drift (e.g. price edited mid-checkout) — keep the record, flag it.
-      console.error(
-        `[paypal/capture] amount mismatch: captured ${mapped.amountCents}, priced ${priced.total_cents}`,
+      // Amount drift (e.g. price edited mid-checkout) — keep the record, flag
+      // it. The order is still written, because refusing here would strand a
+      // captured payment; but somebody has been charged a different number
+      // from the one the shop now computes, and that needs a human.
+      await alert(
+        "paypal.capture.amount-mismatch",
+        "A payment was captured for a different amount than the shop now prices the cart at. The order was recorded; check it by hand.",
+        {
+          capturedCents: mapped.amountCents,
+          pricedCents: priced.total_cents,
+          providerOrderId: parsed.orderID,
+        },
       );
     }
 
@@ -115,7 +140,13 @@ export async function POST(request: Request) {
       redirectUrl: `/checkout/success?${params.toString()}`,
     });
   } catch (error) {
-    console.error("[paypal/capture]", error);
+    // Anything reaching here happened at or after the capture call, so the
+    // money may or may not have moved. Always worth a human's attention.
+    await alert(
+      "paypal.capture.failed",
+      "A PayPal capture failed. Check PayPal for a payment with no order against it.",
+      { err: error, providerOrderId: parsed.orderID },
+    );
     return NextResponse.json(
       {
         error:

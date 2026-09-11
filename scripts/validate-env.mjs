@@ -70,6 +70,39 @@ if (skipPayment && paypalLive) {
   process.exit(1);
 }
 
+// The webhook is the safety net under the browser-driven capture: it is what
+// repairs an order when the buyer's browser dies between paying and our
+// response. Without PAYPAL_WEBHOOK_ID the signature check cannot pass, so
+// every delivery is rejected as unverifiable and the net is simply not there —
+// silently, because a shop that never hits the failure looks identical to one
+// that is protected. Loud whenever PayPal is configured at all, fatal when the
+// money is real.
+const paypalConfigured = Boolean(
+  (process.env.PAYPAL_CLIENT_ID ?? "").trim() &&
+  (process.env.PAYPAL_SECRET ?? "").trim(),
+);
+const webhookId = (process.env.PAYPAL_WEBHOOK_ID ?? "").trim();
+
+if (paypalConfigured && !webhookId) {
+  if (paypalLive) {
+    console.error(
+      "[env] PAYPAL_ENV=live with no PAYPAL_WEBHOOK_ID — the webhook that",
+    );
+    console.error(
+      "[env] repairs an order when the buyer's browser dies cannot verify a",
+    );
+    console.error("[env] single delivery, so orders would be lost silently.");
+    process.exit(1);
+  }
+  console.warn(
+    "[env] ⚠ PayPal is configured but PAYPAL_WEBHOOK_ID is not — webhook",
+  );
+  console.warn(
+    "[env] ⚠ deliveries will all be rejected as unverifiable, so the order-",
+  );
+  console.warn("[env] ⚠ repair safety net is off.");
+}
+
 if (skipPayment) {
   console.warn(
     "[env] ⚠ CHECKOUT_SKIP_PAYMENT is ON — checkout skips payment entirely and",

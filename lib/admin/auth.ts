@@ -52,6 +52,14 @@ export type AdminSession = {
  * real accounts; open access exists only in the local no-Supabase mode.)
  */
 export function isOpenAccess(): boolean {
+  // Deployed anywhere on Vercel — production OR a preview — the admin is
+  // never open, whatever else is unset. `validate-env.mjs` already refuses a
+  // PRODUCTION build with no Supabase, but a preview deploy is exempt from
+  // that check and sits on a public URL, so without this line a branch that
+  // simply lacked the Supabase variables would publish an admin anyone could
+  // walk into. Open access is a local-development convenience and now says so
+  // in code rather than by assumption.
+  if (process.env.VERCEL_ENV) return false;
   // `!url`, not `!hosted`: a PARTIAL Supabase config (URL set, service key
   // missing/mis-scoped) must fail closed to a locked admin — never fall
   // open to the public because one env var didn't make it to the deploy.
