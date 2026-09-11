@@ -155,7 +155,8 @@ needs a person who has decided, not an agent who is being helpful.
 
 1. Owner activation + [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
 2. Configure PayPal sandbox, begin Advanced Checkout onboarding; install
-   `cloudflared`/`ngrok` when webhook testing starts.
+   `cloudflared` when webhook testing starts —
+   [guide](docs/guides/paypal-wiring.md).
 3. Enter real shipping rates ([shipping-rates](docs/features/shipping-rates.md),
    OQ-2) — no placeholder rate may be live.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
@@ -163,7 +164,8 @@ needs a person who has decided, not an agent who is being helpful.
 5. Turn database backups on — the pipeline is built and dormant. Set
    `SUPABASE_DB_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and the
    `BACKUP_S3_BUCKET` variable in GitHub Actions
-   ([db-backups](docs/features/db-backups.md)), then **rehearse one restore**
+   ([db-backups](docs/features/db-backups.md),
+   [guide](docs/guides/aws-backup.md)), then **rehearse one restore**
    ([runbook](docs/runbooks/restore-from-backup.md)). Until a restore has been
    rehearsed there is no backup, only files.
 6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human

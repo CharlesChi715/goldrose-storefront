@@ -108,6 +108,8 @@ Tracked as stages 0–7 (session task list, 2026-07-26):
 
 ## Related links
 
+- **How to wire it, step by step:** [`docs/guides/paypal-wiring.md`](../guides/paypal-wiring.md)
+  — sandbox → webhooks → card fields (stages 1–5) → live cutover (written 2026-09-05).
 - Decision register: [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions) (OQ-1)
 - Spec: [admin-design.md](../admin-design.md) §4 (OQ-1 row), §7.4 (order payment columns), §14.3 (owner walkthrough)
 - PayPal: [Advanced Checkout overview](https://developer.paypal.com/studio/checkout/advanced) ·
