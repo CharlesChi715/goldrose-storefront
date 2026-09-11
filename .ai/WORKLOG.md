@@ -7523,3 +7523,32 @@ What the SO layer changed:
   page copy and for what we promise the boss.
 
 Still no decision; the three open questions are unchanged.
+
+## 2026-09-11 12:54 AEST — merge every open branch into main (branch worktree-merge-all-branches)
+
+Ask: "merge all branches to main". Eight branches carried work; three others
+were already fully in main and were deleted locally. Built one integration
+branch with a merge commit per source branch so every original commit and
+every open PR (#38, #42, #43, #44) lands and closes as merged:
+
+dependabot routine group → worktree-repo-health → worktree-production-readiness
+→ worktree-docs+aws-backup-and-paypal-guides → worktree-team-delivery-stripe-payment
+→ feat/agent-advisor-blueprint → worktree-features-new-alias → worktree-tracking-research.
+
+Conflicts and how they were resolved: README keeps main's 2026-09-08 public
+rewrite (repo-health's agent block had already moved to SUMMARY.md);
+`.gitignore` keeps both `ops/` and `.claude/settings.local.json` (now
+untracked); package.json takes repo-health's dependency set, which supersedes
+every Dependabot bump — lockfile compared entry by entry; SUMMARY.md keeps the
+production-readiness release queue plus the aws-backup guide link; the
+features:new script is added to the alphabetised scripts block. README figures
+refreshed (ten CI gates, 279 unit + 193 e2e tests, 79,716 TS lines).
+
+Verified: `npm run check` green (lint, typecheck, format, assets, env,
+migrations, features, 279 unit tests) and `npm run build` succeeds.
+
+Left open: Dependabot #40 (ESLint 10) — eslint-plugin-react crashes under
+ESLint 10, so it stays red until that plugin is upgraded. Two sibling worktrees
+(advisor-blueprint, team-delivery-stripe-payment) hold uncommitted deletions of
+the owner's verbatim notes in docs/features/card-payments.md and
+team-deliveries/README.md; not committed, left for Charles to decide.
