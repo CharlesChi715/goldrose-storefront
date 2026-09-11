@@ -135,30 +135,60 @@ screens while live; card integration after.
   [`docs/ideas.md`](docs/ideas.md) verbatim; change
   [`docs/Database.md`](docs/Database.md) only on explicit request.
 
+### One-way doors
+
+Most changes here are undone by reverting a pull request. These are not. Each
+needs a person who has decided, not an agent who is being helpful.
+
+- **Enabling live PayPal** — the owner's, and only the owner's.
+- **Changing Supabase's Site URL** — invalidates every existing passkey,
+  permanently ([customer-accounts](docs/features/customer-accounts.md)).
+- **`supabase db push`** — applies to the one live database; a migration that
+  drops or rewrites data has no undo ([database-migrations](docs/features/database-migrations.md)).
+- **Any email to a real customer** — cannot be recalled. The e2e suite blanks
+  `RESEND_API_KEY` for this reason.
+- **Publishing a policy page** (`/policies/*`) — a public promise about
+  returns, warranty or arbitration. All six stay `noindex` until signed off.
+- **A price or stock number on the live site** — someone may buy at it.
+
 ## Release queue
 
 1. Owner activation + [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
 2. Configure PayPal sandbox, begin Advanced Checkout onboarding; install
-   `cloudflared`/`ngrok` when webhook testing starts.
+   `cloudflared` when webhook testing starts —
+   [guide](docs/guides/paypal-wiring.md).
 3. Enter real shipping rates ([shipping-rates](docs/features/shipping-rates.md),
    OQ-2) — no placeholder rate may be live.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
-   `CHECKOUT_SKIP_PAYMENT`, turn on [database backups](docs/features/db-backups.md).
-5. Owner enables live PayPal → **the site is open for real orders.**
+   `CHECKOUT_SKIP_PAYMENT`.
+5. Turn database backups on — the pipeline is built and dormant. Set
+   `SUPABASE_DB_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and the
+   `BACKUP_S3_BUCKET` variable in GitHub Actions
+   ([db-backups](docs/features/db-backups.md),
+   [guide](docs/guides/aws-backup.md)), then **rehearse one restore**
+   ([runbook](docs/runbooks/restore-from-backup.md)). Until a restore has been
+   rehearsed there is no backup, only files.
+6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
+   ([runbook](docs/runbooks/payment-failing.md)).
+7. **Confirm the Vercel plan allows commercial use.** Hobby is for
+   non-commercial projects under Vercel's fair-use terms, so a shop taking
+   money belongs on Pro — a suspension here takes the whole site down, and it
+   is unrelated to anything in the code. Check the plan before item 8, not
+   after.
+8. Owner enables live PayPal → **the site is open for real orders.**
 
 While live, in any order (nothing below blocks taking orders):
 
-6. `supabase db push` for `0012`, which fills the two search-analytics cards.
-7. Apply the email-change mail template
+9. Apply the email-change mail template
    ([customer-accounts](docs/features/customer-accounts.md) step 4).
-8. Build guest order lookup ([order-tracking](docs/features/order-tracking.md));
-   signed-in customers already see their orders at `/account`.
-9. Replace mock product content (OQ-3) and third-party/dev imagery product by
-   product; reconcile palettes and tabs.
-10. Replace the remaining placeholder screens: tracking timeline, shipping
+10. Build guest order lookup ([order-tracking](docs/features/order-tracking.md));
+    signed-in customers already see their orders at `/account`.
+11. Replace mock product content (OQ-3) and third-party/dev imagery product by
+    product; reconcile palettes and tabs.
+12. Replace the remaining placeholder screens: tracking timeline, shipping
     choices, card fields, `/blog`. Sign off the six `/policies/*` documents so
     they can come out of `noindex` (AI-046).
-11. Capture screenshots, cancel Shopify, revoke the Figma token, begin
+13. Capture screenshots, cancel Shopify, revoke the Figma token, begin
     marketing. (The Shopify *store integration* is already gone; the
     `@shopify/polaris` UI framework is the admin's own and stays. Cancel the
     subscription only after acceptance.)
@@ -208,9 +238,10 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 - Agent tooling: `.mcp.json` declares supabase (read-only, pinned),
   next-devtools and playwright — all need one-time approval, Supabase needs
   `/mcp` OAuth; all are global in `~/.codex/config.toml`. `.agents/skills/` is
-  the **source of truth** for skills and `.claude/skills/` symlinks into it;
-  `.claude/` is gitignored, so the tracked path for any skill is always
-  `.agents/…`.
+  the **source of truth** for skills and `.claude/skills/` is a tracked
+  symlink into it, so the tracked path for any skill is always `.agents/…`.
+  `.claude/settings.local.json` (this machine's approvals) and
+  `.claude/worktrees/` are gitignored.
 
 ## Repository structure
 
@@ -231,7 +262,8 @@ goldrose-storefront/
 ├── .agents/skills/       # Skills — the doc router too (.claude/ symlinks in)
 ├── .ai/                  # Optional work history; never startup context
 ├── .data/                # Local file-adapter database and uploads
-├── .github/              # CI workflows
+├── .github/              # CI workflows (Node from .nvmrc = Vercel's 24.x)
+├── .githooks/            # commit-msg + pre-commit checks; npm install wires core.hooksPath
 ├── .mcp.json             # Project MCP servers (supabase, next-devtools, playwright)
 ├── .env.example          # Every environment variable, documented
 ├── proxy.ts              # Admin route/API authentication guard
@@ -242,4 +274,4 @@ goldrose-storefront/
 
 Config at the root: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
 `playwright.config.ts`, `postcss.config.mjs`, `vercel.json`, `.prettierrc.json`,
-`.prettierignore`, `.npmrc`, `skills-lock.json`.
+`.prettierignore`, `.npmrc`, `.nvmrc`, `skills-lock.json`.

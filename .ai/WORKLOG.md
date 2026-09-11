@@ -7319,3 +7319,236 @@ would have split a two-path icon into two files, so `render` was used).
   allow verification; run `npm install` in the main checkout.
 - **Baseline deliberately NOT stamped** — ~36 changed frames remain
   un-imported (the page-wide typography pass has only reached `/`).
+
+## 2026-09-05 20:43 AEST — repository health pass (branch worktree-repo-health)
+
+- Deps: next/eslint-config-next 16.3.0 → 16.3.4 (clears the postcss + sharp
+  highs), `npm audit fix` for nanoid/browserslist/brace-expansion → 0 findings;
+  supabase-js, ssr, zod, anthropic sdk, types to current minors; `server-only`
+  and `@next/env` declared (were hoisted-only). ESLint stays on 9: ESLint 10
+  still crashes eslint-plugin-react 7.37 under eslint-config-next 16.3.4
+  (Dependabot #40) — `dependabot.yml` ignores `eslint >=10` with the reason.
+- Security headers in `next.config.ts` (X-Frame-Options SAMEORIGIN, nosniff,
+  Referrer-Policy, Permissions-Policy camera/mic/geolocation off) and
+  `poweredByHeader: false`. No CSP yet — needs PayPal/Supabase/JSON-LD
+  allowances tested against a live checkout.
+- Fixed the flaky "editing a section heading reaches the live home page" e2e:
+  the editor guessed hydration with two animation frames after `load`, and a
+  write landing before hydration was reverted by React 19 (failed 3/6 with the
+  headers on, which only shift timing). The home page now renders
+  `HydrationMark` last (`<html data-hydrated>` from its effect) and
+  `whenPatchable` waits for that mark, 5 s grace; keystrokes reach only cleared
+  documents. 6/6 repeats green afterwards, full suite 191/191.
+- CI: `permissions: contents: read`, concurrency cancels superseded PR runs
+  only, `timeout-minutes: 20`, Node from `.nvmrc` = 24 (Vercel runs 24.x; CI
+  was on 22). `npm run lint` fails on warnings; `npm run check` = CI locally.
+- Hooks in `.githooks/` wired by npm `prepare`: `commit-msg` rejects an empty
+  message (two message-less commits reached main in August via
+  `git-sync`'s --allow-empty-message path), `pre-commit` runs Prettier on the
+  staged files. `.claude/settings.local.json` untracked + gitignored.
+- Code: `BrandWordmark` drops the `x`/`w` props it ignored (14 call sites);
+  `PasskeyLoginButton` uses `router.push` (new Next lint rule). Package name
+  `gr` → `eldreve-storefront`.
+- Docs: README agent-rules block moved to the end, hooks + `npm run check`
+  documented; SUMMARY `.claude/` note and tree; learning doc 09 re-quotes the
+  real setup-node block.
+- Measured, not done: 23.7 MB of Figma PNGs via plain `<img>`, no lazy loading;
+  lossless re-encode saves only 3–6 %, so the real win is next/image or WebP at
+  the export step — its own project (pixel-exact import, pixel baselines).
+
+## 2026-09-07 18:49 AEST — production readiness (branch worktree-production-readiness, stacked on worktree-repo-health)
+
+Everything below was verified against primary sources or the running code, not
+from memory. Two multi-agent passes did the checking: one refuting research
+claims against vendor documentation, one checking every command in the new
+runbooks against the real tool.
+
+**Watching.** `lib/observe.ts`: `logEvent` writes one JSON line per event;
+`alert` also emails the owner, throttled to one per event per 15 minutes with
+the suppressed count. Alerts on every money failure — capture failed, capture
+orphaned (paid, no order), amount mismatch, create failed, webhook failed.
+`sendOwnerAlert` prefers `ALERT_EMAIL` over the settings row on purpose: the
+failure most worth an email is the database being unreachable. `GET /api/health`
+checks only that the database answers, has no side effects, calls no third
+party. `.github/workflows/uptime.yml` probes it every 15 minutes.
+
+**Abuse.** `lib/rate-limit.ts` over nine public POST routes, three policies:
+refuse (429 with Retry-After and no-store), drop-and-200 for analytics, and
+never for `/api/paypal/capture` — refusing that leaves a payment with no order,
+and the webhook repair only fires after a capture completes, so nothing would
+retry.
+
+**Backups.** `.github/workflows/db-backup.yml` + `scripts/backup-db.sh`, three
+files (public schema+data, auth/storage data-only, readable schema), dormant
+until four secrets are set. Not a backup until a restore is rehearsed.
+
+**Checks.** `npm run check:env` fails the build on an undocumented variable and
+on a secret-shaped `NEXT_PUBLIC_` name. Wired into CI.
+
+**Runbooks.** Five plus an index, under `docs/runbooks/`.
+
+**Migration 0015** — 13-month `page_views` retention, batched, function only
+(scheduling would need pg_cron and a failed `create extension` takes the
+migration with it). Written, deliberately not pushed.
+
+### Defects found and fixed
+
+- `logEvent` spread caller fields after the reserved keys, so a field named
+  `event` renamed the line — first casualty was the alerter's own failure line.
+- Nothing on the purchase path read inventory. A stale tab could buy the last
+  unit repeatedly and drive stock negative. Check now in `priceCart`, which
+  every payment route goes through.
+- The admin fell fully open on a Vercel preview with no Supabase configured;
+  `validate-env.mjs` only hard-fails production builds.
+- `PAYPAL_WEBHOOK_ID` was never validated, so the order-repair safety net could
+  be silently absent.
+- No `error.tsx`, `not-found.tsx` or `global-error.tsx` existed at all.
+- The limiter bucketed every addressless request together — which would have
+  made the analytics e2e specs flaky, since the suite fires a beacon per
+  navigation.
+- IPv6 callers were keyed by full address, giving anyone with a /64 unlimited
+  buckets.
+- 429s were cacheable, against RFC 6585 §4.
+- Seven runbook instructions that would have failed when followed, including a
+  `vercel logs` flag that does not exist, a Supabase rotation control that has
+  been removed, and an inverted success criterion on `pg_restore`.
+
+### Record corrections
+
+`database-migrations.md` claimed `0012` was unpushed and never mentioned `0013`
+or `0014`. Querying hosted directly shows `0001-0003` and `0005-0014` all
+applied. The section now carries the query instead of a remembered answer, and
+`storefront-search.md` repeated the same stale claim twice.
+
+### Not done, deliberately
+
+The `.ai/WORKLOG.md` retirement discussed earlier. It was raised, questioned,
+and never explicitly approved, so 7,300 lines were left alone.
+## 2026-08-25 21:03 AEST — Stripe payment link + QR filed as a team delivery
+
+Charles was handed two artefacts by someone the bosses had do "the payment
+job": a Stripe payment link and a 扫码付款 QR poster. Both filed raw and
+**unparsed** in `team-deliveries/inbox/` — the routing table is still empty
+(AI-004), and its README forbids an agent choosing a destination. The
+check-first rule cleared it as a new delivery, not a re-delivery: no sha256
+match in any `originals/*/batch.md`, and the repo held no `stripe` reference of
+any kind beforehand.
+
+The QR decodes (CoreImage) to exactly the delivered URL, so the two artefacts
+are one. Rendering the page read-only — no payment, no field filled — showed it
+is **live**, not a test: US $79.00 for "Gold-Dipped Roses" branded ELDREVE,
+payee **Zhongshu Technology Worldwide Limited**, which matches
+`settings.store.legal_name`, so the money does reach our own entity.
+
+Two matters raised, both tagged in `docs/features/card-payments.md`:
+
+- **AI-047** `OWNER-DECISION` — OQ-1 closed on PayPal Advanced Checkout on
+  single-provider grounds; this is a second live acquirer nobody has recorded.
+  Real checkout rail, or off-site channel?
+- **AI-048** `OWNER-TODO` — the link collects **no shipping address** for a
+  physical gift, writes no `orders` row (so no admin screen, no inventory
+  decrement, no confirmation email, no tracking), and charges $79.00 against a
+  $79.99 catalog price.
+
+SUMMARY was deliberately left alone: OQ-1 is still the recorded decision, and
+changing it is the owner's call, not this session's.
+## 2026-08-15 — npm alias for feature scaffolding
+
+- Added `"features:new"` to package.json beside features:check/roadmap:
+  `npm run features:new -- <id>` now scaffolds a backlog record without the
+  long `node scripts/…` incantation. Charles's draft ideas start life as
+  backlog records via this command (or the /feature-new skill).
+- Replaced the feature-new skill (v2.0.0): discussion-first — four phases
+  (listen/ground, critique/explore, converge at an explicit-agreement gate,
+  materialize via features:new + TEMPLATE fill + roadmap sync + check). No
+  files may be touched before Charles's explicit yes.
+## 2026-08-19 03:03 AEST — Sourced research: live delivery tracking (order-tracking Option C)
+
+Charles asked for every source on how to build a delivery-tracking system for
+this app. Ran a web sweep and wrote the digest into the feature that owns the
+topic — `docs/features/order-tracking.md`, new `## Research — live status
+(Option C), 2026-08-19` section. Decision and Options above it left untouched
+(the cli.mjs note freezes them as write-once); `npm run features:check` passes
+21/21.
+
+Two findings change the inputs to the parked Option C:
+
+1. **USPS closed public tracking on 2026-04-01.** Access is now tied to the
+   sender's Mailer ID plus an Enterprise Payment System account and a signed IP
+   agreement; Web Tools went dark 2026-01-25. Our own parcels stay free *if* we
+   buy postage on our own MID. UPS is unaffected — still free, self-serve
+   OAuth. So a DIY build would cover UPS only and stall on USPS.
+2. **The aggregator floor fell to ~$0 at our volume.** Ship24 (10/mo free) and
+   17TRACK (100 quotas/mo free) both include API *and* webhooks on the free
+   tier. AfterShip's free tier is a decoy — API access starts at ~$70/mo.
+
+Also captured: the push-not-poll architecture with HMAC-over-raw-body +
+idempotency + 5-minute replay window, status normalisation, the EDD-as-release-
+gate constraint, tokenised guest lookup, and two no-API wins (ParcelDelivery
+JSON-LD in the shipping email, carrier auto-detect from number format).
+
+Not decided — left in "What this research does not settle": who fulfils and
+under whose postage account, buy-vs-build, and whether it is worth doing before
+volume. The V1 verdict (carrier link-out is the standard for a small store)
+still stands; what changed is that Option C now costs roughly nothing, not that
+the need arrived.
+
+## 2026-08-19 03:31 AEST — Stack Overflow layer added to the tracking research
+
+Charles asked "and stackoverflow?" — the first sweep was vendor docs and
+comparison blogs, i.e. the happy path only. Added `### Finding 5 — what
+practitioners actually hit` to the same section, plus a Practitioner threads
+group in Sources (19 SO links).
+
+Note for future sessions: **stackoverflow.com blocks our search crawler**
+(WebSearch with allowed_domains returns a 400). The way in is the Stack
+Exchange API — `api.stackexchange.com/2.3/search/advanced?...&site=stackoverflow`,
+and `/questions/{ids}/answers?filter=withbody` to read the answers. Free, no
+key needed at this volume. Tag-first queries work; full-text `q` mostly misses.
+
+What the SO layer changed:
+
+- **UPS push is a paid product.** Track Alert takes a number + callback URL (100
+  per call) and posts scans for 14 days. The free Track API is pull-only, so
+  amended the Finding 1 claim that UPS is simply "the easy half".
+- **USPS publishes no test tracking numbers**; UPS and FedEx both publish a
+  table of them, one per scenario. Captured the actual numbers. Bears on
+  tests/e2e/admin-orders.spec.ts, which fakes fulfilment today.
+- **The question distribution is itself evidence**: tag:fedex/ups/usps carry
+  dozens of high-score questions, tag:easypost and tag:shippo top out at 3–5
+  points, and tag:aftership does not exist. Aggregators are boring to integrate.
+- **The raw-body trap applies to us directly**: App Router must use
+  `await req.text()` and never `req.json()` before HMAC verification.
+- "Real-time tracking is a misnomer" — from an EasyPost engineer. Use it for
+  page copy and for what we promise the boss.
+
+Still no decision; the three open questions are unchanged.
+
+## 2026-09-11 12:54 AEST — merge every open branch into main (branch worktree-merge-all-branches)
+
+Ask: "merge all branches to main". Eight branches carried work; three others
+were already fully in main and were deleted locally. Built one integration
+branch with a merge commit per source branch so every original commit and
+every open PR (#38, #42, #43, #44) lands and closes as merged:
+
+dependabot routine group → worktree-repo-health → worktree-production-readiness
+→ worktree-docs+aws-backup-and-paypal-guides → worktree-team-delivery-stripe-payment
+→ feat/agent-advisor-blueprint → worktree-features-new-alias → worktree-tracking-research.
+
+Conflicts and how they were resolved: README keeps main's 2026-09-08 public
+rewrite (repo-health's agent block had already moved to SUMMARY.md);
+`.gitignore` keeps both `ops/` and `.claude/settings.local.json` (now
+untracked); package.json takes repo-health's dependency set, which supersedes
+every Dependabot bump — lockfile compared entry by entry; SUMMARY.md keeps the
+production-readiness release queue plus the aws-backup guide link; the
+features:new script is added to the alphabetised scripts block. README figures
+refreshed (ten CI gates, 279 unit + 193 e2e tests, 79,716 TS lines).
+
+Verified: `npm run check` green (lint, typecheck, format, assets, env,
+migrations, features, 279 unit tests) and `npm run build` succeeds.
+
+Left open: Dependabot #40 (ESLint 10) — eslint-plugin-react crashes under
+ESLint 10, so it stays red until that plugin is upgraded. Two sibling worktrees
+(advisor-blueprint, team-delivery-stripe-payment) hold uncommitted deletions of
+the owner's verbatim notes in docs/features/card-payments.md and
+team-deliveries/README.md; not committed, left for Charles to decide.

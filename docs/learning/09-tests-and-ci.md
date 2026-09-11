@@ -71,16 +71,18 @@ This is worth pausing on, because the industry default is to reach for a framewo
 The cost is visible in CI, and documented there:
 
 ```yaml
-# .github/workflows/ci.yml:29-34
-      # Node 24: `npm run test:unit` runs `node --test` directly over .ts
-      # files, which needs the unflagged type stripping added in Node 23.6.
-      - uses: actions/setup-node@v5
+# .github/workflows/ci.yml:38-45
+      - uses: actions/setup-node@v7
         with:
-          node-version: "24"
-          cache: "npm"
+          # .nvmrc names the Node major Vercel runs in production (24.x, the
+          # project setting), so CI exercises the runtime that actually serves.
+          # It is also what lets `npm run test:unit` and the `.ts` scripts run
+          # under plain `node`: type stripping is unflagged from Node 22.18/23.6.
+          node-version-file: .nvmrc
+          cache: npm
 ```
 
-That is the right way to record a constraint: at the line that depends on it, not in a wiki nobody opens.
+That is the right way to record a constraint: at the line that depends on it, not in a wiki nobody opens. The version itself lives in one file, `.nvmrc`, that CI, `nvm`/`fnm` users and the README all point at — change it there and nothing else has to be remembered.
 
 ### Step 2 — Isolating tests from the real database
 

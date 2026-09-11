@@ -34,6 +34,7 @@
 
 import { spotlightStyle } from "@/lib/images/spotlight";
 import type { SpotlightArea } from "@/lib/home-content/frames";
+import { HYDRATED_ATTRIBUTE } from "@/components/HydrationMark";
 import type { FieldView } from "../HomeSectionsEditor";
 
 /** What a patch attempt did, so the caller can tell the owner the truth. */
@@ -255,24 +256,59 @@ export function patchFrame(
 }
 
 /**
+ * How long to wait for the page's hydration mark before writing anyway. A page
+ * whose script failed to run never hydrates — and then there is nothing left
+ * that could revert the write, so it is safe to go ahead.
+ */
+const HYDRATION_GRACE_MS = 5000;
+
+/**
  * Whether the preview has hydrated enough to be written into.
  *
  * The rails are client components hydrating over server HTML. A text patch
  * applied in the window between `load` and hydration is a mismatch, and React 19
  * resolves a mismatch by re-rendering the subtree from its own props — silently
- * reverting the edit. There is no exposed "hydrated" signal, so this waits for
- * the document to be complete and then for two animation frames, which is after
- * React's first commit in practice.
+ * reverting the edit. The home page says when it is done (`HydrationMark` sets
+ * `data-hydrated` on `<html>` from the last effect of the page), so this waits
+ * for the document to load and then for that attribute. Two animation frames
+ * after `load` — the previous guess — lost the race often enough that the
+ * editor's own test was flaky.
+ *
+ * The initial `about:blank` document is never resolved: it is already
+ * "complete", carries no mark, and is about to be replaced. The caller's `load`
+ * listener asks again for the real document.
  *
  * @param frameWindow - The preview's window.
  * @returns Resolves once patching is safe.
  */
 export function whenPatchable(frameWindow: Window): Promise<void> {
   return new Promise((resolve) => {
-    const settle = () =>
-      frameWindow.requestAnimationFrame(() =>
-        frameWindow.requestAnimationFrame(() => resolve()),
-      );
+    const settle = () => {
+      const doc = frameWindow.document;
+      if (doc.URL === "about:blank") return;
+      const root = doc.documentElement;
+      if (root.hasAttribute(HYDRATED_ATTRIBUTE)) {
+        resolve();
+        return;
+      }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        observer.disconnect();
+        frameWindow.clearTimeout(timer);
+        resolve();
+      };
+      // The parent's observer can watch a same-origin child document directly.
+      const observer = new MutationObserver(() => {
+        if (root.hasAttribute(HYDRATED_ATTRIBUTE)) finish();
+      });
+      observer.observe(root, {
+        attributes: true,
+        attributeFilter: [HYDRATED_ATTRIBUTE],
+      });
+      const timer = frameWindow.setTimeout(finish, HYDRATION_GRACE_MS);
+    };
     if (frameWindow.document.readyState === "complete") settle();
     else frameWindow.addEventListener("load", settle, { once: true });
   });

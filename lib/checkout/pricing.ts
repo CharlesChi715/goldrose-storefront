@@ -133,6 +133,32 @@ export async function priceCart(input: {
       MAX_QUANTITY,
       Math.max(1, Math.floor(line.quantity)),
     );
+    // STOCK IS CHECKED HERE, and here is the only place it can be. Until
+    // 2026-09-07 nothing on the purchase path read inventory at all: a shopper
+    // with a stale tab could order the last unit after it sold, repeatedly,
+    // and `adjust_inventory` has no floor — so stock went negative and the
+    // shop promised what it did not have. Every payment route prices through
+    // this function (that is the §8 rule that stops the browser naming a
+    // price), so one check here covers mock checkout, PayPal create and
+    // PayPal capture alike.
+    //
+    // It closes the window, it does not eliminate it: two buyers who price
+    // simultaneously both pass, because the decrement happens later in
+    // `createOrder`. Making that impossible needs the reservation to live in
+    // the same transaction as the decrement, which is a schema change. This
+    // turns a permanent oversell into a race that needs two buyers within the
+    // same second on the last unit.
+    if (
+      variant.track_quantity &&
+      !variant.continue_selling_when_oos &&
+      variant.inventory_on_hand < quantity
+    ) {
+      throw new Error(
+        variant.inventory_on_hand <= 0
+          ? `${product.title} has just sold out.`
+          : `Only ${variant.inventory_on_hand} left of ${product.title}.`,
+      );
+    }
     return {
       variant_id: variant.id,
       product_id: product.id,

@@ -1,7 +1,8 @@
 ---
-delivery: backlog
+delivery: in-progress
 rollout: not-deployed
-statusChangedAt: 2026-07-25
+statusChangedAt: 2026-09-07
+priority: p0
 ---
 
 # db-backups
@@ -34,8 +35,44 @@ as the independent second copy. **After the pipeline is proven:** cancel Pro to
 save money (re-check the Free-tier pause policy then — Pro is more than
 backups).
 
-Still open — keeps this BACKLOG: **where the nightly job runs** (scheduler
-table below; Option A proposed, awaiting sign-off).
+Scheduler resolved 2026-09-07: **Option A, GitHub Actions nightly cron**, built
+as [`.github/workflows/db-backup.yml`](../../.github/workflows/db-backup.yml)
+calling [`scripts/backup-db.sh`](../../scripts/backup-db.sh).
+
+## What is built, and what is still missing
+
+The pipeline exists and is **dormant**: with its secrets unset the workflow
+writes a warning and does nothing, deliberately, because a job that is red
+every night for a month teaches its owner to ignore red.
+
+Three steps stand between here and an actual backup, and only a human can take
+them:
+
+1. **Make the bucket.** Private, SSE on, block-public-access, plus a lifecycle
+   rule expiring `db/` objects after 30 days.
+2. **Make the credentials and set them.** An IAM user whose only permission is
+   `s3:PutObject` on that bucket path — put-only, so a leaked key cannot read
+   or delete the backups it writes. Then in GitHub → Settings → Secrets and
+   variables → Actions, set the secrets `SUPABASE_DB_URL` (the **session**
+   pooler URL, port 5432 — the transaction pooler cannot serve `pg_dump`),
+   `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and the variable
+   `BACKUP_S3_BUCKET` (optionally `BACKUP_S3_REGION`).
+3. **Rehearse a restore** —
+   [the runbook](../runbooks/restore-from-backup.md). Until this has happened
+   there is no backup, only files, and this record stays out of `accepted`.
+
+Two gaps are known and deliberate rather than overlooked:
+
+- **Storage bucket contents are not captured.** `pg_dump` takes
+  `storage.objects` (the rows describing every product image) and cannot reach
+  the image FILES. A restore from this alone gives a shop whose product photos
+  are all broken links. Syncing the `product-images` bucket is a separate job,
+  not yet built.
+- **It is not a dead man's switch.** GitHub disables scheduled workflows in a
+  repository with no activity for 60 days, and a backup that has quietly
+  stopped looks exactly like one that is working. The cheapest mitigation is
+  the same external monitor the [site-down runbook](../runbooks/site-down.md)
+  recommends, or a calendar reminder to check the Actions tab monthly.
 
 ## Options considered
 
@@ -92,6 +129,8 @@ through the session pooler.
 
 ## Related links
 
+- **How to build it, step by step:** [`docs/guides/aws-backup.md`](../guides/aws-backup.md)
+  — AWS account → S3 → OIDC role → workflow → restore drill (written 2026-09-05).
 - Origin + platform decision: [Database.md](../Database.md) (now points back here)
 - Launch-time Pro upgrade sits with the owner activation work:
   [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)

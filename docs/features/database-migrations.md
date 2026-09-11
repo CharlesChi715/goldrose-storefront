@@ -21,15 +21,38 @@ A schema change is a file — `supabase/migrations/000N_name.sql` — applied wi
 one database and in no repository, so no other environment, review or rollback
 can ever see it.
 
-## Applied state — 2026-08-15
+## Applied state — verified 2026-09-07
 
-| Migration                 | Hosted         | Note                                                                                                           |
-| ------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| `0001`–`0003`             | applied        | init, customer auth, tracking + hardening                                                                      |
-| `0004`                    | **skipped**    | permanently; its orphan history row was repaired 2026-07-28 — intentional, not a gap                           |
-| `0005`–`0008`             | applied        | page engagement, `orders.auth_user_id`, reviews, focal point                                                   |
-| `0009`–`0011`             | applied 08-07  | facets, image spotlights, and the view repair `0011` needs                                                     |
-| `0012` (`search_queries`) | **NOT pushed** | written and validated; until `supabase db push` runs, the search log's insert fails and is swallowed by design |
+Read from the hosted project itself, not from memory:
+`select version from supabase_migrations.schema_migrations order by version`
+returned exactly `0001 0002 0003 0005 0006 0007 0008 0009 0010 0011 0012 0013
+0014`. Anyone may repeat that query — it is read-only, and it is the only
+answer that cannot be stale.
+
+| Migration      | Hosted           | Note                                                                                 |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| `0001`–`0003`  | applied          | init, customer auth, tracking + hardening                                            |
+| `0004`         | **skipped**      | permanently; its orphan history row was repaired 2026-07-28 — intentional, not a gap |
+| `0005`–`0008`  | applied          | page engagement, `orders.auth_user_id`, reviews, focal point                         |
+| `0009`–`0011`  | applied 08-07    | facets, image spotlights, and the view repair `0011` needs                           |
+| `0012`–`0014`  | applied          | search queries, advisor keys, advisor key grants                                     |
+| `0015`         | **NOT pushed**   | `page_views` retention; written 2026-09-07, see below                                |
+
+**Every migration file in the repository is applied except `0015`.** This table
+said otherwise until 2026-09-07: it claimed `0012` was unpushed and did not
+mention `0013` or `0014` at all, so a reader would have gone looking for empty
+search-analytics cards that had in fact been working for weeks. The lesson is
+in the heading — this section is dated because it decays, and the query above
+is how to re-date it.
+
+### `0015` — page-view retention
+
+Deletes `page_views` rows older than thirteen months, in batches. Written and
+validated, deliberately not pushed: it is the first migration here that
+DELETES, and it should be pushed by a human who has read it rather than
+arriving as a surprise in someone else's change. Pushing it is safe today —
+the oldest row is from July 2026, so it deletes nothing at all until August
+2027, which is exactly the right time to install a rule like this.
 
 ## Tech details
 
@@ -56,10 +79,10 @@ can ever see it.
 
 ## Blockers and dependencies
 
-- **`0012` is the only outstanding push.** It is not a hard release gate — no
-  money or identity depends on it — but the two search-analytics cards in
-  `/admin/analytics` stay empty until it lands
-  ([storefront-search](storefront-search.md)).
+- **`0015` is the only outstanding push**, and it blocks nothing: it removes
+  analytics rows that do not exist yet. See above.
+- ⚠️ The CLI cannot push from a git worktree, so `supabase db push` has to be
+  run from the main checkout.
 
 ## Related links
 

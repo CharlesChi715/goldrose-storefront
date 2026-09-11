@@ -10,6 +10,8 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { getStore } from "@/lib/supabase/store.ts";
+import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
+import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   message: z.string().trim().min(2).max(2000),
@@ -19,6 +21,15 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const gate = checkRequest(request.headers, "feedback", LIMITS.feedback);
+  if (!gate.allowed) {
+    logEvent("warn", "ratelimit.refused", { route: "feedback" });
+    return NextResponse.json(
+      { ok: false, error: "Thanks — that's enough for now. Try again later." },
+      { status: 429, headers: refusalHeaders(gate) },
+    );
+  }
+
   let parsed: z.infer<typeof requestSchema>;
   try {
     parsed = requestSchema.parse(await request.json());

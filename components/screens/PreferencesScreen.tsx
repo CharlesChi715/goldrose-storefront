@@ -88,7 +88,7 @@ export function PreferencesScreen() {
       nav={false}
     >
       {/* 1523:1075/1076 Brand Navigation — the wordmark at the frame's own box */}
-      <BrandWordmark x={141} y={0} w={140} h={51} />
+      <BrandWordmark y={0} h={51} />
 
       <SettingsHeader title="Preferences" />
       {/* 1523:1077 返回 — the frame's pasted back-arrow art (its own back-icon

@@ -136,6 +136,53 @@ function orderSummaryText(order: OrderRow, lines: OrderLineRow[]): string {
 }
 
 /**
+ * Email the owner that something on the money path broke (`lib/observe.ts`).
+ *
+ * Deliberately unlike every other message in this file:
+ *
+ * - **It ignores the notification toggles.** Those are the buyer's
+ *   transactional mail, switched in the admin (§9.11). An operational alert is
+ *   not a notification the shop may turn off.
+ * - **It prefers an address from the environment.** `ALERT_EMAIL` is read
+ *   first, and only if it is unset does this fall back to the owner contact in
+ *   settings. The settings table lives in the database, and the failure most
+ *   worth an email is the database being unreachable — an alerter that needs
+ *   the thing it is reporting on is no alerter at all.
+ * - **It never throws.** `deliver` already swallows send failures; the settings
+ *   read is wrapped for the same reason.
+ *
+ * @param subject - The alert subject line, already prefixed by the caller.
+ * @param text - The plain-text body.
+ * @returns True when the alert was addressed to somebody — false when no
+ *   address is configured anywhere, which the caller logs. As everywhere in
+ *   this file, "addressed" is not "delivered": with `RESEND_API_KEY` unset the
+ *   message goes to the console instead.
+ */
+export async function sendOwnerAlert(
+  subject: string,
+  text: string,
+): Promise<boolean> {
+  let to = process.env.ALERT_EMAIL?.trim() ?? "";
+  if (!to) {
+    try {
+      to = (await getEmailSettings()).ownerEmail;
+    } catch {
+      // The database is unreachable — exactly the case ALERT_EMAIL exists for.
+      console.error(
+        "[email] alert could not be addressed: no ALERT_EMAIL and settings unreadable",
+      );
+      return false;
+    }
+  }
+  if (!to) {
+    console.error(`[email] alert with no recipient: ${subject}\n${text}`);
+    return false;
+  }
+  await deliver(to, subject, text);
+  return true;
+}
+
+/**
  * Send the buyer's order confirmation and the owner's new-order alert,
  * right after an order lands (§10.1). Each email is skipped when its
  * settings toggle is off or the recipient address is missing.

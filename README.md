@@ -4,7 +4,7 @@ Direct-to-consumer storefront for a 24K gold-dipped rose gift line, with its own
 
 [![CI](https://github.com/CharlesChi715/goldrose-storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/CharlesChi715/goldrose-storefront/actions/workflows/ci.yml)
 
-Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by one engineer for Zhongshu Technology Worldwide Ltd (Hong Kong): 80 routes, 21 database tables and 422 automated tests across 77,763 lines of TypeScript. It replaced the brand's Shopify storefront, so everything a merchant needs — catalogue, checkout, orders, inventory, customers, discounts, analytics — is implemented here rather than rented.
+Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by one engineer for Zhongshu Technology Worldwide Ltd (Hong Kong): 80 routes, 21 database tables and 472 automated tests across 79,716 lines of TypeScript. It replaced the brand's Shopify storefront, so everything a merchant needs — catalogue, checkout, orders, inventory, customers, discounts, analytics — is implemented here rather than rented.
 
 <table>
   <tr>
@@ -103,14 +103,14 @@ Locally the admin opens without a password and checkout is simulated, so no mone
 ## Tests and CI
 
 ```bash
-npm run test:unit    # 231 tests, node --test, no services, ~0.6s
+npm run test:unit    # 279 tests, node --test, no services, ~0.6s
 npx playwright install
-npm run test:e2e     # 191 tests against a production build on port 3001
+npm run test:e2e     # 193 tests against a production build on port 3001
 ```
 
 The Playwright configuration blanks the Supabase, PayPal and Resend variables for its own server, so the suite cannot reach hosted data, real money or the live email quota. Unit tests cover the logic that is genuinely easy to get wrong: webhook idempotency, price derivation, discount and facet matching, engagement dwell rules, reminder time zones and the migration checker itself.
 
-[CI](.github/workflows/ci.yml) runs nine gates on every push and pull request — `lint`, `typecheck`, `format:check`, `check:assets`, `check:migrations`, `features:check`, `test:unit`, a seed and a full production build. The end-to-end suite runs locally rather than in CI: its pixel baselines are macOS-rendered and would fail on a Linux runner.
+[CI](.github/workflows/ci.yml) runs ten gates on every push and pull request — `lint`, `typecheck`, `format:check`, `check:assets`, `check:env`, `check:migrations`, `features:check`, `test:unit`, a seed and a full production build. `npm run check` runs the first eight locally in CI's order, so green here means green there. The end-to-end suite runs locally rather than in CI: its pixel baselines are macOS-rendered and would fail on a Linux runner.
 
 ## Repository layout
 

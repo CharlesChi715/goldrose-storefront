@@ -2,6 +2,8 @@
 # red mark. Next 16 removed lint-on-build, so without this workflow `npm run
 # lint` only ever runs when somebody remembers to type it.
 #
+# `npm run check` runs the same checks locally, in the same order.
+#
 # Deliberately NOT here yet:
 #   * `npm run test:e2e` — the pixel baselines in tests/e2e/__screenshots__ are
 #     named `-darwin.png`; on a Linux runner every pixel spec fails. Adding e2e
@@ -13,20 +15,44 @@ on:
     branches: [main]
   pull_request:
 
+# The job only reads the repository. Nothing here pushes, comments or
+# releases, so the token it is handed cannot either.
+permissions:
+  contents: read
+
+# A newer push to the same pull request cancels the run it supersedes — nobody
+# waits on a verdict for code that no longer exists. Pushes to main are never
+# cancelled: every commit on main keeps its own mark.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   checks:
     runs-on: ubuntu-latest
+    # A healthy run takes about two minutes; a hung build should not hold the
+    # runner for the six hours GitHub allows by default.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          # .nvmrc names the Node major Vercel runs in production (24.x, the
+          # project setting), so CI exercises the runtime that actually serves.
+          # It is also what lets `npm run test:unit` and the `.ts` scripts run
+          # under plain `node`: type stripping is unflagged from Node 22.18/23.6.
+          node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run format:check
       - run: npm run check:assets
+      # .env.example is the only map of this system's credentials and is kept
+      # by hand. This fails when the code reads a variable nobody documented,
+      # and when a secret-shaped name is about to be published to the browser
+      # behind NEXT_PUBLIC_.
+      - run: npm run check:env
       # Nothing else in this job reads a .sql file, so a migration-number
       # collision between two parallel branches passes every other step.
       - run: npm run check:migrations

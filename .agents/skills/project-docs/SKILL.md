@@ -19,6 +19,7 @@ learn which is current.
 | Startup context: goal, state index, structure, rules      | `SUMMARY.md` — one line per fact, then a link           |
 | Where a feature stands, why the approach won, what's left | `docs/features/<id>.md` — front matter is the status DB |
 | How a built thing works (mechanism, spec, geometry)       | `docs/admin-design.md` `§` — see the `admin-spec` skill |
+| How to set up a vendor or run a drill, step by step       | `docs/guides/<topic>.md` — operator guides and runbooks |
 | What one delivery did; a question waiting on Charles      | `agent-delivery/sessions/` + `INBOX.md`                 |
 | Design-file state, what the design team owes us           | `docs/ixd/README.md`                                    |
 | Naming conventions                                        | `docs/ixd/naming/` — see the `naming` skill             |

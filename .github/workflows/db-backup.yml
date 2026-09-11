@@ -1,0 +1,126 @@
+# Nightly logical backup of the hosted Supabase database to S3.
+#
+# WHY THIS EXISTS
+# Supabase's own daily backups are a paid feature and this project is on the
+# free tier, so the live database — the one that will hold real orders and real
+# customers — has no backup at all. Losing it today costs a seed script; losing
+# it after the first real order costs orders and customers that cannot be
+# reconstructed from anything.
+#
+# The plan and the reasoning behind every choice live in
+# docs/features/db-backups.md. This file is only the execution.
+#
+# THREE THINGS TO KNOW BEFORE TRUSTING IT
+#  1. Until the secrets below are set it does NOTHING, and says so as a warning
+#     rather than a failure. A pipeline that is red every night for a month
+#     teaches its owner to ignore red, and then it is red for a real reason and
+#     nobody looks.
+#  2. Scheduled workflows run only from the DEFAULT branch, and GitHub disables
+#     them after 60 days of repository inactivity. A backup that has silently
+#     stopped looks exactly like a backup that is working.
+#  3. It does not capture the Storage BUCKET CONTENTS — the product image
+#     files. See scripts/backup-db.sh.
+#
+# WHAT MAKES IT REAL: a restore, done by hand, at least once — see
+# docs/runbooks/restore-from-backup.md. Until that has happened this is a
+# pipeline that produces files, not a backup.
+name: Database backup
+
+on:
+  schedule:
+    # 17:00 UTC — around 03:00 in Sydney, where the operator is, so a failure
+    # is waiting in the morning rather than arriving mid-afternoon.
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      # `secrets` is not available in a job-level `if`, so the guard is a step
+      # that every later step reads.
+      - name: Is backup configured yet
+        id: config
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          missing=""
+          [ -z "$DB_URL" ] && missing="$missing SUPABASE_DB_URL"
+          [ -z "$AWS_KEY" ] && missing="$missing AWS_ACCESS_KEY_ID"
+          [ -z "${{ vars.BACKUP_S3_BUCKET }}" ] && missing="$missing BACKUP_S3_BUCKET(var)"
+          if [ -n "$missing" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Database backups are NOT running — missing:$missing"
+            echo "::warning::Set them in Settings → Secrets and variables → Actions."
+            echo "::warning::Until then the live database has no backup. See docs/features/db-backups.md"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install the PostgreSQL 17 client
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          # The runner's default client is older than the hosted server, and
+          # pg_dump refuses to dump a server newer than itself. The error reads
+          # like a connection problem, so pin the version rather than hope.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/pgdg.gpg
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          pg_dump --version
+
+      - name: Dump the database
+        if: steps.config.outputs.ready == 'true'
+        env:
+          # The SESSION pooler URL (port 5432). GitHub's runners are IPv4-only
+          # and Supabase's direct connection is IPv6-only, so the pooler is not
+          # a preference here, it is the only route. The transaction pooler
+          # (6543) cannot serve pg_dump.
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: scripts/backup-db.sh "$RUNNER_TEMP/backup"
+
+      - name: Upload to S3
+        if: steps.config.outputs.ready == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.BACKUP_S3_REGION || 'us-west-2' }}
+          BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+        run: |
+          # Dated path, so a lifecycle rule can expire old ones and a human can
+          # find the night they want without listing the whole bucket.
+          stamp="$(date -u +%Y/%m/%Y-%m-%dT%H%MZ)"
+          dest="s3://$BUCKET/db/$stamp/"
+          echo "Uploading to $dest"
+          aws s3 cp "$RUNNER_TEMP/backup" "$dest" \
+            --recursive --only-show-errors --sse AES256
+          # Prove it arrived. `aws s3 cp` has exited 0 on a partial upload
+          # before; listing what is actually there is the cheap confirmation.
+          aws s3 ls "$dest"
+
+      - name: Say what happened
+        if: always()
+        run: |
+          if [ "${{ steps.config.outputs.ready }}" != "true" ]; then
+            echo "Backups not configured — nothing was uploaded."
+          elif [ "${{ job.status }}" = "success" ]; then
+            echo "Backup uploaded. Remember: it is not a backup until a restore"
+            echo "has been rehearsed — docs/runbooks/restore-from-backup.md"
+          else
+            echo "::error::The nightly database backup FAILED. The live database"
+            echo "::error::may now have no recent copy. See docs/runbooks/restore-from-backup.md"
+          fi
