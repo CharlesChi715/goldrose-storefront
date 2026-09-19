@@ -9,7 +9,7 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 ```
 
 - A 10-second green run backed up nothing: the guard step skipped everything.
-- CI writes to the bucket; it never reads, lists or deletes. It encrypts with a public key only.
+- CI writes to the bucket; it never reads, lists or deletes.
 - Secrets: people → password manager · programs → `.env.local` · workflow → GitHub secrets ·
   the repo → never (public, and git never forgets).
 
@@ -17,7 +17,8 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 
 - Root `aws@eldreve.com` is a Cloudflare catch-all into the company Gmail. Emergencies only.
 - Passkeys live in Charles's iCloud Keychain. ⚠️ TODO: a root spare the boss can hold.
-- ⚠️ Lose the `age` secret key and every backup is unreadable forever. Both partners hold it.
+- ⚠️ `age` encryption is **deferred** (2026-09-19). Dumps sit in S3 readable by anyone who can
+  sign in to this AWS account; the bucket locks and SSE are the only protection. Revisit before launch.
 
 ## Why
 
@@ -27,7 +28,7 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 | Work as `charles-admin`              | Root can revoke it; nobody can revoke root.           |
 | OIDC and `aws login`, no access keys | Nothing long-lived to steal.                          |
 | `put-object`, never `sync`           | `sync` needs `ListBucket`, which breaks write-only.   |
-| Asymmetric `age`                     | A passphrase would let CI decrypt.                    |
+| `age` deferred, asymmetric when added | Key custody is a risk too: lose the key, lose every backup. |
 | Dead-man switch                      | A dropped or disabled cron sends no failure mail.     |
 | No dump as a run artifact            | The repo is public.                                   |
 
@@ -35,8 +36,8 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 
 1. `./bucket.sh` — name and region are permanent.
 2. `./role.sh` — trust is pinned to this repo and `main`; never add `environment:` to the job.
-3. `age-keygen` (never `-pq`) · healthchecks.io `23 10 * * *` UTC, grace 2 h · GitHub secrets.
-4. Replace `db-backup.yml`: it uses long-lived keys, uploads unencrypted, skips Storage files.
+3. healthchecks.io `23 10 * * *` UTC, grace 2 h · GitHub secrets and variables.
+4. Replace `db-backup.yml`: it uses long-lived keys, needs `ListBucket`, skips Storage files.
    Open: `backup-db.sh` writes three files, the full version one archive.
 5. Weekly CI restore test; monthly drill by hand, recorded in the feature record.
 
