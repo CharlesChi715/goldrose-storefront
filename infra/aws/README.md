@@ -1,7 +1,7 @@
 # infra/aws
 
 The AWS settings behind the database backups, as files. They live in the repo so
-every device has the same copy. How and why: [`aws-backup.md`](aws-backup.md).
+every device has the same copy. How and why: [`db-backups`](../../docs/features/db-backups.md).
 
 | File                 | What it sets                                         | Applied with                                 |
 | -------------------- | ---------------------------------------------------- | -------------------------------------------- |

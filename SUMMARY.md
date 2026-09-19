@@ -162,7 +162,7 @@ needs a person who has decided, not an agent who is being helpful.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
    `CHECKOUT_SKIP_PAYMENT`.
 5. Database backups run nightly since 2026-09-19; what is left is in
-   [db-backups](docs/features/db-backups.md) ([guide](infra/aws/aws-backup.md)).
+   [db-backups](docs/features/db-backups.md).
    First restore rehearsed 2026-09-19, every count matched live; drill monthly.
    AWS root `aws@eldreve.com`; Charles's card pays for now.
 6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
