@@ -137,13 +137,13 @@ with RLS bypassed, so stronger than the service-role key.
 
 ⚠️ The reset is immediate, cannot be undone, and breaks every saved copy of the
 connection string at once: your `psql` sessions, the password `supabase db push`
-asks for, and the GitHub Actions secret `SUPABASE_DB_URL`, which carries this
-password inside the URL — a stale one means the nightly backup fails and mails
+asks for, and the GitHub Actions secret `BACKUP_PGPASSWORD`, which is this
+password — a stale one means the nightly backup fails and mails
 you. Update it straight after (paste at the prompt, so it never enters shell
 history; `gh auth login` first if `gh` is not authenticated):
 
 ```bash
-gh secret set SUPABASE_DB_URL
+gh secret set BACKUP_PGPASSWORD
 gh workflow run db-backup.yml
 ```
 

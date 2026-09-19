@@ -10,13 +10,12 @@ name: Database backup
 
 on:
   schedule:
-    # 17:00 UTC — around 03:00 in Sydney, where the operator is, so a failure
-    # is waiting in the morning rather than arriving mid-afternoon.
-    - cron: "0 17 * * *"
+    - cron: "23 10 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: db-backup
@@ -24,34 +23,32 @@ concurrency:
 
 jobs:
   dump:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - uses: actions/checkout@v7
 
-      # `secrets` is not available in a job-level `if`, so the guard is a step
-      # that every later step reads.
-      - name: Is backup configured yet
-        id: config
+      - name: Refuse to run half-configured
         env:
-          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          PGPASSWORD: ${{ secrets.BACKUP_PGPASSWORD }}
+          ROLE: ${{ vars.AWS_ROLE_ARN }}
+          DB_HOST: ${{ vars.BACKUP_PGHOST }}
+          DB_USER: ${{ vars.BACKUP_PGUSER }}
         run: |
           missing=""
-          [ -z "$DB_URL" ] && missing="$missing SUPABASE_DB_URL"
-          [ -z "$AWS_KEY" ] && missing="$missing AWS_ACCESS_KEY_ID"
-          [ -z "${{ vars.BACKUP_S3_BUCKET }}" ] && missing="$missing BACKUP_S3_BUCKET(var)"
+          [ -n "$PGPASSWORD" ] || missing="$missing BACKUP_PGPASSWORD"
+          [ -n "$ROLE" ] || missing="$missing AWS_ROLE_ARN"
+          [ -n "$BUCKET" ] || missing="$missing S3_BUCKET"
+          [ -n "$DB_HOST" ] || missing="$missing BACKUP_PGHOST"
+          [ -n "$DB_USER" ] || missing="$missing BACKUP_PGUSER"
           if [ -n "$missing" ]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Database backups are NOT running — missing:$missing"
-            echo "::warning::Set them in Settings → Secrets and variables → Actions."
-            echo "::warning::Until then the live database has no backup. See docs/features/db-backups.md"
-          else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "::error::Database backup cannot run. Missing:$missing"
+            exit 1
           fi
 
       - name: Install the PostgreSQL 17 client
-        if: steps.config.outputs.ready == 'true'
         run: |
           # The runner's default client is older than the hosted server, and
           # pg_dump refuses to dump a server newer than itself. The error reads
@@ -66,40 +63,38 @@ jobs:
           pg_dump --version
 
       - name: Dump the database
-        if: steps.config.outputs.ready == 'true'
         env:
-          # The SESSION pooler URL (port 5432). GitHub's runners are IPv4-only
-          # and Supabase's direct connection is IPv6-only, so the pooler is not
-          # a preference here, it is the only route. The transaction pooler
+          # The SESSION pooler (port 5432). GitHub's runners are IPv4-only and
+          # Supabase's direct connection is IPv6-only, so the pooler is not a
+          # preference here, it is the only route. The transaction pooler
           # (6543) cannot serve pg_dump.
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PGPASSWORD: ${{ secrets.BACKUP_PGPASSWORD }}
+          PGSSLMODE: require
+          DATABASE_URL: postgresql://${{ vars.BACKUP_PGUSER }}@${{ vars.BACKUP_PGHOST }}:5432/postgres
         run: scripts/backup-db.sh "$RUNNER_TEMP/backup"
 
+      - name: Get a one-hour AWS key card
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-west-2
+
       - name: Upload to S3
-        if: steps.config.outputs.ready == 'true'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ vars.BACKUP_S3_REGION || 'us-west-2' }}
-          BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
         run: |
-          # Dated path, so a lifecycle rule can expire old ones and a human can
-          # find the night they want without listing the whole bucket.
           stamp="$(date -u +%Y/%m/%Y-%m-%dT%H%MZ)"
-          dest="s3://$BUCKET/db/$stamp/"
-          echo "Uploading to $dest"
-          aws s3 cp "$RUNNER_TEMP/backup" "$dest" \
-            --recursive --only-show-errors --sse AES256
-          # Prove it arrived. `aws s3 cp` has exited 0 on a partial upload
-          # before; listing what is actually there is the cheap confirmation.
-          aws s3 ls "$dest"
+          for file in public.dump platform.dump schema.sql; do
+            echo "db/$stamp/$file"
+            aws s3api put-object \
+              --bucket "$BUCKET" \
+              --key "db/$stamp/$file" \
+              --body "$RUNNER_TEMP/backup/$file" \
+              --query VersionId --output text
+          done
 
       - name: Say what happened
         if: always()
         run: |
-          if [ "${{ steps.config.outputs.ready }}" != "true" ]; then
-            echo "Backups not configured — nothing was uploaded."
-          elif [ "${{ job.status }}" = "success" ]; then
+          if [ "${{ job.status }}" = "success" ]; then
             echo "Backup uploaded. Remember: it is not a backup until a restore"
             echo "has been rehearsed — docs/runbooks/restore-from-backup.md"
           else
