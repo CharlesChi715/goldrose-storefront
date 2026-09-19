@@ -26,7 +26,7 @@ Nothing here touches live data. Run it in daylight, not during an outage.
 0. **Install the AWS command line and name the bucket.** It is the tool that
    reads the bucket and this Mac does not have it — nothing below works without
    it, and the failure looks like a bad bucket name rather than a missing
-   program. The bucket is the Actions variable `BACKUP_S3_BUCKET` (Settings →
+   program. The bucket is the Actions variable `S3_BUCKET` (Settings →
    Secrets and variables → Actions).
 
    ```bash
@@ -156,7 +156,7 @@ protects you.
 **Set these first, in the shell you are about to work in.** This section is the
 one people jump straight to, so it cannot rely on variables the drill above
 exported. The live password is `SUPABASE_DB_PASSWORD` in `.env.local`; the
-bucket is the Actions variable `BACKUP_S3_BUCKET`. Percent-encode any
+bucket is the Actions variable `S3_BUCKET`. Percent-encode any
 `@ : / #` in the password, and never paste these lines into a commit or a chat.
 
 ```bash

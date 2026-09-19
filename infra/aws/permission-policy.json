@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PutOnlyBackups",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": [
+        "arn:aws:s3:::eldreve-backups-780564622532-us-west-2-an/db/*",
+        "arn:aws:s3:::eldreve-backups-780564622532-us-west-2-an/files/*"
+      ]
+    }
+  ]
+}
