@@ -221,7 +221,9 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 ## Environment and tooling — verified 2026-07-27
 
 - Apple-silicon iMac, Sydney; macOS, zsh, Homebrew. CLIs: Git/`gh`, Node/npm,
-  Supabase, Vercel, `psql`, Docker, Python 3/`uv`, `jq`, ripgrep, Claude, Codex.
+  Supabase, Vercel, `psql`, Docker, Python 3/`uv`, `jq`, ripgrep, `aws`, Claude, Codex.
+- AWS: `infra/aws/status.sh` prints the live state in one call — trust it, never a
+  document. Sign in with `aws login` as `charles-admin`; no access keys exist.
 - Production deploys `main` → GitHub/Vercel integration, **not** CLI deploys.
   Hosted Supabase project `cfvsvgbldnzkcjvbwnjp`; local dev uses it too when the
   Supabase variables are set.
@@ -250,6 +252,7 @@ goldrose-storefront/
 ├── public/               # Browser-served images and static assets
 ├── assets/               # Raw owner/source art; not served directly
 ├── supabase/             # Hosted database migrations
+├── infra/                # Cloud settings as files, and the scripts that apply and check them
 ├── scripts/              # Seed, validation, and feature utilities
 ├── tests/                # Playwright end-to-end and unit tests
 ├── docs/                 # Specs, feature records, guides

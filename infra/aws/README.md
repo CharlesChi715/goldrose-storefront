@@ -11,8 +11,10 @@ every device has the same copy. How and why: [`db-backups`](../../docs/features/
 | `permission-policy.json` | what the role may do: `s3:PutObject` on `db/` and `files/` | `aws iam put-role-policy`          |
 | `bucket.sh`          | creates the bucket, then applies every bucket setting | `./bucket.sh` — safe to re-run               |
 | `role.sh`            | GitHub's identity provider, the role, its one permission | `./role.sh` — once                        |
+| `status.sh`          | **nothing** — read-only; prints the live state in seven lines | `./status.sh` — exits 1 if a check fails |
 
 Run the commands from this folder, signed in with `aws login` as `charles-admin`.
+`status.sh` is the answer to "what is in AWS right now?" — one call, no document to trust.
 
 ## Rules
 
