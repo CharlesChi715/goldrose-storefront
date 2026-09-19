@@ -16,18 +16,21 @@ YAMLs, every command) is in git: `git show d3e7a35:docs/guides/aws-backup.md`.
 - Encrypt **before** upload; CI holds only the public key.
 - An untested backup is a file, not a backup.
 
-## Facts
+## Facts — ask AWS, never a document
 
-| Item        | Value                                                                        |
-| ----------- | ---------------------------------------------------------------------------- |
-| Account     | `780564622532` (ELDREVE), Paid plan, Basic support, created 2026-09-19        |
-| Root        | `aws@eldreve.com` → Cloudflare catch-all → company Gmail. Passkey (iCloud Keychain) |
-| Daily user  | `charles-admin`, group `Admins`, passkey, **no access keys**                 |
-| Sign-in URL | `https://780564622532.signin.aws.amazon.com/console`                         |
-| Region      | `us-west-2` (next to Supabase and Vercel `pdx1`)                             |
-| Bucket      | `eldreve-backups-780564622532-us-west-2-an`                                  |
-| Database    | `aws-1-us-west-2.pooler.supabase.com:5432`, user `postgres.cfvsvgbldnzkcjvbwnjp` |
-| Budget      | `eldreve-backups-5usd`                                                       |
+AWS holds what is configured; a written copy can only go stale.
+
+```bash
+aws sts get-caller-identity                                          # account, and who am I
+aws s3api list-buckets --query 'Buckets[].Name'
+aws iam list-users --query 'Users[].UserName'
+aws iam list-access-keys --user-name charles-admin                   # must stay empty
+aws iam get-account-summary --query SummaryMap.AccountMFAEnabled     # 1 = root MFA is on
+aws budgets describe-budgets --account-id "$ACCOUNT_ID" --query 'Budgets[].BudgetName'
+```
+
+Only what AWS cannot tell you is written down: root is `aws@eldreve.com`, a Cloudflare
+catch-all into the company Gmail, and both passkeys live in Charles's iCloud Keychain.
 
 ## Decisions
 
@@ -41,6 +44,7 @@ YAMLs, every command) is in git: `git show d3e7a35:docs/guides/aws-backup.md`.
 | Root needs a spare others can hold       | ⚠️ TODO: authenticator app as 2nd device, or share the passkey with the boss. |
 | $5 budget                                | Silent when healthy, loud when broken. Lower = alert fatigue.           |
 | `aws login`, no access keys              | 12-hour token; nothing on disk to steal.                                |
+| Region `us-west-2`                       | Beside Supabase and Vercel `pdx1`; a restore never crosses an ocean.    |
 | Session pooler, port 5432                | Direct host is IPv6-only; 6543 breaks `pg_dump`.                        |
 | GitHub OIDC role, `s3:PutObject` only    | No long-lived key; a stolen token cannot read or wipe history.          |
 | `put-object`, not `s3 sync`/`cp` to AWS  | `sync` needs `ListBucket`, which breaks put-only.                       |
@@ -92,7 +96,8 @@ aws sts get-caller-identity             # "who am I?" — the first command when
 
 ```bash
 cd infra/aws; export AWS_REGION=us-west-2
-BUCKET="eldreve-backups-780564622532-us-west-2-an"
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+BUCKET="eldreve-backups-${ACCOUNT_ID}-us-west-2-an"
 aws s3api create-bucket --bucket "$BUCKET" --bucket-namespace account-regional \
   --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
 aws s3api put-public-access-block --bucket "$BUCKET" --public-access-block-configuration \

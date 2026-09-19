@@ -3,8 +3,6 @@
 The AWS settings behind the database backups, as files. They live in the repo so
 every device has the same copy. How and why: [`docs/guides/aws-backup.md`](../../docs/guides/aws-backup.md).
 
-Account `780564622532` · region `us-west-2` · bucket `eldreve-backups-780564622532-us-west-2-an`
-
 | File                 | What it sets                                         | Applied with                                 |
 | -------------------- | ---------------------------------------------------- | -------------------------------------------- |
 | `lifecycle.json`     | delete backups after 30 days, old versions 7 later   | `aws s3api put-bucket-lifecycle-configuration` |
