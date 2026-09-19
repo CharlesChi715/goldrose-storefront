@@ -129,7 +129,7 @@ through the session pooler.
 
 ## Related links
 
-- **How to build it, step by step:** [`docs/guides/aws-backup.md`](../guides/aws-backup.md)
+- **How to build it, step by step:** [`infra/aws/aws-backup.md`](../../infra/aws/aws-backup.md)
   — AWS account → S3 → OIDC role → workflow → restore drill (written 2026-09-05).
 - Origin + platform decision: [Database.md](../Database.md) (now points back here)
 - Launch-time Pro upgrade sits with the owner activation work:

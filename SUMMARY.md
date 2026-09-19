@@ -165,7 +165,7 @@ needs a person who has decided, not an agent who is being helpful.
    `SUPABASE_DB_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and the
    `BACKUP_S3_BUCKET` variable in GitHub Actions
    ([db-backups](docs/features/db-backups.md),
-   [guide](docs/guides/aws-backup.md)), then **rehearse one restore**
+   [guide](infra/aws/aws-backup.md)), then **rehearse one restore**
    ([runbook](docs/runbooks/restore-from-backup.md)). Until a restore has been
    rehearsed there is no backup, only files.
    AWS root `aws@eldreve.com`; Charles's card pays for now.

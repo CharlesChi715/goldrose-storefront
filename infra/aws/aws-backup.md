@@ -1,7 +1,7 @@
 # AWS backup — short guide
 
-Status lives in [`db-backups`](../features/db-backups.md), never here. Settings files:
-[`infra/aws/`](../../infra/aws/README.md). The full verified version (sources, both workflow
+Status lives in [`db-backups`](../../docs/features/db-backups.md), never here. Settings files:
+[this folder](README.md). The full verified version (sources, both workflow
 YAMLs, every command) is in git: `git show d3e7a35:docs/guides/aws-backup.md`.
 
 ## Model
