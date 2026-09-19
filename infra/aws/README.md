@@ -9,6 +9,8 @@ every device has the same copy. How and why: [`aws-backup.md`](aws-backup.md).
 | `bucket-policy.json` | refuse any request that is not HTTPS                 | `aws s3api put-bucket-policy`                |
 | `trust-policy.json`  | who may become the backup role: this repo, `main` only | `aws iam create-role`                      |
 | `permission-policy.json` | what the role may do: `s3:PutObject` on `db/` and `files/` | `aws iam put-role-policy`          |
+| `bucket.sh`          | creates the bucket, then applies every bucket setting | `./bucket.sh` — safe to re-run               |
+| `role.sh`            | GitHub's identity provider, the role, its one permission | `./role.sh` — once                        |
 
 Run the commands from this folder, signed in with `aws login` as `charles-admin`.
 
