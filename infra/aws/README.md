@@ -9,6 +9,8 @@ Account `780564622532` · region `us-west-2` · bucket `eldreve-backups-78056462
 | -------------------- | ---------------------------------------------------- | -------------------------------------------- |
 | `lifecycle.json`     | delete backups after 30 days, old versions 7 later   | `aws s3api put-bucket-lifecycle-configuration` |
 | `bucket-policy.json` | refuse any request that is not HTTPS                 | `aws s3api put-bucket-policy`                |
+| `trust-policy.json`  | who may become the backup role: this repo, `main` only | `aws iam create-role`                      |
+| `permission-policy.json` | what the role may do: `s3:PutObject` on `db/` and `files/` | `aws iam put-role-policy`          |
 
 Run the commands from this folder, signed in with `aws login` as `charles-admin`.
 

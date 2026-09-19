@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::780564622532:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+          "token.actions.githubusercontent.com:sub": [
+            "repo:CharlesChi715/goldrose-storefront:ref:refs/heads/main",
+            "repo:CharlesChi715@96568777/goldrose-storefront@1279916967:ref:refs/heads/main"
+          ]
+        }
+      }
+    }
+  ]
+}
