@@ -168,8 +168,7 @@ needs a person who has decided, not an agent who is being helpful.
    [guide](docs/guides/aws-backup.md)), then **rehearse one restore**
    ([runbook](docs/runbooks/restore-from-backup.md)). Until a restore has been
    rehearsed there is no backup, only files.
-   AWS account: root `aws@eldreve.com`; Charles's own card pays for now —
-   swap to a company card later.
+   AWS root `aws@eldreve.com`; Charles's card pays for now.
 6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
    ([runbook](docs/runbooks/payment-failing.md)).
 7. **Confirm the Vercel plan allows commercial use.** Hobby is for
