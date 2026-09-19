@@ -1,5 +1,3 @@
-# Nightly logical backup of the hosted Supabase database to S3.
-#
 # WHY THIS EXISTS
 # Supabase's own daily backups are a paid feature and this project is on the
 # free tier, so the live database — the one that will hold real orders and real
@@ -7,23 +5,7 @@
 # it after the first real order costs orders and customers that cannot be
 # reconstructed from anything.
 #
-# The plan and the reasoning behind every choice live in
-# docs/features/db-backups.md. This file is only the execution.
-#
-# THREE THINGS TO KNOW BEFORE TRUSTING IT
-#  1. Until the secrets below are set it does NOTHING, and says so as a warning
-#     rather than a failure. A pipeline that is red every night for a month
-#     teaches its owner to ignore red, and then it is red for a real reason and
-#     nobody looks.
-#  2. Scheduled workflows run only from the DEFAULT branch, and GitHub disables
-#     them after 60 days of repository inactivity. A backup that has silently
-#     stopped looks exactly like a backup that is working.
-#  3. It does not capture the Storage BUCKET CONTENTS — the product image
-#     files. See scripts/backup-db.sh.
-#
-# WHAT MAKES IT REAL: a restore, done by hand, at least once — see
-# docs/runbooks/restore-from-backup.md. Until that has happened this is a
-# pipeline that produces files, not a backup.
+# Plan, status and known gaps: docs/features/db-backups.md
 name: Database backup
 
 on:
