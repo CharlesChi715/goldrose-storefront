@@ -7,6 +7,11 @@
 ## 2. ASCII chart
 
 ```text
+once, before the first night, by Charles
+
+bucket.sh  the S3 storage  ─▶  role.sh  who may touch it
+
+
 every night, on GitHub's temporary computer
 
 pg_dump ──connects──▶ SUPABASE (pooler, port 5432)
