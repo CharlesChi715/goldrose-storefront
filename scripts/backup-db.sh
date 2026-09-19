@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 #
-# ROLE OF THIS FILE
-# Take one logical backup of the hosted Supabase database.
-#
-# Run by .github/workflows/db-backup.yml every night, and by a human doing the
-# restore drill. Same script both ways on purpose: a backup procedure that only
-# exists inside a CI workflow is a procedure nobody can practise, and an
-# unpractised restore is not a backup.
+# WHY A SCRIPT AND NOT STEPS INSIDE THE WORKFLOW
+# The nightly job and a human doing the restore drill run this same file. A
+# backup procedure that only exists inside a CI workflow is a procedure nobody
+# can practise, and an unpractised restore is not a backup.
 #
 #   DATABASE_URL='postgresql://...' scripts/backup-db.sh ./out
 #
