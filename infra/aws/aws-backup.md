@@ -36,7 +36,7 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 
 1. `./bucket.sh` — name and region are permanent.
 2. `./role.sh` — trust is pinned to this repo and `main`; never add `environment:` to the job.
-3. GitHub secrets and variables · `uptime.yml` fails when no backup succeeded in 26 h.
+3. GitHub secrets and variables · `uptime.yml` fails when no backup succeeded in 25 h.
 4. Replace `db-backup.yml`: it uses long-lived keys, needs `ListBucket`, skips Storage files.
    Open: `backup-db.sh` writes three files, the full version one archive.
 5. Weekly CI restore test; monthly drill by hand, recorded in the feature record.
