@@ -26,7 +26,7 @@ external dead-man switch were deferred on 2026-09-19 — why: [guide](../../infr
 - [x] Workflow on `main` uses OIDC and fails when unconfigured; five settings in GitHub.
 - [x] **First real backup: run `35432091546`, three files under `db/2026/09/2026-09-19T0829Z/`.**
 - [x] `uptime.yml` goes red when no backup has succeeded in 25 hours.
-- [ ] Restore drill. Until then there is no backup, only files.
+- [x] **Restore drill, 2026-09-19:** backup `2026-09-19T0829Z` restored into a throwaway Supabase project. Eight of eight counts matched live (20 orders, 21 lines, 2 products, 5 customers, 10 users, 10 identities, 33 image rows, 15 foreign keys); the web API answered identically to live. Five errors ignored, all Supabase bookkeeping. Scratch project and local files deleted. Charles ran the download and inspection; the agent ran the restore and comparison at his request. Next drill due 2026-10-19.
 - [ ] The `product-images` files, which no dump contains.
 - [ ] Before launch: `age` encryption, an external dead-man switch, the weekly CI restore test.
 

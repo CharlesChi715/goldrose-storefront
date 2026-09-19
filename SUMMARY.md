@@ -163,7 +163,7 @@ needs a person who has decided, not an agent who is being helpful.
    `CHECKOUT_SKIP_PAYMENT`.
 5. Database backups run nightly since 2026-09-19; what is left is in
    [db-backups](docs/features/db-backups.md) ([guide](infra/aws/aws-backup.md)).
-   Until **one restore is rehearsed** there is no backup, only files.
+   First restore rehearsed 2026-09-19, every count matched live; drill monthly.
    AWS root `aws@eldreve.com`; Charles's card pays for now.
 6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
    ([runbook](docs/runbooks/payment-failing.md)).
