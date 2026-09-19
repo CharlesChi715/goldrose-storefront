@@ -44,7 +44,7 @@ fi
 # and the hosted project is 17.x — so a runner's default 16 client fails with a
 # version mismatch that reads like a connection error if you are not looking
 # for it.
-client_major="$(pg_dump --version | sed -E 's/.*[^0-9]([0-9]+)\.[0-9]+.*/\1/')"
+client_major="$(pg_dump --version | sed -E 's/^pg_dump \(PostgreSQL\) ([0-9]+).*/\1/')"
 if [ "${client_major}" -lt 17 ]; then
   echo "backup-db: pg_dump is major ${client_major}; the server is 17." >&2
   echo "backup-db: install the 17 client (apt.postgresql.org) and retry." >&2
