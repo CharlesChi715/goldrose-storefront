@@ -37,8 +37,8 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 1. `./bucket.sh` — name and region are permanent.
 2. `./role.sh` — trust is pinned to this repo and `main`; never add `environment:` to the job.
 3. GitHub secrets and variables · `uptime.yml` fails when no backup succeeded in 25 h.
-4. Replace `db-backup.yml`: it uses long-lived keys, needs `ListBucket`, skips Storage files.
-   Open: `backup-db.sh` writes three files, the full version one archive.
+4. `db-backup.yml` swaps GitHub's token for one-hour credentials and uploads with `put-object`.
+   Still missing: the Storage files, which no dump contains.
 5. Weekly CI restore test; monthly drill by hand, recorded in the feature record.
 
 New device: `brew install awscli`, `aws login`, `aws configure set region us-west-2` (the

@@ -1,7 +1,7 @@
 ---
 delivery: in-progress
-rollout: not-deployed
-statusChangedAt: 2026-09-07
+rollout: live
+statusChangedAt: 2026-09-19
 priority: p0
 ---
 
@@ -14,24 +14,26 @@ order a lost database means unrecoverable orders and customers.
 
 ## Decision
 
-Nightly dump by GitHub Actions, encrypted with `age`, written to a private S3 bucket
-through a write-only role; Supabase Pro joins at launch as a second copy, not a replacement.
+Nightly dump by GitHub Actions, written to a private S3 bucket through a write-only role;
+Supabase Pro joins at launch as a second copy, not a replacement. `age` encryption and an
+external dead-man switch were deferred on 2026-09-19 — why: [guide](../../infra/aws/aws-backup.md).
 
 ## Where it stands — 2026-09-19
 
-- [x] Script and workflow on `main` — **dormant**: green in 10 seconds, uploads nothing.
 - [x] Local dump proven: 21 tables.
 - [x] AWS account, root MFA, `charles-admin`, budget alarm, `aws login`.
-- [x] Settings and scripts written: [`infra/aws/`](../../infra/aws/README.md).
-- [ ] `./bucket.sh`, then `./role.sh`.
-- [ ] `age` key held by both partners · healthchecks.io · GitHub secrets.
-- [ ] Replace the workflow: OIDC, encryption, and the `product-images` files no dump contains.
+- [x] Bucket and write-only role created from [`infra/aws/`](../../infra/aws/README.md), each setting verified.
+- [x] Workflow on `main` uses OIDC and fails when unconfigured; five settings in GitHub.
+- [x] **First real backup: run `35432091546`, three files under `db/2026/09/2026-09-19T0829Z/`.**
+- [x] `uptime.yml` goes red when no backup has succeeded in 25 hours.
 - [ ] Restore drill. Until then there is no backup, only files.
+- [ ] The `product-images` files, which no dump contains.
+- [ ] Before launch: `age` encryption, an external dead-man switch, the weekly CI restore test.
 
 ## Acceptance criteria
 
 - [ ] An encrypted dump and the Storage files land in the bucket every night.
-- [ ] CI can only `PutObject`; a lifecycle rule deletes after 30 days.
+- [x] CI can only `PutObject`; a lifecycle rule deletes after 30 days.
 - [ ] A failed or missing run alerts both partners.
 - [ ] The weekly CI restore test is green.
 - [ ] Charles completes one restore drill; evidence in `verification.human`.
@@ -49,7 +51,7 @@ through a write-only role; Supabase Pro joins at launch as a second copy, not a 
 
 ## Open questions
 
-- OQ-1: `backup-db.sh` writes three files; the guide was designed around one archive.
+- OQ-1 — decided 2026-09-19: keep the three files `backup-db.sh` writes; they are what ran, locally and in CI.
 - OQ-2: a spare for root sign-in that the boss can hold.
 
 ## Related links
