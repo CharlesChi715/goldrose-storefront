@@ -29,14 +29,14 @@ version: `git show d3e7a35:docs/guides/aws-backup.md` · state: ask `aws` and `g
 | OIDC and `aws login`, no access keys | Nothing long-lived to steal.                          |
 | `put-object`, never `sync`           | `sync` needs `ListBucket`, which breaks write-only.   |
 | `age` deferred, asymmetric when added | Key custody is a risk too: lose the key, lose every backup. |
-| Dead-man switch                      | A dropped or disabled cron sends no failure mail.     |
+| Freshness check in `uptime.yml`      | A dropped run sends no failure mail. External dead-man switch deferred: it alone survives GitHub disabling every schedule. |
 | No dump as a run artifact            | The repo is public.                                   |
 
 ## Steps
 
 1. `./bucket.sh` — name and region are permanent.
 2. `./role.sh` — trust is pinned to this repo and `main`; never add `environment:` to the job.
-3. healthchecks.io `23 10 * * *` UTC, grace 2 h · GitHub secrets and variables.
+3. GitHub secrets and variables · `uptime.yml` fails when no backup succeeded in 26 h.
 4. Replace `db-backup.yml`: it uses long-lived keys, needs `ListBucket`, skips Storage files.
    Open: `backup-db.sh` writes three files, the full version one archive.
 5. Weekly CI restore test; monthly drill by hand, recorded in the feature record.
