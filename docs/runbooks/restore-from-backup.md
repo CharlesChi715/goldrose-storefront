@@ -13,8 +13,10 @@ about it.
   and no restore has ever been rehearsed.
 - The **Database backup** workflow is red with
   `::error::The nightly database backup FAILED.`
-- It is yellow with `::warning::Database backups are NOT running — missing: …`:
-  backups were never configured, so there is nothing to restore.
+- It is red with `::error::Database backup cannot run. Missing: …`: a GitHub
+  secret or variable was removed, so no backup was made that night.
+- **Uptime** is red with `The last successful database backup is over 25 hours
+  old`: the nightly run failed or GitHub never started it.
 - **Real restore:** the admin shows missing or plainly wrong data, or
   `health.database.failed` keeps appearing and Supabase reports the project
   broken rather than merely paused.
@@ -31,14 +33,15 @@ Nothing here touches live data. Run it in daylight, not during an outage.
 
    ```bash
    brew install awscli
-   aws configure          # access key, secret, region us-west-2, output json
+   aws login              # browser sign-in as charles-admin; no access keys exist
+   aws configure set region us-west-2
    aws sts get-caller-identity
-   export BACKUP_S3_BUCKET='<bucket name>'
+   export BACKUP_S3_BUCKET="$(gh variable get S3_BUCKET)"
    ```
 
-   Good answer: `get-caller-identity` prints your account number and user ARN.
-   ⚠️ Use **your own** AWS login here, not the backup job's keys — that IAM user
-   is put-only by design and cannot list or download.
+   Good answer: `get-caller-identity` ends in `user/charles-admin`.
+   ⚠️ Only a human login can do this. The backup job's role is write-only by
+   design and cannot list or download.
 
 1. **Fetch last night's folder and read the dump before restoring it** — that
    last check needs no database and catches a bad download in five seconds.
@@ -49,7 +52,7 @@ Nothing here touches live data. Run it in daylight, not during an outage.
    ```bash
    aws s3 ls "s3://$BACKUP_S3_BUCKET/db/$(date -u +%Y/%m)/" --recursive | tail -6
    mkdir -p "$HOME/eldreve-drill"
-   aws s3 cp "s3://$BACKUP_S3_BUCKET/db/2026/09/2026-09-06T1700Z/" "$HOME/eldreve-drill" --recursive
+   aws s3 cp "s3://$BACKUP_S3_BUCKET/db/<folder from the listing>/" "$HOME/eldreve-drill" --recursive
    pg_restore --list "$HOME/eldreve-drill/public.dump" | grep -c 'TABLE DATA'
    ```
 
@@ -65,53 +68,83 @@ Nothing here touches live data. Run it in daylight, not during an outage.
    organisation you own**, so a new organisation does not buy a third: if it
    refuses, pause or delete a free project you no longer need, or restore
    `public.dump` only into the local Docker Postgres above and skip the admin
-   check for this drill. Copy its
-   **Session pooler** URI from Connect: the direct host is IPv6-only and the
-   transaction pooler on 6543 cannot serve `pg_restore`. Percent-encode any
-   `@ : / #` in the password, and never paste this line into a commit or chat.
+   check for this drill. The CLI makes one too: `supabase projects create
+   eldreve-restore-drill --org-id <org> --region us-west-2 --db-password <pw>`.
+   Copy its **Session pooler** host from Connect: the direct host is IPv6-only
+   and the transaction pooler on 6543 cannot serve `pg_restore`. ⚠️ The host is
+   per project — on 2026-09-19 the scratch project sat on `aws-0-…` while live
+   sits on `aws-1-…`, and the wrong one answers "Tenant or user not found". Keep
+   the password out of the URL so it needs no percent-encoding, and prove the
+   target is empty and is not live before writing to it — both lines must print 0:
 
    ```bash
-   export DRILL_URL='postgresql://postgres.<scratch-ref>:<password>@aws-1-us-west-2.pooler.supabase.com:5432/postgres'
+   read -rs PGPASSWORD && export PGPASSWORD      # paste the scratch password; nothing is shown
+   export DRILL_URL='postgresql://postgres.<scratch-ref>@<pooler-host>:5432/postgres?sslmode=require'
+   echo "$DRILL_URL" | grep -c cfvsvgbldnzkcjvbwnjp
+   psql "$DRILL_URL" -w -Atc "select count(*) from auth.users"
    ```
 
-3. **Restore our tables, then the platform rows — in that order.** `public.dump`
-   carries schema and data together, so it rebuilds the shop with no migrations
-   run. `platform.dump` is data only, the rows of `auth.users` and
-   `storage.objects` with none of their table definitions, because Supabase
-   provisions those tables itself on every project and a dump carrying its own
-   copies collides and dies half-done — so the rows can only pour in once
-   Supabase has made the tables, which is why they come second.
+3. **Restore the platform rows, then our tables — in that order.**
+   `platform.dump` is data only, the rows of `auth.users` and `storage.objects`
+   with none of their table definitions, because Supabase provisions those
+   tables itself on every project and a dump carrying its own copies collides
+   and dies half-done. It goes **first** because `public.dump` ends by
+   re-creating foreign keys, and several of ours point at `auth.users`: with the
+   users already there all 15 keys come back (drill, 2026-09-19); restored the
+   other way round, those keys are validated against an empty table and are
+   silently left out. `public.dump` carries schema and data together, so it
+   rebuilds the shop with no migrations run.
 
    ⚠️ **Do not judge this by the exit code.** Good answer: it ends with
    `warning: errors ignored on restore: N` and **exits 1**. That is normal
    here, not a failure — `pg_restore` without `--exit-on-error` continues past
-   errors and then exits 1 if it ignored any, and the errors about extensions,
-   `schema "public" already exists`, and duplicate keys on Supabase's own
-   bookkeeping tables each count towards N. It exits 0 only when nothing at all
-   was ignored, which will not happen against a real Supabase project. Judge it
-   by the row counts in step 4 instead.
+   errors and then exits 1 if it ignored any. The 2026-09-19 drill saw exactly
+   five, all Supabase's own bookkeeping: `permission denied for table` on
+   `schema_migrations`, `migrations`, `vector_indexes` and `buckets_vectors`,
+   and `schema "public" already exists`. Anything naming one of **our** tables
+   is a real failure. Judge the restore by the row counts in step 4. Send the
+   output to a file: a failed row prints its contents, which are customer data.
 
    ```bash
-   pg_restore --no-owner --no-privileges --dbname "$DRILL_URL" "$HOME/eldreve-drill/public.dump"
-   pg_restore --no-owner --no-privileges --dbname "$DRILL_URL" "$HOME/eldreve-drill/platform.dump"
+   pg_restore -w --no-owner --no-privileges --dbname "$DRILL_URL" "$HOME/eldreve-drill/platform.dump" > "$HOME/eldreve-drill/platform.log" 2>&1
+   pg_restore -w --no-owner --no-privileges --dbname "$DRILL_URL" "$HOME/eldreve-drill/public.dump" > "$HOME/eldreve-drill/public.log" 2>&1
+   grep -h 'ERROR:' "$HOME"/eldreve-drill/*.log | sort | uniq -c
    ```
 
 4. **Count what landed, and compare with live.** The live password is
    `SUPABASE_DB_PASSWORD` in `.env.local` ([`README.md`](../../README.md)); this
-   query only reads. Good answer: products, customers and users match, orders
-   match or are a few fewer, because the shop kept trading after the dump.
+   query only reads. Good answer: products, customers, users and foreign keys
+   match, orders match or are a few fewer, because the shop kept trading after
+   the dump. The first drill matched on every count.
 
    ```bash
-   export LIVE_URL='postgresql://postgres.cfvsvgbldnzkcjvbwnjp:<password>@aws-1-us-west-2.pooler.supabase.com:5432/postgres'
-   for u in "$DRILL_URL" "$LIVE_URL"; do psql "$u" -c "select
+   Q="select
      (select count(*) from public.orders) as orders,
      (select count(*) from public.products) as products,
      (select count(*) from public.customers) as customers,
      (select count(*) from auth.users) as users,
-     (select count(*) from storage.objects) as image_rows;"; done
+     (select count(*) from storage.objects) as image_rows,
+     (select count(*) from pg_constraint where contype = 'f'
+        and connamespace = 'public'::regnamespace) as foreign_keys;"
+   psql "$DRILL_URL" -w -c "$Q"
+   PGPASSWORD="$(grep '^SUPABASE_DB_PASSWORD=' .env.local | cut -d= -f2-)" psql -w \
+     'postgresql://postgres.cfvsvgbldnzkcjvbwnjp@aws-1-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require' -c "$Q"
    ```
 
-5. **Open the admin against the restored copy.** Shell values beat `.env.local`,
+5. **Read the copy the way the app does.** The admin reads through Supabase's
+   web API, so ask the copy and live the same question and compare; this needs
+   no sign-in. The scratch service key: `supabase projects api-keys --project-ref
+   <scratch-ref>`. Good answer: the two replies are identical (they were, byte
+   for byte, on 2026-09-19).
+
+   ```bash
+   curl -sS "https://<scratch-ref>.supabase.co/rest/v1/orders?select=name,total_cents,financial_status&order=number.desc&limit=5" \
+     -H "apikey: $SCRATCH_KEY" -H "Authorization: Bearer $SCRATCH_KEY"
+   ```
+
+   Opening the admin itself is a bonus, and may not be possible: a scratch
+   project cannot send the sign-in mail, and passkeys are pinned to the real
+   domain. If you try it, shell values beat `.env.local`,
    so this edits no file; run it from the main repo checkout, not a worktree.
    Open `http://localhost:3000/admin/orders`, open one order, and check the
    customer, line items and total against that same order in the live admin. That

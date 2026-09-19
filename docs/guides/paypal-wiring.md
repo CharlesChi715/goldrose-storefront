@@ -1275,7 +1275,7 @@ alter table checkouts
 Apply, verify, record:
 
 ⚠️ `supabase db push` changes the **LIVE database** that eldreve.com reads. Take a dump
-first so a mistake is recoverable: run the manual dump from `infra/aws/aws-backup.md`, or
+first so a mistake is recoverable: run the manual dump (`scripts/backup-db.sh`, see `db-backups.md`), or
 the one-liner below (everything, including `supabase db push`, picks up the exported
 `SUPABASE_DB_PASSWORD` — the CLI reads that variable and does not prompt,
 <https://supabase.com/docs/reference/cli/supabase-db-push>; it prompts only in a tab where
@@ -1944,7 +1944,7 @@ ACDC review alone takes days. Same numbering as the pre-flight table so cross-re
   |    |         | Appendix B → the LIVE Webhook ID into the same password-manager item                        |
   | P6 | Charles | Other hard gates cleared: real shipping rates (OQ-2, shipping-rates.md), demo reviews       |
   |    |         | removed (`npm run seed:reviews -- --remove`), database backups on (status:                  |
-  |    |         | docs/features/db-backups.md; procedure: infra/aws/aws-backup.md)                            |
+  |    |         | docs/features/db-backups.md; restore: docs/runbooks/restore-from-backup.md)                 |
   | P7 | Charles | Sandbox orders cancelled-with-restock, tagged `sandbox`, archived (A9) — while Production   |
   |    |         | still runs sandbox keys                                                                     |
   | P8 | Charles | Migration 0015 applied; Phase D merged to main and running in sandbox on eldreve.com with   |

@@ -41,7 +41,7 @@ markers (`check` fails when the block is stale). Meter legend:
 | [shipping-rates](shipping-rates.md) | ●○○○ ready | not-deployed |
 | [customer-accounts](customer-accounts.md) | ●●○○ in-progress | live |
 | [database-migrations](database-migrations.md) | ●●○○ in-progress | live |
-| [db-backups](db-backups.md) | ●●○○ in-progress | not-deployed |
+| [db-backups](db-backups.md) | ●●○○ in-progress | live |
 | [engagement-tracking](engagement-tracking.md) | ●●○○ in-progress | live |
 | [feature-records](feature-records.md) | ●●○○ in-progress | not-deployed |
 | [product-reviews](product-reviews.md) | ●●○○ in-progress | live |
