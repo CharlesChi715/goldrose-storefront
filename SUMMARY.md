@@ -161,13 +161,9 @@ needs a person who has decided, not an agent who is being helpful.
    OQ-2) — no placeholder rate may be live.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
    `CHECKOUT_SKIP_PAYMENT`.
-5. Turn database backups on — the pipeline is built and dormant. Set
-   `SUPABASE_DB_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and the
-   `BACKUP_S3_BUCKET` variable in GitHub Actions
-   ([db-backups](docs/features/db-backups.md),
-   [guide](infra/aws/aws-backup.md)), then **rehearse one restore**
-   ([runbook](docs/runbooks/restore-from-backup.md)). Until a restore has been
-   rehearsed there is no backup, only files.
+5. Turn database backups on — built and dormant; what is left is in
+   [db-backups](docs/features/db-backups.md) ([guide](infra/aws/aws-backup.md)).
+   Until **one restore is rehearsed** there is no backup, only files.
    AWS root `aws@eldreve.com`; Charles's card pays for now.
 6. Set `ALERT_EMAIL` in Vercel so a failed payment reaches a human
    ([runbook](docs/runbooks/payment-failing.md)).
