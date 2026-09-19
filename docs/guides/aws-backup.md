@@ -318,8 +318,14 @@ after creation.
  └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+> **Decided 2026-09-19 — the settings files live in the repo, in [`infra/aws/`](../../infra/aws/README.md),
+> not in a scratch folder.** Charles works across several devices, and a file that exists on
+> one Mac is a setup nobody else can reproduce. The files hold names and account numbers, never
+> secrets. Where a later section says "create `<name>.json`" with a `cat > … <<'EOF'` block,
+> the file already exists in `infra/aws/` — skip the `cat` and the `sed`, run only the `aws` line.
+
 ```bash
-mkdir -p ~/aws-setup && cd ~/aws-setup          # scratch files live here, never in the repo
+cd infra/aws                                    # from the repo root; the settings files live here
 export AWS_REGION=us-west-2
 export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 export BUCKET="eldreve-backups-${ACCOUNT_ID}-us-west-2-an"   # after §3.1: the name you actually got
@@ -389,11 +395,11 @@ Refs: <https://docs.aws.amazon.com/cli/latest/reference/s3api/put-public-access-
 
 ### 3.3 Lifecycle: 30-day retention
 
-Create `lifecycle.json` in the working folder `~/aws-setup` (not in the repo). The `cat > …
+`lifecycle.json` already exists in `infra/aws` (see the note at the top of §3). The `cat > …
 <<'EOF'` form writes everything up to the closing `EOF` line into the file:
 
 ```bash
-cd ~/aws-setup
+cd infra/aws
 cat > lifecycle.json <<'EOF'
 {
   "Rules": [
@@ -426,11 +432,11 @@ this is only a backstop).
 
 ### 3.4 Refuse plain-HTTP requests
 
-Create `bucket-policy.json` in `~/aws-setup` (verbatim AWS example; `sed` then substitutes
+Create `bucket-policy.json` in `infra/aws` (verbatim AWS example; `sed` then substitutes
 the bucket name):
 
 ```bash
-cd ~/aws-setup
+cd infra/aws
 cat > bucket-policy.json <<'EOF'
 {
   "Version": "2012-10-17",
@@ -491,7 +497,7 @@ anywhere — there is no access key to leak, rotate or forget.
 Docs: <https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws>,
 <https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html>.
 
-All commands: **Mac terminal**, logged in as `charles-admin`, in `~/aws-setup` with the four
+All commands: **Mac terminal**, logged in as `charles-admin`, in `infra/aws` with the four
 lines of the §3 "Working folder + variables" block re-run (new window = re-run them).
 
 ### 4.1 Tell AWS to trust GitHub's token issuer (once per account)
@@ -536,10 +542,10 @@ other branch is *meant* to be refused. ⚠️ Never add `environment:` to the ba
 
 ### 4.3 Trust policy (who may assume the role)
 
-Create `trust-policy.json` in `~/aws-setup` (`<ACCOUNT_ID>` is substituted by `sed` in §4.5):
+Create `trust-policy.json` in `infra/aws` (`<ACCOUNT_ID>` is substituted by `sed` in §4.5):
 
 ```bash
-cd ~/aws-setup
+cd infra/aws
 cat > trust-policy.json <<'EOF'
 {
   "Version": "2012-10-17",
@@ -572,10 +578,10 @@ whose `sub` condition is missing or a bare wildcard
 
 ### 4.4 Permission policy (what the role may do): PutObject only, two prefixes
 
-Create `permission-policy.json` in `~/aws-setup` (`<BUCKET>` is substituted by `sed` in §4.5):
+Create `permission-policy.json` in `infra/aws` (`<BUCKET>` is substituted by `sed` in §4.5):
 
 ```bash
-cd ~/aws-setup
+cd infra/aws
 cat > permission-policy.json <<'EOF'
 {
   "Version": "2012-10-17",
@@ -603,7 +609,7 @@ workflow does **not** use `aws s3 sync` towards AWS — `sync` needs `s3:ListBuc
 ### 4.5 Create the role and record its ARN
 
 ```bash
-cd ~/aws-setup                             # $ACCOUNT_ID and $BUCKET: §3 "Working folder + variables" block
+cd infra/aws                             # $ACCOUNT_ID and $BUCKET: §3 "Working folder + variables" block
 sed -i '' "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" trust-policy.json
 sed -i '' "s/<BUCKET>/$BUCKET/g"          permission-policy.json
 grep -c '<' trust-policy.json permission-policy.json   # both must print 0: no placeholder left
