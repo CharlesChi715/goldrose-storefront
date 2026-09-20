@@ -19,7 +19,7 @@ Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by o
 
 ## What's inside
 
-**Storefront** — 48 pages: catalogue with faceted search, product detail with reviews and per-image spotlight zoom, cart, native PayPal checkout, customer accounts (magic-link and OAuth sign-in), order history, gift reminders and a business-enquiry flow. Structured data, a database-driven sitemap and an `/llms.txt` endpoint make the catalogue legible to search engines and to AI crawlers.
+**Storefront** — 48 pages: catalogue with faceted search, product detail with reviews and per-image spotlight zoom, cart, card checkout on Stripe's hosted page, customer accounts (magic-link and OAuth sign-in), order history, gift reminders and a business-enquiry flow. Structured data, a database-driven sitemap and an `/llms.txt` endpoint make the catalogue legible to search engines and to AI crawlers.
 
 **Admin** — 32 pages modelled on Shopify's operator idiom with [Polaris](https://polaris.shopify.com/): orders (including drafts, abandoned checkouts and packing slips), an inventory screen with reason-coded stock adjustments, customers, discounts, file management, CSV exports, a settings area with a team allowlist, and a homepage editor that makes 175 fields owner-editable. The interface is bilingual, English and Simplified Chinese.
 
@@ -32,7 +32,7 @@ Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by o
 The choices worth explaining, and what each one bought:
 
 - **Two interchangeable database backends behind one 15-method interface.** Hosted Supabase Postgres in production; a single JSON file in local mode. `git clone && npm install && npm run seed && npm run dev` gives you a working shop and admin with no cloud account, no credentials and no Docker — and the test suite runs in that mode, so it can never touch live data.
-- **The server re-prices every cart from the database.** The browser stores only variant IDs and quantities. Mock checkout, PayPal order creation and PayPal capture each recompute the total from database rows, so tampered client state cannot change what a buyer pays.
+- **The server re-prices every cart from the database.** The browser stores only variant IDs and quantities. Mock checkout, Stripe session creation and the Stripe return leg each recompute the total from database rows, so tampered client state cannot change what a buyer pays.
 - **The storefront reads through a SQL view with the public key.** `catalog_products` exposes what a shopper may see; cost and stock columns are not in the view, so a leaked anon key still cannot read margins or inventory.
 - **The admin answers 404, not 401.** `requireAdmin()` runs in the layout and again at the top of every action and route, and a partial Supabase configuration fails closed to a locked admin rather than falling open.
 - **Money is integer cents, everywhere.** No floating point crosses a boundary.
@@ -48,18 +48,18 @@ One Next.js App Router application, server components by default, deployed to Ve
                     ┌───────────────────────────────────────────────┐
   browser  ───────► │  Next.js 16, App Router, React 19             │
                     │                                               │
-                    │  app/         80 pages, 20 route handlers     │
+                    │  app/         80 pages, 21 route handlers     │
                     │  components/  storefront screens (Figma)      │
                     │  lib/         domain logic, zod at every edge │
                     └───────────┬───────────────────────┬───────────┘
                                 │                       │
-                     TableStore interface         PayPal Orders v2
+                     TableStore interface         Stripe Checkout
                      (15 methods, one shape)      server-side only
                                 │                       │
               ┌─────────────────┴─────┐                 ▼
-              ▼                       ▼           create, capture
+              ▼                       ▼           session, return
     Supabase Postgres          .data/db.json      webhook signature
-    21 tables, 13 migrations   one JSON file      verified upstream
+    21 tables, 15 migrations   one JSON file      verified by HMAC
     RLS on every table         (local + CI)
 ```
 
@@ -76,7 +76,7 @@ Admin authentication is Supabase Auth plus membership in an `admin_users` allowl
 | Admin UI | Shopify Polaris 13 and Polaris Viz |
 | Data | Supabase Postgres, or a local JSON file adapter |
 | Auth | Supabase Auth (OAuth, magic link); HMAC cookie in local mode |
-| Payments | PayPal Orders v2, server-side, with signature-verified webhooks |
+| Payments | Stripe Checkout (hosted page), server-side, with signature-verified webhooks |
 | Validation | Zod at every trust boundary |
 | Email | Resend, with console fallback |
 | AI | Anthropic SDK — a scoped admin assistant, key held per admin |
@@ -108,17 +108,17 @@ npx playwright install
 npm run test:e2e     # 193 tests against a production build on port 3001
 ```
 
-The Playwright configuration blanks the Supabase, PayPal and Resend variables for its own server, so the suite cannot reach hosted data, real money or the live email quota. Unit tests cover the logic that is genuinely easy to get wrong: webhook idempotency, price derivation, discount and facet matching, engagement dwell rules, reminder time zones and the migration checker itself.
+The Playwright configuration blanks the Supabase, Stripe and Resend variables for its own server, so the suite cannot reach hosted data, real money or the live email quota. Unit tests cover the logic that is genuinely easy to get wrong: webhook idempotency, price derivation, discount and facet matching, engagement dwell rules, reminder time zones and the migration checker itself.
 
 [CI](.github/workflows/ci.yml) runs ten gates on every push and pull request — `lint`, `typecheck`, `format:check`, `check:assets`, `check:env`, `check:migrations`, `features:check`, `test:unit`, a seed and a full production build. `npm run check` runs the first eight locally in CI's order, so green here means green there. The end-to-end suite runs locally rather than in CI: its pixel baselines are macOS-rendered and would fail on a Linux runner.
 
 ## Repository layout
 
 ```text
-app/            routes — 48 storefront pages, 32 admin pages, 20 handlers
+app/            routes — 48 storefront pages, 32 admin pages, 21 handlers
 components/     storefront screens imported from the design
-lib/            domain logic: catalog, checkout, paypal, admin, account, supabase
-supabase/       13 SQL migrations — 21 tables, views, indexes
+lib/            domain logic: catalog, checkout, stripe, admin, account, supabase
+supabase/       15 SQL migrations — 21 tables, views, indexes
 scripts/        seed, environment and migration guards, Figma sync, feature CLI
 tests/          unit tests and Playwright specs with visual baselines
 docs/           specs, feature records, database reference, learning series
@@ -139,7 +139,7 @@ docs/           specs, feature records, database reference, learning series
 
 The site is live, and the following are deliberately incomplete:
 
-- **Payments run in PayPal sandbox.** The integration is end-to-end and has taken a sandbox payment; switching to live is an owner-only release gate. There is no card rail — the credit-card option is a form, not a processor.
+- **Payments run in Stripe test mode.** Card checkout on Stripe's hosted page is built end to end and has taken test payments and refunds; switching to live keys is an owner-only release gate, so no real card is charged yet.
 - **The policy documents are written but not indexed.** Six `/policies/*` documents were imported from their approved designs and are reachable, each shipping `robots: noindex` until the owner signs off the return window, warranty and arbitration terms they commit to. The journal is still a placeholder, and `/orders/track` shows the design's placeholder timeline — real order status exists for signed-in customers at `/account/orders`.
 - **The storefront is a scaled fixed-width mobile canvas,** not a fluid responsive layout with breakpoints.
 - **The admin assistant is a scoped assistant, not an agent.** It streams answers from a small hand-maintained allowlist document, with each admin supplying their own Anthropic key, stored in Supabase Vault behind restricted-grant functions. No retrieval, no tools, no database access.

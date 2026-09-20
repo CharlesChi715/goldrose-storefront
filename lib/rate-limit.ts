@@ -24,9 +24,9 @@
  *                      discount lookup.
  *   - drop (200)     — analytics. Losing a row is free; blocking a shopper's
  *                      page or search is not. The route lies cheerfully.
- *   - never limited  — /api/paypal/capture. A refused capture is money taken
+ *   - never limited  — /api/stripe/return. A refused return is money taken
  *                      with no order recorded. It is idempotent by design and
- *                      guarded by PayPal itself; it does not get a limiter.
+ *                      guarded by Stripe itself; it does not get a limiter.
  */
 
 /** One rule: at most `limit` hits in a `windowMs` sliding window. */
@@ -67,7 +67,7 @@ export const LIMITS = {
   /** Guessing discount codes is the one brute-force worth naming. */
   discount: { limit: 20, windowMs: MINUTE },
   /**
-   * Starts a PayPal order, or places a mock one. Deliberately loose: this is
+   * Starts a Stripe Checkout session, or places a mock order. Deliberately loose: this is
    * the one limited route the e2e suite drives repeatedly, all of it from a
    * single localhost address, and a limiter that turns the test suite red is
    * a limiter somebody will delete. 60 checkouts in ten minutes from one

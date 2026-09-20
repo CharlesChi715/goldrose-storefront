@@ -46,7 +46,6 @@ export type OrderDetail = {
   events: OrderEventRow[];
   customer: (CustomerRow & { ordersCount: number }) | null;
   conversion: ConversionSummary | null;
-  sellerProtection: string | null;
 };
 
 /** Display name for an order's customer: customer name ▸ order email ▸ shipping name ▸ "—". */
@@ -139,8 +138,7 @@ async function conversionFor(
 
 /**
  * Full order detail: lines, timeline events (newest first), the customer
- * with their lifetime order count, the conversion summary, and the PayPal
- * seller-protection status dug out of the raw capture payload.
+ * with their lifetime order count, and the conversion summary.
  *
  * @param id - Order id; unknown ids return null.
  */
@@ -158,13 +156,6 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
   }
   const customer =
     customers.find((row) => row.id === order.customer_id) ?? null;
-  const raw = order.raw as {
-    purchase_units?: Array<{
-      payments?: {
-        captures?: Array<{ seller_protection?: { status?: string } }>;
-      };
-    }>;
-  } | null;
   return {
     order,
     lines: lines.filter((line) => line.order_id === id),
@@ -179,9 +170,6 @@ export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
         }
       : null,
     conversion: await conversionFor(order.visitor_id),
-    sellerProtection:
-      raw?.purchase_units?.[0]?.payments?.captures?.[0]?.seller_protection
-        ?.status ?? null,
   };
 }
 
@@ -284,7 +272,7 @@ async function restockLines(orderId: string, orderName: string, actor: string) {
 }
 
 /**
- * Refund (§9.4): custom amount + optional restock. Real PayPal orders hit
+ * Refund (§9.4): custom amount + optional restock. Real Stripe orders hit
  * the provider refund API via provider_capture_id; mock orders record the
  * refund locally only. The §10.5 webhook independently confirms status.
  * Throws when the amount is out of range or the order can't be refunded.
@@ -336,7 +324,7 @@ export async function refundOrder(input: {
 
 /**
  * Cancel (§9.4): unfulfilled only; optional full refund of the remainder +
- * restock. Real PayPal payments refund through the provider API; a timeline
+ * restock. Real Stripe payments refund through the provider API; a timeline
  * event records what was done. Throws when fulfilled or already cancelled.
  *
  * @param input - Order id, optional reason, refund/restock flags, and the acting admin.

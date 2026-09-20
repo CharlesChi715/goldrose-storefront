@@ -64,8 +64,8 @@ Dated 2026-08-08:
   `region-alignment`) moved `test-deployment` → `live` — their code ships in
   the eldreve.com production deployment, and rollout states where code runs,
   not whether anyone has exercised it yet. Each records the judgment in its
-  own Context. `paypal-wallet` stays `test-deployment`: its code is live but
-  runs against PayPal sandbox, which is the state the value names.
+  own Context. (`paypal-wallet` was the one exception, held at `test-deployment`;
+  it was dropped and its code removed on 2026-09-20.)
 
 ## Related links
 

@@ -2,14 +2,16 @@ import type { PricedCart } from "../checkout/pricing.ts";
 
 export type StripeConfig = {
   configured: boolean;
+  live: boolean;
   secretKey: string;
   webhookSecret: string;
 };
 
 /**
  * Read Stripe settings from env vars. `configured` is true only when the
- * secret key is present; the webhook secret is carried separately because
- * webhook verification fails closed without it.
+ * secret key is present; `live` is true when that key's own prefix says real
+ * money (`sk_live_`, or a restricted `rk_live_`). The webhook secret is
+ * carried separately because webhook verification fails closed without it.
  *
  * @returns The resolved config; never throws on missing vars.
  */
@@ -17,6 +19,7 @@ export function getStripeConfig(): StripeConfig {
   const secretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
   return {
     configured: Boolean(secretKey),
+    live: /^(sk|rk)_live_/.test(secretKey),
     secretKey,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? "",
   };

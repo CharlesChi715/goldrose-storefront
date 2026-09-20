@@ -50,11 +50,11 @@ markers (`check` fails when the block is stale). Meter legend:
 | [home-content-admin](home-content-admin.md) | ●●●○ uat | live |
 | [media-spotlight](media-spotlight.md) | ●●●○ uat | live |
 | [order-tracking](order-tracking.md) | ●●●○ uat | live |
-| [paypal-wallet](paypal-wallet.md) | ●●●○ uat | test-deployment |
 | [posting-account-attribution](posting-account-attribution.md) | ●●●○ uat | live |
 | [shop-facets](shop-facets.md) | ●●●○ uat | live |
 | [storefront-search](storefront-search.md) | ●●●○ uat | live |
 | [region-alignment](region-alignment.md) | ●●●● accepted | live |
+| [paypal-wallet](paypal-wallet.md) | ✕ dropped | not-deployed |
 
 <!-- END features:roadmap -->
 

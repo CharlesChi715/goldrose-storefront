@@ -2,8 +2,8 @@
  * ROLE OF THIS FILE
  * /checkout — server half: loads the DB catalog (safe view), shipping zones
  * and served countries, defaults the ship-to country from Vercel's geo-IP
- * header (§8), and mounts the client checkout with the PayPal client id
- * when configured (sandbox until launch) or mock mode otherwise.
+ * header (§8), and mounts the client checkout with the Stripe card rail
+ * when its key is set, or mock mode otherwise.
  */
 
 import { headers } from "next/headers";
@@ -40,15 +40,9 @@ export default async function CheckoutPage() {
     ? geo
     : "US";
 
-  // Testing-phase switch: skip payment entirely, so the PayPal buttons must
-  // not mount even when the keys exist (§10.4, lib/checkout/mode.ts).
+  // Testing-phase switch: skip payment entirely, so the card rail must not
+  // show even when its key exists (§10.4, lib/checkout/mode.ts).
   const skipPayment = skipPaymentEnabled();
-  const paypalClientId =
-    !skipPayment &&
-    process.env.PAYPAL_CLIENT_ID &&
-    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
-      ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
-      : null;
   // Card rail (docs/features/card-payments.md): Stripe Checkout hosts the
   // card page, so the client only needs to know the rail exists — no key.
   const stripeEnabled =
@@ -60,7 +54,6 @@ export default async function CheckoutPage() {
       zones={zones}
       countries={countries}
       defaultCountry={defaultCountry}
-      paypalClientId={paypalClientId}
       stripeEnabled={stripeEnabled}
       showDiscountField={showDiscountField}
       skipPayment={skipPayment}

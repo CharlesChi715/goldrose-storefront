@@ -5,16 +5,16 @@
  * lib/checkout/pricing.ts and lib/supabase/types.ts.
  */
 
-/** The two checkout methods (§10 — OQ-1 working assumption: PayPal). */
-export type PaymentMethodId = "card" | "paypal";
+/** The checkout method: card (Stripe Checkout when configured, the mock form otherwise). */
+export type PaymentMethodId = "card";
 
-export type PaymentMethodKind = "express" | "card";
+export type PaymentMethodKind = "card";
 
 /**
  * Card fields are only ever used transiently in MOCK mode to validate format
  * and derive a brand + last four. They are NEVER persisted, logged, or
  * forwarded anywhere. With a real provider configured, the card UI is
- * PayPal's — no PAN ever reaches this server (§10.4).
+ * Stripe's — no PAN ever reaches this server (§10.4).
  */
 export type CardInput = {
   number: string;

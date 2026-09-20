@@ -8,14 +8,14 @@
  * Two things change here:
  *
  * 1. `logEvent` writes ONE JSON line per event — `level`, `event`, then the
- *    fields — so a log search for `paypal.capture.failed` finds every case,
+ *    fields — so a log search for `stripe.return.failed` finds every case,
  *    and an order id sits in a field rather than inside a sentence.
  * 2. `alert` does that AND emails the owner, through the same Resend link the
  *    order emails use (no new account, no new key). It is throttled to one
  *    email per event per 15 minutes per server instance, so a broken webhook
  *    at midnight is one message with a count, not four hundred.
  *
- * Event names are dotted, lowercase, past tense: `paypal.capture.failed`.
+ * Event names are dotted, lowercase, past tense: `stripe.return.failed`.
  * Alerts are for the money path and the health check only; everything else
  * is a log line. Neither function ever throws — reporting a failure must not
  * become a second failure.
@@ -53,7 +53,7 @@ export function describeError(error: unknown): ErrorShape {
  * ever found at 3 a.m.
  *
  * @param level - info, warn or error; picks the console stream.
- * @param event - Dotted event name, e.g. `paypal.webhook.failed`.
+ * @param event - Dotted event name, e.g. `stripe.webhook.failed`.
  * @param fields - Searchable context: ids, statuses, amounts. No secrets.
  */
 export function logEvent(

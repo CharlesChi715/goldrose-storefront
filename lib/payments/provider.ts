@@ -1,4 +1,3 @@
-import { getPayPalConfig, refundPayPalCapture } from "../paypal/client.ts";
 import { getStripeConfig, refundStripeCharge } from "../stripe/client.ts";
 import type { OrderRow } from "../supabase/types.ts";
 
@@ -22,18 +21,6 @@ export async function refundProviderPayment(
   }
   switch (order.payment_provider) {
     case "mock":
-      return;
-    case "paypal":
-      if (!getPayPalConfig().configured) {
-        throw new Error(
-          "PayPal is not configured — cannot refund a real payment.",
-        );
-      }
-      await refundPayPalCapture(
-        order.provider_capture_id,
-        amountCents,
-        order.currency,
-      );
       return;
     case "stripe":
       if (!getStripeConfig().configured) {

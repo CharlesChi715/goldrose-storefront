@@ -225,9 +225,9 @@ export BACKUP_S3_BUCKET='<bucket name>'
    because the CLI's migration history is not in the dump and it would replay
    everything ([database-migrations](../features/database-migrations.md)).
 
-4. **Recover the orders the dump missed.** PayPal holds the money, so payments
-   taken after the dump are unrecorded rather than lost: reconcile the PayPal
-   transactions after the dump's timestamp, plus any `paypal.capture.orphaned`
+4. **Recover the orders the dump missed.** Stripe holds the money, so payments
+   taken after the dump are unrecorded rather than lost: reconcile the Stripe
+   payments after the dump's timestamp, plus any `stripe.return.orphaned`
    alert emails, and re-enter those orders by hand.
 
 **How long:** a project provisions in minutes, this restore runs in under a
@@ -235,7 +235,7 @@ minute, the redeploy takes a couple more; budget an hour, and never rush the
 evidence dump to save five of them. **Tell the bosses**, in one message and plain
 words: what broke, that the shop is not taking orders while it is repaired, that
 the last saved copy is from *(the time, in Sydney)*, that any payment taken after
-that is safe with PayPal and will be re-entered by hand, and when you will update
+that is safe with Stripe and will be re-entered by hand, and when you will update
 them next. Do **not** promise full recovery before the counts match, do not
 refund anything, and do not take orders by message as a workaround — an order
 outside the system is an order nobody ships.

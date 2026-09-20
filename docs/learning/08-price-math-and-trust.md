@@ -6,7 +6,7 @@ Traced end to end per [README.md](README.md).
 ## Feature Summary
 
 **What it does**
-Turns `[{variantId, quantity}]` plus a country and an optional discount code into an exact amount of money, on the server, from database prices. The result is one object, [`PricedCart`](../../lib/checkout/pricing.ts#L33-L45), and every path that charges anyone — mock checkout, PayPal create, PayPal capture, the discount preview — produces it by calling the same function, [`priceCart()`](../../lib/checkout/pricing.ts#L100).
+Turns `[{variantId, quantity}]` plus a country and an optional discount code into an exact amount of money, on the server, from database prices. The result is one object, [`PricedCart`](../../lib/checkout/pricing.ts#L33-L45), and every path that charges anyone — mock checkout, Stripe session creation, the Stripe return leg, the discount preview — produces it by calling the same function, [`priceCart()`](../../lib/checkout/pricing.ts#L100).
 
 **Why it exists**
 
@@ -59,7 +59,7 @@ Key jargon:
                        │           + shipping + tax           │
                        └────┬─────────────────────────────────┘
                             ▼
-                         PricedCart ──▶ orders row / PayPal breakdown
+                         PricedCart ──▶ orders row / Stripe line items 
 ```
 
 ### Step 1 — The unit: integer cents, everywhere
@@ -130,7 +130,7 @@ function toCents(dollars: string): number | null {
 }
 ```
 
-⚠️ Worth knowing: the display conversion is *not* actually centralised. A dozen files re-implement it as `` `$${(cents / 100).toFixed(2)}` `` — CSV exports, emails, PayPal, timeline strings. Harmless today because the inputs are integers, but it means a future currency change is a dozen-file edit rather than one.
+⚠️ Worth knowing: the display conversion is *not* actually centralised. A dozen files re-implement it as `` `$${(cents / 100).toFixed(2)}` `` — CSV exports, emails, timeline strings. Harmless today because the inputs are integers, but it means a future currency change is a dozen-file edit rather than one.
 
 ### Step 2 — The cart holds no prices
 
@@ -235,7 +235,7 @@ export function computeShipping(
 
 Note `>=` — spend exactly $75.00 and shipping is free. Off-by-one decisions like this are worth being deliberate about; the inclusive form is what customers expect from "free over $75".
 
-Naming trap: `lib/checkout/methods.ts` is **payment** methods (PayPal / card), not shipping methods. And the Standard/Express/Next-Day picker on the checkout screen is *cosmetic* — a documented owner decision at [CheckoutClient.tsx:383-391](../../app/checkout/CheckoutClient.tsx#L383-L391). Every method ships at the zone rate. Knowing which controls are real is half of reading this repo.
+Naming trap: `lib/checkout/methods.ts` is **payment** methods (card), not shipping methods. And the Standard/Express/Next-Day picker on the checkout screen is *cosmetic* — a documented owner decision at [CheckoutClient.tsx:383-391](../../app/checkout/CheckoutClient.tsx#L383-L391). Every method ships at the zone rate. Knowing which controls are real is half of reading this repo.
 
 ```tsx
 // app/checkout/CheckoutClient.tsx:383-391
@@ -421,7 +421,7 @@ Three server routes can price a cart. All three call `priceCart()`, and all thre
 | Route                                                                          | Purpose                        |
 | ------------------------------------------------------------------------------ | ------------------------------ |
 | [app/api/checkout/route.ts](../../app/api/checkout/route.ts#L86-L92)           | mock / card checkout           |
-| [app/api/paypal/create/route.ts](../../app/api/paypal/create/route.ts#L45-L50) | open a PayPal order            |
+| [app/api/stripe/checkout/route.ts](../../app/api/stripe/checkout/route.ts#L65) | open a Stripe Checkout Session |
 | [app/api/discount/route.ts](../../app/api/discount/route.ts#L38-L43)           | preview a code (advisory only) |
 
 Here is the whole accepted shape of a checkout request — read the `lines` array and notice what is *not* in it:
@@ -430,7 +430,7 @@ Here is the whole accepted shape of a checkout request — read the `lines` arra
 // app/api/checkout/route.ts:22-38
 const requestSchema = z.object({
   // "none" = the CHECKOUT_SKIP_PAYMENT flow: order placed with no payment step.
-  method: z.enum(["card", "paypal", "none"]),
+  method: z.enum(["card", "none"]),
   lines: z
     .array(
       z.object({
@@ -487,37 +487,39 @@ And it is tested. [tests/e2e/checkout.spec.ts:130-153](../../tests/e2e/checkout.
 
 **Write the attack as a test.** A comment saying "we don't trust client prices" decays; a test that pays $0.01 and demands $55.94 does not.
 
-The strongest link is PayPal capture ([capture/route.ts:50-68](../../app/api/paypal/capture/route.ts#L50-L68)): it does not even trust the totals it stored minutes earlier at create time. It re-prices from the persisted cart, and it re-resolves the country from the address PayPal actually returned:
+The strongest link is the Stripe return leg ([return/route.ts:77-88](../../app/api/stripe/return/route.ts#L77-L88)): it does not even trust the totals it stored minutes earlier when the session was created. It re-prices from the persisted cart, and it re-resolves the country from the address Stripe actually collected:
 
 ```ts
-// app/api/paypal/capture/route.ts:50-61
-    // §10.3: verify the ship-to country is in a served zone; PayPal's
-    // shipping address wins over the pre-checkout selection when it differs.
-    const country = mapped.shipToCountry ?? checkout.cart.country ?? "US";
+// app/api/stripe/return/route.ts:77-88
+    // Re-price with the country Stripe collected the address for; the
+    // session's allowed_countries kept it inside the priced zone.
     const priced = await priceCart({
       lines: checkout.cart.lines.map((line) => ({
         variantId: line.variant_id,
         quantity: line.quantity,
       })),
-      country,
+      country: mapped.shipToCountry ?? checkout.cart.country ?? "US",
       discountCode: checkout.discount_code,
       email: mapped.email ?? checkout.email,
     });
 ```
 
-If the recomputed total disagrees with what was captured, it logs and keeps going — money has already moved, so refusing is not on the menu:
+If the recomputed total disagrees with what was captured, it does not record a paid order at the wrong amount. It gives the money back, marks the checkout `rejected` so the webhook cannot rebuild it, and alerts a human:
 
 ```ts
-// app/api/paypal/capture/route.ts:63-68
+// app/api/stripe/return/route.ts:89-117 (abridged)
     if (mapped.amountCents !== null && mapped.amountCents !== priced.total_cents) {
-      // Amount drift (e.g. price edited mid-checkout) — keep the record, flag it.
-      console.error(
-        `[paypal/capture] amount mismatch: captured ${mapped.amountCents}, priced ${priced.total_cents}`,
-      );
+      const refundTarget = mapped.chargeId ?? mapped.paymentIntentId;
+      if (refundTarget) {
+        await refundStripeCharge(refundTarget, null);
+      }
+      await getStore().update("checkouts", { id: checkout.id }, { status: "rejected", /* … */ });
+      await alert("stripe.return.amount-mismatch", /* … */);
+      return back("/checkout?step=payment&payerror=drift");
     }
 ```
 
-That is the honest handling of a real distributed-systems problem: after an external side effect, you can detect divergence but not undo it. Detect, record, alert — never pretend.
+That is the honest handling of a real distributed-systems problem: after an external side effect you cannot un-happen it, only compensate. Detect, compensate (refund), alert — never pretend the payment was for the right amount.
 
 ### Step 7 — The mirror in the browser, and where it lies
 
@@ -549,7 +551,7 @@ But a mirror that drifts still shows the customer a wrong number. Look at that l
   const total = subtotal - discountCents + shippingInfo.amount;
 ```
 
-The server total is `discountedSubtotal + shipping + tax`. The client's is the same **only while the tax rate is 0**. Set a non-zero rate in admin and the button reads `Pay $54.94 Securely` while PayPal charges more. Related: the applied discount is not re-validated when quantity or country changes — only the APPLY button refetches — so a stale discount can sit on screen until pay time.
+The server total is `discountedSubtotal + shipping + tax`. The client's is the same **only while the tax rate is 0**. Set a non-zero rate in admin and the button reads `Pay $54.94 Securely` while Stripe charges more. Related: the applied discount is not re-validated when quantity or country changes — only the APPLY button refetches — so a stale discount can sit on screen until pay time.
 
 Neither can overcharge anyone (the server is authoritative), but both are *disclosure* bugs, and price-versus-charge mismatches are a consumer-protection issue as much as an engineering one. The general lesson:
 

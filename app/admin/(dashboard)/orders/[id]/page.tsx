@@ -35,7 +35,6 @@ export default async function OrderDetailPage({
           : null
       }
       conversion={detail.conversion}
-      sellerProtection={detail.sellerProtection}
     />
   );
 }

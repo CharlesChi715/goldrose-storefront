@@ -84,10 +84,6 @@ export const PUBLIC_BY_CONSTRUCTION = new Map([
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "grants nothing by itself — Row Level Security decides what a request may do",
   ],
-  [
-    "NEXT_PUBLIC_PAYPAL_CLIENT_ID",
-    "PayPal's public client id, required by the browser SDK",
-  ],
 ]);
 
 /** Words that mean "this is a credential" in an environment variable name. */

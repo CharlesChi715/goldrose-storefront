@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Order creation (§7.4, §10.1) — the one path every completed checkout goes
- * through: mock checkout, PayPal capture, draft "Mark as paid", and the
+ * through: mock checkout, the Stripe return leg, draft "Mark as paid", and the
  * webhook's repair flow. Writes the order + snapshot lines, decrements
  * stock with visible 'order' movements, auto-creates/links the customer,
  * records timeline events, completes the checkouts row, and sends emails.
@@ -26,7 +26,7 @@ import type { PricedCart } from "../checkout/pricing.ts";
 export type CreateOrderInput = {
   priced: PricedCart;
   source: OrderSource;
-  payment_provider: string; // 'mock' | 'paypal' | …
+  payment_provider: string; // 'mock' | 'stripe' | …
   provider_order_id?: string | null;
   provider_capture_id?: string | null;
   financial_status?: FinancialStatus;

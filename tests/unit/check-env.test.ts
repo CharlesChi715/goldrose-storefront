@@ -68,11 +68,10 @@ test("a secret-shaped NEXT_PUBLIC_ name is an error, however it arrives", () => 
   );
 });
 
-test("the two legitimately public credentials are allowed, with a reason", () => {
-  const { errors } = compare(
-    reads("NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_PAYPAL_CLIENT_ID"),
-    ["NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_PAYPAL_CLIENT_ID"],
-  );
+test("the one legitimately public credential is allowed, with a reason", () => {
+  const { errors } = compare(reads("NEXT_PUBLIC_SUPABASE_ANON_KEY"), [
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  ]);
   assert.deepEqual(errors, []);
 });
 

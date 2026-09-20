@@ -16,12 +16,12 @@
  *
  * The checkout itself is unchanged: cart lines with quantity controls,
  * ship-to country (zone-priced shipping), optional gift message (→ the
- * order's Notes card), discount codes (§8), and payment. With PayPal
- * configured the real JS-SDK button drives /api/paypal/create + /capture
- * from inside the fixed pay bar's CTA slot; otherwise the payment section's
- * PayPal row and the local card wells drive /api/checkout — full
- * click-through, no money anywhere. With `skipPayment` (CHECKOUT_SKIP_PAYMENT,
- * §10.4) both are replaced by a single Place-order CTA in the pay bar.
+ * order's Notes card), discount codes (§8), and payment. With Stripe
+ * configured the pay bar's CTA redirects to Stripe Checkout through
+ * /api/stripe/checkout; otherwise the local card wells drive /api/checkout —
+ * full click-through, no money anywhere. With `skipPayment`
+ * (CHECKOUT_SKIP_PAYMENT, §10.4) both are replaced by a single Place-order CTA
+ * in the pay bar.
  *
  * DEV BANDS (design's field language, flagged to the design team):
  * - Discount code: the design deleted the code-entry card again, but §8 keeps
@@ -37,8 +37,8 @@
  *   to the real cart (AI-017).
  * - Shipping is still zone-priced, but the zone now comes solely from
  *   Vercel's geo-IP header (`x-vercel-ip-country`, "US" when absent) with no
- *   way for the customer to correct a wrong guess (AI-018). The PayPal
- *   branch is unaffected — PayPal collects the real address itself.
+ *   way for the customer to correct a wrong guess (AI-018). The Stripe
+ *   branch is unaffected — Stripe Checkout collects the real address itself.
  *
  * AI-TAG(AI-017): AGENT-BLOCKED — no cart editing anywhere in the live site;
  * wire /bag to the real cart. See
@@ -61,7 +61,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScaleFrame } from "@/components/chrome";
 import { abs } from "@/lib/figma-layout";
 import { notoSC, playfair } from "@/lib/fonts";
@@ -577,102 +577,6 @@ function FieldBox({
   );
 }
 
-/** Real PayPal JS-SDK buttons (sandbox/live keys decide which world). */
-function PayPalSdkButtons({
-  clientId,
-  buildPayload,
-  onFail,
-}: {
-  clientId: string;
-  buildPayload: () => {
-    lines: Array<{ variantId: string; quantity: number }>;
-    country: string;
-    note?: string;
-  };
-  onFail: (message: string) => void;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  // Latest-ref: the PayPal SDK callbacks below outlive any single render, so
-  // they read the current payload builder through this ref.
-  const payloadRef = useRef(buildPayload);
-  useEffect(() => {
-    payloadRef.current = buildPayload;
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-    const scriptId = "paypal-sdk";
-
-    function renderButtons() {
-      const paypal = (
-        window as unknown as {
-          paypal?: {
-            Buttons: (options: unknown) => {
-              render: (el: HTMLElement) => void;
-            };
-          };
-        }
-      ).paypal;
-      if (!paypal || !containerRef.current || cancelled) {
-        return;
-      }
-      containerRef.current.innerHTML = "";
-      paypal
-        .Buttons({
-          createOrder: async () => {
-            const response = await fetch("/api/paypal/create", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payloadRef.current()),
-            });
-            const data = await response.json();
-            if (!response.ok || !data.id) {
-              throw new Error(data.error ?? "Could not start PayPal checkout.");
-            }
-            return data.id;
-          },
-          onApprove: async (data: { orderID: string }) => {
-            const response = await fetch("/api/paypal/capture", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderID: data.orderID }),
-            });
-            const result = await response.json();
-            if (!response.ok || !result.redirectUrl) {
-              throw new Error(result.error ?? "Could not capture payment.");
-            }
-            window.localStorage.removeItem("goldrose-cart-v2");
-            window.location.assign(result.redirectUrl);
-          },
-          onError: (error: unknown) => {
-            onFail(
-              error instanceof Error
-                ? error.message
-                : "PayPal checkout failed.",
-            );
-          },
-        })
-        .render(containerRef.current);
-    }
-
-    if (document.getElementById(scriptId)) {
-      renderButtons();
-    } else {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`;
-      script.onload = renderButtons;
-      script.onerror = () => onFail("Could not load PayPal.");
-      document.head.appendChild(script);
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [clientId, onFail]);
-
-  return <div ref={containerRef} />;
-}
-
 /**
  * The Secure Pay Bar (2157:526) — 430×75, fixed to the viewport bottom. In
  * the frame it overflows the canvas, i.e. the design pins it ("固定在底部").
@@ -683,12 +587,10 @@ function PayBar({
   total,
   label,
   onPay,
-  payButtonSlot,
 }: {
   total: string;
   label: string;
-  onPay?: () => void;
-  payButtonSlot?: React.ReactNode;
+  onPay: () => void;
 }) {
   return (
     <>
@@ -713,36 +615,30 @@ function PayBar({
         >
           {total}
         </Txt>
-        {payButtonSlot ? (
-          /* With PayPal live the SDK's own iframe button is the only thing
-             that can start a payment; it fills the CTA's 276×48 box. */
-          <div style={abs(150, 13.5, 276, 48)}>{payButtonSlot}</div>
-        ) : (
-          <button
-            type="button"
-            onClick={onPay}
-            className={notoSC.className}
-            style={{
-              ...abs(150, 13.5, 276, 48),
-              background: INK,
-              borderRadius: 10,
-              border: 0,
-              padding: 0,
-              cursor: "pointer",
-              fontSize: 12,
-              lineHeight: "48px",
-              fontWeight: 500,
-              letterSpacing: 1.1,
-              color: CREAM,
-              textAlign: "center",
-            }}
-          >
-            {label}
-            <span style={{ color: GOLD, marginLeft: 10, fontWeight: 500 }}>
-              →
-            </span>
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onPay}
+          className={notoSC.className}
+          style={{
+            ...abs(150, 13.5, 276, 48),
+            background: INK,
+            borderRadius: 10,
+            border: 0,
+            padding: 0,
+            cursor: "pointer",
+            fontSize: 12,
+            lineHeight: "48px",
+            fontWeight: 500,
+            letterSpacing: 1.1,
+            color: CREAM,
+            textAlign: "center",
+          }}
+        >
+          {label}
+          <span style={{ color: GOLD, marginLeft: 10, fontWeight: 500 }}>
+            →
+          </span>
+        </button>
       </div>
     </>
   );
@@ -753,7 +649,6 @@ export function CheckoutClient({
   zones,
   countries,
   defaultCountry,
-  paypalClientId,
   stripeEnabled = false,
   showDiscountField = true,
   skipPayment = false,
@@ -762,7 +657,6 @@ export function CheckoutClient({
   zones: ShippingZone[];
   countries: Array<{ code: string; name: string }>;
   defaultCountry: string;
-  paypalClientId: string | null;
   /** Card rail: server has STRIPE_SECRET_KEY, so the Pay-by-card action
    * redirects to Stripe's hosted checkout page. */
   stripeEnabled?: boolean;
@@ -1041,9 +935,9 @@ export function CheckoutClient({
   }
 
   /** The mock-card branch: the only branch whose form is actually submitted.
-   * Any real rail — PayPal wallet or Stripe cards — retires it: a PAN typed
-   * into our own form is exactly what the hosted rails exist to avoid. */
-  const mockForm = !skipPayment && !paypalClientId && !stripeEnabled;
+   * The real rail, Stripe cards, retires it: a PAN typed into our own form is
+   * exactly what the hosted rail exists to avoid. */
+  const mockForm = !skipPayment && !stripeEnabled;
   const first = lines[0] ?? null;
   /** The item card shows line 1; any further lines are listed read-only. */
   const extraLines = lines.slice(1);
@@ -1377,7 +1271,7 @@ export function CheckoutClient({
               lh={10.8}
               color={MUTED}
             >
-              {paypalClientId || stripeEnabled
+              {stripeEnabled
                 ? "The delivery address is collected on the secure payment page."
                 : "Test mode — no delivery address is collected."}
             </Txt>
@@ -1727,7 +1621,7 @@ export function CheckoutClient({
                 color={INK}
                 wrap
               >
-                {paypalClientId || stripeEnabled
+                {stripeEnabled
                   ? "The delivery address is collected on the secure payment page."
                   : "Test mode — no delivery address is collected."}
               </Txt>
@@ -2046,9 +1940,7 @@ export function CheckoutClient({
                   lh={12}
                   color={MUTED}
                 >
-                  {paypalClientId
-                    ? "Card and bank details are collected in PayPal's own window."
-                    : "Test mode — no payment details are collected."}
+                  {"Test mode — no payment details are collected."}
                 </Txt>
               )}
               {stripeEnabled ? (
@@ -2090,7 +1982,10 @@ export function CheckoutClient({
               )}
             </>
           )}
-          {/* PayPal / Apple Pay / Afterpay rows (2170:258/263/268) */}
+          {/* PayPal / Apple Pay / Afterpay rows (2170:258/263/268).
+              AI-TAG(AI-052): OWNER-DECISION — the frame draws payment brands
+              we do not accept; only cards through Stripe are real. See
+              /agent-delivery/sessions/aws-paypal-wireup-09-20-worktree-remove-paypal.md. */}
           {[
             { label: "PayPal", meta: "PayPal", y: T_PAYMENT + 174 },
             { label: "Apple Pay", meta: " Pay", y: T_PAYMENT + 225 },
@@ -2136,29 +2031,6 @@ export function CheckoutClient({
               </Txt>
             </div>
           ))}
-          {/* In mock mode the PayPal row is the mock express entry — a
-              transparent live twin sits on the row's own box. */}
-          {mockForm ? (
-            <button
-              type="button"
-              onClick={() => {
-                if (!isBusy) {
-                  submitMockCheckout("paypal", false);
-                }
-              }}
-              aria-label="Pay with PayPal"
-              style={{
-                ...abs(28, T_PAYMENT + 174, 374, 44),
-                appearance: "none",
-                border: 0,
-                margin: 0,
-                padding: 0,
-                background: "transparent",
-                cursor: "pointer",
-              }}
-            />
-          ) : null}
-
           {/* ---------- Band · discount code (§8 keeps the feature) ---------- */}
           {showDiscountField ? (
             <>
@@ -2457,19 +2329,13 @@ export function CheckoutClient({
             align="center"
             wrap
           >
-            {pendingMethod === "paypal"
-              ? "Starting PayPal checkout…"
-              : pendingMethod === "card" && stripeEnabled
-                ? "Opening Stripe's secure card checkout…"
-                : skipPayment
-                  ? "Testing phase — payment is switched off. The order is recorded in the admin with a test badge and no money moves."
-                  : mockForm
-                    ? "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."
-                    : stripeEnabled && paypalClientId
-                      ? "Pay with PayPal, or by card on Stripe's secure page."
-                      : stripeEnabled
-                        ? "Card payments are completed on Stripe's secure page."
-                        : "PayPal collects shipping and payment in its own secure window."}
+            {pendingMethod === "card" && stripeEnabled
+              ? "Opening Stripe's secure card checkout…"
+              : skipPayment
+                ? "Testing phase — payment is switched off. The order is recorded in the admin with a test badge and no money moves."
+                : mockForm
+                  ? "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."
+                  : "Card payments are completed on Stripe's secure page."}
           </Txt>
         </div>
       </ScaleFrame>
@@ -2478,35 +2344,25 @@ export function CheckoutClient({
       <PayBar
         total={formatMoney(total)}
         label={payLabel}
-        {...(!skipPayment && paypalClientId
-          ? {
-              payButtonSlot: (
-                <PayPalSdkButtons
-                  clientId={paypalClientId}
-                  buildPayload={() => checkoutPayload(rawLines)}
-                  onFail={setError}
-                />
-              ),
-            }
-          : {
-              onPay: skipPayment
-                ? () => {
-                    if (!isBusy) {
-                      submitMockCheckout("none", false);
-                    }
+        onPay={
+          skipPayment
+            ? () => {
+                if (!isBusy) {
+                  submitMockCheckout("none", false);
+                }
+              }
+            : stripeEnabled
+              ? () => {
+                  if (!isBusy) {
+                    startStripeCheckout();
                   }
-                : stripeEnabled
-                  ? () => {
-                      if (!isBusy) {
-                        startStripeCheckout();
-                      }
-                    }
-                  : () => {
-                      if (!isBusy) {
-                        submitMockCheckout("card", true);
-                      }
-                    },
-            })}
+                }
+              : () => {
+                  if (!isBusy) {
+                    submitMockCheckout("card", true);
+                  }
+                }
+        }
       />
     </>
   );

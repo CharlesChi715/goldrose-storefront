@@ -157,7 +157,7 @@ agent-inbox` so it reaches
   `OWNER-DECISION` row instead of being lost in chat, then add a dated entry to
   `.ai/WORKLOG.md`.
 - **The rule that prevents a repeat: never point the test suite at production
-  credentials.** `npm run test:e2e` blanks the Resend, Supabase, PayPal and
+  credentials.** `npm run test:e2e` blanks the Resend, Supabase, Stripe and
   `CHECKOUT_SKIP_PAYMENT` variables in `playwright.config.ts` precisely so a full
   run cannot spend a real allowance. To test mail for real, send one message by
   hand and count it against the day's 100.

@@ -9,15 +9,17 @@
 import { requireAdmin } from "@/lib/admin/auth";
 import { adminAlerts } from "@/lib/admin/analytics";
 import { getForumIdentity } from "@/lib/admin/forum";
+import { getStripeConfig } from "@/lib/stripe/client.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type { ForumThreadActivity } from "@/lib/forum-unread";
 import { AdminFrame, type PaymentMode } from "./AdminFrame";
 
 function currentPaymentMode(): PaymentMode {
-  if (!process.env.PAYPAL_CLIENT_ID) {
+  const stripe = getStripeConfig();
+  if (!stripe.configured) {
     return "mock";
   }
-  return process.env.PAYPAL_ENV === "live" ? "live" : "sandbox";
+  return stripe.live ? "live" : "sandbox";
 }
 
 export default async function DashboardLayout({

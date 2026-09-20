@@ -15,7 +15,7 @@ import {
   type APIRequestContext,
   type Page,
 } from "@playwright/test";
-import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
+import { adminLogin, ADMIN_VIEWPORT, MOCK_CARD_ORDER } from "./helpers";
 
 test.use({ viewport: ADMIN_VIEWPORT });
 test.describe.configure({ mode: "serial" });
@@ -25,7 +25,7 @@ const SIGNATURE_VARIANT = "0a2b1a10-4b7e-4d7a-9d24-000000000101";
 async function checkoutTotals(request: APIRequestContext, country: string) {
   const response = await request.post("/api/checkout", {
     data: {
-      method: "paypal",
+      ...MOCK_CARD_ORDER,
       lines: [{ variantId: SIGNATURE_VARIANT, quantity: 1 }],
       country,
     },

@@ -1,7 +1,7 @@
 # Feature Learning 01 — Add to Cart → Checkout → Order
 
 Traced end to end per [README.md](README.md).
-This trace follows the **mock-payment path** (no PayPal keys configured — how local dev runs today). Where the real PayPal path branches off, it is noted.
+This trace follows the **mock-payment path** (no Stripe key configured — how the test suite runs). Where the real Stripe path branches off, it is noted.
 
 ## Feature Summary
 
@@ -54,7 +54,7 @@ Key jargon used below:
                                       └── POST /api/checkout {lines, country, card, …NO prices}
                                                                         ┌──────────────────────────────┐
                                                                         │ app/api/checkout/route.ts     │
-                                                                        │ 1 refuse if PayPal configured │
+                                                                        │ 1 refuse if Stripe configured │
                                                                         │ 2 zod-validate request shape  │
                                                                         │ 3 priceCart()  ← DB, re-price │
                                                                         │ 4 validateCard() (format only)│
@@ -216,21 +216,21 @@ The page splits in two:
     }
   ```
 
-  It then guesses the ship-to country from Vercel's geo-IP header ([page.tsx:37-39](../../app/checkout/page.tsx#L37-L39)) and decides the payment mode: if PayPal env keys exist it passes a `paypalClientId`, otherwise `null` → **mock mode** ([page.tsx:41-47](../../app/checkout/page.tsx#L41-L47)).
+  It then guesses the ship-to country from Vercel's geo-IP header ([page.tsx:37-39](../../app/checkout/page.tsx#L37-L39)) and decides the payment mode: if the Stripe key exists it passes `stripeEnabled`, otherwise **mock mode** ([page.tsx:43-49](../../app/checkout/page.tsx#L43-L49)).
 
   ```tsx
-  // app/checkout/page.tsx:37-47
+  // app/checkout/page.tsx:37-49
     const headerStore = await headers();
     const geo = (headerStore.get("x-vercel-ip-country") ?? "").toUpperCase();
     const defaultCountry = countries.some((country) => country.code === geo) ? geo : "US";
 
-    // Testing-phase switch: skip payment entirely, so the PayPal buttons must
-    // not mount even when the keys exist (§10.4, lib/checkout/mode.ts).
+    // Testing-phase switch: skip payment entirely, so the card rail must not
+    // show even when its key exists (§10.4, lib/checkout/mode.ts).
     const skipPayment = skipPaymentEnabled();
-    const paypalClientId =
-      !skipPayment && process.env.PAYPAL_CLIENT_ID && process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
-        ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
-        : null;
+    // Card rail (docs/features/card-payments.md): Stripe Checkout hosts the
+    // card page, so the client only needs to know the rail exists — no key.
+    const stripeEnabled =
+      !skipPayment && Boolean(process.env.STRIPE_SECRET_KEY?.trim());
   ```
 
 - **Client half** [app/checkout/CheckoutClient.tsx](../../app/checkout/CheckoutClient.tsx): `useCart(catalog)` ([CheckoutClient.tsx:360-361](../../app/checkout/CheckoutClient.tsx#L360-L361)) joins the localStorage lines against the DB catalog to produce displayable lines with real prices. Cart lines whose variant no longer exists in the catalog are hidden (and the server would reject them anyway) — that filtering happens back in the cart store.
@@ -358,14 +358,14 @@ Pressing "Pay $…" calls `submitMockCheckout` ([CheckoutClient.tsx:483](../../a
 
 [app/api/checkout/route.ts](../../app/api/checkout/route.ts) is the API route. In order:
 
-1. **Refuses to run if PayPal is configured** ([route.ts:62-68](../../app/api/checkout/route.ts#L62-L68)) — mock checkout exists only while there is no real payment provider.
+1. **Refuses to run if Stripe is configured** ([route.ts:75-83](../../app/api/checkout/route.ts#L75-L83)) — mock checkout exists only while there is no real payment provider.
 
    ```ts
-   // app/api/checkout/route.ts:62-68
+   // app/api/checkout/route.ts:77-83
      const skipPayment = skipPaymentEnabled();
-     if (getPayPalConfig().configured && !skipPayment) {
+     if (getStripeConfig().configured && !skipPayment) {
        return NextResponse.json(
-         { ok: false, error: "Mock checkout is disabled — PayPal is configured." },
+         { ok: false, error: "Mock checkout is disabled — Stripe is configured." },
          { status: 400 },
        );
      }
@@ -377,7 +377,7 @@ Pressing "Pay $…" calls `submitMockCheckout` ([CheckoutClient.tsx:483](../../a
    // app/api/checkout/route.ts:22-34, 70-75
    const requestSchema = z.object({
      // "none" = the CHECKOUT_SKIP_PAYMENT flow: order placed with no payment step.
-     method: z.enum(["card", "paypal", "none"]),
+     method: z.enum(["card", "none"]),
      lines: z
        .array(
          z.object({
@@ -491,7 +491,7 @@ Pressing "Pay $…" calls `submitMockCheckout` ([CheckoutClient.tsx:483](../../a
 
 ### Step 5 — Server re-pricing: lib/checkout/pricing.ts
 
-`priceCart()` ([pricing.ts:100](../../lib/checkout/pricing.ts#L100)) is the single pricing authority, shared by mock checkout, PayPal create, and PayPal capture. Everything it needs comes from the store, not the request ([pricing.ts:106-121](../../lib/checkout/pricing.ts#L106-L121)).
+`priceCart()` ([pricing.ts:100](../../lib/checkout/pricing.ts#L100)) is the single pricing authority, shared by mock checkout, Stripe session creation, and the Stripe return leg. Everything it needs comes from the store, not the request ([pricing.ts:106-121](../../lib/checkout/pricing.ts#L106-L121)).
 
 ```ts
 // lib/checkout/pricing.ts:100-121
@@ -562,9 +562,9 @@ It then applies, in order: discount code (validated server-side), shipping from 
 
 ### Step 6 — Recording the order: lib/orders/db.ts
 
-`createOrder()` ([db.ts:150](../../lib/orders/db.ts#L150)) is **the one path every completed checkout goes through** — mock, PayPal capture, admin "Mark as paid", and the webhook repair flow all converge here. Sequence:
+`createOrder()` ([db.ts:150](../../lib/orders/db.ts#L150)) is **the one path every completed checkout goes through** — mock, the Stripe return leg, admin "Mark as paid", and the webhook repair flow all converge here. Sequence:
 
-1. **Idempotency**: if an order with this `provider_order_id` already exists, return it ([db.ts:154-162](../../lib/orders/db.ts#L154-L162)). A double-delivered PayPal webhook can never create a duplicate order. (Idempotent = safe to run twice with the same effect as once.)
+1. **Idempotency**: if an order with this `provider_order_id` already exists, return it ([db.ts:154-162](../../lib/orders/db.ts#L154-L162)). A double-delivered Stripe webhook can never create a duplicate order. (Idempotent = safe to run twice with the same effect as once.)
 
    ```ts
    // lib/orders/db.ts:154-162
@@ -737,60 +737,28 @@ The client clears the cart and navigates to `/checkout/success?order=%231001&tot
       />
 ```
 
-### The PayPal branch (for contrast)
+### The Stripe branch (for contrast)
 
-With PayPal keys configured, the card form disappears and `PayPalSdkButtons` ([CheckoutClient.tsx:259](../../app/checkout/CheckoutClient.tsx#L259)) loads PayPal's JS SDK instead — mounted only when `paypalClientId` came down from the server half ([CheckoutClient.tsx:759-780](../../app/checkout/CheckoutClient.tsx#L759-L780)).
-
-```tsx
-// app/checkout/CheckoutClient.tsx:759-780
-              {...(paypalClientId
-                ? {
-                    // …
-                    payButtonSlot: (
-                      <PayPalSdkButtons
-                        clientId={paypalClientId}
-                        buildPayload={() => checkoutPayload(rawLines)}
-                        onFail={setError}
-                      />
-                    ),
-                  }
-                : {
-                    onPayPal: () => {
-                      if (!isBusy) {
-                        submitMockCheckout("paypal", false);
-                      }
-                    },
-                  })}
-```
-
-Buttons drive `POST /api/paypal/create` (server re-prices with the *same* `priceCart()` and opens a PayPal order) then `POST /api/paypal/capture` (verifies and captures, then calls the *same* `createOrder()`). Note that `buildPayload` is the very same `checkoutPayload()` from step 4 — still IDs and quantities only, no prices.
+With `STRIPE_SECRET_KEY` set, the mock card form disappears and the pay action calls `startStripeCheckout()` ([CheckoutClient.tsx](../../app/checkout/CheckoutClient.tsx)) instead. There is no card field on our page at all: the browser asks our server for a Stripe Checkout Session and then **leaves for Stripe's own page**.
 
 ```tsx
-// app/checkout/CheckoutClient.tsx:292-316
-          createOrder: async () => {
-            const response = await fetch("/api/paypal/create", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payloadRef.current()),
-            });
-            const data = await response.json();
-            // …
-            return data.id;
-          },
-          onApprove: async (data: { orderID: string }) => {
-            const response = await fetch("/api/paypal/capture", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderID: data.orderID }),
-            });
-            const result = await response.json();
-            // …
-            window.localStorage.removeItem("goldrose-cart-v2");
-            window.location.assign(result.redirectUrl);
-          },
+// app/checkout/CheckoutClient.tsx — startStripeCheckout()
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...checkoutPayload(rawLines),
+          ...(email.trim() ? { email: email.trim() } : {}),
+        }),
+      });
+      const result = await response.json();
+      // …
+      window.location.assign(result.url);
 ```
 
-A webhook at `/api/webhooks/paypal` repairs missed captures. Mock and real paths differ only in *who moves the money* — pricing and order recording are identical code.
+`POST /api/stripe/checkout` re-prices with the *same* `priceCart()`, saves the `checkouts` row, and opens the session. Note that the body is built by the very same `checkoutPayload()` the mock path uses: variant ids and quantities, never a price. After the buyer pays, Stripe redirects to `GET /api/stripe/return`, which verifies the session, re-prices once more, and calls the *same* order-creation funnel.
+
+A webhook at `/api/webhooks/stripe` rebuilds the order when the buyer's browser dies before the return leg runs. Mock and real paths differ only in *who moves the money* — pricing and order recording are identical code.
 
 ## Tests covering this path
 
@@ -801,7 +769,7 @@ A webhook at `/api/webhooks/paypal` repairs missed captures. Mock and real paths
 - `tampered client prices are ignored — the server prices from the DB` — the core security property of steps 4–5.
 - `an admin price edit changes the checkout total` — proves prices come from the DB, not the page.
 
-Unit tests: [tests/unit/abandoned.test.ts](../../tests/unit/abandoned.test.ts) (checkouts-row lifecycle), [tests/unit/paypal-webhook.test.ts](../../tests/unit/paypal-webhook.test.ts) (the repair flow that also ends in `createOrder()`).
+Unit tests: [tests/unit/abandoned.test.ts](../../tests/unit/abandoned.test.ts) (checkouts-row lifecycle), [tests/unit/stripe-webhook.test.ts](../../tests/unit/stripe-webhook.test.ts) (the repair flow that ends in the same order-creation funnel).
 
 ## Ideas worth stealing from this feature
 

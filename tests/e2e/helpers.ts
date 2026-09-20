@@ -52,3 +52,25 @@ export async function settleFixedChrome(page: Page): Promise<void> {
     { polling: 120 },
   );
 }
+
+/**
+ * The buyer fields a mock card order needs when a spec posts straight to
+ * /api/checkout. Spread it into the request body next to lines and country.
+ */
+export const MOCK_CARD_ORDER = {
+  method: "card",
+  email: "e2e-buyer@example.com",
+  shipping: {
+    name: "Test Buyer",
+    address1: "1 Test Street",
+    city: "Testville",
+    state: "CA",
+    postalCode: "90001",
+  },
+  card: {
+    name: "Test Buyer",
+    number: "4242 4242 4242 4242",
+    expiry: "12/33",
+    cvc: "123",
+  },
+} as const;

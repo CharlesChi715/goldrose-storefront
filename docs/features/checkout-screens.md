@@ -39,6 +39,6 @@ why the two landed together.
 
 - [card-payments](card-payments.md) — the card fields this flow hands off to
 - [shipping-rates](shipping-rates.md) — the rates this flow displays
-- [paypal-wallet](paypal-wallet.md) — the payment step itself
+- [card-payments](card-payments.md) — the payment step itself
 - The money path end to end:
   [`docs/learning/01-add-to-cart-checkout.md`](../learning/01-add-to-cart-checkout.md)

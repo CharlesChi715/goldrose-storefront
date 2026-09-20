@@ -52,7 +52,7 @@ const en = {
   "banner.mock":
     "Test mode — checkout is simulated locally and no payment provider is connected.",
   "banner.sandbox":
-    "PayPal sandbox mode — payments use sandbox money, nothing real is charged.",
+    "Stripe test mode — payments use test cards, nothing real is charged.",
   "banner.live": "Live payments are ON — real money moves at checkout.",
 
   // Login
@@ -465,7 +465,6 @@ const en = {
   "order.payment.refunded": "Refunded",
   "order.payment.captureId": "Capture reference",
   "order.payment.card": "Card",
-  "order.payment.sellerProtection": "Seller protection",
   "order.refund": "Refund",
   "order.refund.title": "Refund payment",
   "order.refund.amount": "Refund amount",
@@ -668,15 +667,14 @@ const en = {
   "settings.payments.title": "Payments",
   "settings.payments.provider": "Provider",
   "settings.payments.mode.mock": "Not connected — mock checkout is active",
-  "settings.payments.mode.sandbox": "PayPal sandbox connected",
-  "settings.payments.mode.live": "PayPal LIVE connected",
-  "settings.payments.clientId": "Client ID",
+  "settings.payments.mode.sandbox": "Stripe test mode connected",
+  "settings.payments.mode.live": "Stripe LIVE connected",
   "settings.payments.webhook.ok": "Webhook configured",
   "settings.payments.webhook.missing":
-    "Webhook not configured (PAYPAL_WEBHOOK_ID)",
+    "Webhook not configured (STRIPE_WEBHOOK_SECRET)",
   "settings.checkout.title": "Checkout",
   "settings.checkout.mockNote":
-    "With no PayPal keys set, checkout runs in mock mode — full click-through, no money moves.",
+    "With no Stripe key set, checkout runs in mock mode — full click-through, no money moves.",
   "settings.checkout.discountToggle":
     "Show the discount code field at checkout",
   "settings.shipping.title": "Shipping and delivery",
@@ -945,7 +943,7 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "topbar.account.logout": "退出",
 
   "banner.mock": "测试模式 — 结账在本地模拟，未连接任何支付服务商。",
-  "banner.sandbox": "PayPal 沙盒模式 — 付款使用沙盒资金，不会产生真实扣款。",
+  "banner.sandbox": "Stripe 测试模式 — 付款使用测试卡，不会产生真实扣款。",
   "banner.live": "正式收款已开启 — 结账将转移真实资金。",
 
   "login.title": "登录",
@@ -1324,7 +1322,6 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "order.payment.refunded": "已退款",
   "order.payment.captureId": "收款凭证号",
   "order.payment.card": "银行卡",
-  "order.payment.sellerProtection": "卖家保障",
   "order.refund": "退款",
   "order.refund.title": "退款",
   "order.refund.amount": "退款金额",
@@ -1515,14 +1512,14 @@ const zh: Partial<Record<AdminMessageKey, string>> = {
   "settings.payments.title": "收款",
   "settings.payments.provider": "服务商",
   "settings.payments.mode.mock": "未连接 — 当前为模拟结账",
-  "settings.payments.mode.sandbox": "已连接 PayPal 沙盒",
-  "settings.payments.mode.live": "已连接 PayPal 正式环境",
-  "settings.payments.clientId": "客户端 ID",
+  "settings.payments.mode.sandbox": "已连接 Stripe 测试模式",
+  "settings.payments.mode.live": "已连接 Stripe 正式环境",
   "settings.payments.webhook.ok": "Webhook 已配置",
-  "settings.payments.webhook.missing": "Webhook 未配置（PAYPAL_WEBHOOK_ID）",
+  "settings.payments.webhook.missing":
+    "Webhook 未配置（STRIPE_WEBHOOK_SECRET）",
   "settings.checkout.title": "结账",
   "settings.checkout.mockNote":
-    "未设置 PayPal 密钥时，结账为模拟模式 — 全流程可点击，不会转移任何资金。",
+    "未设置 Stripe 密钥时，结账为模拟模式 — 全流程可点击，不会转移任何资金。",
   "settings.checkout.discountToggle": "在结账页显示折扣码输入框",
   "settings.shipping.title": "发货和配送",
   "settings.shipping.zone.name": "区域名称",

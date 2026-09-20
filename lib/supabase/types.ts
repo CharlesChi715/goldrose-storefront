@@ -177,7 +177,7 @@ export type OrderRow = {
    * checkouts, admin drafts, and webhook-repaired orders (no buyer session).
    * Optional: rows written before the column existed have none. */
   auth_user_id?: string | null;
-  /** 'wallet' (PayPal account) or 'card' (Stripe Checkout); absent for mock
+  /** 'card' (Stripe Checkout); 'wallet' is reserved and unused; absent for mock
    * and draft orders, and for rows written before migration 0016. */
   payment_method_kind?: "wallet" | "card" | null;
   /** Brand as the provider reports it, uppercased ('VISA'); last4 is never

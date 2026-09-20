@@ -4,8 +4,8 @@
  * click-through: server re-prices the cart from the database, validates the
  * card format locally (never stored), then records a real order row with
  * source='mock' — stock decrement, customer, timeline, emails and all — with
- * no money moving anywhere. Disabled the moment PayPal keys exist: real
- * checkouts go through /api/paypal/* instead (§10.2).
+ * no money moving anywhere. Disabled the moment Stripe keys exist: real
+ * checkouts go through /api/stripe/* instead (docs/features/card-payments.md).
  */
 
 import { NextResponse } from "next/server";
@@ -15,8 +15,8 @@ import { validateCard } from "@/lib/checkout/card";
 import { skipPaymentEnabled } from "@/lib/checkout/mode";
 import { priceCart } from "@/lib/checkout/pricing";
 import { createOrder } from "@/lib/orders/db";
-import { getPayPalConfig } from "@/lib/paypal/client";
 import { currentAuthUserId } from "@/lib/supabase/server-auth.ts";
+import { getStripeConfig } from "@/lib/stripe/client.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import type { Address } from "@/lib/supabase/types.ts";
 import { checkRequest, LIMITS, refusalHeaders } from "@/lib/rate-limit.ts";
@@ -24,7 +24,7 @@ import { logEvent } from "@/lib/observe.ts";
 
 const requestSchema = z.object({
   // "none" = the CHECKOUT_SKIP_PAYMENT flow: order placed with no payment step.
-  method: z.enum(["card", "paypal", "none"]),
+  method: z.enum(["card", "none"]),
   lines: z
     .array(
       z.object({
@@ -75,9 +75,9 @@ export async function POST(request: Request) {
   // Mock checkout exists only while no real provider is configured (§10.4) —
   // or while the testing-phase skip-payment flag is deliberately on.
   const skipPayment = skipPaymentEnabled();
-  if (getPayPalConfig().configured && !skipPayment) {
+  if (getStripeConfig().configured && !skipPayment) {
     return NextResponse.json(
-      { ok: false, error: "Mock checkout is disabled — PayPal is configured." },
+      { ok: false, error: "Mock checkout is disabled — Stripe is configured." },
       { status: 400 },
     );
   }

@@ -97,8 +97,8 @@ export type MappedStripeSession = {
  * Pull everything an order row needs out of a Checkout Session: ids,
  * payment state, payer email/phone, shipping + billing addresses, the
  * charged amount (already integer cents), and the card brand/last4 when
- * the charge is expanded. The brand is uppercased to match how PayPal
- * reports brands ('VISA'), so the admin shows one spelling. Every missing
+ * the charge is expanded. The brand is uppercased ('VISA'), so the admin
+ * shows one spelling. Every missing
  * field maps to null.
  *
  * @param session - Raw session JSON from Stripe (retrieve or webhook event).

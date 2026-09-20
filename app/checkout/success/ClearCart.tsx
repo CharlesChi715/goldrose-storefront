@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 /**
  * Empties the stored cart once the confirmation page is reached. The mock
- * and PayPal flows clear it client-side before navigating here, but the
+ * flow clears it client-side before navigating here, but the
  * Stripe flow arrives by cross-site redirect (Stripe page → return route →
  * here) with no checkout script in between — so the page itself clears.
  * Removing an already-removed key is a no-op, and storage access can throw

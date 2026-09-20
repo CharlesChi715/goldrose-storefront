@@ -5,7 +5,7 @@
 // (the session id); the Stripe webhook independently repairs the record if
 // the buyer's browser dies between paying and this redirect.
 //
-// DELIBERATELY NOT RATE LIMITED, like /api/paypal/capture: by the time a
+// DELIBERATELY NOT RATE LIMITED: by the time a
 // request reaches here Stripe may already hold the shopper's money, and a
 // refusal would leave a payment with no order against it.
 

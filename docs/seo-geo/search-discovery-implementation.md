@@ -69,7 +69,7 @@ Work is labelled:
 | AI summary         | Dynamic `/llms.txt`                                   | Replace example contact data and ensure every value matches the storefront                            |
 | Catalog data       | `lib/supabase/catalog.ts` and `catalog_products` view | Normalize complete merchant fields and validation; the internal view is not an external feed API      |
 | Policies           | Values exist in admin settings                        | Publish Contact, Shipping, Returns/Refunds, Privacy, and Terms routes                                 |
-| Inventory/checkout | Native cart and PayPal flow                           | Resolve Tier 1 integrity defects in the repository review before feeds amplify stock and order errors |
+| Inventory/checkout | Native cart and Stripe card checkout                  | Resolve Tier 1 integrity defects in the repository review before feeds amplify stock and order errors |
 | Analytics          | First-party page-view beacon with UTM/referrer        | Classify AI referrals and measure the complete conversion funnel                                      |
 | External setup     | Not represented in the repository                     | Production domain, Search Console, Merchant Center, business verification, and feed enrolment         |
 
