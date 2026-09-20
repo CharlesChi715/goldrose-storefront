@@ -163,6 +163,22 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
 }
 
 /**
+ * Whether a failed insert was the orders table refusing a second row for one
+ * provider payment. Matched on the message because the store adapters hand
+ * back a plain Error, not a driver error object with a code.
+ *
+ * @param error - Whatever the insert threw.
+ * @returns True only for a unique violation on provider_order_id.
+ */
+function isDuplicateProviderOrder(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("duplicate key value") &&
+    error.message.includes("provider_order_id")
+  );
+}
+
+/**
  * Same as createOrder, but says whether this call actually wrote the order.
  * Two independent paths race to record one payment — the buyer's return from
  * the provider and the provider's webhook — and whichever loses must not
@@ -250,7 +266,24 @@ export async function createOrderIfAbsent(
     line_total_cents: line.line_total_cents,
   }));
 
-  await store.insert("orders", [order]);
+  try {
+    await store.insert("orders", [order]);
+  } catch (error) {
+    // The lookup above cannot win this race: the buyer's return leg and the
+    // provider's webhook both read "no order" and then both insert. The unique
+    // index on provider_order_id is the only real arbiter, so losing it is a
+    // normal outcome, not a failure — the winner's order is the answer. Before
+    // this, the loser threw and the buyer who had just paid saw an error page.
+    if (input.provider_order_id && isDuplicateProviderOrder(error)) {
+      const existing = (await store.all("orders")).find(
+        (row) => row.provider_order_id === input.provider_order_id,
+      );
+      if (existing) {
+        return { order: existing, created: false };
+      }
+    }
+    throw error;
+  }
   await store.insert("order_lines", lines);
 
   // Sales auto-decrement stock with a visible movement (§7.3 decision).
