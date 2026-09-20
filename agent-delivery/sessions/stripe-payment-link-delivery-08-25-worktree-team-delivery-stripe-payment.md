@@ -28,32 +28,16 @@ no field was filled in.**
 The QR decodes to exactly that URL (CoreImage `CIDetectorTypeQRCode`), so the
 poster and the link are one artefact, not two.
 
+⚠️ **The table above is what it WAS. The link was deactivated 2026-09-20**
+(`active: false`) once the real card rail worked — Charles's call, closing
+AI-048. It was the only payment link on the live account, so nothing outside
+the storefront collects money now. A payment link cannot be deleted, only
+deactivated; the full record is in
+[`archive/AI-048-…`](../archive/AI-048-that-link-charges-79-00-collecting-no.md).
+The QR poster stays filed as delivered, but it now resolves to Stripe's "no
+longer active" page.
+
 ---
-
-## AI-048 · `OWNER-TODO` · the link takes $79 with no address and no order
-
-Independent of the rail decision (AI-047, closed 2026-09-20: answered (a), a
-real checkout rail) — this bites as soon as the QR is shown to a customer.
-
-- **A payment through it is invisible to the storefront.** It writes no
-  `orders` row, so it reaches no admin screen, decrements no inventory, sends
-  no confirmation email and creates no tracking. Whoever watches the Stripe
-  dashboard *is* the fulfilment system.
-- **It sells a physical gift and collects no delivery address.** On the
-  evidence of the page a customer can pay $79 and we will not know where to
-  send the rose. Stripe payment links can collect one; it is switched off.
-- **$79.00 is not a catalog price.** The nearest is `premium-gift-bundle` at
-  **$79.99**, and "Gold-Dipped Roses" is not a handle we ship. Same brand,
-  different price, is a claim the live site contradicts.
-- **Discounts, tax and shipping are Stripe's settings**, not our `discounts`
-  table — and not the real shipping rates OQ-2 still has not answered.
-
-SUMMARY's hard gate reads: anything a stranger's money or identity touches is
-real *before* the switch. This is money, and it is live now.
-
-**Recommended before the QR is given to anyone else:** turn on shipping-address
-collection, set the price to the catalog price, and name the person who
-reconciles Stripe payments into orders by hand.
 
 ## Delivered this session
 

@@ -7580,3 +7580,19 @@ team-deliveries/README.md; not committed, left for Charles to decide.
   orders_provider_order_id_key, showing a paid buyer an error page.
 - Filed AI-050 (three sandbox orders hold 4 units of live stock) and AI-051
   (Adaptive Pricing would refund every non-US buyer).
+
+## 2026-09-20 — Vercel wired, naked payment link retired
+
+- Vercel Production + Preview now carry STRIPE_SECRET_KEY and
+  STRIPE_WEBHOOK_SECRET (test values, both sensitive); test-mode webhook
+  endpoint we_1UHcTpGvea4GUGR4Secqlyv9 → https://eldreve.com/api/webhooks/stripe
+  for checkout.session.completed, charge.refunded, charge.dispute.created.
+  Exactly one endpoint; the secret never touched a command line.
+  ⚠️ Needs a dashboard redeploy (build cache unticked) to take effect.
+- Found that production had NO payment env at all, so the live site has been
+  serving the mock card form — it accepts a real PAN and emails a
+  confirmation for an order nobody paid for. The redeploy retires that.
+- AI-048 closed: plink_1U7snA… set active:false on the live account
+  (payment links cannot be deleted). It was the only one, so nothing outside
+  the storefront collects money now.
+- AI-051 closed: Adaptive Pricing stays ON, Charles's call.
