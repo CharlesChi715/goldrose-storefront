@@ -24,7 +24,9 @@ Supabase Pro joins at launch as a second copy, not a replacement.
 
 - CI writes to the bucket; it never reads, lists or deletes.
 - A green run means a backup exists: missing settings are an error, not a warning.
-- State: ask `aws` and `gh`, never a document. Settings and scripts: [`infra/aws/`](../../infra/aws/README.md).
+- State: run [`infra/aws/status.sh`](../../infra/aws/status.sh), never trust a document. It asks
+  `aws` and `gh`, prints seven lines, and exits 1 if any check fails. Settings and scripts:
+  [`infra/aws/`](../../infra/aws/README.md).
 
 ## Where it stands — 2026-09-19
 
