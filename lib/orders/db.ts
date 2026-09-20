@@ -159,6 +159,21 @@ async function orderNumberPrefix(): Promise<string> {
  * already landed (idempotency, §10.5).
  */
 export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
+  return (await createOrderIfAbsent(input)).order;
+}
+
+/**
+ * Same as createOrder, but says whether this call actually wrote the order.
+ * Two independent paths race to record one payment — the buyer's return from
+ * the provider and the provider's webhook — and whichever loses must not
+ * claim in the timeline that it repaired anything.
+ *
+ * @param input - The priced cart plus source, payment, contact, and address details.
+ * @returns The order row, with `created: false` when it already existed.
+ */
+export async function createOrderIfAbsent(
+  input: CreateOrderInput,
+): Promise<{ order: OrderRow; created: boolean }> {
   const store = getStore();
   const now = new Date().toISOString();
 
@@ -168,7 +183,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
       (order) => order.provider_order_id === input.provider_order_id,
     );
     if (existing) {
-      return existing;
+      return { order: existing, created: false };
     }
   }
 
@@ -295,5 +310,5 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     }
     await sendOrderPlacedEmails(order, lines);
   }
-  return order;
+  return { order, created: true };
 }

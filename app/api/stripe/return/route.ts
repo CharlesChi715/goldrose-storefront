@@ -11,7 +11,7 @@
 
 import { NextResponse } from "next/server";
 import { priceCart } from "@/lib/checkout/pricing";
-import { createOrder } from "@/lib/orders/db";
+import { createOrderIfAbsent } from "@/lib/orders/db";
 import {
   getStripeCheckoutSession,
   getStripeConfig,
@@ -115,7 +115,7 @@ export async function GET(request: Request) {
       return back("/checkout?step=payment&payerror=drift");
     }
 
-    const order = await createOrder({
+    const { order, created } = await createOrderIfAbsent({
       priced,
       source: "site",
       payment_provider: "stripe",
@@ -135,6 +135,22 @@ export async function GET(request: Request) {
       auth_user_id: await currentAuthUserId(),
       raw: session,
     });
+
+    // The webhook can beat this route to the insert, and its event payload has
+    // no card brand or last four. This response does — it retrieved the
+    // session with the charge expanded — so fill in what the winner could not.
+    if (!created && mapped.cardBrand && !order.card_brand) {
+      await getStore().update(
+        "orders",
+        { id: order.id },
+        {
+          payment_method_kind: "card",
+          card_brand: mapped.cardBrand,
+          card_last4: mapped.cardLast4,
+          ...(mapped.chargeId ? { provider_capture_id: mapped.chargeId } : {}),
+        },
+      );
+    }
 
     // `oid` is the success page's lookup key for the buyer's own email —
     // the UUID, never the sequential order name (lib/orders/confirmation.ts).
