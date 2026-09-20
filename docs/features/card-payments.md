@@ -176,6 +176,23 @@ Tracked as stages 0–7 (session task list, 2026-07-26):
 
 ## Blockers and dependencies
 
+**Current, as of 2026-09-20 — nothing here blocks the card rail any more.**
+The list below belonged to the abandoned PayPal card path and is kept only
+for the trail. What is actually left:
+
+- **A Vercel redeploy.** `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`
+  (test values) are set on Production and Preview, and the test-mode webhook
+  endpoint `we_1UHcTpGvea4GUGR4Secqlyv9` points at
+  `https://eldreve.com/api/webhooks/stripe` for the three events we handle.
+  Environment variables only reach a **new** build, so until someone
+  redeploys (dashboard → Redeploy, build cache unticked) the live site still
+  serves the mock card form.
+- **The live cutover is the owner's**, and it is a one-way door: `sk_live_…`
+  plus a live-mode webhook endpoint, with `CHECKOUT_SKIP_PAYMENT` unset and
+  OQ-2 shipping rates answered first.
+
+The superseded PayPal blockers:
+
 - **Stage 0 gates Stage 3.** Advanced Checkout is not switched on by default;
   PayPal must approve it for the account and individual card brands can need
   activation. Not expressible as a feature id — it is an owner dashboard action.
@@ -184,10 +201,6 @@ Tracked as stages 0–7 (session task list, 2026-07-26):
   here** — wallet included, not just cards.
 - `PAYPAL_WEBHOOK_ID` must be set or signature verification fails closed and every
   delivery 401s.
-
-AI-TAG(AI-048): OWNER-TODO — that link collects no shipping address and writes
-no order. See
-/agent-delivery/sessions/stripe-payment-link-delivery-08-25-worktree-team-delivery-stripe-payment.md.
 
 ## Related links
 
