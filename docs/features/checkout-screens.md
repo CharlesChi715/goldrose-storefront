@@ -41,4 +41,3 @@ why the two landed together.
 - [shipping-rates](shipping-rates.md) — the rates this flow displays
 - [card-payments](card-payments.md) — the payment step itself
 - The money path end to end:
-  [`docs/learning/01-add-to-cart-checkout.md`](../learning/01-add-to-cart-checkout.md)

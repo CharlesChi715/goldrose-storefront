@@ -139,7 +139,6 @@ What is left to reach `uat`, as of 2026-09-20:
 ## Related links
 
 - Decision register: [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions) (OQ-1)
-- Spec: [admin-design.md](../admin-design.md) §7.4 (order payment columns), §10 (checkout and payments), §14.3 (owner walkthrough)
 - When a payment fails: [payment-failing runbook](../runbooks/payment-failing.md)
 - Stripe: [Checkout Sessions](https://docs.stripe.com/payments/checkout) ·
   [webhook signatures](https://docs.stripe.com/webhooks#verify-official-libraries)

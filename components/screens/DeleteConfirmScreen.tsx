@@ -9,7 +9,7 @@
  *
  * Visual placeholder, deliberately inert: account deletion is destructive
  * and has no backend flow (GDPR-style deletion touches orders, auth and
- * files — an owner decision, flagged in docs/ixd/README.md). The
+ * files — an owner decision). The
  * type-DELETE field is a styled div (the live-input hazard rule), the
  * checkbox flips visually so the state can be reviewed, and the red
  * button does nothing.

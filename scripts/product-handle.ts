@@ -20,7 +20,7 @@
  * instead, so the image tree can be created from the same list.
  *
  * Exits non-zero on any title that cannot produce a handle, and on any two
- * titles that collide — docs/ixd/naming/product-handles.md §3 forbids
+ * titles that collide — the handle rule forbids
  * inventing a `-2` suffix, so a collision is a naming decision for a human,
  * and finding it before an import beats finding it during one.
  */

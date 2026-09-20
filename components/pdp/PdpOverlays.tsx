@@ -30,7 +30,7 @@
  * indistinguishable from a real one, so it is a review claim, not "visibly
  * mocked" art). The twelve color cards and twelve unboxing tiles are still
  * design placeholders — the catalog has no color-option or UGC tables yet
- * (docs/ixd/README.md), so color selection and the unboxing chips/tabs stay
+ * so color selection and the unboxing chips/tabs stay
  * cosmetic. The media viewer pages through the design's four product images
  * for real. The mocks' iOS home indicator (1523:4274) is not implemented —
  * C-3 status-bar precedent.
@@ -728,7 +728,7 @@ function ColorDrawer({ onClose }: { onClose: () => void }) {
           ●&nbsp;&nbsp;{color.tag} Collection
         </div>
         {/* Confirm just closes — the twelve colors are mock options, not
-            variants (docs/ixd/README.md). */}
+            variants. */}
         <button
           type="button"
           onClick={onClose}

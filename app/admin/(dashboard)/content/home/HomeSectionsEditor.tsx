@@ -13,7 +13,7 @@
  *   in an editor docked beside it. This is the fast path, and it is a MOUSE
  *   path: the preview frames are `aria-hidden` and `tabIndex={-1}` on purpose,
  *   so nothing here may be reachable only by pointing.
- * - SEARCH across every field on the page. With ~180 of them across 8 sections,
+ * - SEARCH across every field on the page. With every field in the registry, across its sections,
  *   finding "the gold caption on the second best-seller card" by scrolling is
  *   worse than typing "caption".
  * - READ THE LIST under each card. It is the complete inventory — including the

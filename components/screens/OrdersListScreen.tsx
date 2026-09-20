@@ -19,7 +19,7 @@
  *
  * The status tabs filter for real. "Delivered" has no live signal yet
  * (fulfillment stops at "shipped"), so for real data that tab shows an
- * empty-state line — flagged in docs/ixd/README.md.
+ * empty-state line — no frame draws it.
  *
  * Buttons: TRACK ORDER / VIEW STATUS → /orders/track (exists); BUY AGAIN →
  * /shop (nearest honest destination, H-15 precedent); VIEW DETAILS →

@@ -175,10 +175,11 @@ one-line **"pending from design"** note in the session hand-off — but change
 nothing. When filing the hand-off, invoke the `agent-delivery` skill and follow
 it; don't improvise the write-back.
 
-**Where the standing state lives:** `docs/ixd/README.md` → *Design-sync state*
-— what is imported, whether the baseline is stamped, what design still owes us,
-and the divergences from the frames that are sanctioned rather than bugs. Read
-it before a sync and update it after one; per-sync detail stays in the session
+**Where the standing state lives:** the pipeline itself. Run
+`npm run figma:brief` for what changed since the baseline and
+`npm run figma:unbuilt` for what is drawn but not built — both read the live
+file, so neither can be out of date. Sanctioned divergences from a frame are
+noted in the component that diverges; per-sync detail stays in the session
 file.
 
 ## 6. Repo ↔ Figma drift

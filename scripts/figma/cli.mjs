@@ -570,7 +570,7 @@ async function assets(ids, clock) {
   );
 }
 
-/** `2439:369` → `2439-369.svg`, matching the 1,200 files already there. */
+/** `2439:369` → `2439-369.svg`, matching the files already there. */
 function assetFilename(asset) {
   return `${asset.id.replace(/[^\w-]/g, "-")}.${asset.format}`;
 }
@@ -582,7 +582,7 @@ function assetFilename(asset) {
  * frames whose route does not exist in the repo. Admin, API and technical
  * routes are expected to have no design and are excluded.
  *
- * The match relies on the frame-naming rule (docs/ixd/naming/figma-route-rule.md):
+ * The match relies on the frame-naming rule:
  * a frame is named for its exact route, optionally followed by `·` metadata.
  */
 function routes() {
@@ -701,7 +701,7 @@ function repoRouteSet() {
 
 /**
  * Frame route → frame, per the naming rule
- * (docs/ixd/naming/figma-route-rule.md): a frame is named for its exact route,
+ * a frame is named for its exact route,
  * optionally followed by `·`-separated design metadata.
  */
 function frameRouteMap() {

@@ -4,7 +4,7 @@ Direct-to-consumer storefront for a 24K gold-dipped rose gift line, with its own
 
 [![CI](https://github.com/CharlesChi715/goldrose-storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/CharlesChi715/goldrose-storefront/actions/workflows/ci.yml)
 
-Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by one engineer for Zhongshu Technology Worldwide Ltd (Hong Kong): 80 routes, 21 database tables and 472 automated tests across 79,716 lines of TypeScript. It replaced the brand's Shopify storefront, so everything a merchant needs — catalogue, checkout, orders, inventory, customers, discounts, analytics — is implemented here rather than rented.
+Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by one engineer for Zhongshu Technology Worldwide Ltd (Hong Kong). It replaced the brand's Shopify storefront, so everything a merchant needs — catalogue, checkout, orders, inventory, customers, discounts, analytics — is implemented here rather than rented.
 
 <table>
   <tr>
@@ -31,7 +31,7 @@ Live at **[eldreve.com](https://eldreve.com)**. Designed, built and shipped by o
 
 The choices worth explaining, and what each one bought:
 
-- **Two interchangeable database backends behind one 15-method interface.** Hosted Supabase Postgres in production; a single JSON file in local mode. `git clone && npm install && npm run seed && npm run dev` gives you a working shop and admin with no cloud account, no credentials and no Docker — and the test suite runs in that mode, so it can never touch live data.
+- **Two interchangeable database backends behind seven primitives.** Hosted Supabase Postgres in production; a single JSON file in local mode. `git clone && npm install && npm run seed && npm run dev` gives you a working shop and admin with no cloud account, no credentials and no Docker — and the test suite runs in that mode, so it can never touch live data.
 - **The server re-prices every cart from the database.** The browser stores only variant IDs and quantities. Mock checkout, Stripe session creation and the Stripe return leg each recompute the total from database rows, so tampered client state cannot change what a buyer pays.
 - **The storefront reads through a SQL view with the public key.** `catalog_products` exposes what a shopper may see; cost and stock columns are not in the view, so a leaked anon key still cannot read margins or inventory.
 - **The admin answers 404, not 401.** `requireAdmin()` runs in the layout and again at the top of every action and route, and a partial Supabase configuration fails closed to a locked admin rather than falling open.
@@ -54,7 +54,7 @@ One Next.js App Router application, server components by default, deployed to Ve
                     └───────────┬───────────────────────┬───────────┘
                                 │                       │
                      TableStore interface         Stripe Checkout
-                     (15 methods, one shape)      server-side only
+                     (seven primitives)           server-side only
                                 │                       │
               ┌─────────────────┴─────┐                 ▼
               ▼                       ▼           session, return
@@ -85,7 +85,7 @@ Admin authentication is Supabase Auth plus membership in an `admin_users` allowl
 
 ## Quick start
 
-Node 22 and npm. No accounts, keys or containers are needed — the app falls back to a local file database.
+Node as pinned in [`.nvmrc`](.nvmrc), and npm. No accounts, keys or containers are needed — the app falls back to a local file database.
 
 ```bash
 git clone https://github.com/CharlesChi715/goldrose-storefront.git
@@ -103,14 +103,14 @@ Locally the admin opens without a password and checkout is simulated, so no mone
 ## Tests and CI
 
 ```bash
-npm run test:unit    # 279 tests, node --test, no services, ~0.6s
+npm run test:unit    # node --test, no services, about a second
 npx playwright install
-npm run test:e2e     # 193 tests against a production build on port 3001
+npm run test:e2e     # against a production build on port 3001
 ```
 
 The Playwright configuration blanks the Supabase, Stripe and Resend variables for its own server, so the suite cannot reach hosted data, real money or the live email quota. Unit tests cover the logic that is genuinely easy to get wrong: webhook idempotency, price derivation, discount and facet matching, engagement dwell rules, reminder time zones and the migration checker itself.
 
-[CI](.github/workflows/ci.yml) runs ten gates on every push and pull request — `lint`, `typecheck`, `format:check`, `check:assets`, `check:env`, `check:migrations`, `features:check`, `test:unit`, a seed and a full production build. `npm run check` runs the first eight locally in CI's order, so green here means green there. The end-to-end suite runs locally rather than in CI: its pixel baselines are macOS-rendered and would fail on a Linux runner.
+[CI](.github/workflows/ci.yml) runs every gate on each push and pull request, and `npm run check` runs the same set locally in the same order, so green here means green there. The end-to-end suite runs locally rather than in CI: its pixel baselines are macOS-rendered and would fail on a Linux runner.
 
 ## Repository layout
 
@@ -129,11 +129,14 @@ docs/           specs, feature records, database reference, learning series
 | Document | What it covers |
 | --- | --- |
 | [`SUMMARY.md`](SUMMARY.md) | Repository entrypoint: goal, current state, safety rules |
-| [`docs/admin-design.md`](docs/admin-design.md) | The authoritative admin specification |
-| [`docs/Database.md`](docs/Database.md) | Schema reference and data rules |
-| [`docs/features/README.md`](docs/features/README.md) | 21 feature records; the roadmap table is generated from their front matter and validated in CI |
-| [`docs/learning/`](docs/learning/) | Ten end-to-end walkthroughs, each tracing one flow from click to database |
+| [`docs/features/`](docs/features/README.md) | One record per feature — the decision, the options rejected, and what is left. The roadmap table is generated from their front matter and validated in CI |
+| [`docs/runbooks/`](docs/runbooks/README.md) | What to do when the site is down, a payment is stuck, or the database must be restored |
 | [`.env.example`](.env.example) | Every variable, and which trust boundary it belongs to |
+
+Everything else is read from the repository rather than written down: the
+schema is `supabase/migrations/*.sql`, the layout is `tree`, the CI gates are
+[`ci.yml`](.github/workflows/ci.yml), and the live cloud state is
+`infra/aws/status.sh`.
 
 ## Status and limitations
 
@@ -143,7 +146,7 @@ The site is live, and the following are deliberately incomplete:
 - **The policy documents are written but not indexed.** Six `/policies/*` documents were imported from their approved designs and are reachable, each shipping `robots: noindex` until the owner signs off the return window, warranty and arbitration terms they commit to. The journal is still a placeholder, and `/orders/track` shows the design's placeholder timeline — real order status exists for signed-in customers at `/account/orders`.
 - **The storefront is a scaled fixed-width mobile canvas,** not a fluid responsive layout with breakpoints.
 - **The admin assistant is a scoped assistant, not an agent.** It streams answers from a small hand-maintained allowlist document, with each admin supplying their own Anthropic key, stored in Supabase Vault behind restricted-grant functions. No retrieval, no tools, no database access.
-- **The admin is about 95% translated** into Simplified Chinese, falling back to English per key. The storefront is English only.
+- **The admin is bilingual; the storefront is English only.** Admin strings fall back to English per key when a translation is missing.
 - **The repository name predates the brand.** `goldrose-storefront` was the working name before the rename to ELDREVE.
 
 ## Licence and contact

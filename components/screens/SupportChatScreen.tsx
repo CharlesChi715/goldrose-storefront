@@ -9,7 +9,7 @@
  * SUPPORT-ORDER-CONTEXT-CARD, SUPPORT-COMPOSER-BAR, …) but changed no
  * geometry or copy — band-diffed clean against the scale-2 render on
  * 2026-08-03. Those names are NOT mirrored as data-el here: the component
- * naming rule (docs/ixd/naming/component-names.md) is still Draft.
+ * naming rule is still Draft.
  * Geometry, colors, fonts and copy verbatim from the Figma REST data;
  * ornamental glyphs are Figma's own SVG exports (the composer's ☺ is a
  * crop of the frame render — it exports as a .notdef box, the C-2 ✉
@@ -22,7 +22,7 @@
  * order card and read receipts are the mock's own strings, and the
  * composer is a styled div — there is no support-chat backend yet (the
  * /care hero's "Chat with us" lands here so the designed flow can be
- * reviewed; flagged in docs/ixd/README.md).
+ * reviewed).
  */
 
 import { BackButton } from "@/components/BackButton";

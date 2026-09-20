@@ -55,7 +55,7 @@ const saveProductSchema = z.object({
     .string()
     .trim()
     // Empty = derive from the title; otherwise the canonical handle format
-    // (docs/ixd/naming/product-handles.md §3).
+    // (the handle rule — lib/admin/product-handle.ts).
     .regex(
       /^$|^[a-z0-9]+(-[a-z0-9]+)*$/,
       "Handle must be lowercase words separated by single hyphens",

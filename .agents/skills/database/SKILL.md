@@ -8,13 +8,15 @@ metadata:
 
 # Database rules (this project)
 
-Shapes and SKU rules: [`docs/Database.md`](../../../docs/Database.md) —
-`products` / `product_variants` / `product_images` column lists, SKU rules
-(2026-07-24) and the SKU naming convention (2026-07-25).
-⚠️ **Edit that file only on Charles's explicit request**, and keep it concise.
+**Table shapes are `supabase/migrations/*.sql`, and nothing restates them.**
+No document lists columns: a column list written by hand disagrees with the
+schema the first time anyone adds one. Read the migrations, or ask the database
+(`\d orders` in `psql`). The row types in `lib/supabase/types.ts` are the
+TypeScript mirror, checked by `npm run typecheck`.
 
-Table-by-table requirements live in `docs/admin-design.md` §7 (`admin-spec`
-skill). RLS is §7.13.
+SKU rules and the handle rule are implemented, not described:
+`lib/admin/products.ts` and `lib/admin/product-handle.ts`, guarded by
+`tests/unit/product-handle.test.ts`.
 
 ## Applying a change — the only accepted route
 

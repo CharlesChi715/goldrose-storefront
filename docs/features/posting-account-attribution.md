@@ -51,7 +51,7 @@ All done 2026-07-24 (tag named `utm_acc`):
 | 3   | `lib/admin/orders.ts`, `lib/admin/analytics.ts`                                                            | ✅ Comment wording only — logic already goes through `accountOf()`            |
 | 4   | `lib/admin/i18n.ts`                                                                                        | ✅ `analytics.emptyAccount` EN + 中文 now say `utm_acc`                       |
 | 5   | `tests/unit/channel-attribution.test.ts`, `tests/e2e/admin-analytics.spec.ts`, `lib/supabase/seed-data.ts` | ✅ Switched to `utm_acc`; new unit test pins "utm_content is ignored"         |
-| 6   | TESTER-GUIDE "Marketing links", `docs/learning/02-posting-account-attribution.md`, SUMMARY.md              | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
+| 6   | TESTER-GUIDE "Marketing links", SUMMARY.md                                                                | ✅ Owner's link recipe is `...&utm_acc=amy`; click-test tip added (EN + 中文) |
 | 7   | —                                                                                                          | ✅ `tests/unit/channel-attribution.test.ts` + `tests/e2e/admin-analytics.spec.ts` green 2026-07-24 |
 
 ## Blockers and dependencies
@@ -60,5 +60,4 @@ None. The only step left is human acceptance (owner click-test), which is the UA
 
 ## Related links
 
-- Walkthrough: [../learning/02-posting-account-attribution.md](../learning/02-posting-account-attribution.md)
 - Owner instructions: the tester guide's "Marketing links" section (since retired, in git history)

@@ -383,7 +383,7 @@ Two cheap wins that need no Option C at all:
 
 - **`schema.org/ParcelDelivery` JSON-LD in the shipping email** makes Gmail and
   Outlook render a native "Track package" action. Pure markup, no API, and it
-  sits squarely in the `seo-geo` remit.
+  sits squarely in the SEO remit.
 - **Carrier auto-detection from the number format** (`ts-tracking-number`,
   `jkeen/tracking_number_data`) would let the admin paste a number without
   picking a carrier — a small usability win over today's dropdown.
@@ -549,8 +549,6 @@ Left for Charles, in the order they block each other:
 
 ## Related links
 
-- Spec: [admin-design.md §9.4 fulfill flow, §10.3 notifications](../admin-design.md)
 - Activation: owner items in
   [SUMMARY.md · Release queue](../../SUMMARY.md#release-queue)
-- SKU rules behind the 0003 bundle: [Database.md](../Database.md)
 - Sibling ask, same boss note: [promotion-emails.md](promotion-emails.md)

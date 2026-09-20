@@ -78,4 +78,3 @@ change and a join key must not be.
   [`tests/e2e/account.spec.ts`](../../tests/e2e/account.spec.ts),
   [`tests/e2e/account-screens.spec.ts`](../../tests/e2e/account-screens.spec.ts)
 - Who may see what, end to end:
-  [`docs/learning/07-who-can-see-what.md`](../learning/07-who-can-see-what.md)

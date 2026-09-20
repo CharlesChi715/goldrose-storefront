@@ -30,7 +30,7 @@
  *   and the input's clear button all work. The mock's four example rows are
  *   what an actual history looks like, not seeded content.
  *
- * Deliberate deviations (docs/ixd/README.md):
+ * Deliberate deviations from the frame:
  * - The design draws no results state at all — it draws a TYPED field with
  *   trending chips still below it. Results are therefore ours, built in the
  *   frame's own language (its 25/30 Playfair headings, its 390-wide rows, its

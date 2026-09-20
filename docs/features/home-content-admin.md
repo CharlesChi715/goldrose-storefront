@@ -15,7 +15,7 @@ code. Built across four deliveries (2026-08-07 → 2026-08-10) and live in the
 admin; it awaits the owner acceptance walkthrough.
 
 **The mechanism is specified in
-[`admin-design.md` §9.8.1](../../docs/admin-design.md#981-content--home-page)**
+the home-page editor**
 — registry, field kinds, character budgets, show/hide re-stacking, the section
 map, the previews, the picker, framing and the scroll rules. This record keeps
 the status, the rulings and the costs, and does not restate any of it.
@@ -79,7 +79,7 @@ Only what §9.8.1 does not cover:
 ## Blockers and dependencies
 
 - Owner acceptance walkthrough
-  ([§14.3](../../docs/admin-design.md#143-final-acceptance)) — the ACCEPTED gate
+  (the owner's end-to-end admin walkthrough) — the ACCEPTED gate
   for this record.
 - ⚠️ **The rule that must not be broken when editing this screen:** the frame
   loop lives in a leaf (`picker/PickerLayer.tsx`), never on the screen
@@ -90,7 +90,6 @@ Only what §9.8.1 does not cover:
 
 ## Related links
 
-- Spec: [`admin-design.md` §9.8.1](../../docs/admin-design.md#981-content--home-page)
 - Registry and maths: [`lib/home-content/registry.ts`](../../lib/home-content/registry.ts) ·
   [`layout.ts`](../../lib/home-content/layout.ts) ·
   [`preview.ts`](../../lib/home-content/preview.ts) ·

@@ -187,7 +187,7 @@ const source = `/**
  * Two deliberate departures from the frames, and only two:
  *
  * 1. **The brand name.** The frames still say "GoldRose" 24 times. Per the
- *    brand-name rule (docs/ixd/naming/brand-name.md) and AI-037, the file is a
+ *    brand-name rule and AI-037, the file is a
  *    version BEHIND the repo on brand strings, so its wording is treated as
  *    stale rather than as design: every occurrence reads ELDREVE.
  * 2. **The fill-in-the-blank tokens.** The frames ship unfilled editorial

@@ -6,7 +6,7 @@
  * four-step process and two CTAs (the frame carries no enquiry form). Copy is
  * the design's own placeholder text. "Apply for wholesale" links to
  * /business/wholesale; "Contact business team" has no destination yet, so it
- * stays inert (see docs/ixd).
+ * stays inert (no design exists for the submitted state).
  */
 
 import type { Metadata } from "next";

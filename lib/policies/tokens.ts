@@ -14,7 +14,7 @@
  * registered postal address — is reported unresolved so the page can draw a
  * visible "to be confirmed" mark, never an invented fact and never a raw
  * `[BRACKET]` leaking design scaffolding onto a live page. That follows
- * docs/ixd's standing instruction to leave a placeholder where a thing is
+ * the standing instruction to leave a placeholder where a thing is
  * unsure, and it is why the routes stay noindex until the bosses sign the
  * copy off (AI-046).
  *
