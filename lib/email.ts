@@ -211,7 +211,11 @@ export async function sendOrderPlacedEmails(
     await deliver(
       ownerEmail,
       `New order ${order.name} — ${money(order.total_cents)}`,
-      `A new order just came in.\n\n${summary}\n\nSource: ${order.source} · Provider: ${order.payment_provider}`,
+      `A new order just came in.\n\n${summary}\n\nSource: ${order.source} · Provider: ${order.payment_provider}${
+        order.card_brand && order.card_last4
+          ? ` (${order.card_brand} •••• ${order.card_last4})`
+          : ""
+      }`,
     );
   }
 }

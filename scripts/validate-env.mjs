@@ -103,6 +103,46 @@ if (paypalConfigured && !webhookId) {
   console.warn("[env] ⚠ repair safety net is off.");
 }
 
+// Stripe carries the card rail (card-payments.md). The key's own prefix says
+// whether money is real; the same skip-payment and missing-webhook-secret
+// hazards apply as for PayPal, with sk_live_ playing the PAYPAL_ENV=live role.
+const stripeKey = (process.env.STRIPE_SECRET_KEY ?? "").trim();
+const stripeLive = stripeKey.startsWith("sk_live_");
+const stripeWebhookSecret = (process.env.STRIPE_WEBHOOK_SECRET ?? "").trim();
+
+if (skipPayment && stripeLive) {
+  console.error(
+    "[env] CHECKOUT_SKIP_PAYMENT is set while STRIPE_SECRET_KEY is a LIVE key —",
+  );
+  console.error(
+    "[env] checkout would hand out orders for free on a storefront taking real money.",
+  );
+  console.error("[env] Remove CHECKOUT_SKIP_PAYMENT before going live.");
+  process.exit(1);
+}
+
+if (stripeKey && !stripeWebhookSecret) {
+  if (stripeLive) {
+    console.error(
+      "[env] STRIPE_SECRET_KEY is a LIVE key with no STRIPE_WEBHOOK_SECRET —",
+    );
+    console.error(
+      "[env] the webhook that repairs an order when the buyer's browser dies",
+    );
+    console.error(
+      "[env] cannot verify a single delivery, so orders would be lost silently.",
+    );
+    process.exit(1);
+  }
+  console.warn(
+    "[env] ⚠ Stripe is configured but STRIPE_WEBHOOK_SECRET is not — webhook",
+  );
+  console.warn(
+    "[env] ⚠ deliveries will all be rejected as unverifiable, so the order-",
+  );
+  console.warn("[env] ⚠ repair safety net is off.");
+}
+
 if (skipPayment) {
   console.warn(
     "[env] ⚠ CHECKOUT_SKIP_PAYMENT is ON — checkout skips payment entirely and",

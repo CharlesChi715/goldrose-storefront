@@ -754,6 +754,7 @@ export function CheckoutClient({
   countries,
   defaultCountry,
   paypalClientId,
+  stripeEnabled = false,
   showDiscountField = true,
   skipPayment = false,
 }: {
@@ -762,6 +763,9 @@ export function CheckoutClient({
   countries: Array<{ code: string; name: string }>;
   defaultCountry: string;
   paypalClientId: string | null;
+  /** Card rail: server has STRIPE_SECRET_KEY, so the Pay-by-card action
+   * redirects to Stripe's hosted checkout page. */
+  stripeEnabled?: boolean;
   showDiscountField?: boolean;
   skipPayment?: boolean;
 }) {
@@ -811,7 +815,18 @@ export function CheckoutClient({
   const [shipMethod, setShipMethod] = useState(0);
 
   const [pendingMethod, setPendingMethod] = useState<SubmitMethod | null>(null);
-  const [error, setError] = useState("");
+  // The Stripe return leg reports its two failure exits by query param —
+  // there is no client script between Stripe's page and this one, so the
+  // message arrives with the page load.
+  const [error, setError] = useState(
+    () =>
+      ({
+        drift:
+          "Prices changed while you were paying. Nothing has been charged — please try again.",
+        failed:
+          "Something went wrong finishing your card payment. If you were charged, your order will still be recorded automatically.",
+      })[searchParams.get("payerror") ?? ""] ?? "",
+  );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -967,6 +982,38 @@ export function CheckoutClient({
     }
   }
 
+  /** Card rail: create the server-priced Stripe Checkout Session and hand
+   * the browser to its hosted page. The cart is NOT cleared here — backing
+   * out of Stripe returns to an intact bag; /checkout/success clears it. */
+  async function startStripeCheckout() {
+    if (rawLines.length === 0) {
+      setError("Your cart is empty.");
+      return;
+    }
+    setPendingMethod("card");
+    setError("");
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...checkoutPayload(rawLines),
+          ...(email.trim() ? { email: email.trim() } : {}),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.url) {
+        setError(result.error ?? "Could not start card checkout.");
+        setPendingMethod(null);
+        return;
+      }
+      window.location.assign(result.url);
+    } catch {
+      setError("Something went wrong starting checkout. Please try again.");
+      setPendingMethod(null);
+    }
+  }
+
   const isBusy = pendingMethod !== null;
 
   if (hydrated && lines.length === 0) {
@@ -993,8 +1040,10 @@ export function CheckoutClient({
     );
   }
 
-  /** The mock-card branch: the only branch whose form is actually submitted. */
-  const mockForm = !skipPayment && !paypalClientId;
+  /** The mock-card branch: the only branch whose form is actually submitted.
+   * Any real rail — PayPal wallet or Stripe cards — retires it: a PAN typed
+   * into our own form is exactly what the hosted rails exist to avoid. */
+  const mockForm = !skipPayment && !paypalClientId && !stripeEnabled;
   const first = lines[0] ?? null;
   /** The item card shows line 1; any further lines are listed read-only. */
   const extraLines = lines.slice(1);
@@ -1328,8 +1377,8 @@ export function CheckoutClient({
               lh={10.8}
               color={MUTED}
             >
-              {paypalClientId
-                ? "PayPal collects the delivery address in its own secure window."
+              {paypalClientId || stripeEnabled
+                ? "The delivery address is collected on the secure payment page."
                 : "Test mode — no delivery address is collected."}
             </Txt>
           )}
@@ -1667,7 +1716,7 @@ export function CheckoutClient({
                 weight={500}
                 serif
               >
-                {skipPayment ? "Test order" : "PayPal checkout"}
+                {skipPayment ? "Test order" : "Secure checkout"}
               </Txt>
               <Txt
                 x={42}
@@ -1678,8 +1727,8 @@ export function CheckoutClient({
                 color={INK}
                 wrap
               >
-                {paypalClientId
-                  ? "PayPal collects the delivery address in its own secure window."
+                {paypalClientId || stripeEnabled
+                  ? "The delivery address is collected on the secure payment page."
                   : "Test mode — no delivery address is collected."}
               </Txt>
               <Txt
@@ -1952,43 +2001,93 @@ export function CheckoutClient({
               ) : null}
             </>
           ) : (
-            /* Deliberately no live card fields outside the mock branch: with
-               PayPal live the card is collected in PayPal's own window, and a
-               PAN typed into a field whose value goes nowhere is a
-               PCI/security hazard. */
+            /* Deliberately no live card fields outside the mock branch: a
+               PAN belongs on the provider's hosted page (Stripe Checkout),
+               never in a field of ours — that is the whole PCI SAQ A design.
+               With Stripe configured the top well becomes the card CTA. */
             <>
-              <Txt
-                x={46}
-                y={T_PAYMENT + 80}
-                w={338}
-                size={10}
-                lh={12}
-                color={MUTED}
-              >
-                {paypalClientId
-                  ? "Card and bank details are collected in PayPal's own window."
-                  : "Test mode — no payment details are collected."}
-              </Txt>
-              <Txt
-                x={46}
-                y={T_PAYMENT + 122}
-                w={151}
-                size={10}
-                lh={12}
-                color={MUTED}
-              >
-                Name on card
-              </Txt>
-              <Txt
-                x={225}
-                y={T_PAYMENT + 122}
-                w={100}
-                size={10}
-                lh={12}
-                color={MUTED}
-              >
-                {"MM / YY"}
-              </Txt>
+              {stripeEnabled ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isBusy) {
+                      startStripeCheckout();
+                    }
+                  }}
+                  aria-label="Pay by card on Stripe's secure checkout page"
+                  className={notoSC.className}
+                  style={{
+                    ...abs(36, T_PAYMENT + 68, 358, 36),
+                    appearance: "none",
+                    border: 0,
+                    margin: 0,
+                    padding: 0,
+                    background: GREEN,
+                    borderRadius: 6,
+                    color: "#FFFFFF",
+                    fontSize: 11,
+                    lineHeight: "36px",
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textAlign: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  {pendingMethod === "card"
+                    ? "OPENING SECURE CHECKOUT…"
+                    : "PAY BY CARD"}
+                </button>
+              ) : (
+                <Txt
+                  x={46}
+                  y={T_PAYMENT + 80}
+                  w={338}
+                  size={10}
+                  lh={12}
+                  color={MUTED}
+                >
+                  {paypalClientId
+                    ? "Card and bank details are collected in PayPal's own window."
+                    : "Test mode — no payment details are collected."}
+                </Txt>
+              )}
+              {stripeEnabled ? (
+                <Txt
+                  x={46}
+                  y={T_PAYMENT + 122}
+                  w={338}
+                  size={9}
+                  lh={10.8}
+                  color={MUTED}
+                  wrap
+                >
+                  Card number, expiry and CVC are entered on Stripe&apos;s
+                  secure page — they never touch this site.
+                </Txt>
+              ) : (
+                <>
+                  <Txt
+                    x={46}
+                    y={T_PAYMENT + 122}
+                    w={151}
+                    size={10}
+                    lh={12}
+                    color={MUTED}
+                  >
+                    Name on card
+                  </Txt>
+                  <Txt
+                    x={225}
+                    y={T_PAYMENT + 122}
+                    w={100}
+                    size={10}
+                    lh={12}
+                    color={MUTED}
+                  >
+                    {"MM / YY"}
+                  </Txt>
+                </>
+              )}
             </>
           )}
           {/* PayPal / Apple Pay / Afterpay rows (2170:258/263/268) */}
@@ -2360,11 +2459,17 @@ export function CheckoutClient({
           >
             {pendingMethod === "paypal"
               ? "Starting PayPal checkout…"
-              : skipPayment
-                ? "Testing phase — payment is switched off. The order is recorded in the admin with a test badge and no money moves."
-                : mockForm
-                  ? "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."
-                  : "PayPal collects shipping and payment in its own secure window."}
+              : pendingMethod === "card" && stripeEnabled
+                ? "Opening Stripe's secure card checkout…"
+                : skipPayment
+                  ? "Testing phase — payment is switched off. The order is recorded in the admin with a test badge and no money moves."
+                  : mockForm
+                    ? "Development mode — no real charge is taken and card numbers are never stored. Use a test number like 4242 4242 4242 4242."
+                    : stripeEnabled && paypalClientId
+                      ? "Pay with PayPal, or by card on Stripe's secure page."
+                      : stripeEnabled
+                        ? "Card payments are completed on Stripe's secure page."
+                        : "PayPal collects shipping and payment in its own secure window."}
           </Txt>
         </div>
       </ScaleFrame>
@@ -2390,11 +2495,17 @@ export function CheckoutClient({
                       submitMockCheckout("none", false);
                     }
                   }
-                : () => {
-                    if (!isBusy) {
-                      submitMockCheckout("card", true);
+                : stripeEnabled
+                  ? () => {
+                      if (!isBusy) {
+                        startStripeCheckout();
+                      }
                     }
-                  },
+                  : () => {
+                      if (!isBusy) {
+                        submitMockCheckout("card", true);
+                      }
+                    },
             })}
       />
     </>

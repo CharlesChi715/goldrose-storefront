@@ -1,5 +1,13 @@
 # Wiring PayPal: sandbox, webhooks, card fields, live
 
+> **⚠️ Scope change 2026-09-20 — cards left PayPal.** The card rail is now
+> Stripe Checkout ([card-payments](../features/card-payments.md), decision
+> revision), so **Phase D (§5) and Phase E's card rows are superseded** —
+> don't build them. The **wallet** rail is unchanged: Phases A–C and the
+> wallet parts of Phase E remain the live procedure, minus the ACDC
+> enablement steps. Local card-webhook testing needs no cloudflared —
+> `stripe listen` does it.
+
 **Last verified 2026-09-05.** Owning records: [card-payments](../features/card-payments.md)
 (status of the card rail) and [paypal-wallet](../features/paypal-wallet.md) (status of the
 wallet rail). This guide is the *procedure*; status lives in those two front matters.

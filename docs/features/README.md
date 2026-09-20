@@ -37,8 +37,8 @@ markers (`check` fails when the block is stale). Meter legend:
 | [product-content-pipeline](product-content-pipeline.md) | ○○○○ backlog | not-deployed |
 | [promotion-emails](promotion-emails.md) | ○○○○ backlog | not-deployed |
 | [tiktok-analytics](tiktok-analytics.md) | ○○○○ backlog | not-deployed |
-| [card-payments](card-payments.md) | ●○○○ ready | not-deployed |
 | [shipping-rates](shipping-rates.md) | ●○○○ ready | not-deployed |
+| [card-payments](card-payments.md) | ●●○○ in-progress | not-deployed |
 | [customer-accounts](customer-accounts.md) | ●●○○ in-progress | live |
 | [database-migrations](database-migrations.md) | ●●○○ in-progress | live |
 | [db-backups](db-backups.md) | ●●○○ in-progress | live |

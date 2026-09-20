@@ -404,6 +404,12 @@ export function OrderDetailView({
                     ({order.payment_provider})
                   </Text>
                 ) : null}
+                {order.card_brand && order.card_last4 ? (
+                  <Text as="p" tone="subdued" variant="bodySm">
+                    {t("order.payment.card")}: {order.card_brand} ••••{" "}
+                    {order.card_last4}
+                  </Text>
+                ) : null}
                 {sellerProtection ? (
                   <Text as="p" tone="subdued" variant="bodySm">
                     {t("order.payment.sellerProtection")}: {sellerProtection}

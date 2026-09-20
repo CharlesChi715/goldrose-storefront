@@ -42,6 +42,11 @@ export type CreateOrderInput = {
    * this is what lets /account find the order whatever the sign-in method
    * was. Null for guests, admin drafts, and webhook repairs. */
   auth_user_id?: string | null;
+  /** Instrument columns (migration 0016). Leave undefined to omit them from
+   * the insert entirely — deploy-safe while the migration is unpushed. */
+  payment_method_kind?: "wallet" | "card" | null;
+  card_brand?: string | null;
+  card_last4?: string | null;
   raw?: unknown;
   actor?: string;
   /** Drafts are created without touching stock; "Mark as paid" decrements. */
@@ -208,6 +213,13 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRow> {
     placed_at: now,
     raw: input.raw ?? null,
     auth_user_id: input.auth_user_id ?? null,
+    // Spread-only-when-given: an undefined key never reaches the insert, so
+    // this deploys safely before migration 0016 is pushed.
+    ...(input.payment_method_kind !== undefined
+      ? { payment_method_kind: input.payment_method_kind }
+      : {}),
+    ...(input.card_brand !== undefined ? { card_brand: input.card_brand } : {}),
+    ...(input.card_last4 !== undefined ? { card_last4: input.card_last4 } : {}),
   };
 
   const lines: OrderLineRow[] = input.priced.lines.map((line) => ({
