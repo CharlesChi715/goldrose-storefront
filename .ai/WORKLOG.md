@@ -7564,3 +7564,19 @@ team-deliveries/README.md; not committed, left for Charles to decide.
   .env/validate-env rules, 25 unit tests. `npm run check` fully green.
 - Stripe CLI authenticated on this Mac (live account); the live payment link
   plink_1U7snAGvea4GUGR4sk0kQcWK confirmed shipping-blind via API (AI-048).
+
+## 2026-09-20 — Stripe card rail activated and walked through (worktree-stripe-race-fixes)
+
+- Applied migrations 0015 + 0016 to hosted after a pg_dump safety copy
+  (~/before-0016.dump); verified the three order columns and the widened
+  checkouts.status constraint.
+- Stripe test key + `stripe listen` webhook secret wired into .env.local;
+  CHECKOUT_SKIP_PAYMENT commented out locally so the card rail renders.
+- Drove three real sandbox purchases in a browser (#1018 Visa, #1019 and
+  #1021 Mastercard), one $5 partial refund and three full refunds — all
+  synced by the signature-verified webhook.
+- Two defects found and fixed (PR #56): the webhook lost card brand/last4
+  when it beat the return leg, and the loser of that race threw on
+  orders_provider_order_id_key, showing a paid buyer an error page.
+- Filed AI-050 (three sandbox orders hold 4 units of live stock) and AI-051
+  (Adaptive Pricing would refund every non-US buyer).

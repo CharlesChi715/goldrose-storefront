@@ -92,6 +92,9 @@ export function allowedShipToCountries(priced: PricedCart): string[] {
  *   the success/cancel URLs; email prefills the Stripe page when known.
  * @returns The session id and the hosted payment page URL to redirect to.
  */
+// AI-TAG(AI-051): OWNER-DECISION — Adaptive Pricing converts the session into
+// the buyer's currency, which the return leg's USD amount check can never
+// match. See /agent-delivery/sessions/payment-learning-09-20-worktree-stripe-checkout.md.
 export async function createStripeCheckoutSession(
   priced: PricedCart,
   options: { checkoutId: string; origin: string; email?: string | null },
