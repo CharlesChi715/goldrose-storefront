@@ -3,10 +3,10 @@
  * The testing-phase "skip payment" switch (§10.4). With CHECKOUT_SKIP_PAYMENT
  * on, /checkout drops the card form and every payment button and offers a
  * single Place order button that records the order straight away — no card,
- * no provider, no money. The real PayPal path is only GATED by this, never
+ * no provider, no money. The real Stripe path is only GATED by this, never
  * modified: turn the flag off and checkout behaves exactly as before.
  *
- * Follows the house convention (lib/paypal/client.ts, lib/supabase/env.ts):
+ * Follows the house convention (lib/stripe/client.ts, lib/supabase/env.ts):
  * one function owns the process.env read, call sites read the function.
  */
 

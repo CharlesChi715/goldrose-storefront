@@ -23,8 +23,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * @param orderId - The order's UUID, as carried by the success redirect's
  *   `oid` param. Untrusted: rejected unless it is UUID-shaped.
  * @returns The order's email, or null when the id is malformed, matches no
- *   order, or the order was placed without an address (guest PayPal flows
- *   can land without one).
+ *   order, or the order was placed without an address.
  */
 export async function getOrderConfirmationEmail(
   orderId: string | undefined,

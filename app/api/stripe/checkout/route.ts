@@ -1,7 +1,6 @@
 // POST /api/stripe/checkout: re-price the cart from the DB, log the
 // checkouts row, create the Stripe Checkout Session, hand its hosted-page
-// URL back to the client. No client-supplied price is ever trusted — the
-// same contract as /api/paypal/create.
+// URL back to the client. No client-supplied price is ever trusted.
 
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
@@ -33,7 +32,7 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  // Limited like /api/paypal/create: starting a checkout is repeatable and a
+  // Limited: starting a checkout is repeatable and a
   // refusal only costs the shopper a retry — no money has moved yet.
   const gate = checkRequest(
     request.headers,
@@ -107,8 +106,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    // A shopper who cannot start a checkout is a silently lost sale — the
-    // same reasoning as paypal.create.failed.
+    // A shopper who cannot start a checkout is a silently lost sale.
     await alert(
       "stripe.checkout.failed",
       "A shopper could not start Stripe card checkout.",

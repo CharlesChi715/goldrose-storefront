@@ -50,10 +50,9 @@ export default defineConfig({
     timeout: 240_000,
     env: {
       // Real process env beats .env.local, so blanking these guarantees the
-      // suite runs mock checkout even on a machine with PayPal keys.
-      PAYPAL_CLIENT_ID: "",
-      PAYPAL_SECRET: "",
-      NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
+      // suite runs mock checkout even on a machine with Stripe keys.
+      STRIPE_SECRET_KEY: "",
+      STRIPE_WEBHOOK_SECRET: "",
       // Same for the testing-phase skip-payment flag (.env.local): blank it so
       // the suite always exercises the real express/card checkout UI.
       CHECKOUT_SKIP_PAYMENT: "",

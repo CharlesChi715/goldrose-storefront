@@ -39,7 +39,7 @@ export async function GET() {
 
 > ${settings.search_engine.home_description}
 
-${settings.store.name} sells real roses preserved in 24K gold — keepsake gifts for anniversaries, Valentine's Day, Mother's Day, and milestone moments. All prices are in USD. Checkout is on-site; PayPal is accepted.
+${settings.store.name} sells real roses preserved in 24K gold — keepsake gifts for anniversaries, Valentine's Day, Mother's Day, and milestone moments. All prices are in USD. Checkout is on-site; Visa and Mastercard are accepted, paid on Stripe's secure page.
 
 ## Products
 

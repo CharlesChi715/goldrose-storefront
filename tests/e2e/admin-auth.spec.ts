@@ -66,7 +66,7 @@ test("owner logs in and sees the Shopify-clone nav and top bar", async ({
   // Top bar: search + account menu with the signed-in email.
   await expect(page.getByPlaceholder("Search")).toBeVisible();
   await expect(page.getByText("owner@goldrose.local")).toBeVisible();
-  // Payment-mode banner: mock mode (no PayPal env in tests).
+  // Payment-mode banner: mock mode (no Stripe key in tests).
   await expect(page.getByText(/Test mode/)).toBeVisible();
 });
 

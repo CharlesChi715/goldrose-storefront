@@ -6,7 +6,7 @@
  * modal), payment card (+ refund modal), timeline with comments. Right:
  * notes (prefilled with the buyer's gift message, editable), customer,
  * contact information, shipping/billing addresses, tags, conversion
- * summary; seller-protection status replaces Shopify's fraud card (adapt).
+ * summary.
  * Actions: refund, cancel (unfulfilled only), print packing slip, archive.
  * No delete — same as Shopify.
  */
@@ -102,14 +102,12 @@ export function OrderDetailView({
   events,
   customer,
   conversion,
-  sellerProtection,
 }: {
   order: OrderRow;
   lines: OrderLineRow[];
   events: OrderEventRow[];
   customer: CustomerSummary;
   conversion: ConversionSummary | null;
-  sellerProtection: string | null;
 }) {
   const t = useAdminT();
   const router = useRouter();
@@ -408,11 +406,6 @@ export function OrderDetailView({
                   <Text as="p" tone="subdued" variant="bodySm">
                     {t("order.payment.card")}: {order.card_brand} ••••{" "}
                     {order.card_last4}
-                  </Text>
-                ) : null}
-                {sellerProtection ? (
-                  <Text as="p" tone="subdued" variant="bodySm">
-                    {t("order.payment.sellerProtection")}: {sellerProtection}
                   </Text>
                 ) : null}
               </BlockStack>

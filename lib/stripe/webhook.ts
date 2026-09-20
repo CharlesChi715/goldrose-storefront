@@ -51,8 +51,7 @@ async function addEvent(orderId: string, message: string): Promise<void> {
 }
 
 /**
- * Handle checkout.session.completed. Three paths, mirroring the PayPal
- * handler: an existing pending order is marked paid ("confirmed"); an
+ * Handle checkout.session.completed. Three paths: an existing pending order is marked paid ("confirmed"); an
  * already-paid order is a "duplicate" redelivery; and when no order exists,
  * the order is rebuilt from the saved checkout via a fresh server re-price
  * ("repaired" — the buyer's browser died between paying on Stripe and our

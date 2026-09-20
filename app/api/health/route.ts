@@ -9,7 +9,7 @@
  * takes the whole shop down while the homepage keeps serving a cached copy and
  * looks fine — precisely the outage a "GET / returns 200" probe misses.
  *
- * It deliberately does NOT call PayPal or Resend. A health check that calls a
+ * It deliberately does NOT call Stripe or Resend. A health check that calls a
  * third party turns their outage into our red alert, and turns our probe into
  * traffic against someone else's rate limit. Their failures surface where they
  * happen, through `alert()` on the money path.

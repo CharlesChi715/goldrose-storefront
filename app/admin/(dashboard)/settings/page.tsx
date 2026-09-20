@@ -10,7 +10,7 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { hasAdvisorKey } from "@/lib/advisor/keys";
 import { getSettingsMap } from "@/lib/admin/settings";
 import { getContentSlot } from "@/lib/content";
-import { getPayPalConfig } from "@/lib/paypal/client";
+import { getStripeConfig } from "@/lib/stripe/client.ts";
 import { getStore } from "@/lib/supabase/store.ts";
 import { SettingsView } from "./SettingsView";
 
@@ -26,15 +26,14 @@ export default async function SettingsPage() {
     getContentSlot("policy.privacy"),
     getContentSlot("policy.terms"),
   ]);
-  const paypal = getPayPalConfig();
+  const stripe = getStripeConfig();
 
   return (
     <SettingsView
       settings={settings}
       payment={{
-        mode: paypal.configured ? paypal.env : "mock",
-        clientIdTail: paypal.clientId ? `…${paypal.clientId.slice(-6)}` : null,
-        webhookConfigured: Boolean(paypal.webhookId),
+        mode: !stripe.configured ? "mock" : stripe.live ? "live" : "sandbox",
+        webhookConfigured: Boolean(stripe.webhookSecret),
       }}
       advisor={{ keySaved: advisorKeySaved }}
       owners={admins.map((admin) => admin.email || admin.user_id)}

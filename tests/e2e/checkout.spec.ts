@@ -10,7 +10,7 @@
 import { test, expect } from "@playwright/test";
 import { promises as fs } from "fs";
 import path from "path";
-import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
+import { adminLogin, ADMIN_VIEWPORT, MOCK_CARD_ORDER } from "./helpers";
 
 const CART_KEY = "goldrose-cart-v2";
 const DB_FILE = path.join(process.cwd(), ".data", "db.json");
@@ -144,14 +144,23 @@ test("non-US address gets its zone's shipping rate (Rest of world)", async ({
   // sets, exercising the real production path.
   await page.setExtraHTTPHeaders({ "x-vercel-ip-country": "GB" });
   await page.goto("/checkout");
+  await page.fill("#email", "stage4-row@example.com");
+  await page.fill("#ship-name", "Test Buyer");
+  await page.fill("#ship-address1", "1 Test Street");
+  await page.fill("#ship-city", "London");
+  await page.fill("#ship-state", "LDN");
+  await page.fill("#ship-zip", "N1 9GU");
   await page.getByRole("button", { name: "CONTINUE TO PAYMENT" }).click();
   await page.waitForURL(/step=payment/);
   // Rest-of-world placeholder rate: $19.95, no free threshold.
   await expect(page.getByText("$19.95")).toBeVisible();
   await expect(page.getByText("Shipping (Rest of world)")).toBeVisible();
 
-  // Mock express (PayPal) completes without the card form.
-  await page.getByRole("button", { name: "Pay with PayPal" }).click();
+  await page.fill("#card-name", "Test Buyer");
+  await page.fill("#card-number", "4242 4242 4242 4242");
+  await page.fill("#card-expiry", "12/33");
+  await page.fill("#card-cvc", "123");
+  await page.getByRole("button", { name: /^PAY \$/ }).click();
   await page.waitForURL(/\/checkout\/success\?/);
 
   const orderName = (
@@ -168,7 +177,7 @@ test("tampered client prices are ignored — the server prices from the DB", asy
 }) => {
   const response = await request.post("/api/checkout", {
     data: {
-      method: "paypal",
+      ...MOCK_CARD_ORDER,
       lines: [
         {
           variantId: SIGNATURE_VARIANT,
@@ -207,7 +216,7 @@ test("an admin price edit changes the checkout total", async ({
   async function checkoutTotal(): Promise<number> {
     const response = await request.post("/api/checkout", {
       data: {
-        method: "paypal",
+        ...MOCK_CARD_ORDER,
         lines: [{ variantId: SIGNATURE_VARIANT, quantity: 1 }],
         country: "US",
       },

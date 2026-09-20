@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 // Response headers every route sends. This is the low-risk baseline a shop
 // that takes payments is expected to have. A Content-Security-Policy is
-// deliberately NOT here yet: PayPal's SDK, Supabase and the inline JSON-LD on
+// deliberately NOT here yet: Supabase and the inline JSON-LD on
 // the product pages each need their own allowance, and a wrong CSP breaks
 // checkout silently — it gets its own change, tested against a live checkout.
 const securityHeaders = [
@@ -17,7 +17,8 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   // Nothing on the site uses these; switching them off closes that door for
   // any third-party script too. `payment` and `publickey-credentials-get` are
-  // deliberately NOT restricted — PayPal and passkeys need them.
+  // deliberately NOT restricted — passkeys need the second, and the first is
+  // left open for a future on-page wallet.
   {
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",

@@ -13,7 +13,7 @@
     },
     {
       "route": "/checkout/cancel",
-      "why": "PayPal cancel return path; technical, no design."
+      "why": "Hosted-checkout cancel return path; technical, no design."
     },
     {
       "route": "/policies/email-sms-terms",

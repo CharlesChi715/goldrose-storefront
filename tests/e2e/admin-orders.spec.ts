@@ -284,8 +284,11 @@ test("customer auto-created with profile, orders and its own timeline", async ({
 test("webhook rejects unverifiable deliveries with 401", async ({
   request,
 }) => {
-  const response = await request.post("/api/webhooks/paypal", {
-    data: { event_type: "PAYMENT.CAPTURE.COMPLETED", resource: { id: "FAKE" } },
+  const response = await request.post("/api/webhooks/stripe", {
+    data: {
+      type: "checkout.session.completed",
+      data: { object: { id: "FAKE" } },
+    },
   });
   expect(response.status()).toBe(401);
 });

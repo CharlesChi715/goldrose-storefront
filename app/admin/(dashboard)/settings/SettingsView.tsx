@@ -72,7 +72,6 @@ export function SettingsView({
   settings: SettingsShape;
   payment: {
     mode: "mock" | "sandbox" | "live";
-    clientIdTail: string | null;
     webhookConfigured: boolean;
   };
   /** Whether this admin has an advisor key stored — never the key itself. */
@@ -277,7 +276,7 @@ export function SettingsView({
               {t("settings.payments.title")}
             </Text>
             <InlineStack gap="200" blockAlign="center">
-              <Text as="span">{t("settings.payments.provider")}: PayPal</Text>
+              <Text as="span">{t("settings.payments.provider")}: Stripe</Text>
               <Badge
                 tone={
                   payment.mode === "live"
@@ -290,11 +289,6 @@ export function SettingsView({
                 {t(`settings.payments.mode.${payment.mode}`)}
               </Badge>
             </InlineStack>
-            {payment.clientIdTail ? (
-              <Text as="p" tone="subdued" variant="bodySm">
-                {t("settings.payments.clientId")}: {payment.clientIdTail}
-              </Text>
-            ) : null}
             <Text as="p" tone="subdued" variant="bodySm">
               {payment.webhookConfigured
                 ? t("settings.payments.webhook.ok")

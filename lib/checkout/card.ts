@@ -2,9 +2,9 @@
  * ROLE OF THIS FILE
  * Format-only card validation for the mock (development) checkout: brand
  * detection, the Luhn checksum, and expiry checks. It can say "this LOOKS
- * like a card number", never "this card can pay". In live mode payment runs
- * through PayPal and never touches this code (a card rail is future work —
- * docs/features/card-payments.md).
+ * like a card number", never "this card can pay". With Stripe configured
+ * payment runs on Stripe's hosted page and never touches this code
+ * (docs/features/card-payments.md).
  */
 
 import type { CardInput } from "@/lib/checkout/types";

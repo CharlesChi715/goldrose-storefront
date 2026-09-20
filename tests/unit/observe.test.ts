@@ -59,10 +59,10 @@ async function captureConsole(run: () => Promise<void> | void) {
 test("the first alert of its kind is logged and emailed", async () => {
   const { alert, sent } = harness();
   await captureConsole(() =>
-    alert("paypal.capture.failed", "A capture failed.", { orderId: "abc" }),
+    alert("stripe.return.failed", "A capture failed.", { orderId: "abc" }),
   );
   assert.equal(sent.length, 1);
-  assert.match(sent[0].subject, /paypal\.capture\.failed/);
+  assert.match(sent[0].subject, /stripe\.return\.failed/);
   assert.match(sent[0].text, /A capture failed\./);
   assert.match(sent[0].text, /orderId/);
 });
@@ -70,9 +70,9 @@ test("the first alert of its kind is logged and emailed", async () => {
 test("the same event inside the window is logged but not emailed again", async () => {
   const { alert, sent } = harness();
   const lines = await captureConsole(async () => {
-    await alert("paypal.capture.failed", "one");
-    await alert("paypal.capture.failed", "two");
-    await alert("paypal.capture.failed", "three");
+    await alert("stripe.return.failed", "one");
+    await alert("stripe.return.failed", "two");
+    await alert("stripe.return.failed", "three");
   });
   assert.equal(sent.length, 1, "only the first email goes out");
   assert.equal(lines.length, 3, "but every occurrence is still logged");
@@ -94,8 +94,8 @@ test("the next email says how many it stood in for", async () => {
 test("a quiet event is not silenced by a noisy neighbour", async () => {
   const { alert, sent } = harness();
   await captureConsole(async () => {
-    await alert("paypal.capture.failed", "noisy");
-    await alert("paypal.capture.failed", "noisy again");
+    await alert("stripe.return.failed", "noisy");
+    await alert("stripe.return.failed", "noisy again");
     await alert("db.unreachable", "different event");
   });
   assert.equal(sent.length, 2);
@@ -121,21 +121,21 @@ test("a sender that throws never reaches the caller", async () => {
     },
   });
   const lines = await captureConsole(() =>
-    alert("paypal.capture.failed", "the original problem"),
+    alert("stripe.return.failed", "the original problem"),
   );
   // The original event AND the failure to report it are both on the record.
-  assert.ok(lines.some((line) => line.includes("paypal.capture.failed")));
+  assert.ok(lines.some((line) => line.includes("stripe.return.failed")));
   assert.ok(lines.some((line) => line.includes("alert.email.failed")));
 });
 
 test("an alert carries the cause's message, not [object Object]", async () => {
   const { alert, sent } = harness();
   await captureConsole(() =>
-    alert("paypal.capture.failed", "capture blew up", {
-      err: new Error("PayPal returned 502"),
+    alert("stripe.return.failed", "capture blew up", {
+      err: new Error("Stripe returned 502"),
     }),
   );
-  assert.match(sent[0].text, /PayPal returned 502/);
+  assert.match(sent[0].text, /Stripe returned 502/);
 });
 
 test("a log line is one parseable JSON object carrying the event name", async () => {
@@ -158,7 +158,7 @@ test("a field cannot rename the event it is attached to", async () => {
   // reporting on — an alert about a broken alert, wearing the wrong name.
   const lines = await captureConsole(() => {
     logEvent("error", "alert.email.failed", {
-      event: "paypal.capture.failed",
+      event: "stripe.return.failed",
       level: "info",
       ts: "not a timestamp",
     });

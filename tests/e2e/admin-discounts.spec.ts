@@ -10,7 +10,7 @@
 import { test, expect } from "@playwright/test";
 import { promises as fs } from "fs";
 import path from "path";
-import { adminLogin, ADMIN_VIEWPORT } from "./helpers";
+import { adminLogin, ADMIN_VIEWPORT, MOCK_CARD_ORDER } from "./helpers";
 
 test.use({ viewport: ADMIN_VIEWPORT });
 test.describe.configure({ mode: "serial" });
@@ -147,7 +147,7 @@ test("limit-reached codes are rejected", async ({ page, request }) => {
   // Use it once through the real checkout API…
   const first = await request.post("/api/checkout", {
     data: {
-      method: "paypal",
+      ...MOCK_CARD_ORDER,
       lines: [{ variantId: SIGNATURE_VARIANT, quantity: 1 }],
       country: "US",
       discountCode: CODE_LIMIT,

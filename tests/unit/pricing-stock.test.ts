@@ -10,10 +10,10 @@
  *
  * Every payment route prices through this one function, which is what makes a
  * single check sufficient — so these tests are the guarantee for mock
- * checkout, PayPal create and PayPal capture together.
+ * checkout, Stripe session create and the Stripe return leg together.
  *
  * Runs in a temp working directory so the repo's own .data/db.json is
- * untouched (the pattern from paypal-webhook.test.ts).
+ * untouched (the pattern from stripe-webhook.test.ts).
  */
 
 import { test, before } from "node:test";

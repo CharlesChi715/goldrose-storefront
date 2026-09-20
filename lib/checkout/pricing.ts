@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * Server-side cart pricing (§8 "checkout re-pricing"): every checkout —
- * mock, PayPal create, capture verification — re-prices the cart FROM THE
+ * mock, Stripe session create, return verification — re-prices the cart FROM THE
  * DATABASE by variant id. The browser never supplies a price, so tampered
  * client data can't change what a customer is charged. Shipping comes from
  * the zone matching the ship-to country (§10.3); tax from settings (0 while
@@ -139,8 +139,8 @@ export async function priceCart(input: {
     // and `adjust_inventory` has no floor — so stock went negative and the
     // shop promised what it did not have. Every payment route prices through
     // this function (that is the §8 rule that stops the browser naming a
-    // price), so one check here covers mock checkout, PayPal create and
-    // PayPal capture alike.
+    // price), so one check here covers mock checkout, Stripe session create
+    // and the Stripe return leg alike.
     //
     // It closes the window, it does not eliminate it: two buyers who price
     // simultaneously both pass, because the decrement happens later in
