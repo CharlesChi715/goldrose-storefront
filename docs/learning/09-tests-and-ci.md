@@ -41,7 +41,7 @@ Key jargon:
  npm run test:e2e    playwright                         ✗ e2e NOT run in CI
         │                                                 (baselines are -darwin)
         ├─ webServer: next build && next start -p 3001
-        │    env: PAYPAL_* = ""     → mock checkout, no money
+        │    env: STRIPE_* = ""     → mock checkout, no money
         │         SUPABASE_* = ""   → local .data/db.json, never the live DB
         │         ADMIN_DEV_PASSWORD = "stage2-test-password"
         │
@@ -86,15 +86,15 @@ That is the right way to record a constraint: at the line that depends on it, no
 
 ### Step 2 — Isolating tests from the real database
 
-Several unit tests exercise real database logic. They must not touch the repo's actual `.data/db.json`. The trick ([paypal-webhook.test.ts:16-21](../../tests/unit/paypal-webhook.test.ts#L16-L21)):
+Several unit tests exercise real database logic. They must not touch the repo's actual `.data/db.json`. The trick ([stripe-webhook.test.ts:7-12](../../tests/unit/stripe-webhook.test.ts#L7-L12)):
 
 ```ts
-// tests/unit/paypal-webhook.test.ts:16-21
+// tests/unit/stripe-webhook.test.ts:7-12
 // The local file store roots itself at process.cwd() — isolate it FIRST,
 // before any store import can cache a path.
-process.chdir(mkdtempSync(path.join(tmpdir(), "goldrose-webhook-test-")));
+process.chdir(mkdtempSync(path.join(tmpdir(), "goldrose-stripe-test-")));
 
-const { handlePayPalEvent } = await import("../../lib/paypal/webhook.ts");
+const { handleStripeEvent } = await import("../../lib/stripe/webhook.ts");
 const { getStore } = await import("../../lib/supabase/store.ts");
 ```
 
@@ -159,10 +159,9 @@ That is a sharp idea. A test that scans a codebase passes trivially if the scan 
 // playwright.config.ts:51-68
     env: {
       // Real process env beats .env.local, so blanking these guarantees the
-      // suite runs mock checkout even on a machine with PayPal keys.
-      PAYPAL_CLIENT_ID: "",
-      PAYPAL_SECRET: "",
-      NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
+      // suite runs mock checkout even on a machine with Stripe keys.
+      STRIPE_SECRET_KEY: "",
+      STRIPE_WEBHOOK_SECRET: "",
       // Same for the testing-phase skip-payment flag (.env.local): blank it so
       // the suite always exercises the real express/card checkout UI.
       CHECKOUT_SKIP_PAYMENT: "",
@@ -291,13 +290,13 @@ And the division of labour is written down where you'd look for it. Each unit te
 [scripts/validate-env.mjs](../../scripts/validate-env.mjs) runs before every `next build`:
 
 ```js
-// scripts/validate-env.mjs:65-74
-if (skipPayment && paypalLive) {
+// scripts/validate-env.mjs:74-82
+if (skipPayment && stripeLive) {
   console.error(
-    "[env] CHECKOUT_SKIP_PAYMENT is set while PAYPAL_ENV=live — checkout would",
+    "[env] CHECKOUT_SKIP_PAYMENT is set while STRIPE_SECRET_KEY is a LIVE key —",
   );
   console.error(
-    "[env] hand out orders for free on a storefront taking real money.",
+    "[env] checkout would hand out orders for free on a storefront taking real money.",
   );
   console.error("[env] Remove CHECKOUT_SKIP_PAYMENT before going live.");
   process.exit(1);
@@ -338,7 +337,7 @@ Written plainly, because a safety net you overestimate is worse than one you und
    * exists against hosted Supabase and is exercised by hand there.
   ```
 
-- **Real PayPal is never contacted** — all fixtures. Signature verification is only smoke-covered.
+- **Real Stripe is never contacted** — all fixtures. Signature verification has its own unit test ([stripe-verify.test.ts](../../tests/unit/stripe-verify.test.ts)).
 - **Pricing has no unit tests at all** ([08](08-price-math-and-trust.md) Step 7) — `priceCart`, `applyDiscountCode` and `computeShipping` are pure functions with almost no I/O, and are the cheapest high-value tests available right now.
 
 ## Recap

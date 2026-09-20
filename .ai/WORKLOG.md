@@ -7606,3 +7606,28 @@ team-deliveries/README.md; not committed, left for Charles to decide.
   from China will not hit the "Prices changed while you were paying" stop.
 - card-payments.md corrected; the archived AI-051 record still shows the
   original answer, which is what an archive is for.
+
+## 2026-09-20 17:14 AEST — PayPal removed; Stripe is the only payment provider
+
+Charles confirmed the business runs on Stripe and Aspire and asked for every
+out-of-date PayPal reference to go. Branch `worktree-remove-paypal`.
+
+- Code: deleted `lib/paypal/`, `/api/paypal/*`, `/api/webhooks/paypal`, the
+  SDK button, the refund branch, the PayPal env block and build guards, the
+  PayPal-only seller-protection line in the admin order view, and two unit
+  test files. `PaymentMethodId` is now just `"card"`.
+- Holes closed on the way: `/api/checkout` (mock orders) stayed open while
+  Stripe was configured; the admin banner and Settings card said "mock" with
+  Stripe set; `rk_live_` keys did not count as live in the build guard;
+  `playwright.config.ts` did not blank Stripe keys; `llms.txt` said PayPal is
+  accepted.
+- Docs: `paypal-wallet` → dropped; `card-payments` rewritten (217 → 144
+  lines); spec §4, §5, §6, §7.4, §10, §13, §15, §16 + Rev 5; payment-failing
+  runbook rewritten against the `stripe.*` alerts, with a dispute section;
+  rotate-a-key, restore, site-down, quota runbooks; README figures recounted
+  (21 handlers, 15 migrations); lessons 01, 07, 08, 09 updated; lesson 06 and
+  `docs/guides/` deleted; advisor app facts corrected.
+- Filed AI-052: the design still draws PayPal, Apple Pay, Afterpay, shop Pay
+  and Klarna marks that the shop does not accept.
+- Verified: `npm run check` green (294 unit tests), 31 payment-related e2e
+  specs green against a fresh build.

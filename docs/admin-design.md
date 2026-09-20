@@ -111,9 +111,8 @@ Build "our own Shopify" for ELDREVE in **one phase**:
   tell** — same navigation, screens, wording (in English and 中文), and
   workflows — so nothing has to be relearned when Shopify is cancelled.
   Backed by the project's first real database (Supabase).
-- a **native checkout that takes payments directly** — working assumption:
-  PayPal Orders API v2 (the owner's verified business account, proven with a
-  real payment on 2026-07-15; provider choice is OQ-1, §4).
+- a **native checkout that takes payments directly** — Stripe Checkout,
+  settling into the company's Stripe account (OQ-1, §4 and §10).
 
 ELDREVE sells **internationally** (not US-only, decided 2026-07-21).
 Shopify is removed as part of this build, not after it. Development and
@@ -195,7 +194,7 @@ Every Shopify admin feature lands in one of three buckets. Dropped features
 
 - **Clone** — layout, cards, columns, tabs, buttons, and wording copied from
   the real screen, in both languages.
-- **Adapt** — same screen, but the PayPal/Supabase/Vercel reality shows
+- **Adapt** — same screen, but the Stripe/Supabase/Vercel reality shows
   through (e.g. the payment card shows a provider capture id, not Shopify
   Payments; one stock location, so no location picker).
 - **Dropped** — feature doesn't apply to this business; omitted entirely.
@@ -221,7 +220,7 @@ proceeds.
 
 | ID       | Question                                                                               | Working assumption (build against this)                                                                                                                                                                                                           | Blocks                                                          | Owner action                                                              |
 | -------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **OQ-1** | **Payment provider** — PayPal only, Stripe, or both? (owner unsure, raised 2026-07-22) | **PayPal-direct** — account verified, real payment proven 2026-07-15. The schema is provider-neutral (§7.4: `payment_provider`, `provider_order_id`, `provider_capture_id`), so adding/switching providers later changes routes, not the database | Stage 4 payment routes only; stages 0–3 are payment-independent | Charles decides; "add Stripe for cards" re-evaluated at launch either way |
+| **OQ-1** | **Payment provider** — CLOSED 2026-09-20 | **Stripe only**: cards on Stripe Checkout, settling into the company's Stripe account. PayPal was built in July, never configured, and removed 2026-09-20 ([paypal-wallet](features/paypal-wallet.md)). The schema is provider-neutral (§7.4: `payment_provider`, `provider_order_id`, `provider_capture_id`), so a future provider changes routes, not the database | Nothing | None — state lives in [card-payments](features/card-payments.md) |
 | **OQ-2** | Which countries do we ship to, at what rates?                                          | Seed zones: *United States* · *Rest of world* (placeholder rate)                                                                                                                                                                                  | Nothing in the build; real rates needed before launch           | Charles supplies country list + rates                                     |
 | **OQ-3** | Real product info (names, prices, photos)                                              | Placeholder design text stays on the storefront                                                                                                                                                                                                   | Stage 9                                                         | Charles supplies                                                          |
 | **OQ-4** | Supabase project not yet created                                                       | —                                                                                                                                                                                                                                                 | Stages 1+                                                       | Charles creates it (checklist in §13)                                     |
@@ -235,7 +234,7 @@ proceeds.
 | Keep Shopify vs replace it | Custom admin + native checkout                                                                                                                                           | Keeping Shopify: monthly cost + two systems behind a fully custom storefront. A gradual transition rail (Rev 1) was designed, then cut — no customers to protect (Rev 2)                                                                                                                                                            |
 | Admin UI                   | `@shopify/polaris`                                                                                                                                                       | Plain Tailwind admin (the Rev 2 plan): faster to start but only approximates Shopify — fails the owner's "exactly the same" requirement (Rev 3). Hand-cloning Shopify's look without Polaris: strictly more work for a worse copy                                                                                                   |
 | Database / auth / storage  | Supabase                                                                                                                                                                 | One vendor covers Postgres + Auth + Storage with an owner-usable dashboard; RLS enables the "storefront reads only a safe view" security model (§7.13). Separate DB + NextAuth + S3: more moving parts for a solo owner                                                                                                             |
-| Payment provider           | PayPal-direct (**working assumption — OQ-1**)                                                                                                                            | Stripe: best card/wallet UX but a new account + verification and loses the PayPal button many gift buyers prefer. Both providers: best conversion, roughly double the money-code — deferred to launch. Decision recorded when OQ-1 closes                                                                                           |
+| Payment provider           | Stripe Checkout, hosted page (OQ-1 closed 2026-09-20) | PayPal-direct was the July working assumption, when the boss's PayPal account was the only way to take money; the company's verified Stripe account replaced that reason. Both providers side by side: two dashboards, two refund paths and two webhooks for a shop with no customers yet |
 | Visitor analytics          | First-party `page_views` beacon (§7.12)                                                                                                                                  | GA4 / external tools: blocked by ad-blockers (20–40% undercount), cookie-consent burden for international traffic, and the data lives outside our DB so it can't power the admin's Shopify-style cards or the order Conversion summary. Ad-platform pixels are added when paid ads start (§16) — additive, coexists with the beacon |
 | Dev/prod isolation         | One shared Supabase project (planned ap-southeast-2; actually created in `us-west-2` — see [features/region-alignment.md](features/region-alignment.md)) | Two projects: cleaner but doubles owner setup and key management; buyers hit cached Vercel pages, not the DB. Revisit if staff join                                                                                                                                                                                                 |
 
@@ -255,7 +254,7 @@ proceeds.
 | Visitor behavior (page views, sessions)                | — (not collected)                                       | **Supabase** `page_views` (first-party beacon)   |
 | Site copy (promo slogan …)                             | Baked into page code / PNG crops                        | **Supabase** `site_content`                      |
 | Business settings (shipping zones, tax, store details) | Constants in `lib/business.ts`                          | **Supabase** `settings`                          |
-| Customer payment details                               | Shopify + PayPal                                        | **Payment provider only**                        |
+| Customer payment details                               | Shopify                                                 | **Payment provider only** (Stripe)               |
 | Cart                                                   | Buyer's browser localStorage                            | unchanged (keyed by variant, `goldrose-cart-v2`) |
 
 ### 6.2 System diagram
@@ -270,9 +269,9 @@ flowchart LR
   subgraph Vercel["Next.js on Vercel"]
     VIEW[catalog_products VIEW<br/>anon key, safe columns only]
     SA[Admin server actions<br/>service key + zod]
-    PPA[/api/paypal create + capture/]
+    PPA[/api/stripe checkout + return/]
     BE[/api/beacon/]
-    WH[/api/webhooks/paypal/]
+    WH[/api/webhooks/stripe/]
   end
   subgraph Supabase
     DB[(Postgres: products, variants,<br/>inventory_movements, orders,<br/>order_lines, order_events, checkouts,<br/>customers, discounts, page_views,<br/>site_content, settings, admin_users)]
@@ -285,7 +284,7 @@ flowchart LR
   SF --> VIEW --> DB
   SF --> BE --> DB
   CO --> PPA --> PP
-  PP -->|capture webhook| WH --> DB
+  PP -->|signed webhook| WH --> DB
   PPA --> DB
   PPA -.-> EM
   AD --> SA --> DB
@@ -299,7 +298,7 @@ flowchart LR
   physically excludes private columns (cost per item, stock counts). Even if
   the public anon key leaked, nothing sensitive is readable.
 - All writes go through **admin server actions** (validated with zod) or the
-  payment/beacon routes (`/api/paypal/*`, `/api/webhooks/paypal`,
+  payment/beacon routes (`/api/stripe/*`, `/api/webhooks/stripe`,
   `/api/beacon`) using the service-role key, which exists only in
   server-side code (`server-only` import guard).
 - The admin lives at `app/admin/*` built on **Polaris** — deliberately the
@@ -408,15 +407,15 @@ can correct by hand.
 
 ### 7.4 `orders` + `order_lines`
 
-Payment columns are **provider-neutral** (OQ-1): V1 populates them from
-PayPal, but nothing renames if a provider is added or switched.
+Payment columns are **provider-neutral** (OQ-1): Stripe populates them today,
+and nothing renames if a provider is added or switched.
 
 | Column                                                                                                                         | Notes                                                                                                                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id` uuid PK, `number` int, `name` text                                                                                        | Shopify-style **#1001** (prefix configurable in Settings → General)                                                                                                                   |
 | `source` ∈ **mock / site / draft**                                                                                             | mock = dev/demo; site = real payment; draft = created in admin                                                                                                                        |
 | `customer_id` FK null                                                                                                          | Auto-linked on capture (§7.7)                                                                                                                                                         |
-| `payment_provider` text                                                                                                        | `'paypal'` in V1; `'mock'` for dev orders                                                                                                                                             |
+| `payment_provider` text                                                                                                        | `'stripe'` for card orders (Stripe Checkout session id in `provider_order_id`); `'mock'` for dev orders                                                                               |
 | `provider_order_id` text **unique null**                                                                                       | Idempotency — webhook redeliveries upsert, never duplicate                                                                                                                            |
 | `provider_capture_id` text                                                                                                     | Capture reference for refunds                                                                                                                                                         |
 | `email`, `phone`, `shipping_address` jsonb, `billing_address` jsonb                                                            | From the provider's payer + shipping data                                                                                                                                             |
@@ -986,9 +985,10 @@ account menu, exactly like Shopify's admin-language preference.
 
 ## 10. Checkout & payments
 
-V1 implements the PayPal provider (working assumption — OQ-1). The order
-schema and admin screens are provider-neutral; only the routes and the
-checkout buttons are PayPal-specific.
+Stripe is the payment provider (OQ-1, closed 2026-09-20): cards are paid on
+**Stripe Checkout**, Stripe's hosted page, so no card number ever reaches our
+page or server. The order schema and admin screens are provider-neutral; only
+the routes and the checkout's pay action are Stripe-specific.
 
 ### 10.1 Flow
 
@@ -997,41 +997,50 @@ sequenceDiagram
   participant B as Buyer
   participant N as Next.js
   participant DB as Supabase
-  participant P as PayPal
+  participant S as Stripe
   B->>N: /checkout (cart from localStorage)
   N->>DB: read catalog view (display prices)
-  B->>N: pick ship-to country (zone shipping rate)
+  B->>N: ship-to country from geo-IP (zone shipping rate)
   B->>N: apply discount code (optional)
-  B->>N: PayPal button (JS SDK)
+  B->>N: Pay (POST /api/stripe/checkout)
   N->>DB: re-price lines + validate discount (service key)
   N->>DB: insert checkouts row (status open)
-  N->>P: create PayPal order (server, DB prices)
-  B->>P: approve in PayPal popup
-  N->>P: capture (server)
-  N->>DB: insert order source='site' (pending→paid),<br/>upsert customer, adjust_inventory(order),<br/>checkout → completed
+  N->>S: create Checkout Session (server, DB prices,<br/>ship-to limited to the priced zone)
+  N-->>B: session URL → browser leaves for Stripe's page
+  B->>S: card, shipping address, 3DS — all on Stripe's page
+  S-->>B: redirect to /api/stripe/return?session_id=…
+  N->>S: retrieve the session (paid?)
+  N->>DB: re-price with the collected country;<br/>amount differs → refund in full, no order
+  N->>DB: insert order source='site' (paid),<br/>upsert customer, adjust_inventory(order),<br/>checkout → completed
   N-->>B: order confirmation email (Resend, if configured)
-  P-->>N: PAYMENT.CAPTURE.COMPLETED webhook (verified)
-  N->>DB: confirm financial_status, idempotent by provider_order_id
   N->>B: /checkout/success
+  S-->>N: checkout.session.completed webhook (signature verified)
+  N->>DB: confirm, or rebuild the order if the return leg never ran
 ```
 
 ### 10.2 Routes
 
-- `app/api/paypal/create/route.ts` — re-prices the cart from the DB,
+- `app/api/stripe/checkout/route.ts` — re-prices the cart from the DB,
   validates/applies the discount code, logs the `checkouts` row, creates the
-  PayPal order, returns its id to the JS SDK buttons.
-- `app/api/paypal/capture/route.ts` — captures after approval, writes the
-  order + lines + customer + stock decrement + timeline event, increments
-  `discounts.used_count` when a code was applied, and returns the success
-  redirect.
+  Checkout Session and returns its hosted-page URL. No client-supplied price
+  is ever trusted.
+- `app/api/stripe/return/route.ts` — Stripe's `success_url`. Retrieves the
+  session, and when it is paid writes the order + lines + customer + stock
+  decrement + timeline event, increments `discounts.used_count` when a code
+  was applied, and redirects to the success page. Idempotent by
+  `provider_order_id` (the session id). If the captured amount differs from
+  the fresh re-price it refunds the payment in full, marks the checkout
+  `rejected` and records no order.
 
 ### 10.3 International model (V1) & emails
 
 - **International**: only countries in an active zone are offered; shipping
-  = the zone's rate; all prices in **USD** (the provider settles USD, the
-  buyer's bank converts); import duties are the buyer's responsibility —
-  stated on the checkout page. Capture verifies the shipping-address
-  country is in a served zone. Per-market pricing / multi-currency are V2.
+  = the zone's rate; all prices in **USD** (Stripe's Adaptive Pricing is
+  switched off, so every session is charged in USD and the buyer's bank
+  converts); import duties are the buyer's responsibility — stated on the
+  checkout page. The Checkout Session only accepts shipping addresses in the
+  priced zone's countries, so the charged shipping can never be wrong.
+  Per-market pricing / multi-currency are V2.
 - **Emails** (adapt for Shopify's notifications): order confirmation and
   shipping confirmation to the buyer, new-order alert to the owner — sent
   via **Resend**; with no `RESEND_API_KEY` set, emails are logged to the
@@ -1040,35 +1049,42 @@ sequenceDiagram
 ### 10.4 Refunds, mock mode, environments
 
 - **Refunds**: issued from the order detail page via the provider's refund
-  API (`provider_capture_id`); the webhook confirms status independently.
-- **Mock mode stays**: with no payment env vars set (local dev),
-  `/api/checkout` simulates the whole flow — order saved with
-  source='mock', no money, full click-through.
-- **Environments**: `PAYPAL_ENV=sandbox` for all testing (fake money, real
-  flow), flipped to `live` + live keys at launch.
-- Card-without-PayPal-branding (Advanced Card Processing vs adding Stripe):
-  part of the OQ-1 launch decision; not part of this build. Shop Pay is
-  gone with Shopify — accepted.
+  API (`provider_capture_id`, dispatched by `lib/payments/provider.ts`); the
+  webhook confirms status independently.
+- **Mock mode stays**: with no `STRIPE_SECRET_KEY` set (local dev, the e2e
+  suite), `/api/checkout` simulates the whole flow — order saved with
+  source='mock', no money, full click-through. The moment a Stripe key is
+  set, the mock card form and the mock endpoint both switch themselves off.
+- **Skip payment**: `CHECKOUT_SKIP_PAYMENT=1` is a testing-phase switch that
+  places uncharged `mock` orders from a single Place-order button. The build
+  fails if it is set next to a live Stripe key.
+- **Environments**: the key's own prefix picks the world — a test key charges
+  nothing real; `sk_live_` / `rk_live_` is real money and an owner-only
+  switch. The admin banner shows which mode is active.
+- Shop Pay is gone with Shopify — accepted.
 
 ### 10.5 Payment webhook
 
-`app/api/webhooks/paypal/route.ts` (Node runtime):
+`app/api/webhooks/stripe/route.ts` (Node runtime):
 
-1. Receive event; verify authenticity against PayPal's
-   `verify-webhook-signature` API using `PAYPAL_WEBHOOK_ID`
-   (server-to-server check — no shared-secret HMAC like Shopify's).
-2. Handle `PAYMENT.CAPTURE.COMPLETED` (→ financial_status 'paid') and
-   `PAYMENT.CAPTURE.REFUNDED` (→ 'refunded' / 'partially_refunded' by
-   amount).
-3. Idempotent upsert keyed on `provider_order_id` — the capture route
-   usually wrote the order already; the webhook confirms/repairs it (e.g.
-   buyer closed the tab between approval and our capture response). Repairs
-   also write the timeline event.
-4. Respond 200 quickly.
+1. Receive the event; verify its `stripe-signature` header against the raw
+   body with `STRIPE_WEBHOOK_SECRET` (HMAC, `lib/stripe/verify.ts`).
+   Unverifiable deliveries get 401.
+2. Handle `checkout.session.completed` and
+   `checkout.session.async_payment_succeeded` (→ confirm or rebuild the
+   order), `charge.refunded` (→ 'refunded' / 'partially_refunded' by amount)
+   and `charge.dispute.created` (→ tag the order `disputed`, timeline entry,
+   owner alert email).
+3. Idempotent, keyed on `provider_order_id` — the return leg usually wrote
+   the order already; the webhook confirms it, or rebuilds it from the saved
+   `checkouts` row when the buyer's browser died between paying and the
+   return leg. Repairs also write the timeline event.
+4. Respond quickly; a 500 makes Stripe retry, which is safe.
 
-Setup (documented in README): PayPal Developer Dashboard → app → add webhook
-URL `https://<prod-domain>/api/webhooks/paypal`, subscribe to the two
-capture events, copy the webhook id into `PAYPAL_WEBHOOK_ID`.
+Setup: Stripe dashboard → Developers → Webhooks → add endpoint
+`https://<prod-domain>/api/webhooks/stripe`, subscribe to those events, copy
+the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET`. Test mode and
+live mode each need their own endpoint and their own secret.
 
 This route sits **outside** the auth middleware matcher (signature
 verification is its auth).
@@ -1133,17 +1149,14 @@ step**, because the live Shopify admin is the visual reference for the clone
 ## 13. Environments & configuration
 
 New env vars (added to `.env.example`, `.env.local`, Vercel; all `SHOPIFY_*`
-vars removed). Payment vars reflect the OQ-1 working assumption (PayPal):
+vars removed). `.env.example` is the authority; the core set:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=        # Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=   # public key — can only read the safe view
 SUPABASE_SERVICE_ROLE_KEY=       # SERVER ONLY, full DB access, marked sensitive in Vercel
-PAYPAL_ENV=sandbox               # sandbox | live
-PAYPAL_CLIENT_ID=                # from PayPal Developer Dashboard (matching env)
-PAYPAL_SECRET=                   # SERVER ONLY
-PAYPAL_WEBHOOK_ID=               # for signature verification
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=    # same client id, exposed for the JS SDK buttons
+STRIPE_SECRET_KEY=               # SERVER ONLY; the key's prefix picks test or live
+STRIPE_WEBHOOK_SECRET=           # whsec_… of the /api/webhooks/stripe endpoint, same mode as the key
 RESEND_API_KEY=                  # optional — order emails; unset = log to console
 ```
 
@@ -1153,8 +1166,8 @@ RESEND_API_KEY=                  # optional — order emails; unset = log to con
 - Owner setup checklist (README): create Supabase project → run
   `0001_init.sql` → Auth: create owner user → insert `admin_users` row →
   create public `product-images` bucket → paste keys into Vercel +
-  `.env.local`; PayPal Developer Dashboard → sandbox app → client id/secret
-  + webhook id.
+  `.env.local`; Stripe dashboard → test API key + a webhook endpoint's
+  signing secret.
 - Hygiene: `.env.local` currently contains a stray Figma token line (unused
   by code) — delete it, and revoke that token in Figma.
 
@@ -1213,7 +1226,7 @@ screenshot the Shopify admin (§12) and cancel Shopify.
 | Payment provider still undecided (OQ-1)                                     | Provider-neutral order schema; provider code isolated to routes + checkout buttons; stages 0–3 don't touch payments at all                                                                                 |
 | Buyer drops off between approval and capture                                | Capture webhook repairs the order record independently of the browser                                                                                                                                      |
 | Committed/Available inventory math drifts                                   | Derived in a single SQL view from order lines, never stored twice; covered by Stage 3 acceptance                                                                                                           |
-| Sandbox/live key mix-ups                                                    | Single `PAYPAL_ENV` switch controls key set + SDK URL; the admin banner shows the active mode                                                                                                              |
+| Sandbox/live key mix-ups                                                    | The Stripe key's own prefix decides test or live, and the webhook secret must come from an endpoint in the same mode; the build fails on skip-payment next to a live key; the admin banner shows the active mode|
 | Build fails if Supabase is down (build-time DB reads)                       | try/catch → `[]` + dynamicParams; pages degrade to on-demand rendering                                                                                                                                     |
 | Private data (costs, stock) leaking to the storefront                       | Enforced by the SQL view + RLS, not by code convention                                                                                                                                                     |
 | @supabase/ssr cookie API misuse silently breaks sessions                    | Use the current getAll/setAll pattern exactly                                                                                                                                                              |
@@ -1251,12 +1264,13 @@ Explicitly out of scope for this build:
   (needs reviews first), `hreflang` when storefront translations arrive;
   sequencing and acceptance criteria in
   `docs/seo-geo/search-discovery-implementation.md`.
-- Full Markets parity: per-market pricing, multi-currency (PayPal supports
-  it), storefront translations, duties/taxes calculated at checkout.
+- Full Markets parity: per-market pricing, multi-currency (Stripe supports
+  it; it needs FX at capture and a currency column on orders), storefront
+  translations, duties/taxes calculated at checkout.
 - Collections & storefront navigation (only if the storefront design ever
   grows beyond one grid), gift cards, customer segments.
-- Card payments without PayPal branding (Advanced Card Processing vs
-  Stripe) — folds into the OQ-1 launch decision.
+- A wallet button (Apple Pay, Google Pay, or PayPal again) if buyers ask for
+  one — a second rail is new routes, not a schema change.
 - Concierge chat backend (the chatbox placeholder) — chat history table +
   provider integration.
 - Reviews (likely a third-party service), multi-staff roles and permissions,
@@ -1276,3 +1290,4 @@ Explicitly out of scope for this build:
 | 4.2 | 2026-07-22 | First-party visitor analytics moved into V1 (`page_views` beacon: sessions, conversion funnel, traffic sources, live visitors, order Conversion summary); ad pixels deferred until paid ads start; V2 list audited for completeness. **Document restructured** (this shape): metadata header, ToC, agent guide (§2), open questions (§4), alternatives (§5), changelog moved here; order payment columns made provider-neutral and payment provider reopened as OQ-1 |
 | 4.3 | 2026-07-22 | **SEO + GEO into V1** (owner request): DB-driven sitemap, robots, canonicals, Open Graph, Product/Organization/Breadcrumb JSON-LD; homepage search listing adapted into Settings → Search engine & AI; GEO = AI crawlers allowed (owner toggle) + `/llms.txt` + machine-readable-compensation rule for PNG text (§8.1); checkout country selector defaults via geo-IP                                                                                                |
 | 4.4 | 2026-07-22 | **§0 one-shot autonomous build directive** (owner request): full decision authority for the building agent, resource fallbacks (local/mocked Supabase, fixture-tested PayPal, console emails), hard guardrails (sandbox money only, owner-only actions preserved, `main` never broken), stage-by-stage commits, and required deliverables (BUILD-REPORT.md + owner activation checklist)                                                                             |
+| 5   | 2026-09-20 | **Payments are Stripe-only** (OQ-1 closed): §10 rewritten for Stripe Checkout (hosted page, return leg, signed webhook, amount-drift refund); PayPal routes, library and env vars removed from §4, §5, §6, §7.4, §13, §15 and §16. §0 and §14 still describe the July build as it was planned, PayPal included |

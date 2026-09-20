@@ -1982,7 +1982,10 @@ export function CheckoutClient({
               )}
             </>
           )}
-          {/* PayPal / Apple Pay / Afterpay rows (2170:258/263/268) */}
+          {/* PayPal / Apple Pay / Afterpay rows (2170:258/263/268).
+              AI-TAG(AI-052): OWNER-DECISION — the frame draws payment brands
+              we do not accept; only cards through Stripe are real. See
+              /agent-delivery/sessions/aws-paypal-wireup-09-20-worktree-remove-paypal.md. */}
           {[
             { label: "PayPal", meta: "PayPal", y: T_PAYMENT + 174 },
             { label: "Apple Pay", meta: " Pay", y: T_PAYMENT + 225 },

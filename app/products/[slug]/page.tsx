@@ -554,7 +554,11 @@ export default async function ProductDetailPage({
           ))}
         </Section>
 
-        {/* 07 · Checkout actions — wired to the v2 cart (Stage 4) */}
+        {/* 07 · Checkout actions — wired to the v2 cart (Stage 4).
+            AI-TAG(AI-052): OWNER-DECISION — the brand marks below (shop Pay,
+            Klarna, PayPal, Apple Pay) are drawn by the frame and none is
+            accepted; only cards through Stripe are real. See
+            /agent-delivery/sessions/aws-paypal-wireup-09-20-worktree-remove-paypal.md. */}
         <Section
           x={16}
           y={1376}

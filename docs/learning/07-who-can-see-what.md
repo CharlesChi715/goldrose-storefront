@@ -73,7 +73,7 @@ export const config = {
 };
 ```
 
-Narrow on purpose. Storefront routes stay statically optimised, and the PayPal webhook and analytics beacon are deliberately *unmatched* — they authenticate with a signature, not a session, so a session check there would only break them.
+Narrow on purpose. Storefront routes stay statically optimised, and the Stripe webhook and analytics beacon are deliberately *unmatched* — they authenticate with a signature, not a session, so a session check there would only break them.
 
 The part worth staring at is the local branch ([proxy.ts:40-52](../../proxy.ts#L40-L52)) — cookie present → straight through, never verified:
 

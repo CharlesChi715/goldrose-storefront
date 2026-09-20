@@ -23,8 +23,8 @@
 ## What the site can do today
 
 <!-- Keep each line a plain business fact, not a technical one.
-     Good:  "Customers can pay with PayPal."
-     Bad:   "PayPal Advanced Checkout via lib/paypal adapter." -->
+     Good:  "Customers can pay by card."
+     Bad:   "Stripe Checkout Session via lib/stripe adapter." -->
 
 ### What a customer can do
 
@@ -32,9 +32,11 @@
   gold-trimmed eternal rose.
 - Customers can browse the shop, open a product page, and search the site.
 - Customers can put a rose in the bag and go all the way through checkout,
-  paying with PayPal. Important: checkout is still running in PayPal's test
-  mode, so an order can be placed end to end but no real money moves yet.
-  Turning on real payments is the owner's decision and has not been made.
+  paying by Visa or Mastercard on a secure payment page run by Stripe. The
+  money goes to the company's Stripe account. Important: checkout is still
+  running in Stripe's test mode, so an order can be placed end to end with a
+  test card but no real money moves yet. Turning on real payments is the
+  owner's decision and has not been made. PayPal is not offered.
 - Discount codes work: a valid code lowers the price during checkout.
 - A customer can sign in with a code sent to their email, and gets an account
   area. Some screens in there are real and some are still only a design.
@@ -90,7 +92,7 @@
 ## What is not ready yet
 
 <!-- Being honest here is what stops the advisor promising things we cannot do.
-     Good:  "We cannot take credit cards yet — PayPal only."               -->
+     Good:  "We cannot take real payments yet — Stripe is in test mode."   -->
 
 -
 

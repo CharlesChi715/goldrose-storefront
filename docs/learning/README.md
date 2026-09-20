@@ -15,7 +15,6 @@ The format is set by the guideline below.
 | 03  | [Admin product CRUD](03-admin-product-crud.md)                       | admin form → server action → two backends                    | One `TableStore` interface, two implementations      |
 | 04  | [How pages read the database](04-how-pages-read-the-database.md)     | server component → catalog view → browser                    | Anon key vs service key; what the public may see     |
 | 05  | [Verifying the hosted database](05-verifying-the-hosted-database.md) | terminal → PostgREST → Postgres constraint                   | Trust, but verify — a rejection is a measurement     |
-| 06  | [PayPal payment and recovery](06-paypal-payment-and-recovery.md)     | PayPal button → capture → order → webhook repair             | Idempotency, and what to do after money moves        |
 | 07  | [Who can get in, who can see what](07-who-can-see-what.md)           | `/admin` request → proxy → session → allowlist → RLS         | Authentication ≠ authorization; fail closed          |
 | 08  | [Price math, and who may do it](08-price-math-and-trust.md)          | cart → discount → shipping → tax → total                     | Integer cents; the server always re-prices           |
 | 09  | [The safety net: tests and CI](09-tests-and-ci.md)                   | `npm test` → Playwright → GitHub Actions                     | Determinism is engineered, not hoped for             |
@@ -24,7 +23,7 @@ The format is set by the guideline below.
 ## Reading order
 
 - **New to the repo:** 04 → 01 → 03. That is read, buy, manage.
-- **Working on checkout or payments:** 01 → 08 → 06.
+- **Working on checkout or payments:** 01 → 08. (Lesson 06 traced the PayPal rail and was removed with it on 2026-09-20; the Stripe rail has no lesson yet.)
 - **Working on the admin, auth, or anything hosted:** 07 → 05 → 03.
 - **Changing anything at all:** 09, so you know what will and won't catch you.
 - **Working with other people:** 10 — it explains the workflow every change here rides on.
