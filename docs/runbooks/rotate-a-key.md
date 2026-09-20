@@ -33,7 +33,7 @@ Order matters: a leaked key is being used while you decide whether it leaked.
 1. **Assume compromise.** If the value was visible outside the team, rotate now
    and investigate after. Waiting never improves the position.
 2. **Find its section below** — who issues it, who holds it, what breaks.
-3. **Rotate at the issuer** (Supabase, PayPal, Resend, Figma). The old value dies
+3. **Rotate at the issuer** (Supabase, Stripe, Resend, Figma). The old value dies
    here, so any gap starts here.
 4. **Update every holder.** Most are in Vercel; this lists names and environments
    and prints no values:
@@ -98,19 +98,22 @@ production build, since the value is baked in; then browsers still on the old
 bundle send a dead key, and their sign-in and account pages fail until a hard
 reload. Customer sign-in and admin passkey login both use it.
 
-### `PAYPAL_CLIENT_ID` / `PAYPAL_SECRET` — sandbox and live are different apps
+### `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — test and live are different keys
 
-Issued in the PayPal Developer Dashboard, per app. **Sandbox and live are
-separate apps with separate credentials**, so rotate inside the environment you
-are in; only the owner may switch `PAYPAL_ENV` to live. The secret is held by
-Vercel only; the client id is not a secret and also ships as
-`NEXT_PUBLIC_PAYPAL_CLIENT_ID` for PayPal's browser SDK — checkout renders its
-buttons only when both are set. If the dashboard offers a second secret on the
-same app, add it, deploy, then delete the old: a rotation with no gap. Otherwise
-pick a quiet hour, because while the secret is wrong every call fails
-authentication, checkout stops taking money, and `paypal.create.failed` /
-`paypal.capture.failed` alert mail arrives. A **new app** also means a new
-`PAYPAL_WEBHOOK_ID`.
+Issued in the Stripe dashboard (Developers → API keys). **Test mode and live
+mode have separate keys**, so rotate inside the mode you are in; only the owner
+may put a live key in. Both values are held by Vercel only, and nothing about
+Stripe ships to the browser. Stripe's **Roll key** lets the old key keep working
+for a period you choose, so roll, update Vercel, redeploy, and let the old one
+expire: a rotation with no gap. While the key is wrong every call fails
+authentication, checkout stops taking money, and `stripe.checkout.failed` /
+`stripe.return.failed` alert mail arrives.
+
+The webhook signing secret (`whsec_…`) belongs to one webhook **endpoint**, not
+to the account: roll it on the endpoint (Developers → Webhooks →
+`/api/webhooks/stripe` → Roll secret), and a **new endpoint** means a new
+`STRIPE_WEBHOOK_SECRET`. A secret from the other mode's endpoint rejects every
+delivery with 401, which switches the order-repair safety net off silently.
 
 ### `RESEND_API_KEY` and `RESEND_SMTP_PASSWORD` — two keys, two holders
 
@@ -169,7 +172,7 @@ an emergency.
   and when, whether customer data was read, whether payments were affected — the
   fact and the timeline, not the variable names.
 - **Do not** paste either value into chat, mail or a screenshot; rotate live
-  PayPal credentials without the owner; or change the Supabase Site URL. If the
+  Stripe keys without the owner; or change the Supabase Site URL. If the
   shop is down too, work [site-down.md](site-down.md) first — a broken key and a
   broken deploy look identical from outside.
 

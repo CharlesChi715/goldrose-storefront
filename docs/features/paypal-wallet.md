@@ -1,32 +1,35 @@
 ---
-delivery: uat
-rollout: test-deployment
-statusChangedAt: 2026-08-08
-priority: p0
+delivery: dropped
+rollout: not-deployed
+statusChangedAt: 2026-09-20
 ---
 
 # paypal-wallet
 
 ## Context
 
-PayPal Orders v2 wallet checkout is built (routes, webhook, refunds, fixture
-tests); switching to live credentials is an owner-only release gate.
+A PayPal wallet button at checkout, settling into the boss's PayPal business
+account. Built in July (Orders v2 routes, webhook, refunds, fixture tests) and
+never configured: no PayPal credential was ever set on any machine or in
+Vercel, so the code never ran outside its unit fixtures.
 
-- ⚠️ **Corrected 2026-09-05:** no `PAYPAL_*` variable is set in Vercel (checked
-  with `vercel env ls production`), so the live site is **not** in sandbox mode
-  — `/checkout` renders the **mock card form** and records `source='mock'`
-  orders. No PayPal credentials exist on Charles's machine either; the PayPal
-  code path has never run outside its unit fixtures. The 2026-07-15 real
-  payment went through the since-deleted Shopify checkout, not this code.
+## Decision
 
-## Blockers and dependencies
+**Dropped 2026-09-20 (Charles).** The business runs on Stripe and Aspire;
+PayPal is not part of how the company is paid.
 
-- Only the owner may enable live PayPal (release queue step 5), and
-  `CHECKOUT_SKIP_PAYMENT` must be unset in the same move.
-- Sandbox credentials + webhook id must exist before anything here can be
-  verified — the wiring order is in the guide below.
+- PayPal was the plan only while the boss's PayPal account was the one way to
+  take money. The company's verified Stripe account replaced that reason the
+  day the card rail was built —
+  [card-payments](card-payments.md).
+- Two rails mean two dashboards, two refund paths and two webhooks to keep
+  correct, for a shop with no customers yet.
+- The code was removed rather than left dormant, because dormant payment code
+  still has to be kept correct. Removing it also exposed a real hole: the mock
+  order endpoint only closed itself when PayPal was configured, never when
+  Stripe was.
 
-## Related links
-
-- **How to wire it, step by step:** [`docs/guides/paypal-wiring.md`](../guides/paypal-wiring.md)
-- Card rail on the same account: [card-payments](card-payments.md)
+The cost, accepted: US buyers who prefer PayPal see no PayPal button. If that
+ever matters, the order columns are provider-neutral, so a second rail is new
+routes and no schema change. The removed code is in git history before commit
+`e659e4b`.

@@ -2,7 +2,7 @@
 
 Open this when the shop will not load, when the **Uptime** workflow in GitHub
 Actions has gone red, or when `/api/health` answers `degraded`. A
-`[ELDREVE alert] paypal.*` email is a different problem — the shop is up and one
+`[ELDREVE alert] stripe.*` email is a different problem — the shop is up and one
 payment failed — and does not belong here.
 
 ## Symptoms
