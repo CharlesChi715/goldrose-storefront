@@ -4,22 +4,6 @@ The session that revised OQ-1 (cards → Stripe Checkout, boss-approved) and
 built the whole card rail. One matter stays open: the rail is dark until its
 keys exist, and only Charles can mint them.
 
-## AI-050 · `OWNER-TODO` · three refunded sandbox orders hold 4 units of live stock
-
-The 2026-09-20 walkthrough placed three real sandbox orders in the **live
-database** — `#1018`, `#1019`, `#1021`. Every payment was refunded in full at
-Stripe and the webhook synced each to `refunded`, so no money is outstanding.
-The stock is: `GR-ROSE-RED-SOL-RUBY` is **down 4 units** on three `order`
-movements, and refunding never restocks.
-
-House rule D13 (sandbox orders are cancelled and restocked, tagged `sandbox`,
-then archived — never hard-deleted) needs an admin session, which an agent
-does not have. In `/admin` → each order → **Cancel**, tick *Restock items*,
-then tag `sandbox` and archive.
-
-Location: [`docs/features/card-payments.md`](../../docs/features/card-payments.md)
-(walkthrough evidence).
-
 ## AI-049 · `OWNER-TODO` · paste the Stripe keys and push 0016 to light the card rail
 
 The code ships inert: `/checkout` shows the card CTA only when

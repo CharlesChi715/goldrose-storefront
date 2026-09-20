@@ -80,10 +80,6 @@ Two defects the walkthrough caught, both fixed (PR #56):
   to an error page. `createOrderIfAbsent` now treats that violation as the
   race being decided, and returns the winner's order.
 
-AI-TAG(AI-050): OWNER-TODO — those three sandbox orders still hold 4 units of
-live stock; cancel + restock + archive them. See
-/agent-delivery/sessions/payment-learning-09-20-worktree-stripe-checkout.md.
-
 ⚠️ **Adaptive Pricing stays ON — decided 2026-09-20 (AI-051, closed).**
 Stripe converts a Checkout Session into the buyer's own currency, based on
 their IP, before any card is entered. Our return leg compares the captured
