@@ -53,9 +53,10 @@ deployment), and mock content is retired piece by piece while it is up — not i
 one sweep beforehand. Two rules keep that safe:
 
 - **Hard gates — never gradual.** Anything a stranger's money or identity
-  touches is real *before* the switch: live PayPal (owner-only),
-  `CHECKOUT_SKIP_PAYMENT` unset, real shipping rates (OQ-2), demo reviews
-  removed (`npm run seed:reviews -- --remove`), database backups on.
+  touches is real *before* the switch: live payment keys (owner-only —
+  PayPal wallet + Stripe cards), `CHECKOUT_SKIP_PAYMENT` unset, real shipping
+  rates (OQ-2), demo reviews removed (`npm run seed:reviews -- --remove`),
+  database backups on.
 - **Gradual — everything else.** Product copy, imagery and the placeholder
   screens are replaced item by item while live. A live placeholder may look
   unfinished; it may **never** state a price, stock level, delivery date or
@@ -84,9 +85,11 @@ processing times and arbitration — so every route ships
 `robots: { index: false }` until the bosses sign the copy off (AI-046).
 Removing that line is a business decision, not a technical one.
 
-**Next:** clear the hard gates (owner activation/UAT, real shipping rates, live
-PayPal) → take real orders → keep replacing mock content and placeholder
-screens while live; card integration after.
+**Next:** clear the hard gates (owner activation/UAT, real shipping rates,
+live payment keys) → take real orders → keep replacing mock content and
+placeholder screens while live. The card rail is built (Stripe Checkout,
+2026-09-20) and activates when its keys are set —
+[card-payments](docs/features/card-payments.md).
 
 ## Runtime and safety
 
@@ -124,7 +127,8 @@ screens while live; card integration after.
   a price, stock level, delivery date or policy we cannot honour.
 - `CHECKOUT_SKIP_PAYMENT=1` is test-only and records uncharged mock orders.
   Remove before the first real order; builds reject it with `PAYPAL_ENV=live`.
-- Only the owner may enable live PayPal.
+- Only the owner may enable live payment keys (PayPal `live`, or a
+  `sk_live_` Stripe key).
 - Supabase configuration must be fully present or absent; the service-role key
   stays server-side.
 - Money uses integer cents; orders are never hard-deleted.
@@ -140,7 +144,8 @@ screens while live; card integration after.
 Most changes here are undone by reverting a pull request. These are not. Each
 needs a person who has decided, not an agent who is being helpful.
 
-- **Enabling live PayPal** — the owner's, and only the owner's.
+- **Enabling live payment keys** (PayPal `live`, or a `sk_live_` Stripe
+  key) — the owner's, and only the owner's.
 - **Changing Supabase's Site URL** — invalidates every existing passkey,
   permanently ([customer-accounts](docs/features/customer-accounts.md)).
 - **`supabase db push`** — applies to the one live database; a migration that
@@ -154,9 +159,11 @@ needs a person who has decided, not an agent who is being helpful.
 ## Release queue
 
 1. Owner activation + [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
-2. Configure PayPal sandbox, begin Advanced Checkout onboarding; install
-   `cloudflared` when webhook testing starts —
-   [guide](docs/guides/paypal-wiring.md).
+2. Wire payments for real: push migration `0016`, paste Stripe TEST keys
+   (`.env.local`, then Vercel) and run the card walkthrough with
+   `stripe listen`; configure the PayPal wallet sandbox per the
+   [guide](docs/guides/paypal-wiring.md) (its card phases are superseded —
+   [card-payments](docs/features/card-payments.md) owns the card rail).
 3. Enter real shipping rates ([shipping-rates](docs/features/shipping-rates.md),
    OQ-2) — no placeholder rate may be live.
 4. Clear the test scaffolding: `npm run seed:reviews -- --remove`, unset
@@ -172,7 +179,8 @@ needs a person who has decided, not an agent who is being helpful.
    money belongs on Pro — a suspension here takes the whole site down, and it
    is unrelated to anything in the code. Check the plan before item 8, not
    after.
-8. Owner enables live PayPal → **the site is open for real orders.**
+8. Owner enables the live payment keys (PayPal wallet + Stripe cards) →
+   **the site is open for real orders.**
 
 While live, in any order (nothing below blocks taking orders):
 
@@ -199,9 +207,10 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 
 ## Product decisions
 
-- **OQ-1 — decided 2026-07-26:** use
-  [PayPal Advanced Cards](docs/features/card-payments.md) for Visa/Mastercard at
-  checkout; that record owns the state and the onboarding stages.
+- **OQ-1 — decided 2026-07-26, revised 2026-09-20:** Visa/Mastercard go
+  through [Stripe Checkout](docs/features/card-payments.md), settling into
+  the company's Stripe account (boss-approved); PayPal keeps the wallet.
+  That record owns the state and the remaining activation steps.
 - **OQ-2 — open, and a hard gate:** real shipping rates must replace the
   placeholder before the first real order —
   [shipping-rates](docs/features/shipping-rates.md).

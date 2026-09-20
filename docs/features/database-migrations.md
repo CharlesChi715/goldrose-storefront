@@ -37,8 +37,9 @@ answer that cannot be stale.
 | `0009`–`0011`  | applied 08-07    | facets, image spotlights, and the view repair `0011` needs                           |
 | `0012`–`0014`  | applied          | search queries, advisor keys, advisor key grants                                     |
 | `0015`         | **NOT pushed**   | `page_views` retention; written 2026-09-07, see below                                |
+| `0016`         | **NOT pushed**   | card payment columns + `checkouts.status` 'rejected'; written 2026-09-20             |
 
-**Every migration file in the repository is applied except `0015`.** This table
+**Every migration file in the repository is applied except `0015` and `0016`.** This table
 said otherwise until 2026-09-07: it claimed `0012` was unpushed and did not
 mention `0013` or `0014` at all, so a reader would have gone looking for empty
 search-analytics cards that had in fact been working for weeks. The lesson is
@@ -53,6 +54,18 @@ DELETES, and it should be pushed by a human who has read it rather than
 arriving as a surprise in someone else's change. Pushing it is safe today —
 the oldest row is from July 2026, so it deletes nothing at all until August
 2027, which is exactly the right time to install a rule like this.
+
+### `0016` — card payment columns
+
+Adds `orders.payment_method_kind` / `card_brand` / `card_last4` and widens
+`checkouts.status` with the terminal `rejected` (the Stripe drift hard-stop,
+[card-payments](card-payments.md)). Written with the Stripe build,
+deliberately not pushed with it: the code omits the new columns from every
+insert until they exist, so main can deploy first and the push happens from
+the main repo dir (CLI rule) with the usual pre-push dump. Push it before
+setting `STRIPE_SECRET_KEY` in Vercel — a card order recorded without its
+instrument columns loses nothing but the brand/last4 display, but the
+`rejected` constraint must exist before the first real drift rejection.
 
 ## Tech details
 

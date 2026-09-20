@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import { ScaleFrame } from "@/components/chrome";
 import { notoSC } from "@/lib/fonts";
 import { OrderConfirmedScreen } from "@/components/screens/OrderConfirmedScreen";
+import { ClearCart } from "./ClearCart";
 import { formatMoney } from "@/lib/money";
 import { isPaymentMethodId, getPaymentMethod } from "@/lib/checkout/methods";
 import { getOrderConfirmationEmail } from "@/lib/orders/confirmation";
@@ -59,6 +60,7 @@ export default async function CheckoutSuccessPage({
       fontClass={notoSC.className}
       nav={false}
     >
+      <ClearCart />
       <OrderConfirmedScreen
         orderName={params.order ?? ""}
         email={email}

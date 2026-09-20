@@ -49,6 +49,10 @@ export default async function CheckoutPage() {
     process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
       ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
       : null;
+  // Card rail (docs/features/card-payments.md): Stripe Checkout hosts the
+  // card page, so the client only needs to know the rail exists — no key.
+  const stripeEnabled =
+    !skipPayment && Boolean(process.env.STRIPE_SECRET_KEY?.trim());
 
   return (
     <CheckoutClient
@@ -57,6 +61,7 @@ export default async function CheckoutPage() {
       countries={countries}
       defaultCountry={defaultCountry}
       paypalClientId={paypalClientId}
+      stripeEnabled={stripeEnabled}
       showDiscountField={showDiscountField}
       skipPayment={skipPayment}
     />

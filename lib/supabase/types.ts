@@ -177,6 +177,13 @@ export type OrderRow = {
    * checkouts, admin drafts, and webhook-repaired orders (no buyer session).
    * Optional: rows written before the column existed have none. */
   auth_user_id?: string | null;
+  /** 'wallet' (PayPal account) or 'card' (Stripe Checkout); absent for mock
+   * and draft orders, and for rows written before migration 0016. */
+  payment_method_kind?: "wallet" | "card" | null;
+  /** Brand as the provider reports it, uppercased ('VISA'); last4 is never
+   * more of the number than that, anywhere. */
+  card_brand?: string | null;
+  card_last4?: string | null;
 };
 
 export type OrderLineRow = {
@@ -230,7 +237,9 @@ export type CheckoutRow = {
   subtotal_cents: number;
   total_cents: number;
   provider_order_id: string | null;
-  status: "open" | "completed";
+  /** `rejected` is terminal (refunded amount-drift payment): the webhook
+   * repair path must never rebuild an order from it. */
+  status: "open" | "completed" | "rejected";
   created_at: string;
   completed_at: string | null;
 };

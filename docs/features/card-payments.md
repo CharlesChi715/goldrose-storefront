@@ -1,7 +1,7 @@
 ---
-delivery: ready
+delivery: in-progress
 rollout: not-deployed
-statusChangedAt: 2026-07-26
+statusChangedAt: 2026-09-20
 priority: p0
 ---
 
@@ -32,6 +32,40 @@ for PayPal's window.
   exercises none of this.
 
 ## Decision
+
+**REVISED 2026-09-20: cards go through Stripe Checkout, not PayPal Advanced
+Checkout.** The 2026-07-26 decision below is superseded; it survives for the
+reasoning trail.
+
+- What changed: the company already holds a **live, verified Stripe account**
+  (Zhongshu Technology Worldwide Limited, `acct_1U1f0EGvea4GUGR4`) with a live
+  payment link taking card money (AI-047) — the original rejection reason
+  ("the boss would need to open and KYC a second financial account") is dead.
+- Sign-off: the boss approved card revenue settling into Zhongshu's Stripe
+  instead of his PayPal (relayed by Charles in-session, 2026-09-20). The
+  PayPal **wallet** rail is unchanged and still settles to his PayPal.
+- Shape: the "Credit Card" action redirects to **Stripe Checkout** (Stripe's
+  hosted payment page) — card number never touches our page or server (PCI
+  SAQ A), 3DS handled by Stripe, shipping address collected there and
+  restricted to the priced zone's countries so the charged shipping can never
+  be wrong. Server routes: `/api/stripe/checkout` (re-price → session),
+  `/api/stripe/return` (verify → drift hard-stop → `createOrder`),
+  `/api/webhooks/stripe` (HMAC-verified confirm/repair/refund/dispute sync).
+  Orders carry `payment_provider: "stripe"` in the same provider-neutral
+  columns; refunds dispatch per provider via `lib/payments/provider.ts`.
+- Advantages over ACDC that decided it, beyond the account: no per-account
+  onboarding wait (ACDC stage 0 never happened), `stripe listen` replaces
+  cloudflared for local webhook testing, and the mock card form retires the
+  moment the key is set.
+
+Build (2026-09-20): code, migration `0016_card_payment_columns.sql` (written,
+NOT pushed), unit tests (verify/mapping/webhook), all `npm run check` gates
+green. Remaining to reach `uat`: push 0016, set `STRIPE_SECRET_KEY` +
+`STRIPE_WEBHOOK_SECRET` (test → live), register the production webhook
+endpoint, sandbox walkthrough, then the owner's live low-value card payment +
+refund.
+
+The original decision, superseded:
 
 Build on **PayPal Advanced Checkout** (also marketed as "Expanded Checkout";
 the card feature is *Advanced Credit and Debit Card Payments*). PayPal renders
@@ -73,6 +107,12 @@ not the database.
 
 ## Plan
 
+**Superseded 2026-09-20** with the ACDC decision — kept for the trail. What
+replaced it is listed in the Decision revision above; of the stages below,
+the build delivered the intent of 2 (as migration `0016`), 3 (as Stripe
+Checkout), 4's failure handling (drift hard-stop, refund/dispute webhooks)
+and 5 (tests) in one pass, and stage 0 is no longer needed at all.
+
 Tracked as stages 0–7 (session task list, 2026-07-26):
 
 - **Stage 0** — owner enables Advanced Checkout in the PayPal dashboard and
@@ -105,10 +145,6 @@ Tracked as stages 0–7 (session task list, 2026-07-26):
   here** — wallet included, not just cards.
 - `PAYPAL_WEBHOOK_ID` must be set or signature verification fails closed and every
   delivery 401s.
-
-AI-TAG(AI-047): OWNER-DECISION — a live Stripe payment link is already taking
-card money for ELDREVE, which this record's decision did not contemplate. See
-/agent-delivery/sessions/stripe-payment-link-delivery-08-25-worktree-team-delivery-stripe-payment.md.
 
 AI-TAG(AI-048): OWNER-TODO — that link collects no shipping address and writes
 no order. See

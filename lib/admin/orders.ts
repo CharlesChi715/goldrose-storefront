@@ -10,7 +10,7 @@
 import { randomUUID } from "crypto";
 import { accountOf } from "./channels.ts";
 import { sendShippingConfirmationEmail } from "@/lib/email";
-import { getPayPalConfig, refundPayPalCapture } from "@/lib/paypal/client";
+import { refundProviderPayment } from "@/lib/payments/provider";
 import {
   buildTrackingUrl,
   carrierLabel,
@@ -312,18 +312,7 @@ export async function refundOrder(input: {
     throw new Error("Order can't be refunded");
   }
 
-  if (order.payment_provider === "paypal" && order.provider_capture_id) {
-    if (!getPayPalConfig().configured) {
-      throw new Error(
-        "PayPal is not configured — cannot refund a real payment.",
-      );
-    }
-    await refundPayPalCapture(
-      order.provider_capture_id,
-      input.amountCents,
-      order.currency,
-    );
-  }
+  await refundProviderPayment(order, input.amountCents);
 
   const refunded = order.refunded_cents + input.amountCents;
   await store.update(
@@ -372,18 +361,7 @@ export async function cancelOrder(input: {
     order.financial_status !== "pending"
   ) {
     const remaining = order.total_cents - order.refunded_cents;
-    if (order.payment_provider === "paypal" && order.provider_capture_id) {
-      if (!getPayPalConfig().configured) {
-        throw new Error(
-          "PayPal is not configured — cannot refund a real payment.",
-        );
-      }
-      await refundPayPalCapture(
-        order.provider_capture_id,
-        remaining,
-        order.currency,
-      );
-    }
+    await refundProviderPayment(order, remaining);
     await store.update(
       "orders",
       { id: input.id },

@@ -7552,3 +7552,15 @@ ESLint 10, so it stays red until that plugin is upgraded. Two sibling worktrees
 (advisor-blueprint, team-delivery-stripe-payment) hold uncommitted deletions of
 the owner's verbatim notes in docs/features/card-payments.md and
 team-deliveries/README.md; not committed, left for Charles to decide.
+
+## 2026-09-20 — card rail built on Stripe Checkout (worktree-stripe-checkout)
+
+- OQ-1 revised with boss sign-off (relayed by Charles): cards settle into
+  Zhongshu's Stripe account; PayPal keeps the wallet rail unchanged.
+- Built: lib/stripe/{client,verify,mapping,webhook}.ts, /api/stripe/checkout,
+  /api/stripe/return (drift hard-stop + refund), /api/webhooks/stripe,
+  lib/payments/provider.ts refund dispatch, checkout UI card CTA, admin +
+  owner-email card surfacing, migration 0016 (written, NOT pushed),
+  .env/validate-env rules, 25 unit tests. `npm run check` fully green.
+- Stripe CLI authenticated on this Mac (live account); the live payment link
+  plink_1U7snAGvea4GUGR4sk0kQcWK confirmed shipping-blind via API (AI-048).
