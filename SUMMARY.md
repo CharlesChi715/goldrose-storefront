@@ -227,31 +227,10 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
 - Path `~/Documents/Work/gold_rose` for company or additional info.
 
-## Environment and tooling — verified 2026-07-27
+## Environment and tooling
 
-- Apple-silicon iMac, Sydney; macOS, zsh, Homebrew. CLIs: Git/`gh`, Node/npm,
-  Supabase, Vercel, `psql`, Docker, Python 3/`uv`, `jq`, ripgrep, `aws`, Claude, Codex.
+- Check the CLI tools and MCP servers yourself, through `brew leaves` or another
+  way you come up with; no list is kept here.
 - AWS: `infra/aws/status.sh` prints the live state in one call — trust it, never a
   document. Sign in with `aws login` as `charles-admin`; no access keys exist.
-- Production deploys `main` → GitHub/Vercel integration, **not** CLI deploys.
-  Hosted Supabase project `cfvsvgbldnzkcjvbwnjp`; local dev uses it too when the
-  Supabase variables are set.
-- Secrets in `.env.local` (gitignored); `.env.example` lists every variable.
-- Auth: `gh` SSH works as `CharlesChi715` but its API token is invalid — run
-  `gh auth login` before `gh` API work. Vercel CLI linked as `vancechi`;
-  Supabase CLI linked; `psql` works (`ops/RUNBOOK.local.md`); Docker reachable.
-  No `cloudflared`/`ngrok` — install one before PayPal webhook testing.
-  `FIGMA_TOKEN` has `file_content:read`; revoke after design-import work.
-  **Re-verify tool auth before environment-dependent work.**
-- Agent tooling: `.mcp.json` declares supabase (read-only, pinned),
-  next-devtools and playwright — all need one-time approval, Supabase needs
-  `/mcp` OAuth; all are global in `~/.codex/config.toml`. `.agents/skills/` is
-  the **source of truth** for skills and `.claude/skills/` is a tracked
-  symlink into it, so the tracked path for any skill is always `.agents/…`.
-  `.claude/settings.local.json` (this machine's approvals) and
-  `.claude/worktrees/` are gitignored.
 - run `tree` to learn the files in this repo.
-
-Config at the root: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
-`playwright.config.ts`, `postcss.config.mjs`, `vercel.json`, `.prettierrc.json`,
-`.prettierignore`, `.npmrc`, `.nvmrc`, `skills-lock.json`.
