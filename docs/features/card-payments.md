@@ -84,6 +84,23 @@ AI-TAG(AI-050): OWNER-TODO — those three sandbox orders still hold 4 units of
 live stock; cancel + restock + archive them. See
 /agent-delivery/sessions/payment-learning-09-20-worktree-stripe-checkout.md.
 
+⚠️ **Adaptive Pricing stays ON — decided 2026-09-20 (AI-051, closed).**
+Stripe converts a Checkout Session into the buyer's own currency, based on
+their IP, before any card is entered. Our return leg compares the captured
+amount against the USD re-price, so a converted session can never match: the
+payment is refunded in full and no order is written. That is the safe
+direction — nobody is charged the wrong amount — and Charles accepted losing
+non-US sales rather than fund multi-currency (FX at capture, a currency
+column, two-currency refunds and reporting) before there is demand for it.
+
+**This will hit the §14.3 acceptance walkthrough.** The owner pays from
+China, so that session arrives in CNY and the screen reads "Prices changed
+while you were paying." That is this setting, not a broken checkout. Either
+switch Adaptive Pricing off for the ten minutes the walkthrough takes
+(Stripe → Settings → Payments → Adaptive Pricing → the *Zhongshu Technology
+Worldwide Limited* toggle in the Checkout row), or expect the message and
+read it correctly.
+
 Remaining to reach `uat`: Stripe keys in Vercel + a production webhook
 endpoint, then the owner's live low-value card payment and refund.
 

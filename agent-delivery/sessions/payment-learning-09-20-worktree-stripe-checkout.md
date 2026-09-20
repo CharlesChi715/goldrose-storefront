@@ -20,33 +20,6 @@ then tag `sandbox` and archive.
 Location: [`docs/features/card-payments.md`](../../docs/features/card-payments.md)
 (walkthrough evidence).
 
-## AI-051 · `OWNER-DECISION` · Stripe Adaptive Pricing would refuse non-US buyers
-
-Stripe Checkout offered the test purchase in **A$204.39** before a US$139.98
-was selected — Adaptive Pricing is on for the account, and it converts the
-session into the buyer's local currency.
-
-Our return leg compares the captured amount against the server re-price in
-USD cents. A converted session arrives as AUD cents, which can never match,
-so the hard stop fires: the payment is **refunded in full and no order is
-written**. That is the safe direction — nobody is charged the wrong amount —
-but every non-US buyer would be turned away after paying.
-
-Two options, and it is a commercial call, not a technical one:
-
-- **Turn Adaptive Pricing off** (Stripe dashboard → Settings → Payments →
-  Adaptive Pricing). Everyone pays in USD, exactly as the catalog states.
-  Simplest, and matches the US-first market.
-- **Keep it and teach the code to price in the buyer's currency** — a real
-  feature: FX at capture time, a currency column on orders, refunds and
-  reporting in two currencies. Not worth it before the first sale.
-
-Recommended: off until there is evidence of non-US demand.
-
-Location: [`lib/stripe/client.ts`](../../lib/stripe/client.ts) ·
-[`app/api/stripe/return/route.ts`](../../app/api/stripe/return/route.ts)
-(the amount check that would reject it).
-
 ## AI-049 · `OWNER-TODO` · paste the Stripe keys and push 0016 to light the card rail
 
 The code ships inert: `/checkout` shows the card CTA only when
