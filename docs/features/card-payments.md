@@ -80,22 +80,31 @@ Two defects the walkthrough caught, both fixed (PR #56):
   to an error page. `createOrderIfAbsent` now treats that violation as the
   race being decided, and returns the winner's order.
 
-⚠️ **Adaptive Pricing stays ON — decided 2026-09-20 (AI-051, closed).**
-Stripe converts a Checkout Session into the buyer's own currency, based on
-their IP, before any card is entered. Our return leg compares the captured
-amount against the USD re-price, so a converted session can never match: the
-payment is refunded in full and no order is written. That is the safe
-direction — nobody is charged the wrong amount — and Charles accepted losing
-non-US sales rather than fund multi-currency (FX at capture, a currency
-column, two-currency refunds and reporting) before there is demand for it.
+**Adaptive Pricing is OFF — set 2026-09-20 (AI-051).** Stripe converts a
+Checkout Session into the buyer's own currency, based on their IP, before any
+card is entered. Our return leg compares the captured amount against the USD
+re-price, so a converted session can never match: the payment would be
+refunded in full and no order written — safe, in that nobody is charged the
+wrong amount, but every non-US buyer would be turned away after paying. The
+decision was first to accept that, then reversed the same day: the toggle
+(Stripe → Settings → Payments → Adaptive Pricing → *Zhongshu Technology
+Worldwide Limited*, Checkout row) is now off, so every session is priced in
+USD exactly as the catalog states, wherever the buyer is.
 
-**This will hit the §14.3 acceptance walkthrough.** The owner pays from
-China, so that session arrives in CNY and the screen reads "Prices changed
-while you were paying." That is this setting, not a broken checkout. Either
-switch Adaptive Pricing off for the ten minutes the walkthrough takes
-(Stripe → Settings → Payments → Adaptive Pricing → the *Zhongshu Technology
-Worldwide Limited* toggle in the Checkout row), or expect the message and
-read it correctly.
+Two things follow:
+
+- **The §14.3 acceptance walkthrough is safe.** The owner pays from China
+  and still gets a USD session, so "Prices changed while you were paying"
+  should NOT appear. If it does, something else is wrong — start by checking
+  whether this toggle was switched back on.
+- **Payment links are the exception.** Adaptive Pricing is permanently on for
+  Payment Links and Managed Payments and cannot be switched off, so any
+  future link sells in local currency no matter what this setting says. The
+  one link that existed was retired on 2026-09-20 (AI-048).
+
+If multi-currency is ever wanted for real, it is a feature, not a toggle: FX
+at capture, a currency column on orders, and refunds and reporting in two
+currencies.
 
 Remaining to reach `uat`: Stripe keys in Vercel + a production webhook
 endpoint, then the owner's live low-value card payment and refund.

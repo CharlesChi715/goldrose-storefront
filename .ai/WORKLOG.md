@@ -7596,3 +7596,13 @@ team-deliveries/README.md; not committed, left for Charles to decide.
   (payment links cannot be deleted). It was the only one, so nothing outside
   the storefront collects money now.
 - AI-051 closed: Adaptive Pricing stays ON, Charles's call.
+
+## 2026-09-20 — Adaptive Pricing turned off (reverses the same day's AI-051 answer)
+
+- Charles first chose to leave Stripe Adaptive Pricing on, then switched it
+  off for Zhongshu (Checkout row; Aspire HK is a different entity and
+  untouched). Every Checkout Session is now priced in USD wherever the buyer
+  is, so non-US buyers can complete a purchase and the §14.3 walkthrough
+  from China will not hit the "Prices changed while you were paying" stop.
+- card-payments.md corrected; the archived AI-051 record still shows the
+  original answer, which is what an archive is for.
