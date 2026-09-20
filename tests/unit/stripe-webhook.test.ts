@@ -16,7 +16,11 @@ const REJECTED_SESSION_ID = "cs_test_rejected";
 const CHECKOUT_ID = "22222222-2222-4222-8222-222222222222";
 const SIGNATURE_VARIANT = "0a2b1a10-4b7e-4d7a-9d24-000000000101";
 
-function completedEvent(eventId: string, sessionId = SESSION_ID) {
+function completedEvent(
+  eventId: string,
+  sessionId = SESSION_ID,
+  checkoutId = CHECKOUT_ID,
+) {
   return {
     id: eventId,
     type: "checkout.session.completed",
@@ -28,7 +32,7 @@ function completedEvent(eventId: string, sessionId = SESSION_ID) {
         payment_status: "paid",
         amount_total: 5594,
         currency: "usd",
-        metadata: { checkout_id: CHECKOUT_ID },
+        metadata: { checkout_id: checkoutId },
         customer_details: {
           email: "fixture-buyer@example.com",
           name: "Fixture Buyer",
@@ -144,6 +148,53 @@ test("a rejected checkout is never rebuilt by the repair path", async () => {
   assert.equal(
     orders.some((row) => row.provider_order_id === REJECTED_SESSION_ID),
     false,
+  );
+});
+
+test("losing the race to the return leg reports duplicate, not repaired", async () => {
+  // The return leg has already written the order for this session — exactly
+  // the state the webhook finds when it arrives second. Observed live on
+  // 2026-09-20, where the reverse order produced a false "repaired" timeline.
+  const raced = "cs_test_raced";
+  const racedCheckout = "44444444-4444-4444-8444-444444444444";
+  await getStore().insert("checkouts", [
+    {
+      id: racedCheckout,
+      cart: {
+        lines: [{ variant_id: SIGNATURE_VARIANT, quantity: 1 }],
+        country: "US",
+      },
+      email: "fixture-buyer@example.com",
+      discount_code: null,
+      subtotal_cents: 4999,
+      total_cents: 5594,
+      provider_order_id: raced,
+      status: "open",
+      created_at: new Date().toISOString(),
+      completed_at: null,
+    },
+  ]);
+  const first = await handleStripeEvent(
+    completedEvent("evt_race_1", raced, racedCheckout),
+  );
+  assert.equal(first, "repaired");
+  const second = await handleStripeEvent(
+    completedEvent("evt_race_2", raced, racedCheckout),
+  );
+  assert.equal(second, "duplicate");
+  const orders = await getStore().all("orders");
+  assert.equal(
+    orders.filter((row) => row.provider_order_id === raced).length,
+    1,
+  );
+  const events = await getStore().all("order_events");
+  const order = orders.find((row) => row.provider_order_id === raced);
+  assert.equal(
+    events.filter(
+      (entry) =>
+        entry.order_id === order?.id && entry.message.includes("repaired"),
+    ).length,
+    1,
   );
 });
 

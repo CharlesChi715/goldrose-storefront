@@ -9,7 +9,7 @@
 
 import { randomUUID } from "crypto";
 import { priceCart } from "../checkout/pricing.ts";
-import { createOrder } from "../orders/db.ts";
+import { createOrderIfAbsent } from "../orders/db.ts";
 import { getStore } from "../supabase/store.ts";
 
 export type PayPalWebhookEvent = {
@@ -124,7 +124,7 @@ async function handleCaptureCompleted(
     discountCode: checkout.discount_code,
     email: checkout.email,
   });
-  const order = await createOrder({
+  const { order, created } = await createOrderIfAbsent({
     priced,
     source: "site",
     payment_provider: "paypal",
@@ -137,6 +137,11 @@ async function handleCaptureCompleted(
     checkout_id: checkout.id,
     raw: event,
   });
+  if (!created) {
+    // The capture route wrote it between our lookup and this insert; nothing
+    // was repaired.
+    return "duplicate";
+  }
   await addEvent(
     order.id,
     "Order repaired from PayPal webhook (capture completed)",

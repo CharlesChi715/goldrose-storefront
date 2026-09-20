@@ -36,10 +36,15 @@ answer that cannot be stale.
 | `0005`–`0008`  | applied          | page engagement, `orders.auth_user_id`, reviews, focal point                         |
 | `0009`–`0011`  | applied 08-07    | facets, image spotlights, and the view repair `0011` needs                           |
 | `0012`–`0014`  | applied          | search queries, advisor keys, advisor key grants                                     |
-| `0015`         | **NOT pushed**   | `page_views` retention; written 2026-09-07, see below                                |
-| `0016`         | **NOT pushed**   | card payment columns + `checkouts.status` 'rejected'; written 2026-09-20             |
+| `0015`         | applied 09-20    | `page_views` retention; written 2026-09-07, see below                                |
+| `0016`         | applied 09-20    | card payment columns + `checkouts.status` 'rejected'                                |
 
-**Every migration file in the repository is applied except `0015` and `0016`.** This table
+**Every migration file in the repository is now applied.** `0015` went up on
+2026-09-20 alongside the card-payment work: `supabase db push` applies every
+unapplied file, not the one you have in mind. It deletes nothing before
+August 2027, so the section below's "pushed by a human who has read it"
+condition was met in spirit — but the lesson is that parking a migration in
+the repository does not park it in the queue. This table
 said otherwise until 2026-09-07: it claimed `0012` was unpushed and did not
 mention `0013` or `0014` at all, so a reader would have gone looking for empty
 search-analytics cards that had in fact been working for weeks. The lesson is
@@ -48,12 +53,14 @@ is how to re-date it.
 
 ### `0015` — page-view retention
 
-Deletes `page_views` rows older than thirteen months, in batches. Written and
-validated, deliberately not pushed: it is the first migration here that
-DELETES, and it should be pushed by a human who has read it rather than
-arriving as a surprise in someone else's change. Pushing it is safe today —
-the oldest row is from July 2026, so it deletes nothing at all until August
-2027, which is exactly the right time to install a rule like this.
+Deletes `page_views` rows older than thirteen months, in batches. **Applied
+2026-09-20.** It had been held back deliberately — the first migration here
+that DELETES, meant to be pushed by a human who had read it — and it went up
+with the next `supabase db push` regardless, because the CLI applies every
+unapplied file. No harm: the oldest row is from July 2026, so it deletes
+nothing until August 2027. The rule to carry forward is that the repository
+is the queue; a migration you are not ready to apply belongs outside
+`supabase/migrations/` until you are.
 
 ### `0016` — card payment columns
 

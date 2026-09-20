@@ -58,12 +58,51 @@ reasoning trail.
   cloudflared for local webhook testing, and the mock card form retires the
   moment the key is set.
 
-Build (2026-09-20): code, migration `0016_card_payment_columns.sql` (written,
-NOT pushed), unit tests (verify/mapping/webhook), all `npm run check` gates
-green. Remaining to reach `uat`: push 0016, set `STRIPE_SECRET_KEY` +
-`STRIPE_WEBHOOK_SECRET` (test → live), register the production webhook
-endpoint, sandbox walkthrough, then the owner's live low-value card payment +
-refund.
+Build (2026-09-20): code, migration `0016_card_payment_columns.sql`, unit
+tests, all `npm run check` gates green.
+
+**Sandbox walkthrough passed the same day** (localhost against Stripe test
+mode, real browser). Evidence: three card purchases — orders `#1018`
+(Visa 4242), `#1019` and `#1021` (Mastercard 4444) — each written from the
+server re-price with the shipping address Stripe collected, one $5 partial
+refund and three full refunds, every one synced by the signature-verified
+webhook (`refund_synced`, `partially_refunded` → `refunded`). Migration 0016
+applied to hosted after a `pg_dump` safety copy.
+
+Two defects the walkthrough caught, both fixed (PR #56):
+
+- The webhook can beat the buyer's return leg to the insert, and its event
+  payload carries `payment_intent` as a bare id — so `#1018` recorded no card
+  brand or last four. The webhook now re-reads the session with the charge
+  expanded, and the return leg backfills what the winner could not know.
+- Worse: both paths read "no order", both inserted, and the unique index
+  rejected the loser — which threw, so a buyer who had already paid was sent
+  to an error page. `createOrderIfAbsent` now treats that violation as the
+  race being decided, and returns the winner's order.
+
+AI-TAG(AI-050): OWNER-TODO — those three sandbox orders still hold 4 units of
+live stock; cancel + restock + archive them. See
+/agent-delivery/sessions/payment-learning-09-20-worktree-stripe-checkout.md.
+
+⚠️ **Adaptive Pricing stays ON — decided 2026-09-20 (AI-051, closed).**
+Stripe converts a Checkout Session into the buyer's own currency, based on
+their IP, before any card is entered. Our return leg compares the captured
+amount against the USD re-price, so a converted session can never match: the
+payment is refunded in full and no order is written. That is the safe
+direction — nobody is charged the wrong amount — and Charles accepted losing
+non-US sales rather than fund multi-currency (FX at capture, a currency
+column, two-currency refunds and reporting) before there is demand for it.
+
+**This will hit the §14.3 acceptance walkthrough.** The owner pays from
+China, so that session arrives in CNY and the screen reads "Prices changed
+while you were paying." That is this setting, not a broken checkout. Either
+switch Adaptive Pricing off for the ten minutes the walkthrough takes
+(Stripe → Settings → Payments → Adaptive Pricing → the *Zhongshu Technology
+Worldwide Limited* toggle in the Checkout row), or expect the message and
+read it correctly.
+
+Remaining to reach `uat`: Stripe keys in Vercel + a production webhook
+endpoint, then the owner's live low-value card payment and refund.
 
 The original decision, superseded:
 

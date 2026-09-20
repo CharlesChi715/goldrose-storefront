@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
 import { priceCart } from "../checkout/pricing.ts";
-import { createOrder } from "../orders/db.ts";
+import { createOrderIfAbsent } from "../orders/db.ts";
 import { sendOwnerAlert } from "../email.ts";
 import { getStore } from "../supabase/store.ts";
+import { getStripeCheckoutSession, getStripeConfig } from "./client.ts";
 import { mapStripeSession, type StripeCheckoutSession } from "./mapping.ts";
 
 export type StripeWebhookEvent = {
@@ -67,7 +68,24 @@ async function handleSessionCompleted(
   if (!session?.id || session.payment_status !== "paid") {
     return "ignored";
   }
-  const mapped = mapStripeSession(session);
+  // A webhook event carries payment_intent as a bare id, so the card brand and
+  // last four are simply not in it. Re-read the session with the charge
+  // expanded, or an order recorded by this path (it can beat the buyer's
+  // return leg) would lose the instrument for good. Falls back to the event on
+  // any failure — an order with no brand beats no order.
+  let mapped = mapStripeSession(session);
+  if (getStripeConfig().configured) {
+    try {
+      mapped = mapStripeSession(
+        (await getStripeCheckoutSession(session.id)) as StripeCheckoutSession,
+      );
+    } catch (error) {
+      console.error(
+        `[stripe/webhook] could not re-read session ${session.id} for card details`,
+        error,
+      );
+    }
+  }
   const store = getStore();
   const orders = await store.all("orders");
   const existing = orders.find(
@@ -110,7 +128,7 @@ async function handleSessionCompleted(
     discountCode: checkout.discount_code,
     email: mapped.email ?? checkout.email,
   });
-  const order = await createOrder({
+  const { order, created } = await createOrderIfAbsent({
     priced,
     source: "site",
     payment_provider: "stripe",
@@ -129,6 +147,12 @@ async function handleSessionCompleted(
     checkout_id: checkout.id,
     raw: event,
   });
+  if (!created) {
+    // The buyer's return leg wrote it in the seconds between our lookup and
+    // this insert. Nothing was repaired; saying so would be a lie in the
+    // merchant's own audit trail.
+    return "duplicate";
+  }
   await addEvent(
     order.id,
     "Order repaired from Stripe webhook (checkout session completed)",
