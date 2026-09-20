@@ -241,36 +241,7 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
   symlink into it, so the tracked path for any skill is always `.agents/…`.
   `.claude/settings.local.json` (this machine's approvals) and
   `.claude/worktrees/` are gitignored.
-
-## Repository structure
-
-```text
-goldrose-storefront/
-├── app/                  # Next.js routes, pages, and API endpoints
-├── components/           # Storefront, screen, and shared React UI
-├── lib/                  # Domain logic and data/payment/auth adapters
-├── public/               # Browser-served images and static assets
-├── assets/               # Raw owner/source art; not served directly
-├── supabase/             # Hosted database migrations
-├── infra/                # Cloud settings as files, and the scripts that apply and check them
-├── scripts/              # Seed, validation, and feature utilities
-├── tests/                # Playwright end-to-end and unit tests
-├── docs/                 # Specs, feature records, guides
-├── agent-delivery/       # Agent workflow rules, INBOX, session write-backs
-├── team-deliveries/      # Upstream deliveries: inbox/ + originals/ (kept)
-├── trash/                # Scratch, gitignored, deletable; never referenced
-├── .agents/skills/       # Skills — the doc router too (.claude/ symlinks in)
-├── .ai/                  # Optional work history; never startup context
-├── .data/                # Local file-adapter database and uploads
-├── .github/              # CI workflows (Node from .nvmrc = Vercel's 24.x)
-├── .githooks/            # commit-msg + pre-commit checks; npm install wires core.hooksPath
-├── .mcp.json             # Project MCP servers (supabase, next-devtools, playwright)
-├── .env.example          # Every environment variable, documented
-├── proxy.ts              # Admin route/API authentication guard
-├── package.json          # Dependencies and runnable commands
-├── README.md             # Setup, stack, run, test, and deploy guide
-└── SUMMARY.md            # This entrypoint: context, state index, and rules
-```
+- run `tree` to learn the files in this repo.
 
 Config at the root: `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`,
 `playwright.config.ts`, `postcss.config.mjs`, `vercel.json`, `.prettierrc.json`,
