@@ -7,6 +7,23 @@ to live, so restoring is a plain `git mv` back.
 
 Nothing here is served — Next.js only serves `public/`.
 
+## Retired 2026-09-21
+
+Figma exports are named by node id (`1523-1675.png`), and the code interpolates
+those ids (`` `/eldreve/screens/${row.glyph}.svg` ``), so a plain path search
+cannot tell a live asset from a dead one. Each file below was retired only
+after its id was found nowhere in any `.ts`/`.tsx`/`.mjs`/`.css` source, in any
+document outside the history folders, or in the hosted database — `site_content`
+holds one text-only row and `product_images.path` holds Storage filenames, so
+nothing in `public/` is named from data.
+
+| Path here                        | Came from       | Why it was retired                                                                                                                                                                                              |
+| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public/eldreve/screens/` (25)   | same            | Node exports from frames that were redrawn or never built. 2.0 MB, `1523-1675.png` alone 824 KB.                                                                                                                |
+| `public/eldreve/home/` (13)      | same            | Superseded home art, including a 516 KB `31-14.png`.                                                                                                                                                            |
+| `public/eldreve/` (2)            | same            | `detail-hero.png` and `shop-hero.png` — eldreve-era heroes that were never wired up. The live shop hero was `public/veloria/shop-hero.png`, retired 2026-07-26 above.                                            |
+| `public/eldreve/menu/` (2)       | same            | Drawer icons dropped when the menu groups changed.                                                                                                                                                              |
+
 ## Retired 2026-08-04
 
 | Path here              | Came from                | Why it was retired                                                                                                                                                                                                     |

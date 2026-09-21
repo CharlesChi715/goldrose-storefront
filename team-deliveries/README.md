@@ -60,5 +60,10 @@ own — stop and ask.
 
 ## Related
 
-- `docs/ixd/README.md` — where parse output lands and how it is transcribed
-  (verbatim mirror, `⚠️ Developer note` for problems).
+`docs/ixd/` held the transcription convention — verbatim mirror, with a
+`⚠️ Developer note` where the delivery was wrong. PR #61 deleted it on
+2026-09-21, along with the rest of the documentation that restated the
+repository. Nothing replaced it, so read it out of history when a delivery
+needs transcribing:
+
+    git show af211fb^:docs/ixd/README.md
