@@ -51,7 +51,7 @@ on `send.eldreve.com`.
 - **Billing still points at the wrong place** — move it to hua's PayPal.
 - The brand-name rule that came with the domain (what was renamed, and the
   `goldrose` strings that are identifiers) is
-  [`docs/ixd/naming/brand-name.md`](../ixd/naming/brand-name.md).
+  a deliberately-kept storage key or the Vercel host.
 
 ## Related links
 

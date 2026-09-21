@@ -35,7 +35,6 @@ upload stays whole and the PDP's fullscreen viewer still shows all of it.
 
 ## Related links
 
-- Spec: [`admin-design.md` §9.5](../../docs/admin-design.md#95-products-adminproducts--clone)
   (and §7.1 for the stored shape)
 - [`lib/images/spotlight.ts`](../../lib/images/spotlight.ts) · migration
   [`0010_product_image_spotlight.sql`](../../supabase/migrations/0010_product_image_spotlight.sql)

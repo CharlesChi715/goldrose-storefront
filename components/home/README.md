@@ -3,7 +3,7 @@
 `app/page.tsx` stacks these seven bands, in order, inside one `ScaleFrame`.
 
 The `A<n>` names are the **design team's** identifiers, not ours — they match
-the Figma frame, the entries in [`docs/ixd/`](../../docs/ixd/README.md), and the
+the Figma frame and the
 `implements H-09` style references used in commit messages. That shared
 vocabulary is worth more than self-describing filenames, so this table carries
 the meaning instead of a rename. The gaps in the numbering are the design's

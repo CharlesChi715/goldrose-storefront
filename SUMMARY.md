@@ -18,8 +18,8 @@ Open a linked document only when the task needs it.
 - History belongs to `git log`, not to this file.
 - **Which document owns which topic is a skill, not a table here.** Load
   `project-docs` to route — it also carries the rule for choosing where a new
-  fact goes. Topic skills: `admin-spec`, `database`, `naming`, `seo-geo`,
-  `figma-sync`, `agent-delivery`, `feature-new`.
+  fact goes. Topic skills: `database`, `figma-sync`, `agent-delivery`,
+  `feature-new`.
 
 ## Goal
 
@@ -75,8 +75,7 @@ fails if it drifts:
 
 What is still visibly mocked (product copy and imagery, the tracking timeline,
 shipping choices, card fields) is tracked in those records and in
-[`agent-delivery/INBOX.md`](agent-delivery/INBOX.md); how far the design
-import has got is [`docs/ixd/README.md`](docs/ixd/README.md).
+[`agent-delivery/INBOX.md`](agent-delivery/INBOX.md).
 
 ⚠️ **The `/policies/*` documents are built but not published.** Six were
 imported from their Figma frames on 2026-08-18 and are reachable, but they
@@ -135,9 +134,8 @@ placeholder screens while live. The card rail is built (Stripe Checkout,
 - Storefront data revalidates every 300 seconds.
 - Admin strings use `t()` for English and Shopify-style Chinese; every exported
   `lib/` function requires JSDoc.
-- [`docs/admin-design.md`](docs/admin-design.md) is the authoritative spec. Keep
-  [`docs/ideas.md`](docs/ideas.md) verbatim; change
-  [`docs/Database.md`](docs/Database.md) only on explicit request.
+- Keep [`docs/ideas.md`](docs/ideas.md) verbatim — the owner's own words.
+- The schema is `supabase/migrations/*.sql`; no document restates it.
 
 ### One-way doors
 
@@ -158,7 +156,8 @@ needs a person who has decided, not an agent who is being helpful.
 
 ## Release queue
 
-1. Owner activation + [acceptance walkthrough](docs/admin-design.md#143-final-acceptance).
+1. Owner activation: the owner walks the admin end to end — add a product,
+   receive stock, make a discount, pay a test order, fulfil it, refund it.
 2. Prove the card rail on the real domain: Stripe TEST keys are in Vercel, so
    buy once on eldreve.com with the `4242` test card —
    [card-payments](docs/features/card-payments.md) owns what is left.
@@ -178,7 +177,9 @@ needs a person who has decided, not an agent who is being helpful.
    is unrelated to anything in the code. Check the plan before item 8, not
    after.
 8. Owner enables the live Stripe keys and the live webhook secret →
-   **the site is open for real orders.**
+   **the site is open for real orders.** In the same move, update
+   [`docs/advisor/app-info.md`](docs/advisor/app-info.md) — it tells the bosses
+   no real money moves, and nothing else will correct it.
 
 While live, in any order (nothing below blocks taking orders):
 
@@ -199,7 +200,6 @@ While live, in any order (nothing below blocks taking orders):
 Later: promotion email consent
 ([`promotion-emails.md`](docs/features/promotion-emails.md)), 120-SKU imports
 ([`product-content-pipeline.md`](docs/features/product-content-pipeline.md)),
-supplier colors ([`supplier-color-charts.md`](docs/supplier-color-charts.md)),
 campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
 ([`region-alignment.md`](docs/features/region-alignment.md)).
 
@@ -222,7 +222,7 @@ campaign ideas ([`ideas.md`](docs/ideas.md)), EU read replica
   — Vercel, Supabase redirects, passkey RP ID, inbound routing, Resend — is
   state, so it lives in
   [domain-and-email](docs/features/domain-and-email.md). What may still be
-  called `goldrose` is [`brand-name.md`](docs/ixd/naming/brand-name.md).
+  called `goldrose` is a storage key or the Vercel host, both kept deliberately.
 - Use `assets/PlaceholderPicture.png` for explicitly unknown images.
 - Path `~/Documents/Work/gold_rose` for company or additional info.
 

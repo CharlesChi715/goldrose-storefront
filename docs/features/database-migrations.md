@@ -21,35 +21,29 @@ A schema change is a file — `supabase/migrations/000N_name.sql` — applied wi
 one database and in no repository, so no other environment, review or rollback
 can ever see it.
 
-## Applied state — verified 2026-09-07
+## Applied state — ask, do not read
 
-Read from the hosted project itself, not from memory:
-`select version from supabase_migrations.schema_migrations order by version`
-returned exactly `0001 0002 0003 0005 0006 0007 0008 0009 0010 0011 0012 0013
-0014`. Anyone may repeat that query — it is read-only, and it is the only
-answer that cannot be stale.
+**This record does not list which migrations are applied.** It did, and the
+list disagreed with its own Blockers section within two weeks. Run the query
+instead; it is read-only and it cannot be stale:
 
-| Migration      | Hosted           | Note                                                                                 |
-| -------------- | ---------------- | ------------------------------------------------------------------------------------ |
-| `0001`–`0003`  | applied          | init, customer auth, tracking + hardening                                            |
-| `0004`         | **skipped**      | permanently; its orphan history row was repaired 2026-07-28 — intentional, not a gap |
-| `0005`–`0008`  | applied          | page engagement, `orders.auth_user_id`, reviews, focal point                         |
-| `0009`–`0011`  | applied 08-07    | facets, image spotlights, and the view repair `0011` needs                           |
-| `0012`–`0014`  | applied          | search queries, advisor keys, advisor key grants                                     |
-| `0015`         | applied 09-20    | `page_views` retention; written 2026-09-07, see below                                |
-| `0016`         | applied 09-20    | card payment columns + `checkouts.status` 'rejected'                                |
+```bash
+supabase migration list        # from the MAIN checkout, never a worktree
+```
 
-**Every migration file in the repository is now applied.** `0015` went up on
-2026-09-20 alongside the card-payment work: `supabase db push` applies every
-unapplied file, not the one you have in mind. It deletes nothing before
-August 2027, so the section below's "pushed by a human who has read it"
-condition was met in spirit — but the lesson is that parking a migration in
-the repository does not park it in the queue. This table
-said otherwise until 2026-09-07: it claimed `0012` was unpushed and did not
-mention `0013` or `0014` at all, so a reader would have gone looking for empty
-search-analytics cards that had in fact been working for weeks. The lesson is
-in the heading — this section is dated because it decays, and the query above
-is how to re-date it.
+The only durable fact is the one below: `0004` is skipped on purpose, so a gap
+there is not a missing push.
+
+⚠️ **`supabase db push` applies every unapplied file, not the one you have in
+mind.** `0015` went up on 2026-09-20 as a passenger of the card-payment push,
+though it had been held back on purpose. The rule that follows: the repository
+*is* the queue, so a migration you are not ready to apply belongs outside
+`supabase/migrations/` until you are.
+
+Why the list went: a hand-written applied-state table claimed `0012` was
+unpushed for weeks after it was live, and never mentioned `0013` or `0014`. A
+reader went looking for broken search-analytics cards that had been working
+the whole time.
 
 ### `0015` — page-view retention
 
@@ -99,8 +93,8 @@ instrument columns loses nothing but the brand/last4 display, but the
 
 ## Blockers and dependencies
 
-- **`0015` is the only outstanding push**, and it blocks nothing: it removes
-  analytics rows that do not exist yet. See above.
+- Whether anything is unpushed is answered by `supabase migration list`, not
+  by this file.
 - ⚠️ The CLI cannot push from a git worktree, so `supabase db push` has to be
   run from the main checkout.
 
@@ -109,9 +103,8 @@ instrument columns loses nothing but the brand/last4 display, but the
 - [`supabase/migrations/`](../../supabase/migrations/) — the files themselves
 - [`scripts/check-migrations.mjs`](../../scripts/check-migrations.mjs) ·
   [`tests/unit/check-migrations.test.ts`](../../tests/unit/check-migrations.test.ts)
-- Table shapes and SKU rules: [`docs/Database.md`](../Database.md) — change only
+- Table shapes: the migrations themselves, `supabase/migrations/*.sql` — change only
   on explicit request
 - The workflow as a loadable rule card:
   [`.agents/skills/database/SKILL.md`](../../.agents/skills/database/SKILL.md)
 - Verifying hosted by hand:
-  [`docs/learning/05-verifying-the-hosted-database.md`](../learning/05-verifying-the-hosted-database.md)

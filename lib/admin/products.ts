@@ -138,7 +138,7 @@ export async function getProductDetail(
 
 /**
  * Throws when another product already uses `handle` as its handle or id.
- * The handle rule (docs/ixd/naming/product-handles.md §3) forbids
+ * The handle rule (lib/admin/product-handle.ts) forbids
  * auto-disambiguation (`-2`): a collision means the title must be revised
  * or a deliberate manual handle set.
  *
@@ -230,8 +230,8 @@ export type SaveProductInput = {
  * @param input - Full form payload; id null = create.
  * @param actor - Admin name recorded on inventory movements.
  * @returns The saved product's id (= the handle derived from the title on
- *   create, docs/ixd/naming/product-handles.md). Throws when a non-blank SKU
- *   is already taken (SKU rules, Database.md), when a handle cannot be
+ *   create, lib/admin/product-handle.ts). Throws when a non-blank SKU
+ *   is already taken, when a handle cannot be
  *   derived or collides, or when a non-draft product's handle would change.
  */
 export async function saveProduct(
@@ -249,7 +249,7 @@ export async function saveProduct(
     throw new Error(`Unknown product: ${input.id}`);
   }
 
-  // Handle rule (docs/ixd/naming/product-handles.md): derived once from the
+  // Handle rule (lib/admin/product-handle.ts): derived once from the
   // title at creation, manual handles must pass the same validation, and a
   // non-draft product's handle is frozen until product_redirects exists (§5).
   const manualHandle = input.handle?.trim() || null;
@@ -279,7 +279,7 @@ export async function saveProduct(
 
   const id = existing?.id ?? handle;
 
-  // SKU rules (docs/Database.md): non-blank SKUs are unique storewide. The
+  // SKU rule: non-blank SKUs are unique storewide. The
   // 0003 partial index enforces this on Postgres; this check covers the
   // local file adapter and turns the violation into a readable error.
   const incomingSkus = input.variants
@@ -429,7 +429,7 @@ export async function saveProduct(
 /**
  * Shopify's Duplicate action: full copy (variants + media) as a new draft
  * with zeroed inventory and cleared SKUs (non-blank SKUs are unique
- * storewide — SKU rules, Database.md). Throws on an unknown product, or when
+ * storewide). Throws on an unknown product, or when
  * the copy's title derives a handle that is taken or underivable (handle
  * rule: no -2 suffixes).
  *

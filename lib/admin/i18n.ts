@@ -271,7 +271,7 @@ const en = {
   "form.description.help": "Required on every product, drafts included.",
   // Placeholders (§9.5) — examples only, never defaults. Values follow the
   // repo's own conventions: handle fixtures from
-  // docs/ixd/naming/product-handles.md, SKUs from Database.md.
+  // the handle rule in lib/admin/product-handle.ts.
   "form.title.ph": "e.g. 24K Gold Dipped Eternal Rose",
   "form.description.ph":
     "What the product is, how it is made, and what makes it worth giving.",

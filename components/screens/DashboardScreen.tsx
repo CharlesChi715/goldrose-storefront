@@ -518,7 +518,7 @@ function Dashboard({
           </>
         ) : (
           // Real visitor, no orders yet — the design has no empty state, so
-          // the card keeps its typography and says so (docs/ixd/README.md).
+          // the card keeps its typography and says so.
           <>
             <div
               style={{

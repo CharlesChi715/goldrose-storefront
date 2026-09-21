@@ -48,9 +48,11 @@
   there is no screen for it yet.
 - Besides the shop, customers can read the brand story, how a rose is made,
   and a care and help area.
-- The published policy pages are: shipping and delivery, returns, refunds and
-  cancellations, warranty and care, privacy, terms of service, email and SMS
-  terms, and contact and legal.
+- Policy pages exist and can be read — shipping and delivery, returns, refunds
+  and cancellations, warranty and care, privacy, terms of service, email and
+  SMS terms, contact and legal — but the bosses have **not signed them off**,
+  so they are hidden from search engines. Do not quote a return window, a
+  warranty length or a delivery time from them as a promise.
 - The site is built to be found: it publishes a sitemap and a robots file for
   search engines, and a plain-language file written for AI assistants so they
   can describe us correctly.
@@ -92,9 +94,19 @@
 ## What is not ready yet
 
 <!-- Being honest here is what stops the advisor promising things we cannot do.
-     Good:  "We cannot take real payments yet — Stripe is in test mode."   -->
+     Good:  "We cannot take real payments yet — Stripe is in test mode."
+     ⚠️ Re-read this section on the day real payments are switched on; the
+     first bullet becomes false the moment the owner sets the live key.    -->
 
--
+- **No real money moves yet.** Checkout runs in Stripe's test mode, so an order
+  can be placed end to end with a test card but nothing is charged. Turning on
+  real payments is the owner's decision and has not been made.
+- **We cannot promise a return window, warranty or delivery time.** The policy
+  pages are written but unsigned (above).
+- **Order tracking is partly a placeholder.** A signed-in customer sees their
+  real orders; the public tracking page still shows a sample timeline.
+- **Publishing a customer review is a manual job** — there is no screen for it.
+- **The blog is not written.** The page exists and says so.
 
 ## How we want to work
 

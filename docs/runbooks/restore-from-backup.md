@@ -25,10 +25,10 @@ about it.
 
 Nothing here touches live data. Run it in daylight, not during an outage.
 
-0. **Install the AWS command line and name the bucket.** It is the tool that
-   reads the bucket and this Mac does not have it — nothing below works without
-   it, and the failure looks like a bad bucket name rather than a missing
-   program. The bucket is the Actions variable `S3_BUCKET` (Settings →
+0. **Check the AWS command line, and name the bucket.** It is the tool that
+   reads the bucket; without it the failure looks like a bad bucket name rather
+   than a missing program. `command -v aws` prints a path if you already have
+   it — install only if it prints nothing. The bucket is the Actions variable `S3_BUCKET` (Settings →
    Secrets and variables → Actions).
 
    ```bash
@@ -46,8 +46,10 @@ Nothing here touches live data. Run it in daylight, not during an outage.
 1. **Fetch last night's folder and read the dump before restoring it** — that
    last check needs no database and catches a bad download in five seconds.
    Good answer: three files, `public.dump` tens of KB rather than zero, and a
-   count near 21 — the number of tables the shop has, and the same check
-   `scripts/backup-db.sh` makes.
+   table count close to what live has. Ask live rather than trusting a number
+   written here: `select count(*) from information_schema.tables where
+   table_schema = 'public'`. This is the same check `scripts/backup-db.sh`
+   makes.
 
    ```bash
    aws s3 ls "s3://$BACKUP_S3_BUCKET/db/$(date -u +%Y/%m)/" --recursive | tail -6

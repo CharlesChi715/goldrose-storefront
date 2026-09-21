@@ -15,7 +15,7 @@
  * hides the legal block entirely rather than printing blanks (AI-033).
  * Importing the frame verbatim would hard-code details that are owner data
  * and re-open a gap that cost a rejected TikTok application. Recorded as a
- * sanctioned divergence in docs/ixd/README.md rather than as unfinished work.
+ * sanctioned divergence rather than as unfinished work.
  *
  * Every value comes from the `store` setting, so the owner fills it in at
  * /admin/settings without a deploy. Until the registered entity is supplied

@@ -48,6 +48,10 @@ jobs:
       - run: npm run typecheck
       - run: npm run format:check
       - run: npm run check:assets
+      # README states counts about this repo — pages, handlers, migrations,
+      # tables. A number in prose is a promise nobody re-checks by hand, so
+      # this recomputes each one and fails with the real value.
+      - run: npm run check:counts
       # .env.example is the only map of this system's credentials and is kept
       # by hand. This fails when the code reads a variable nobody documented,
       # and when a secret-shaped name is about to be published to the browser

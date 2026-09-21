@@ -2,8 +2,8 @@
  * ROLE OF THIS FILE
  * /admin/advisor — the business advisor chat page.
  *
- * Design lives in docs/advisor/BLUEPRINT-agent-advisor.md, not in
- * docs/admin-design.md: the advisor is new surface the spec does not cover,
+ * Design lives in docs/advisor/BLUEPRINT-agent-advisor.md: the advisor is
+ * surface added after the original build,
  * so there is no § to cite yet.
  *
  * Chat only. The page reads and answers; it never writes to the app, the

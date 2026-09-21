@@ -608,7 +608,7 @@ export function ShopInteractive({
             />
           ))
         ) : (
-          /* No design exists for an empty grid (docs/ixd/README.md), so this
+          /* No design exists for an empty grid, so this
              is the page's own type at the grid's top-left, not invented art.
              It is reachable three ways: a search that matches nothing, an
              empty catalog, and a catalog read that failed. */

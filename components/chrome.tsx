@@ -582,7 +582,7 @@ export function ScaleFrame({
    * Opt out of the shared tab bar. B-3 (partnerships) and C-1/C-2 (tracking,
    * confirmation) draw their OWN nav band inside the frame, so the screen
    * component renders it and the shared bar would double up. Flagged to the
-   * design team in docs/ixd. B-4 (wholesale) used to be in that list; as of
+   * design team. B-4 (wholesale) used to be in that list; as of
    * 2026-07-29 it renders the shared fixed bar like every other main page,
    * because an in-frame band scrolls away instead of staying reachable.
    */

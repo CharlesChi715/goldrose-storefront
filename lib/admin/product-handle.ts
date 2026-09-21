@@ -1,7 +1,7 @@
 /**
  * ROLE OF THIS FILE
  * The one implementation of the product-handle rule
- * (docs/ixd/naming/product-handles.md): deriving the public
+ * This file is the handle rule itself: deriving the public
  * `/products/<handle>` URL segment from a product title. Pure and
  * dependency-free so both the server-only admin writes and the unit test
  * that replays the doc's fixture table can import it.
@@ -13,7 +13,7 @@ export const HANDLE_MAX_LENGTH = 120;
 
 /**
  * Derives the public product handle from a product title, exactly as
- * docs/ixd/naming/product-handles.md §2 specifies: NFKD-normalise and strip
+ * The rule: NFKD-normalise and strip
  * combining marks, lowercase, delete apostrophes, collapse every other
  * non-alphanumeric run to one hyphen, trim hyphens. The whole title is kept —
  * no stop-word stripping, no truncation, no collision suffixes.

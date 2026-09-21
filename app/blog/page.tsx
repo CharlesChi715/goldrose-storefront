@@ -4,7 +4,7 @@
  * The homepage footer (2380:855, Ready-for-dev) links here, so the route has
  * to resolve; the frame itself is NOT marked Ready-for-dev, so no design is
  * invented. This page was once built for real (2026-07-31) and reverted for
- * the same reason — see docs/ixd/README.md.
+ * the same reason: the design team has drawn no blog.
  *
  * AI-TAG(AI-026): PLACEHOLDER — /blog is a coming-soon scaffold until
  * BLOG-JOURNAL-PAGE (1593:115) is marked Ready-for-dev. See

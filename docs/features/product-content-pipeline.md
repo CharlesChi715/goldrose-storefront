@@ -45,7 +45,7 @@ named by Title works just as well, so nobody uploading has to know what a handle
 is.
 
 **Images attach to a variant** (was OQ-1, decided 2026-08-04). The 120-SKU list
-is [124 colours of one rose](../supplier-color-charts.md), and the PDP design
+is 124 colours of one rose, and the PDP design
 already paints colour swatches under a "View All 120 Colors ›" link with a
 full-screen picker behind it — currently cosmetic. So `product_images` gains a
 `variant_id` and the gallery follows the selected colour. The two alternatives
@@ -77,7 +77,7 @@ title.
 **One row = one variant.** Every `products` column repeats on each of that
 product's variant rows; `Handle` binds the row to its parent, `SKU` identifies
 the row itself. Per-column database rules live in
-[Database.md § Table shapes](../Database.md) — that is the authoritative list.
+`supabase/migrations/*.sql` — those are the authoritative list.
 
 **32 columns, in this order.** Required first, so the columns that decide
 whether an import succeeds are visible without scrolling. ▪ repeats on every row
@@ -312,7 +312,7 @@ Vercel and is parsed there, because validating a row needs the database.
 
 - SKU rules first (or together): the import upserts by handle+SKU, which
   assumes SKUs are unique and non-blank — rules + enforcement in
-  [../Database.md § SKU rules](../Database.md).
+  the SKU rules encoded in `lib/admin/products.ts`.
 - **`product_redirects` does not exist.** An active product's handle cannot be
   changed safely without it, and the handle rule says to add the migration
   before the 120-SKU import, not after.
@@ -348,8 +348,7 @@ file.
 ## Related links
 
 - SUMMARY OQ-3 → [SUMMARY.md · Product decisions](../../SUMMARY.md#product-decisions)
-- Column-by-column requirements: [Database.md § Table shapes](../Database.md)
-- Handle rule and its fixtures: [product-handles.md](../ixd/naming/product-handles.md)
+- Handle rule and its fixtures: `lib/admin/product-handle.ts` + `tests/unit/product-handle.test.ts`
 - Current live-text wiring: `app/products/[slug]/page.tsx`, `app/shop/page.tsx`,
   `lib/admin/products.ts` (`revalidateStorefront`)
 - Existing export (mirror for the import UI): `app/api/admin/products/export/route.ts`

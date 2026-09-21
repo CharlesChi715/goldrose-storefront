@@ -130,7 +130,7 @@ Three cards on `/admin/analytics`, EN + 中文 like every other admin string:
 Still cookieless, still first-party, still no PII — but dwell and scroll depth
 are *behavioural* measurement, which sits differently under EU rules than a plain
 hit counter. This raises the consent debt already logged at
-`docs/admin-design.md:1004`. Recommendation: ship it, and fold it into the same
+the consent-wording debt. Recommendation: ship it, and fold it into the same
 consent-wording review that gates launch rather than opening that question now.
 
 ## Acceptance criteria
