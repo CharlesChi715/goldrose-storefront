@@ -7631,3 +7631,29 @@ out-of-date PayPal reference to go. Branch `worktree-remove-paypal`.
   and Klarna marks that the shop does not accept.
 - Verified: `npm run check` green (294 unit tests), 31 payment-related e2e
   specs green against a fresh build.
+
+## 2026-09-21 — Doc purge merged to main (#61); branch and worktree removed
+
+- Squash-merged PR #61 `worktree-kill-stale-content` → main as `af211fb`
+  ("docs: delete what describes the repo, keep what decides things"):
+  71 files, +388 / −7,792. Deletes `docs/learning/`, `docs/admin-design.md`,
+  `docs/ixd/`, `docs/seo-geo/`, `docs/Database.md`,
+  `docs/supplier-color-charts.md`, two advisor drafts, and the `admin-spec`,
+  `naming` and `seo-geo` skills that only routed to them.
+- Adds `scripts/check-counts.mjs` — recomputes nine README counts (pages,
+  handlers, migrations, tables) from the repo and fails with the real value;
+  wired into `npm run check` and `ci.yml`.
+- Confirmed the squash captured everything before deleting: main and the
+  branch tip resolved to the identical tree `f38071f`.
+- Removed the locked worktree `.claude/worktrees/kill-stale-content` (lock
+  owner pid 94212 was dead, tree clean) and deleted the local branch; the
+  remote branch went with the merge. Repo is back to main only, plus the
+  pre-existing stale `worktree-adaptive-off` / `close-ai050` pair.
+- Verified: `npm run check` exits 0 (all nine gates, 293 unit tests); GitHub
+  CI green on `af211fb`. A first local typecheck failed only on a stale
+  `.next/` cache still referencing the PayPal routes deleted in #60 —
+  cleared, not a source problem.
+- Left open: `team-deliveries/README.md` "Related" section still links
+  `docs/ixd/README.md`, which #61 deleted. Dated archives under
+  `agent-delivery/` and `team-deliveries/originals/` also link it, but those
+  are historical records; the README pointer is the live one.
