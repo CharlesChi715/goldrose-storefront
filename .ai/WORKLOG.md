@@ -7657,3 +7657,39 @@ out-of-date PayPal reference to go. Branch `worktree-remove-paypal`.
   `docs/ixd/README.md`, which #61 deleted. Dated archives under
   `agent-delivery/` and `team-deliveries/originals/` also link it, but those
   are historical records; the README pointer is the live one.
+
+## 2026-09-21 — Repo audit, and the residue #60/#61 left behind (#62)
+
+Audited the repository for anything to tidy after the day's two merges. Most
+of what turned up was already deliberate — `.gitignore` carries a rationale per
+rule, all four TODOs are tagged into the AI-nnn inbox, `npm audit` is clean, and
+`docs/features/paypal-wallet.md` was correctly marked `delivery: dropped`. Three
+things were genuine residue, fixed in #62:
+
+- 42 files (2.9 MB) under `public/eldreve/` referenced by nothing. Figma exports
+  are named by node id and the code interpolates those ids, so a path search
+  cannot separate live from dead; each was retired only after its id appeared in
+  no `.ts`/`.tsx`/`.mjs`/`.css` source, no document outside the history folders,
+  and no hosted table (`site_content` = one text-only row, `product_images.path`
+  = Storage filenames, so nothing under `public/` is named from data). Moved to
+  `assets/archive/`, not deleted, per the convention that folder already sets.
+- `team-deliveries/README.md` sent the next figma-sync session to
+  `docs/ixd/README.md`, which #61 deleted. Now names the commit to read it from.
+- `assets/supplier-color-charts/` — 13 MB of supplier originals left unexplained
+  when #61 deleted their transcription. Given a README.
+
+Decided against two things. Deduplicating the 42 byte-identical assets would
+save 1.4 MB but break re-import idempotency, since node-id filenames are the
+Figma pipeline's contract. Shrinking the 145 MB `.git` (a 20 MB `.numbers`
+original, four re-commits of a 2 MB e2e baseline) needs a history rewrite, which
+is not worth it at this size.
+
+Left for Charles: the auto-mode classifier refused `gh pr merge` on dependabot
+#54 and refused `npm install`, so the local `node_modules` is still missing
+`server-only` — declared, locked, and imported by nine lib modules. CI is
+unaffected because it runs `npm ci`.
+
+Still open, as decisions rather than chores: e2e never runs in CI (documented at
+`ci.yml:7-10` — the `-darwin.png` baselines need a macos runner); 390 files
+still carry a `ROLE OF THIS FILE` header against the 2026-09-20 rule; and
+`app/checkout/CheckoutClient.tsx` is 2,369 lines.
